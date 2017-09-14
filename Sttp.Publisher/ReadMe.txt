@@ -1,0 +1,1 @@
+﻿This class library is expected to contain only functionality related to an STTP Publisher.
