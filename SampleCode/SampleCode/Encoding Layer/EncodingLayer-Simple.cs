@@ -42,7 +42,7 @@ namespace sttp2
 
         }
 
-        public void SendDataPoints(bool sendReliably, DataPoint[] points)
+        public void SendDataPoints(bool sendReliably, DataPointPadded[] points)
         {
             //Serializes these data points, and compresses them if applicable. 
         }
@@ -69,15 +69,36 @@ namespace sttp2
         Buffer = 16 // 64-bytes, max
     }
 
-    public class DataPoint
+    /// <summary>
+    /// Reusable structure for data points that are larger than 16 bytes in size.
+    /// </summary>
+    public class LargeType
+    {
+        public byte[] Data = new byte[64];
+        /// <summary>
+        /// Increments every time that a new value larger than 64 bytes is created. 0 if the data doesn't need to be fragmented.
+        /// </summary>
+        public uint Sequence;
+        /// <summary>
+        /// The fragment index of data that is being sent.
+        /// </summary>
+        public uint Fragment;
+        /// <summary>
+        /// The total size of all fragments.
+        /// </summary>
+        public uint Length;
+    }
+
+    public class DataPointPadded
     {
         public uint RuntimeID;
-        public uint Quality;
-        public ulong Timestamp;
-        public byte TimeFlags;
-        public uint Value1; //The lower 4 bytes of the value. 
-        public uint Value2; //The upper 4 bytes of the value. Only valid for types that require more than 4 bytes;
-        public byte[] ValueLarge; //If more than 8 bytes are required, the data is stored here. So, for GUIDs, Decimal, byte[], char[]
+        public ulong Value1; //The lower 8 bytes of the value. 
+        public ulong Value2; //The upper 8 bytes of the value. Only valid for types that require more than 8 bytes;
+        public LargeType ExtendedValueBuffer; //Required if MaxValueLength > 16. Otherwise this value will be null.
+        public ulong Timestamp1; //Lower 8 bytes of the time.
+        public ulong Timestamp2; //Upper 8 bytes of the time.
+        public uint TimestampFlags;
+        public uint QualityFlags;
     }
 
     public class DataPointKey
@@ -85,7 +106,14 @@ namespace sttp2
         public uint RuntimeID;
         public string Identifier; //Can include any mix of the following: GUID:{2238...23}; DeviceID = 2038; DeviceName='PMU123'; Type=PA:3
         public ValueTypeCode Type;
-        public bool IncludesTime;
-        public bool IncludesQuality;
+
+        /// <summary>
+        /// Information for the encoding algorithm.
+        /// </summary>
+        public int MaxValueLength; //The maximum number of bytes required to store the length
+        public int MaxTimestampLength; //The maximum number of bytes to store the timestamp
+        public int MaxTimestampFlagsLength; //The maximum number of bytes to store the timestamp flags
+        public int MaxQualityFlagsLength; //The maximum number of bytes to store the quality flags
+        public int SequenceLength; //The maximum number of bytes to store the sequence length
     }
 }
