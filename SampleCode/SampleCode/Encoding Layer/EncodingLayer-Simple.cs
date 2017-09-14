@@ -30,11 +30,34 @@ namespace sttp2
         /// </summary>
         public event EventHandler<DataPointKey> NewSignalMapping;
 
-        public EncodingLayer(Stream stream) { }
+        public EncodingLayer(Action<byte[], int, int> outStream, Func<byte[], int, int, int> inStream) { }
 
-        public void RegisterSignalMapping(DataPointKey requiredMetadata)
+        /// <summary>
+        /// The number of bytes that are on the buffer to send reliably
+        /// </summary>
+        public int PendingReliableData { get; }
+        /// <summary>
+        /// The number of bytes that are on the buffer to send unreliably
+        /// </summary>
+        public int PendingUnreliableData { get; }
+
+        /// <summary>
+        /// Begins sending a series of <see cref="DataPointKey"/>, one at a time. After
+        /// sending each metadata segment, <see cref="PendingReliableData"/> or <see cref="PendingUnreliableData"/>
+        /// will indicate how much data is pending to be sent. This will allow control of the packet size.
+        /// </summary>
+        public void BeginRegisterSignalMapping(bool sendReliably, DataPointKey requiredMetadata)
         {
             //Sends this to the client and builds compression state data for it.
+        }
+
+        /// <summary>
+        /// Finalizes the sequential series of <see cref="BeginRegisterSignalMapping"/>. This must be called before
+        /// any other command is issued.
+        /// </summary>
+        public void EndRegisterSignalMapping()
+        {
+
         }
 
         public void SendCommand(bool sendReliably, byte responseCode, byte commandCode, byte[] data, int position, int length)
@@ -42,9 +65,33 @@ namespace sttp2
 
         }
 
-        public void SendDataPoints(bool sendReliably, DataPointPadded[] points)
+        /// <summary>
+        /// Begins sending a series of data points, one at a time. After
+        /// sending each point, <see cref="PendingReliableData"/> or <see cref="PendingUnreliableData"/>
+        /// will indicate how much data is pending to be sent. This will allow control of the packet size.
+        /// </summary>
+        /// <param name="sendReliably"></param>
+        /// <param name="point"></param>
+        public void BeginSendDataPoint(bool sendReliably, DataPointPadded point)
         {
-            //Serializes these data points, and compresses them if applicable. 
+
+        }
+
+        /// <summary>
+        /// Finalizes the sequential series of <see cref="BeginSendDataPoint"/>. This must be called before
+        /// any other command is issued.
+        /// </summary>
+        public void EndSendDataPoint()
+        {
+
+        }
+
+        /// <summary>
+        /// Flushes all pending data to the provided socket.
+        /// </summary>
+        public void Flush()
+        {
+
         }
     }
 
@@ -110,10 +157,9 @@ namespace sttp2
         /// <summary>
         /// Information for the encoding algorithm.
         /// </summary>
-        public int MaxValueLength; //The maximum number of bytes required to store the length
-        public int MaxTimestampLength; //The maximum number of bytes to store the timestamp
-        public int MaxTimestampFlagsLength; //The maximum number of bytes to store the timestamp flags
-        public int MaxQualityFlagsLength; //The maximum number of bytes to store the quality flags
-        public int SequenceLength; //The maximum number of bytes to store the sequence length
+        public int ValueSize; //The fixed size to store the Value. Must not exceed 16 bytes. If variable length, specify -1. If not included, specify 0.
+        public int TimestampSize; //The number of bytes to store the timestamp. 0 if a timestamp is not included.
+        public int TimestampFlagsSize; //The number of bytes to store the timestamp flags
+        public int QualityFlagsSize; //The number of bytes to store the quality flags
     }
 }
