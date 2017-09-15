@@ -2,6 +2,9 @@
 
 namespace Sttp.WireProtocol
 {
+    /// <summary>
+    /// SEC: Should we really support this many string types? Why not just say it has to be UTF8?
+    /// </summary>
     [Flags]
     public enum StringEncodingFlags
     {

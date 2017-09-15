@@ -5,6 +5,7 @@ namespace Sttp.WireProtocol
     [Flags]
     public enum QualityFlags
     {
+        //SEC: We should include an IsNull flag for empty values. Maybe an IsMissing could fit.
         Normal = 0,                 // Defines normal state
         BadTime = 1 << 0,           // Defines bad time state
         BadValue = 1 << 1,          // Defines bad value state

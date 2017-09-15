@@ -1,5 +1,6 @@
 ﻿namespace Sttp.WireProtocol
 {
+    // SEC: I think we should decide on a single timestamp type that we will support instead of complicate the protocol.
     // Publisher determines timestamp type for data point - should be stored in metadata
     public enum TimestampType
     {
