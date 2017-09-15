@@ -47,6 +47,7 @@
     <Compile Include="DataPoint.cs" />
     <Compile Include="DataPointKey.cs" />
     <Compile Include="DataPointKeySet.cs" />
+    <Compile Include="MetadataRecord.cs" />
     <Compile Include="NamedVersion.cs" />
     <Compile Include="NamedVersions.cs" />
     <Compile Include="NTP128Timestamp.cs" />
