@@ -7,7 +7,7 @@ using Sttp.WireProtocol;
 
 namespace Sttp.Publisher
 {
-    // API layer exists above wire protocol layer whose details are invisible to API user
+    // API layer exists above wire protocol layer whose details are invisible to API user.
     // Goal here is that API is the primary interface any STTP user will ever see and hence
     // needs to remain as simple as possible.
     public class API
@@ -75,42 +75,93 @@ namespace Sttp.Publisher
 
         public void SendData(Guid pointID, ushort value)
         {
-            // route to needed subscribers
+            // Route to needed subscribers
             Subscriber[] subscribers = FindAllFor(pointID);
 
             // Create data point structure for UInt16
+            byte[] pointValue = BigEndian.GetBytes(value);
+
+            // Define state: timestamp, data quality, etc
+            byte[] pointState = null;
+
             foreach (Subscriber subscriber in subscribers)
-                subscriber.QueueDataPoint(new object());
+            {
+                subscriber.QueueDataPoint(new DataPoint
+                {
+                    ID = GetRuntimeID(subscriber, pointID),
+                    Value = pointValue,
+                    State = pointState
+                });
+            }
         }
 
         public void SendData(Guid pointID, int value)
         {
-            // route to needed subscribers
+            // Route to needed subscribers
             Subscriber[] subscribers = FindAllFor(pointID);
 
             // Create data point structure for Int32
+            byte[] pointValue = BigEndian.GetBytes(value);
+
+            // Define state: timestamp, data quality, etc
+            byte[] pointState = null;
+
             foreach (Subscriber subscriber in subscribers)
-                subscriber.QueueDataPoint(new object());
+            {
+                subscriber.QueueDataPoint(new DataPoint
+                {
+                    ID = GetRuntimeID(subscriber, pointID),
+                    Value = pointValue,
+                    State = pointState
+                });
+            }
         }
 
         public void SendData(Guid pointID, byte[] value)
         {
-            // route to needed subscribers
+            // Route to needed subscribers
             Subscriber[] subscribers = FindAllFor(pointID);
 
             // Fragment value into 15-byte chunks with sequence number
+            int fragments = value.Length / 15;
+
+            // Define state: timestamp, data quality, etc
+            byte[] pointState = null;
 
             // Subscriber API can recollate
 
             // Create data point structure for each chunk and send each chunk to subscribers
             foreach (Subscriber subscriber in subscribers)
-                subscriber.QueueDataPoint(new object());
+            {
+                uint runtimeID = GetRuntimeID(subscriber, pointID);
+
+                for (int i = 0; i < fragments; i++)
+                {
+                    BufferValue bufferValue = new BufferValue
+                    {
+                        Data = value.BlockCopy(i * 15, 15)
+                    };
+
+                    subscriber.QueueDataPoint(new DataPoint
+                    {
+                        ID = runtimeID,
+                        Value = bufferValue.Encode(),
+                        State = BigEndian.GetBytes((ushort)i)
+                    });
+                }
+            }
         }
 
         private Subscriber[] FindAllFor(Guid pointID)
         {
             // TODO: look up subscribers that have subscribed to this point
             return null;
+        }
+
+        private uint GetRuntimeID(Subscriber subscriber, Guid uniqueID)
+        {
+            // TODO: Lookup subscriber's runtime ID for Guid
+            return 0;
         }
 
         private void OnClientConnected(dynamic tcpSocket)

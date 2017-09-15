@@ -3,12 +3,6 @@ using System.IO;
 
 namespace Sttp.WireProtocol
 {
-    public enum ResponseCode : byte
-    {
-        Succeeded = 0x80,
-        Failed = 0x81
-    }
-
     public class Response
     {
         public ResponseCode ResponseCode;

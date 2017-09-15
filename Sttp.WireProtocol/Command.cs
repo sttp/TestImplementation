@@ -3,18 +3,6 @@ using System.IO;
 
 namespace Sttp.WireProtocol
 {
-    public enum CommandCode : byte
-    {
-        NegotiateSession = 0x00,
-        MetadataRefresh = 0x01,
-        Subscribe = 0x02,
-        Unsubscribe = 0x03,
-        SecureDataChannel = 0x04,
-        RuntimeIDMapping = 0x05,
-        DataPointPacket = 0x06,
-        NoOp = 0xFF
-    }
-
     public class Command
     {
         public CommandCode CommandCode;
@@ -23,16 +11,16 @@ namespace Sttp.WireProtocol
 
     public static class CommandExtensions
     {
-        public static byte[] Encode(this Command response)
+        public static byte[] Encode(this Command command)
         {
-            if ((object)response == null)
-                throw new ArgumentNullException(nameof(response));
+            if ((object)command == null)
+                throw new ArgumentNullException(nameof(command));
 
             MemoryStream stream = new MemoryStream();
 
-            stream.WriteByte((byte)response.CommandCode);
+            stream.WriteByte((byte)command.CommandCode);
 
-            int length = response.Payload?.Length ?? 0;
+            int length = command.Payload?.Length ?? 0;
 
             if (length > ushort.MaxValue)
                 throw new OverflowException("Command payload to large");
@@ -40,7 +28,7 @@ namespace Sttp.WireProtocol
             stream.Write(BigEndian.GetBytes((ushort)length), 0, 2);
 
             if (length > 0)
-                stream.Write(response.Payload, 0, length);
+                stream.Write(command.Payload, 0, length);
 
             return stream.ToArray();
         }
@@ -64,5 +52,4 @@ namespace Sttp.WireProtocol
             return command;
         }
     }
-
 }

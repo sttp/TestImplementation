@@ -18,7 +18,7 @@ namespace Sttp.Publisher
         private Func<byte[], int, int, byte[]> m_compression;
         private byte[] m_key;
         private byte[] m_iv;
-        private readonly List<dynamic> m_dataPointQueue;
+        private readonly List<DataPoint> m_dataPointQueue;
         private readonly List<Command> m_commandQueue;
         private readonly List<Response> m_responseQueue;
         private readonly Thread m_dataThread;
@@ -30,6 +30,7 @@ namespace Sttp.Publisher
             m_api = api;
             m_tcpSocket = tcpSocket;
             m_id = Guid.NewGuid();
+            m_dataPointQueue = new List<DataPoint>();
             m_commandQueue = new List<Command>();
             m_responseQueue = new List<Response>();
             m_enabled = true;
@@ -65,11 +66,11 @@ namespace Sttp.Publisher
             m_key = key;
             m_iv = iv;
 
-            // TODO: Payload needs to be CryptoKeys structure
+            // TODO: Payload needs to be SymmetricSecurity structure
             SendResponse(new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.SecureDataChannel, Payload = null });
         }
 
-        internal void QueueDataPoint(dynamic dataPoint)
+        internal void QueueDataPoint(DataPoint dataPoint)
         {
             lock (m_dataPointQueue)
                 m_dataPointQueue.Add(dataPoint);
