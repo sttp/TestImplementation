@@ -266,7 +266,7 @@ namespace Sttp.Publisher
                 subscriber.QueueDataPoints(dataPoints.Select(point => new DataPoint
                 {
                     ID = runtimeID,
-                    Value = point.Value,
+                    //Value = point.Value, ToDo: Fix
                     State = point.State
                 }));
             }
@@ -285,7 +285,7 @@ namespace Sttp.Publisher
                 subscriber.QueueDataPoints(dataPoints.Select(point => new DataPoint
                 {
                     ID = runtimeID,
-                    Value = point.Value,
+                    //Value = point.Value, ToDo: Fix
                     State = point.State
                 }));
             }

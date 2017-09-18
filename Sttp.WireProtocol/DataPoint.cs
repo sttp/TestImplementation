@@ -8,14 +8,13 @@ namespace Sttp.WireProtocol
     // Note: this should be turned into a reusable class and therefore the initial size of 
     // Value and State should be the maximum supported size. It's not necessary to clear
     // the unused bytes on Value and State.
-    
+
     /// <summary>
     /// Represents a single point of data.
     /// </summary>
     public class DataPoint : IEncode
     {
-        public const int MaxValueSize = 16;
-        public const int MaxStateSize = 20;
+        public const int MaxValueSize = 64;
 
         /// <summary>
         /// Maps to DataPointKey.RuntimeID
@@ -25,7 +24,23 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// Contains the Value.
         /// </summary>
-        public byte[] Value;
+        public readonly byte[] Value = new byte[64];
+
+        /// <summary>
+        /// Increments every time that a new value larger than 64 bytes is created. 0 if the data doesn't need to be fragmented.
+        /// </summary>
+        public uint Sequence;
+        /// <summary>
+        /// The fragment index of data that is being sent.
+        /// </summary>
+        public uint Fragment;
+        /// <summary>
+        /// The total size of all fragments.
+        /// </summary>
+        public uint Length;
+
+        public SttpTimestamp Time;
+        public QualityFlags QualityFlags;
 
         /// <summary>
         /// Contains the Timestamp and Quality flags. For variable length types, it can also include length and sequence numbers.
@@ -34,93 +49,91 @@ namespace Sttp.WireProtocol
 
         public byte[] Encode()
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                stream.Write(BigEndian.GetBytes(ID), 0, 4);
-
-                if ((object)Value != null && Value.Length > 0)
-                    stream.Write(Value, 0, Value.Length);
-
-                if ((object)State != null && State.Length > 0)
-                    stream.Write(State, 0, State.Length);
-
-                return stream.ToArray();
-            }
+            throw new NotImplementedException();
+            //Encoding occurs somewhere else.
         }
 
         public void SetValue(sbyte value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(short value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(int value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(long value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(byte value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(ushort value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(uint value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(ulong value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(decimal value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(double value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(float value)
         {
-            Value = BigEndian.GetBytes(value);
+            BigEndian.CopyBytes(value, Value, 0);
         }
 
         public void SetValue(Guid value)
         {
-            Value = value.ToByteArray();
+            throw new NotImplementedException();
+            //Guid.ToByteArray does not conform to big endian bytes.
+            //todo: Implment this 
+            //BigEndian.CopyBytes(value, Value, 0);
         }
 
-        public void SetValue(byte[] value)
+        public void SetValue(byte[] value, uint sequence, uint fragment, uint length)
         {
-            BufferValue buffer = new BufferValue { Data = Value };
-            Value = buffer.Encode();
+            value.CopyTo(Value, 0);
+            Sequence = sequence;
+            Fragment = fragment;
+            Length = length;
         }
 
         public void SetState(DataPointState state)
         {
-            State = state?.Encode();
+            throw new NotImplementedException();
+            //ToDo: Come up with a better way to assign state.
         }
+
 
         public static List<DataPoint> GetDataPoints(byte[] value)
         {
+            //ToDo: Need to correct this
             const int MaxBufferSize = MaxValueSize - 1;
 
             List<DataPoint> dataPoints = new List<DataPoint>();
@@ -136,16 +149,10 @@ namespace Sttp.WireProtocol
                 if (i == fragments - 1 && remainder > 0)
                     length = remainder;
 
-                BufferValue bufferValue = new BufferValue
-                {
-                    Data = value.BlockCopy(i * MaxBufferSize, length)
-                };
-
-                dataPoints.Add(new DataPoint
-                {
-                    Value = bufferValue.Encode(),
-                    State = BigEndian.GetBytes((ushort)i)
-                });
+                var point = new DataPoint();
+                Array.Copy(value, i * MaxBufferSize,point.Value,0,length);
+                point.State = BigEndian.GetBytes((ushort)i);
+                dataPoints.Add(point);
             }
 
             return dataPoints;
@@ -153,36 +160,7 @@ namespace Sttp.WireProtocol
 
         public static List<DataPoint> GetDataPoints(string value, Encoding encoding)
         {
-            const int MaxBufferSize = MaxValueSize - 1;
-
-            List<DataPoint> dataPoints = new List<DataPoint>();
-
-            byte[] data = encoding.GetBytes(value);
-
-            // Fragment value into 15-byte chunks with sequence number
-            int remainder = data.Length % MaxBufferSize;
-            int fragments = data.Length / MaxBufferSize + remainder > 0 ? 1 : 0;
-
-            for (int i = 0; i < fragments; i++)
-            {
-                int length = MaxBufferSize;
-
-                if (i == fragments - 1 && remainder > 0)
-                    length = remainder;
-
-                StringValue stringValue = new StringValue
-                {
-                    Data = data.BlockCopy(i * MaxBufferSize, length)
-                };
-
-                dataPoints.Add(new DataPoint
-                {
-                    Value = stringValue.Encode(),
-                    State = BigEndian.GetBytes((ushort)i)
-                });
-            }
-
-            return dataPoints;
+            return GetDataPoints(encoding.GetBytes(value));
         }
     }
 }
