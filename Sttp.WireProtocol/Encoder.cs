@@ -106,7 +106,7 @@ namespace Sttp.WireProtocol
             // Need to consider filtering options an impacts on server
         }
 
-        public void RequestMetadataTablesReply(Guid cachedBaseVersionNumber, int versionNumber, MetadataRow[] rows)
+        public void RequestMetadataReply(Guid cachedBaseVersionNumber, int versionNumber, MetadataRow[] rows)
         {
             //Metadata will be chunked one row at a time for the reply. 
         }
