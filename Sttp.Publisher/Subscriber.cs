@@ -114,8 +114,6 @@ namespace Sttp.Publisher
                 }
 
                 // Combine data points into command payload / fragment as needed into 16K chunks
-                List<DataPointPacket> packets = DataPointPacket.GetDataPointPackets(dataPoints, m_api.TargetPacketSize);
-
                 foreach (DataPointPacket dataPointPacket in DataPointPacket.GetDataPointPackets(dataPoints, m_api.TargetPacketSize))
                 {
                     byte[] payload = dataPointPacket.Payload;
