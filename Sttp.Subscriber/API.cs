@@ -12,7 +12,7 @@ namespace Sttp.Subscriber
         public event EventHandler ReceivedMetaData;
         public event EventHandler ReceivedDataPoints;
         public event EventHandler MetadataChanged;
-        private event EventHandler<EventArgs<Response>> ReceivedResponse;
+        private event EventHandler<EventArgs<object>> ReceivedResponse;
 
         private dynamic m_tcpSocket;
         private dynamic m_udpSocket;
@@ -108,7 +108,7 @@ namespace Sttp.Subscriber
             // if no UDP port defined throw exception
         }
 
-        private void SendCommand(Command command)
+        private void SendCommand(object command)
         {
 
         }

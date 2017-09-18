@@ -15,7 +15,7 @@ namespace Sttp.Publisher
 {
     public class Subscriber
     {
-        internal event EventHandler<EventArgs<Response>> ReceivedResponse;
+        //internal event EventHandler<EventArgs<Response>> ReceivedResponse;
 
         internal int NegotiationStep;
 
@@ -25,8 +25,8 @@ namespace Sttp.Publisher
         private byte[] m_key;
         private byte[] m_iv;
         private readonly List<DataPoint> m_dataPointQueue;
-        private readonly List<Command> m_commandQueue;
-        private readonly List<Response> m_responseQueue;
+        //private readonly List<Command> m_commandQueue;
+        //private readonly List<Response> m_responseQueue;
         private readonly Thread m_dataThread;
         private readonly Thread m_sendThread;
         private bool m_enabled;
@@ -38,28 +38,55 @@ namespace Sttp.Publisher
             m_tcpSocket = tcpSocket;
             m_id = Guid.NewGuid();
             m_dataPointQueue = new List<DataPoint>();
-            m_commandQueue = new List<Command>();
-            m_responseQueue = new List<Response>();
+            //m_commandQueue = new List<Command>();
+            //m_responseQueue = new List<Response>();
             m_enabled = true;
 
             m_dataThread = new Thread(CollateData);
             m_dataThread.Start();
 
-            m_sendThread = new Thread(SendData);
-            m_sendThread.Start();
-
-            m_encoder = new Encoder();
+            m_encoder = new Encoder(1024);
             m_decoder = new Decoder();
-
+            m_encoder.NewPacket += m_encoder_NewPacket;
             // Setup data reception event or handler, etc...
             //m_tcpSocket.OnDataReceived += m_tcpSocket_OnDataReceived;
+        }
+
+        private void m_encoder_NewPacket(object sender, EventArgs<bool, byte[], int> e)
+        {
+            bool sendReliably = e.Argument1;
+            byte[] data = e.Argument2;
+            int length = e.Argument3;
+
+            //ToDo: possibly queue data packets so this method will never block.
+            if (sendReliably)
+            {
+                m_tcpSocket.Send(data, length);
+            }
+            else
+            {
+                // Encrypt payload
+                if ((object)m_key != null)
+                {
+                    using (AesManaged aes = new AesManaged())
+                    {
+                        aes.KeySize = 256;
+                        aes.Key = m_key;
+                        aes.IV = m_iv;
+                        data = aes.Encrypt(data, 0, data.Length, m_key, m_iv);
+                        length = data.Length;
+                    }
+                }
+                m_udpSocket.Send(data, length);
+            }
         }
 
         public void Start()
         {
             // Start session negotiation - first step is to declare supported protocol versions...
             ProtocolVersions versions = new ProtocolVersions { Versions = new[] { OnePointZero } };
-            SendCommand(new Command { CommandCode = CommandCode.NegotiateSession, Payload = versions.Encode() });
+            m_encoder.NegotiateSessionStep1(versions);
+            m_encoder.Flush();
             // Start timer to wait on subscriber response - then disconnect otherwise
         }
 
@@ -80,35 +107,14 @@ namespace Sttp.Publisher
             m_key = key;
             m_iv = iv;
 
-            // TODO: Payload needs to be SymmetricSecurity structure
-            SendResponse(new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.SecureDataChannel, Payload = null });
-        }
-
-        internal void QueueDataPoints(IEnumerable<DataPoint> dataPoints)
-        {
-            // Add each point individually instead of as a range - this
-            // way bulk data points can interleave with other data points
-            // that may be being added simultaneously
-            foreach (DataPoint dataPoint in dataPoints)
-                QueueDataPoint(dataPoint);
+            m_encoder.SecureDataChannel(key, iv);
+            m_encoder.Flush();
         }
 
         internal void QueueDataPoint(DataPoint dataPoint)
         {
             lock (m_dataPointQueue)
                 m_dataPointQueue.Add(dataPoint);
-        }
-
-        internal void SendCommand(Command command)
-        {
-            lock (m_commandQueue)
-                m_commandQueue.Add(command);
-        }
-
-        internal void SendResponse(Response response)
-        {
-            lock (m_responseQueue)
-                m_responseQueue.Add(response);
         }
 
         private void CollateData()
@@ -167,23 +173,7 @@ namespace Sttp.Publisher
                     }
                 }
 
-                //Send this data packet.
-
-                byte[] payload = new byte[0];
-
-                // Encrypt payload
-                if ((object)m_key != null)
-                {
-                    using (AesManaged aes = new AesManaged())
-                    {
-                        aes.KeySize = 256;
-                        aes.Key = m_key;
-                        aes.IV = m_iv;
-                        payload = aes.Encrypt(payload, 0, payload.Length, m_key, m_iv);
-                    }
-                }
-
-                SendCommand(null);
+                m_encoder.Flush();
             }
         }
 
@@ -209,40 +199,121 @@ namespace Sttp.Publisher
             }
         }
 
-        private void SendData()
-        {
-            // TODO: This is prototype example code - use thread signaling and/or handle in a better way...
-            while (m_enabled)
-            {
-                Thread.Sleep(500);
-
-                Command[] commands;
-                Response[] responses;
-
-                lock (m_commandQueue)
-                {
-                    commands = m_commandQueue.ToArray();
-                    m_commandQueue.Clear();
-                }
-
-                lock (m_responseQueue)
-                {
-                    responses = m_responseQueue.ToArray();
-                    m_responseQueue.Clear();
-                }
-
-                foreach (Command command in commands)
-                    m_tcpSocket.Send(command.Encode());
-
-                foreach (Response response in responses)
-                    m_tcpSocket.Send(response.Encode());
-            }
-        }
-
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
-            Response response = Response.Decode(buffer, startIndex, length);
-            ReceivedResponse?.Invoke(this, new EventArgs<Response>(response));
+            m_decoder.WriteData(buffer, startIndex, length);
+            var code = m_decoder.NextMessage();
+            while (code != DecoderCallback.EndOfMessages)
+            {
+                switch (code)
+                {
+                    case DecoderCallback.NegotiateSessionStep1:
+                        // Setup subscriber desired protocol version, validating that publisher can support it
+                        ProtocolVersions versions;
+                        m_decoder.NegotiateSessionStep1(out versions);
+
+                        // Version 1.0 is the only currently supported version for this implementation
+                        if (versions.Versions.Any(v => v == OnePointZero))
+                        {
+                            // Send supported operational modes
+                            OperationalModes modes = new OperationalModes
+                            {
+                                Stateful = new NamedVersions { Items = new[] { new NamedVersion { Name = "TSSC", Version = OnePointZero } } },
+                                Stateless = new NamedVersions { Items = new[] { new NamedVersion { Name = "DEFLATE", Version = OnePointZero } } },
+                                UdpPort = SupportsUDP ? (ushort)1 : (ushort)0
+                            };
+
+                            m_encoder.NegotiateSessionStep1Reply(modes);
+                            m_encoder.Flush();
+                        }
+                        else
+                        {
+                            Disconnect();
+                        }
+                        break;
+                    case DecoderCallback.NegotiateSessionStep1Reply:
+                        m_encoder.CommandFailed(CommandCode.NegotiateSession, "Not expecting a reply");
+                        m_encoder.Flush();
+                        Disconnect();
+                        break;
+                    case DecoderCallback.NegotiateSessionStep2:
+                        // Setup subscriber desired operational modes, validating that publisher can support them
+                        OperationalModes subscriberModes;
+                        m_decoder.NegotiateSessionStep2(out subscriberModes);
+
+                        // Validate UDP support
+                        if (!SupportsUDP && subscriberModes.UdpPort > 0)
+                        {
+                            m_encoder.CommandFailed(CommandCode.NegotiateSession, "Publisher does not support UDP");
+                            m_encoder.Flush();
+                            Disconnect();
+                            return;
+                        }
+
+                        // Set up desired compression algorithm
+                        Func<byte[], int, int, byte[]> compression = null;
+                        string name = subscriberModes.Stateful.Items[0].Name;
+                        Version version = subscriberModes.Stateful.Items[0].Version;
+                        bool supported = true;
+
+                        switch (name)
+                        {
+                            case "DEFLATE":
+                                if (version == OnePointZero)
+                                    compression = null; // DeflateCompress();
+                                else
+                                    supported = false;
+                                break;
+                            case "TSSC":
+                                if (version == OnePointZero)
+                                    compression = null; // new TsscAlgorithm(subscriber).Compress();
+                                else
+                                    supported = false;
+                                break;
+                            case "NONE":
+                                supported = version == OnePointZero;
+                                break;
+                        }
+
+                        if (subscriberModes.UdpPort > 0)
+                        {
+                            // TODO: Setup Stateless compression algorithm also
+                        }
+
+                        if (supported)
+                        {
+                            m_encoder.CommandSuccess(CommandCode.NegotiateSession, "");
+                            m_encoder.Flush();
+                            //SetCompressionAlgorithm(compression);
+                            SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(this));
+                        }
+                        else
+                        {
+                            m_encoder.CommandFailed(CommandCode.NegotiateSession, $"Unsupported compression algorithm: {name}");
+                            m_encoder.Flush();
+                            Disconnect();
+                        }
+                        break;
+                    case DecoderCallback.CommandSuccess:
+                        break;
+                    case DecoderCallback.CommandFailed:
+                        break;
+                    case DecoderCallback.RequestMetadataTables:
+                        break;
+                    case DecoderCallback.RequestMetadataTablesReply:
+                        break;
+                    case DecoderCallback.RequestMetadata:
+                        break;
+                    case DecoderCallback.RequestMetadataReply:
+                        break;
+                    case DecoderCallback.Subscribe:
+                        break;
+                    case DecoderCallback.EndOfMessages:
+                        break;
+                }
+
+                code = m_decoder.NextMessage();
+            }
         }
 
         public const ushort DefaultTargetPacketSize = short.MaxValue / 2;
@@ -261,130 +332,6 @@ namespace Sttp.Publisher
         {
             //ToDo: Handle strings and byte arrays differently.
             QueueDataPoint(dataPoint);
-        }
-
-        private void subscriber_ReceivedResponse(object sender, EventArgs<Response> e)
-        {
-            Response response = e.Argument;
-
-            // Check which command this is in response to
-            switch (response.CommandCode)
-            {
-                case CommandCode.NegotiateSession:
-                    NegotiateSession(response);
-                    break;
-                case CommandCode.MetadataRefresh:
-                    break;
-                case CommandCode.Subscribe:
-                    break;
-                case CommandCode.Unsubscribe:
-                    break;
-                case CommandCode.SecureDataChannel:
-                    SecureDataChannel();
-                    break;
-                case CommandCode.RuntimeIDMapping:
-                    break;
-                case CommandCode.NoOp:
-                    break;
-            }
-        }
-
-        private void NegotiateSession(Response response)
-        {
-            if (response.ResponseCode == ResponseCode.Succeeded)
-            {
-                NegotiationStep++;
-
-                if (NegotiationStep == 1)
-                {
-                    // Setup subscriber desired protocol version, validating that publisher can support it
-                    ProtocolVersions versions = ProtocolVersions.Decode(response.Payload, 0, response.Payload.Length);
-
-                    // Version 1.0 is the only currently supported version for this implementation
-                    if (versions.Versions.Any(version => version == OnePointZero))
-                    {
-                        // Send supported operational modes
-                        OperationalModes modes = new OperationalModes
-                        {
-                            Stateful = new NamedVersions { Items = new[] { new NamedVersion { Name = "TSSC", Version = OnePointZero } } },
-                            Stateless = new NamedVersions { Items = new[] { new NamedVersion { Name = "DEFLATE", Version = OnePointZero } } },
-                            UdpPort = SupportsUDP ? (ushort)1 : (ushort)0
-                        };
-
-                        SendResponse(new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.NegotiateSession, Payload = modes.Encode() });
-                    }
-                    else
-                    {
-                        Disconnect();
-                    }
-                }
-                else if (NegotiationStep == 2)
-                {
-                    // Setup subscriber desired operational modes, validating that publisher can support them
-                    OperationalModes subscriberModes = OperationalModes.Decode(response.Payload, 0, response.Payload.Length);
-
-                    // Validate UDP support
-                    if (!SupportsUDP && subscriberModes.UdpPort > 0)
-                    {
-                        SendResponse(new Response { ResponseCode = ResponseCode.Failed, CommandCode = CommandCode.NegotiateSession, Payload = MessageResponse("Publisher does not support UDP") });
-                        Disconnect();
-                        return;
-                    }
-
-                    // Set up desired compression algorithm
-                    Func<byte[], int, int, byte[]> compression = null;
-                    string name = subscriberModes.Stateful.Items[0].Name;
-                    Version version = subscriberModes.Stateful.Items[0].Version;
-                    bool supported = true;
-
-                    switch (name)
-                    {
-                        case "DEFLATE":
-                            if (version == OnePointZero)
-                                compression = null; // DeflateCompress();
-                            else
-                                supported = false;
-                            break;
-                        case "TSSC":
-                            if (version == OnePointZero)
-                                compression = null; // new TsscAlgorithm(subscriber).Compress();
-                            else
-                                supported = false;
-                            break;
-                        case "NONE":
-                            supported = version == OnePointZero;
-                            break;
-                    }
-
-                    if (subscriberModes.UdpPort > 0)
-                    {
-                        // TODO: Setup Stateless compression algorithm also
-                    }
-
-                    if (supported)
-                    {
-                        //SetCompressionAlgorithm(compression);
-                        SendResponse(new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.NegotiateSession, Payload = null });
-                        SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(this));
-                    }
-                    else
-                    {
-                        SendResponse(new Response { ResponseCode = ResponseCode.Failed, CommandCode = CommandCode.NegotiateSession, Payload = MessageResponse($"Unsupported compression algorithm: {name}") });
-                        Disconnect();
-                    }
-                }
-                else
-                {
-                    Disconnect();
-
-                    // TODO: Just log instead of throwing exception
-                    throw new InvalidOperationException("Too many session negotiation steps encountered - check protocol version");
-                }
-            }
-            else
-            {
-                Disconnect();
-            }
         }
 
         private void SecureDataChannel()

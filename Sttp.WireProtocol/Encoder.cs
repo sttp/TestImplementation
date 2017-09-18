@@ -13,6 +13,11 @@ namespace Sttp.WireProtocol
     public class Encoder
     {
         /// <summary>
+        /// Once this size has been reached, the protocol will automatically call 
+        /// </summary>
+        private int m_autoFlushPacketSize; 
+
+        /// <summary>
         /// The bytes that need to be reliably sent. Note, this data is not valid until <see cref="Flush"/> has been called.
         /// </summary>
         public byte[] ReliableSendBuffer { get; private set; }
@@ -29,6 +34,16 @@ namespace Sttp.WireProtocol
         /// </summary>
         public int UnreliableSendBufferLength { get; private set; }
 
+        /// <summary>
+        /// Occurs when a new packet of data must be sent on the wire. This is called immediately
+        /// after <see cref="Flush"/> or when the <see cref="m_autoFlushPacketSize"/> has been exceeded.
+        /// </summary>
+        public event EventHandler<EventArgs<bool, byte[], int>> NewPacket;
+
+        public Encoder(int autoflushPacketSize)
+        {
+            m_autoFlushPacketSize = autoflushPacketSize;
+        }
 
         public void NegotiateSessionStep1(ProtocolVersions protocolVersionNumber)
         {
