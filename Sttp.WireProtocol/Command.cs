@@ -3,24 +3,18 @@ using System.IO;
 
 namespace Sttp.WireProtocol
 {
-    public class Command
+    public class Command : IEncode
     {
         public CommandCode CommandCode;
         public byte[] Payload;
-    }
 
-    public static class CommandExtensions
-    {
-        public static byte[] Encode(this Command command)
+        public byte[] Encode()
         {
-            if ((object)command == null)
-                throw new ArgumentNullException(nameof(command));
-
             MemoryStream stream = new MemoryStream();
 
-            stream.WriteByte((byte)command.CommandCode);
+            stream.WriteByte((byte)CommandCode);
 
-            int length = command.Payload?.Length ?? 0;
+            int length = Payload?.Length ?? 0;
 
             if (length > ushort.MaxValue)
                 throw new OverflowException("Command payload to large");
@@ -28,12 +22,12 @@ namespace Sttp.WireProtocol
             stream.Write(BigEndian.GetBytes((ushort)length), 0, 2);
 
             if (length > 0)
-                stream.Write(command.Payload, 0, length);
+                stream.Write(Payload, 0, length);
 
             return stream.ToArray();
         }
 
-        public static Command DecodeCommand(this byte[] buffer, int startIndex, int length)
+        public static Command Decode(byte[] buffer, int startIndex, int length)
         {
             buffer.ValidateParameters(startIndex, length);
 

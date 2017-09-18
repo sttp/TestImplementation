@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Threading;
 using Sttp.WireProtocol;
 
@@ -70,6 +71,15 @@ namespace Sttp.Publisher
             SendResponse(new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.SecureDataChannel, Payload = null });
         }
 
+        internal void QueueDataPoints(IEnumerable<DataPoint> dataPoints)
+        {
+            // Add each point individually instead of as a range - this
+            // way bulk data points can interleave with other data points
+            // that may be being added simultaneously
+            foreach (DataPoint dataPoint in dataPoints)
+                QueueDataPoint(dataPoint);
+        }
+
         internal void QueueDataPoint(DataPoint dataPoint)
         {
             lock (m_dataPointQueue)
@@ -95,7 +105,7 @@ namespace Sttp.Publisher
             {
                 Thread.Sleep(100);
 
-                dynamic[] dataPoints;
+                DataPoint[] dataPoints;
 
                 lock (m_dataPointQueue)
                 {
@@ -104,23 +114,32 @@ namespace Sttp.Publisher
                 }
 
                 // Combine data points into command payload / fragment as needed into 16K chunks
+                List<DataPointPacket> packets = DataPointPacket.GetDataPointPackets(dataPoints, m_api.TargetPacketSize);
 
-                Command dataPointPacket = new Command { CommandCode = CommandCode.DataPointPacket, Payload = null };
+                foreach (DataPointPacket dataPointPacket in DataPointPacket.GetDataPointPackets(dataPoints, m_api.TargetPacketSize))
+                {
+                    byte[] payload = dataPointPacket.Payload;
 
-                byte[] payload = dataPointPacket.Payload;
+                    // Compress payload
+                    if ((object)m_compression != null)
+                        payload = m_compression(payload, 0, payload.Length);
 
-                // Compress payload
-                if ((object)m_compression != null)
-                    payload = m_compression(payload, 0, payload.Length);
+                    // Encrypt payload
+                    if ((object)m_key != null)
+                    {
+                        using (AesManaged aes = new AesManaged())
+                        {
+                            aes.KeySize = 256;
+                            aes.Key = m_key;
+                            aes.IV = m_iv;
+                            payload = aes.Encrypt(payload, 0, payload.Length, m_key, m_iv);
+                        }
+                    }
 
-                // Encrypt payload
-                //if ((object)m_key != null)
-                //    payload = aes.Encrypt(payload, m_key, m_iv);
+                    dataPointPacket.Payload = payload;
 
-                dataPointPacket.Payload = payload;
-
-
-                SendCommand(dataPointPacket);
+                    SendCommand(dataPointPacket);
+                }
             }
         }
 
@@ -156,7 +175,7 @@ namespace Sttp.Publisher
 
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
-            Response response = buffer.DecodeResponse(startIndex, length);
+            Response response = Response.Decode(buffer, startIndex, length);
             ReceivedResponse?.Invoke(this, new EventArgs<Response>(response));
         }
     }

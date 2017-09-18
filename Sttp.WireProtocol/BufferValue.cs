@@ -3,21 +3,15 @@ using System.IO;
 
 namespace Sttp.WireProtocol
 {
-    public class BufferValue
+    public class BufferValue : IEncode
     {
         public byte[] Data;
-    }
 
-    public static class BufferValueExtensions
-    {
-        public static byte[] Encode(this BufferValue bufferValue)
+        public byte[] Encode()
         {
-            if ((object)bufferValue == null)
-                throw new ArgumentNullException(nameof(bufferValue));
-
             MemoryStream stream = new MemoryStream();
 
-            int length = bufferValue.Data?.Length ?? 0;
+            int length = Data?.Length ?? 0;
 
             if (length > 15)
                 throw new OverflowException("Buffer payload to large");
@@ -25,12 +19,12 @@ namespace Sttp.WireProtocol
             stream.WriteByte((byte)length);
 
             if (length > 0)
-                stream.Write(bufferValue.Data, 0, length);
+                stream.Write(Data, 0, length);
 
             return stream.ToArray();
         }
 
-        public static BufferValue DecodeBufferValue(this byte[] buffer, int startIndex, int length)
+        public static BufferValue Decode(byte[] buffer, int startIndex, int length)
         {
             buffer.ValidateParameters(startIndex, length);
 

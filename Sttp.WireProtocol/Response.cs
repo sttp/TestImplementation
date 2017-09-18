@@ -3,26 +3,20 @@ using System.IO;
 
 namespace Sttp.WireProtocol
 {
-    public class Response
+    public class Response : IEncode
     {
         public ResponseCode ResponseCode;
         public CommandCode CommandCode;
         public byte[] Payload;
-    }
 
-    public static class ResponseExtensions
-    {
-        public static byte[] Encode(this Response response)
+        public byte[] Encode()
         {
-            if ((object)response == null)
-                throw new ArgumentNullException(nameof(response));
-
             MemoryStream stream = new MemoryStream();
 
-            stream.WriteByte((byte)response.ResponseCode);
-            stream.WriteByte((byte)response.CommandCode);
+            stream.WriteByte((byte)ResponseCode);
+            stream.WriteByte((byte)CommandCode);
 
-            int length = response.Payload?.Length ?? 0;
+            int length = Payload?.Length ?? 0;
 
             if (length > ushort.MaxValue)
                 throw new OverflowException("Response payload to large");
@@ -30,12 +24,12 @@ namespace Sttp.WireProtocol
             stream.Write(BigEndian.GetBytes((ushort)length), 0, 2);
 
             if (length > 0)
-                stream.Write(response.Payload, 0, length);
+                stream.Write(Payload, 0, length);
 
             return stream.ToArray();
         }
 
-        public static Response DecodeResponse(this byte[] buffer, int startIndex, int length)
+        public static Response Decode(byte[] buffer, int startIndex, int length)
         {
             buffer.ValidateParameters(startIndex, length);
 

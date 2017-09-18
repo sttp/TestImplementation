@@ -47,6 +47,9 @@
     <Compile Include="DataPoint.cs" />
     <Compile Include="DataPointKey.cs" />
     <Compile Include="DataPointKeySet.cs" />
+    <Compile Include="DataPointPacket.cs" />
+    <Compile Include="DataPointState.cs" />
+    <Compile Include="IEncode.cs" />
     <Compile Include="MetadataRecord.cs" />
     <Compile Include="NamedVersion.cs" />
     <Compile Include="NamedVersions.cs" />

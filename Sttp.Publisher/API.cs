@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Sttp.WireProtocol;
+using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
 {
@@ -12,6 +15,11 @@ namespace Sttp.Publisher
     // needs to remain as simple as possible.
     public class API
     {
+        public const ushort DefaultTargetPacketSize = short.MaxValue / 2;
+        public const bool DefaultSupportsUDP = true;
+
+        private static readonly Version OnePointZero = new Version(1, 0);
+
         public event EventHandler<EventArgs<Subscriber>> SubscriberConnected;          // Subscriber connected
         public event EventHandler<EventArgs<Subscriber>> SubscriberSessionEstablished; // Successful session negotiations
         public event EventHandler<EventArgs<Subscriber>> SubscriberDisconnected;       // Subscriber disconnected
@@ -25,6 +33,10 @@ namespace Sttp.Publisher
         }
 
         public ReadOnlyDictionary<Guid, Subscriber> Subscribers => new ReadOnlyDictionary<Guid, Subscriber>(m_subscribers);
+
+        public ushort TargetPacketSize { get; set; } = DefaultTargetPacketSize;
+
+        public bool SupportsUDP { get; set; } = DefaultSupportsUDP;
 
         public void Connect(string connectionString)
         {
@@ -73,82 +85,209 @@ namespace Sttp.Publisher
             return false;
         }
 
-        public void SendData(Guid pointID, ushort value)
+        public void SendData(Guid pointID, sbyte value, DataPointState state = null)
         {
             // Route to needed subscribers
-            Subscriber[] subscribers = FindAllFor(pointID);
-
-            // Create data point structure for UInt16
-            byte[] pointValue = BigEndian.GetBytes(value);
-
-            // Define state: timestamp, data quality, etc
-            byte[] pointState = null;
-
-            foreach (Subscriber subscriber in subscribers)
+            foreach (Subscriber subscriber in FindAllFor(pointID))
             {
-                subscriber.QueueDataPoint(new DataPoint
-                {
-                    ID = GetRuntimeID(subscriber, pointID),
-                    Value = pointValue,
-                    State = pointState
-                });
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
             }
         }
 
-        public void SendData(Guid pointID, int value)
+        public void SendData(Guid pointID, short value, DataPointState state = null)
         {
             // Route to needed subscribers
-            Subscriber[] subscribers = FindAllFor(pointID);
-
-            // Create data point structure for Int32
-            byte[] pointValue = BigEndian.GetBytes(value);
-
-            // Define state: timestamp, data quality, etc
-            byte[] pointState = null;
-
-            foreach (Subscriber subscriber in subscribers)
+            foreach (Subscriber subscriber in FindAllFor(pointID))
             {
-                subscriber.QueueDataPoint(new DataPoint
-                {
-                    ID = GetRuntimeID(subscriber, pointID),
-                    Value = pointValue,
-                    State = pointState
-                });
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, int value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, long value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, byte value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, ushort value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, uint value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, ulong value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, decimal value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, double value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, float value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
+            }
+        }
+
+        public void SendData(Guid pointID, Guid value, DataPointState state = null)
+        {
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                DataPoint point = new DataPoint { ID = GetRuntimeID(subscriber, pointID) };
+
+                point.SetValue(value);
+                point.SetState(state);
+
+                subscriber.QueueDataPoint(point);
             }
         }
 
         public void SendData(Guid pointID, byte[] value)
         {
+            // Fragment buffer into needed data points
+            List<DataPoint> dataPoints = DataPoint.GetDataPoints(value);
+
             // Route to needed subscribers
-            Subscriber[] subscribers = FindAllFor(pointID);
-
-            // Fragment value into 15-byte chunks with sequence number
-            int fragments = value.Length / 15;
-
-            // Define state: timestamp, data quality, etc
-            byte[] pointState = null;
-
-            // Subscriber API can recollate
-
-            // Create data point structure for each chunk and send each chunk to subscribers
-            foreach (Subscriber subscriber in subscribers)
+            foreach (Subscriber subscriber in FindAllFor(pointID))
             {
                 uint runtimeID = GetRuntimeID(subscriber, pointID);
 
-                for (int i = 0; i < fragments; i++)
+                subscriber.QueueDataPoints(dataPoints.Select(point => new DataPoint
                 {
-                    BufferValue bufferValue = new BufferValue
-                    {
-                        Data = value.BlockCopy(i * 15, 15)
-                    };
+                    ID = runtimeID,
+                    Value = point.Value,
+                    State = point.State
+                }));
+            }
+        }
 
-                    subscriber.QueueDataPoint(new DataPoint
-                    {
-                        ID = runtimeID,
-                        Value = bufferValue.Encode(),
-                        State = BigEndian.GetBytes((ushort)i)
-                    });
-                }
+        public void SendData(Guid pointID, string value, Encoding encoding)
+        {
+            // Fragment string into needed data points
+            List<DataPoint> dataPoints = DataPoint.GetDataPoints(value, encoding);
+
+            // Route to needed subscribers
+            foreach (Subscriber subscriber in FindAllFor(pointID))
+            {
+                uint runtimeID = GetRuntimeID(subscriber, pointID);
+
+                subscriber.QueueDataPoints(dataPoints.Select(point => new DataPoint
+                {
+                    ID = runtimeID,
+                    Value = point.Value,
+                    State = point.State
+                }));
             }
         }
 
@@ -175,8 +314,8 @@ namespace Sttp.Publisher
             SubscriberConnected?.Invoke(this, new EventArgs<Subscriber>(subscriber));
 
             // Start session negotiation - first step is to declare supported protocol versions...
-            // TODO: Payload needs to be ProtocolVersions array
-            SendCommand(subscriber, new Command { CommandCode = CommandCode.NegotiateSession, Payload = null });
+            ProtocolVersions versions = new ProtocolVersions { Versions = new[] { OnePointZero } };
+            SendCommand(subscriber, new Command { CommandCode = CommandCode.NegotiateSession, Payload = versions.Encode() });
 
             // Start timer to wait on subscriber response - then disconnect otherwise
         }
@@ -194,56 +333,7 @@ namespace Sttp.Publisher
             switch (response.CommandCode)
             {
                 case CommandCode.NegotiateSession:
-                    if (response.ResponseCode == ResponseCode.Succeeded)
-                    {
-                        subscriber.NegotiationStep++;
-
-                        if (subscriber.NegotiationStep == 1)
-                        {
-                            // Setup subscriber desired protocol version, validating that publisher can support it
-                            // Then send support operational modes
-                            // TODO: Payload needs to be OperationalModes structure
-                            SendResponse(subscriber, new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.NegotiateSession, Payload = null });
-                        }
-                        else if (subscriber.NegotiationStep == 2)
-                        {
-                            // Setup subscriber desired operational modes, validating that publisher can support them
-                            // This also sets up desired compression algorithm:
-
-                            Func<byte[], int, int, byte[]> compression;
-                            string name = "TSSC"; // operationalModes.CompressionAlgorithms[0].Name;
-                            // Version version = operationalModes.CompressionAlgorithms[0].Version;
-
-                            switch(name)
-                            {
-                                case "DEFLATE":
-                                    compression = null; // DeflateCompress();
-                                    break;
-                                case "TSSC":
-                                    compression = null; // new TsscAlgorithm(subscriber).Compress();
-                                    break;
-                                default:
-                                    compression = null;
-                                    break;
-                            }
-
-                            subscriber.SetCompressionAlgorithm(compression);
-
-                            SendResponse(subscriber, new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.NegotiateSession, Payload = null });
-                            SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(subscriber));
-                        }
-                        else
-                        {
-                            DisconnectSubscriber(subscriber);
-
-                            // TODO: Just log instead of throwing exception
-                            throw new InvalidOperationException("Too many session negotiation steps encountered - check protocol version");
-                        }
-                    }
-                    else
-                    {
-                        DisconnectSubscriber(subscriber);
-                    }
+                    NegotiateSession(subscriber, response);
                     break;
                 case CommandCode.MetadataRefresh:
                     break;
@@ -252,19 +342,141 @@ namespace Sttp.Publisher
                 case CommandCode.Unsubscribe:
                     break;
                 case CommandCode.SecureDataChannel:
-                    using (AesManaged aes = new AesManaged())
-                    {
-                        aes.KeySize = 256;
-                        aes.GenerateKey();
-                        aes.GenerateIV();
-
-                        subscriber.SetCryptoParameters(aes.Key, aes.IV);
-                    }
+                    SecureDataChannel(subscriber);
                     break;
                 case CommandCode.RuntimeIDMapping:
                     break;
                 case CommandCode.NoOp:
                     break;
+            }
+        }
+
+        private void NegotiateSession(Subscriber subscriber, Response response)
+        {
+            if (response.ResponseCode == ResponseCode.Succeeded)
+            {
+                subscriber.NegotiationStep++;
+
+                if (subscriber.NegotiationStep == 1)
+                {
+                    // Setup subscriber desired protocol version, validating that publisher can support it
+                    ProtocolVersions versions = ProtocolVersions.Decode(response.Payload, 0, response.Payload.Length);
+
+                    // Version 1.0 is the only currently supported version for this implementation
+                    if (versions.Versions.Any(version => version == OnePointZero))
+                    {
+                        // Send supported operational modes
+                        OperationalModes modes = new OperationalModes
+                        {
+                            Encodings = StringEncodingFlags.ASCII | StringEncodingFlags.ANSI | StringEncodingFlags.UTF8 | StringEncodingFlags.Unicode,
+                            Stateful = new NamedVersions { Items = new[] { new NamedVersion { Name = "TSSC", Version = OnePointZero } } },
+                            Stateless = new NamedVersions { Items = new[] { new NamedVersion { Name = "DEFLATE", Version = OnePointZero } } },
+                            UdpPort = SupportsUDP ? (ushort)1 : (ushort)0
+                        };
+
+                        SendResponse(subscriber, new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.NegotiateSession, Payload = modes.Encode() });
+                    }
+                    else
+                    {
+                        DisconnectSubscriber(subscriber);
+                    }
+                }
+                else if (subscriber.NegotiationStep == 2)
+                {
+                    // Setup subscriber desired operational modes, validating that publisher can support them
+                    OperationalModes subscriberModes = OperationalModes.Decode(response.Payload, 0, response.Payload.Length);
+
+                    // Validate UDP support
+                    if (!SupportsUDP && subscriberModes.UdpPort > 0)
+                    {
+                        SendResponse(subscriber, new Response { ResponseCode = ResponseCode.Failed, CommandCode = CommandCode.NegotiateSession, Payload = MessageResponse("Publisher does not support UDP") });
+                        DisconnectSubscriber(subscriber);
+                        return;
+                    }
+
+                    // Set up desired compression algorithm
+                    Func<byte[], int, int, byte[]> compression = null;
+                    string name = subscriberModes.Stateful.Items[0].Name;
+                    Version version = subscriberModes.Stateful.Items[0].Version;
+                    bool supported = true;
+
+                    switch (name)
+                    {
+                        case "DEFLATE":
+                            if (version == OnePointZero)
+                                compression = null; // DeflateCompress();
+                            else
+                                supported = false;
+                            break;
+                        case "TSSC":
+                            if (version == OnePointZero)
+                                compression = null; // new TsscAlgorithm(subscriber).Compress();
+                            else
+                                supported = false;
+                            break;
+                        case "NONE":
+                            supported = version == OnePointZero;
+                            break;
+                    }
+
+                    if (subscriberModes.UdpPort > 0)
+                    {
+                        // TODO: Setup Stateless compression algorithm also
+                    }
+
+                    if (supported)
+                    {
+                        subscriber.SetCompressionAlgorithm(compression);
+                        SendResponse(subscriber, new Response { ResponseCode = ResponseCode.Succeeded, CommandCode = CommandCode.NegotiateSession, Payload = null });
+                        SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(subscriber));
+                    }
+                    else
+                    {
+                        SendResponse(subscriber, new Response { ResponseCode = ResponseCode.Failed, CommandCode = CommandCode.NegotiateSession, Payload = MessageResponse($"Unsupported compression algorithm: {name}") });
+                        DisconnectSubscriber(subscriber);
+                    }
+                }
+                else
+                {
+                    DisconnectSubscriber(subscriber);
+
+                    // TODO: Just log instead of throwing exception
+                    throw new InvalidOperationException("Too many session negotiation steps encountered - check protocol version");
+                }
+            }
+            else
+            {
+                DisconnectSubscriber(subscriber);
+            }
+        }
+
+        private void SecureDataChannel(Subscriber subscriber)
+        {
+            using (AesManaged aes = new AesManaged())
+            {
+                aes.KeySize = 256;
+                aes.GenerateKey();
+                aes.GenerateIV();
+
+                subscriber.SetCryptoParameters(aes.Key, aes.IV);
+            }
+        }
+
+        private byte[] MessageResponse(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+                return new byte[] { 0 };
+
+            if (message.Length > byte.MaxValue)
+                message = message.Substring(0, byte.MaxValue);
+
+            byte[] data = Encoding.ASCII.GetBytes(message);
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                stream.WriteByte((byte)data.Length);
+                stream.Write(data, 0, data.Length);
+                return stream.ToArray();
             }
         }
 

@@ -3,7 +3,7 @@
 namespace Sttp.WireProtocol
 {
     [Flags]
-    public enum QualityFlags
+    public enum QualityFlags : byte
     {
         //SEC: We should include an IsNull flag for empty values. Maybe an IsMissing could fit.
         Normal = 0,                 // Defines normal state
