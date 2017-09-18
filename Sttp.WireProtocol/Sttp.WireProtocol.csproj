@@ -55,6 +55,7 @@
     <Compile Include="MetadataRecord.cs" />
     <Compile Include="NamedVersion.cs" />
     <Compile Include="NamedVersions.cs" />
+    <Compile Include="SttpTimestamp.cs" />
     <Compile Include="NTP128Timestamp.cs" />
     <Compile Include="OperationalModes.cs" />
     <Compile Include="Priority.cs" />
