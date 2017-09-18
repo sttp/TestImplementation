@@ -52,7 +52,10 @@
     <Compile Include="Decoder.cs" />
     <Compile Include="Encoder.cs" />
     <Compile Include="IEncode.cs" />
-    <Compile Include="MetadataRecord.cs" />
+    <Compile Include="MetadataColumn.cs" />
+    <Compile Include="MetadataField.cs" />
+    <Compile Include="MetadataRow.cs" />
+    <Compile Include="MetadataTable.cs" />
     <Compile Include="NamedVersion.cs" />
     <Compile Include="NamedVersions.cs" />
     <Compile Include="SttpTimestamp.cs" />

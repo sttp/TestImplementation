@@ -483,5 +483,6 @@ namespace Sttp.Publisher
         private void SendCommand(Subscriber subscriber, Command command) => subscriber?.SendCommand(command);
 
         private void SendResponse(Subscriber subscriber, Response response) => subscriber?.SendResponse(response);
+
     }
 }
