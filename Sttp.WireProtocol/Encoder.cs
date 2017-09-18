@@ -160,7 +160,7 @@ namespace Sttp.WireProtocol
         /// sending each metadata segment, <see cref="ReliableSendBufferLength"/> or <see cref="UnreliableSendBufferLength"/>
         /// will indicate approximately how much data is pending to be sent. This will allow control of the packet size.
         /// </summary>
-        public void RuntimeIDMapping(DataPointKey requiredMetadata)
+        public void RuntimeIDMapping(DataPointKeyWire requiredMetadata)
         {
             //Sends this to the client and builds compression state data for it.
         }
@@ -172,7 +172,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         /// <param name="sendReliably"></param>
         /// <param name="point"></param>
-        public void SendDataPoint(bool sendReliably, DataPoint point)
+        public void SendDataPoint(bool sendReliably, DataPointWire point)
         {
 
         }

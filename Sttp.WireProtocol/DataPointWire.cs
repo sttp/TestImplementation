@@ -35,6 +35,8 @@ namespace Sttp.WireProtocol
 
         public SttpTimestamp Time;
 
+        public TimestampFlags Flags;
+
         public QualityFlags QualityFlags;
 
         //This code goes elsewhere

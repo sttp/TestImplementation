@@ -7,6 +7,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using Sttp.WireProtocol;
+using Decoder = Sttp.WireProtocol.Decoder;
+using Encoder = Sttp.WireProtocol.Encoder;
 using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
@@ -28,6 +30,8 @@ namespace Sttp.Publisher
         private readonly Thread m_dataThread;
         private readonly Thread m_sendThread;
         private bool m_enabled;
+        private readonly Encoder m_encoder;
+        private readonly Decoder m_decoder;
 
         internal Subscriber(dynamic tcpSocket)
         {
@@ -43,6 +47,9 @@ namespace Sttp.Publisher
 
             m_sendThread = new Thread(SendData);
             m_sendThread.Start();
+
+            m_encoder = new Encoder();
+            m_decoder = new Decoder();
 
             // Setup data reception event or handler, etc...
             //m_tcpSocket.OnDataReceived += m_tcpSocket_OnDataReceived;
@@ -119,29 +126,86 @@ namespace Sttp.Publisher
                     m_dataPointQueue.Clear();
                 }
 
-                // Combine data points into command payload / fragment as needed into 16K chunks
-                //List<DataPointPacket> packets = DataPointPacket.GetDataPointPackets(dataPoints, TargetPacketSize);
+                DataPointWire wire = new DataPointWire();
 
-                //foreach (DataPointPacket dataPointPacket in DataPointPacket.GetDataPointPackets(dataPoints, TargetPacketSize))
-                //{
-                //    byte[] payload = dataPointPacket.Payload;
+                PatchSignalMapping(dataPoints);
 
-                //    // Encrypt payload
-                //    if ((object)m_key != null)
-                //    {
-                //        using (AesManaged aes = new AesManaged())
-                //        {
-                //            aes.KeySize = 256;
-                //            aes.Key = m_key;
-                //            aes.IV = m_iv;
-                //            payload = aes.Encrypt(payload, 0, payload.Length, m_key, m_iv);
-                //        }
-                //    }
+                foreach (var point in dataPoints)
+                {
+                    if (point.ValueLength <= 64)
+                    {
+                        wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
+                        Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
+                        wire.Sequence = 0;
+                        wire.Fragment = 0;
+                        wire.Length = (uint)point.ValueLength;
+                        wire.Time = new SttpTimestamp(point.Time);
+                        wire.Flags = point.Flags;
+                        wire.QualityFlags = point.QualityFlags;
 
-                //    dataPointPacket.Payload = payload;
+                        m_encoder.SendDataPoint(true, wire);
+                    }
+                    else
+                    {
+                        uint bulkID = m_nextBulkValueID;
+                        if (m_nextBulkValueID == 0)
+                            m_nextBulkValueID++;
 
-                //    SendCommand(dataPointPacket);
-                //}
+                        wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
+                        wire.Sequence = bulkID;
+                        wire.Length = (uint)point.ValueLength;
+                        wire.Time = new SttpTimestamp(point.Time);
+                        wire.Flags = point.Flags;
+                        wire.QualityFlags = point.QualityFlags;
+
+                        for (int x = 0; x < point.ValueLength; x += 64)
+                        {
+                            Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
+                            wire.Fragment = (uint)(x / 64);
+                            m_encoder.SendDataPoint(true, wire);
+                        }
+                    }
+                }
+
+                //Send this data packet.
+
+                byte[] payload = new byte[0];
+
+                // Encrypt payload
+                if ((object)m_key != null)
+                {
+                    using (AesManaged aes = new AesManaged())
+                    {
+                        aes.KeySize = 256;
+                        aes.Key = m_key;
+                        aes.IV = m_iv;
+                        payload = aes.Encrypt(payload, 0, payload.Length, m_key, m_iv);
+                    }
+                }
+
+                SendCommand(null);
+            }
+        }
+
+        private Dictionary<Guid, DataPointKeyWire> m_signalMapping = new Dictionary<Guid, DataPointKeyWire>();
+        private uint m_nextRuntimeIDIndex = 0;
+        private uint m_nextBulkValueID = 1;
+
+        private void PatchSignalMapping(DataPoint[] dataPoints)
+        {
+            foreach (var point in dataPoints)
+            {
+                DataPointKeyWire map;
+                if (!(m_signalMapping.TryGetValue(point.Key.UniqueID, out map) && map.Type == point.Key.Type))
+                {
+                    map = new DataPointKeyWire();
+                    map.UniqueID = point.Key.UniqueID;
+                    map.Flags = StateFlags.Quality;
+                    map.Type = point.Key.Type;
+                    map.RuntimeID = m_nextRuntimeIDIndex;
+                    m_nextRuntimeIDIndex++;
+                    m_encoder.RuntimeIDMapping(map);
+                }
             }
         }
 
