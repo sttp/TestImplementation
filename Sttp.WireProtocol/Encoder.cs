@@ -29,6 +29,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public int UnreliableSendBufferLength { get; private set; }
 
+
         public void NegotiateSessionStep1(ProtocolVersions protocolVersionNumber)
         {
             //Client connects to server and specifies it's protocol versions supported

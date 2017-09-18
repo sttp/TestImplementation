@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Sttp.WireProtocol
 {
-    public class Command : IEncode
+    public class Command 
     {
         public CommandCode CommandCode;
         public byte[] Payload;

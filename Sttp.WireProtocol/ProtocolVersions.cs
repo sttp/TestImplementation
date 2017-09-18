@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol
 {
-    public class ProtocolVersions : IEncode
+    public class ProtocolVersions
     {
         //public byte Count; <-- serialize value only
         public Version[] Versions;

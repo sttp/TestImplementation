@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol
 {
-    public class NamedVersions : IEncode
+    public class NamedVersions 
     {
         //public ushort Count; <-- serialize only
         public NamedVersion[] Items;

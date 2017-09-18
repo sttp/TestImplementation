@@ -2,7 +2,7 @@
 
 namespace Sttp.WireProtocol
 {
-    public class Version : IEquatable<Version>, IEncode
+    public class Version : IEquatable<Version>
     {
         public readonly byte Major;
         public readonly byte Minor;

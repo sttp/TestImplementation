@@ -6,7 +6,7 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// The wireline type for transmitting time.
     /// </summary>
-    public class SttpTimestamp : IEncode
+    public class SttpTimestamp
     {
         public readonly long Seconds;    // Seconds since 1/1/0001 +/-292 billion years
                                          // Stored normally.
