@@ -5,46 +5,37 @@ namespace Sttp.WireProtocol
 {
     public class MetadataTable
     {
-        /// <summary>
-        /// The name of the table.
-        /// </summary>
-        public readonly string TableName;
-
         public readonly int TableId;
-
-        private int m_nextColumnSequenceNumber;
 
         /// <summary>
         /// All possible columns that are defined for the table.
         /// </summary>
-        public Dictionary<string, MetadataColumn> Columns;
+        public Dictionary<int, MetadataColumn> Columns;
 
         /// <summary>
         /// All possible rows.
         /// </summary>
         public Dictionary<int, MetadataRow> Rows;
 
-        public MetadataTable(string tableName, int tableId)
+        public MetadataTable(int tableId)
         {
-            TableName = tableName;
             TableId = tableId;
-            Columns = new Dictionary<string, MetadataColumn>();
+            Columns = new Dictionary<int, MetadataColumn>();
             Rows = new Dictionary<int, MetadataRow>();
         }
 
-        public void FillSchema(MetadataChangeLog changeLog, string columnName, ValueType columnType)
+        public void FillSchema(MetadataChangeLog changeLog, int columnId, ValueType columnType)
         {
             MetadataColumn column;
-            if (!Columns.TryGetValue(columnName, out column))
+            if (!Columns.TryGetValue(columnId, out column))
             {
-                column = new MetadataColumn(m_nextColumnSequenceNumber, columnName, columnType);
-                m_nextColumnSequenceNumber++;
-                Columns[columnName] = column;
+                column = new MetadataColumn(columnId, columnType);
+                Columns[columnId] = column;
                 changeLog.AddColumn(TableId, column);
             }
         }
 
-        public void FillData(MetadataChangeLog changeLog, string columnName, int recordID, object fieldValue)
+        public void FillData(MetadataChangeLog changeLog, int columnId, int recordID, object fieldValue)
         {
             MetadataRow row;
             if (!Rows.TryGetValue(recordID, out row))
@@ -53,7 +44,7 @@ namespace Sttp.WireProtocol
                 Rows[recordID] = row;
                 changeLog.AddRow(TableId, row);
             }
-            row.FillData(TableId, changeLog, Columns[columnName], fieldValue);
+            row.FillData(TableId, changeLog, Columns[columnId], fieldValue);
 
         }
 
@@ -62,8 +53,7 @@ namespace Sttp.WireProtocol
             switch (patch.ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    patch.OutAddColumn(out int _, out int columnId, out string columnName, out ValueType columnType);
-                    Columns[columnName] = new MetadataColumn(columnId, columnName, columnType);
+                    Columns[patch.ColumnID] = new MetadataColumn(patch.ColumnID, patch.ColumnType);
                     break;
                 case MetadataChangeType.AddRow:
                     Rows[patch.RowID] = new MetadataRow(patch.RowID);

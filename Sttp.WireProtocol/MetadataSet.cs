@@ -8,15 +8,16 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class MetadataSet
     {
-        private int m_nextTableSequenceNumber = 0;
-        private Dictionary<string, MetadataTable> m_tables;
-        private Dictionary<int, MetadataTable> m_tablesById;
+        private Dictionary<int, MetadataTable> m_tables;
         private MetadataChangeLog m_changeLog = new MetadataChangeLog();
+        private Dictionary<string, int> m_keywordMapping;
+        private List<string> m_keywords;
 
         public MetadataSet()
         {
-            m_tables = new Dictionary<string, MetadataTable>();
-            m_tablesById = new Dictionary<int, MetadataTable>();
+            m_keywordMapping = new Dictionary<string, int>();
+            m_keywords = new List<string>();
+            m_tables = new Dictionary<int, MetadataTable>();
         }
 
         /// <summary>
@@ -59,21 +60,26 @@ namespace Sttp.WireProtocol
 
         public void FillSchema(string tableName, string columnName, ValueType columnType)
         {
+            int tableID = NameToId(tableName);
+            int columnID = NameToId(columnName);
+
             MetadataTable table;
-            if (!m_tables.TryGetValue(tableName, out table))
+            if (!m_tables.TryGetValue(tableID, out table))
             {
-                table = new MetadataTable(tableName, m_nextTableSequenceNumber);
-                m_nextTableSequenceNumber++;
-                m_tables[tableName] = table;
-                m_tablesById[table.TableId] = table;
+                table = new MetadataTable(tableID);
+                m_tables[table.TableId] = table;
                 m_changeLog.AddTable(table);
             }
-            table.FillSchema(m_changeLog, columnName, columnType);
+            table.FillSchema(m_changeLog, columnID, columnType);
         }
+       
 
         public void FillData(string tableName, string columnName, int recordID, object fieldValue)
         {
-            m_tables[tableName].FillData(m_changeLog, columnName, recordID, fieldValue);
+            int tableID = NameToId(tableName);
+            int columnID = NameToId(columnName);
+
+            m_tables[tableID].FillData(m_changeLog, columnID, recordID, fieldValue);
         }
 
         public void ApplyPatch(List<MetadataPatchDetails> patchDetails)
@@ -92,7 +98,7 @@ namespace Sttp.WireProtocol
                     case MetadataChangeType.AddRow:
                     case MetadataChangeType.AddField:
                     case MetadataChangeType.AddFieldValue:
-                        m_tablesById[patch.TableID].ApplyPatch(patch);
+                        m_tables[patch.TableID].ApplyPatch(patch);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -104,15 +110,32 @@ namespace Sttp.WireProtocol
         {
             switch (patch.ChangeType)
             {
+                case MetadataChangeType.AddKeyword:
+                    if (patch.KeywordID != NameToId(patch.Keyword))
+                    {
+                        throw new Exception("Names out of sequence");
+                    }
+                    break;
                 case MetadataChangeType.AddTable:
-                    patch.OutAddTable(out int tableID, out string tableName);
-                    var table = new MetadataTable(tableName, tableID);
-                    m_tables[tableName] = table;
+                    m_tables[patch.TableID] = new MetadataTable(patch.TableID); 
                     break;
                 default:
                     throw new NotSupportedException("Invalid patch type:");
             }
         }
+
+        private int NameToId(string name)
+        {
+            int id;
+            if (m_keywordMapping.TryGetValue(name, out id))
+            {
+                id = m_keywords.Count;
+                m_keywordMapping[name] = id;
+                m_keywords.Add(name);
+            }
+            return id;
+        }
+
 
     }
 }

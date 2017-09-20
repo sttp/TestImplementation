@@ -77,13 +77,13 @@ namespace Sttp.WireProtocol
         public void AddTable(MetadataTable table)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddTable(table.TableId, table.TableName);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddTable(table.TableId);
         }
 
         public void AddColumn(int tableID, MetadataColumn column)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(tableID, column.ColumnID, column.ColumnName, column.ColumnType);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(tableID, column.ColumnID, column.ColumnType);
         }
 
         public void AddRow(int tableID, MetadataRow row)

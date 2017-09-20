@@ -5,11 +5,39 @@ namespace Sttp.WireProtocol
     public class MetadataPatchDetails
     {
         public MetadataChangeType ChangeType;
-        private int m_int1;
-        private int m_int2;
-        private int m_int3;
-        private string m_string1;
+        private int m_tableId;
+        private int m_columnId;
+        private int m_recordId;
+        private string m_keyword;
         private byte[] m_data;
+
+        public int KeywordID
+        {
+            get
+            {
+                switch (ChangeType)
+                {
+                    case MetadataChangeType.AddKeyword:
+                        return m_tableId;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        public string Keyword
+        {
+            get
+            {
+                switch (ChangeType)
+                {
+                    case MetadataChangeType.AddKeyword:
+                        return m_keyword;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
         public int TableID
         {
@@ -22,7 +50,7 @@ namespace Sttp.WireProtocol
                     case MetadataChangeType.AddRow:
                     case MetadataChangeType.AddField:
                     case MetadataChangeType.AddFieldValue:
-                        return m_int1;
+                        return m_tableId;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -36,10 +64,9 @@ namespace Sttp.WireProtocol
                 switch (ChangeType)
                 {
                     case MetadataChangeType.AddRow:
-                        return m_int2;
                     case MetadataChangeType.AddField:
                     case MetadataChangeType.AddFieldValue:
-                        return m_int3;
+                        return m_recordId;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -55,7 +82,7 @@ namespace Sttp.WireProtocol
                     case MetadataChangeType.AddColumn:
                     case MetadataChangeType.AddField:
                     case MetadataChangeType.AddFieldValue:
-                        return m_int2;
+                        return m_columnId;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -76,26 +103,47 @@ namespace Sttp.WireProtocol
             }
         }
 
+        public ValueType ColumnType
+        {
+            get
+            {
+                switch (ChangeType)
+                {
+                    case MetadataChangeType.AddColumn:
+                        return (ValueType)m_recordId;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
-        public static MetadataPatchDetails AddTable(int tableID, string tableName)
+        public static MetadataPatchDetails AddKeyword(int id, string name)
+        {
+            return new MetadataPatchDetails()
+            {
+                ChangeType = MetadataChangeType.AddKeyword,
+                m_tableId = id,
+                m_keyword = name
+            };
+        }
+
+        public static MetadataPatchDetails AddTable(int tableID)
         {
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddTable,
-                m_int1 = tableID,
-                m_string1 = tableName
+                m_tableId = tableID
             };
         }
 
-        public static MetadataPatchDetails AddColumn(int tableID, int columnId, string columnName, ValueType columnType)
+        public static MetadataPatchDetails AddColumn(int tableID, int columnId, ValueType columnType)
         {
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddColumn,
-                m_int1 = tableID,
-                m_int2 = columnId,
-                m_int3 = (int)columnType,
-                m_string1 = columnName
+                m_tableId = tableID,
+                m_columnId = columnId,
+                m_recordId = (int)columnType
             };
         }
 
@@ -104,8 +152,8 @@ namespace Sttp.WireProtocol
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddRow,
-                m_int1 = tableID,
-                m_int2 = rowRecordID
+                m_tableId = tableID,
+                m_recordId = rowRecordID
             };
         }
 
@@ -114,9 +162,9 @@ namespace Sttp.WireProtocol
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddField,
-                m_int1 = tableID,
-                m_int2 = columnColumnID,
-                m_int3 = recordID
+                m_tableId = tableID,
+                m_columnId = columnColumnID,
+                m_recordId = recordID
             };
         }
 
@@ -125,56 +173,13 @@ namespace Sttp.WireProtocol
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddField,
-                m_int1 = tableID,
-                m_int2 = columnColumnID,
-                m_int3 = recordID,
+                m_tableId = tableID,
+                m_columnId = columnColumnID,
+                m_recordId = recordID,
                 m_data = encoding
             };
         }
 
-        public void OutAddTable(out int tableID, out string tableName)
-        {
-            if (ChangeType == MetadataChangeType.AddTable)
-                throw new InvalidOperationException("The change type is invalid");
-            tableID = m_int1;
-            tableName = m_string1;
-        }
-
-        public void OutAddColumn(out int tableID, out int columnId, out string columnName, out ValueType columnType)
-        {
-            if (ChangeType == MetadataChangeType.AddColumn)
-                throw new InvalidOperationException("The change type is invalid");
-            tableID = m_int1;
-            columnId = m_int2;
-            columnType = (ValueType)m_int3;
-            columnName = m_string1;
-        }
-
-        public void OutAddRow(out int tableID, out int rowRecordID)
-        {
-            if (ChangeType == MetadataChangeType.AddRow)
-                throw new InvalidOperationException("The change type is invalid");
-            tableID = m_int1;
-            rowRecordID = m_int2;
-        }
-
-        public void OutAddField(out int tableID, out int columnColumnID, out int recordID)
-        {
-            if (ChangeType == MetadataChangeType.AddField)
-                throw new InvalidOperationException("The change type is invalid");
-            tableID = m_int1;
-            columnColumnID = m_int2;
-            recordID = m_int3;
-        }
-
-        public void OutAddFieldValue(out int tableID, out int columnColumnID, out int recordID, out byte[] encoding)
-        {
-            if (ChangeType != MetadataChangeType.AddField)
-                throw new InvalidOperationException("The change type is invalid");
-            tableID = m_int1;
-            columnColumnID = m_int2;
-            recordID = m_int3;
-            encoding = m_data;
-        }
+        
     }
 }
