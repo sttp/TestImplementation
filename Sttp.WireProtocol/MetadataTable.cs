@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sttp.WireProtocol
 {
@@ -19,6 +20,13 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// All possible columns that are defined for the table.
         /// </summary>
-        public MetadataColumn[] Columns;
+        public List<MetadataColumn> Columns;
+
+        public List<MetadataRow> Rows;
+
+        public void AddRow(MetadataRow row)
+        {
+            
+        }
     }
 }
