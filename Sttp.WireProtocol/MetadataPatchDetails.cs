@@ -24,5 +24,10 @@ namespace Sttp.WireProtocol
         {
             throw new NotImplementedException();
         }
+
+        public static MetadataPatchDetails AddTable(long transactionID, string tableName, string columnName, ValueType columnType)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

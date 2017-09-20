@@ -2,7 +2,10 @@
 {
     public enum MetadataChangeType
     {
-        FillSchema,
-        FillData,
+        AddTable,
+        AddColumn,
+        AddRow,
+        AddField,
+        AddFieldValue,
     }
 }

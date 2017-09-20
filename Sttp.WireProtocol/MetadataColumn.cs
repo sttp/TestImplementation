@@ -2,11 +2,13 @@ namespace Sttp.WireProtocol
 {
     public class MetadataColumn
     {
-        public string ColumnName;
-        public ValueType ColumnType; //The type the column fields are encoded with. 
+        public readonly int ColumnID;
+        public readonly string ColumnName;
+        public readonly ValueType ColumnType; //The type the column fields are encoded with. 
 
-        public MetadataColumn(string columnName, ValueType columnType)
+        public MetadataColumn(int columnID, string columnName, ValueType columnType)
         {
+            ColumnID = columnID;
             ColumnName = columnName;
             ColumnType = columnType;
         }
