@@ -43,10 +43,10 @@
   <ItemGroup>
     <Compile Include="DataPointWire.cs" />
     <Compile Include="DataPointKeyWire.cs" />
-    <Compile Include="MetadataChangeLog.cs" />
-    <Compile Include="MetadataChangeType.cs" />
-    <Compile Include="MetadataPatchDetails.cs" />
-    <Compile Include="MetadataSet.cs" />
+    <Compile Include="Data\MetadataChangeLog.cs" />
+    <Compile Include="Data\MetadataChangeType.cs" />
+    <Compile Include="Data\MetadataPatchDetails.cs" />
+    <Compile Include="Data\MetadataSet.cs" />
     <Compile Include="Obsolete\BufferValue.cs" />
     <Compile Include="Obsolete\Command.cs" />
     <Compile Include="CommandCode.cs" />
@@ -58,10 +58,10 @@
     <Compile Include="Decoder.cs" />
     <Compile Include="Encoder.cs" />
     <Compile Include="Obsolete\IEncode.cs" />
-    <Compile Include="MetadataColumn.cs" />
-    <Compile Include="MetadataField.cs" />
-    <Compile Include="MetadataRow.cs" />
-    <Compile Include="MetadataTable.cs" />
+    <Compile Include="Data\MetadataColumn.cs" />
+    <Compile Include="Data\MetadataField.cs" />
+    <Compile Include="Data\MetadataRow.cs" />
+    <Compile Include="Data\MetadataTable.cs" />
     <Compile Include="NamedVersion.cs" />
     <Compile Include="NamedVersions.cs" />
     <Compile Include="SttpTimestamp.cs" />

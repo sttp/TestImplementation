@@ -1,4 +1,5 @@
-namespace Sttp.WireProtocol
+using ValueType = Sttp.WireProtocol.ValueType;
+namespace Sttp.Data
 {
     public class MetadataColumn
     {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.WireProtocol
+namespace Sttp.Data
 {
     /// <summary>
     /// The set of all metadata used by the protocol.

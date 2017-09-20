@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using Sttp.Data;
 
 namespace Sttp.WireProtocol
 {

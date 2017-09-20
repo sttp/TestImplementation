@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol
+namespace Sttp.Data
 {
     public class MetadataChangeLog
     {
