@@ -73,7 +73,7 @@ namespace Sttp.Data
             }
             table.FillSchema(m_changeLog, columnID, columnType);
         }
-       
+
 
         public void FillData(string tableName, string columnName, int recordID, object fieldValue)
         {
@@ -90,20 +90,7 @@ namespace Sttp.Data
 
             foreach (var patch in patchDetails)
             {
-                switch (patch.ChangeType)
-                {
-                    case MetadataChangeType.AddTable:
-                        ApplyPatch(patch);
-                        break;
-                    case MetadataChangeType.AddColumn:
-                    case MetadataChangeType.AddRow:
-                    case MetadataChangeType.AddField:
-                    case MetadataChangeType.AddFieldValue:
-                        m_tables[patch.TableID].ApplyPatch(patch);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                ApplyPatch(patch);
             }
         }
 
@@ -118,7 +105,13 @@ namespace Sttp.Data
                     }
                     break;
                 case MetadataChangeType.AddTable:
-                    m_tables[patch.TableID] = new MetadataTable(patch.TableID); 
+                    m_tables[patch.TableID] = new MetadataTable(patch.TableID);
+                    break;
+                case MetadataChangeType.AddColumn:
+                case MetadataChangeType.AddRow:
+                case MetadataChangeType.AddField:
+                case MetadataChangeType.AddFieldValue:
+                    m_tables[patch.TableID].ApplyPatch(patch);
                     break;
                 default:
                     throw new NotSupportedException("Invalid patch type:");
