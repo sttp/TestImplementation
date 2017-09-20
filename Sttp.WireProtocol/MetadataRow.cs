@@ -5,14 +5,24 @@ namespace Sttp.WireProtocol
 {
     public class MetadataRow
     {
-        public MetadataTable Table;
-        public Guid RowID;
-        public bool Deleted; //When versioning metadata, this provides a way to indicate that a row was removed entirely.
-        public List<MetadataField> Fields;
+        public int RecordID;
+        public Dictionary<string, MetadataField> Fields;
 
-        public void AddField(MetadataColumn column, object value)
+        public MetadataRow(int recordID)
         {
-            Fields.Add(new MetadataField(column, value));
+            RecordID = recordID;
+            Fields = new Dictionary<string, MetadataField>();
+        }
+
+        public void FillData(MetadataColumn column, object value)
+        {
+            MetadataField field;
+            if (!Fields.TryGetValue(column.ColumnName, out field))
+            {
+                field = new MetadataField();
+                Fields[column.ColumnName] = field;
+            }
+            field.Value = column.Encode(value);
         }
     }
 }

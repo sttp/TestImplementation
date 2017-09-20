@@ -9,24 +9,44 @@ namespace Sttp.WireProtocol
         /// The name of the table.
         /// </summary>
         public string TableName;
-        /// <summary>
-        /// This will change if the implementation does not support versioning metadata.
-        /// </summary>
-        public Guid BaseVersionID;
-        /// <summary>
-        /// This is the version number of the last time this individual table was modified.
-        /// </summary>
-        public int LastVersionNumber;
+
         /// <summary>
         /// All possible columns that are defined for the table.
         /// </summary>
-        public List<MetadataColumn> Columns;
+        public Dictionary<string, MetadataColumn> Columns;
 
-        public List<MetadataRow> Rows;
+        /// <summary>
+        /// All possible rows.
+        /// </summary>
+        public Dictionary<int, MetadataRow> Rows;
 
-        public void AddRow(MetadataRow row)
+        public MetadataTable(string tableName)
         {
-            
+            TableName = tableName;
+            Columns = new Dictionary<string, MetadataColumn>();
+            Rows = new Dictionary<int, MetadataRow>();
+        }
+
+        public void FillSchema(string columnName, ValueType columnType)
+        {
+            MetadataColumn column;
+            if (!Columns.TryGetValue(columnName, out column))
+            {
+                column = new MetadataColumn(columnName, columnType);
+                Columns[columnName] = column;
+            }
+        }
+
+        public void FillData(string columnName, int recordID, object fieldValue)
+        {
+            MetadataRow row;
+            if (!Rows.TryGetValue(recordID, out row))
+            {
+                row = new MetadataRow(recordID);
+                Rows[recordID] = row;
+            }
+            row.FillData(Columns[columnName], fieldValue);
+
         }
     }
 }

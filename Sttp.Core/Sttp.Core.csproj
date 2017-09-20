@@ -44,8 +44,11 @@
   <ItemGroup>
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="BigEndian.cs" />
+    <Compile Include="Encoding7Bit.cs" />
     <Compile Include="EventArgs.cs" />
+    <Compile Include="GuidExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BigEndianStreamExtensions.cs" />
     <Compile Include="SymmetricAlgorithmExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

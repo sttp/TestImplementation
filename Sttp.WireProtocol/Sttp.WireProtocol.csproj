@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="DataPointWire.cs" />
     <Compile Include="DataPointKeyWire.cs" />
+    <Compile Include="MetadataChangeType.cs" />
+    <Compile Include="MetadataPatchDetails.cs" />
     <Compile Include="MetadataSet.cs" />
     <Compile Include="Obsolete\BufferValue.cs" />
     <Compile Include="Obsolete\Command.cs" />

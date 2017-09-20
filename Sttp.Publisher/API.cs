@@ -101,7 +101,7 @@ namespace Sttp.Publisher
 
         private void OnClientConnected(dynamic tcpSocket)
         {
-            Subscriber subscriber = new Subscriber(tcpSocket);
+            Subscriber subscriber = new Subscriber(null, tcpSocket);
             subscriber.SubscriberSessionEstablished += (sender, args) => SubscriberSessionEstablished?.Invoke(sender, args);
             subscriber.SubscriberDisconnected += (sender, args) => DisconnectSubscriber(args.Argument);
 

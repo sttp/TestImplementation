@@ -32,9 +32,11 @@ namespace Sttp.Publisher
         private bool m_enabled;
         private readonly Encoder m_encoder;
         private readonly Decoder m_decoder;
+        private MetadataSet m_metadata;
 
-        internal Subscriber(dynamic tcpSocket)
+        internal Subscriber(dynamic tcpSocket, MetadataSet metadata)
         {
+            m_metadata = metadata;
             m_tcpSocket = tcpSocket;
             m_id = Guid.NewGuid();
             m_dataPointQueue = new List<DataPoint>();
