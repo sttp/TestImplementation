@@ -10,11 +10,13 @@ namespace Sttp.WireProtocol
     {
         private int m_nextTableSequenceNumber = 0;
         private Dictionary<string, MetadataTable> m_tables;
+        private Dictionary<int, MetadataTable> m_tablesById;
         private MetadataChangeLog m_changeLog = new MetadataChangeLog();
 
         public MetadataSet()
         {
             m_tables = new Dictionary<string, MetadataTable>();
+            m_tablesById = new Dictionary<int, MetadataTable>();
         }
 
         /// <summary>
@@ -63,6 +65,7 @@ namespace Sttp.WireProtocol
                 table = new MetadataTable(tableName, m_nextTableSequenceNumber);
                 m_nextTableSequenceNumber++;
                 m_tables[tableName] = table;
+                m_tablesById[table.TableId] = table;
                 m_changeLog.AddTable(table);
             }
             table.FillSchema(m_changeLog, columnName, columnType);
@@ -73,6 +76,43 @@ namespace Sttp.WireProtocol
             m_tables[tableName].FillData(m_changeLog, columnName, recordID, fieldValue);
         }
 
-       
+        public void ApplyPatch(List<MetadataPatchDetails> patchDetails)
+        {
+            if (LogRevisions)
+                throw new NotSupportedException("Not supported now, but might do it later.");
+
+            foreach (var patch in patchDetails)
+            {
+                switch (patch.ChangeType)
+                {
+                    case MetadataChangeType.AddTable:
+                        ApplyPatch(patch);
+                        break;
+                    case MetadataChangeType.AddColumn:
+                    case MetadataChangeType.AddRow:
+                    case MetadataChangeType.AddField:
+                    case MetadataChangeType.AddFieldValue:
+                        m_tablesById[patch.TableID].ApplyPatch(patch);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        private void ApplyPatch(MetadataPatchDetails patch)
+        {
+            switch (patch.ChangeType)
+            {
+                case MetadataChangeType.AddTable:
+                    patch.OutAddTable(out int tableID, out string tableName);
+                    var table = new MetadataTable(tableName, tableID);
+                    m_tables[tableName] = table;
+                    break;
+                default:
+                    throw new NotSupportedException("Invalid patch type:");
+            }
+        }
+
     }
 }

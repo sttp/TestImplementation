@@ -47,9 +47,6 @@ namespace Sttp.WireProtocol
             }
         }
 
-       
-
-
         public bool TryBuildPatchData(Guid instanceID, long cachedVersionID, out List<MetadataPatchDetails> patchingDetails)
         {
             patchingDetails = null;
@@ -77,30 +74,34 @@ namespace Sttp.WireProtocol
             }
         }
 
-
         public void AddTable(MetadataTable table)
         {
-
+            if (LogRevisions)
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddTable(table.TableId, table.TableName);
         }
 
         public void AddColumn(int tableID, MetadataColumn column)
         {
-            throw new NotImplementedException();
+            if (LogRevisions)
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(tableID, column.ColumnID, column.ColumnName, column.ColumnType);
         }
 
-        public void AddRow(int tableId, MetadataRow row)
+        public void AddRow(int tableID, MetadataRow row)
         {
-            throw new NotImplementedException();
+            if (LogRevisions)
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddRow(tableID, row.RecordID);
         }
 
         public void AddField(int tableID, int columnColumnID, int recordID)
         {
-            throw new NotImplementedException();
+            if (LogRevisions)
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddField(tableID, columnColumnID, recordID);
         }
 
         public void AddFieldValue(int tableID, int columnColumnID, int recordID, byte[] encoding)
         {
-            throw new NotImplementedException();
+            if (LogRevisions)
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddFieldValue(tableID, columnColumnID, recordID, encoding);
         }
     }
 }
