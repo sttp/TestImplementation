@@ -31,20 +31,5 @@ namespace Sttp.Data.Publisher
                 field.Value = encoding;
             }
         }
-
-        public void ApplyPatch(MetadataPatchDetails patch)
-        {
-            switch (patch.ChangeType)
-            {
-                case MetadataChangeType.AddField:
-                    Fields[patch.ColumnID] = new MetadataField();
-                    break;
-                case MetadataChangeType.AddFieldValue:
-                    Fields[patch.ColumnID].Value = patch.Data;
-                    break;
-                default:
-                    throw new NotSupportedException("Invalid patch type:");
-            }
-        }
     }
 }

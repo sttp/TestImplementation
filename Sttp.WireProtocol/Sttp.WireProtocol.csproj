@@ -47,7 +47,6 @@
     <Compile Include="Data\Publisher\MetadataChangeType.cs" />
     <Compile Include="Data\Publisher\MetadataPatchDetails.cs" />
     <Compile Include="Data\Publisher\MetadataSet.cs" />
-    <Compile Include="Data\Subscriber\MetadataChangeLog.cs" />
     <Compile Include="Data\Subscriber\MetadataChangeType.cs" />
     <Compile Include="Data\Subscriber\MetadataColumn.cs" />
     <Compile Include="Data\Subscriber\MetadataField.cs" />

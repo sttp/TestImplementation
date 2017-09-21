@@ -48,24 +48,5 @@ namespace Sttp.Data.Publisher
             row.FillData(TableId, changeLog, Columns[columnId], fieldValue);
 
         }
-
-        public void ApplyPatch(MetadataPatchDetails patch)
-        {
-            switch (patch.ChangeType)
-            {
-                case MetadataChangeType.AddColumn:
-                    Columns[patch.ColumnID] = new MetadataColumn(patch.ColumnID, patch.ColumnType);
-                    break;
-                case MetadataChangeType.AddRow:
-                    Rows[patch.RowID] = new MetadataRow(patch.RowID);
-                    break;
-                case MetadataChangeType.AddField:
-                case MetadataChangeType.AddFieldValue:
-                    Rows[patch.RowID].ApplyPatch(patch);
-                    break;
-                default:
-                    throw new NotSupportedException("Invalid patch type:");
-            }
-        }
     }
 }

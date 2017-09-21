@@ -10,7 +10,6 @@ namespace Sttp.Data.Subscriber
     public class MetadataSet
     {
         private Dictionary<int, MetadataTable> m_tables;
-        private MetadataChangeLog m_changeLog = new MetadataChangeLog();
         private Dictionary<string, int> m_keywordMapping;
         private List<string> m_keywords;
 
@@ -24,70 +23,15 @@ namespace Sttp.Data.Subscriber
         /// <summary>
         /// If logging is enabled, this is the ID for the transaction log.
         /// </summary>
-        public Guid InstanceID => m_changeLog.InstanceID;
+        public Guid InstanceID { get; private set; }
 
         /// <summary>
         /// This identifies the transaction number of the supplied log. 
         /// </summary>
-        public long TransactionID => m_changeLog.TransactionID;
-
-        /// <summary>
-        /// Gets/Sets if transaction logging is supported for changes made to this data set.
-        /// It's recommended that this be turned off if large changes will occur to the set. 
-        /// </summary>
-        public bool LogRevisions
-        {
-            get => m_changeLog.LogRevisions;
-            set => m_changeLog.LogRevisions = value;
-        }
-
-        public void InitializeDefaults()
-        {
-            FillSchema("Measurement", "DeviceID", ValueType.Guid);
-            FillSchema("Measurement", "PointTag", ValueType.String);
-            FillSchema("Measurement", "SignalReference", ValueType.String);
-            FillSchema("Measurement", "SignalTypeID", ValueType.Int32);
-            FillSchema("Measurement", "Adder", ValueType.Decimal);
-            FillSchema("Measurement", "Multiplier", ValueType.Decimal);
-            FillSchema("Measurement", "Description", ValueType.String);
-            FillSchema("Measurement", "ChannelName", ValueType.String);
-            FillSchema("Measurement", "SignalType", ValueType.String);
-            FillSchema("Measurement", "PositionIndex", ValueType.Int32);
-            FillSchema("Measurement", "PhaseDesignation", ValueType.String);
-            FillSchema("Measurement", "EngineeringUnits", ValueType.String);
-            FillSchema("Measurement", "EngineeringScale", ValueType.Decimal);
-            //ToDo: Add More
-        }
-
-        public void FillSchema(string tableName, string columnName, ValueType columnType)
-        {
-            int tableID = NameToId(tableName);
-            int columnID = NameToId(columnName);
-
-            MetadataTable table;
-            if (!m_tables.TryGetValue(tableID, out table))
-            {
-                table = new MetadataTable(tableID);
-                m_tables[table.TableId] = table;
-                m_changeLog.AddTable(table);
-            }
-            table.FillSchema(m_changeLog, columnID, columnType);
-        }
-
-
-        public void FillData(string tableName, string columnName, int recordID, object fieldValue)
-        {
-            int tableID = NameToId(tableName);
-            int columnID = NameToId(columnName);
-
-            m_tables[tableID].FillData(m_changeLog, columnID, recordID, fieldValue);
-        }
+        public long TransactionID { get; private set; }
 
         public void ApplyPatch(List<MetadataPatchDetails> patchDetails)
         {
-            if (LogRevisions)
-                throw new NotSupportedException("Not supported now, but might do it later.");
-
             foreach (var patch in patchDetails)
             {
                 ApplyPatch(patch);
