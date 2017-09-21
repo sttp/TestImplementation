@@ -35,6 +35,8 @@ namespace Sttp.Data.Publisher
 
         /// <summary>
         /// Indicates that this table has 1 record for each measurement and can be used
+        /// in filtering. False means this is a ancillary table that won't be understood by the
+        /// API, but is used for the application layer.
         /// </summary>
         public bool IsMappedToDataPoint;
 
@@ -62,7 +64,7 @@ namespace Sttp.Data.Publisher
             Rows = new List<MetadataRow>();
         }
 
-        public void FillSchema(string columnName, ValueType columnType)
+        public void AddColumn(string columnName, ValueType columnType)
         {
             int columnId;
             MetadataColumn column;
@@ -75,7 +77,7 @@ namespace Sttp.Data.Publisher
             }
         }
 
-        public void FillData(string columnName, int rowIndex, object fieldValue)
+        public void AddOrUpdateValue(string columnName, int rowIndex, object value)
         {
             while (Rows.Count < rowIndex)
             {
@@ -89,7 +91,13 @@ namespace Sttp.Data.Publisher
                 row = new MetadataRow(rowIndex);
                 Rows[rowIndex] = row;
             }
-            row.FillData(m_changeLog, Columns[m_columnLookup[columnName]], fieldValue);
+            row.FillData(m_changeLog, Columns[m_columnLookup[columnName]], value);
+        }
+
+        public void DeleteRow(int rowIndex)
+        {
+            Rows[rowIndex] = null;
+            m_changeLog.DeleteRow(rowIndex);
         }
 
         public byte[] SendToClient(Guid instanceId, long cachedRuntimeID, dynamic permissionsFilter)

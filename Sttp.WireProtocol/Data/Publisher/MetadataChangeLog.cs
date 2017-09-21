@@ -85,5 +85,11 @@ namespace Sttp.Data.Publisher
             if (LogRevisions)
                 m_revisions[++TransactionID] = MetadataPatchDetails.AddValue(columnIndex, recordIndex, value);
         }
+
+        public void DeleteRow(int rowIndex)
+        {
+            if (LogRevisions)
+                m_revisions[++TransactionID] = MetadataPatchDetails.DeleteRow(rowIndex);
+        }
     }
 }

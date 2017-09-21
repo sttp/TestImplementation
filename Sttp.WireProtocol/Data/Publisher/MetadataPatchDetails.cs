@@ -32,6 +32,7 @@ namespace Sttp.Data.Publisher
             {
                 switch (ChangeType)
                 {
+                    case MetadataChangeType.DeleteRow:
                     case MetadataChangeType.AddValue:
                         return m_rowIndex;
                     default:
@@ -105,6 +106,13 @@ namespace Sttp.Data.Publisher
             };
         }
 
-
+        public static MetadataPatchDetails DeleteRow(int rowIndex)
+        {
+            return new MetadataPatchDetails()
+            {
+                ChangeType = MetadataChangeType.DeleteRow,
+                m_rowIndex = rowIndex
+            };
+        }
     }
 }

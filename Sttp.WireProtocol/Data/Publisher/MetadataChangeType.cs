@@ -4,5 +4,6 @@
     {
         AddColumn,
         AddValue,
+        DeleteRow,
     }
 }
