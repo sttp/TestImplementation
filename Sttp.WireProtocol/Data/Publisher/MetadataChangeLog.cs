@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sttp.Data
+namespace Sttp.Data.Publisher
 {
     public class MetadataChangeLog
     {

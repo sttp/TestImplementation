@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.Data
+namespace Sttp.Data.Subscriber
 {
     /// <summary>
     /// The set of all metadata used by the protocol.

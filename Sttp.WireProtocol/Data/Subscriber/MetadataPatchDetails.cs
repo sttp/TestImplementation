@@ -1,7 +1,7 @@
 using System;
 using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.Data
+namespace Sttp.Data.Subscriber
 {
     public class MetadataPatchDetails
     {
