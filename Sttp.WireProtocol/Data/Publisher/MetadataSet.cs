@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data.Publisher
@@ -9,16 +10,18 @@ namespace Sttp.Data.Publisher
     /// </summary>
     public class MetadataSet
     {
-        private Dictionary<int, MetadataTable> m_tables;
         private MetadataChangeLog m_changeLog = new MetadataChangeLog();
-        private Dictionary<string, int> m_keywordMapping;
-        private List<string> m_keywords;
+
+        private Dictionary<string, int> m_tableLookup;
+
+        private List<MetadataTable> m_tables;
+        private List<MetadataColumn> m_columns;
 
         public MetadataSet()
         {
-            m_keywordMapping = new Dictionary<string, int>();
-            m_keywords = new List<string>();
-            m_tables = new Dictionary<int, MetadataTable>();
+            m_tables = new List<MetadataTable>();
+            m_columns = new List<MetadataColumn>();
+            m_tableLookup = new Dictionary<string, int>();
         }
 
         /// <summary>
@@ -61,39 +64,46 @@ namespace Sttp.Data.Publisher
 
         public void FillSchema(string tableName, string columnName, ValueType columnType)
         {
-            int tableID = NameToId(tableName);
-            int columnID = NameToId(columnName);
-
+            //Note: once the schema has been filled, removing the schema details are not supported. This is 
+            //      because the schema is index mapped to improve execution speed with arrays. Removing columns or tables
+            //      would mess this up.
             MetadataTable table;
-            if (!m_tables.TryGetValue(tableID, out table))
+            int tableID;
+            if (!m_tableLookup.TryGetValue(tableName, out tableID))
             {
-                table = new MetadataTable(tableID);
-                m_tables[table.TableId] = table;
+                tableID = m_tables.Count;
+                table = new MetadataTable(tableName, tableID);
+                m_tables.Add(table);
                 m_changeLog.AddTable(table);
+                m_tableLookup[tableName] = tableID;
             }
-            table.FillSchema(m_changeLog, columnID, columnType);
+            m_tables[tableID].FillSchema(m_columns, m_changeLog, columnName, columnType);
         }
 
         public void FillData(string tableName, string columnName, int recordID, object fieldValue)
         {
-            int tableID = NameToId(tableName);
-            int columnID = NameToId(columnName);
+            int tableID = m_tableLookup[tableName];
 
-            m_tables[tableID].FillData(m_changeLog, columnID, recordID, fieldValue);
+            m_tables[tableID].FillData(m_changeLog, columnName, recordID, fieldValue);
         }
 
-        private int NameToId(string name)
+        public byte[] SendToClient(Guid instanceId, long cachedRuntimeID, dynamic permissionsFilter)
         {
-            int id;
-            if (m_keywordMapping.TryGetValue(name, out id))
+            if (m_changeLog.TryBuildPatchData(instanceId, cachedRuntimeID, out List<MetadataPatchDetails> data))
             {
-                id = m_keywords.Count;
-                m_keywordMapping[name] = id;
-                m_keywords.Add(name);
+                foreach (var record in data)
+                {
+                    if (permissionsFilter.Permit(record))
+                    {
+                        //Serialize Record
+                    }
+                }
+                return null;
             }
-            return id;
-        }
 
+            //Serialize all metadata
+            throw new NotImplementedException();
+        }
 
     }
 }

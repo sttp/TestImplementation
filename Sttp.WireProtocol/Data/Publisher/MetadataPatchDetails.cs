@@ -158,12 +158,11 @@ namespace Sttp.Data.Publisher
             };
         }
 
-        public static MetadataPatchDetails AddField(int tableID, int columnColumnID, int recordID)
+        public static MetadataPatchDetails AddField(int columnColumnID, int recordID)
         {
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddField,
-                m_tableId = tableID,
                 m_columnId = columnColumnID,
                 m_recordId = recordID
             };

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data.Subscriber
@@ -74,6 +75,17 @@ namespace Sttp.Data.Subscriber
             return id;
         }
 
+        public DataSet CreateDataSet()
+        {
+            //takes the current metadata and makes a dataset from it.
+            return null;
+        }
+
+        public DataTable CreateDataTable(string tableName)
+        {
+            //takes the current metadata and makes a table from it.
+            return null;
+        }
 
     }
 }

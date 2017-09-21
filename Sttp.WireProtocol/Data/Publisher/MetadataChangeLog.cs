@@ -77,13 +77,13 @@ namespace Sttp.Data.Publisher
         public void AddTable(MetadataTable table)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddTable(table.TableId);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddTable(table.TableIndex);
         }
 
         public void AddColumn(int tableID, MetadataColumn column)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(tableID, column.ColumnID, column.ColumnType);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(tableID, column.DataSetColumnIndex, column.ColumnType);
         }
 
         public void AddRow(int tableID, MetadataRow row)
@@ -92,10 +92,10 @@ namespace Sttp.Data.Publisher
                 m_revisions[++TransactionID] = MetadataPatchDetails.AddRow(tableID, row.RecordID);
         }
 
-        public void AddField(int tableID, int columnColumnID, int recordID)
+        public void AddField(int columnColumnID, int recordID)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddField(tableID, columnColumnID, recordID);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddField(columnColumnID, recordID);
         }
 
         public void AddFieldValue(int tableID, int columnColumnID, int recordID, byte[] encoding)

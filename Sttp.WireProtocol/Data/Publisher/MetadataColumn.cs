@@ -3,12 +3,21 @@ namespace Sttp.Data.Publisher
 {
     public class MetadataColumn
     {
-        public readonly int ColumnID;
+        /// <summary>
+        /// The 0 based index of this column in the DataSet
+        /// </summary>
+        public readonly int DataSetColumnIndex;
+        /// <summary>
+        /// The 0 based index of this column in the data table.
+        /// </summary>
+        public readonly int ColumnIndex; 
+
         public readonly ValueType ColumnType; //The type the column fields are encoded with. 
 
-        public MetadataColumn(int columnID, ValueType columnType)
+        public MetadataColumn(int dataSetColumnIndex, int columnIndex, ValueType columnType)
         {
-            ColumnID = columnID;
+            DataSetColumnIndex = dataSetColumnIndex;
+            ColumnIndex = columnIndex;
             ColumnType = columnType;
         }
 
