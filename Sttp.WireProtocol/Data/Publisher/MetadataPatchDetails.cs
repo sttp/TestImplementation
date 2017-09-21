@@ -6,84 +6,49 @@ namespace Sttp.Data.Publisher
     public class MetadataPatchDetails
     {
         public MetadataChangeType ChangeType;
-        private int m_tableId;
-        private int m_columnId;
-        private int m_recordId;
-        private string m_keyword;
-        private byte[] m_data;
+        private ValueType m_columnType;
+        private int m_columnIndex;
+        private int m_rowIndex;
+        private string m_columnName;
+        private byte[] m_value;
 
-        public int KeywordID
-        {
-            get
-            {
-                switch (ChangeType)
-                {
-                    case MetadataChangeType.AddKeyword:
-                        return m_tableId;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
-        public string Keyword
-        {
-            get
-            {
-                switch (ChangeType)
-                {
-                    case MetadataChangeType.AddKeyword:
-                        return m_keyword;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
-        public int TableID
-        {
-            get
-            {
-                switch (ChangeType)
-                {
-                    case MetadataChangeType.AddTable:
-                    case MetadataChangeType.AddColumn:
-                    case MetadataChangeType.AddRow:
-                    case MetadataChangeType.AddField:
-                    case MetadataChangeType.AddFieldValue:
-                        return m_tableId;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
-        public int RowID
-        {
-            get
-            {
-                switch (ChangeType)
-                {
-                    case MetadataChangeType.AddRow:
-                    case MetadataChangeType.AddField:
-                    case MetadataChangeType.AddFieldValue:
-                        return m_recordId;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
-        public int ColumnID
+        public string ColumnName
         {
             get
             {
                 switch (ChangeType)
                 {
                     case MetadataChangeType.AddColumn:
-                    case MetadataChangeType.AddField:
-                    case MetadataChangeType.AddFieldValue:
-                        return m_columnId;
+                        return m_columnName;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        public int RowIndex
+        {
+            get
+            {
+                switch (ChangeType)
+                {
+                    case MetadataChangeType.AddValue:
+                        return m_rowIndex;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        public int ColumnIndex
+        {
+            get
+            {
+                switch (ChangeType)
+                {
+                    case MetadataChangeType.AddColumn:
+                    case MetadataChangeType.AddValue:
+                        return m_columnIndex;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -96,8 +61,8 @@ namespace Sttp.Data.Publisher
             {
                 switch (ChangeType)
                 {
-                    case MetadataChangeType.AddFieldValue:
-                        return m_data;
+                    case MetadataChangeType.AddValue:
+                        return m_value;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -111,75 +76,35 @@ namespace Sttp.Data.Publisher
                 switch (ChangeType)
                 {
                     case MetadataChangeType.AddColumn:
-                        return (ValueType)m_recordId;
+                        return m_columnType;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
         }
 
-        public static MetadataPatchDetails AddKeyword(int id, string name)
-        {
-            return new MetadataPatchDetails()
-            {
-                ChangeType = MetadataChangeType.AddKeyword,
-                m_tableId = id,
-                m_keyword = name
-            };
-        }
-
-        public static MetadataPatchDetails AddTable(int tableID)
-        {
-            return new MetadataPatchDetails()
-            {
-                ChangeType = MetadataChangeType.AddTable,
-                m_tableId = tableID
-            };
-        }
-
-        public static MetadataPatchDetails AddColumn(int tableID, int columnId, ValueType columnType)
+        public static MetadataPatchDetails AddColumn(int columnIndex, string columnName, ValueType columnType)
         {
             return new MetadataPatchDetails()
             {
                 ChangeType = MetadataChangeType.AddColumn,
-                m_tableId = tableID,
-                m_columnId = columnId,
-                m_recordId = (int)columnType
+                m_columnName = columnName,
+                m_columnIndex = columnIndex,
+                m_columnType = columnType
             };
         }
 
-        public static MetadataPatchDetails AddRow(int tableID, int rowRecordID)
+        public static MetadataPatchDetails AddValue(int columnIndex, int rowIndex, byte[] value)
         {
             return new MetadataPatchDetails()
             {
-                ChangeType = MetadataChangeType.AddRow,
-                m_tableId = tableID,
-                m_recordId = rowRecordID
+                ChangeType = MetadataChangeType.AddValue,
+                m_columnIndex = columnIndex,
+                m_rowIndex = rowIndex,
+                m_value = value
             };
         }
 
-        public static MetadataPatchDetails AddField(int columnColumnID, int recordID)
-        {
-            return new MetadataPatchDetails()
-            {
-                ChangeType = MetadataChangeType.AddField,
-                m_columnId = columnColumnID,
-                m_recordId = recordID
-            };
-        }
 
-        public static MetadataPatchDetails AddFieldValue(int tableID, int columnColumnID, int recordID, byte[] encoding)
-        {
-            return new MetadataPatchDetails()
-            {
-                ChangeType = MetadataChangeType.AddField,
-                m_tableId = tableID,
-                m_columnId = columnColumnID,
-                m_recordId = recordID,
-                m_data = encoding
-            };
-        }
-
-        
     }
 }

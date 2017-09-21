@@ -6,36 +6,38 @@ namespace Sttp.Data.Publisher
 {
     public class MetadataRow
     {
-        public int RecordID;
+        public int RowIndex;
         public List<MetadataField> Fields;
 
-        public MetadataRow(int recordID)
+        public MetadataRow(int rowIndex)
         {
-            RecordID = recordID;
+            RowIndex = rowIndex;
             Fields = new List<MetadataField>();
         }
 
-        internal void FillData(int tableID, MetadataChangeLog changeLog, MetadataColumn column, object value)
+        internal void FillData(MetadataChangeLog changeLog, MetadataColumn column, object value)
         {
             MetadataField field;
 
-            while (Fields.Count < column.ColumnIndex)
+            while (Fields.Count < column.Index)
             {
                 Fields.Add(null);
             }
-            field = Fields[column.ColumnIndex];
+            field = Fields[column.Index];
+            byte[] encoding = column.Encode(value);
             if (field == null)
             {
                 field = new MetadataField();
-                Fields[column.ColumnIndex] = field;
-                changeLog.AddField(column.DataSetColumnIndex, RecordID);
+                Fields[column.Index] = field;
+                field.Value = encoding;
+                changeLog.AddValue(column.Index, RowIndex, encoding);
             }
-            byte[] encoding = column.Encode(value);
-            if (!field.Value.SequenceEqual(encoding))
+            else if (!field.Value.SequenceEqual(encoding))
             {
-                changeLog.AddFieldValue(tableID, column.ColumnIndex, RecordID, encoding);
+                changeLog.AddValue(column.Index, RowIndex, encoding);
                 field.Value = encoding;
             }
+
         }
     }
 }

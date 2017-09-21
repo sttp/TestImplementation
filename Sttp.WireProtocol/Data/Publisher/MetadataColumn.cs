@@ -4,21 +4,23 @@ namespace Sttp.Data.Publisher
     public class MetadataColumn
     {
         /// <summary>
-        /// The 0 based index of this column in the DataSet
-        /// </summary>
-        public readonly int DataSetColumnIndex;
-        /// <summary>
         /// The 0 based index of this column in the data table.
         /// </summary>
-        public readonly int ColumnIndex; 
+        public readonly int Index;
+        /// <summary>
+        /// The name of the column
+        /// </summary>
+        public readonly string Name;
+        /// <summary>
+        /// The type of this column
+        /// </summary>
+        public readonly ValueType Type;
 
-        public readonly ValueType ColumnType; //The type the column fields are encoded with. 
-
-        public MetadataColumn(int dataSetColumnIndex, int columnIndex, ValueType columnType)
+        public MetadataColumn(int index, string name, ValueType type)
         {
-            DataSetColumnIndex = dataSetColumnIndex;
-            ColumnIndex = columnIndex;
-            ColumnType = columnType;
+            Index = index;
+            Type = type;
+            Name = name;
         }
 
         public byte[] Encode(object value)

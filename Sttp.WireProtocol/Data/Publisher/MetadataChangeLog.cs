@@ -74,34 +74,16 @@ namespace Sttp.Data.Publisher
             }
         }
 
-        public void AddTable(MetadataTable table)
+        public void AddColumn(MetadataColumn column)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddTable(table.TableIndex);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(column.Index, column.Name, column.Type);
         }
 
-        public void AddColumn(int tableID, MetadataColumn column)
+        public void AddValue(int columnIndex, int recordIndex, byte[] value)
         {
             if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(tableID, column.DataSetColumnIndex, column.ColumnType);
-        }
-
-        public void AddRow(int tableID, MetadataRow row)
-        {
-            if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddRow(tableID, row.RecordID);
-        }
-
-        public void AddField(int columnColumnID, int recordID)
-        {
-            if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddField(columnColumnID, recordID);
-        }
-
-        public void AddFieldValue(int tableID, int columnColumnID, int recordID, byte[] encoding)
-        {
-            if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddFieldValue(tableID, columnColumnID, recordID, encoding);
+                m_revisions[++TransactionID] = MetadataPatchDetails.AddValue(columnIndex, recordIndex, value);
         }
     }
 }
