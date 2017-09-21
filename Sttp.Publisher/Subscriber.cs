@@ -332,7 +332,7 @@ namespace Sttp.Publisher
 
         public bool SupportsUDP { get; set; } = DefaultSupportsUDP;
 
-        public void SendData(DataPoint dataPoint)
+        public void SendData(int runtimeID, DataPoint dataPoint)
         {
             //ToDo: Handle strings and byte arrays differently.
             QueueDataPoint(dataPoint);

@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttributeList.cs" />
     <Compile Include="DataPointWire.cs" />
     <Compile Include="DataPointKeyWire.cs" />
     <Compile Include="Data\Publisher\MetadataChangeLog.cs" />

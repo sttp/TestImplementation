@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Sttp.Data.Publisher;
 using Sttp.WireProtocol;
 using Version = Sttp.WireProtocol.Version;
 
@@ -26,6 +27,7 @@ namespace Sttp.Publisher
 
         private dynamic m_tcpSocket;
         private readonly Dictionary<Guid, Subscriber> m_subscribers;
+        private MetadataSet m_metadata;
 
         public API()
         {
@@ -86,14 +88,45 @@ namespace Sttp.Publisher
 
         public void SendData(DataPoint dataPoint)
         {
+            int runtimeID = FindRuntimeID(dataPoint.Key);
             // Route to needed subscribers
-            foreach (Subscriber subscriber in FindAllFor(dataPoint.Key.UniqueID))
+            foreach (Subscriber subscriber in FindAllFor(runtimeID))
             {
-                subscriber.SendData(dataPoint);
+                subscriber.SendData(runtimeID, dataPoint);
             }
         }
 
-        private Subscriber[] FindAllFor(Guid pointID)
+        private Dictionary<Guid, DataPointMapping> m_dataPointMappingInfo;
+
+        private int FindRuntimeID(DataPointKey key)
+        {
+            DataPointMapping mapping;
+            if (!m_dataPointMappingInfo.TryGetValue(key.UniqueID, out mapping))
+            {
+                mapping = new DataPointMapping()
+                {
+                    AttributeVersionNumber = key.Attributes.Version,
+                    RuntimeID = ~m_dataPointMappingInfo.Count
+                };
+                m_dataPointMappingInfo[key.UniqueID] = mapping;
+            }
+            if (key.Attributes.Version != mapping.AttributeVersionNumber)
+            {
+                foreach (var item in key.Attributes.GetSchema())
+                {
+                    m_metadata[item.Item1].AddColumn(item.Item2, item.Item3);
+                }
+
+                foreach (var item in key.Attributes.GetValues())
+                {
+                    m_metadata[item.Item1].AddOrUpdateValue(item.Item2, mapping.RuntimeID, item.Item3);
+                }
+            }
+            return mapping.RuntimeID;
+
+        }
+
+        private Subscriber[] FindAllFor(int runtimeID)
         {
             // TODO: look up subscribers that have subscribed to this point
             return null;
@@ -112,6 +145,14 @@ namespace Sttp.Publisher
 
             subscriber.Start();
         }
+
+        private class DataPointMapping
+        {
+            public int RuntimeID;
+            public int AttributeVersionNumber;
+
+        }
+
 
     }
 }

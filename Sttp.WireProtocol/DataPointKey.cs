@@ -13,9 +13,15 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// Unique data point identifier
         /// </summary>
-        public Guid UniqueID;
-        public ValueType Type;   // Value type of `DataPoint`
-        public bool HasQuality;
+        public readonly Guid UniqueID;
+        public readonly ValueType Type;   // Value type of `DataPoint`
+        public readonly bool HasQuality;
+
+        /// <summary>
+        /// Contains the list of all attributes that are associated with this measurement. 
+        /// </summary>
+        public readonly AttributeList Attributes;
     }
+
     // 23-bytes
 }
