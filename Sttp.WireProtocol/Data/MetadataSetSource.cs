@@ -8,18 +8,18 @@ namespace Sttp.Data.Publisher
     /// <summary>
     /// The set of all metadata used by the protocol.
     /// </summary>
-    public class MetadataSet
+    public class MetadataSetSource
     {
         private Dictionary<string, int> m_tableLookup;
-        private List<MetadataTable> m_tables;
+        private List<MetadataTableSource> m_tables;
 
-        public MetadataSet()
+        public MetadataSetSource()
         {
-            m_tables = new List<MetadataTable>();
+            m_tables = new List<MetadataTableSource>();
             m_tableLookup = new Dictionary<string, int>();
         }
 
-        public MetadataTable this[string tableName]
+        public MetadataTableSource this[string tableName]
         {
             get
             {
@@ -27,10 +27,10 @@ namespace Sttp.Data.Publisher
             }
         }
 
-        public void AddTable(MetadataTable table)
+        public void AddTable(MetadataTableSource tableSource)
         {
-            m_tables.Add(table);
-            m_tableLookup.Add(table.TableName, m_tables.Count - 1);
+            m_tables.Add(tableSource);
+            m_tableLookup.Add(tableSource.TableName, m_tables.Count - 1);
         }
     }
 }

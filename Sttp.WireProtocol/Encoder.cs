@@ -42,6 +42,10 @@ namespace Sttp.WireProtocol
         /// </summary>
         public event EventHandler<EventArgs<bool, byte[], int>> NewPacket;
 
+        /// <summary>
+        /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
+        /// </summary>
+        /// <param name="autoflushPacketSize"></param>
         public Encoder(int autoflushPacketSize)
         {
             m_autoFlushPacketSize = autoflushPacketSize;
@@ -78,7 +82,7 @@ namespace Sttp.WireProtocol
             
         }
 
-        public void RequestMetadataTablesReply(MetadataTable[] tableDefinitions)
+        public void RequestMetadataTablesReply(MetadataTableSource[] tableSourceDefinitions)
         {
 
         }

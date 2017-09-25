@@ -1,4 +1,4 @@
-namespace Sttp.Data.Subscriber
+namespace Sttp.Data
 {
     public class MetadataField
     {

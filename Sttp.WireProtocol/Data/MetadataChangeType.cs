@@ -1,4 +1,4 @@
-﻿namespace Sttp.Data.Publisher
+﻿namespace Sttp.Data
 {
     public enum MetadataChangeType
     {

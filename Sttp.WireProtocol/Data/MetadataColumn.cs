@@ -1,5 +1,5 @@
 using ValueType = Sttp.WireProtocol.ValueType;
-namespace Sttp.Data.Publisher
+namespace Sttp.Data
 {
     public class MetadataColumn
     {

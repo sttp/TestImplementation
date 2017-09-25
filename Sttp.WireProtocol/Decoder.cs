@@ -28,23 +28,92 @@ namespace Sttp.WireProtocol
     }
 
     /// <summary>
-    /// Responsible with decoding each packet into commands.
+    /// Responsible for decoding each packet into commands.
     /// </summary>
     public class Decoder
     {
-        private byte[] m_buffer;
+        private byte[] m_buffer = new byte[128];
         private int m_bufferPosition;
         private int m_bufferLength;
 
+        /// <summary>
+        /// The number of bytes that can be written to the buffer.
+        /// </summary>
+        private int FreeSpace => m_buffer.Length - m_bufferPosition;
+
+        /// <summary>
+        /// The number of bytes that are still being used.
+        /// </summary>
+        private int UsedSpace => m_bufferLength - m_bufferPosition;
+
+        /// <summary>
+        /// Writes the wire protocol data to the decoder.
+        /// </summary>
+        /// <param name="data">the data to write</param>
+        /// <param name="position">the starting position</param>
+        /// <param name="length">the length</param>
         public void WriteData(byte[] data, int position, int length)
         {
-            //ToDo: Compact and resize if needed. 
+            int bufferLength = UsedSpace;
+            if (m_bufferPosition > 0 && UsedSpace != 0)
+            {
+                //Compact
+                Array.Copy(m_buffer, m_bufferPosition, m_buffer, 0, bufferLength);
+            }
+            m_bufferLength = bufferLength;
+            m_bufferPosition = 0;
+
+            while (FreeSpace < length)
+            {
+                //Grow the buffer
+                byte[] newBuffer = new byte[m_buffer.Length * 2];
+                Array.Copy(m_buffer, 0, newBuffer, 0, bufferLength);
+                m_buffer = newBuffer;
+            }
+
             Array.Copy(data, position, m_buffer, m_bufferLength, length);
             m_bufferLength += length;
         }
 
+        /// <summary>
+        /// Gets the next decoded message. This method should be in a while loop, decoding all
+        /// messages before the next block of data is added to the decoder via <see cref="WriteData"/>
+        /// </summary>
+        /// <returns></returns>
         public DecoderCallback NextMessage()
         {
+            //A message fewer than 2 bytes are not valid.
+            if (UsedSpace < 2)
+                return DecoderCallback.EndOfMessages;
+
+            int position;
+            int messageLength = uint15.Read(m_buffer, m_bufferPosition, out position);
+            if (messageLength > UsedSpace)
+                return DecoderCallback.EndOfMessages;
+
+            switch ((CommandCode)m_buffer[m_bufferPosition + position])
+            {
+                case CommandCode.NegotiateSession:
+                    return DecoderCallback.NegotiateSessionStep1;
+                    return DecoderCallback.NegotiateSessionStep2;
+                case CommandCode.MetadataRefresh:
+                    return DecoderCallback.RequestMetadata;
+                case CommandCode.Subscribe:
+                    return DecoderCallback.Subscribe;
+                case CommandCode.Unsubscribe:
+                    break;
+                case CommandCode.SecureDataChannel:
+                    break;
+                case CommandCode.RuntimeIDMapping:
+                    break;
+                case CommandCode.DataPointPacket:
+                    break;
+                case CommandCode.NoOp:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             //Decode the next message. Return the message type so it can be properly handled.
             return DecoderCallback.EndOfMessages;
         }
@@ -73,7 +142,7 @@ namespace Sttp.WireProtocol
         {
             //Do nothing, just here to be complete.
         }
-        public void RequestMetadataTablesReply(out MetadataTable[] tableDefinitions)
+        public void RequestMetadataTablesReply(out MetadataTableSource[] tableSourceDefinitions)
         {
             throw new NotImplementedException();
         }
@@ -93,5 +162,47 @@ namespace Sttp.WireProtocol
             throw new NotImplementedException();
         }
 
+    }
+
+    public static class uint15
+    {
+        /// <summary>
+        /// Reads a 15 bit encoded integer.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="bufferPosition"></param>
+        /// <param name="messageLength"></param>
+        /// <returns></returns>
+        public static int Read(byte[] buffer, int bufferPosition, out int messageLength)
+        {
+            if (buffer[0] < 128)
+            {
+                messageLength = 1;
+                return buffer[bufferPosition];
+            }
+            messageLength = 2;
+            return (buffer[bufferPosition] - 128) | (buffer[bufferPosition + 1] << 7);
+        }
+
+        /// <summary>
+        /// Writes the specified <see cref="value"/> into the <see cref="buffer"/>, encoding it as an int15
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="position"></param>
+        /// <param name="value">must be a positive 15 bit number</param>
+        /// <returns>the number of bytes it took to encode this value. 1 or 2</returns>
+        public static int Write(byte[] buffer, int position, int value)
+        {
+            if (value < 0 || value > short.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(value), "Must be between 0 and 32767");
+            if (value < 128)
+            {
+                buffer[position] = (byte)value;
+                return 1;
+            }
+            buffer[position] = (byte)(value & 127);
+            buffer[position + 1] = (byte)(value >> 7);
+            return 2;
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace Sttp.Publisher
 
         private dynamic m_tcpSocket;
         private readonly Dictionary<Guid, Subscriber> m_subscribers;
-        private MetadataSet m_metadata;
+        private MetadataSetSource m_metadata;
 
         public API()
         {

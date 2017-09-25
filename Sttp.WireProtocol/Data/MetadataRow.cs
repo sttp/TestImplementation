@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sttp.Data.Publisher
+namespace Sttp.Data
 {
     public class MetadataRow
     {
@@ -38,6 +38,26 @@ namespace Sttp.Data.Publisher
                 field.Value = encoding;
             }
 
+        }
+
+        public void ApplyPatch(MetadataPatchDetails patch)
+        {
+            switch (patch.ChangeType)
+            {
+                case MetadataChangeType.AddValue:
+                    while (Fields.Count <= patch.ColumnIndex)
+                    {
+                        Fields.Add(null);
+                    }
+                    if (Fields[patch.ColumnIndex] == null)
+                    {
+                        Fields[patch.ColumnIndex] = new MetadataField();
+                    }
+                    Fields[patch.ColumnIndex].Value = patch.Data;
+                    break;
+                default:
+                    throw new NotSupportedException("Invalid patch type:");
+            }
         }
     }
 }

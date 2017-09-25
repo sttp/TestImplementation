@@ -4,7 +4,7 @@ using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data.Publisher
 {
-    public class MetadataTable
+    public class MetadataTableSource
     {
         private MetadataChangeLog m_changeLog = new MetadataChangeLog();
 
@@ -55,8 +55,11 @@ namespace Sttp.Data.Publisher
         /// </summary>
         public List<MetadataRow> Rows;
 
-        public MetadataTable(string tableName, bool isMappedToDataPoint)
+        public int TableIndex;
+
+        public MetadataTableSource(int tableIndex, string tableName, bool isMappedToDataPoint)
         {
+            TableIndex = tableIndex;
             TableName = tableName;
             IsMappedToDataPoint = isMappedToDataPoint;
             m_columnLookup = new Dictionary<string, int>();
