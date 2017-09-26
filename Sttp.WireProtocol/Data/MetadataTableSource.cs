@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Sttp.IO;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data.Publisher
@@ -103,21 +105,74 @@ namespace Sttp.Data.Publisher
             m_changeLog.DeleteRow(rowIndex);
         }
 
-        public byte[] SendToClient(Guid instanceId, long cachedRuntimeID, dynamic permissionsFilter)
+        public byte[] RequestTableData(Guid cachedInstanceID, long transaction, MetadataTableFilter permissionFilter)
         {
-            if (m_changeLog.TryBuildPatchData(instanceId, cachedRuntimeID, out List<MetadataPatchDetails> data))
+            MemoryStream stream = new MemoryStream();
+
+            if (m_changeLog.TryBuildPatchData(cachedInstanceID, transaction, out List<MetadataPatchDetails> data))
             {
+                stream.Write((byte)0); //PatchMetadata
+                stream.Write((byte)1); //Version
+                stream.Write(InstanceID);
+                stream.Write(TransactionID);
                 foreach (var record in data)
                 {
-                    if (permissionsFilter.Permit(record))
+                    if (permissionFilter == null || permissionFilter.Permit(record))
                     {
-                        //Serialize Record
+                        stream.Write(true);
+                        record.Save(stream);
                     }
                 }
-                return null;
+                stream.Write(false);
+                return stream.ToArray();
             }
 
-            //Serialize all metadata
+            stream.Write((byte)1); //New Table. Patch not available.
+            stream.Write((byte)1); //Version Number
+            stream.Write(InstanceID);
+            stream.Write(TransactionID);
+            //Columns are already serialized by this point only send the rows.
+            foreach (var row in Rows)
+            {
+                if (permissionFilter == null || permissionFilter.PermitRow(row))
+                {
+                    stream.Write(true);
+                    stream.Write(row.RowIndex);
+                    for (var columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
+                    {
+                        var field = row.Fields[columnIndex];
+                        if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
+                        {
+                            stream.Write(true);
+                            stream.Write(columnIndex);
+                            stream.Write(field.Value != null);
+                            if (field.Value != null)
+                                stream.WriteWithLength(field.Value);
+                        }
+                    }
+                    stream.Write(false);
+                }
+            }
+            stream.Write(false);
+            return stream.ToArray();
+        }
+    }
+
+
+    public class MetadataTableFilter
+    {
+        public bool Permit(MetadataPatchDetails record)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool PermitRow(MetadataRow row)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool PermitField(int rowRowIndex, int columnIndex, byte[] value)
+        {
             throw new NotImplementedException();
         }
     }

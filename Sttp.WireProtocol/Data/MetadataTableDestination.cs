@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using Sttp.IO;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data.Subscriber
@@ -42,10 +45,17 @@ namespace Sttp.Data.Subscriber
         /// All possible rows.
         /// </summary>
         public List<MetadataRow> Rows;
+        /// <summary>
+        /// the index of the table
+        /// </summary>
+        public int TableIndex;
 
-        public MetadataTableDestination(string tableName, bool isMappedToDataPoint)
+        public MetadataTableDestination(Guid instanceId, long transactionId, string tableName, int tableIndex, bool isMappedToDataPoint)
         {
+            InstanceID = instanceId;
+            TransactionID = transactionId;
             TableName = tableName;
+            TableIndex = tableIndex;
             IsMappedToDataPoint = isMappedToDataPoint;
             m_columnLookup = new Dictionary<string, int>();
             Columns = new List<MetadataColumn>();
@@ -80,6 +90,99 @@ namespace Sttp.Data.Subscriber
                 default:
                     throw new NotSupportedException("Invalid patch type:");
             }
+        }
+
+        public void AddColumn(int index, string name, ValueType type)
+        {
+            while (Columns.Count <= index)
+            {
+                Columns.Add(null);
+            }
+            Columns[index] = new MetadataColumn(index, name, type);
+        }
+
+        public void FillTable(byte[] data)
+        {
+            MemoryStream stream = new MemoryStream(data);
+            byte method = stream.ReadNextByte();
+
+            switch (method)
+            {
+                case 0:
+                    PatchTable(stream);
+                    break;
+                case 1:
+                    RebuildTable(stream);
+                    break;
+                default:
+                    throw new Exception();
+
+            }
+
+        }
+
+        private void PatchTable(MemoryStream stream)
+        {
+            byte version = stream.ReadNextByte();
+
+            switch (version)
+            {
+                case 1:
+                    InstanceID = stream.ReadGuid();
+                    TransactionID = stream.ReadInt64();
+                    while (stream.ReadBoolean())
+                    {
+                        var record = new MetadataPatchDetails(stream);
+                        ApplyPatch(record);
+                    }
+                    break;
+                default:
+                    throw new VersionNotFoundException();
+            }
+        }
+
+        private void RebuildTable(MemoryStream stream)
+        {
+            byte version = stream.ReadNextByte();
+
+            switch (version)
+            {
+                case 1:
+                    InstanceID = stream.ReadGuid();
+                    TransactionID = stream.ReadInt64();
+                    Rows.Clear();
+                    while (stream.ReadBoolean())
+                    {
+                        int rowIndex = stream.ReadInt32();
+                        while (Rows.Count <= rowIndex)
+                        {
+                            Rows.Add(null);
+                        }
+                        var row = new MetadataRow(rowIndex);
+                        Rows[rowIndex] = row;
+                        while (stream.ReadBoolean())
+                        {
+
+                            int columnIndex = stream.ReadInt32();
+                            byte[] data = null;
+                            if (stream.ReadBoolean())
+                                data = stream.ReadBytes();
+
+                            while (row.Fields.Count <= columnIndex)
+                            {
+                                row.Fields.Add(null);
+                            }
+                            row.Fields[columnIndex] = new MetadataField();
+                            row.Fields[columnIndex].Value = data;
+                        }
+                        var record = new MetadataPatchDetails(stream);
+                        ApplyPatch(record);
+                    }
+                    break;
+                default:
+                    throw new VersionNotFoundException();
+            }
+
         }
     }
 }
