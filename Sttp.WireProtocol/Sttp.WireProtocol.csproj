@@ -42,28 +42,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeList.cs" />
-    <Compile Include="Metadata\MetadataCommand.cs" />
-    <Compile Include="DataPointWire.cs" />
-    <Compile Include="DataPointKeyWire.cs" />
+    <Compile Include="Codec\Metadata\MetadataCommand.cs" />
+    <Compile Include="Codec\DataPointWire.cs" />
+    <Compile Include="Codec\DataPointKeyWire.cs" />
     <Compile Include="Data\MetadataChangeLog.cs" />
     <Compile Include="Data\MetadataChangeType.cs" />
-    <Compile Include="Metadata\MetadataDecoder.cs" />
-    <Compile Include="Metadata\MetadataEncoder.cs" />
-    <Compile Include="Data\MetadataPatchDetails.cs" />
+    <Compile Include="Codec\Metadata\MetadataDecoder.cs" />
+    <Compile Include="Codec\Metadata\MetadataEncoder.cs" />
     <Compile Include="Data\MetadataSetSource.cs" />
     <Compile Include="Data\MetadataSetDestination.cs" />
     <Compile Include="Data\MetadataTableDestination.cs" />
     <Compile Include="Data\MetadataTableFilter.cs" />
+    <Compile Include="Data\MetadataPatchDetails.cs" />
     <Compile Include="Obsolete\BufferValue.cs" />
     <Compile Include="Obsolete\Command.cs" />
-    <Compile Include="CommandCode.cs" />
+    <Compile Include="Codec\CommandCode.cs" />
     <Compile Include="DataPoint.cs" />
     <Compile Include="DataPointKey.cs" />
     <Compile Include="Obsolete\DataPointKeySet.cs" />
     <Compile Include="Obsolete\DataPointPacket.cs" />
     <Compile Include="Obsolete\DataPointState.cs" />
-    <Compile Include="DecoderTCP.cs" />
-    <Compile Include="EncoderTCP.cs" />
+    <Compile Include="Codec\DecoderTCP.cs" />
+    <Compile Include="Codec\EncoderTCP.cs" />
     <Compile Include="Obsolete\IEncode.cs" />
     <Compile Include="Data\MetadataColumn.cs" />
     <Compile Include="Data\MetadataField.cs" />

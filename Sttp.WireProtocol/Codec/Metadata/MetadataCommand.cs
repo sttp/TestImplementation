@@ -100,7 +100,7 @@ namespace Sttp.WireProtocol
         /// cacheInstanceID should be null if the local data is not cached.
         /// 
         /// Payload: 
-        /// string tableName;
+        /// int tableIndex;
         /// Guid cacheInstanceId
         /// long transactionID
         /// </summary>

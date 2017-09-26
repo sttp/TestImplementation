@@ -72,5 +72,18 @@ namespace Sttp.WireProtocol.Data
             m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }
+
+        public void SelectAllTablesWithSchema()
+        {
+            m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
+        }
+
+        public void ResyncTable(string tableIndex, Guid cachedInstanceId, long transactionId)
+        {
+            m_stream.Write((byte)MetadataCommand.ResyncTable);
+            m_stream.Write(tableIndex);
+            m_stream.Write(cachedInstanceId);
+            m_stream.Write(transactionId);
+        }
     }
 }
