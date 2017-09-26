@@ -8,42 +8,81 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// Clears all metadata for a user.
         /// </summary>
-        MetadataClear,
+        Clear,
 
         /// <summary>
         /// Adds or replaces a table.
+        /// 
+        /// Payload: 
+        /// Guid instanceID, 
+        /// long transactionID, 
+        /// string tableName, 
+        /// int tableIndex, 
+        /// bool isMappedToDataPoint
         /// </summary>
-        MetadataAddTable,
+        AddTable,
 
         /// <summary>
         /// Deletes a table.
+        /// 
+        /// Payload: 
+        /// int tableIndex
         /// </summary>
-        MetadataDeleteTable,
+        DeleteTable,
 
         /// <summary>
         /// Updates the transaction version of the table.
+        /// 
+        /// Payload: 
+        /// int tableIndex, 
+        /// long transactionID
+        /// 
         /// </summary>
-        MetadataUpdateTable,
-        
+        UpdateTable,
+
         /// <summary>
         /// Adds or replaces a column.
+        /// 
+        /// Payload: 
+        /// int tableIndex, 
+        /// int columnIndex, 
+        /// string columnName, 
+        /// ValueType columnType
+        /// 
         /// </summary>
-        MetadataAddColumn,
+        AddColumn,
 
         /// <summary>
         /// Removes a column.
+        /// 
+        /// Payload: 
+        /// int tableIndex, 
+        /// int columnIndex
+        /// 
         /// </summary>
-        MetadataDeleteColumn,
+        DeleteColumn,
 
         /// <summary>
         /// Adds or updates a value.
+        /// 
+        /// Payload: 
+        /// int tableIndex, 
+        /// int columnIndex, 
+        /// int rowIndex, 
+        /// byte[] value
+        /// 
         /// </summary>
-        MetadataAddValue,
+        AddValue,
 
         /// <summary>
         /// Removes an entire row of data.
+        /// 
+        /// Payload: 
+        /// int tableIndex, 
+        /// int rowIndex,
+        /// 
         /// </summary>
-        MetadataDeleteRow,
+        DeleteRow,
 
     }
 }

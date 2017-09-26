@@ -41,12 +41,12 @@ namespace Sttp.Data
             var method = decoder.NextCommand();
             switch (method)
             {
-                case MetadataCommand.MetadataClear:
+                case MetadataCommand.Clear:
                     decoder.Clear();
                     m_tables.Clear();
                     m_tableLookup.Clear();
                     break;
-                case MetadataCommand.MetadataAddTable:
+                case MetadataCommand.AddTable:
                     {
                         decoder.AddTable(out Guid instanceID, out long transactionID, out string tableName, out int tableIndex, out bool isMappedToDataPoint);
                         var table = new MetadataTableDestination(instanceID, transactionID, tableName, tableIndex, isMappedToDataPoint);
@@ -58,38 +58,38 @@ namespace Sttp.Data
                         m_tables[tableIndex] = table;
                     }
                     break;
-                case MetadataCommand.MetadataDeleteTable:
+                case MetadataCommand.DeleteTable:
                     {
                         decoder.DeleteTable(out int tableIndex);
                         m_tableLookup.Remove(m_tables[tableIndex].TableName);
                         m_tables[tableIndex] = null;
                     }
                     break;
-                case MetadataCommand.MetadataUpdateTable:
+                case MetadataCommand.UpdateTable:
                     {
                         decoder.UpdateTable(out int tableIndex, out long transactionID);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
-                case MetadataCommand.MetadataAddColumn:
+                case MetadataCommand.AddColumn:
                     {
                         decoder.AddColumn(out int tableIndex, out int columnIndex, out string columnName, out ValueType columnType);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
-                case MetadataCommand.MetadataDeleteColumn:
+                case MetadataCommand.DeleteColumn:
                     {
                         decoder.DeleteColumn(out int tableIndex, out int columnIndex);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
-                case MetadataCommand.MetadataAddValue:
+                case MetadataCommand.AddValue:
                     {
                         decoder.AddValue(out int tableIndex, out int columnIndex, out int rowIndex, out byte[] value);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
-                case MetadataCommand.MetadataDeleteRow:
+                case MetadataCommand.DeleteRow:
                     {
                         decoder.DeleteRow(out int tableIndex, out int rowIndex);
                         m_tables[tableIndex].Fill(decoder);
