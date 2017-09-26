@@ -2,6 +2,7 @@
 {
     public enum MetadataChangeType
     {
+
         AddColumn,
         AddValue,
         DeleteRow,

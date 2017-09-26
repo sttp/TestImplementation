@@ -8,8 +8,6 @@ using System.Text;
 using System.Threading;
 using Sttp.Data;
 using Sttp.WireProtocol;
-using Decoder = Sttp.WireProtocol.Decoder;
-using Encoder = Sttp.WireProtocol.Encoder;
 using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
@@ -31,8 +29,8 @@ namespace Sttp.Publisher
         private readonly Thread m_dataThread;
         private readonly Thread m_sendThread;
         private bool m_enabled;
-        private readonly Encoder m_encoder;
-        private readonly Decoder m_decoder;
+        private readonly EncoderTCP m_encoder;
+        private readonly DecoderTCP m_decoderTcp;
         private MetadataSetSource m_metadata;
 
         internal Subscriber(dynamic tcpSocket, MetadataSetSource metadata)
@@ -48,8 +46,8 @@ namespace Sttp.Publisher
             m_dataThread = new Thread(CollateData);
             m_dataThread.Start();
 
-            m_encoder = new Encoder(1024);
-            m_decoder = new Decoder();
+            m_encoder = new EncoderTCP(1024);
+            m_decoderTcp = new DecoderTCP();
             m_encoder.NewPacket += m_encoder_NewPacket;
             // Setup data reception event or handler, etc...
             //m_tcpSocket.OnDataReceived += m_tcpSocket_OnDataReceived;
@@ -204,8 +202,8 @@ namespace Sttp.Publisher
 
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
-            m_decoder.WriteData(buffer, startIndex, length);
-            var code = m_decoder.NextMessage();
+            m_decoderTcp.WriteData(buffer, startIndex, length);
+            var code = m_decoderTcp.NextMessage();
             while (code != DecoderCallback.EndOfMessages)
             {
                 switch (code)
@@ -213,7 +211,7 @@ namespace Sttp.Publisher
                     case DecoderCallback.NegotiateSessionStep1:
                         // Setup subscriber desired protocol version, validating that publisher can support it
                         ProtocolVersions versions;
-                        m_decoder.NegotiateSessionStep1(out versions);
+                        m_decoderTcp.NegotiateSessionStep1(out versions);
 
                         // Version 1.0 is the only currently supported version for this implementation
                         if (versions.Versions.Any(v => v == OnePointZero))
@@ -242,7 +240,7 @@ namespace Sttp.Publisher
                     case DecoderCallback.NegotiateSessionStep2:
                         // Setup subscriber desired operational modes, validating that publisher can support them
                         OperationalModes subscriberModes;
-                        m_decoder.NegotiateSessionStep2(out subscriberModes);
+                        m_decoderTcp.NegotiateSessionStep2(out subscriberModes);
 
                         // Validate UDP support
                         if (!SupportsUDP && subscriberModes.UdpPort > 0)
@@ -315,7 +313,7 @@ namespace Sttp.Publisher
                         break;
                 }
 
-                code = m_decoder.NextMessage();
+                code = m_decoderTcp.NextMessage();
             }
         }
 

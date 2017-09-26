@@ -11,7 +11,7 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// Responsible for encoding each command into bytes
     /// </summary>
-    public class Encoder
+    public class EncoderTCP
     {
         /// <summary>
         /// Once this size has been reached, the protocol will automatically call 
@@ -21,19 +21,11 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// The bytes that need to be reliably sent. Note, this data is not valid until <see cref="Flush"/> has been called.
         /// </summary>
-        public byte[] ReliableSendBuffer { get; private set; }
+        public byte[] SendBuffer { get; private set; }
         /// <summary>
         /// The length of <see cref="ReliableSendBuffer"/>
         /// </summary>
-        public int ReliableSendBufferLength { get; private set; }
-        /// <summary>
-        /// The bytes that can be sent unreliably. Note, this data is not valid until <see cref="Flush"/> has been called.
-        /// </summary>
-        public byte[] UnreliableSendBuffer { get; private set; }
-        /// <summary>
-        /// The length of <see cref="UnreliableSendBuffer"/>
-        /// </summary>
-        public int UnreliableSendBufferLength { get; private set; }
+        public int SendBufferLength { get; private set; }
 
         /// <summary>
         /// Occurs when a new packet of data must be sent on the wire. This is called immediately
@@ -45,7 +37,7 @@ namespace Sttp.WireProtocol
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
         /// <param name="autoflushPacketSize"></param>
-        public Encoder(int autoflushPacketSize)
+        public EncoderTCP(int autoflushPacketSize)
         {
             m_autoFlushPacketSize = autoflushPacketSize;
         }

@@ -6,7 +6,7 @@ using System.Text;
 namespace Sttp.WireProtocol
 {
     /// <summary>
-    /// This data point is what is used to communicating with the <see cref="Encoder"/>/<see cref="Decoder"/>. 
+    /// This data point is what is used to communicating with the <see cref="EncoderTCP"/>/<see cref="DecoderTCP"/>. 
     /// </summary>
     public class DataPointWire
     {

@@ -7,6 +7,7 @@ namespace Sttp.WireProtocol.Data
     public class MetadataDecoder
     {
         private MemoryStream m_stream;
+
         public void WriteData(byte[] buffer, int position, int length)
         {
 
@@ -69,6 +70,5 @@ namespace Sttp.WireProtocol.Data
             tableIndex = m_stream.ReadInt32();
             rowIndex = m_stream.ReadInt32();
         }
-
     }
 }

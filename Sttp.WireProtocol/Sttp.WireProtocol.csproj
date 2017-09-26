@@ -42,12 +42,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeList.cs" />
+    <Compile Include="Codec\CommandCode3.cs" />
     <Compile Include="DataPointWire.cs" />
     <Compile Include="DataPointKeyWire.cs" />
     <Compile Include="Data\MetadataChangeLog.cs" />
     <Compile Include="Data\MetadataChangeType.cs" />
-    <Compile Include="Data\MetadataDecoder.cs" />
-    <Compile Include="Data\MetadataEncoder.cs" />
+    <Compile Include="Codec\MetadataDecoder.cs" />
+    <Compile Include="Codec\MetadataEncoder.cs" />
     <Compile Include="Data\MetadataPatchDetails.cs" />
     <Compile Include="Data\MetadataSetSource.cs" />
     <Compile Include="Data\MetadataSetDestination.cs" />
@@ -61,8 +62,8 @@
     <Compile Include="Obsolete\DataPointKeySet.cs" />
     <Compile Include="Obsolete\DataPointPacket.cs" />
     <Compile Include="Obsolete\DataPointState.cs" />
-    <Compile Include="Decoder.cs" />
-    <Compile Include="Encoder.cs" />
+    <Compile Include="Codec\DecoderTCP.cs" />
+    <Compile Include="Codec\EncoderTCP.cs" />
     <Compile Include="Obsolete\IEncode.cs" />
     <Compile Include="Data\MetadataColumn.cs" />
     <Compile Include="Data\MetadataField.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="TimestampFlags.cs" />
     <Compile Include="Obsolete\TimestampType.cs" />
     <Compile Include="Obsolete\Unix64Timestamp.cs" />
+    <Compile Include="uint15.cs" />
     <Compile Include="ValueType.cs" />
     <Compile Include="Version.cs" />
   </ItemGroup>
