@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Sttp.Data;
 
 namespace Sttp.WireProtocol
 {
@@ -141,20 +140,20 @@ namespace Sttp.WireProtocol
         {
             //Do nothing, just here to be complete.
         }
-        public void RequestMetadataTablesReply(out MetadataTableSource[] tableSourceDefinitions)
-        {
-            throw new NotImplementedException();
-        }
+        //public void RequestMetadataTablesReply(out MetadataTableSource[] tableSourceDefinitions)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public void RequestMetadata(out string tableName, out Guid cachedBaseVersionNumber, out int versionNumber, out string filterString)
         {
             throw new NotImplementedException();
         }
 
-        public void RequestMetadataReply(out Guid cachedBaseVersionNumber, out int versionNumber, out MetadataRow[] rows)
-        {
-            throw new NotImplementedException();
-        }
+        //public void RequestMetadataReply(out Guid cachedBaseVersionNumber, out int versionNumber, out MetadataRow[] rows)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public void Subscribe(out string subscriptionString, out bool augment)
         {

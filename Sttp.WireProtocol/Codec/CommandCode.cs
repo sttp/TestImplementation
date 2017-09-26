@@ -1,4 +1,3 @@
-using Sttp.Data;
 
 namespace Sttp.WireProtocol
 {

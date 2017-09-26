@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using Sttp.Data;
 
 namespace Sttp.WireProtocol
 {
@@ -73,10 +72,10 @@ namespace Sttp.WireProtocol
             
         }
 
-        public void RequestMetadataTablesReply(MetadataTableSource[] tableSourceDefinitions)
-        {
+        //public void RequestMetadataTablesReply(MetadataTableSource[] tableSourceDefinitions)
+        //{
 
-        }
+        //}
 
         public void RequestMetadata(string tableName, Guid cachedBaseVersionNumber, int versionNumber, string filterString)
         {
@@ -119,10 +118,10 @@ namespace Sttp.WireProtocol
             // Need to consider filtering options an impacts on server
         }
 
-        public void RequestMetadataReply(Guid cachedBaseVersionNumber, int versionNumber, MetadataRow[] rows)
-        {
-            //Metadata will be chunked one row at a time for the reply. 
-        }
+        //public void RequestMetadataReply(Guid cachedBaseVersionNumber, int versionNumber, MetadataRow[] rows)
+        //{
+        //    //Metadata will be chunked one row at a time for the reply. 
+        //}
 
         public void Subscribe(string subscriptionString, bool augment)
         {

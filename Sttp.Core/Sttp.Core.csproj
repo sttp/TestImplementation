@@ -42,17 +42,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArrayExtensions.cs" />
-    <Compile Include="BigEndian.cs" />
-    <Compile Include="Encoding7Bit.cs" />
-    <Compile Include="EventArgs.cs" />
-    <Compile Include="GuidExtensions.cs" />
+    <Compile Include="AttributeList.cs" />
+    <Compile Include="DataPoint.cs" />
+    <Compile Include="DataPointKey.cs" />
+    <Compile Include="Data\MetadataChangeLog.cs" />
+    <Compile Include="Data\MetadataChangeType.cs" />
+    <Compile Include="Data\MetadataColumn.cs" />
+    <Compile Include="Data\MetadataField.cs" />
+    <Compile Include="Data\MetadataPatchDetails.cs" />
+    <Compile Include="Data\MetadataRow.cs" />
+    <Compile Include="Data\MetadataSetDestination.cs" />
+    <Compile Include="Data\MetadataSetSource.cs" />
+    <Compile Include="Data\MetadataTableDestination.cs" />
+    <Compile Include="Data\MetadataTableFilter.cs" />
+    <Compile Include="Data\MetadataTableSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BigEndianStreamExtensions.cs" />
-    <Compile Include="SymmetricAlgorithmExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ExternalCode\ReadMe.txt" />
     <Content Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj">
+      <Project>{8048242f-debd-43b2-8673-bea2ec461ee3}</Project>
+      <Name>Sttp.WireProtocol</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
