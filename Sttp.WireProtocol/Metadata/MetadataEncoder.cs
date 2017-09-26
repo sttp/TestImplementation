@@ -15,25 +15,25 @@ namespace Sttp.WireProtocol.Data
 
         public void Clear()
         {
-            m_stream.Write((byte)CommandCode3.MetadataClear);
+            m_stream.Write((byte)MetadataCommand.MetadataClear);
         }
 
         public void DeleteTable(int tableIndex)
         {
-            m_stream.Write((byte)CommandCode3.MetadataDeleteTable);
+            m_stream.Write((byte)MetadataCommand.MetadataDeleteTable);
             m_stream.Write(tableIndex);
         }
 
         public void UpdateTable(int tableIndex, long transactionID)
         {
-            m_stream.Write((byte)CommandCode3.MetadataUpdateTable);
+            m_stream.Write((byte)MetadataCommand.MetadataUpdateTable);
             m_stream.Write(tableIndex);
             m_stream.Write(transactionID);
         }
 
         public void AddTable(Guid instanceID, long transactionID, string tableName, int tableIndex, bool isMappedToDataPoint)
         {
-            m_stream.Write((byte)CommandCode3.MetadataAddTable);
+            m_stream.Write((byte)MetadataCommand.MetadataAddTable);
             m_stream.Write(instanceID);
             m_stream.Write(transactionID);
             m_stream.Write(tableName);
@@ -43,7 +43,7 @@ namespace Sttp.WireProtocol.Data
 
         public void AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType)
         {
-            m_stream.Write((byte)CommandCode3.MetadataAddColumn);
+            m_stream.Write((byte)MetadataCommand.MetadataAddColumn);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(columnName);
@@ -52,14 +52,14 @@ namespace Sttp.WireProtocol.Data
 
         public void DeleteColumn(int tableIndex, int columnIndex)
         {
-            m_stream.Write((byte)CommandCode3.MetadataDeleteColumn);
+            m_stream.Write((byte)MetadataCommand.MetadataDeleteColumn);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
         }
 
         public void AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value)
         {
-            m_stream.Write((byte)CommandCode3.MetadataAddValue);
+            m_stream.Write((byte)MetadataCommand.MetadataAddValue);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(rowIndex);
@@ -68,7 +68,7 @@ namespace Sttp.WireProtocol.Data
 
         public void DeleteRow(int tableIndex, int rowIndex)
         {
-            m_stream.Write((byte)CommandCode3.MetadataDeleteRow);
+            m_stream.Write((byte)MetadataCommand.MetadataDeleteRow);
             m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }

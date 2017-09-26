@@ -13,9 +13,9 @@ namespace Sttp.WireProtocol.Data
 
         }
 
-        public CommandCode3 NextCommand()
+        public MetadataCommand NextCommand()
         {
-            return (CommandCode3)m_stream.ReadNextByte();
+            return (MetadataCommand)m_stream.ReadNextByte();
         }
 
         public void Clear()

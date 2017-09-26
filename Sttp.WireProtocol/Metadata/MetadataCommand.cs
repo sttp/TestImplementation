@@ -1,6 +1,9 @@
 namespace Sttp.WireProtocol
 {
-    public enum CommandCode3
+    /// <summary>
+    /// All of the permitted commands for metadata.
+    /// </summary>
+    public enum MetadataCommand
     {
         /// <summary>
         /// Clears all metadata for a user.
