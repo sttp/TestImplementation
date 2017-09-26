@@ -12,8 +12,8 @@ namespace Sttp.WireProtocol
         public byte[] Value;
         public int ValueLength;
         public DateTime Time;
-        public TimestampFlags Flags;
-        public QualityFlags QualityFlags;
+        public TimeQualityFlags Flags;
+        public DataQualityFlags QualityFlags;
 
         public void SetValue(sbyte value)
         {
