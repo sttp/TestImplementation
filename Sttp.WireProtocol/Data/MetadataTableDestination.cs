@@ -118,7 +118,6 @@ namespace Sttp.Data.Subscriber
                     throw new Exception();
 
             }
-
         }
 
         private void PatchTable(MemoryStream stream)

@@ -50,6 +50,7 @@
     <Compile Include="Data\MetadataSetSource.cs" />
     <Compile Include="Data\MetadataSetDestination.cs" />
     <Compile Include="Data\MetadataTableDestination.cs" />
+    <Compile Include="Data\MetadataTableFilter.cs" />
     <Compile Include="Obsolete\BufferValue.cs" />
     <Compile Include="Obsolete\Command.cs" />
     <Compile Include="CommandCode.cs" />

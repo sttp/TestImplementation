@@ -157,23 +157,4 @@ namespace Sttp.Data.Publisher
             return stream.ToArray();
         }
     }
-
-
-    public class MetadataTableFilter
-    {
-        public bool Permit(MetadataPatchDetails record)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool PermitRow(MetadataRow row)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool PermitField(int rowRowIndex, int columnIndex, byte[] value)
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
