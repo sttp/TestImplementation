@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.Data.Publisher
+namespace Sttp.Data
 {
     /// <summary>
     /// Identifies a filter on the metadata since not all users will be permitted to see all metadata.

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.Data.Publisher
+namespace Sttp.Data
 {
     public class MetadataTableSource
     {

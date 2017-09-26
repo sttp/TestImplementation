@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using Sttp.IO;
 using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.Data.Subscriber
+namespace Sttp.Data
 {
     /// <summary>
     /// The set of all metadata used by the protocol.

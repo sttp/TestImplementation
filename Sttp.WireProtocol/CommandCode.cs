@@ -1,5 +1,4 @@
-using Sttp.Data.Publisher;
-using Sttp.Data.Subscriber;
+using Sttp.Data;
 
 namespace Sttp.WireProtocol
 {

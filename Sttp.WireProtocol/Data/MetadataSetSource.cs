@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Policy;
+using Sttp.WireProtocol;
 using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.Data.Publisher
+namespace Sttp.Data
 {
     /// <summary>
     /// The set of all metadata used by the protocol.

@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using Sttp.Data;
-using Sttp.Data.Publisher;
 using Sttp.WireProtocol;
 using Decoder = Sttp.WireProtocol.Decoder;
 using Encoder = Sttp.WireProtocol.Encoder;

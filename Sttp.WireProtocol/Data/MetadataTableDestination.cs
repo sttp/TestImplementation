@@ -5,7 +5,7 @@ using System.IO;
 using Sttp.IO;
 using ValueType = Sttp.WireProtocol.ValueType;
 
-namespace Sttp.Data.Subscriber
+namespace Sttp.Data
 {
     public class MetadataTableDestination
     {
