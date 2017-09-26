@@ -3,7 +3,7 @@
 namespace Sttp.WireProtocol
 {
     [Flags]
-    public enum QualityFlags : byte
+    public enum DataQualityFlags : byte
     {
         Normal = 0,                 // Defines normal state
         BadTime = 1 << 0,           // Defines bad time state

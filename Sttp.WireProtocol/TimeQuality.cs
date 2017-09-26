@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol
 {
-    public enum TimeQuality
+    public enum TimeQuality : byte
     {
         Locked = 0x0,                       // Clock locked, Normal operation
         Failure = 0xF,                      // Clock fault, time not reliable

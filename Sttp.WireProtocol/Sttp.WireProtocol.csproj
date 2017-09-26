@@ -76,7 +76,7 @@
     <Compile Include="Obsolete\Priority.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolVersions.cs" />
-    <Compile Include="QualityFlags.cs" />
+    <Compile Include="DataQualityFlags.cs" />
     <Compile Include="Obsolete\ResolutionType.cs" />
     <Compile Include="Obsolete\Response.cs" />
     <Compile Include="ResponseCode.cs" />
@@ -87,7 +87,7 @@
     <Compile Include="Obsolete\StringValueState.cs" />
     <Compile Include="Obsolete\TicksTimestamp.cs" />
     <Compile Include="TimeQuality.cs" />
-    <Compile Include="TimestampFlags.cs" />
+    <Compile Include="TimeQualityFlags.cs" />
     <Compile Include="Obsolete\TimestampType.cs" />
     <Compile Include="Obsolete\Unix64Timestamp.cs" />
     <Compile Include="ValueType.cs" />

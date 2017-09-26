@@ -35,9 +35,9 @@ namespace Sttp.WireProtocol
 
         public SttpTimestamp Time;
 
-        public TimestampFlags Flags;
+        public TimeQualityFlags Flags;
 
-        public QualityFlags QualityFlags;
+        public DataQualityFlags QualityFlags;
 
         //This code goes elsewhere
         //public static List<DataPoint> GetDataPoints(byte[] value)

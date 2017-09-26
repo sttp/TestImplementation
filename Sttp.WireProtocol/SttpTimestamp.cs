@@ -37,9 +37,7 @@ namespace Sttp.WireProtocol
         {
             Seconds = seconds;
             Fraction = fraction;
-        }
-
-        
+        }        
     }
-    // 17-bytes
+    // 16-bytes
 }
