@@ -84,5 +84,29 @@ namespace Sttp.WireProtocol
         /// </summary>
         DeleteRow,
 
+        /// <summary>
+        /// Gets all of the tables with their columns
+        /// 
+        /// Payload:
+        /// None
+        /// </summary>
+        SelectAllTablesWithSchema,
+
+        /// <summary>
+        /// Requests that the specified table is resynchronized. In other words, send 
+        /// only the changes if the specified transactions are still stored on the server
+        /// otherwise, resend the entire server.
+        /// 
+        /// cacheInstanceID should be null if the local data is not cached.
+        /// 
+        /// Payload: 
+        /// string tableName;
+        /// Guid cacheInstanceId
+        /// long transactionID
+        /// </summary>
+        ResyncTable,
+
+
+
     }
 }
