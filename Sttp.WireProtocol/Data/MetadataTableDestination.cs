@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using Sttp.IO;
+using Sttp.WireProtocol.Data;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -181,6 +182,11 @@ namespace Sttp.Data
                 default:
                     throw new VersionNotFoundException();
             }
+
+        }
+
+        public void Fill(MetadataDecoder decoder)
+        {
 
         }
     }

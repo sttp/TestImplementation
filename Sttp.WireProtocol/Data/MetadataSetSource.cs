@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Policy;
 using Sttp.WireProtocol;
+using Sttp.WireProtocol.Data;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -43,32 +44,21 @@ namespace Sttp.Data
         /// Replies with all of the tables with their schema
         /// </summary>
         /// <returns></returns>
-        public byte[] RequestAllTablesWithSchema()
+        public void RequestAllTablesWithSchema(MetadataEncoder encoder)
         {
-            MemoryStream stream = new MemoryStream();
-            stream.Write((byte)0); //Version Code
-            stream.Write(m_tables.Count); //Number of tables
             foreach (var table in m_tables)
             {
-                stream.Write(table.InstanceID);
-                stream.Write(table.TransactionID);
-                stream.Write(table.TableName);
-                stream.Write(table.TableIndex);
-                stream.Write(table.IsMappedToDataPoint);
-                stream.Write(table.Columns.Count);
+                encoder.AddTable(table.InstanceID, table.TransactionID, table.TableName, table.TableIndex, table.IsMappedToDataPoint);
                 foreach (var column in table.Columns)
                 {
-                    stream.Write(column.Index);
-                    stream.Write(column.Name);
-                    stream.Write((byte)column.Type);
+                    encoder.AddColumn(table.TableIndex, column.Index, column.Name, column.Type);
                 }
             }
-            return stream.ToArray();
         }
 
-        public byte[] RequestTableData(string tableName, Guid cachedInstanceID = default(Guid), long transaction = 0, dynamic permissionsFilter = null)
+        public byte[] RequestTableData(MetadataEncoder encoder, string tableName, Guid cachedInstanceID = default(Guid), long transaction = 0, dynamic permissionsFilter = null)
         {
-            return m_tables[m_tableLookup[tableName]].RequestTableData(cachedInstanceID, transaction, permissionsFilter);
+            return m_tables[m_tableLookup[tableName]].RequestTableData(encoder, cachedInstanceID, transaction, permissionsFilter);
         }
 
 

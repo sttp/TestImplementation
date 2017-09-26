@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Sttp.WireProtocol.Data;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -105,56 +106,40 @@ namespace Sttp.Data
             m_changeLog.DeleteRow(rowIndex);
         }
 
-        public byte[] RequestTableData(Guid cachedInstanceID, long transaction, MetadataTableFilter permissionFilter)
+        public void RequestTableData(MetadataEncoder encoder, Guid cachedInstanceID, long transaction, MetadataTableFilter permissionFilter)
         {
-            MemoryStream stream = new MemoryStream();
-
             if (m_changeLog.TryBuildPatchData(cachedInstanceID, transaction, out List<MetadataPatchDetails> data))
             {
-                stream.Write((byte)0); //PatchMetadata
-                stream.Write((byte)1); //Version
-                stream.Write(InstanceID);
-                stream.Write(TransactionID);
                 foreach (var record in data)
                 {
                     if (permissionFilter == null || permissionFilter.Permit(record))
                     {
-                        stream.Write(true);
-                        record.Save(stream);
+                        record.Save(TableIndex, encoder);
                     }
                 }
-                stream.Write(false);
-                return stream.ToArray();
+                encoder.UpdateTable(TableIndex, TransactionID);
+                return;
             }
 
-            stream.Write((byte)1); //New Table. Patch not available.
-            stream.Write((byte)1); //Version Number
-            stream.Write(InstanceID);
-            stream.Write(TransactionID);
-            //Columns are already serialized by this point only send the rows.
+            encoder.AddTable(InstanceID, TransactionID, TableName, TableIndex, IsMappedToDataPoint);
+            foreach (var column in Columns)
+            {
+                encoder.AddColumn(TableIndex, column.Index, column.Name, column.Type);
+            }
             foreach (var row in Rows)
             {
                 if (permissionFilter == null || permissionFilter.PermitRow(row))
                 {
-                    stream.Write(true);
-                    stream.Write(row.RowIndex);
                     for (var columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
                     {
                         var field = row.Fields[columnIndex];
                         if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
                         {
-                            stream.Write(true);
-                            stream.Write(columnIndex);
-                            stream.Write(field.Value != null);
-                            if (field.Value != null)
-                                stream.WriteWithLength(field.Value);
+                            encoder.AddValue(TableIndex, columnIndex, row.RowIndex, field.Value);
                         }
                     }
-                    stream.Write(false);
                 }
             }
-            stream.Write(false);
-            return stream.ToArray();
         }
     }
 }

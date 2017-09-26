@@ -1,6 +1,7 @@
 using Sttp.IO;
 using System;
 using System.IO;
+using Sttp.WireProtocol.Data;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -16,7 +17,7 @@ namespace Sttp.Data
 
         private MetadataPatchDetails()
         {
-            
+
         }
         public MetadataPatchDetails(Stream stream)
         {
@@ -146,27 +147,18 @@ namespace Sttp.Data
             };
         }
 
-        public void Save(Stream stream)
+        public void Save(int tableIndex, MetadataEncoder encoder)
         {
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    stream.Write((byte)ChangeType);
-                    stream.Write(ColumnIndex);
-                    stream.Write(ColumnName);
-                    stream.Write((byte)m_columnType);
+                    encoder.AddColumn(tableIndex, m_columnIndex, m_columnName, m_columnType);
                     break;
                 case MetadataChangeType.AddValue:
-                    stream.Write((byte)ChangeType);
-                    stream.Write(ColumnIndex);
-                    stream.Write(RowIndex);
-                    stream.Write(m_value != null);
-                    if (m_value != null)
-                        stream.WriteWithLength(m_value);
+                    encoder.AddValue(tableIndex, m_columnIndex, m_rowIndex, m_value);
                     break;
                 case MetadataChangeType.DeleteRow:
-                    stream.Write((byte)ChangeType);
-                    stream.Write(RowIndex);
+                    encoder.DeleteRow(tableIndex, m_rowIndex);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
