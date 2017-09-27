@@ -106,7 +106,5 @@ namespace Sttp.WireProtocol
         /// </summary>
         ResyncTable,
 
-
-
     }
 }

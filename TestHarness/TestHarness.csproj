@@ -44,11 +44,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codec\Metadata\Test.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sttp.Core\Sttp.Core.csproj">
+      <Project>{8546536c-fc21-4c1d-9e16-6b3e4baa4c0d}</Project>
+      <Name>Sttp.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sttp.Publisher\Sttp.Publisher.csproj">
+      <Project>{3c414d02-3971-47a5-9cb0-c4e56879eb59}</Project>
+      <Name>Sttp.Publisher</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sttp.Subscriber\Sttp.Subscriber.csproj">
+      <Project>{1152de5e-8668-4cfa-8aa0-ef0a9ab32885}</Project>
+      <Name>Sttp.Subscriber</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj">
+      <Project>{8048242f-debd-43b2-8673-bea2ec461ee3}</Project>
+      <Name>Sttp.WireProtocol</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

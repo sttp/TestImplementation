@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Codec\EncoderQueue.cs" />
     <Compile Include="Codec\Metadata\MetadataCommand.cs" />
     <Compile Include="Codec\DataPointWire.cs" />
     <Compile Include="Codec\DataPointKeyWire.cs" />

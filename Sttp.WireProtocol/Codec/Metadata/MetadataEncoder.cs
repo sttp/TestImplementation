@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,9 +10,33 @@ using System.Threading.Tasks;
 
 namespace Sttp.WireProtocol.Data
 {
+    /// <summary>
+    /// Encodes a metadata packet.
+    /// </summary>
     public class MetadataEncoder
     {
         private MemoryStream m_stream = new MemoryStream();
+
+        /// <summary>
+        /// Begins a new metadata packet
+        /// </summary>
+        public void BeginCommand()
+        {
+            m_stream.Position = 0;
+            m_stream.SetLength(0);
+        }
+
+        /// <summary>
+        /// Ends a metadata packet and requests the buffer block that was allocated.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] EndCommand()
+        {
+            return m_stream.ToArray();
+        }
+
+
+        #region Defined sub-commands
 
         public void Clear()
         {
@@ -85,5 +110,10 @@ namespace Sttp.WireProtocol.Data
             m_stream.Write(cachedInstanceId);
             m_stream.Write(transactionId);
         }
+
+        #endregion
+
+
+
     }
 }

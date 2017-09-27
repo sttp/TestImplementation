@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using Sttp.WireProtocol.Data;
 
 namespace Sttp.WireProtocol
 {
@@ -15,14 +16,15 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// Once this size has been reached, the protocol will automatically call 
         /// </summary>
-        private int m_autoFlushPacketSize; 
+        private int m_autoFlushPacketSize;
 
         /// <summary>
         /// The bytes that need to be reliably sent. Note, this data is not valid until <see cref="Flush"/> has been called.
         /// </summary>
         public byte[] SendBuffer { get; private set; }
+
         /// <summary>
-        /// The length of <see cref="ReliableSendBuffer"/>
+        /// The length of <see cref="SendBufferLength"/>
         /// </summary>
         public int SendBufferLength { get; private set; }
 
@@ -40,6 +42,7 @@ namespace Sttp.WireProtocol
         {
             m_autoFlushPacketSize = autoflushPacketSize;
         }
+
 
         public void NegotiateSessionStep1(ProtocolVersions protocolVersionNumber)
         {
@@ -66,10 +69,9 @@ namespace Sttp.WireProtocol
 
         }
 
-
         public void RequestMetadataTables()
         {
-            
+
         }
 
         //public void RequestMetadataTablesReply(MetadataTableSource[] tableSourceDefinitions)
@@ -148,7 +150,7 @@ namespace Sttp.WireProtocol
 
         public void SendMetadata()
         {
-            
+
         }
 
         public void Unsubscribe()
