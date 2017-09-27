@@ -5,10 +5,30 @@ namespace Sttp.WireProtocol
     /// </summary>
     public enum MetadataCommand
     {
+        #region [ Notification Publisher to Subscriber ]
+
         /// <summary>
-        /// Clears all metadata for a user.
+        /// Indicates that the metadata for a table has recently changed.
+        /// It's up to the client to resync the metadata.
+        /// 
+        /// Payload:
+        /// int tableIndex
+        /// Guid instanceID, 
+        /// long transactionID, 
         /// </summary>
-        Clear,
+        MetadataChanged,
+
+        #endregion
+
+        #region [ Response Publisher to Subscriber]
+
+        /// <summary>
+        /// Changes the active table
+        /// 
+        /// Payload:
+        /// int tableIndex
+        /// </summary>
+        UseTable,
 
         /// <summary>
         /// Adds or replaces a table.
@@ -17,24 +37,14 @@ namespace Sttp.WireProtocol
         /// Guid instanceID, 
         /// long transactionID, 
         /// string tableName, 
-        /// int tableIndex, 
         /// bool isMappedToDataPoint
         /// </summary>
         AddTable,
 
         /// <summary>
-        /// Deletes a table.
-        /// 
-        /// Payload: 
-        /// int tableIndex
-        /// </summary>
-        DeleteTable,
-
-        /// <summary>
         /// Updates the transaction version of the table.
         /// 
         /// Payload: 
-        /// int tableIndex, 
         /// long transactionID
         /// 
         /// </summary>
@@ -44,7 +54,6 @@ namespace Sttp.WireProtocol
         /// Adds or replaces a column.
         /// 
         /// Payload: 
-        /// int tableIndex, 
         /// int columnIndex, 
         /// string columnName, 
         /// ValueType columnType
@@ -53,20 +62,9 @@ namespace Sttp.WireProtocol
         AddColumn,
 
         /// <summary>
-        /// Removes a column.
-        /// 
-        /// Payload: 
-        /// int tableIndex, 
-        /// int columnIndex
-        /// 
-        /// </summary>
-        DeleteColumn,
-
-        /// <summary>
         /// Adds or updates a value.
         /// 
         /// Payload: 
-        /// int tableIndex, 
         /// int columnIndex, 
         /// int rowIndex, 
         /// byte[] value
@@ -78,11 +76,39 @@ namespace Sttp.WireProtocol
         /// Removes an entire row of data.
         /// 
         /// Payload: 
-        /// int tableIndex, 
         /// int rowIndex,
         /// 
         /// </summary>
         DeleteRow,
+
+        #endregion
+
+        #region [Data Request, Subscriber to Publisher]
+
+        /// <summary>
+        /// Requests metadata from the active table.
+        ///  
+        /// Payload: 
+        /// 
+        /// int tableIndex
+        /// int columnListCount
+        /// int[] columnIndexes
+        /// int filterExpressions
+        /// string[] filterExpressionStrings
+        /// </summary>
+        GetTable,
+
+        /// <summary>
+        /// Requests that the active table is resynchronized with the local copy.
+        /// 
+        /// cacheInstanceID should be null the first time a request happens
+        /// 
+        /// Payload: 
+        /// int tableIndex
+        /// Guid cacheInstanceId
+        /// long transactionID
+        /// </summary>
+        SyncTable,
 
         /// <summary>
         /// Gets all of the tables with their columns
@@ -92,19 +118,8 @@ namespace Sttp.WireProtocol
         /// </summary>
         SelectAllTablesWithSchema,
 
-        /// <summary>
-        /// Requests that the specified table is resynchronized. In other words, send 
-        /// only the changes if the specified transactions are still stored on the server
-        /// otherwise, resend the entire server.
-        /// 
-        /// cacheInstanceID should be null if the local data is not cached.
-        /// 
-        /// Payload: 
-        /// int tableIndex;
-        /// Guid cacheInstanceId
-        /// long transactionID
-        /// </summary>
-        ResyncTable,
+        #endregion
+
 
     }
 }

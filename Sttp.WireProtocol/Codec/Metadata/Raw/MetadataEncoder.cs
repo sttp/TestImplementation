@@ -35,80 +35,83 @@ namespace Sttp.WireProtocol.Data.Raw
             return m_stream.ToArray();
         }
 
-
-        #region Defined sub-commands
-
-        public void Clear()
+        public void MetadataChanged(int tableIndex, Guid instanceID, long transactionID)
         {
-            m_stream.Write((byte)MetadataCommand.Clear);
+            throw new NotImplementedException();
         }
 
-        public void DeleteTable(int tableIndex)
+        public void UseTable(int tableIndex)
         {
-            m_stream.Write((byte)MetadataCommand.DeleteTable);
-            m_stream.Write(tableIndex);
+            throw new NotImplementedException();
         }
 
-        public void UpdateTable(int tableIndex, long transactionID)
-        {
-            m_stream.Write((byte)MetadataCommand.UpdateTable);
-            m_stream.Write(tableIndex);
-            m_stream.Write(transactionID);
-        }
-
-        public void AddTable(Guid instanceID, long transactionID, string tableName, int tableIndex, bool isMappedToDataPoint)
+        public void AddTable(Guid instanceID, long transactionID, string tableName, bool isMappedToDataPoint)
         {
             m_stream.Write((byte)MetadataCommand.AddTable);
             m_stream.Write(instanceID);
             m_stream.Write(transactionID);
             m_stream.Write(tableName);
-            m_stream.Write(tableIndex);
             m_stream.Write(isMappedToDataPoint);
         }
 
-        public void AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType)
+        public void UpdateTable(long transactionID)
+        {
+            m_stream.Write((byte)MetadataCommand.UpdateTable);
+            m_stream.Write(transactionID);
+        }
+
+        public void AddColumn(int columnIndex, string columnName, ValueType columnType)
         {
             m_stream.Write((byte)MetadataCommand.AddColumn);
-            m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(columnName);
             m_stream.Write((byte)columnType);
         }
 
-        public void DeleteColumn(int tableIndex, int columnIndex)
-        {
-            m_stream.Write((byte)MetadataCommand.DeleteColumn);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-        }
-
-        public void AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value)
+        public void AddValue(int columnIndex, int rowIndex, byte[] value)
         {
             m_stream.Write((byte)MetadataCommand.AddValue);
-            m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(rowIndex);
             m_stream.WriteWithLength(value);
         }
 
-        public void DeleteRow(int tableIndex, int rowIndex)
+        public void DeleteRow(int rowIndex)
         {
             m_stream.Write((byte)MetadataCommand.DeleteRow);
-            m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }
+
+        public void GetTable(int tableIndex, int[] columnList, string[] filterExpression)
+        {
+            m_stream.Write((byte)MetadataCommand.GetTable);
+            m_stream.Write(tableIndex);
+            m_stream.Write(columnList.Length);
+            foreach (var item in columnList)
+            {
+                m_stream.Write(item);
+            }
+        }
+
+        public void SyncTable(int tableIndex, Guid cachedInstanceId, long transactionId, int[] columnList)
+        {
+            m_stream.Write((byte)MetadataCommand.SyncTable);
+            m_stream.Write(tableIndex);
+            m_stream.Write(cachedInstanceId);
+            m_stream.Write(transactionId);
+            m_stream.Write(columnList.Length);
+            foreach (var item in columnList)
+            {
+                m_stream.Write(item);
+            }
+        }
+
+        #region Defined sub-commands
+
 
         public void SelectAllTablesWithSchema()
         {
             m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
-        }
-
-        public void ResyncTable(int tableIndex, Guid cachedInstanceId, long transactionId)
-        {
-            m_stream.Write((byte)MetadataCommand.ResyncTable);
-            m_stream.Write(tableIndex);
-            m_stream.Write(cachedInstanceId);
-            m_stream.Write(transactionId);
         }
 
         #endregion

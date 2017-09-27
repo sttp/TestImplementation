@@ -17,16 +17,16 @@ namespace Prototype.Codec.Metadata
         {
             var codec = new MetadataEncoder();
             codec.BeginCommand();
-            codec.AddTable(Guid.Empty, 0, "DataPoint", 0, true);
-            codec.AddColumn(0, 0, "ID", ValueType.Guid);
-            codec.AddColumn(0, 1, "Name", ValueType.String);
-            codec.AddValue(0, 0, 1, Guid.NewGuid().ToRfcBytes());
-            codec.AddValue(0, 1, 0, Encoding.UTF8.GetBytes("PMU1"));
-            codec.AddTable(Guid.Empty, 1, "Synchrophasors", 0, true);
-            codec.AddColumn(1, 0, "Latitude", ValueType.Double);
-            codec.AddColumn(1, 1, "Longitude", ValueType.Double);
-            codec.AddValue(1, 0, 1, BigEndian.GetBytes(35.123));
-            codec.AddValue(1, 1, 1, BigEndian.GetBytes(-97.123));
+            //codec.AddTable(Guid.Empty, 0, "DataPoint", 0, true);
+            //codec.AddColumn(0, 0, "ID", ValueType.Guid);
+            //codec.AddColumn(0, 1, "Name", ValueType.String);
+            //codec.AddValue(0, 0, 1, Guid.NewGuid().ToRfcBytes());
+            //codec.AddValue(0, 1, 0, Encoding.UTF8.GetBytes("PMU1"));
+            //codec.AddTable(Guid.Empty, 1, "Synchrophasors", 0, true);
+            //codec.AddColumn(1, 0, "Latitude", ValueType.Double);
+            //codec.AddColumn(1, 1, "Longitude", ValueType.Double);
+            //codec.AddValue(1, 0, 1, BigEndian.GetBytes(35.123));
+            //codec.AddValue(1, 1, 1, BigEndian.GetBytes(-97.123));
 
             byte[] dataToSend = codec.EndCommand();
 

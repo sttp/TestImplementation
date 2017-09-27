@@ -41,11 +41,6 @@ namespace Sttp.Data
             var method = decoder.NextCommand();
             switch (method)
             {
-                case MetadataCommand.Clear:
-                    decoder.Clear();
-                    m_tables.Clear();
-                    m_tableLookup.Clear();
-                    break;
                 case MetadataCommand.AddTable:
                     {
                         decoder.AddTable(out Guid instanceID, out long transactionID, out string tableName, out int tableIndex, out bool isMappedToDataPoint);
@@ -58,13 +53,6 @@ namespace Sttp.Data
                         m_tables[tableIndex] = table;
                     }
                     break;
-                case MetadataCommand.DeleteTable:
-                    {
-                        decoder.DeleteTable(out int tableIndex);
-                        m_tableLookup.Remove(m_tables[tableIndex].TableName);
-                        m_tables[tableIndex] = null;
-                    }
-                    break;
                 case MetadataCommand.UpdateTable:
                     {
                         decoder.UpdateTable(out int tableIndex, out long transactionID);
@@ -74,12 +62,6 @@ namespace Sttp.Data
                 case MetadataCommand.AddColumn:
                     {
                         decoder.AddColumn(out int tableIndex, out int columnIndex, out string columnName, out ValueType columnType);
-                        m_tables[tableIndex].Fill(decoder);
-                    }
-                    break;
-                case MetadataCommand.DeleteColumn:
-                    {
-                        decoder.DeleteColumn(out int tableIndex, out int columnIndex);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;

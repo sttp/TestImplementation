@@ -110,21 +110,23 @@ namespace Sttp.Data
         {
             if (m_changeLog.TryBuildPatchData(cachedInstanceID, transaction, out List<MetadataPatchDetails> data))
             {
+                encoder.UseTable(TableIndex);
                 foreach (var record in data)
                 {
                     if (permissionFilter == null || permissionFilter.Permit(record))
                     {
-                        record.Save(TableIndex, encoder);
+                        record.Save(encoder);
                     }
                 }
-                encoder.UpdateTable(TableIndex, TransactionID);
+                encoder.UpdateTable(TransactionID);
                 return;
             }
 
-            encoder.AddTable(InstanceID, TransactionID, TableName, TableIndex, IsMappedToDataPoint);
+            encoder.UseTable(TableIndex);
+            encoder.AddTable(InstanceID, TransactionID, TableName, IsMappedToDataPoint);
             foreach (var column in Columns)
             {
-                encoder.AddColumn(TableIndex, column.Index, column.Name, column.Type);
+                encoder.AddColumn(column.Index, column.Name, column.Type);
             }
             foreach (var row in Rows)
             {
@@ -135,7 +137,7 @@ namespace Sttp.Data
                         var field = row.Fields[columnIndex];
                         if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
                         {
-                            encoder.AddValue(TableIndex, columnIndex, row.RowIndex, field.Value);
+                            encoder.AddValue(columnIndex, row.RowIndex, field.Value);
                         }
                     }
                 }

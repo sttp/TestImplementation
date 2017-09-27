@@ -147,18 +147,18 @@ namespace Sttp.Data
             };
         }
 
-        public void Save(int tableIndex, IMetadataEncoder encoder)
+        public void Save(IMetadataEncoder encoder)
         {
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    encoder.AddColumn(tableIndex, m_columnIndex, m_columnName, m_columnType);
+                    encoder.AddColumn(m_columnIndex, m_columnName, m_columnType);
                     break;
                 case MetadataChangeType.AddValue:
-                    encoder.AddValue(tableIndex, m_columnIndex, m_rowIndex, m_value);
+                    encoder.AddValue(m_columnIndex, m_rowIndex, m_value);
                     break;
                 case MetadataChangeType.DeleteRow:
-                    encoder.DeleteRow(tableIndex, m_rowIndex);
+                    encoder.DeleteRow(m_rowIndex);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

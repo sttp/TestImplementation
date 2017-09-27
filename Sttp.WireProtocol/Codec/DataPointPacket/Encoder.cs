@@ -29,7 +29,6 @@ namespace Sttp.WireProtocol.Codec.DataPointPacket
         public void MapRuntimeID(DataPointKeyWire point)
         {
 
-
         }
 
         public void SendDataPoint(DataPointWire point)

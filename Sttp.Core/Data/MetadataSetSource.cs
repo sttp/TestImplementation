@@ -48,10 +48,11 @@ namespace Sttp.Data
         {
             foreach (var table in m_tables)
             {
-                encoder.AddTable(table.InstanceID, table.TransactionID, table.TableName, table.TableIndex, table.IsMappedToDataPoint);
+                encoder.UseTable(table.TableIndex);
+                encoder.AddTable(table.InstanceID, table.TransactionID, table.TableName, table.IsMappedToDataPoint);
                 foreach (var column in table.Columns)
                 {
-                    encoder.AddColumn(table.TableIndex, column.Index, column.Name, column.Type);
+                    encoder.AddColumn(column.Index, column.Name, column.Type);
                 }
             }
         }
