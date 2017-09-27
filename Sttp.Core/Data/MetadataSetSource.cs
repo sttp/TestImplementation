@@ -44,7 +44,7 @@ namespace Sttp.Data
         /// Replies with all of the tables with their schema
         /// </summary>
         /// <returns></returns>
-        public void RequestAllTablesWithSchema(MetadataEncoder encoder)
+        public void RequestAllTablesWithSchema(IMetadataEncoder encoder)
         {
             foreach (var table in m_tables)
             {
@@ -56,7 +56,7 @@ namespace Sttp.Data
             }
         }
 
-        public byte[] RequestTableData(MetadataEncoder encoder, string tableName, Guid cachedInstanceID = default(Guid), long transaction = 0, dynamic permissionsFilter = null)
+        public byte[] RequestTableData(IMetadataEncoder encoder, string tableName, Guid cachedInstanceID = default(Guid), long transaction = 0, dynamic permissionsFilter = null)
         {
             return m_tables[m_tableLookup[tableName]].RequestTableData(encoder, cachedInstanceID, transaction, permissionsFilter);
         }

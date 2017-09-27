@@ -47,14 +47,20 @@
     <Compile Include="Codec\DataPointPacket\Decoder.cs" />
     <Compile Include="Codec\DataPointPacket\Encoder.cs" />
     <Compile Include="Codec\EncoderQueue.cs" />
+    <Compile Include="Codec\Metadata\Condensed\MetadataDecoder.cs" />
+    <Compile Include="Codec\Metadata\Condensed\MetadataEncoder.cs" />
+    <Compile Include="Codec\Metadata\GZip\MetadataDecoder.cs" />
+    <Compile Include="Codec\Metadata\GZip\MetadataEncoder.cs" />
     <Compile Include="Codec\Metadata\MetadataCommand.cs" />
     <Compile Include="Codec\DataPointWire.cs" />
     <Compile Include="Codec\DataPointKeyWire.cs" />
-    <Compile Include="Codec\Metadata\MetadataDecoder.cs" />
-    <Compile Include="Codec\Metadata\MetadataEncoder.cs" />
     <Compile Include="Codec\CommandCode.cs" />
     <Compile Include="Codec\DecoderTCP.cs" />
     <Compile Include="Codec\EncoderTCP.cs" />
+    <Compile Include="Codec\Metadata\IMetadataDecoder.cs" />
+    <Compile Include="Codec\Metadata\IMetadataEncoder.cs" />
+    <Compile Include="Codec\Metadata\Raw\MetadataDecoder.cs" />
+    <Compile Include="Codec\Metadata\Raw\MetadataEncoder.cs" />
     <Compile Include="External\ArrayExtensions.cs" />
     <Compile Include="External\BigEndian.cs" />
     <Compile Include="External\BigEndianStreamExtensions.cs" />
@@ -81,7 +87,12 @@
     <Content Include="External\ReadMe.txt" />
     <Content Include="ReadMe.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Codec\DataPointPacket\Encoded\" />
+    <Folder Include="Codec\DataPointPacket\Raw\" />
+    <Folder Include="Codec\DataPointPacket\TSSC1\" />
+    <Folder Include="Codec\DataPointPacket\TSSC2\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

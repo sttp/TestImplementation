@@ -36,7 +36,7 @@ namespace Sttp.Data
         /// Fills a new dataset with the results of RequestAllTablesWithSchema
         /// </summary>
         /// <returns></returns>
-        public void Fill(MetadataDecoder decoder)
+        public void Fill(IMetadataDecoder decoder)
         {
             var method = decoder.NextCommand();
             switch (method)

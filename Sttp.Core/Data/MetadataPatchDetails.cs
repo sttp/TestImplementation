@@ -147,7 +147,7 @@ namespace Sttp.Data
             };
         }
 
-        public void Save(int tableIndex, MetadataEncoder encoder)
+        public void Save(int tableIndex, IMetadataEncoder encoder)
         {
             switch (ChangeType)
             {

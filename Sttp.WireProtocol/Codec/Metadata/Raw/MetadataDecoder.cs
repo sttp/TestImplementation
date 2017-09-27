@@ -2,9 +2,9 @@
 using System.IO;
 using Sttp.IO;
 
-namespace Sttp.WireProtocol.Data
+namespace Sttp.WireProtocol.Data.Raw
 {
-    public class MetadataDecoder
+    public class MetadataDecoder : IMetadataDecoder
     {
         private MemoryStream m_stream = new MemoryStream();
 

@@ -106,7 +106,7 @@ namespace Sttp.Data
             m_changeLog.DeleteRow(rowIndex);
         }
 
-        public void RequestTableData(MetadataEncoder encoder, Guid cachedInstanceID, long transaction, MetadataTableFilter permissionFilter)
+        public void RequestTableData(IMetadataEncoder encoder, Guid cachedInstanceID, long transaction, MetadataTableFilter permissionFilter)
         {
             if (m_changeLog.TryBuildPatchData(cachedInstanceID, transaction, out List<MetadataPatchDetails> data))
             {

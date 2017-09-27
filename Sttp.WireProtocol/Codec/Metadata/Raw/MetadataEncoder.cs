@@ -8,12 +8,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sttp.WireProtocol.Data
+namespace Sttp.WireProtocol.Data.Raw
 {
     /// <summary>
     /// Encodes a metadata packet.
     /// </summary>
-    public class MetadataEncoder
+    public class MetadataEncoder : IMetadataEncoder
     {
         private MemoryStream m_stream = new MemoryStream();
 

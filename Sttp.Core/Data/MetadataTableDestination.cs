@@ -185,7 +185,7 @@ namespace Sttp.Data
 
         }
 
-        public void Fill(MetadataDecoder decoder)
+        public void Fill(IMetadataDecoder decoder)
         {
 
         }
