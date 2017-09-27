@@ -197,5 +197,10 @@ namespace Sttp.WireProtocol
         {
 
         }
+
+        public void SendBulkData(uint bulkID, byte[] data, int position, int length)
+        {
+
+        }
     }
 }

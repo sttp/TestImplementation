@@ -143,8 +143,7 @@ namespace Sttp.Publisher
                     {
                         wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
                         Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
-                        wire.Sequence = 0;
-                        wire.Fragment = 0;
+                        wire.BulkDataValueID = 0;
                         wire.Length = (uint)point.ValueLength;
                         wire.Time = new SttpTimestamp(point.Time);
                         wire.Flags = point.Flags;
@@ -159,18 +158,13 @@ namespace Sttp.Publisher
                             m_nextBulkValueID++;
 
                         wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
-                        wire.Sequence = bulkID;
+                        wire.BulkDataValueID = bulkID;
                         wire.Length = (uint)point.ValueLength;
                         wire.Time = new SttpTimestamp(point.Time);
                         wire.Flags = point.Flags;
                         wire.QualityFlags = point.QualityFlags;
-
-                        for (int x = 0; x < point.ValueLength; x += 64)
-                        {
-                            Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
-                            wire.Fragment = (uint)(x / 64);
-                            m_encoder.SendDataPoint(true, wire);
-                        }
+                        m_encoder.SendDataPoint(true, wire);
+                        m_encoder.SendBulkData(bulkID, point.Value, 0, point.ValueLength);
                     }
                 }
 
