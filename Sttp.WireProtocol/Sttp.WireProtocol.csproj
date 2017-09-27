@@ -49,8 +49,8 @@
     <Compile Include="Codec\EncoderQueue.cs" />
     <Compile Include="Codec\Metadata\Condensed\MetadataDecoder.cs" />
     <Compile Include="Codec\Metadata\Condensed\MetadataEncoder.cs" />
-    <Compile Include="Codec\Metadata\GZip\MetadataDecoder.cs" />
-    <Compile Include="Codec\Metadata\GZip\MetadataEncoder.cs" />
+    <Compile Include="Codec\Metadata\Deflate\MetadataDecoder.cs" />
+    <Compile Include="Codec\Metadata\Deflate\MetadataEncoder.cs" />
     <Compile Include="Codec\Metadata\MetadataCommand.cs" />
     <Compile Include="Codec\DataPointWire.cs" />
     <Compile Include="Codec\DataPointKeyWire.cs" />

@@ -103,7 +103,7 @@ namespace Sttp.WireProtocol.Data.Raw
             m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
         }
 
-        public void ResyncTable(string tableIndex, Guid cachedInstanceId, long transactionId)
+        public void ResyncTable(int tableIndex, Guid cachedInstanceId, long transactionId)
         {
             m_stream.Write((byte)MetadataCommand.ResyncTable);
             m_stream.Write(tableIndex);

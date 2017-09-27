@@ -13,7 +13,7 @@ namespace Sttp.WireProtocol.Data
         void DeleteRow(int tableIndex, int rowIndex);
         void DeleteTable(int tableIndex);
         byte[] EndCommand();
-        void ResyncTable(string tableIndex, Guid cachedInstanceId, long transactionId);
+        void ResyncTable(int tableIndex, Guid cachedInstanceId, long transactionId);
         void SelectAllTablesWithSchema();
         void UpdateTable(int tableIndex, long transactionID);
     }

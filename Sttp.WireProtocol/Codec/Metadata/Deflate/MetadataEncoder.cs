@@ -13,7 +13,7 @@ namespace Sttp.WireProtocol.Data.GZip
     /// <summary>
     /// Encodes a metadata packet.
     /// </summary>
-    public class MetadataEncoder
+    public class MetadataEncoder : IMetadataEncoder
     {
         private MemoryStream m_stream = new MemoryStream();
 
@@ -103,7 +103,7 @@ namespace Sttp.WireProtocol.Data.GZip
             m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
         }
 
-        public void ResyncTable(string tableIndex, Guid cachedInstanceId, long transactionId)
+        public void ResyncTable(int tableIndex, Guid cachedInstanceId, long transactionId)
         {
             m_stream.Write((byte)MetadataCommand.ResyncTable);
             m_stream.Write(tableIndex);

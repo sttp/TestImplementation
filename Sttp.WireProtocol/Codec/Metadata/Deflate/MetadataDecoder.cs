@@ -4,7 +4,7 @@ using Sttp.IO;
 
 namespace Sttp.WireProtocol.Data.GZip
 {
-    public class MetadataDecoder
+    public class MetadataDecoder : IMetadataDecoder
     {
         private MemoryStream m_stream = new MemoryStream();
 

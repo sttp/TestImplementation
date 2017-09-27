@@ -4,7 +4,7 @@ using Sttp.IO;
 
 namespace Sttp.WireProtocol.Data.Condensed
 {
-    public class MetadataDecoder
+    public class MetadataDecoder : IMetadataDecoder
     {
         private MemoryStream m_stream = new MemoryStream();
 
@@ -33,6 +33,7 @@ namespace Sttp.WireProtocol.Data.Condensed
         {
             MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
             tableIndex = m_stream.ReadInt32();
+
         }
 
         public void UpdateTable(out int tableIndex, out long transactionID)
