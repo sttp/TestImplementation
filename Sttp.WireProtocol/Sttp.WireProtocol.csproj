@@ -43,9 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Codec\DataPointPacket\Command.cs" />
-    <Compile Include="Codec\DataPointPacket\Decoder.cs" />
-    <Compile Include="Codec\DataPointPacket\Encoder.cs" />
+    <Compile Include="Codec\DataPointPacket\DataPointCommand.cs" />
+    <Compile Include="Codec\DataPointPacket\DataPointDecoder.cs" />
+    <Compile Include="Codec\DataPointPacket\DataPointEncoder.cs" />
     <Compile Include="Codec\EncoderQueue.cs" />
     <Compile Include="Codec\Metadata\Condensed\MetadataDecoder.cs" />
     <Compile Include="Codec\Metadata\Condensed\MetadataEncoder.cs" />

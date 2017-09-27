@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Sttp.WireProtocol.Codec.DataPointPacket
 {
-    public class Decoder
+    public enum DataPointCommand
     {
-
+        MapRuntimeID,
+        SendDataPoint,
     }
 }
