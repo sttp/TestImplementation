@@ -9,6 +9,13 @@ namespace Sttp.WireProtocol.Codec.DataPointPacket
     {
         private MemoryStream m_stream = new MemoryStream();
 
+        private Action<byte[], int, int> m_baseEncoder;
+
+        public DataPointEncoder(Action<byte[], int, int> baseEncoder)
+        {
+            m_baseEncoder = baseEncoder;
+        } 
+
         /// <summary>
         /// Begins a new metadata packet
         /// </summary>

@@ -46,7 +46,7 @@
     <Compile Include="DataPointPacket\DataPointCommand.cs" />
     <Compile Include="DataPointPacket\DataPointDecoder.cs" />
     <Compile Include="DataPointPacket\DataPointEncoder.cs" />
-    <Compile Include="Codec\EncoderQueue.cs" />
+    <Compile Include="EncoderUDP.cs" />
     <Compile Include="MetadataPacket\Condensed\MetadataDecoder.cs" />
     <Compile Include="MetadataPacket\Condensed\MetadataEncoder.cs" />
     <Compile Include="MetadataPacket\Deflate\MetadataDecoder.cs" />
@@ -54,9 +54,9 @@
     <Compile Include="MetadataPacket\MetadataCommand.cs" />
     <Compile Include="DataPointPacket\DataPointWire.cs" />
     <Compile Include="DataPointPacket\DataPointKeyWire.cs" />
-    <Compile Include="Codec\CommandCode.cs" />
-    <Compile Include="Codec\DecoderTCP.cs" />
-    <Compile Include="Codec\EncoderTCP.cs" />
+    <Compile Include="CommandCode.cs" />
+    <Compile Include="DecoderTCP.cs" />
+    <Compile Include="EncoderTCP.cs" />
     <Compile Include="MetadataPacket\IMetadataDecoder.cs" />
     <Compile Include="MetadataPacket\IMetadataEncoder.cs" />
     <Compile Include="MetadataPacket\Raw\MetadataDecoder.cs" />

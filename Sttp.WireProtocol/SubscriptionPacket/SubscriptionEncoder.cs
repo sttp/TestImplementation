@@ -13,6 +13,13 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class SubscriptionEncoder
     {
+        private Action<byte[], int, int> m_baseEncoder;
+
+        public SubscriptionEncoder(Action<byte[], int, int> baseEncoder)
+        {
+            m_baseEncoder = baseEncoder;
+        }
+
         public void SubscribeAdvance(string filter, bool augment)
         {
             // Subscription needs to support direct point identification list as well as

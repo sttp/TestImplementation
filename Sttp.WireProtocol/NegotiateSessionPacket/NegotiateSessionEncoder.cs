@@ -13,6 +13,13 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class NegotiateSessionEncoder
     {
+        private Action<byte[], int, int> m_baseEncoder;
+
+        public NegotiateSessionEncoder(Action<byte[], int, int> baseEncoder)
+        {
+            m_baseEncoder = baseEncoder;
+        }
+
         public enum EncryptionOptions
         {
             /// <summary>

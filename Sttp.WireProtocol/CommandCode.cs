@@ -10,7 +10,11 @@ namespace Sttp.WireProtocol
         SecureDataChannel = 0x04,
         RuntimeIDMapping = 0x05,
         DataPointPacket = 0x06,
-        NoOp = 0xFF
+        /// <summary>
+        /// Indicates that a fragmented packet is being sent
+        /// </summary>
+        Fragment = 0x07,
+        NoOp = 0xFF,
     }
 
     public enum CommandCode2

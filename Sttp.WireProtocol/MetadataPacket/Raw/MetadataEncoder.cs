@@ -15,6 +15,13 @@ namespace Sttp.WireProtocol.Data.Raw
     /// </summary>
     public class MetadataEncoder : IMetadataEncoder
     {
+        private Action<byte[], int, int> m_baseEncoder;
+
+        public MetadataEncoder(Action<byte[], int, int> baseEncoder)
+        {
+            m_baseEncoder = baseEncoder;
+        }
+
         private MemoryStream m_stream = new MemoryStream();
 
         /// <summary>

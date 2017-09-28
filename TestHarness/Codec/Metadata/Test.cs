@@ -15,7 +15,7 @@ namespace Prototype.Codec.Metadata
     {
         public static void Test1()
         {
-            var codec = new MetadataEncoder();
+            var codec = new MetadataEncoder(null);
             codec.BeginCommand();
             //codec.AddTable(Guid.Empty, 0, "DataPoint", 0, true);
             //codec.AddColumn(0, 0, "ID", ValueType.Guid);

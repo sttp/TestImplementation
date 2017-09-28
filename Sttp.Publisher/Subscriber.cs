@@ -53,41 +53,53 @@ namespace Sttp.Publisher
             //m_tcpSocket.OnDataReceived += m_tcpSocket_OnDataReceived;
         }
 
-        private void m_encoder_NewPacket(object sender, EventArgs<bool, byte[], int> e)
+        private void m_encoder_NewPacket(byte[] data, int position, int length)
         {
-            bool sendReliably = e.Argument1;
-            byte[] data = e.Argument2;
-            int length = e.Argument3;
 
             //ToDo: possibly queue data packets so this method will never block.
-            if (sendReliably)
+            m_tcpSocket.Send(data, position, length);
+            //          } 
+            //            else
+            //            {
+            //                // Encrypt payload
+            //                if ((object) m_key != null)
+            //                {
+            //                    using (AesManaged aes = new AesManaged())
+            //                    {
+            //                        aes.KeySize = 256;
+            //                        aes.Key = m_key;
+            //                        aes.IV = m_iv;
+            //                        data = aes.Encrypt(data, 0, data.Length, m_key, m_iv);
+            //                        length = data.Length;
+            //                    }
+            //}
+            //m_udpSocket.Send(data, length);
+            //            }
+        }
+
+        private void m_encoderUDP_NewPacket(byte[] data, int position, int length)
+        {
+            // Encrypt payload
+            if ((object)m_key != null)
             {
-                m_tcpSocket.Send(data, length);
-            }
-            else
-            {
-                // Encrypt payload
-                if ((object)m_key != null)
+                using (AesManaged aes = new AesManaged())
                 {
-                    using (AesManaged aes = new AesManaged())
-                    {
-                        aes.KeySize = 256;
-                        aes.Key = m_key;
-                        aes.IV = m_iv;
-                        data = aes.Encrypt(data, 0, data.Length, m_key, m_iv);
-                        length = data.Length;
-                    }
+                    aes.KeySize = 256;
+                    aes.Key = m_key;
+                    aes.IV = m_iv;
+                    data = aes.Encrypt(data, position, data.Length, m_key, m_iv);
+                    position = 0;
+                    length = data.Length;
                 }
-                m_udpSocket.Send(data, length);
             }
+            m_udpSocket.Send(data, position, length);
         }
 
         public void Start()
         {
             // Start session negotiation - first step is to declare supported protocol versions...
             ProtocolVersions versions = new ProtocolVersions { Versions = new[] { OnePointZero } };
-            m_encoder.NegotiateSessionStep1(versions);
-            m_encoder.Flush();
+            m_encoder.NegotiateSession.SupportedVersions(versions);
             // Start timer to wait on subscriber response - then disconnect otherwise
         }
 
@@ -107,9 +119,7 @@ namespace Sttp.Publisher
         {
             m_key = key;
             m_iv = iv;
-
-            m_encoder.SecureDataChannel(key, iv);
-            m_encoder.Flush();
+            m_encoder.NegotiateSession.SecureUdpDataChannel(key, iv);
         }
 
         internal void QueueDataPoint(DataPoint dataPoint)
@@ -137,38 +147,22 @@ namespace Sttp.Publisher
 
                 PatchSignalMapping(dataPoints);
 
+                m_encoder.DataPoint.BeginCommand();
+
                 foreach (var point in dataPoints)
                 {
-                    if (point.ValueLength <= 64)
-                    {
-                        wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
-                        Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
-                        wire.BulkDataValueID = 0;
-                        wire.Length = (uint)point.ValueLength;
-                        wire.Time = new SttpTimestamp(point.Time);
-                        wire.Flags = point.Flags;
-                        wire.QualityFlags = point.QualityFlags;
+                    wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
+                    Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
+                    wire.BulkDataValueID = 0;
+                    wire.Length = (uint)point.ValueLength;
+                    wire.Time = new SttpTimestamp(point.Time);
+                    wire.Flags = point.Flags;
+                    wire.QualityFlags = point.QualityFlags;
 
-                        m_encoder.SendDataPoint(true, wire);
-                    }
-                    else
-                    {
-                        uint bulkID = m_nextBulkValueID;
-                        if (m_nextBulkValueID == 0)
-                            m_nextBulkValueID++;
-
-                        wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
-                        wire.BulkDataValueID = bulkID;
-                        wire.Length = (uint)point.ValueLength;
-                        wire.Time = new SttpTimestamp(point.Time);
-                        wire.Flags = point.Flags;
-                        wire.QualityFlags = point.QualityFlags;
-                        m_encoder.SendDataPoint(true, wire);
-                        m_encoder.SendBulkData(bulkID, point.Value, 0, point.ValueLength);
-                    }
+                    m_encoder.DataPoint.SendDataPoint(wire);
                 }
 
-                m_encoder.Flush();
+                m_encoder.DataPoint.EndCommand();
             }
         }
 
@@ -189,7 +183,7 @@ namespace Sttp.Publisher
                     map.Type = point.Key.Type;
                     map.RuntimeID = m_nextRuntimeIDIndex;
                     m_nextRuntimeIDIndex++;
-                    m_encoder.RuntimeIDMapping(map);
+                    m_encoder.DataPoint.MapRuntimeID(map);
                 }
             }
         }
@@ -218,8 +212,7 @@ namespace Sttp.Publisher
                                 UdpPort = SupportsUDP ? (ushort)1 : (ushort)0
                             };
 
-                            m_encoder.NegotiateSessionStep1Reply(modes);
-                            m_encoder.Flush();
+                            m_encoder.NegotiateSession.SelectedModes(modes);
                         }
                         else
                         {
@@ -227,8 +220,7 @@ namespace Sttp.Publisher
                         }
                         break;
                     case DecoderCallback.NegotiateSessionStep1Reply:
-                        m_encoder.CommandFailed(CommandCode.NegotiateSession, "Not expecting a reply");
-                        m_encoder.Flush();
+                        //m_encoder.CommandFailed(CommandCode.NegotiateSession, "Not expecting a reply");
                         Disconnect();
                         break;
                     case DecoderCallback.NegotiateSessionStep2:
@@ -239,8 +231,7 @@ namespace Sttp.Publisher
                         // Validate UDP support
                         if (!SupportsUDP && subscriberModes.UdpPort > 0)
                         {
-                            m_encoder.CommandFailed(CommandCode.NegotiateSession, "Publisher does not support UDP");
-                            m_encoder.Flush();
+                            //m_encoder.CommandFailed(CommandCode.NegotiateSession, "Publisher does not support UDP");
                             Disconnect();
                             return;
                         }
@@ -277,15 +268,13 @@ namespace Sttp.Publisher
 
                         if (supported)
                         {
-                            m_encoder.CommandSuccess(CommandCode.NegotiateSession, "");
-                            m_encoder.Flush();
+                            //m_encoder.CommandSuccess(CommandCode.NegotiateSession, "");
                             //SetCompressionAlgorithm(compression);
                             SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(this));
                         }
                         else
                         {
-                            m_encoder.CommandFailed(CommandCode.NegotiateSession, $"Unsupported compression algorithm: {name}");
-                            m_encoder.Flush();
+                            //m_encoder.CommandFailed(CommandCode.NegotiateSession, $"Unsupported compression algorithm: {name}");
                             Disconnect();
                         }
                         break;
