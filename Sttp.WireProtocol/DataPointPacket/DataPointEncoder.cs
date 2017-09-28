@@ -46,7 +46,6 @@ namespace Sttp.WireProtocol.Codec.DataPointPacket
             m_stream.Write((byte)point.QualityFlags);
             m_stream.Write(point.BulkDataValueID);
             m_stream.Write(point.Value);
-
         }
 
     }

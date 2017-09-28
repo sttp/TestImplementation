@@ -43,24 +43,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Codec\DataPointPacket\DataPointCommand.cs" />
-    <Compile Include="Codec\DataPointPacket\DataPointDecoder.cs" />
-    <Compile Include="Codec\DataPointPacket\DataPointEncoder.cs" />
+    <Compile Include="DataPointPacket\DataPointCommand.cs" />
+    <Compile Include="DataPointPacket\DataPointDecoder.cs" />
+    <Compile Include="DataPointPacket\DataPointEncoder.cs" />
     <Compile Include="Codec\EncoderQueue.cs" />
-    <Compile Include="Codec\Metadata\Condensed\MetadataDecoder.cs" />
-    <Compile Include="Codec\Metadata\Condensed\MetadataEncoder.cs" />
-    <Compile Include="Codec\Metadata\Deflate\MetadataDecoder.cs" />
-    <Compile Include="Codec\Metadata\Deflate\MetadataEncoder.cs" />
-    <Compile Include="Codec\Metadata\MetadataCommand.cs" />
-    <Compile Include="Codec\DataPointWire.cs" />
-    <Compile Include="Codec\DataPointKeyWire.cs" />
+    <Compile Include="MetadataPacket\Condensed\MetadataDecoder.cs" />
+    <Compile Include="MetadataPacket\Condensed\MetadataEncoder.cs" />
+    <Compile Include="MetadataPacket\Deflate\MetadataDecoder.cs" />
+    <Compile Include="MetadataPacket\Deflate\MetadataEncoder.cs" />
+    <Compile Include="MetadataPacket\MetadataCommand.cs" />
+    <Compile Include="DataPointPacket\DataPointWire.cs" />
+    <Compile Include="DataPointPacket\DataPointKeyWire.cs" />
     <Compile Include="Codec\CommandCode.cs" />
     <Compile Include="Codec\DecoderTCP.cs" />
     <Compile Include="Codec\EncoderTCP.cs" />
-    <Compile Include="Codec\Metadata\IMetadataDecoder.cs" />
-    <Compile Include="Codec\Metadata\IMetadataEncoder.cs" />
-    <Compile Include="Codec\Metadata\Raw\MetadataDecoder.cs" />
-    <Compile Include="Codec\Metadata\Raw\MetadataEncoder.cs" />
+    <Compile Include="MetadataPacket\IMetadataDecoder.cs" />
+    <Compile Include="MetadataPacket\IMetadataEncoder.cs" />
+    <Compile Include="MetadataPacket\Raw\MetadataDecoder.cs" />
+    <Compile Include="MetadataPacket\Raw\MetadataEncoder.cs" />
     <Compile Include="External\ArrayExtensions.cs" />
     <Compile Include="External\BigEndian.cs" />
     <Compile Include="External\BigEndianStreamExtensions.cs" />
@@ -70,16 +70,20 @@
     <Compile Include="External\SymmetricAlgorithmExtensions.cs" />
     <Compile Include="NamedVersion.cs" />
     <Compile Include="NamedVersions.cs" />
-    <Compile Include="SttpTimestamp.cs" />
+    <Compile Include="DataPointPacket\SttpTimestamp.cs" />
+    <Compile Include="NegotiateSessionPacket\NegotiateSessionCommandCode.cs" />
+    <Compile Include="NegotiateSessionPacket\NegotiateSessionDecoder.cs" />
+    <Compile Include="NegotiateSessionPacket\NegotiateSessionEncoder.cs" />
     <Compile Include="OperationalModes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolVersions.cs" />
-    <Compile Include="DataQualityFlags.cs" />
+    <Compile Include="DataPointPacket\DataQualityFlags.cs" />
     <Compile Include="ResponseCode.cs" />
-    <Compile Include="StateFlags.cs" />
-    <Compile Include="TimeQuality.cs" />
-    <Compile Include="TimeQualityFlags.cs" />
+    <Compile Include="DataPointPacket\StateFlags.cs" />
+    <Compile Include="DataPointPacket\TimeQuality.cs" />
+    <Compile Include="DataPointPacket\TimeQualityFlags.cs" />
     <Compile Include="External\uint15.cs" />
+    <Compile Include="SubscriptionPacket\SubscriptionEncoder.cs" />
     <Compile Include="ValueType.cs" />
     <Compile Include="Version.cs" />
   </ItemGroup>
@@ -88,10 +92,11 @@
     <Content Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Codec\DataPointPacket\Encoded\" />
-    <Folder Include="Codec\DataPointPacket\Raw\" />
-    <Folder Include="Codec\DataPointPacket\TSSC1\" />
-    <Folder Include="Codec\DataPointPacket\TSSC2\" />
+    <Folder Include="DataPointPacket\Encoded\" />
+    <Folder Include="DataPointPacket\Raw\" />
+    <Folder Include="DataPointPacket\TSSC1\" />
+    <Folder Include="DataPointPacket\TSSC2\" />
+    <Folder Include="DataPointPacket\Unreliable\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
