@@ -4,15 +4,28 @@ namespace Sttp.WireProtocol.Data
 {
     public interface IMetadataDecoder
     {
-        void AddColumn(out int tableIndex, out int columnIndex, out string columnName, out ValueType columnType);
-        void AddTable(out Guid instanceID, out long transactionID, out string tableName, out int tableIndex, out bool isMappedToDataPoint);
-        void AddValue(out int tableIndex, out int columnIndex, out int rowIndex, out byte[] value);
         void BeginCommand(byte[] buffer, int position, int length);
-        void Clear();
-        void DeleteColumn(out int tableIndex, out int columnIndex);
-        void DeleteRow(out int tableIndex, out int rowIndex);
-        void DeleteTable(out int tableIndex);
         MetadataCommand NextCommand();
-        void UpdateTable(out int tableIndex, out long transactionID);
+
+        #region [ Response Publisher to Subscriber ]
+
+        void UseTable(out int tableIndex);
+        void AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out bool isMappedToDataPoint);
+        void AddColumn(out int columnIndex, out string columnName, out ValueType columnType);
+        void AddValue(out int columnIndex, out int rowIndex, out byte[] value);
+        void DeleteRow(out int rowIndex);
+        void TableVersion(out int tableIndex, out Guid majorVersion, out long minorVersion);
+
+        #endregion
+
+        #region [ Request Subscriber to Publisher ]
+
+        void GetTable(out int tableIndex, out int[] columnList, out string[] filterExpression);
+        void SyncTable(out int tableIndex, out Guid majorVersion, out long minorVersion, out int[] columnList);
+        void SelectAllTablesWithSchema();
+        void GetAllTableVersions();
+
+        #endregion
+
     }
 }

@@ -42,29 +42,22 @@ namespace Sttp.WireProtocol.Data.Raw
             return m_stream.ToArray();
         }
 
-        public void MetadataChanged(int tableIndex, Guid instanceID, long transactionID)
-        {
-            throw new NotImplementedException();
-        }
+
+
+        #region [ Response Publisher to Subscriber ]
 
         public void UseTable(int tableIndex)
         {
             throw new NotImplementedException();
         }
 
-        public void AddTable(Guid instanceID, long transactionID, string tableName, bool isMappedToDataPoint)
+        public void AddTable(Guid majorVersion, long minorVersion, string tableName, bool isMappedToDataPoint)
         {
             m_stream.Write((byte)MetadataCommand.AddTable);
-            m_stream.Write(instanceID);
-            m_stream.Write(transactionID);
+            m_stream.Write(majorVersion);
+            m_stream.Write(minorVersion);
             m_stream.Write(tableName);
             m_stream.Write(isMappedToDataPoint);
-        }
-
-        public void UpdateTable(long transactionID)
-        {
-            m_stream.Write((byte)MetadataCommand.UpdateTable);
-            m_stream.Write(transactionID);
         }
 
         public void AddColumn(int columnIndex, string columnName, ValueType columnType)
@@ -89,6 +82,15 @@ namespace Sttp.WireProtocol.Data.Raw
             m_stream.Write(rowIndex);
         }
 
+        public void TableVersion(int tableIndex, Guid majorVersion, long minorVersion)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region [ Request Subscriber to Publisher ]
+
         public void GetTable(int tableIndex, int[] columnList, string[] filterExpression)
         {
             m_stream.Write((byte)MetadataCommand.GetTable);
@@ -100,12 +102,12 @@ namespace Sttp.WireProtocol.Data.Raw
             }
         }
 
-        public void SyncTable(int tableIndex, Guid cachedInstanceId, long transactionId, int[] columnList)
+        public void SyncTable(int tableIndex, Guid majorVersion, long minorVersion, int[] columnList)
         {
             m_stream.Write((byte)MetadataCommand.SyncTable);
             m_stream.Write(tableIndex);
-            m_stream.Write(cachedInstanceId);
-            m_stream.Write(transactionId);
+            m_stream.Write(majorVersion);
+            m_stream.Write(minorVersion);
             m_stream.Write(columnList.Length);
             foreach (var item in columnList)
             {
@@ -113,12 +115,14 @@ namespace Sttp.WireProtocol.Data.Raw
             }
         }
 
-        #region Defined sub-commands
-
-
         public void SelectAllTablesWithSchema()
         {
             m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
+        }
+
+        public void GetAllTableVersions()
+        {
+            m_stream.Write((byte)MetadataCommand.GetAllTableVersions);
         }
 
         #endregion

@@ -23,65 +23,87 @@ namespace Sttp.WireProtocol.Data.Raw
             return command;
         }
 
-        public void Clear()
-        {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            //Just a placeholder to be complete.
-        }
+        #region [ Response Publisher to Subscriber ]
 
-        public void DeleteTable(out int tableIndex)
+        public void UseTable(out int tableIndex)
         {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
+            if (MetadataCommand.UseTable != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
             tableIndex = m_stream.ReadInt32();
         }
 
-        public void UpdateTable(out int tableIndex, out long transactionID)
+        public void AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out bool isMappedToDataPoint)
         {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            tableIndex = m_stream.ReadInt32();
-            transactionID = m_stream.ReadInt64();
-        }
-
-        public void AddTable(out Guid instanceID, out long transactionID, out string tableName, out int tableIndex, out bool isMappedToDataPoint)
-        {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            instanceID = m_stream.ReadGuid();
-            transactionID = m_stream.ReadInt64();
+            if (MetadataCommand.AddTable != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
             tableName = m_stream.ReadString();
-            tableIndex = m_stream.ReadInt32();
             isMappedToDataPoint = m_stream.ReadBoolean();
+            majorVersion = m_stream.ReadGuid();
+            minorVersion = m_stream.ReadInt64();
         }
 
-        public void AddColumn(out int tableIndex, out int columnIndex, out string columnName, out ValueType columnType)
+        public void AddColumn(out int columnIndex, out string columnName, out ValueType columnType)
         {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            tableIndex = m_stream.ReadInt32();
+            if (MetadataCommand.AddColumn != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
             columnIndex = m_stream.ReadInt32();
             columnName = m_stream.ReadString();
             columnType = (ValueType)m_stream.ReadNextByte();
         }
 
-        public void DeleteColumn(out int tableIndex, out int columnIndex)
+        public void AddValue(out int columnIndex, out int rowIndex, out byte[] value)
         {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            tableIndex = m_stream.ReadInt32();
-            columnIndex = m_stream.ReadInt32();
-        }
-
-        public void AddValue(out int tableIndex, out int columnIndex, out int rowIndex, out byte[] value)
-        {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            tableIndex = m_stream.ReadInt32();
+            if (MetadataCommand.AddValue != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
             columnIndex = m_stream.ReadInt32();
             rowIndex = m_stream.ReadInt32();
             value = m_stream.ReadBytes();
         }
 
-        public void DeleteRow(out int tableIndex, out int rowIndex)
+        public void DeleteRow(out int rowIndex)
         {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
-            tableIndex = m_stream.ReadInt32();
+            if (MetadataCommand.DeleteRow != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
             rowIndex = m_stream.ReadInt32();
         }
+
+        public void TableVersion(out int tableIndex, out Guid majorVersion, out long minorVersion)
+        {
+            if (MetadataCommand.TableVersion != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
+            tableIndex = m_stream.ReadInt32();
+            majorVersion = m_stream.ReadGuid();
+            minorVersion = m_stream.ReadInt64();
+        }
+
+        #endregion
+
+        #region [ Request Subscriber to Publisher ]
+
+        public void GetTable(out int tableIndex, out int[] columnList, out string[] filterExpression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SyncTable(out int tableIndex, out Guid majorVersion, out long minorVersion, out int[] columnList)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SelectAllTablesWithSchema()
+        {
+            if (MetadataCommand.SelectAllTablesWithSchema != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
+        }
+
+        public void GetAllTableVersions()
+        {
+            if (MetadataCommand.GetAllTableVersions != (MetadataCommand)m_stream.ReadNextByte())
+                throw new InvalidOperationException("Wrong Method Called");
+        }
+
+        #endregion
+
+
     }
 }

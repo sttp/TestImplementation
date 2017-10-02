@@ -5,22 +5,7 @@ namespace Sttp.WireProtocol
     /// </summary>
     public enum MetadataCommand
     {
-        #region [ Notification Publisher to Subscriber ]
-
-        /// <summary>
-        /// Indicates that the metadata for a table has recently changed.
-        /// It's up to the client to resync the metadata.
-        /// 
-        /// Payload:
-        /// int tableIndex
-        /// Guid instanceID, 
-        /// long transactionID, 
-        /// </summary>
-        MetadataChanged,
-
-        #endregion
-
-        #region [ Response Publisher to Subscriber]
+        #region [ Response Publisher to Subscriber ]
 
         /// <summary>
         /// Changes the active table
@@ -31,27 +16,18 @@ namespace Sttp.WireProtocol
         UseTable,
 
         /// <summary>
-        /// Adds or replaces a table.
+        /// Adds or Replaces a table if it already exists.
         /// 
         /// Payload: 
-        /// Guid instanceID, 
-        /// long transactionID, 
+        /// Guid majorVersion, 
+        /// long minorVersion, 
         /// string tableName, 
         /// bool isMappedToDataPoint
         /// </summary>
         AddTable,
 
         /// <summary>
-        /// Updates the transaction version of the table.
-        /// 
-        /// Payload: 
-        /// long transactionID
-        /// 
-        /// </summary>
-        UpdateTable,
-
-        /// <summary>
-        /// Adds or replaces a column.
+        /// Adds a column.
         /// 
         /// Payload: 
         /// int columnIndex, 
@@ -62,7 +38,7 @@ namespace Sttp.WireProtocol
         AddColumn,
 
         /// <summary>
-        /// Adds or updates a value.
+        /// Adds or updates a value. Deleting a value would be to assign it with null.
         /// 
         /// Payload: 
         /// int columnIndex, 
@@ -81,12 +57,24 @@ namespace Sttp.WireProtocol
         /// </summary>
         DeleteRow,
 
+        /// <summary>
+        /// Indicates what the current version of a table is.
+        /// 
+        /// Payload:
+        /// int tableIndex
+        /// Guid majorVersion, 
+        /// long minorVersion, 
+        /// 
+        /// This is in response to <see cref="GetTableVersions"/>
+        /// </summary>
+        TableVersion,
+
         #endregion
 
-        #region [Data Request, Subscriber to Publisher]
+        #region [ Request Subscriber to Publisher ]
 
         /// <summary>
-        /// Requests metadata from the active table.
+        /// Requests metadata from the specified table.
         ///  
         /// Payload: 
         /// 
@@ -95,18 +83,36 @@ namespace Sttp.WireProtocol
         /// int[] columnIndexes
         /// int filterExpressions
         /// string[] filterExpressionStrings
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="AddTable"/>
+        /// <see cref="UseTable"/>
+        /// <see cref="AddColumn"/>
+        /// <see cref="AddValue"/>
+        /// 
         /// </summary>
         GetTable,
 
         /// <summary>
-        /// Requests that the active table is resynchronized with the local copy.
+        /// Requests that the specified table is synchronized with the local copy.
         /// 
-        /// cacheInstanceID should be null the first time a request happens
+        /// MajorVersion == Guid.Empty if the local table is blank.
         /// 
         /// Payload: 
         /// int tableIndex
-        /// Guid cacheInstanceId
-        /// long transactionID
+        /// Guid majorVersion
+        /// long minorVersion
+        /// int columnListCount
+        /// int[] columnList
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="AddTable"/> Note: Only if the table cannot be patched and a replacement is required.
+        /// <see cref="UseTable"/>
+        /// <see cref="AddColumn"/>
+        /// <see cref="AddValue"/>
+        /// <see cref="DeleteRow"/>
+        /// <see cref="TableVersion"/>
+        /// 
         /// </summary>
         SyncTable,
 
@@ -115,8 +121,28 @@ namespace Sttp.WireProtocol
         /// 
         /// Payload:
         /// None
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="AddTable"/>
+        /// <see cref="UseTable"/>
+        /// <see cref="AddColumn"/>
+        /// 
+        /// 
         /// </summary>
         SelectAllTablesWithSchema,
+
+        /// <summary>
+        /// Gets the version information for every table the user has access to.
+        /// 
+        /// Payload:
+        /// None
+        /// <see cref="AddTable"/>
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="TableVersion"/>
+        /// </summary>
+        GetAllTableVersions,
+
 
         #endregion
 

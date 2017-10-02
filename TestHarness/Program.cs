@@ -11,7 +11,7 @@ namespace Prototype
     {
         static void Main(string[] args)
         {
-            Test.Test1();
+            //Test.Test1();
         }
     }
 }
