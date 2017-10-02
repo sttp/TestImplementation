@@ -43,6 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="External\uint22.cs" />
+    <Compile Include="StreamReader.cs" />
+    <Compile Include="StreamWriter.cs" />
     <Compile Include="DataPointPacket\DataPointCommand.cs" />
     <Compile Include="DataPointPacket\DataPointDecoder.cs" />
     <Compile Include="DataPointPacket\DataPointEncoder.cs" />
