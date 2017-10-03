@@ -1,4 +1,5 @@
 ﻿using System;
+using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.Data.Raw
 {
@@ -42,21 +43,22 @@ namespace Sttp.WireProtocol.Data.Raw
             m_stream.WriteInt15(tableIndex);
         }
 
-        public void AddTable(Guid majorVersion, long minorVersion, string tableName, bool isMappedToDataPoint)
+        public void AddTable(Guid majorVersion, long minorVersion, string tableName, TableFlags tableFlags)
         {
             m_stream.Write(MetadataCommand.AddTable);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
             m_stream.Write(tableName);
-            m_stream.Write(isMappedToDataPoint);
+            m_stream.Write(tableFlags);
         }
 
-        public void AddColumn(int columnIndex, string columnName, ValueType columnType)
+        public void AddColumn(int columnIndex, string columnName, ValueType columnType, string referenceTable)
         {
             m_stream.Write(MetadataCommand.AddColumn);
             m_stream.WriteInt15(columnIndex);
             m_stream.Write(columnName);
             m_stream.Write(columnType);
+            m_stream.Write(referenceTable);
         }
 
         public void AddValue(int columnIndex, int rowIndex, byte[] value)

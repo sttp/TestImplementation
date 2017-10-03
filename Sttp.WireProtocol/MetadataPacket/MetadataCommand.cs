@@ -22,7 +22,7 @@ namespace Sttp.WireProtocol
         /// Guid majorVersion, 
         /// long minorVersion, 
         /// string tableName, 
-        /// bool isMappedToDataPoint
+        /// TableFlags flags
         /// </summary>
         AddTable,
 
@@ -33,6 +33,7 @@ namespace Sttp.WireProtocol
         /// int columnIndex, 
         /// string columnName, 
         /// ValueType columnType
+        /// string referenceTable
         /// 
         /// </summary>
         AddColumn,

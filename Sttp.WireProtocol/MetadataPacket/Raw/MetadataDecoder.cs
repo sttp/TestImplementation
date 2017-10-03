@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Sttp.IO;
+using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.Data.Raw
 {
@@ -32,23 +33,24 @@ namespace Sttp.WireProtocol.Data.Raw
             tableIndex = m_stream.ReadInt32();
         }
 
-        public void AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out bool isMappedToDataPoint)
+        public void AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out TableFlags tableFlags)
         {
             if (MetadataCommand.AddTable != (MetadataCommand)m_stream.ReadNextByte())
                 throw new InvalidOperationException("Wrong Method Called");
             tableName = m_stream.ReadString();
-            isMappedToDataPoint = m_stream.ReadBoolean();
+            tableFlags = (TableFlags)m_stream.ReadByte();
             majorVersion = m_stream.ReadGuid();
             minorVersion = m_stream.ReadInt64();
         }
 
-        public void AddColumn(out int columnIndex, out string columnName, out ValueType columnType)
+        public void AddColumn(out int columnIndex, out string columnName, out ValueType columnType, out string referenceTable)
         {
             if (MetadataCommand.AddColumn != (MetadataCommand)m_stream.ReadNextByte())
                 throw new InvalidOperationException("Wrong Method Called");
             columnIndex = m_stream.ReadInt32();
             columnName = m_stream.ReadString();
             columnType = (ValueType)m_stream.ReadNextByte();
+            referenceTable = m_stream.ReadString();
         }
 
         public void AddValue(out int columnIndex, out int rowIndex, out byte[] value)

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="External\uint22.cs" />
+    <Compile Include="MetadataPacket\TableFlags.cs" />
     <Compile Include="StreamReader.cs" />
     <Compile Include="StreamWriter.cs" />
     <Compile Include="DataPointPacket\DataPointCommand.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.Data
 {
@@ -10,8 +11,8 @@ namespace Sttp.WireProtocol.Data
         #region [ Response Publisher to Subscriber ]
 
         void UseTable(int tableIndex);
-        void AddTable(Guid majorVersion, long minorVersion, string tableName, bool isMappedToDataPoint);
-        void AddColumn(int columnIndex, string columnName, ValueType columnType);
+        void AddTable(Guid majorVersion, long minorVersion, string tableName, TableFlags tableFlags);
+        void AddColumn(int columnIndex, string columnName, ValueType columnType, string referenceTable);
         void AddValue(int columnIndex, int rowIndex, byte[] value);
         void DeleteRow(int rowIndex);
         void TableVersion(int tableIndex, Guid majorVersion, long minorVersion);

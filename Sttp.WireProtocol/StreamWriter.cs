@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
@@ -84,6 +85,10 @@ namespace Sttp.WireProtocol
             Write((byte)type);
         }
 
+        public void Write(TableFlags flags)
+        {
+            Write((byte)flags);
+        }
 
         #endregion
 
