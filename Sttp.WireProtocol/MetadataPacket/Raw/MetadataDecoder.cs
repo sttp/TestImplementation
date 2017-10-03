@@ -7,19 +7,17 @@ namespace Sttp.WireProtocol.Data.Raw
 {
     public class MetadataDecoder : IMetadataDecoder
     {
-        private MemoryStream m_stream = new MemoryStream();
+        private StreamReader m_stream = new StreamReader();
 
         public void BeginCommand(byte[] buffer, int position, int length)
         {
-            m_stream.Position = 0;
-            m_stream.SetLength(0);
-            m_stream.Write(buffer, position, length);
-            m_stream.Position = 0;
+            m_stream.Clear();
+            m_stream.Fill(buffer, position, length);
         }
 
         public MetadataCommand NextCommand()
         {
-            MetadataCommand command = (MetadataCommand)m_stream.ReadNextByte();
+            MetadataCommand command = m_stream.ReadMetadataCommand();
             m_stream.Position -= 1;
             return command;
         }
@@ -28,14 +26,14 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void UseTable(out int tableIndex)
         {
-            if (MetadataCommand.UseTable != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.UseTable != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
             tableIndex = m_stream.ReadInt32();
         }
 
         public void AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out TableFlags tableFlags)
         {
-            if (MetadataCommand.AddTable != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.AddTable != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
             tableName = m_stream.ReadString();
             tableFlags = (TableFlags)m_stream.ReadByte();
@@ -43,19 +41,18 @@ namespace Sttp.WireProtocol.Data.Raw
             minorVersion = m_stream.ReadInt64();
         }
 
-        public void AddColumn(out int columnIndex, out string columnName, out ValueType columnType, out string referenceTable)
+        public void AddColumn(out int columnIndex, out string columnName, out ValueType columnType)
         {
-            if (MetadataCommand.AddColumn != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.AddColumn != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
             columnIndex = m_stream.ReadInt32();
             columnName = m_stream.ReadString();
-            columnType = (ValueType)m_stream.ReadNextByte();
-            referenceTable = m_stream.ReadString();
+            columnType = m_stream.ReadValueType();
         }
 
         public void AddValue(out int columnIndex, out int rowIndex, out byte[] value)
         {
-            if (MetadataCommand.AddValue != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.AddValue != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
             columnIndex = m_stream.ReadInt32();
             rowIndex = m_stream.ReadInt32();
@@ -64,18 +61,27 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void DeleteRow(out int rowIndex)
         {
-            if (MetadataCommand.DeleteRow != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.DeleteRow != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
             rowIndex = m_stream.ReadInt32();
         }
 
         public void TableVersion(out int tableIndex, out Guid majorVersion, out long minorVersion)
         {
-            if (MetadataCommand.TableVersion != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.TableVersion != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
             tableIndex = m_stream.ReadInt32();
             majorVersion = m_stream.ReadGuid();
             minorVersion = m_stream.ReadInt64();
+        }
+
+        public void AddRelationship(out int tableIndex, out int columnIndex, out int foreignTableIndex)
+        {
+            if (MetadataCommand.AddRelationship != m_stream.ReadMetadataCommand())
+                throw new InvalidOperationException("Wrong Method Called");
+            tableIndex = m_stream.ReadInt32();
+            columnIndex = m_stream.ReadInt32();
+            foreignTableIndex = m_stream.ReadInt32();
         }
 
         #endregion
@@ -94,13 +100,13 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void SelectAllTablesWithSchema()
         {
-            if (MetadataCommand.SelectAllTablesWithSchema != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.SelectAllTablesWithSchema != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
         }
 
         public void GetAllTableVersions()
         {
-            if (MetadataCommand.GetAllTableVersions != (MetadataCommand)m_stream.ReadNextByte())
+            if (MetadataCommand.GetAllTableVersions != m_stream.ReadMetadataCommand())
                 throw new InvalidOperationException("Wrong Method Called");
         }
 

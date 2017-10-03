@@ -33,7 +33,6 @@ namespace Sttp.WireProtocol
         /// int columnIndex, 
         /// string columnName, 
         /// ValueType columnType
-        /// string referenceTable
         /// 
         /// </summary>
         AddColumn,
@@ -66,9 +65,21 @@ namespace Sttp.WireProtocol
         /// Guid majorVersion, 
         /// long minorVersion, 
         /// 
-        /// This is in response to <see cref="GetTableVersions"/>
+        /// This is in response to <see cref="GetAllTableVersions"/>
         /// </summary>
         TableVersion,
+
+        /// <summary>
+        /// Adds a table relationship. Sometimes known as a foreign key relationship.
+        /// 
+        /// Payload:
+        /// int tableIndex
+        /// int columnIndex,
+        /// int foreignTableIndex
+        /// 
+        /// This is in response to <see cref="GetAllTableVersions"/>
+        /// </summary>
+        AddRelationship,
 
         #endregion
 

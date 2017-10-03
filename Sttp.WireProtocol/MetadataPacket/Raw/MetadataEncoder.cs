@@ -52,13 +52,12 @@ namespace Sttp.WireProtocol.Data.Raw
             m_stream.Write(tableFlags);
         }
 
-        public void AddColumn(int columnIndex, string columnName, ValueType columnType, string referenceTable)
+        public void AddColumn(int columnIndex, string columnName, ValueType columnType)
         {
             m_stream.Write(MetadataCommand.AddColumn);
             m_stream.WriteInt15(columnIndex);
             m_stream.Write(columnName);
             m_stream.Write(columnType);
-            m_stream.Write(referenceTable);
         }
 
         public void AddValue(int columnIndex, int rowIndex, byte[] value)
@@ -81,6 +80,14 @@ namespace Sttp.WireProtocol.Data.Raw
             m_stream.WriteInt15(tableIndex);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
+        }
+
+        public void AddRelationship(int tableIndex, int columnIndex, int foreignTableIndex)
+        {
+            m_stream.Write(MetadataCommand.TableVersion);
+            m_stream.WriteInt15(tableIndex);
+            m_stream.WriteInt15(columnIndex);
+            m_stream.WriteInt15(foreignTableIndex);
         }
 
         #endregion

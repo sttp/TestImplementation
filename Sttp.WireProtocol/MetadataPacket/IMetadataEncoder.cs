@@ -12,10 +12,11 @@ namespace Sttp.WireProtocol.Data
 
         void UseTable(int tableIndex);
         void AddTable(Guid majorVersion, long minorVersion, string tableName, TableFlags tableFlags);
-        void AddColumn(int columnIndex, string columnName, ValueType columnType, string referenceTable);
+        void AddColumn(int columnIndex, string columnName, ValueType columnType);
         void AddValue(int columnIndex, int rowIndex, byte[] value);
         void DeleteRow(int rowIndex);
         void TableVersion(int tableIndex, Guid majorVersion, long minorVersion);
+        void AddRelationship(int tableIndex, int columnIndex, int foreignTableIndex);
 
         #endregion
 
