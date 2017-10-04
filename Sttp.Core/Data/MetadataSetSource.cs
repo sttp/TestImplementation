@@ -49,7 +49,7 @@ namespace Sttp.Data
             foreach (var table in m_tables)
             {
                 encoder.UseTable(table.TableIndex);
-                encoder.AddTable(table.InstanceID, table.TransactionID, table.TableName, table.IsMappedToDataPoint);
+                encoder.AddTable(table.MajorVersion, table.MinorVersion, table.TableName, table.TableFlags);
                 foreach (var column in table.Columns)
                 {
                     encoder.AddColumn(column.Index, column.Name, column.Type);
@@ -57,9 +57,9 @@ namespace Sttp.Data
             }
         }
 
-        public byte[] RequestTableData(IMetadataEncoder encoder, string tableName, Guid cachedInstanceID = default(Guid), long transaction = 0, dynamic permissionsFilter = null)
+        public byte[] RequestTableData(IMetadataEncoder encoder, string tableName, Guid majorVersion = default(Guid), long minorVersion = 0, dynamic permissionsFilter = null)
         {
-            return m_tables[m_tableLookup[tableName]].RequestTableData(encoder, cachedInstanceID, transaction, permissionsFilter);
+            return m_tables[m_tableLookup[tableName]].RequestTableData(encoder, majorVersion, minorVersion, permissionsFilter);
         }
 
 

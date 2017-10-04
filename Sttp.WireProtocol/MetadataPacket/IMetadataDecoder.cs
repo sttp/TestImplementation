@@ -18,7 +18,6 @@ namespace Sttp.WireProtocol.Data
         void TableVersion(out int tableIndex, out Guid majorVersion, out long minorVersion);
         void AddRelationship(out int tableIndex, out int columnIndex, out int foreignTableIndex);
 
-
         #endregion
 
         #region [ Request Subscriber to Publisher ]

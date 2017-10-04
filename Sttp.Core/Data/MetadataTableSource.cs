@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Sttp.WireProtocol.Data;
+using Sttp.WireProtocol.MetadataPacket;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -14,21 +15,21 @@ namespace Sttp.Data
         /// <summary>
         /// If logging is enabled, this is the ID for the transaction log.
         /// </summary>
-        public Guid InstanceID => m_changeLog.InstanceID;
+        public Guid MajorVersion => m_changeLog.MajorVersion;
 
         /// <summary>
         /// This identifies the transaction number of the supplied log. 
         /// </summary>
-        public long TransactionID => m_changeLog.TransactionID;
+        public long MinorVersion => m_changeLog.MinorVersion;
 
         /// <summary>
         /// Gets/Sets if transaction logging is supported for changes made to this data set.
         /// It's recommended that this be turned off if large changes will occur to the set. 
         /// </summary>
-        public bool LogRevisions
+        public bool TrackChanges
         {
-            get => m_changeLog.LogRevisions;
-            set => m_changeLog.LogRevisions = value;
+            get => m_changeLog.TrackChanges;
+            set => m_changeLog.TrackChanges = value;
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace Sttp.Data
         /// in filtering. False means this is a ancillary table that won't be understood by the
         /// API, but is used for the application layer.
         /// </summary>
-        public bool IsMappedToDataPoint;
+        public TableFlags TableFlags;
 
         /// <summary>
         /// All possible columns that are defined for the table.
@@ -60,11 +61,11 @@ namespace Sttp.Data
 
         public int TableIndex;
 
-        public MetadataTableSource(int tableIndex, string tableName, bool isMappedToDataPoint)
+        public MetadataTableSource(int tableIndex, string tableName, TableFlags tableFlags)
         {
             TableIndex = tableIndex;
             TableName = tableName;
-            IsMappedToDataPoint = isMappedToDataPoint;
+            TableFlags = tableFlags;
             m_columnLookup = new Dictionary<string, int>();
             Columns = new List<MetadataColumn>();
             Rows = new List<MetadataRow>();
@@ -106,9 +107,9 @@ namespace Sttp.Data
             m_changeLog.DeleteRow(rowIndex);
         }
 
-        public void RequestTableData(IMetadataEncoder encoder, Guid cachedInstanceID, long transaction, MetadataTableFilter permissionFilter)
+        public void RequestTableData(IMetadataEncoder encoder, Guid majorVersion, long minorVersion, MetadataTableFilter permissionFilter)
         {
-            if (m_changeLog.TryBuildPatchData(cachedInstanceID, transaction, out List<MetadataPatchDetails> data))
+            if (m_changeLog.TrySyncTableVersion(majorVersion, minorVersion, out List<MetadataChangeLogRecord> data))
             {
                 encoder.UseTable(TableIndex);
                 foreach (var record in data)
@@ -118,12 +119,12 @@ namespace Sttp.Data
                         record.Save(encoder);
                     }
                 }
-                encoder.UpdateTable(TransactionID);
+                encoder.TableVersion(TableIndex, MajorVersion, MinorVersion);
                 return;
             }
 
             encoder.UseTable(TableIndex);
-            encoder.AddTable(InstanceID, TransactionID, TableName, IsMappedToDataPoint);
+            encoder.AddTable(MajorVersion, MinorVersion, TableName, TableFlags);
             foreach (var column in Columns)
             {
                 encoder.AddColumn(column.Index, column.Name, column.Type);

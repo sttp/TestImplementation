@@ -6,69 +6,84 @@ namespace Sttp.Data
     public class MetadataChangeLog
     {
         /// <summary>
-        /// If logging is enabled, this is the ID for the transaction log.
+        /// If logging is enabled, this is the Major version of the table. If disabled, this value is <see cref="Guid.Empty"/>.
         /// </summary>
-        public Guid InstanceID { get; private set; }
+        public Guid MajorVersion { get; private set; }
 
         /// <summary>
-        /// This identifies the transaction number of the supplied log. 
+        /// Identifies the number of changes that have occurred since the major version was established.
         /// </summary>
-        public long TransactionID { get; private set; }
+        public long MinorVersion { get; private set; }
 
-        private SortedList<long, MetadataPatchDetails> m_revisions = new SortedList<long, MetadataPatchDetails>();
+        private SortedList<long, MetadataChangeLogRecord> m_revisions = new SortedList<long, MetadataChangeLogRecord>();
 
         /// <summary>
-        /// Gets/Sets if transaction logging is supported for changes made to this data set.
-        /// It's recommended that this be turned off if large changes will occur to the set. 
+        /// Gets/Sets if changes will be tracked so a client can patch their local metadata repository.
         /// </summary>
-        public bool LogRevisions
+        public bool TrackChanges
         {
             get
             {
-                return InstanceID != Guid.Empty;
+                return MajorVersion != Guid.Empty;
             }
             set
             {
-                if (LogRevisions != value)
+                if (TrackChanges != value)
                 {
                     if (value)
                     {
                         m_revisions.Clear();
-                        InstanceID = Guid.NewGuid();
-                        TransactionID = 0;
+                        MajorVersion = Guid.NewGuid();
+                        MinorVersion = 0;
                     }
                     else
                     {
                         m_revisions.Clear();
-                        InstanceID = Guid.Empty;
+                        MajorVersion = Guid.Empty;
                     }
                 }
 
             }
         }
 
-        public bool TryBuildPatchData(Guid instanceID, long cachedVersionID, out List<MetadataPatchDetails> patchingDetails)
+
+        /// <summary>
+        /// Attempts to synchronize a client's version of the metadata tables with the current server version.
+        /// </summary>
+        /// <param name="majorVersion"></param>
+        /// <param name="minorVersion"></param>
+        /// <param name="changes"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This will fail if the revision history doesn't go back far enough to patch the metadata, or if the MajorVersion does not match.
+        /// </remarks>
+        public bool TrySyncTableVersion(Guid majorVersion, long minorVersion, out List<MetadataChangeLogRecord> changes)
         {
-            patchingDetails = null;
-            if (InstanceID != instanceID || !LogRevisions)
+            changes = null;
+            if (MajorVersion != majorVersion || !TrackChanges)
                 return false;
 
-            int starting = m_revisions.IndexOfKey(cachedVersionID);
+            int starting = m_revisions.IndexOfKey(minorVersion);
             if (starting >= 0)
             {
-                patchingDetails = new List<MetadataPatchDetails>();
+                changes = new List<MetadataChangeLogRecord>();
                 for (int x = starting; x < m_revisions.Count; x++)
                 {
-                    patchingDetails.Add(m_revisions.Values[x]);
+                    changes.Add(m_revisions.Values[x]);
                 }
                 return true;
             }
             return false;
         }
 
-        public void ClearRevisionHistory(long clearBeforeRevision)
+        /// <summary>
+        /// Removes all changes to a table before this minor version.
+        /// </summary>
+        /// <param name="clearBeforeMinorVersion"></param>
+        public void ClearRevisionHistory(long clearBeforeMinorVersion)
         {
-            while (m_revisions.Count > 0 && m_revisions.Keys[0] < clearBeforeRevision)
+            //ToDo: Since minor version always indexes by 1, having an indexed queue as a change log will perform better.
+            while (m_revisions.Count > 0 && m_revisions.Keys[0] < clearBeforeMinorVersion)
             {
                 m_revisions.RemoveAt(0);
             }
@@ -76,20 +91,20 @@ namespace Sttp.Data
 
         public void AddColumn(MetadataColumn column)
         {
-            if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddColumn(column.Index, column.Name, column.Type);
+            if (TrackChanges)
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddColumn(column.Index, column.Name, column.Type);
         }
 
         public void AddValue(int columnIndex, int recordIndex, byte[] value)
         {
-            if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.AddValue(columnIndex, recordIndex, value);
+            if (TrackChanges)
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddValue(columnIndex, recordIndex, value);
         }
 
         public void DeleteRow(int rowIndex)
         {
-            if (LogRevisions)
-                m_revisions[++TransactionID] = MetadataPatchDetails.DeleteRow(rowIndex);
+            if (TrackChanges)
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.DeleteRow(rowIndex);
         }
     }
 }

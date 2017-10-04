@@ -40,7 +40,7 @@ namespace Sttp.Data
 
         }
 
-        public void ApplyPatch(MetadataPatchDetails patch)
+        public void ApplyPatch(MetadataChangeLogRecord patch)
         {
             switch (patch.ChangeType)
             {

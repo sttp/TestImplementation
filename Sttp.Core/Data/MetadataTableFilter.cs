@@ -7,7 +7,7 @@ namespace Sttp.Data
     /// </summary>
     public class MetadataTableFilter
     {
-        public bool Permit(MetadataPatchDetails record)
+        public bool Permit(MetadataChangeLogRecord record)
         {
             throw new NotImplementedException();
         }

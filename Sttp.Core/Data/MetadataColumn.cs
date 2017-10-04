@@ -1,5 +1,6 @@
 using Sttp.IO;
 using System.IO;
+using Sttp.WireProtocol;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -28,12 +29,12 @@ namespace Sttp.Data
 
         public byte[] Encode(object value)
         {
-            return null;
+            return ValueTypeCodec.Encode(Type, value);
         }
 
         public object Decode(byte[] data)
         {
-            return null;
+            return ValueTypeCodec.Decode(Type, data);
         }
 
     }

@@ -89,6 +89,7 @@
     <Compile Include="External\uint15.cs" />
     <Compile Include="SubscriptionPacket\SubscriptionEncoder.cs" />
     <Compile Include="ValueType.cs" />
+    <Compile Include="ValueTypeCodec.cs" />
     <Compile Include="Version.cs" />
   </ItemGroup>
   <ItemGroup>

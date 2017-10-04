@@ -6,7 +6,7 @@ using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {
-    public class MetadataPatchDetails
+    public class MetadataChangeLogRecord
     {
         public MetadataChangeType ChangeType;
         private ValueType m_columnType;
@@ -15,11 +15,11 @@ namespace Sttp.Data
         private string m_columnName;
         private byte[] m_value;
 
-        private MetadataPatchDetails()
+        private MetadataChangeLogRecord()
         {
 
         }
-        public MetadataPatchDetails(Stream stream)
+        public MetadataChangeLogRecord(Stream stream)
         {
             ChangeType = (MetadataChangeType)stream.ReadNextByte();
             switch (ChangeType)
@@ -116,9 +116,9 @@ namespace Sttp.Data
             }
         }
 
-        public static MetadataPatchDetails AddColumn(int columnIndex, string columnName, ValueType columnType)
+        public static MetadataChangeLogRecord AddColumn(int columnIndex, string columnName, ValueType columnType)
         {
-            return new MetadataPatchDetails()
+            return new MetadataChangeLogRecord()
             {
                 ChangeType = MetadataChangeType.AddColumn,
                 m_columnName = columnName,
@@ -127,9 +127,9 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataPatchDetails AddValue(int columnIndex, int rowIndex, byte[] value)
+        public static MetadataChangeLogRecord AddValue(int columnIndex, int rowIndex, byte[] value)
         {
-            return new MetadataPatchDetails()
+            return new MetadataChangeLogRecord()
             {
                 ChangeType = MetadataChangeType.AddValue,
                 m_columnIndex = columnIndex,
@@ -138,14 +138,16 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataPatchDetails DeleteRow(int rowIndex)
+        public static MetadataChangeLogRecord DeleteRow(int rowIndex)
         {
-            return new MetadataPatchDetails()
+            return new MetadataChangeLogRecord()
             {
                 ChangeType = MetadataChangeType.DeleteRow,
                 m_rowIndex = rowIndex
             };
         }
+
+
 
         public void Save(IMetadataEncoder encoder)
         {

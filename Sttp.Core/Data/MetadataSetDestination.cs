@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using Sttp.IO;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.Data;
+using Sttp.WireProtocol.MetadataPacket;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -38,13 +39,19 @@ namespace Sttp.Data
         /// <returns></returns>
         public void Fill(IMetadataDecoder decoder)
         {
+            int tableIndex = -1;
             var method = decoder.NextCommand();
             switch (method)
             {
+                case MetadataCommand.UseTable:
+                {
+                    decoder.UseTable(out tableIndex);
+                }
+                    break;
                 case MetadataCommand.AddTable:
                     {
-                        decoder.AddTable(out Guid instanceID, out long transactionID, out string tableName, out int tableIndex, out bool isMappedToDataPoint);
-                        var table = new MetadataTableDestination(instanceID, transactionID, tableName, tableIndex, isMappedToDataPoint);
+                        decoder.AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out TableFlags tableFlags);
+                        var table = new MetadataTableDestination(majorVersion, minorVersion, tableName, tableIndex, tableFlags);
                         m_tableLookup.Add(table.TableName, tableIndex);
                         while (m_tables.Count <= table.TableIndex)
                         {
@@ -53,30 +60,38 @@ namespace Sttp.Data
                         m_tables[tableIndex] = table;
                     }
                     break;
-                case MetadataCommand.UpdateTable:
-                    {
-                        decoder.UpdateTable(out int tableIndex, out long transactionID);
-                        m_tables[tableIndex].Fill(decoder);
-                    }
-                    break;
                 case MetadataCommand.AddColumn:
                     {
-                        decoder.AddColumn(out int tableIndex, out int columnIndex, out string columnName, out ValueType columnType);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
                 case MetadataCommand.AddValue:
                     {
-                        decoder.AddValue(out int tableIndex, out int columnIndex, out int rowIndex, out byte[] value);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
                 case MetadataCommand.DeleteRow:
                     {
-                        decoder.DeleteRow(out int tableIndex, out int rowIndex);
                         m_tables[tableIndex].Fill(decoder);
                     }
                     break;
+                case MetadataCommand.TableVersion:
+                    {
+                        decoder.TableVersion(out int tableIndex1, out Guid majorVersion, out long minorVersion);
+                        m_tables[tableIndex1].Fill(decoder);
+                    }
+                    break;
+                case MetadataCommand.AddRelationship:
+                    {
+                        decoder.AddRelationship(out int tableIndex1, out int columnIndex, out int foreignTableIndex);
+                        m_tables[tableIndex1].Fill(decoder);
+                    }
+                    break;
+                case MetadataCommand.GetTable:
+                case MetadataCommand.SyncTable:
+                case MetadataCommand.SelectAllTablesWithSchema:
+                case MetadataCommand.GetAllTableVersions:
+                    throw new NotSupportedException();
                 default:
                     throw new ArgumentOutOfRangeException();
             }

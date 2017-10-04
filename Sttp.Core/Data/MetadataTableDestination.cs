@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using Sttp.IO;
 using Sttp.WireProtocol.Data;
+using Sttp.WireProtocol.MetadataPacket;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -25,12 +26,7 @@ namespace Sttp.Data
         /// </summary>
         public string TableName;
 
-        /// <summary>
-        /// Indicates that this table has 1 record for each measurement and can be used
-        /// in filtering. False means this is a ancillary table that won't be understood by the
-        /// API, but is used for the application layer.
-        /// </summary>
-        public bool IsMappedToDataPoint;
+        public TableFlags TableFlags;
 
         /// <summary>
         /// All possible columns that are defined for the table.
@@ -51,19 +47,19 @@ namespace Sttp.Data
         /// </summary>
         public int TableIndex;
 
-        public MetadataTableDestination(Guid instanceId, long transactionId, string tableName, int tableIndex, bool isMappedToDataPoint)
+        public MetadataTableDestination(Guid instanceId, long transactionId, string tableName, int tableIndex, TableFlags tableFlags)
         {
             InstanceID = instanceId;
             TransactionID = transactionId;
             TableName = tableName;
             TableIndex = tableIndex;
-            IsMappedToDataPoint = isMappedToDataPoint;
+            TableFlags = tableFlags;
             m_columnLookup = new Dictionary<string, int>();
             Columns = new List<MetadataColumn>();
             Rows = new List<MetadataRow>();
         }
 
-        public void ApplyPatch(MetadataPatchDetails patch)
+        public void ApplyPatch(MetadataChangeLogRecord patch)
         {
             switch (patch.ChangeType)
             {
@@ -132,7 +128,7 @@ namespace Sttp.Data
                     TransactionID = stream.ReadInt64();
                     while (stream.ReadBoolean())
                     {
-                        var record = new MetadataPatchDetails(stream);
+                        var record = new MetadataChangeLogRecord(stream);
                         ApplyPatch(record);
                     }
                     break;
@@ -175,7 +171,7 @@ namespace Sttp.Data
                             row.Fields[columnIndex] = new MetadataField();
                             row.Fields[columnIndex].Value = data;
                         }
-                        var record = new MetadataPatchDetails(stream);
+                        var record = new MetadataChangeLogRecord(stream);
                         ApplyPatch(record);
                     }
                     break;
