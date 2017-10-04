@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-
-namespace Sttp.WireProtocol
+﻿namespace Sttp.WireProtocol
 {
     /// <summary>
     /// This data point is what is used to communicating with the <see cref="EncoderTCP"/>/<see cref="DecoderTCP"/>. 

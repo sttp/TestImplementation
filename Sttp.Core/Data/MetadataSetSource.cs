@@ -1,11 +1,6 @@
-﻿using Sttp.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Security.Policy;
-using Sttp.WireProtocol;
 using Sttp.WireProtocol.Data;
-using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {

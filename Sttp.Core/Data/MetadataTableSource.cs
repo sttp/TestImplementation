@@ -1,7 +1,5 @@
-﻿using Sttp.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using Sttp.WireProtocol.Data;
 using Sttp.WireProtocol.MetadataPacket;
 using ValueType = Sttp.WireProtocol.ValueType;

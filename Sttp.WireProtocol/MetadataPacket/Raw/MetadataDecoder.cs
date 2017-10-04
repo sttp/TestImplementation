@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using Sttp.IO;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.Data.Raw

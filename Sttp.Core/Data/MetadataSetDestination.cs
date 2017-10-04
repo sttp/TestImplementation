@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using Sttp.IO;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.Data;
 using Sttp.WireProtocol.MetadataPacket;
-using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {

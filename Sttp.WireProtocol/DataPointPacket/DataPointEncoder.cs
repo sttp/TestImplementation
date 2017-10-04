@@ -1,6 +1,5 @@
 ﻿using Sttp.IO;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Sttp.WireProtocol.Codec.DataPointPacket

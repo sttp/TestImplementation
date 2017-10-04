@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sttp;
-using Sttp.WireProtocol;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.Data.Raw;
-using ValueType = Sttp.WireProtocol.ValueType;
-
-namespace Prototype.Codec.Metadata
+﻿namespace Prototype.Codec.Metadata
 {
     public static class Test
     {

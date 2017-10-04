@@ -1,5 +1,3 @@
-using Sttp.IO;
-using System.IO;
 using Sttp.WireProtocol;
 using ValueType = Sttp.WireProtocol.ValueType;
 
