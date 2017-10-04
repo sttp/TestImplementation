@@ -1,75 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EFC6D89E-912E-4D0D-9042-1043E4048E99}</ProjectGuid>
+    <TargetFrameworks>net452;net461;netstandard2.0</TargetFrameworks>
+    <ApplicationIcon />
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Prototype</RootNamespace>
-    <AssemblyName>Prototype</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
+    <StartupObject />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Codec\Metadata\Test.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\Sttp.Core\Sttp.Core.csproj" />
+    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj" />
+	<ProjectReference Include="..\Sttp.Publisher\Sttp.Publisher.csproj" />
+	<ProjectReference Include="..\Sttp.Subscriber\Sttp.Subscriber.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sttp.Core\Sttp.Core.csproj">
-      <Project>{8546536c-fc21-4c1d-9e16-6b3e4baa4c0d}</Project>
-      <Name>Sttp.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sttp.Publisher\Sttp.Publisher.csproj">
-      <Project>{3c414d02-3971-47a5-9cb0-c4e56879eb59}</Project>
-      <Name>Sttp.Publisher</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sttp.Subscriber\Sttp.Subscriber.csproj">
-      <Project>{1152de5e-8668-4cfa-8aa0-ef0a9ab32885}</Project>
-      <Name>Sttp.Subscriber</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj">
-      <Project>{8048242f-debd-43b2-8673-bea2ec461ee3}</Project>
-      <Name>Sttp.WireProtocol</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
