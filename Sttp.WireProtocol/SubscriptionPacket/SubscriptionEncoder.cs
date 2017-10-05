@@ -14,6 +14,7 @@ namespace Sttp.WireProtocol
             m_baseEncoder = baseEncoder;
         }
 
+
         public void SubscribeAdvance(string filter, bool augment)
         {
             // Subscription needs to support direct point identification list as well as

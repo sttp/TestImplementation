@@ -1,8 +1,9 @@
 ﻿namespace Sttp.WireProtocol.Data
 {
-    public interface IMetadataDecoder
+    public interface IMetadataDecoder : IPacketDecoder
     {
-        void BeginCommand(byte[] buffer, int position, int length);
+
+        void Fill(StreamReader buffer);
 
         /// <summary>
         /// Gets the next command. Null if the end of the command string has occurred.

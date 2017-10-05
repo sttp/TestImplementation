@@ -1,24 +1,32 @@
 ﻿using System;
+using Sttp.WireProtocol.Codec.DataPointPacket;
+using Sttp.WireProtocol.Data;
+using Sttp.WireProtocol.Data.Raw;
 
 namespace Sttp.WireProtocol
 {
-    public enum DecoderCallback
+    //public enum DecoderCallback
+    //{
+    //    NegotiateSessionStep1,
+    //    NegotiateSessionStep1Reply,
+    //    NegotiateSessionStep2,
+    //    CommandSuccess,
+    //    CommandFailed,
+    //    RequestMetadataTables,
+    //    RequestMetadataTablesReply,
+    //    RequestMetadata,
+    //    RequestMetadataReply,
+    //    Subscribe,
+    //    /// <summary>
+    //    /// Indicates that all full messages have been parsed. There might still be a split fragment
+    //    /// since TCP turns messages into streams, but after this point, more data needs to be pushed to the decoder.
+    //    /// </summary>
+    //    EndOfMessages
+    //}
+
+    public interface IPacketDecoder
     {
-        NegotiateSessionStep1,
-        NegotiateSessionStep1Reply,
-        NegotiateSessionStep2,
-        CommandSuccess,
-        CommandFailed,
-        RequestMetadataTables,
-        RequestMetadataTablesReply,
-        RequestMetadata,
-        RequestMetadataReply,
-        Subscribe,
-        /// <summary>
-        /// Indicates that all full messages have been parsed. There might still be a split fragment
-        /// since TCP turns messages into streams, but after this point, more data needs to be pushed to the decoder.
-        /// </summary>
-        EndOfMessages
+        CommandCode CommandCode { get; }
     }
 
     /// <summary>
@@ -26,19 +34,20 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class DecoderTCP
     {
-        private byte[] m_buffer = new byte[128];
-        private int m_bufferPosition;
-        private int m_bufferLength;
+        private IMetadataDecoder m_metadataDecoder;
+        private DataPointDecoder m_dataPointDecoder;
+        private NegotiateSessionDecoder m_negotiateSessionDecoder;
+        private SubscriptionDecoder m_subscriptionDecoder;
 
-        /// <summary>
-        /// The number of bytes that can be written to the buffer.
-        /// </summary>
-        private int FreeSpace => m_buffer.Length - m_bufferPosition;
+        private StreamReader m_buffer = new StreamReader();
 
-        /// <summary>
-        /// The number of bytes that are still being used.
-        /// </summary>
-        private int UsedSpace => m_bufferLength - m_bufferPosition;
+        public DecoderTCP()
+        {
+            m_metadataDecoder = new MetadataDecoder();
+            m_dataPointDecoder = new DataPointDecoder();
+            m_negotiateSessionDecoder = new NegotiateSessionDecoder();
+            m_subscriptionDecoder = new SubscriptionDecoder();
+        }
 
         /// <summary>
         /// Writes the wire protocol data to the decoder.
@@ -48,68 +57,58 @@ namespace Sttp.WireProtocol
         /// <param name="length">the length</param>
         public void WriteData(byte[] data, int position, int length)
         {
-            int bufferLength = UsedSpace;
-            if (m_bufferPosition > 0 && UsedSpace != 0)
-            {
-                //Compact
-                Array.Copy(m_buffer, m_bufferPosition, m_buffer, 0, bufferLength);
-            }
-            m_bufferLength = bufferLength;
-            m_bufferPosition = 0;
-
-            while (FreeSpace < length)
-            {
-                //Grow the buffer
-                byte[] newBuffer = new byte[m_buffer.Length * 2];
-                Array.Copy(m_buffer, 0, newBuffer, 0, bufferLength);
-                m_buffer = newBuffer;
-            }
-
-            Array.Copy(data, position, m_buffer, m_bufferLength, length);
-            m_bufferLength += length;
+            m_buffer.Compact();
+            m_buffer.Fill(data, position, length);
         }
 
         /// <summary>
-        /// Gets the next decoded message. This method should be in a while loop, decoding all
+        /// Gets the next data packet. This method should be in a while loop, decoding all
         /// messages before the next block of data is added to the decoder via <see cref="WriteData"/>
         /// </summary>
-        /// <returns></returns>
-        public DecoderCallback NextMessage()
+        /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
+        public IPacketDecoder NextPacket()
         {
             //A message fewer than 2 bytes are not valid.
-            if (UsedSpace < 2)
-                return DecoderCallback.EndOfMessages;
+            if (m_buffer.PendingBytes < 2)
+                return null;
 
-            int position;
-            int messageLength = uint15.Read(m_buffer, m_bufferPosition, out position);
-            if (messageLength > UsedSpace)
-                return DecoderCallback.EndOfMessages;
+            int origPosition = m_buffer.Position;
+            int messageLength = m_buffer.ReadByte();
 
-            switch ((CommandCode)m_buffer[m_bufferPosition + position])
+            if (messageLength > m_buffer.PendingBytes)
+            {
+                m_buffer.Position = origPosition;
+                return null;
+            }
+
+            switch (m_buffer.ReadCommandCode())
             {
                 case CommandCode.NegotiateSession:
-                    return DecoderCallback.NegotiateSessionStep1;
-                    return DecoderCallback.NegotiateSessionStep2;
+                    m_negotiateSessionDecoder.Fill(m_buffer);
+                    return m_negotiateSessionDecoder;
                 case CommandCode.MetadataRefresh:
-                    return DecoderCallback.RequestMetadata;
+                    m_metadataDecoder.Fill(m_buffer);
+                    return m_metadataDecoder;
                 case CommandCode.Subscribe:
-                    return DecoderCallback.Subscribe;
+                    m_subscriptionDecoder.Fill(m_buffer);
+                    return m_subscriptionDecoder;
                 case CommandCode.Unsubscribe:
-                    break;
+                    m_subscriptionDecoder.Fill(m_buffer);
+                    return m_subscriptionDecoder;
                 case CommandCode.SecureDataChannel:
                     break;
                 case CommandCode.RuntimeIDMapping:
-                    break;
+                    m_dataPointDecoder.Fill(m_buffer);
+                    return m_dataPointDecoder;
                 case CommandCode.DataPointPacket:
-                    break;
+                    m_dataPointDecoder.Fill(m_buffer);
+                    return m_dataPointDecoder;
                 case CommandCode.NoOp:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            //Decode the next message. Return the message type so it can be properly handled.
-            return DecoderCallback.EndOfMessages;
+            return null;
         }
 
         public void NegotiateSessionStep1(out ProtocolVersions protocolVersionNumber)

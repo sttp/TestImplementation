@@ -10,6 +10,7 @@ namespace Sttp.WireProtocol
         public byte[] Buffer = new byte[512];
         public int Position;
         public int Length;
+        public int PendingBytes => Length - Position;
 
         public void Clear()
         {
@@ -30,6 +31,17 @@ namespace Sttp.WireProtocol
         private void Fill()
         {
             throw new EndOfStreamException();
+        }
+
+        public void Compact()
+        {
+            if (Position > 0 && Position != Length)
+            {
+                //Compact
+                Array.Copy(Buffer, Position, Buffer, 0, Length - Position);
+            }
+            Length = Length - Position;
+            Position = 0;
         }
 
         private void Grow()
@@ -238,7 +250,7 @@ namespace Sttp.WireProtocol
             length--;
 
             byte[] rv = new byte[length];
-            Array.Copy(Buffer,Position,rv,0,length);
+            Array.Copy(Buffer, Position, rv, 0, length);
 
             Position += length;
             return rv;
@@ -255,6 +267,23 @@ namespace Sttp.WireProtocol
             return Encoding.UTF8.GetString(rv);
         }
 
+        public int ReadInt15()
+        {
+            EnsureCapacity(1);
+            int value = Buffer[0];
+            if (value >= 128)
+            {
+                EnsureCapacity(2);
+                value = (value - 128) | (Buffer[1] << 7);
+                Position += 2;
+            }
+            Position += 1;
+            return value;
+        }
 
+        public CommandCode ReadCommandCode()
+        {
+            return (CommandCode)ReadByte();
+        }
     }
 }

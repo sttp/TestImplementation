@@ -190,112 +190,131 @@ namespace Sttp.Publisher
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
             m_decoderTcp.WriteData(buffer, startIndex, length);
-            var code = m_decoderTcp.NextMessage();
-            while (code != DecoderCallback.EndOfMessages)
+            var packet = m_decoderTcp.NextPacket();
+            while (packet != null)
             {
-                switch (code)
+                switch (packet.CommandCode)
                 {
-                    case DecoderCallback.NegotiateSessionStep1:
-                        // Setup subscriber desired protocol version, validating that publisher can support it
-                        ProtocolVersions versions;
-                        m_decoderTcp.NegotiateSessionStep1(out versions);
+                    //case DecoderCallback.NegotiateSessionStep1:
+                    //    // Setup subscriber desired protocol version, validating that publisher can support it
+                    //    ProtocolVersions versions;
+                    //    m_decoderTcp.NegotiateSessionStep1(out versions);
 
-                        // Version 1.0 is the only currently supported version for this implementation
-                        if (versions.Versions.Any(v => v == OnePointZero))
-                        {
-                            // Send supported operational modes
-                            OperationalModes modes = new OperationalModes
-                            {
-                                Stateful = new NamedVersions { Items = new[] { new NamedVersion { Name = "TSSC", Version = OnePointZero } } },
-                                Stateless = new NamedVersions { Items = new[] { new NamedVersion { Name = "DEFLATE", Version = OnePointZero } } },
-                                UdpPort = SupportsUDP ? (ushort)1 : (ushort)0
-                            };
+                    //    // Version 1.0 is the only currently supported version for this implementation
+                    //    if (versions.Versions.Any(v => v == OnePointZero))
+                    //    {
+                    //        // Send supported operational modes
+                    //        OperationalModes modes = new OperationalModes
+                    //        {
+                    //            Stateful = new NamedVersions { Items = new[] { new NamedVersion { Name = "TSSC", Version = OnePointZero } } },
+                    //            Stateless = new NamedVersions { Items = new[] { new NamedVersion { Name = "DEFLATE", Version = OnePointZero } } },
+                    //            UdpPort = SupportsUDP ? (ushort)1 : (ushort)0
+                    //        };
 
-                            m_encoder.NegotiateSession.SelectedModes(modes);
-                        }
-                        else
-                        {
-                            Disconnect();
-                        }
-                        break;
-                    case DecoderCallback.NegotiateSessionStep1Reply:
-                        //m_encoder.CommandFailed(CommandCode.NegotiateSession, "Not expecting a reply");
-                        Disconnect();
-                        break;
-                    case DecoderCallback.NegotiateSessionStep2:
-                        // Setup subscriber desired operational modes, validating that publisher can support them
-                        OperationalModes subscriberModes;
-                        m_decoderTcp.NegotiateSessionStep2(out subscriberModes);
+                    //        m_encoder.NegotiateSession.SelectedModes(modes);
+                    //    }
+                    //    else
+                    //    {
+                    //        Disconnect();
+                    //    }
+                    //    break;
+                    //case DecoderCallback.NegotiateSessionStep1Reply:
+                    //    //m_encoder.CommandFailed(CommandCode.NegotiateSession, "Not expecting a reply");
+                    //    Disconnect();
+                    //    break;
+                    //case DecoderCallback.NegotiateSessionStep2:
+                    //    // Setup subscriber desired operational modes, validating that publisher can support them
+                    //    OperationalModes subscriberModes;
+                    //    m_decoderTcp.NegotiateSessionStep2(out subscriberModes);
 
-                        // Validate UDP support
-                        if (!SupportsUDP && subscriberModes.UdpPort > 0)
-                        {
-                            //m_encoder.CommandFailed(CommandCode.NegotiateSession, "Publisher does not support UDP");
-                            Disconnect();
-                            return;
-                        }
+                    //    // Validate UDP support
+                    //    if (!SupportsUDP && subscriberModes.UdpPort > 0)
+                    //    {
+                    //        //m_encoder.CommandFailed(CommandCode.NegotiateSession, "Publisher does not support UDP");
+                    //        Disconnect();
+                    //        return;
+                    //    }
 
-                        // Set up desired compression algorithm
-                        Func<byte[], int, int, byte[]> compression = null;
-                        string name = subscriberModes.Stateful.Items[0].Name;
-                        Version version = subscriberModes.Stateful.Items[0].Version;
-                        bool supported = true;
+                    //    // Set up desired compression algorithm
+                    //    Func<byte[], int, int, byte[]> compression = null;
+                    //    string name = subscriberModes.Stateful.Items[0].Name;
+                    //    Version version = subscriberModes.Stateful.Items[0].Version;
+                    //    bool supported = true;
 
-                        switch (name)
-                        {
-                            case "DEFLATE":
-                                if (version == OnePointZero)
-                                    compression = null; // DeflateCompress();
-                                else
-                                    supported = false;
-                                break;
-                            case "TSSC":
-                                if (version == OnePointZero)
-                                    compression = null; // new TsscAlgorithm(subscriber).Compress();
-                                else
-                                    supported = false;
-                                break;
-                            case "NONE":
-                                supported = version == OnePointZero;
-                                break;
-                        }
+                    //    switch (name)
+                    //    {
+                    //        case "DEFLATE":
+                    //            if (version == OnePointZero)
+                    //                compression = null; // DeflateCompress();
+                    //            else
+                    //                supported = false;
+                    //            break;
+                    //        case "TSSC":
+                    //            if (version == OnePointZero)
+                    //                compression = null; // new TsscAlgorithm(subscriber).Compress();
+                    //            else
+                    //                supported = false;
+                    //            break;
+                    //        case "NONE":
+                    //            supported = version == OnePointZero;
+                    //            break;
+                    //    }
 
-                        if (subscriberModes.UdpPort > 0)
-                        {
-                            // TODO: Setup Stateless compression algorithm also
-                        }
+                    //    if (subscriberModes.UdpPort > 0)
+                    //    {
+                    //        // TODO: Setup Stateless compression algorithm also
+                    //    }
 
-                        if (supported)
-                        {
-                            //m_encoder.CommandSuccess(CommandCode.NegotiateSession, "");
-                            //SetCompressionAlgorithm(compression);
-                            SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(this));
-                        }
-                        else
-                        {
-                            //m_encoder.CommandFailed(CommandCode.NegotiateSession, $"Unsupported compression algorithm: {name}");
-                            Disconnect();
-                        }
+                    //    if (supported)
+                    //    {
+                    //        //m_encoder.CommandSuccess(CommandCode.NegotiateSession, "");
+                    //        //SetCompressionAlgorithm(compression);
+                    //        SubscriberSessionEstablished?.Invoke(this, new EventArgs<Subscriber>(this));
+                    //    }
+                    //    else
+                    //    {
+                    //        //m_encoder.CommandFailed(CommandCode.NegotiateSession, $"Unsupported compression algorithm: {name}");
+                    //        Disconnect();
+                    //    }
+                    //    break;
+                    //case DecoderCallback.CommandSuccess:
+                    //    break;
+                    //case DecoderCallback.CommandFailed:
+                    //    break;
+                    //case DecoderCallback.RequestMetadataTables:
+                    //    break;
+                    //case DecoderCallback.RequestMetadataTablesReply:
+                    //    break;
+                    //case DecoderCallback.RequestMetadata:
+                    //    break;
+                    //case DecoderCallback.RequestMetadataReply:
+                    //    break;
+                    //case DecoderCallback.Subscribe:
+                    //    break;
+                    //case DecoderCallback.EndOfMessages:
+                    //    break;
+                    case CommandCode.NegotiateSession:
                         break;
-                    case DecoderCallback.CommandSuccess:
+                    case CommandCode.MetadataRefresh:
                         break;
-                    case DecoderCallback.CommandFailed:
+                    case CommandCode.Subscribe:
                         break;
-                    case DecoderCallback.RequestMetadataTables:
+                    case CommandCode.Unsubscribe:
                         break;
-                    case DecoderCallback.RequestMetadataTablesReply:
+                    case CommandCode.SecureDataChannel:
                         break;
-                    case DecoderCallback.RequestMetadata:
+                    case CommandCode.RuntimeIDMapping:
                         break;
-                    case DecoderCallback.RequestMetadataReply:
+                    case CommandCode.DataPointPacket:
                         break;
-                    case DecoderCallback.Subscribe:
+                    case CommandCode.Fragment:
                         break;
-                    case DecoderCallback.EndOfMessages:
+                    case CommandCode.NoOp:
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-
-                code = m_decoderTcp.NextMessage();
+                packet = m_decoderTcp.NextPacket();
             }
         }
 

@@ -19,10 +19,11 @@ namespace Sttp.WireProtocol.Data.Raw
 
         private StreamReader m_stream = new StreamReader();
 
-        public void BeginCommand(byte[] buffer, int position, int length)
+        public CommandCode CommandCode => CommandCode.MetadataRefresh;
+
+        public void Fill(StreamReader buffer)
         {
-            m_stream.Clear();
-            m_stream.Fill(buffer, position, length);
+            m_stream = buffer;
         }
 
         public IMetadataParams NextCommand()
@@ -78,9 +79,6 @@ namespace Sttp.WireProtocol.Data.Raw
             }
 
         }
-
-
-
 
     }
 }
