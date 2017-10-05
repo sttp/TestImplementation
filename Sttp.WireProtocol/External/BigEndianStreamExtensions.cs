@@ -310,7 +310,6 @@ namespace Sttp.IO
         /// </summary>
         /// <param name="stream">the stream to read from.</param>
         /// <returns>the value read</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte ReadNextByte(this Stream stream)
         {
             int value = stream.ReadByte();

@@ -92,7 +92,6 @@ namespace Sttp
         /// <param name="stream">the stream</param>
         /// <param name="value1">the value to write. Cannot be negative</param>
         /// <returns>The number of bytes required to store the value</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int WriteInt15(byte* stream, short value1)
         {
             if (value1 < 0)
@@ -337,7 +336,6 @@ namespace Sttp
         /// <param name="stream">the stream</param>
         /// <param name="value1">the value to write</param>
         /// <returns>The number of bytes required to store the value</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int Write(byte* stream, uint value1)
         {
             if (value1 < 128)
@@ -742,7 +740,6 @@ namespace Sttp
         /// <param name="stream">the stream</param>
         /// <param name="value1">the value to write</param>
         /// <returns>The number of bytes required to store the value</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int Write(byte* stream, ulong value1)
         {
             if (value1 < 128)

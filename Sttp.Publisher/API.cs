@@ -31,7 +31,7 @@ namespace Sttp.Publisher
             m_subscribers = new Dictionary<Guid, Subscriber>();
         }
 
-        public ReadOnlyDictionary<Guid, Subscriber> Subscribers => new ReadOnlyDictionary<Guid, Subscriber>(m_subscribers);
+        public Dictionary<Guid, Subscriber> Subscribers => new Dictionary<Guid, Subscriber>(m_subscribers);
 
         public ushort TargetPacketSize { get; set; } = DefaultTargetPacketSize;
 

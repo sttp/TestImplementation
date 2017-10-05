@@ -64,7 +64,6 @@ namespace Sttp
         /// <paramref name="startIndex"/> or <paramref name="length"/> is less than 0 -or- 
         /// <paramref name="startIndex"/> and <paramref name="length"/> will exceed <paramref name="array"/> length.
         /// </exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateParameters<T>(this T[] array, int startIndex, int length)
         {
             if ((object)array == null || startIndex < 0 || length < 0 || startIndex + length > array.Length)
@@ -741,7 +740,6 @@ namespace Sttp
         /// <typeparam name="T">Type of structure to read.</typeparam>
         /// <param name="bytes">Bytes containing structure.</param>
         /// <returns>A structure from <paramref name="bytes"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe T ReadStructure<T>(this byte[] bytes) where T : struct
         {
             T structure;
@@ -760,7 +758,6 @@ namespace Sttp
         /// <typeparam name="T">Type of structure to read.</typeparam>
         /// <param name="reader"><see cref="BinaryReader"/> positioned at desired structure.</param>
         /// <returns>A structure read from <see cref="BinaryReader"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T ReadStructure<T>(this BinaryReader reader) where T : struct
         {
             return reader.ReadBytes(Marshal.SizeOf(typeof(T))).ReadStructure<T>();

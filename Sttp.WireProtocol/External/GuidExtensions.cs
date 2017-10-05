@@ -245,7 +245,6 @@ namespace Sttp
         /// </summary>
         /// <param name="guid">the <see cref="Guid"/> to serialize</param>
         /// <returns>A <see cref="byte"/>[] that represents a big endian encoded Guid.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] ToLittleEndianBytes(Guid guid)
         {
             byte[] rv = new byte[16];
@@ -259,7 +258,6 @@ namespace Sttp
         /// <param name="guid">the <see cref="Guid"/> to serialize</param>
         /// <param name="buffer">where to store the <paramref name="guid"/></param>
         /// <param name="startingIndex">the starting index in <paramref name="buffer"/></param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyLittleEndianBytes(Guid guid, byte[] buffer, int startingIndex)
         {
             buffer.ValidateParameters(startingIndex, 16);
@@ -305,7 +303,6 @@ namespace Sttp
         /// </summary>
         /// <param name="buffer">where to read the <see cref="Guid"/>.</param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid ToLittleEndianGuid(byte[] buffer)
         {
             buffer.ValidateParameters(0, 16);
@@ -319,7 +316,6 @@ namespace Sttp
         /// <param name="buffer">where to read the <see cref="Guid"/>.</param>
         /// <param name="startingIndex">the starting index in <paramref name="buffer"/></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Guid ToLittleEndianGuid(byte[] buffer, int startingIndex)
         {
             buffer.ValidateParameters(startingIndex, 16);

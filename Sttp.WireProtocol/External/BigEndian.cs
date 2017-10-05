@@ -81,7 +81,6 @@ namespace Sttp
         /// <returns>true if the byte at startIndex in value is nonzero; otherwise, false.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool ToBoolean(byte* buffer)
         {
             return buffer[0] != 0;
@@ -94,7 +93,6 @@ namespace Sttp
         /// <returns>A character formed by two bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe char ToChar(byte* buffer)
         {
             return (char)ToInt16(buffer);
@@ -107,7 +105,6 @@ namespace Sttp
         /// <returns>A double-precision floating point number formed by eight bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe double ToDouble(byte* buffer)
         {
             long int64 = ToInt64(buffer);
@@ -121,7 +118,6 @@ namespace Sttp
         /// <returns>A 16-bit signed integer formed by two bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe short ToInt16(byte* buffer)
         {
             return (short)((int)buffer[0] << 8 | (int)buffer[1]);
@@ -163,7 +159,6 @@ namespace Sttp
         /// <returns>A 32-bit signed integer formed by four bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int ToInt32(byte* buffer)
         {
             return (int)buffer[0] << 24 |
@@ -179,7 +174,6 @@ namespace Sttp
         /// <returns>A 64-bit signed integer formed by eight bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe long ToInt64(byte* buffer)
         {
             return (long)buffer[0] << 56 |
@@ -199,7 +193,6 @@ namespace Sttp
         /// <returns>A single-precision floating point number formed by four bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe float ToSingle(byte* buffer)
         {
             int int32 = ToInt32(buffer);
@@ -213,7 +206,6 @@ namespace Sttp
         /// <returns>A 16-bit unsigned integer formed by two bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ushort ToUInt16(byte* buffer)
         {
             return (ushort)ToInt16(buffer);
@@ -241,7 +233,6 @@ namespace Sttp
         /// <returns>A 32-bit unsigned integer formed by four bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe uint ToUInt32(byte* buffer)
         {
             return (uint)ToInt32(buffer);
@@ -254,7 +245,6 @@ namespace Sttp
         /// <returns>A 64-bit unsigned integer formed by eight bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ulong ToUInt64(byte* buffer)
         {
             return (ulong)ToInt64(buffer);
@@ -267,7 +257,6 @@ namespace Sttp
         /// <returns>A 128-bit decimal formed by 16 bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe decimal ToDecimal(byte* buffer)
         {
             if (!BitConverter.IsLittleEndian)
@@ -311,7 +300,6 @@ namespace Sttp
         /// <returns>true if the byte at startIndex in value is nonzero; otherwise, false.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ToBoolean(byte[] buffer, int startIndex)
         {
             return buffer[startIndex] != 0;
@@ -325,7 +313,6 @@ namespace Sttp
         /// <returns>A character formed by two bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static char ToChar(byte[] buffer, int startIndex)
         {
             return (char)ToInt16(buffer, startIndex);
@@ -339,7 +326,6 @@ namespace Sttp
         /// <returns>A double-precision floating point number formed by eight bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe double ToDouble(byte[] buffer, int startIndex)
         {
             long int64 = ToInt64(buffer, startIndex);
@@ -354,7 +340,6 @@ namespace Sttp
         /// <returns>A 16-bit signed integer formed by two bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short ToInt16(byte[] buffer, int startIndex)
         {
             return (short)((int)buffer[startIndex] << 8 | (int)buffer[startIndex + 1]);
@@ -398,7 +383,6 @@ namespace Sttp
         /// <returns>A 32-bit signed integer formed by four bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ToInt32(byte[] buffer, int startIndex)
         {
             return (int)buffer[startIndex + 0] << 24 |
@@ -415,7 +399,6 @@ namespace Sttp
         /// <returns>A 64-bit signed integer formed by eight bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ToInt64(byte[] buffer, int startIndex)
         {
             return (long)buffer[startIndex + 0] << 56 |
@@ -436,7 +419,6 @@ namespace Sttp
         /// <returns>A single-precision floating point number formed by four bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe float ToSingle(byte[] buffer, int startIndex)
         {
             int int32 = ToInt32(buffer, startIndex);
@@ -451,7 +433,6 @@ namespace Sttp
         /// <returns>A 16-bit unsigned integer formed by two bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort ToUInt16(byte[] buffer, int startIndex)
         {
             return (ushort)ToInt16(buffer, startIndex);
@@ -481,7 +462,6 @@ namespace Sttp
         /// <returns>A 32-bit unsigned integer formed by four bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ToUInt32(byte[] buffer, int startIndex)
         {
             return (uint)ToInt32(buffer, startIndex);
@@ -495,7 +475,6 @@ namespace Sttp
         /// <returns>A 64-bit unsigned integer formed by eight bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ToUInt64(byte[] buffer, int startIndex)
         {
             return (ulong)ToInt64(buffer, startIndex);
@@ -509,7 +488,6 @@ namespace Sttp
         /// <returns>A 128-bit decimal formed by 16 bytes beginning at startIndex.</returns>
         /// <exception cref="ArgumentNullException">value is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">startIndex is less than zero or greater than the length of value minus 1.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe decimal ToDecimal(byte[] buffer, int startIndex)
         {
             buffer.ValidateParameters(startIndex, 16);
@@ -557,7 +535,6 @@ namespace Sttp
         /// <typeparam name="T">Native value type to get bytes for.</typeparam>
         /// <exception cref="ArgumentException"><paramref name="value"/> type is not primitive.</exception>
         /// <exception cref="InvalidOperationException">Cannot get bytes for <paramref name="value"/> type.</exception>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes<T>(T value) where T : struct, IConvertible
         {
             if (!typeof(T).IsPrimitive)
@@ -599,7 +576,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The <see cref="Boolean"/> value to convert.</param>
         /// <returns>An array of bytes with length 1.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(bool value)
         {
             return new[] { value ? (byte)1 : (byte)0 };
@@ -610,7 +586,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The Unicode character value to convert.</param>
         /// <returns>An array of bytes with length 2.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(char value)
         {
             return GetBytes((short)value);
@@ -621,7 +596,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 8.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe byte[] GetBytes(double value)
         {
             return GetBytes(*(long*)&value);
@@ -632,7 +606,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 2.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(short value)
         {
             return new[]
@@ -665,7 +638,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 4.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(int value)
         {
             return new[]
@@ -682,7 +654,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 8.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(long value)
         {
             return new[]
@@ -703,7 +674,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 4.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe byte[] GetBytes(float value)
         {
             return GetBytes(*(int*)&value);
@@ -714,7 +684,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 2.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(ushort value)
         {
             return GetBytes((short)value);
@@ -743,7 +712,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 4.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(uint value)
         {
             return GetBytes((int)value);
@@ -754,7 +722,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 8.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(ulong value)
         {
             return GetBytes((long)value);
@@ -765,7 +732,6 @@ namespace Sttp
         /// </summary>
         /// <param name="value">The number to convert.</param>
         /// <returns>An array of bytes with length 16.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe byte[] GetBytes(decimal value)
         {
             byte[] destinationArray = new byte[16];
@@ -817,7 +783,6 @@ namespace Sttp
         /// <exception cref="ArgumentException"><paramref name="value"/> type is not primitive.</exception>
         /// <exception cref="InvalidOperationException">Cannot get bytes for <paramref name="value"/> type.</exception>
         /// <returns>Length of bytes copied into array based on size of <typeparamref name="T"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes<T>(T value, byte[] destinationArray, int destinationIndex) where T : struct, IConvertible
         {
             if (!typeof(T).IsPrimitive)
@@ -861,7 +826,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(bool value, byte[] destinationArray, int destinationIndex)
         {
             destinationArray[destinationIndex] = value ? (byte)1 : (byte)0;
@@ -875,7 +839,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(char value, byte[] destinationArray, int destinationIndex)
         {
             return CopyBytes((short)value, destinationArray, destinationIndex);
@@ -888,7 +851,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(double value, byte[] destinationArray, int destinationIndex)
         {
             return CopyBytes(*(long*)&value, destinationArray, destinationIndex);
@@ -901,7 +863,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(short value, byte[] destinationArray, int destinationIndex)
         {
             destinationArray[destinationIndex] = (byte)(value >> 8);
@@ -936,7 +897,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(int value, byte[] destinationArray, int destinationIndex)
         {
             destinationArray[destinationIndex + 0] = (byte)(value >> 24);
@@ -954,7 +914,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(long value, byte[] destinationArray, int destinationIndex)
         {
             destinationArray[destinationIndex + 0] = (byte)(value >> 56);
@@ -976,7 +935,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(float value, byte[] destinationArray, int destinationIndex)
         {
             return CopyBytes(*(int*)&value, destinationArray, destinationIndex);
@@ -989,7 +947,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(ushort value, byte[] destinationArray, int destinationIndex)
         {
             return CopyBytes((short)value, destinationArray, destinationIndex);
@@ -1021,7 +978,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(uint value, byte[] destinationArray, int destinationIndex)
         {
             return CopyBytes((int)value, destinationArray, destinationIndex);
@@ -1034,7 +990,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CopyBytes(ulong value, byte[] destinationArray, int destinationIndex)
         {
             return CopyBytes((long)value, destinationArray, destinationIndex);
@@ -1047,7 +1002,6 @@ namespace Sttp
         /// <param name="destinationArray">The destination buffer.</param>
         /// <param name="destinationIndex">The byte offset into <paramref name="destinationArray"/>.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(decimal value, byte[] destinationArray, int destinationIndex)
         {
             destinationArray.ValidateParameters(destinationIndex, 16);
@@ -1098,7 +1052,6 @@ namespace Sttp
         /// <exception cref="ArgumentException"><paramref name="value"/> type is not primitive.</exception>
         /// <exception cref="InvalidOperationException">Cannot get bytes for <paramref name="value"/> type.</exception>
         /// <returns>Length of bytes copied into array based on size of <typeparamref name="T"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes<T>(T value, byte* destination) where T : struct, IConvertible
         {
             if (!typeof(T).IsPrimitive)
@@ -1141,7 +1094,6 @@ namespace Sttp
         /// <param name="value">The <see cref="Boolean"/> value to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(bool value, byte* destination)
         {
             destination[0] = value ? (byte)1 : (byte)0;
@@ -1154,7 +1106,6 @@ namespace Sttp
         /// <param name="value">The Unicode character value to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(char value, byte* destination)
         {
             return CopyBytes((short)value, destination);
@@ -1166,7 +1117,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(double value, byte* destination)
         {
             return CopyBytes(*(long*)&value, destination);
@@ -1178,7 +1128,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(short value, byte* destination)
         {
             destination[0] = (byte)(value >> 8);
@@ -1211,7 +1160,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(int value, byte* destination)
         {
             destination[0] = (byte)(value >> 24);
@@ -1228,7 +1176,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(long value, byte* destination)
         {
             destination[0] = (byte)(value >> 56);
@@ -1249,7 +1196,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(float value, byte* destination)
         {
             return CopyBytes(*(int*)&value, destination);
@@ -1261,7 +1207,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(ushort value, byte* destination)
         {
             return CopyBytes((short)value, destination);
@@ -1291,7 +1236,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(uint value, byte* destination)
         {
             return CopyBytes((int)value, destination);
@@ -1303,7 +1247,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(ulong value, byte* destination)
         {
             return CopyBytes((long)value, destination);
@@ -1315,7 +1258,6 @@ namespace Sttp
         /// <param name="value">The number to convert and copy.</param>
         /// <param name="destination">The destination buffer.</param>
         /// <returns>Length of bytes copied into array based on size of <paramref name="value"/>.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int CopyBytes(decimal value, byte* destination)
         {
             if (!BitConverter.IsLittleEndian)
