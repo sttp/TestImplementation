@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sttp.WireProtocol.Data;
 
 namespace Sttp.Data
 {
@@ -40,24 +41,17 @@ namespace Sttp.Data
 
         }
 
-        public void ApplyPatch(MetadataChangeLogRecord patch)
+        public void ProcessCommand(MetadataAddValueParams patch)
         {
-            switch (patch.ChangeType)
+            while (Fields.Count <= patch.ColumnIndex)
             {
-                case MetadataChangeType.AddValue:
-                    while (Fields.Count <= patch.ColumnIndex)
-                    {
-                        Fields.Add(null);
-                    }
-                    if (Fields[patch.ColumnIndex] == null)
-                    {
-                        Fields[patch.ColumnIndex] = new MetadataField();
-                    }
-                    Fields[patch.ColumnIndex].Value = patch.Data;
-                    break;
-                default:
-                    throw new NotSupportedException("Invalid patch type:");
+                Fields.Add(null);
             }
+            if (Fields[patch.ColumnIndex] == null)
+            {
+                Fields[patch.ColumnIndex] = new MetadataField();
+            }
+            Fields[patch.ColumnIndex].Value = patch.Value;
         }
     }
 }

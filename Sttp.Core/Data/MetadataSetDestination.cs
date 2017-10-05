@@ -33,21 +33,19 @@ namespace Sttp.Data
         /// Fills a new dataset with the results of RequestAllTablesWithSchema
         /// </summary>
         /// <returns></returns>
-        public void Fill(IMetadataDecoder decoder)
+        public void Process(IMetadataDecoder decoder)
         {
             int tableIndex = -1;
-            var method = decoder.NextCommand();
-            switch (method)
+            var command = decoder.NextCommand();
+            switch (command.Command)
             {
                 case MetadataCommand.UseTable:
-                {
-                    decoder.UseTable(out tableIndex);
-                }
+                    tableIndex = (command as MetadataUseTableParams).TableIndex;
                     break;
                 case MetadataCommand.AddTable:
                     {
-                        decoder.AddTable(out Guid majorVersion, out long minorVersion, out string tableName, out TableFlags tableFlags);
-                        var table = new MetadataTableDestination(majorVersion, minorVersion, tableName, tableIndex, tableFlags);
+                        var cmd = command as MetadataAddTableParams;
+                        var table = new MetadataTableDestination(cmd.MajorVersion, cmd.MinorVersion, cmd.TableName, tableIndex, cmd.TableFlags);
                         m_tableLookup.Add(table.TableName, tableIndex);
                         while (m_tables.Count <= table.TableIndex)
                         {
@@ -57,31 +55,15 @@ namespace Sttp.Data
                     }
                     break;
                 case MetadataCommand.AddColumn:
-                    {
-                        m_tables[tableIndex].Fill(decoder);
-                    }
-                    break;
                 case MetadataCommand.AddValue:
-                    {
-                        m_tables[tableIndex].Fill(decoder);
-                    }
-                    break;
                 case MetadataCommand.DeleteRow:
-                    {
-                        m_tables[tableIndex].Fill(decoder);
-                    }
+                    m_tables[tableIndex].ProcessCommand(command);
                     break;
                 case MetadataCommand.TableVersion:
-                    {
-                        decoder.TableVersion(out int tableIndex1, out Guid majorVersion, out long minorVersion);
-                        m_tables[tableIndex1].Fill(decoder);
-                    }
+                    m_tables[(command as MetadataTableVersionParams).TableIndex].ProcessCommand(command);
                     break;
                 case MetadataCommand.AddRelationship:
-                    {
-                        decoder.AddRelationship(out int tableIndex1, out int columnIndex, out int foreignTableIndex);
-                        m_tables[tableIndex1].Fill(decoder);
-                    }
+                    throw new NotImplementedException();
                     break;
                 case MetadataCommand.GetTable:
                 case MetadataCommand.SyncTable:
@@ -91,32 +73,8 @@ namespace Sttp.Data
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            //int tableCount = stream.ReadInt32();
-            //while (tableCount > 0)
-            //{
-
-
-            //    int columnCount = stream.ReadInt32();
-            //    while (columnCount > 0)
-            //    {
-            //        int index = stream.ReadInt32();
-            //        string name = stream.ReadString();
-            //        ValueType type = (ValueType)stream.ReadNextByte();
-            //        columnCount--;
-
-            //        m_tables[tableIndex].AddColumn(index, name, type);
-            //    }
-
-            //    tableCount--;
-            //}
         }
-
-        public void FillTable(string tableName, byte[] patchDetails)
-        {
-            m_tables[m_tableLookup[tableName]].FillTable(patchDetails);
-        }
-
+        
         public DataSet CreateDataSet()
         {
             //takes the current metadata and makes a dataset from it.

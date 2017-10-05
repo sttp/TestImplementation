@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using Sttp.IO;
+using Sttp.WireProtocol;
 using Sttp.WireProtocol.Data;
 using Sttp.WireProtocol.MetadataPacket;
 using ValueType = Sttp.WireProtocol.ValueType;
@@ -14,12 +15,12 @@ namespace Sttp.Data
         /// <summary>
         /// If logging is enabled, this is the ID for the transaction log.
         /// </summary>
-        public Guid InstanceID;
+        public Guid MajorVersion;
 
         /// <summary>
         /// This identifies the transaction number of the supplied log. 
         /// </summary>
-        public long TransactionID;
+        public long MinorVersion;
 
         /// <summary>
         /// The name of the table
@@ -47,10 +48,10 @@ namespace Sttp.Data
         /// </summary>
         public int TableIndex;
 
-        public MetadataTableDestination(Guid instanceId, long transactionId, string tableName, int tableIndex, TableFlags tableFlags)
+        public MetadataTableDestination(Guid majorVersion, long minorVersion, string tableName, int tableIndex, TableFlags tableFlags)
         {
-            InstanceID = instanceId;
-            TransactionID = transactionId;
+            MajorVersion = majorVersion;
+            MinorVersion = minorVersion;
             TableName = tableName;
             TableIndex = tableIndex;
             TableFlags = tableFlags;
@@ -64,22 +65,10 @@ namespace Sttp.Data
             switch (patch.ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    while (Columns.Count <= patch.ColumnIndex)
-                    {
-                        Columns.Add(null);
-                    }
-                    Columns[patch.ColumnIndex] = new MetadataColumn(patch.ColumnIndex, patch.ColumnName, patch.ColumnType);
+
                     break;
                 case MetadataChangeType.AddValue:
-                    while (Rows.Count <= patch.RowIndex)
-                    {
-                        Rows.Add(null);
-                    }
-                    if (Rows[patch.RowIndex] == null)
-                    {
-                        Rows[patch.RowIndex] = new MetadataRow(patch.RowIndex);
-                    }
-                    Rows[patch.RowIndex].ApplyPatch(patch);
+
                     break;
                 case MetadataChangeType.DeleteRow:
                     Rows[patch.RowIndex] = null;
@@ -98,91 +87,52 @@ namespace Sttp.Data
             Columns[index] = new MetadataColumn(index, name, type);
         }
 
-        public void FillTable(byte[] data)
+        public void ProcessCommand(IMetadataParams command)
         {
-            MemoryStream stream = new MemoryStream(data);
-            byte method = stream.ReadNextByte();
-
-            switch (method)
+            switch (command.Command)
             {
-                case 0:
-                    PatchTable(stream);
-                    break;
-                case 1:
-                    RebuildTable(stream);
-                    break;
-                default:
-                    throw new Exception();
-
-            }
-        }
-
-        private void PatchTable(MemoryStream stream)
-        {
-            byte version = stream.ReadNextByte();
-
-            switch (version)
-            {
-                case 1:
-                    InstanceID = stream.ReadGuid();
-                    TransactionID = stream.ReadInt64();
-                    while (stream.ReadBoolean())
+                case MetadataCommand.AddColumn:
+                    var addC = command as MetadataAddColumnParams;
+                    while (Columns.Count <= addC.ColumnIndex)
                     {
-                        var record = new MetadataChangeLogRecord(stream);
-                        ApplyPatch(record);
+                        Columns.Add(null);
                     }
+                    Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnType);
                     break;
-                default:
-                    throw new VersionNotFoundException();
-            }
-        }
+                case MetadataCommand.AddValue:
+                    var addV = command as MetadataAddValueParams;
 
-        private void RebuildTable(MemoryStream stream)
-        {
-            byte version = stream.ReadNextByte();
-
-            switch (version)
-            {
-                case 1:
-                    InstanceID = stream.ReadGuid();
-                    TransactionID = stream.ReadInt64();
-                    Rows.Clear();
-                    while (stream.ReadBoolean())
+                    while (Rows.Count <= addV.RowIndex)
                     {
-                        int rowIndex = stream.ReadInt32();
-                        while (Rows.Count <= rowIndex)
-                        {
-                            Rows.Add(null);
-                        }
-                        var row = new MetadataRow(rowIndex);
-                        Rows[rowIndex] = row;
-                        while (stream.ReadBoolean())
-                        {
-
-                            int columnIndex = stream.ReadInt32();
-                            byte[] data = null;
-                            if (stream.ReadBoolean())
-                                data = stream.ReadBytes();
-
-                            while (row.Fields.Count <= columnIndex)
-                            {
-                                row.Fields.Add(null);
-                            }
-                            row.Fields[columnIndex] = new MetadataField();
-                            row.Fields[columnIndex].Value = data;
-                        }
-                        var record = new MetadataChangeLogRecord(stream);
-                        ApplyPatch(record);
+                        Rows.Add(null);
                     }
+                    if (Rows[addV.RowIndex] == null)
+                    {
+                        Rows[addV.RowIndex] = new MetadataRow(addV.RowIndex);
+                    }
+                    Rows[addV.RowIndex].ProcessCommand(addV);
+
                     break;
+                case MetadataCommand.DeleteRow:
+                    var delRow = command as MetadataDeleteRowParams;
+                    Rows[delRow.RowIndex] = null;
+                    break;
+                case MetadataCommand.TableVersion:
+                    var tbl = command as MetadataTableVersionParams;
+                    MajorVersion = tbl.MajorVersion;
+                    MinorVersion = tbl.MinorVersion;
+                    break;
+                case MetadataCommand.AddRelationship:
+                case MetadataCommand.AddTable:
+                case MetadataCommand.UseTable:
+                case MetadataCommand.GetTable:
+                case MetadataCommand.SyncTable:
+                case MetadataCommand.SelectAllTablesWithSchema:
+                case MetadataCommand.GetAllTableVersions:
+                    throw new NotSupportedException();
                 default:
-                    throw new VersionNotFoundException();
+                    throw new ArgumentOutOfRangeException();
             }
-
-        }
-
-        public void Fill(IMetadataDecoder decoder)
-        {
 
         }
     }
