@@ -84,7 +84,7 @@ namespace Sttp.Data
 
         public void AddOrUpdateValue(string columnName, int rowIndex, object value)
         {
-            while (Rows.Count < rowIndex)
+            while (Rows.Count <= rowIndex)
             {
                 Rows.Add(null);
             }
@@ -141,6 +141,8 @@ namespace Sttp.Data
                     }
                 }
             }
+
+            encoder.EndCommand();
         }
     }
 }

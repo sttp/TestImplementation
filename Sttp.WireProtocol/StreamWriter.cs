@@ -8,12 +8,12 @@ namespace Sttp.WireProtocol
     {
         public byte[] Buffer = new byte[512];
         public int Position;
-        public int Length;
+        public int Length => Buffer.Length;
 
         public void Clear()
         {
             Position = 0;
-            Length = 0;
+            //Length = 0;
         }
 
         private void Grow()
@@ -37,10 +37,6 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += uint15.Write(Buffer, Position, value);
-            if (Position > Length)
-            {
-                Position = Length;
-            }
         }
 
         #region [ 1 byte values ]
@@ -53,10 +49,6 @@ namespace Sttp.WireProtocol
             }
             Buffer[Position] = value;
             Position++;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
         }
 
         public void Write(bool value)
@@ -99,10 +91,6 @@ namespace Sttp.WireProtocol
             }
             BigEndian.CopyBytes(value, Buffer, Position);
             Position += 2;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
         }
 
         public void Write(ushort value)
@@ -128,10 +116,6 @@ namespace Sttp.WireProtocol
             }
             BigEndian.CopyBytes(value, Buffer, Position);
             Position += 4;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
         }
 
         public void Write(uint value)
@@ -156,10 +140,7 @@ namespace Sttp.WireProtocol
             }
             BigEndian.CopyBytes(value, Buffer, Position);
             Position += 8;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
+
         }
 
         public void Write(ulong value)
@@ -189,10 +170,6 @@ namespace Sttp.WireProtocol
             }
             BigEndian.CopyBytes(value, Buffer, Position);
             Position += 16;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
         }
 
         public void Write(Guid value)
@@ -203,16 +180,17 @@ namespace Sttp.WireProtocol
             }
             Array.Copy(value.ToRfcBytes(), 0, Buffer, Position, 16);
             Position += 16;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
         }
 
         #endregion
 
         public void Write(byte[] value)
-        {
+        { 
+            int len = value?.Length ?? 1;
+            if (len > 1024 * 1024)
+                throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(value));
+
+            // write null and empty
             if (Position + 1 >= Buffer.Length)
             {
                 Grow();
@@ -228,45 +206,21 @@ namespace Sttp.WireProtocol
                 Write((byte)1);
                 return;
             }
-            if (value.Length > 1024 * 1024)
-                throw new Exception("Encoding more than 1MB is prohibited");
 
-            while (Position + value.Length + 3 >= Buffer.Length)
+            while (Position + len + 3 >= Buffer.Length)
             {
                 Grow();
             }
 
             int length = value.Length + 1; //A length of 0 is null
 
-            Position += uint22.Write(Buffer, Position, length);
-            Array.Copy(value, 0, Buffer, 0, value.Length);
-            Position += Buffer.Length;
-            if (Position > Length)
-            {
-                Position = Length;
-            }
+            Position += uint22.Write(Buffer, Position, length); // write len
+            Array.Copy(value, 0, Buffer, Position, value.Length); // write data
+            Position += len;
         }
 
         public void Write(string value)
         {
-            if (Position + 1 >= Buffer.Length)
-            {
-                Grow();
-            }
-
-            if (value == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            if (value.Length == 0)
-            {
-                Write((byte)1);
-                return;
-            }
-            if (value.Length > 1024 * 1024)
-                throw new Exception("Encoding more than 1MB is prohibited");
-
             Write(Encoding.UTF8.GetBytes(value));
         }
 

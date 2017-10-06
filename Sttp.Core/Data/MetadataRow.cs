@@ -20,7 +20,7 @@ namespace Sttp.Data
         {
             MetadataField field;
 
-            while (Fields.Count < column.Index)
+            while (Fields.Count <= column.Index)
             {
                 Fields.Add(null);
             }
