@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Publisher", "Sttp.Publ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Subscriber", "Sttp.Subscriber\Sttp.Subscriber.csproj", "{1152DE5E-8668-4CFA-8AA0-EF0A9AB32885}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHarness", "TestHarness\TestHarness.csproj", "{EFC6D89E-912E-4D0D-9042-1043E4048E99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestHarness", "TestHarness\TestHarness.csproj", "{EFC6D89E-912E-4D0D-9042-1043E4048E99}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Core", "Sttp.Core\Sttp.Core.csproj", "{8546536C-FC21-4C1D-9E16-6B3E4BAA4C0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sttp.Tests", "Sttp.Tests\Sttp.Tests.csproj", "{7C0E77DA-C418-46DA-ACE0-C5612EE1C6C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{8546536C-FC21-4C1D-9E16-6B3E4BAA4C0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8546536C-FC21-4C1D-9E16-6B3E4BAA4C0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8546536C-FC21-4C1D-9E16-6B3E4BAA4C0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C0E77DA-C418-46DA-ACE0-C5612EE1C6C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0E77DA-C418-46DA-ACE0-C5612EE1C6C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0E77DA-C418-46DA-ACE0-C5612EE1C6C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0E77DA-C418-46DA-ACE0-C5612EE1C6C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

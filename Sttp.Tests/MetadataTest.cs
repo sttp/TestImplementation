@@ -1,27 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Data;
-using System.Linq;
-using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Data;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.Data;
 using Sttp.WireProtocol.MetadataPacket;
 
-namespace TestHarness.ApplicationTests.Metadata
+namespace Sttp.Tests
 {
-    public class MetadataTest
+    [TestClass]
+    public class MetadataTests
     {
-        private WireDecoder m_decoder;
+        //private WireDecoder m_decoder;
         private MetadataSetDestination m_testDestinationSet;
+        private WireDecoder m_wireDecoder;
 
-        public void Test()
+        [TestMethod]
+        public void TestUpdateDataSet()
         {
             DataSet testSet = new DataSet();
+
+            var testTable = new DataTable("table1");
+            testTable.Columns.Add("rowid", typeof(int));
+            testTable.Columns.Add("key", typeof(string));
+            testTable.Rows.Add(0,"rowkey0");
+            testSet.Tables.Add(testTable);
+
             MetadataSetSource testSourceSet = new MetadataSetSource();
+            m_wireDecoder = new WireDecoder();
+
             m_testDestinationSet = new MetadataSetDestination();
             WireEncoder encoder = new WireEncoder(1500);
-            m_decoder = new WireDecoder();
             encoder.NewPacket += Encoder_NewPacket;
 
             UpdateDataSet(testSet, testSourceSet);
@@ -35,11 +44,13 @@ namespace TestHarness.ApplicationTests.Metadata
             VerifyDataset(testSet, m_testDestinationSet);
         }
 
+
         private void Encoder_NewPacket(byte[] data, int position, int length)
         {
-            m_decoder.WriteData(data, position, length);
+            m_wireDecoder.WriteData(data, position, length);
+
             IPacketDecoder decoder;
-            while ((decoder = m_decoder.NextPacket()) != null)
+            while ((decoder = m_wireDecoder.NextPacket()) != null)
             {
                 switch (decoder.CommandCode)
                 {
@@ -74,9 +85,9 @@ namespace TestHarness.ApplicationTests.Metadata
                 for (var rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
                 {
                     DataRow row = table.Rows[rowIndex];
-                    for (int x = 0; x < table.Columns.Count; x++)
+                    for (int colIx = 0; colIx < table.Columns.Count; colIx++)
                     {
-                        set[table.TableName].AddOrUpdateValue(table.Columns[x].ColumnName, rowIndex, row[rowIndex]);
+                        set[table.TableName].AddOrUpdateValue(table.Columns[colIx].ColumnName, rowIndex, row[colIx]);
                     }
                 }
             }
@@ -91,10 +102,8 @@ namespace TestHarness.ApplicationTests.Metadata
                     DataColumn column = table.Columns[columnIndex];
                     var col2 = set[table.TableName].Columns[columnIndex];
 
-                    if (column.ColumnName != col2.Name)
-                        throw new Exception();
-                    if (col2.Type != ValueTypeCodec.FromType(column.DataType))
-                        throw new Exception();
+                    Assert.AreEqual(column.ColumnName, col2.Name, "Column Name");
+                    Assert.AreEqual(col2.Type, ValueTypeCodec.FromType(column.DataType), "Column Data Type");
                 }
 
                 for (var rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
@@ -107,26 +116,12 @@ namespace TestHarness.ApplicationTests.Metadata
 
                         if (value == DBNull.Value)
                             value = null;
-                        if (value == null && value2 == null)
-                        {
-                            //Are Equal
-                        }
-                        else if (value == null || value2 == null)
-                        {
-                            throw new Exception();
-                        }
-                        else
-                        {
-                            if (!value.Equals(value2))
-                            {
-                                throw new Exception();
-                            }
-                        }
+
+                        Assert.AreEqual(value, value2, "Encoded Value");
                     }
                 }
             }
 
         }
-
     }
 }
