@@ -66,10 +66,10 @@ namespace Sttp.WireProtocol.Data.Raw
             EnsureCapacity(1 + 16 + 8 + 3 + tableName.Length * 2 + 1);
 
             m_stream.Write(MetadataCommand.AddTable);
-            m_stream.Write(majorVersion);
-            m_stream.Write(minorVersion);
             m_stream.Write(tableName);
             m_stream.Write(tableFlags);
+            m_stream.Write(majorVersion);
+            m_stream.Write(minorVersion);
         }
 
         public void AddColumn(int columnIndex, string columnName, ValueType columnType)

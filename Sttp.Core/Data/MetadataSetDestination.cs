@@ -36,13 +36,16 @@ namespace Sttp.Data
         public void Process(IMetadataDecoder decoder)
         {
             int tableIndex = -1;
-            var command = decoder.NextCommand();
-            switch (command.Command)
+
+            IMetadataParams command;
+            while ((command = decoder.NextCommand()) != null)
             {
-                case MetadataCommand.UseTable:
-                    tableIndex = (command as MetadataUseTableParams).TableIndex;
-                    break;
-                case MetadataCommand.AddTable:
+                switch (command.Command)
+                {
+                    case MetadataCommand.UseTable:
+                        tableIndex = (command as MetadataUseTableParams).TableIndex;
+                        break;
+                    case MetadataCommand.AddTable:
                     {
                         var cmd = command as MetadataAddTableParams;
                         var table = new MetadataTableDestination(cmd.MajorVersion, cmd.MinorVersion, cmd.TableName, tableIndex, cmd.TableFlags);
@@ -53,25 +56,26 @@ namespace Sttp.Data
                         }
                         m_tables[tableIndex] = table;
                     }
-                    break;
-                case MetadataCommand.AddColumn:
-                case MetadataCommand.AddValue:
-                case MetadataCommand.DeleteRow:
-                    m_tables[tableIndex].ProcessCommand(command);
-                    break;
-                case MetadataCommand.TableVersion:
-                    m_tables[(command as MetadataTableVersionParams).TableIndex].ProcessCommand(command);
-                    break;
-                case MetadataCommand.AddRelationship:
-                    throw new NotImplementedException();
-                    break;
-                case MetadataCommand.GetTable:
-                case MetadataCommand.SyncTable:
-                case MetadataCommand.SelectAllTablesWithSchema:
-                case MetadataCommand.GetAllTableVersions:
-                    throw new NotSupportedException();
-                default:
-                    throw new ArgumentOutOfRangeException();
+                        break;
+                    case MetadataCommand.AddColumn:
+                    case MetadataCommand.AddValue:
+                    case MetadataCommand.DeleteRow:
+                        m_tables[tableIndex].ProcessCommand(command);
+                        break;
+                    case MetadataCommand.TableVersion:
+                        m_tables[(command as MetadataTableVersionParams).TableIndex].ProcessCommand(command);
+                        break;
+                    case MetadataCommand.AddRelationship:
+                        throw new NotImplementedException();
+                        break;
+                    case MetadataCommand.GetTable:
+                    case MetadataCommand.SyncTable:
+                    case MetadataCommand.SelectAllTablesWithSchema:
+                    case MetadataCommand.GetAllTableVersions:
+                        throw new NotSupportedException();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
         

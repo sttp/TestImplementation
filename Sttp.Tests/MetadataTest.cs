@@ -109,10 +109,10 @@ namespace Sttp.Tests
                 for (var rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
                 {
                     DataRow row = table.Rows[rowIndex];
-                    for (int x = 0; x < table.Columns.Count; x++)
+                    for (int col = 0; col < table.Columns.Count; col++)
                     {
-                        object value = row[rowIndex];
-                        object value2 = set[table.TableName].GetValue(rowIndex, x);
+                        object value = row[col];
+                        object value2 = set[table.TableName].GetValue(rowIndex, col);
 
                         if (value == DBNull.Value)
                             value = null;

@@ -3,9 +3,15 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// All of the permitted commands for metadata.
     /// </summary>
-    public enum MetadataCommand
+    public enum MetadataCommand : byte
     {
         #region [ Response Publisher to Subscriber ]
+
+        /// <summary>
+        /// An invalid command to indicate that nothing is assigned.
+        /// This cannot be sent over the wire.
+        /// </summary>
+        Invalid = 0x00,
 
         /// <summary>
         /// Changes the active table

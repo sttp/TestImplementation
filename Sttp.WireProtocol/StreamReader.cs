@@ -228,11 +228,19 @@ namespace Sttp.WireProtocol
         public byte[] ReadBytes()
         {
             EnsureCapacity(1);
-            int length = Buffer[0];
+            int length = Buffer[Position];
+
+
             if (length == 0)
+            {
+                Position ++;
                 return null;
+            }
             if (length == 1)
+            {
+                Position ++;
                 return Empty;
+            }
 
             if (length >= 128)
             {
@@ -243,7 +251,7 @@ namespace Sttp.WireProtocol
             }
             else
             {
-                EnsureCapacity(1 - 1 + length);
+                EnsureCapacity(length);
                 Position++;
             }
 
@@ -270,11 +278,11 @@ namespace Sttp.WireProtocol
         public int ReadInt15()
         {
             EnsureCapacity(1);
-            int value = Buffer[0];
+            int value = Buffer[Position];
             if (value >= 128)
             {
                 EnsureCapacity(2);
-                value = (value - 128) | (Buffer[1] << 7);
+                value = (value - 128) | (Buffer[Position + 1] << 7);
                 Position += 2;
             }
             Position += 1;
