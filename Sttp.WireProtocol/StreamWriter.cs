@@ -7,12 +7,14 @@ namespace Sttp.WireProtocol
     public unsafe class StreamWriter
     {
         public byte[] Buffer = new byte[512];
+
         public int Position;
-        public int Length => Buffer.Length;
+        public int Length;
 
         public void Clear()
         {
             Position = 0;
+            Length = 0;
         }
 
         private void Grow()
@@ -36,6 +38,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += uint15.Write(Buffer, Position, value);
+            Length = Position;
         }
 
         #region [ 1 byte values ]
@@ -48,6 +51,7 @@ namespace Sttp.WireProtocol
             }
             Buffer[Position] = value;
             Position++;
+            Length = Position;
         }
 
         public void Write(bool value)
@@ -89,6 +93,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
+            Length = Position;
         }
 
         public void Write(ushort value)
@@ -113,6 +118,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
+            Length = Position;
         }
 
         public void Write(uint value)
@@ -136,6 +142,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
+            Length = Position;
         }
 
         public void Write(ulong value)
@@ -164,6 +171,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
+            Length = Position;
         }
 
         public void Write(Guid value)
@@ -174,6 +182,7 @@ namespace Sttp.WireProtocol
             }
             Array.Copy(value.ToRfcBytes(), 0, Buffer, Position, 16);
             Position += 16;
+            Length = Position;
         }
 
         #endregion
@@ -211,6 +220,7 @@ namespace Sttp.WireProtocol
             Position += uint22.Write(Buffer, Position, length); // write len
             Array.Copy(value, 0, Buffer, Position, value.Length); // write data
             Position += len;
+            Length = Position;
         }
 
         public void Write(string value)

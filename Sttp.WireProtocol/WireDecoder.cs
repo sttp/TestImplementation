@@ -49,15 +49,16 @@ namespace Sttp.WireProtocol
                 return null;
 
             int origPosition = m_buffer.Position;
-            int messageLength = m_buffer.ReadByte();
+            CommandCode commandCode = m_buffer.ReadCommandCode();
+            int messageLength = m_buffer.ReadUInt16();
 
-            if (messageLength > m_buffer.PendingBytes)
+            if (messageLength > m_buffer.PendingBytes + 3)
             {
                 m_buffer.Position = origPosition;
                 return null;
             }
 
-            switch (m_buffer.ReadCommandCode())
+            switch (commandCode)
             {
                 case CommandCode.NegotiateSession:
                     m_negotiateSessionDecoder.Fill(m_buffer);

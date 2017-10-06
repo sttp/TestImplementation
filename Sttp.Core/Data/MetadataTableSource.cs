@@ -141,8 +141,6 @@ namespace Sttp.Data
                     }
                 }
             }
-
-            encoder.EndCommand();
         }
     }
 }
