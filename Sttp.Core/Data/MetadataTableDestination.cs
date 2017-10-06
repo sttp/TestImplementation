@@ -135,5 +135,16 @@ namespace Sttp.Data
             }
 
         }
+
+        public object GetValue(int rowIndex, int columnIndex)
+        {
+            if (Rows.Count >= rowIndex || Rows[rowIndex] == null)
+                return null;
+
+            var row = Rows[rowIndex];
+            if (row.Fields.Count >= columnIndex || row.Fields[columnIndex] == null)
+                return null;
+            return Columns[columnIndex].Decode(row.Fields[columnIndex].Value);
+        }
     }
 }

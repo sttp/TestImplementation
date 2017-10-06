@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Sttp.WireProtocol.Data;
+using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.Data
 {
@@ -26,14 +27,24 @@ namespace Sttp.Data
             }
         }
 
-        public void AddTable(MetadataTableSource tableSource)
+        public void AddTable(string tableName, TableFlags flags)
         {
-            if (tableSource == null)
-                throw new ArgumentNullException(nameof(tableSource));
-
-            m_tables.Add(tableSource);
-            m_tableLookup.Add(tableSource.TableName, m_tables.Count - 1);
+            if (!m_tableLookup.ContainsKey(tableName))
+            {
+                var tbl = new MetadataTableSource(m_tables.Count, tableName, flags);
+                m_tables.Add(tbl);
+                m_tableLookup[tableName] = tbl.TableIndex;
+            }
         }
+
+        //public void AddTable(MetadataTableSource tableSource)
+        //{
+        //    if (tableSource == null)
+        //        throw new ArgumentNullException(nameof(tableSource));
+
+        //    m_tables.Add(tableSource);
+        //    m_tableLookup.Add(tableSource.TableName, m_tables.Count - 1);
+        //}
 
         /// <summary>
         /// Replies with all of the tables with their schema
@@ -52,12 +63,12 @@ namespace Sttp.Data
             }
         }
 
-        public byte[] RequestTableData(IMetadataEncoder encoder, string tableName, Guid majorVersion = default(Guid), long minorVersion = 0, dynamic permissionsFilter = null)
+        public void RequestTableData(IMetadataEncoder encoder, int tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
         {
-            return m_tables[m_tableLookup[tableName]].RequestTableData(encoder, majorVersion, minorVersion, permissionsFilter);
+            m_tables[tableIndex].RequestTableData(encoder, majorVersion, minorVersion, permissionsFilter);
         }
 
 
     }
-   
+
 }

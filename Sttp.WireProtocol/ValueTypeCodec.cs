@@ -96,5 +96,43 @@ namespace Sttp.WireProtocol
             }
 
         }
+
+        public static ValueType FromType(Type columnDataType)
+        {
+            if (columnDataType == typeof(sbyte))
+                return ValueType.SByte;
+            if (columnDataType == typeof(Int16))
+                return ValueType.Int16;
+            if (columnDataType == typeof(Int32))
+                return ValueType.Int32;
+            if (columnDataType == typeof(Int64))
+                return ValueType.Int64;
+            if (columnDataType == typeof(Byte))
+                return ValueType.Byte;
+            if (columnDataType == typeof(UInt16))
+                return ValueType.UInt16;
+            if (columnDataType == typeof(UInt32))
+                return ValueType.UInt32;
+            if (columnDataType == typeof(UInt64))
+                return ValueType.UInt64;
+            if (columnDataType == typeof(Decimal))
+                return ValueType.Decimal;
+            if (columnDataType == typeof(Double))
+                return ValueType.Double;
+            if (columnDataType == typeof(Single))
+                return ValueType.Single;
+            if (columnDataType == typeof(DateTime))
+                return ValueType.Ticks;
+            if (columnDataType == typeof(bool))
+                return ValueType.Bool;
+            if (columnDataType == typeof(Guid))
+                return ValueType.Guid;
+            if (columnDataType == typeof(String))
+                return ValueType.String;
+            if (columnDataType == typeof(byte[]))
+                return ValueType.Buffer;
+
+            return ValueType.Null;
+        }
     }
 }

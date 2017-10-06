@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// Responsible for encoding each command into bytes
     /// </summary>
-    public class Encoder
+    public class WireEncoder
     {
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Sttp.WireProtocol
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
         /// <param name="autoflushPacketSize"></param>
-        public Encoder(int autoflushPacketSize)
+        public WireEncoder(int autoflushPacketSize)
         {
             m_lastCode = CommandCode.Invalid;
             m_autoFlushPacketSize = autoflushPacketSize;
@@ -45,9 +45,9 @@ namespace Sttp.WireProtocol
             m_metadata = new MetadataEncoder(SendNewPacket, m_autoFlushPacketSize);
         }
 
-        private void SendNewPacket(byte[] arg1, int arg2, int arg3)
+        private void SendNewPacket(byte[] buffer, int position, int length)
         {
-            NewPacket?.Invoke(arg1, arg2, arg3);
+            NewPacket?.Invoke(buffer, position, length);
         }
 
         public MetadataEncoder BeginMetadataPacket()

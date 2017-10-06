@@ -3,7 +3,7 @@
 namespace Sttp.WireProtocol
 {
     /// <summary>
-    /// This is the data point key that is used by the <see cref="Encoder"/>/<see cref="Decoder"/> and maintains the 
+    /// This is the data point key that is used by the <see cref="WireEncoder"/>/<see cref="WireDecoder"/> and maintains the 
     /// signal mapping information.
     /// </summary>
     public class DataPointKeyWire

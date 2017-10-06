@@ -7,8 +7,6 @@ using System.Text;
 using System.Threading;
 using Sttp.Data;
 using Sttp.WireProtocol;
-using Decoder = Sttp.WireProtocol.Decoder;
-using Encoder = Sttp.WireProtocol.Encoder;
 using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
@@ -30,8 +28,8 @@ namespace Sttp.Publisher
         private readonly Thread m_dataThread;
         private readonly Thread m_sendThread;
         private bool m_enabled;
-        private readonly Encoder m_encoder;
-        private readonly Decoder m_decoder;
+        private readonly WireEncoder m_wireEncoder;
+        private readonly WireDecoder m_wireDecoder;
         private MetadataSetSource m_metadata;
 
         internal Subscriber(dynamic tcpSocket, MetadataSetSource metadata)
@@ -47,14 +45,14 @@ namespace Sttp.Publisher
             m_dataThread = new Thread(CollateData);
             m_dataThread.Start();
 
-            m_encoder = new Encoder(1024);
-            m_decoder = new Decoder();
-            m_encoder.NewPacket += m_encoder_NewPacket;
+            m_wireEncoder = new WireEncoder(1024);
+            m_wireDecoder = new WireDecoder();
+            m_wireEncoder.NewPacket += WireEncoderNewPacket;
             // Setup data reception event or handler, etc...
             //m_tcpSocket.OnDataReceived += m_tcpSocket_OnDataReceived;
         }
 
-        private void m_encoder_NewPacket(byte[] data, int position, int length)
+        private void WireEncoderNewPacket(byte[] data, int position, int length)
         {
 
             //ToDo: possibly queue data packets so this method will never block.
@@ -191,8 +189,8 @@ namespace Sttp.Publisher
 
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
-            m_decoder.WriteData(buffer, startIndex, length);
-            var packet = m_decoder.NextPacket();
+            m_wireDecoder.WriteData(buffer, startIndex, length);
+            var packet = m_wireDecoder.NextPacket();
             while (packet != null)
             {
                 switch (packet.CommandCode)
@@ -314,7 +312,7 @@ namespace Sttp.Publisher
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                packet = m_decoder.NextPacket();
+                packet = m_wireDecoder.NextPacket();
             }
         }
 

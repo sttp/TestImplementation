@@ -8,7 +8,7 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// Responsible for decoding each packet into commands.
     /// </summary>
-    public class Decoder
+    public class WireDecoder
     {
         private IMetadataDecoder m_metadataDecoder;
         private DataPointDecoder m_dataPointDecoder;
@@ -17,7 +17,7 @@ namespace Sttp.WireProtocol
 
         private StreamReader m_buffer = new StreamReader();
 
-        public Decoder()
+        public WireDecoder()
         {
             m_metadataDecoder = new MetadataDecoder();
             m_dataPointDecoder = new DataPointDecoder();

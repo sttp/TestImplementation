@@ -35,7 +35,7 @@ namespace Sttp.WireProtocol.Data.Raw
             switch (command)
             {
                 case MetadataCommand.UseTable:
-                    m_useTable.TableIndex = m_stream.ReadInt32();
+                    m_useTable.TableIndex = m_stream.ReadInt15();
                     return m_useTable;
                 case MetadataCommand.AddTable:
                     m_addTable.TableName = m_stream.ReadString();
@@ -44,12 +44,12 @@ namespace Sttp.WireProtocol.Data.Raw
                     m_addTable.MinorVersion = m_stream.ReadInt64();
                     return m_addTable;
                 case MetadataCommand.AddColumn:
-                    m_addColumn.ColumnIndex = m_stream.ReadInt32();
+                    m_addColumn.ColumnIndex = m_stream.ReadInt15();
                     m_addColumn.ColumnName = m_stream.ReadString();
                     m_addColumn.ColumnType = m_stream.ReadValueType();
                     return m_addColumn;
                 case MetadataCommand.AddValue:
-                    m_addValue.ColumnIndex = m_stream.ReadInt32();
+                    m_addValue.ColumnIndex = m_stream.ReadInt15();
                     m_addValue.RowIndex = m_stream.ReadInt32();
                     m_addValue.Value = m_stream.ReadBytes();
                     return m_addValue;
@@ -57,14 +57,14 @@ namespace Sttp.WireProtocol.Data.Raw
                     m_deleteRow.RowIndex = m_stream.ReadInt32();
                     return m_deleteRow;
                 case MetadataCommand.TableVersion:
-                    m_tableVersion.TableIndex = m_stream.ReadInt32();
+                    m_tableVersion.TableIndex = m_stream.ReadInt15();
                     m_tableVersion.MajorVersion = m_stream.ReadGuid();
                     m_tableVersion.MinorVersion = m_stream.ReadInt64();
                     return m_tableVersion;
                 case MetadataCommand.AddRelationship:
-                    m_addRelationship.TableIndex = m_stream.ReadInt32();
-                    m_addRelationship.ColumnIndex = m_stream.ReadInt32();
-                    m_addRelationship.ForeignTableIndex = m_stream.ReadInt32();
+                    m_addRelationship.TableIndex = m_stream.ReadInt15();
+                    m_addRelationship.ColumnIndex = m_stream.ReadInt15();
+                    m_addRelationship.ForeignTableIndex = m_stream.ReadInt15();
                     return m_addRelationship;
                 case MetadataCommand.GetTable:
                     return m_getTable;
