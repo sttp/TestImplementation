@@ -13,7 +13,6 @@ namespace Sttp.WireProtocol
         public void Clear()
         {
             Position = 0;
-            //Length = 0;
         }
 
         private void Grow()
@@ -89,8 +88,7 @@ namespace Sttp.WireProtocol
             {
                 Grow();
             }
-            BigEndian.CopyBytes(value, Buffer, Position);
-            Position += 2;
+            Position += BigEndian.CopyBytes(value, Buffer, Position);
         }
 
         public void Write(ushort value)
@@ -114,8 +112,7 @@ namespace Sttp.WireProtocol
             {
                 Grow();
             }
-            BigEndian.CopyBytes(value, Buffer, Position);
-            Position += 4;
+            Position += BigEndian.CopyBytes(value, Buffer, Position);
         }
 
         public void Write(uint value)
@@ -138,9 +135,7 @@ namespace Sttp.WireProtocol
             {
                 Grow();
             }
-            BigEndian.CopyBytes(value, Buffer, Position);
-            Position += 8;
-
+            Position += BigEndian.CopyBytes(value, Buffer, Position);
         }
 
         public void Write(ulong value)
@@ -168,8 +163,7 @@ namespace Sttp.WireProtocol
             {
                 Grow();
             }
-            BigEndian.CopyBytes(value, Buffer, Position);
-            Position += 16;
+            Position += BigEndian.CopyBytes(value, Buffer, Position);
         }
 
         public void Write(Guid value)
