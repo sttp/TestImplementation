@@ -270,5 +270,9 @@ namespace Sttp.WireProtocol
             Write(Encoding.UTF8.GetBytes(value));
         }
 
+        public void Write(CommandCode metadata)
+        {
+            Write((byte)metadata);
+        }
     }
 }

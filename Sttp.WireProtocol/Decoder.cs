@@ -5,34 +5,10 @@ using Sttp.WireProtocol.Data.Raw;
 
 namespace Sttp.WireProtocol
 {
-    //public enum DecoderCallback
-    //{
-    //    NegotiateSessionStep1,
-    //    NegotiateSessionStep1Reply,
-    //    NegotiateSessionStep2,
-    //    CommandSuccess,
-    //    CommandFailed,
-    //    RequestMetadataTables,
-    //    RequestMetadataTablesReply,
-    //    RequestMetadata,
-    //    RequestMetadataReply,
-    //    Subscribe,
-    //    /// <summary>
-    //    /// Indicates that all full messages have been parsed. There might still be a split fragment
-    //    /// since TCP turns messages into streams, but after this point, more data needs to be pushed to the decoder.
-    //    /// </summary>
-    //    EndOfMessages
-    //}
-
-    public interface IPacketDecoder
-    {
-        CommandCode CommandCode { get; }
-    }
-
     /// <summary>
     /// Responsible for decoding each packet into commands.
     /// </summary>
-    public class DecoderTCP
+    public class Decoder
     {
         private IMetadataDecoder m_metadataDecoder;
         private DataPointDecoder m_dataPointDecoder;
@@ -41,7 +17,7 @@ namespace Sttp.WireProtocol
 
         private StreamReader m_buffer = new StreamReader();
 
-        public DecoderTCP()
+        public Decoder()
         {
             m_metadataDecoder = new MetadataDecoder();
             m_dataPointDecoder = new DataPointDecoder();
@@ -86,13 +62,10 @@ namespace Sttp.WireProtocol
                 case CommandCode.NegotiateSession:
                     m_negotiateSessionDecoder.Fill(m_buffer);
                     return m_negotiateSessionDecoder;
-                case CommandCode.MetadataRefresh:
+                case CommandCode.Metadata:
                     m_metadataDecoder.Fill(m_buffer);
                     return m_metadataDecoder;
                 case CommandCode.Subscribe:
-                    m_subscriptionDecoder.Fill(m_buffer);
-                    return m_subscriptionDecoder;
-                case CommandCode.Unsubscribe:
                     m_subscriptionDecoder.Fill(m_buffer);
                     return m_subscriptionDecoder;
                 case CommandCode.SecureDataChannel:

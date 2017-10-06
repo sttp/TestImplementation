@@ -6,7 +6,7 @@ namespace Sttp.WireProtocol.Data
     public interface IMetadataEncoder
     {
         void BeginCommand();
-        byte[] EndCommand();
+        void EndCommand();
 
         #region [ Response Publisher to Subscriber ]
 

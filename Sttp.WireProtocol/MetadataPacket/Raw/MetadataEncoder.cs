@@ -8,43 +8,63 @@ namespace Sttp.WireProtocol.Data.Raw
     /// </summary>
     public class MetadataEncoder : IMetadataEncoder
     {
-        private Action<byte[], int, int> m_baseEncoder;
+        private StreamWriter m_stream;
+        private int m_autoFlushLevel;
+        private Action<byte[], int, int> m_sendPacket;
 
-        public MetadataEncoder(Action<byte[], int, int> baseEncoder)
+        public MetadataEncoder(Action<byte[], int, int> sendPacket, int autoFlushLevel)
         {
-            m_baseEncoder = baseEncoder;
+            m_stream = new StreamWriter();
+            m_sendPacket = sendPacket;
+            m_autoFlushLevel = autoFlushLevel;
         }
-
-        private StreamWriter m_stream = new StreamWriter();
 
         /// <summary>
         /// Begins a new metadata packet
         /// </summary>
         public void BeginCommand()
         {
-            m_stream.Position = 0;
-            m_stream.Length = 0;
+            m_stream.Clear();
+            m_stream.Write(CommandCode.Metadata);
+            m_stream.Write((ushort)0); //Packet Length
         }
 
         /// <summary>
         /// Ends a metadata packet and requests the buffer block that was allocated.
         /// </summary>
         /// <returns></returns>
-        public byte[] EndCommand()
+        public void EndCommand()
         {
-            return m_stream.ToArray();
+            if (m_stream.Position <= 3) //3 bytes means nothing will be sent.
+                return;
+            int length = m_stream.Length;
+            m_stream.Position = 1;
+            m_stream.Write((ushort)length);
+            m_sendPacket(m_stream.Buffer, 0, length);
+        }
+
+        private void EnsureCapacity(int length)
+        {
+            if (m_stream.Length + length > m_autoFlushLevel && m_stream.Position > 3)
+            {
+                EndCommand();
+                BeginCommand();
+            }
         }
 
         #region [ Response Publisher to Subscriber ]
 
         public void UseTable(int tableIndex)
         {
+            EnsureCapacity(3);
             m_stream.Write(MetadataCommand.UseTable);
             m_stream.WriteInt15(tableIndex);
         }
 
         public void AddTable(Guid majorVersion, long minorVersion, string tableName, TableFlags tableFlags)
         {
+            EnsureCapacity(1 + 16 + 8 + 3 + tableName.Length * 2 + 1);
+
             m_stream.Write(MetadataCommand.AddTable);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
@@ -54,6 +74,8 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void AddColumn(int columnIndex, string columnName, ValueType columnType)
         {
+            EnsureCapacity(1 + 2 + 3 + columnName.Length * 2 + 1);
+
             m_stream.Write(MetadataCommand.AddColumn);
             m_stream.WriteInt15(columnIndex);
             m_stream.Write(columnName);
@@ -62,6 +84,8 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void AddValue(int columnIndex, int rowIndex, byte[] value)
         {
+            EnsureCapacity(1 + 2 + 4 + 3 + (value?.Length ?? 0) * 2);
+
             m_stream.Write(MetadataCommand.AddValue);
             m_stream.WriteInt15(columnIndex);
             m_stream.Write(rowIndex);
@@ -70,12 +94,14 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void DeleteRow(int rowIndex)
         {
+            EnsureCapacity(5);
             m_stream.Write(MetadataCommand.DeleteRow);
             m_stream.Write(rowIndex);
         }
 
         public void TableVersion(int tableIndex, Guid majorVersion, long minorVersion)
         {
+            EnsureCapacity(1 + 2 + 16 + 8);
             m_stream.Write(MetadataCommand.TableVersion);
             m_stream.WriteInt15(tableIndex);
             m_stream.Write(majorVersion);
@@ -84,6 +110,7 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void AddRelationship(int tableIndex, int columnIndex, int foreignTableIndex)
         {
+            EnsureCapacity(1 + 2 + 2 + 2);
             m_stream.Write(MetadataCommand.TableVersion);
             m_stream.WriteInt15(tableIndex);
             m_stream.WriteInt15(columnIndex);
@@ -96,6 +123,8 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void GetTable(int tableIndex, int[] columnList, string[] filterExpression)
         {
+            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
+
             m_stream.Write(MetadataCommand.GetTable);
             m_stream.WriteInt15(tableIndex);
 
@@ -120,6 +149,8 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void SyncTable(int tableIndex, Guid majorVersion, long minorVersion, int[] columnList)
         {
+            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
+
             m_stream.Write(MetadataCommand.SyncTable);
             m_stream.WriteInt15(tableIndex);
             m_stream.Write(majorVersion);
@@ -136,11 +167,13 @@ namespace Sttp.WireProtocol.Data.Raw
 
         public void SelectAllTablesWithSchema()
         {
+            EnsureCapacity(1);
             m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
         }
 
         public void GetAllTableVersions()
         {
+            EnsureCapacity(1);
             m_stream.Write((byte)MetadataCommand.GetAllTableVersions);
         }
 

@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading;
 using Sttp.Data;
 using Sttp.WireProtocol;
+using Decoder = Sttp.WireProtocol.Decoder;
+using Encoder = Sttp.WireProtocol.Encoder;
 using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
@@ -28,8 +30,8 @@ namespace Sttp.Publisher
         private readonly Thread m_dataThread;
         private readonly Thread m_sendThread;
         private bool m_enabled;
-        private readonly EncoderTCP m_encoder;
-        private readonly DecoderTCP m_decoderTcp;
+        private readonly Encoder m_encoder;
+        private readonly Decoder m_decoder;
         private MetadataSetSource m_metadata;
 
         internal Subscriber(dynamic tcpSocket, MetadataSetSource metadata)
@@ -45,8 +47,8 @@ namespace Sttp.Publisher
             m_dataThread = new Thread(CollateData);
             m_dataThread.Start();
 
-            m_encoder = new EncoderTCP(1024);
-            m_decoderTcp = new DecoderTCP();
+            m_encoder = new Encoder(1024);
+            m_decoder = new Decoder();
             m_encoder.NewPacket += m_encoder_NewPacket;
             // Setup data reception event or handler, etc...
             //m_tcpSocket.OnDataReceived += m_tcpSocket_OnDataReceived;
@@ -98,7 +100,7 @@ namespace Sttp.Publisher
         {
             // Start session negotiation - first step is to declare supported protocol versions...
             ProtocolVersions versions = new ProtocolVersions { Versions = new[] { OnePointZero } };
-            m_encoder.NegotiateSession.SupportedVersions(versions);
+            //m_encoder.NegotiateSession.SupportedVersions(versions);
             // Start timer to wait on subscriber response - then disconnect otherwise
         }
 
@@ -118,7 +120,7 @@ namespace Sttp.Publisher
         {
             m_key = key;
             m_iv = iv;
-            m_encoder.NegotiateSession.SecureUdpDataChannel(key, iv);
+            //m_encoder.NegotiateSession.SecureUdpDataChannel(key, iv);
         }
 
         internal void QueueDataPoint(DataPoint dataPoint)
@@ -146,7 +148,7 @@ namespace Sttp.Publisher
 
                 PatchSignalMapping(dataPoints);
 
-                m_encoder.DataPoint.BeginCommand();
+                //m_encoder.DataPoint.BeginCommand();
 
                 foreach (var point in dataPoints)
                 {
@@ -158,10 +160,10 @@ namespace Sttp.Publisher
                     wire.Flags = point.Flags;
                     wire.QualityFlags = point.QualityFlags;
 
-                    m_encoder.DataPoint.SendDataPoint(wire);
+                    //m_encoder.DataPoint.SendDataPoint(wire);
                 }
 
-                m_encoder.DataPoint.EndCommand();
+                //m_encoder.DataPoint.EndCommand();
             }
         }
 
@@ -182,15 +184,15 @@ namespace Sttp.Publisher
                     map.Type = point.Key.Type;
                     map.RuntimeID = m_nextRuntimeIDIndex;
                     m_nextRuntimeIDIndex++;
-                    m_encoder.DataPoint.MapRuntimeID(map);
+                    //m_encoder.DataPoint.MapRuntimeID(map);
                 }
             }
         }
 
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
-            m_decoderTcp.WriteData(buffer, startIndex, length);
-            var packet = m_decoderTcp.NextPacket();
+            m_decoder.WriteData(buffer, startIndex, length);
+            var packet = m_decoder.NextPacket();
             while (packet != null)
             {
                 switch (packet.CommandCode)
@@ -295,11 +297,9 @@ namespace Sttp.Publisher
                     //    break;
                     case CommandCode.NegotiateSession:
                         break;
-                    case CommandCode.MetadataRefresh:
+                    case CommandCode.Metadata:
                         break;
                     case CommandCode.Subscribe:
-                        break;
-                    case CommandCode.Unsubscribe:
                         break;
                     case CommandCode.SecureDataChannel:
                         break;
@@ -314,7 +314,7 @@ namespace Sttp.Publisher
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                packet = m_decoderTcp.NextPacket();
+                packet = m_decoder.NextPacket();
             }
         }
 

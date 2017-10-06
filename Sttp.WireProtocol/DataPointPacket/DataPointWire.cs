@@ -1,7 +1,7 @@
 ﻿namespace Sttp.WireProtocol
 {
     /// <summary>
-    /// This data point is what is used to communicating with the <see cref="EncoderTCP"/>/<see cref="DecoderTCP"/>. 
+    /// This data point is what is used to communicating with the <see cref="Encoder"/>/<see cref="Decoder"/>. 
     /// </summary>
     public class DataPointWire
     {

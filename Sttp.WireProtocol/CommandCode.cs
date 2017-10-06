@@ -3,10 +3,8 @@ namespace Sttp.WireProtocol
 {
     public enum CommandCode : byte
     {
-        NegotiateSession = 0x00,
-        MetadataRefresh = 0x01,
-        Subscribe = 0x02,
-        Unsubscribe = 0x03,
+        NegotiateSession = 0x01,
+        Subscribe = 0x03,
         SecureDataChannel = 0x04,
         RuntimeIDMapping = 0x05,
         DataPointPacket = 0x06,
@@ -15,5 +13,18 @@ namespace Sttp.WireProtocol
         /// </summary>
         Fragment = 0x07,
         NoOp = 0xFF,
+
+        //Finalized Names;
+
+        /// <summary>
+        /// An invalid command to indicate that nothing is assigned.
+        /// This cannot be sent over the wire.
+        /// </summary>
+        Invalid = 0x00,
+        
+        /// <summary>
+        /// Contains Metadata related commands.
+        /// </summary>
+        Metadata = 0x02,
     }
 }
