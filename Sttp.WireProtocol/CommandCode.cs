@@ -26,5 +26,9 @@ namespace Sttp.WireProtocol
         /// Contains Metadata related commands.
         /// </summary>
         Metadata = 0x02,
+        /// <summary>
+        /// Capable of sending large blocks of data over STTP.
+        /// </summary>
+        BulkTransport = 0x03,
     }
 }
