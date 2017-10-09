@@ -1,74 +1,18 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class StreamReader
+    public unsafe class StreamReader : StreamBase
     {
-        public byte[] Buffer = new byte[512];
-        public int Position;
-        public int Length;
-        public int PendingBytes => Length - Position;
-
-        public void Clear()
-        {
-            Position = 0;
-            Length = 0;
-        }
-
-        public void Fill(byte[] data, int position, int length)
-        {
-            while (length + Length >= Buffer.Length)
-            {
-                Grow();
-            }
-            Array.Copy(data, position, Buffer, Length, length);
-            Length += length;
-        }
-
-        private void Fill()
-        {
-            throw new EndOfStreamException();
-        }
-
-        public void Compact()
-        {
-            if (Position > 0 && Position != Length)
-            {
-                //Compact
-                Array.Copy(Buffer, Position, Buffer, 0, Length - Position);
-            }
-            Length = Length - Position;
-            Position = 0;
-        }
-
-        private void Grow()
-        {
-            byte[] newBuffer = new byte[Buffer.Length * 2];
-            Buffer.CopyTo(newBuffer, 0);
-            Buffer = newBuffer;
-        }
-
-        public void WriteInt15(int value)
-        {
-            if (Position + 2 >= Buffer.Length)
-            {
-                Fill();
-            }
-            Position += uint15.Write(Buffer, Position, value);
-            if (Position > Length)
-            {
-                Position = Length;
-            }
-        }
+        public int PendingBytes => m_length - Position;
 
         #region [ 1 byte values ]
 
         public byte ReadByte()
         {
-            if (Position + 1 > Length)
+            if (Position + 1 > m_length)
             {
                 Fill();
             }
@@ -87,28 +31,13 @@ namespace Sttp.WireProtocol
             return (sbyte)ReadByte();
         }
 
-        public MetadataCommand ReadMetadataCommand()
-        {
-            return (MetadataCommand)ReadByte();
-        }
-
-        public ValueType ReadValueType()
-        {
-            return (ValueType)ReadByte();
-        }
-
-        public TableFlags ReadTableFlags()
-        {
-            return (TableFlags)ReadByte();
-        }
-
         #endregion
 
         #region [ 2-byte values ]
 
         public short ReadInt16()
         {
-            if (Position + 2 > Length)
+            if (Position + 2 > m_length)
             {
                 Fill();
             }
@@ -127,15 +56,13 @@ namespace Sttp.WireProtocol
             return (char)ReadInt16();
         }
 
-
         #endregion
-
 
         #region [ 4-byte values ]
 
         public int ReadInt32()
         {
-            if (Position + 4 > Length)
+            if (Position + 4 > m_length)
             {
                 Fill();
             }
@@ -161,7 +88,7 @@ namespace Sttp.WireProtocol
 
         public long ReadInt64()
         {
-            if (Position + 8 > Length)
+            if (Position + 8 > m_length)
             {
                 Fill();
             }
@@ -193,7 +120,7 @@ namespace Sttp.WireProtocol
 
         public decimal ReadDecimal()
         {
-            if (Position + 16 > Length)
+            if (Position + 16 > m_length)
             {
                 Fill();
             }
@@ -204,10 +131,11 @@ namespace Sttp.WireProtocol
 
         public Guid ReadGuid()
         {
-            if (Position + 16 > Length)
+            if (Position + 16 > m_length)
             {
                 Fill();
             }
+
             Guid rv = GuidExtensions.ToRfcGuid(Buffer, Position);
             Position += 16;
             return rv;
@@ -217,13 +145,22 @@ namespace Sttp.WireProtocol
 
         private void EnsureCapacity(int length)
         {
-            if (Position + length > Length)
+            if (Position + length > m_length)
             {
                 Fill();
             }
         }
 
-        static readonly byte[] Empty = new byte[0];
+        #region Variable Length
+
+        public byte[] ReadRawBytes(int length)
+        {
+            byte[] rv = new byte[length];
+            Array.Copy(Buffer, Position, rv, 0, length);
+
+            Position += length;
+            return rv;
+        }
 
         public byte[] ReadBytes()
         {
@@ -239,7 +176,7 @@ namespace Sttp.WireProtocol
             if (length == 1)
             {
                 Position ++;
-                return Empty;
+                return StreamBase.Empty;
             }
 
             if (length >= 128)
@@ -275,23 +212,90 @@ namespace Sttp.WireProtocol
             return Encoding.UTF8.GetString(rv);
         }
 
+        #endregion
+
         public int ReadInt15()
         {
             EnsureCapacity(1);
-            int value = Buffer[Position];
-            if (value >= 128)
-            {
-                EnsureCapacity(2);
-                value = (value - 128) | (Buffer[Position + 1] << 7);
-                Position += 2;
-            }
-            Position += 1;
-            return value;
+
+            int val =  uint15.Read(Buffer, Position, out int len);
+            Position += len;
+
+            return val;
         }
 
-        public CommandCode ReadCommandCode()
+        #region Generics
+
+        /// <summary>
+        /// Generic interface for reading an Array of values.
+        /// </summary>
+        /// <typeparam name="T">Data type.</typeparam>
+        /// <returns>Array of T[].</returns>
+        public T[] ReadArray<T>()
         {
-            return (CommandCode)ReadByte();
+            int length = ReadInt15();
+            var result = new T[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = Read<T>();
+            }
+
+            return result;
         }
+
+        /// <summary>
+        /// Generic interface for reading data.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Read<T>()
+        {
+            var t = typeof(T);
+
+            if (t == typeof(Guid))
+                return (T)(object)ReadGuid();
+
+            switch (Type.GetTypeCode(t))
+            {
+                case TypeCode.Boolean:
+                    return (T)Convert.ChangeType(ReadBoolean(), typeof(bool));
+                case TypeCode.Byte:
+                    return (T)Convert.ChangeType(ReadByte(), typeof(byte));
+                case TypeCode.Char:
+                    return (T)Convert.ChangeType(ReadChar(), typeof(char));
+                case TypeCode.DateTime:
+                    return (T)Convert.ChangeType(ReadDateTime(), typeof(DateTime));
+                case TypeCode.Decimal:
+                    return (T)Convert.ChangeType(ReadDecimal(), typeof(Decimal));
+                case TypeCode.Double:
+                    return (T)Convert.ChangeType(ReadDouble(), typeof(Double));
+                case TypeCode.Int16:
+                    return (T)Convert.ChangeType(ReadInt16(), typeof(Int16));
+                case TypeCode.Int32:
+                    return (T)Convert.ChangeType(ReadInt32(), typeof(Int32));
+                case TypeCode.Int64:
+                    return (T)Convert.ChangeType(ReadInt64(), typeof(Int64));
+                case TypeCode.SByte:
+                    return (T)Convert.ChangeType(ReadSByte(), typeof(sbyte));
+                case TypeCode.Single:
+                    return (T)Convert.ChangeType(ReadSingle(), typeof(Single));
+                case TypeCode.String:
+                    return (T)Convert.ChangeType(ReadString(), typeof(string));
+                case TypeCode.UInt16:
+                    return (T)Convert.ChangeType(ReadUInt16(), typeof(UInt16));
+                case TypeCode.UInt32:
+                    return (T)Convert.ChangeType(ReadUInt32(), typeof(UInt32));
+                case TypeCode.UInt64:
+                    return (T)Convert.ChangeType(ReadUInt64(), typeof(UInt64));
+                case TypeCode.Object:
+                case TypeCode.DBNull:
+                case TypeCode.Empty:
+                default:
+                    throw new ArgumentException($"Invalid type: {t.FullName}");
+
+            }
+        }
+
+        #endregion Generics
     }
 }

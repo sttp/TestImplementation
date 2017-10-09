@@ -127,24 +127,8 @@ namespace Sttp.WireProtocol.Data.Raw
 
             m_stream.Write(MetadataCommand.GetTable);
             m_stream.WriteInt15(tableIndex);
-
-            m_stream.WriteInt15(columnList?.Length ?? 0);
-            if (columnList?.Length > 0)
-            {
-                foreach (var item in columnList)
-                {
-                    m_stream.Write(item);
-                }
-            }
-
-            m_stream.WriteInt15(filterExpression?.Length ?? 0);
-            if (filterExpression?.Length > 0)
-            {
-                foreach (var item in filterExpression)
-                {
-                    m_stream.Write(item);
-                }
-            }
+            m_stream.WriteArray(columnList);
+            m_stream.WriteArray(filterExpression);
         }
 
         public void SyncTable(int tableIndex, Guid majorVersion, long minorVersion, int[] columnList)
@@ -155,14 +139,7 @@ namespace Sttp.WireProtocol.Data.Raw
             m_stream.WriteInt15(tableIndex);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
-            m_stream.WriteInt15(columnList?.Length ?? 0);
-            if (columnList?.Length > 0)
-            {
-                foreach (var item in columnList)
-                {
-                    m_stream.Write(item);
-                }
-            }
+            m_stream.WriteArray(columnList);
         }
 
         public void SelectAllTablesWithSchema()

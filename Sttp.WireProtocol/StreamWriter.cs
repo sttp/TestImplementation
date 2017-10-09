@@ -4,43 +4,8 @@ using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class StreamWriter
+    public unsafe class StreamWriter : StreamBase
     {
-        public byte[] Buffer = new byte[512];
-
-        public int Position;
-        public int Length;
-
-        public void Clear()
-        {
-            Position = 0;
-            Length = 0;
-        }
-
-        private void Grow()
-        {
-            byte[] newBuffer = new byte[Buffer.Length * 2];
-            Buffer.CopyTo(newBuffer, 0);
-            Buffer = newBuffer;
-        }
-
-        public byte[] ToArray()
-        {
-            byte[] rv = new byte[Length];
-            Array.Copy(Buffer, 0, rv, 0, Length);
-            return rv;
-        }
-
-        public void WriteInt15(int value)
-        {
-            if (Position + 2 >= Buffer.Length)
-            {
-                Grow();
-            }
-            Position += uint15.Write(Buffer, Position, value);
-            Length = Position;
-        }
-
         #region [ 1 byte values ]
 
         public void Write(byte value)
@@ -51,7 +16,7 @@ namespace Sttp.WireProtocol
             }
             Buffer[Position] = value;
             Position++;
-            Length = Position;
+            m_length = Position;
         }
 
         public void Write(bool value)
@@ -67,21 +32,6 @@ namespace Sttp.WireProtocol
             Write((byte)value);
         }
 
-        public void Write(MetadataCommand command)
-        {
-            Write((byte)command);
-        }
-
-        public void Write(ValueType type)
-        {
-            Write((byte)type);
-        }
-
-        public void Write(TableFlags flags)
-        {
-            Write((byte)flags);
-        }
-
         #endregion
 
         #region [ 2-byte values ]
@@ -93,7 +43,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            Length = Position;
+            m_length = Position;
         }
 
         public void Write(ushort value)
@@ -118,7 +68,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            Length = Position;
+            m_length = Position;
         }
 
         public void Write(uint value)
@@ -142,7 +92,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            Length = Position;
+            m_length = Position;
         }
 
         public void Write(ulong value)
@@ -171,7 +121,7 @@ namespace Sttp.WireProtocol
                 Grow();
             }
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            Length = Position;
+            m_length = Position;
         }
 
         public void Write(Guid value)
@@ -182,13 +132,14 @@ namespace Sttp.WireProtocol
             }
             Array.Copy(value.ToRfcBytes(), 0, Buffer, Position, 16);
             Position += 16;
-            Length = Position;
+            m_length = Position;
         }
 
         #endregion
 
+        #region Variable Length Types
         public void Write(byte[] value)
-        { 
+        {
             int len = value?.Length ?? 1;
             if (len > 1024 * 1024)
                 throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(value));
@@ -220,17 +171,147 @@ namespace Sttp.WireProtocol
             Position += uint22.Write(Buffer, Position, length); // write len
             Array.Copy(value, 0, Buffer, Position, value.Length); // write data
             Position += len;
-            Length = Position;
+            m_length = Position;
+        }
+
+        public void WriteRaw(byte[] value)
+        {
+            Array.Copy(value, 0, Buffer, Position, value.Length); // write data
+            Position += value.Length;
+            m_length = Position;
         }
 
         public void Write(string value)
         {
+            if (Position + 1 >= Buffer.Length)
+            {
+                Grow();
+            }
+
+            if (value == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            if (value.Length == 0)
+            {
+                Write((byte)1);
+                return;
+            }
+
             Write(Encoding.UTF8.GetBytes(value));
         }
 
-        public void Write(CommandCode metadata)
+        #endregion
+
+        public void WriteInt15(int value)
         {
-            Write((byte)metadata);
+            if (Position + 2 >= Buffer.Length)
+            {
+                Grow();
+            }
+            Position += uint15.Write(Buffer, Position, value);
+            m_length = Position;
         }
+
+        #region Generics
+
+        /// <summary>
+        /// Writes a collection to the buffer.
+        /// </summary>
+        /// <typeparam name="T">Data type.</typeparam>
+        /// <param name="collection"></param>
+        public void WriteArray<T>(T[] collection)
+        {
+            if (collection == null)
+            {
+                WriteInt15(0);
+                return;
+            }
+
+            if (collection.Length > short.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(collection), "Length must be between 0 and 32767");
+
+            WriteInt15(collection.Length);
+            for (int i = 0; i < collection.Length; i++)
+            {
+                Write(collection[i]);
+            }
+        }
+
+        /// <summary>
+        /// Generic interface for writing a value.
+        /// </summary>
+        /// <typeparam name="T">Type of value.</typeparam>
+        /// <param name="value">Value to write.</param>
+        public void Write<T>(T value)
+        {
+            var t = typeof(T);
+
+            // special guid handling
+            if (t == typeof(Guid))
+            {
+                Write((Guid)(object)value);
+                return;
+            }
+
+            switch (Type.GetTypeCode(t))
+            {
+                case TypeCode.Boolean:
+                    Write(Convert.ToBoolean(value));
+                    break;
+                case TypeCode.Byte:
+                    Write(Convert.ToByte(value));
+                    break;
+                case TypeCode.Char:
+                    Write(Convert.ToChar(value));
+                    break;
+                case TypeCode.DateTime:
+                    Write(Convert.ToDateTime(value));
+                    break;
+                case TypeCode.Decimal:
+                    Write(Convert.ToDecimal(value));
+                    break;
+                case TypeCode.Double:
+                    Write(Convert.ToDouble(value));
+                    break;
+                case TypeCode.Int16:
+                    Write(Convert.ToInt16(value));
+                    break;
+                case TypeCode.Int32:
+                    Write(Convert.ToInt32(value));
+                    break;
+                case TypeCode.Int64:
+                    Write(Convert.ToInt64(value));
+                    break;
+                case TypeCode.SByte:
+                    Write(Convert.ToSByte(value));
+                    break;
+                case TypeCode.Single:
+                    Write(Convert.ToSingle(value));
+                    break;
+                case TypeCode.String:
+                    Write(Convert.ToString(value));
+                    break;
+                case TypeCode.UInt16:
+                    Write(Convert.ToUInt16(value));
+                    break;
+                case TypeCode.UInt32:
+                    Write(Convert.ToUInt32(value));
+                    break;
+                case TypeCode.UInt64:
+                    Write(Convert.ToUInt64(value));
+                    break;
+                case TypeCode.Object:
+                case TypeCode.DBNull:
+                case TypeCode.Empty:
+                default:
+                    throw new ArgumentException(nameof(value), $"Invalid type: {t.FullName}");
+            }
+        }
+
+        #endregion Generics
+
     }
 }
+

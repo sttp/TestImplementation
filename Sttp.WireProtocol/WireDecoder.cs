@@ -49,7 +49,7 @@ namespace Sttp.WireProtocol
                 return null;
 
             int origPosition = m_buffer.Position;
-            CommandCode commandCode = m_buffer.ReadCommandCode();
+            CommandCode commandCode = m_buffer.Read<CommandCode>();
             int messageLength = m_buffer.ReadUInt16();
 
             if (messageLength > m_buffer.PendingBytes + 3)

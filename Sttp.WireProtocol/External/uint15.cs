@@ -8,18 +8,27 @@ namespace Sttp.WireProtocol
         /// Reads a 15 bit encoded integer.
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="bufferPosition"></param>
+        /// <param name="position"></param>
         /// <param name="messageLength"></param>
         /// <returns></returns>
-        public static int Read(byte[] buffer, int bufferPosition, out int messageLength)
+        public static int Read(byte[] buffer, int position, out int messageLength)
         {
-            if (buffer[0] < 128)
+            if (position >= buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(position), "Exceeded array bounds.");
+
+            if (buffer[position] < 128)
             {
                 messageLength = 1;
-                return buffer[bufferPosition];
+                return buffer[position];
             }
+
+            if (position + 1 >= buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(position), "Exceeded array bounds.");
+
             messageLength = 2;
-            return (buffer[bufferPosition] - 128) | (buffer[bufferPosition + 1] << 7);
+            int value = buffer[position];
+            value ^= (short)(buffer[position + 1] << 7);
+            return (short)(value ^ 0x80);
         }
 
         /// <summary>
@@ -31,6 +40,9 @@ namespace Sttp.WireProtocol
         /// <returns>the number of bytes it took to encode this value. 1 or 2</returns>
         public static int Write(byte[] buffer, int position, int value)
         {
+            if (position >= buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(position), "Exceeded array bounds.");
+
             if (value < 0 || value > short.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(value), "Must be between 0 and 32767");
             if (value < 128)
@@ -38,7 +50,11 @@ namespace Sttp.WireProtocol
                 buffer[position] = (byte)value;
                 return 1;
             }
-            buffer[position] = (byte)(value & 127);
+
+            if (position + 1 >= buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(position), "Exceeded array bounds.");
+
+            buffer[position] = (byte)(value | 128);
             buffer[position + 1] = (byte)(value >> 7);
             return 2;
         }
