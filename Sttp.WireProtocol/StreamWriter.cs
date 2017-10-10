@@ -130,6 +130,7 @@ namespace Sttp.WireProtocol
             {
                 Grow();
             }
+
             Array.Copy(value.ToRfcBytes(), 0, Buffer, Position, 16);
             Position += 16;
             m_length = Position;

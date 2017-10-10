@@ -39,7 +39,7 @@ namespace Sttp.WireProtocol.Data.Raw
                     return m_useTable;
                 case MetadataCommand.AddTable:
                     m_addTable.TableName = m_stream.ReadString();
-                    m_addTable.TableFlags = (TableFlags)m_stream.ReadByte();
+                    m_addTable.TableFlags = m_stream.Read<TableFlags>();
                     m_addTable.MajorVersion = m_stream.ReadGuid();
                     m_addTable.MinorVersion = m_stream.ReadInt64();
                     return m_addTable;

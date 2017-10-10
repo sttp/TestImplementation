@@ -126,9 +126,6 @@ namespace Sttp
         public static byte[] ToRfcBytes(this Guid guid)
         {
             byte[] rv = new byte[16];
-            if (guid == Guid.Empty)
-                return rv;
-
             guid.ToRfcBytes(rv, 0);
             return rv;
         }
