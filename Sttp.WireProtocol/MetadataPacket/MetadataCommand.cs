@@ -112,6 +112,26 @@ namespace Sttp.WireProtocol
         GetTable,
 
         /// <summary>
+        /// Requests metadata from the specified table.
+        ///  
+        /// Payload: 
+        /// 
+        /// int columnListCount
+        /// (int,int)[] Array of (TableIndex, ColumnIndex)
+        /// int joinFieldsCount
+        /// (int,int,int)[] Array of (TableIndex, ColumnIndex, ForeignTableIndex) 
+        /// int filterExpressions
+        /// (int,int,string)[] Array of (TableIndex, ColumnIndex, Expression) filterExpressionStrings
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="UseTable"/>
+        /// <see cref="AddColumn"/>
+        /// <see cref="AddValue"/>
+        /// 
+        /// </summary>
+        GetQuery,
+
+        /// <summary>
         /// Requests that the specified table is synchronized with the local copy.
         /// 
         /// MajorVersion == Guid.Empty if the local table is blank.
