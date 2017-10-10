@@ -14,19 +14,15 @@ namespace Sttp.WireProtocol
         Invalid = 0x00,
 
         /// <summary>
-        /// Changes the active table
-        /// 
-        /// Payload:
-        /// int tableIndex
+        /// Clears the existing database.
         /// </summary>
-        UseTable,
+        Clear,
 
         /// <summary>
-        /// Adds or Replaces a table if it already exists.
+        /// Adds a table.
         /// 
         /// Payload: 
-        /// Guid majorVersion, 
-        /// long minorVersion, 
+        /// int tableIndex,
         /// string tableName, 
         /// TableFlags flags
         /// </summary>
@@ -36,6 +32,7 @@ namespace Sttp.WireProtocol
         /// Adds a column.
         /// 
         /// Payload: 
+        /// int tableIndex,
         /// int columnIndex, 
         /// string columnName, 
         /// ValueType columnType
@@ -47,6 +44,7 @@ namespace Sttp.WireProtocol
         /// Adds or updates a value. Deleting a value would be to assign it with null.
         /// 
         /// Payload: 
+        /// int tableIndex,
         /// int columnIndex, 
         /// int rowIndex, 
         /// byte[] value
@@ -58,22 +56,11 @@ namespace Sttp.WireProtocol
         /// Removes an entire row of data.
         /// 
         /// Payload: 
+        /// int tableIndex,
         /// int rowIndex,
         /// 
         /// </summary>
         DeleteRow,
-
-        /// <summary>
-        /// Indicates what the current version of a table is.
-        /// 
-        /// Payload:
-        /// int tableIndex
-        /// Guid majorVersion, 
-        /// long minorVersion, 
-        /// 
-        /// This is in response to <see cref="GetAllTableVersions"/>
-        /// </summary>
-        TableVersion,
 
         /// <summary>
         /// Adds a table relationship. Sometimes known as a foreign key relationship.
@@ -82,105 +69,106 @@ namespace Sttp.WireProtocol
         /// int tableIndex
         /// int columnIndex,
         /// int foreignTableIndex
-        /// 
-        /// This is in response to <see cref="GetAllTableVersions"/>
         /// </summary>
         AddRelationship,
+
+        /// <summary>
+        /// Indicates what the current version of a table is.
+        /// 
+        /// Payload:
+        /// Guid majorVersion, 
+        /// long minorVersion, 
+        /// </summary>
+        DatabaseVersion,
 
         #endregion
 
         #region [ Request Subscriber to Publisher ]
 
-        /// <summary>
-        /// Requests metadata from the specified table.
-        ///  
-        /// Payload: 
-        /// 
-        /// int tableIndex
-        /// int columnListCount
-        /// int[] columnIndexes
-        /// int filterExpressions
-        /// string[] filterExpressionStrings
-        /// 
-        /// Response is a series of these commands:
-        /// <see cref="AddTable"/>
-        /// <see cref="UseTable"/>
-        /// <see cref="AddColumn"/>
-        /// <see cref="AddValue"/>
-        /// 
-        /// </summary>
-        GetTable,
+        //ToDo: Add this in later.
+        ///// <summary>
+        ///// Requests metadata from the specified table.
+        /////  
+        ///// Payload: 
+        ///// 
+        ///// int tableIndex
+        ///// int columnListCount
+        ///// int[] columnIndexes
+        ///// int filterExpressions
+        ///// string[] filterExpressionStrings
+        ///// 
+        ///// Response is a series of these commands:
+        ///// <see cref="AddTable"/>
+        ///// <see cref="AddColumn"/>
+        ///// <see cref="AddValue"/>
+        ///// 
+        ///// </summary>
+        //GetTable,
+
+        ///// <summary>
+        ///// Requests metadata from the specified table.
+        /////  
+        ///// Payload: 
+        ///// 
+        ///// int columnListCount
+        ///// (int,int)[] Array of (TableIndex, ColumnIndex)
+        ///// int joinFieldsCount
+        ///// (int,int,int)[] Array of (TableIndex, ColumnIndex, ForeignTableIndex) 
+        ///// int filterExpressions
+        ///// (int,int,string)[] Array of (TableIndex, ColumnIndex, Expression) filterExpressionStrings
+        ///// 
+        ///// Response is a series of these commands:
+        ///// <see cref="AddColumn"/>
+        ///// <see cref="AddValue"/>
+        ///// 
+        ///// </summary>
+        //GetQuery,
 
         /// <summary>
-        /// Requests metadata from the specified table.
-        ///  
-        /// Payload: 
+        /// Requests the changes to the database since the specified version.
         /// 
-        /// int columnListCount
-        /// (int,int)[] Array of (TableIndex, ColumnIndex)
-        /// int joinFieldsCount
-        /// (int,int,int)[] Array of (TableIndex, ColumnIndex, ForeignTableIndex) 
-        /// int filterExpressions
-        /// (int,int,string)[] Array of (TableIndex, ColumnIndex, Expression) filterExpressionStrings
-        /// 
-        /// Response is a series of these commands:
-        /// <see cref="UseTable"/>
-        /// <see cref="AddColumn"/>
-        /// <see cref="AddValue"/>
-        /// 
-        /// </summary>
-        GetQuery,
-
-        /// <summary>
-        /// Requests that the specified table is synchronized with the local copy.
-        /// 
-        /// MajorVersion == Guid.Empty if the local table is blank.
+        /// MajorVersion == Guid.Empty if the local database is empty.
         /// 
         /// Payload: 
-        /// int tableIndex
         /// Guid majorVersion
         /// long minorVersion
         /// int columnListCount
-        /// int[] columnList
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        /// }
         /// 
         /// Response is a series of these commands:
         /// <see cref="AddTable"/> Note: Only if the table cannot be patched and a replacement is required.
-        /// <see cref="UseTable"/>
         /// <see cref="AddColumn"/>
         /// <see cref="AddValue"/>
         /// <see cref="DeleteRow"/>
-        /// <see cref="TableVersion"/>
+        /// <see cref="DatabaseVersion"/>
         /// 
         /// </summary>
-        SyncTable,
+        SyncDatabase,
 
         /// <summary>
-        /// Gets all of the tables with their columns
+        /// Gets the schema for the database, This is all tables and columns
         /// 
         /// Payload:
         /// None
         /// 
         /// Response is a series of these commands:
         /// <see cref="AddTable"/>
-        /// <see cref="UseTable"/>
         /// <see cref="AddColumn"/>
         /// 
         /// 
         /// </summary>
-        SelectAllTablesWithSchema,
+        GetDatabaseSchema,
 
         /// <summary>
-        /// Gets the version information for every table the user has access to.
+        /// Gets the current version of the database.
         /// 
         /// Payload:
         /// None
-        /// <see cref="AddTable"/>
-        /// 
-        /// Response is a series of these commands:
-        /// <see cref="TableVersion"/>
         /// </summary>
-        GetAllTableVersions,
-
+        GetDatabaseVersion,
 
         #endregion
 

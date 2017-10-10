@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.Data
 {
@@ -89,22 +90,28 @@ namespace Sttp.Data
             }
         }
 
-        public void AddColumn(MetadataColumn column)
+        public void AddColumn(int tableIndex, MetadataColumn column)
         {
             if (TrackChanges)
-                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddColumn(column.Index, column.Name, column.Type);
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddColumn(tableIndex, column.Index, column.Name, column.Type);
         }
 
-        public void AddValue(int columnIndex, int recordIndex, byte[] value)
+        public void AddValue(int tableIndex, int columnIndex, int recordIndex, byte[] value)
         {
             if (TrackChanges)
-                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddValue(columnIndex, recordIndex, value);
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddValue(tableIndex, columnIndex, recordIndex, value);
         }
 
-        public void DeleteRow(int rowIndex)
+        public void DeleteRow(int tableIndex, int rowIndex)
         {
             if (TrackChanges)
-                m_revisions[++MinorVersion] = MetadataChangeLogRecord.DeleteRow(rowIndex);
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.DeleteRow(tableIndex, rowIndex);
+        }
+
+        public void AddTable(int tableIndex, string tableName, TableFlags flags)
+        {
+            if (TrackChanges)
+                m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddTable(tableIndex, tableName, flags);
         }
     }
 }

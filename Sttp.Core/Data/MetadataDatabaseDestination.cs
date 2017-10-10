@@ -10,12 +10,12 @@ namespace Sttp.Data
     /// <summary>
     /// The set of all metadata used by the protocol.
     /// </summary>
-    public class MetadataSetDestination
+    public class MetadataDatabaseDestination
     {
         private Dictionary<string, int> m_tableLookup;
         private List<MetadataTableDestination> m_tables;
 
-        public MetadataSetDestination()
+        public MetadataDatabaseDestination()
         {
             m_tables = new List<MetadataTableDestination>();
             m_tableLookup = new Dictionary<string, int>();

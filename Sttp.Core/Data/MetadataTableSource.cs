@@ -8,28 +8,7 @@ namespace Sttp.Data
 {
     public class MetadataTableSource
     {
-        private MetadataChangeLog m_changeLog = new MetadataChangeLog();
-
-        /// <summary>
-        /// If logging is enabled, this is the ID for the transaction log.
-        /// </summary>
-        public Guid MajorVersion => m_changeLog.MajorVersion;
-
-        /// <summary>
-        /// This identifies the transaction number of the supplied log. 
-        /// </summary>
-        public long MinorVersion => m_changeLog.MinorVersion;
-
-        /// <summary>
-        /// Gets/Sets if transaction logging is supported for changes made to this data set.
-        /// It's recommended that this be turned off if large changes will occur to the set. 
-        /// </summary>
-        public bool TrackChanges
-        {
-            get => m_changeLog.TrackChanges;
-            set => m_changeLog.TrackChanges = value;
-        }
-
+        private MetadataChangeLog m_changeLog;
         /// <summary>
         /// The name of the table
         /// </summary>
@@ -59,8 +38,9 @@ namespace Sttp.Data
 
         public int TableIndex;
 
-        public MetadataTableSource(int tableIndex, string tableName, TableFlags tableFlags)
+        public MetadataTableSource(MetadataChangeLog changeLog, int tableIndex, string tableName, TableFlags tableFlags)
         {
+            m_changeLog = changeLog;
             TableIndex = tableIndex;
             TableName = tableName;
             TableFlags = tableFlags;
@@ -77,7 +57,7 @@ namespace Sttp.Data
             {
                 column = new MetadataColumn(Columns.Count, columnName, columnType);
                 Columns.Add(column);
-                m_changeLog.AddColumn(column);
+                m_changeLog.AddColumn(TableIndex, column);
                 m_columnLookup[columnName] = column.Index;
             }
         }
@@ -96,36 +76,21 @@ namespace Sttp.Data
                 row = new MetadataRow(rowIndex);
                 Rows[rowIndex] = row;
             }
-            row.FillData(m_changeLog, Columns[m_columnLookup[columnName]], value);
+            row.FillData(TableIndex, m_changeLog, Columns[m_columnLookup[columnName]], value);
         }
 
         public void DeleteRow(int rowIndex)
         {
             Rows[rowIndex] = null;
-            m_changeLog.DeleteRow(rowIndex);
+            m_changeLog.DeleteRow(TableIndex, rowIndex);
         }
 
-        public void RequestTableData(IMetadataEncoder encoder, Guid majorVersion, long minorVersion, MetadataTableFilter permissionFilter)
+        public void RequestTableData(IMetadataEncoder encoder, MetadataTableFilter permissionFilter)
         {
-            if (m_changeLog.TrySyncTableVersion(majorVersion, minorVersion, out List<MetadataChangeLogRecord> data))
-            {
-                encoder.UseTable(TableIndex);
-                foreach (var record in data)
-                {
-                    if (permissionFilter == null || permissionFilter.Permit(record))
-                    {
-                        record.Save(encoder);
-                    }
-                }
-                encoder.TableVersion(TableIndex, MajorVersion, MinorVersion);
-                return;
-            }
-
-            encoder.UseTable(TableIndex);
-            encoder.AddTable(MajorVersion, MinorVersion, TableName, TableFlags);
+            encoder.AddTable(TableIndex, TableName, TableFlags);
             foreach (var column in Columns)
             {
-                encoder.AddColumn(column.Index, column.Name, column.Type);
+                encoder.AddColumn(TableIndex, column.Index, column.Name, column.Type);
             }
             foreach (var row in Rows)
             {
@@ -136,7 +101,7 @@ namespace Sttp.Data
                         var field = row.Fields[columnIndex];
                         if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
                         {
-                            encoder.AddValue(columnIndex, row.RowIndex, field.Value);
+                            encoder.AddValue(TableIndex, columnIndex, row.RowIndex, field.Value);
                         }
                     }
                 }

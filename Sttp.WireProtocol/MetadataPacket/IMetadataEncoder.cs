@@ -10,12 +10,11 @@ namespace Sttp.WireProtocol.Data
 
         #region [ Response Publisher to Subscriber ]
 
-        void UseTable(int tableIndex);
-        void AddTable(Guid majorVersion, long minorVersion, string tableName, TableFlags tableFlags);
-        void AddColumn(int columnIndex, string columnName, ValueType columnType);
-        void AddValue(int columnIndex, int rowIndex, byte[] value);
-        void DeleteRow(int rowIndex);
-        void TableVersion(int tableIndex, Guid majorVersion, long minorVersion);
+        void AddTable(int tableIndex, string tableName, TableFlags tableFlags);
+        void AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType);
+        void AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value);
+        void DeleteRow(int tableIndex, int rowIndex);
+        void DatabaseVersion(Guid majorVersion, long minorVersion);
         void AddRelationship(int tableIndex, int columnIndex, int foreignTableIndex);
 
         #endregion
@@ -26,7 +25,6 @@ namespace Sttp.WireProtocol.Data
         void SyncTable(int tableIndex, Guid majorVersion, long minorVersion, int[] columnList);
         void SelectAllTablesWithSchema();
         void GetAllTableVersions();
-
 
         #endregion
 

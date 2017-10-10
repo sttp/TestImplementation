@@ -12,7 +12,7 @@ namespace Sttp.Tests
     public class MetadataTests
     {
         //private WireDecoder m_decoder;
-        private MetadataSetDestination m_testDestinationSet;
+        private MetadataDatabaseDestination m_testDestinationSet;
         private WireDecoder m_wireDecoder;
 
         [TestMethod]
@@ -26,10 +26,10 @@ namespace Sttp.Tests
             testTable.Rows.Add(0,"rowkey0");
             testSet.Tables.Add(testTable);
 
-            MetadataSetSource testSourceSet = new MetadataSetSource();
+            MetadataDatabaseSource testSourceSet = new MetadataDatabaseSource();
             m_wireDecoder = new WireDecoder();
 
-            m_testDestinationSet = new MetadataSetDestination();
+            m_testDestinationSet = new MetadataDatabaseDestination();
             WireEncoder encoder = new WireEncoder(1500);
             encoder.NewPacket += Encoder_NewPacket;
 
@@ -71,7 +71,7 @@ namespace Sttp.Tests
         }
 
 
-        public void UpdateDataSet(DataSet dataSet, MetadataSetSource set)
+        public void UpdateDataSet(DataSet dataSet, MetadataDatabaseSource set)
         {
             foreach (DataTable table in dataSet.Tables)
             {
@@ -93,7 +93,7 @@ namespace Sttp.Tests
             }
         }
 
-        public void VerifyDataset(DataSet dataSet, MetadataSetDestination set)
+        public void VerifyDataset(DataSet dataSet, MetadataDatabaseDestination set)
         {
             foreach (DataTable table in dataSet.Tables)
             {

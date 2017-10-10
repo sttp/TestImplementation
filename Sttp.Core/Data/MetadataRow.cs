@@ -16,7 +16,7 @@ namespace Sttp.Data
             Fields = new List<MetadataField>();
         }
 
-        internal void FillData(MetadataChangeLog changeLog, MetadataColumn column, object value)
+        internal void FillData(int tableIndex, MetadataChangeLog changeLog, MetadataColumn column, object value)
         {
             MetadataField field;
 
@@ -31,11 +31,11 @@ namespace Sttp.Data
                 field = new MetadataField();
                 Fields[column.Index] = field;
                 field.Value = encoding;
-                changeLog.AddValue(column.Index, RowIndex, encoding);
+                changeLog.AddValue(tableIndex, column.Index, RowIndex, encoding);
             }
             else if (!field.Value.SequenceEqual(encoding))
             {
-                changeLog.AddValue(column.Index, RowIndex, encoding);
+                changeLog.AddValue(tableIndex, column.Index, RowIndex, encoding);
                 field.Value = encoding;
             }
 

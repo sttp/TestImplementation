@@ -2,6 +2,7 @@ using Sttp.IO;
 using System;
 using System.IO;
 using Sttp.WireProtocol.Data;
+using Sttp.WireProtocol.MetadataPacket;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -10,6 +11,7 @@ namespace Sttp.Data
     {
         public MetadataChangeType ChangeType;
         private ValueType m_columnType;
+        private int m_tableIndex;
         private int m_columnIndex;
         private int m_rowIndex;
         private string m_columnName;
@@ -116,10 +118,11 @@ namespace Sttp.Data
             }
         }
 
-        public static MetadataChangeLogRecord AddColumn(int columnIndex, string columnName, ValueType columnType)
+        public static MetadataChangeLogRecord AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType)
         {
             return new MetadataChangeLogRecord()
             {
+                m_tableIndex = tableIndex,
                 ChangeType = MetadataChangeType.AddColumn,
                 m_columnName = columnName,
                 m_columnIndex = columnIndex,
@@ -127,10 +130,11 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataChangeLogRecord AddValue(int columnIndex, int rowIndex, byte[] value)
+        public static MetadataChangeLogRecord AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value)
         {
             return new MetadataChangeLogRecord()
             {
+                m_tableIndex = tableIndex,
                 ChangeType = MetadataChangeType.AddValue,
                 m_columnIndex = columnIndex,
                 m_rowIndex = rowIndex,
@@ -138,10 +142,11 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataChangeLogRecord DeleteRow(int rowIndex)
+        public static MetadataChangeLogRecord DeleteRow(int tableIndex, int rowIndex)
         {
             return new MetadataChangeLogRecord()
             {
+                m_tableIndex = tableIndex,
                 ChangeType = MetadataChangeType.DeleteRow,
                 m_rowIndex = rowIndex
             };
@@ -154,18 +159,22 @@ namespace Sttp.Data
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    encoder.AddColumn(m_columnIndex, m_columnName, m_columnType);
+                    encoder.AddColumn(m_tableIndex, m_columnIndex, m_columnName, m_columnType);
                     break;
                 case MetadataChangeType.AddValue:
-                    encoder.AddValue(m_columnIndex, m_rowIndex, m_value);
+                    encoder.AddValue(m_tableIndex, m_columnIndex, m_rowIndex, m_value);
                     break;
                 case MetadataChangeType.DeleteRow:
-                    encoder.DeleteRow(m_rowIndex);
+                    encoder.DeleteRow(m_tableIndex, m_rowIndex);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
 
+        public static MetadataChangeLogRecord AddTable(int tableIndex, string tableName, TableFlags flags)
+        {
+            throw new NotImplementedException();
         }
     }
 }

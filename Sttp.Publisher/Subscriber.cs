@@ -30,9 +30,9 @@ namespace Sttp.Publisher
         private bool m_enabled;
         private readonly WireEncoder m_wireEncoder;
         private readonly WireDecoder m_wireDecoder;
-        private MetadataSetSource m_metadata;
+        private MetadataDatabaseSource m_metadata;
 
-        internal Subscriber(dynamic tcpSocket, MetadataSetSource metadata)
+        internal Subscriber(dynamic tcpSocket, MetadataDatabaseSource metadata)
         {
             m_metadata = metadata;
             m_tcpSocket = tcpSocket;
