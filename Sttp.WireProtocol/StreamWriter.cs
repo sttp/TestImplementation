@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Sttp.WireProtocol.MetadataPacket;
 
@@ -10,13 +11,10 @@ namespace Sttp.WireProtocol
 
         public void Write(byte value)
         {
-            if (Position + 1 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(1);
             Buffer[Position] = value;
             Position++;
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void Write(bool value)
@@ -38,12 +36,9 @@ namespace Sttp.WireProtocol
 
         public void Write(short value)
         {
-            if (Position + 2 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(2);
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void Write(ushort value)
@@ -63,12 +58,9 @@ namespace Sttp.WireProtocol
 
         public void Write(int value)
         {
-            if (Position + 4 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(4);
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void Write(uint value)
@@ -87,12 +79,9 @@ namespace Sttp.WireProtocol
 
         public void Write(long value)
         {
-            if (Position + 8 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(8);
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void Write(ulong value)
@@ -116,24 +105,17 @@ namespace Sttp.WireProtocol
 
         public void Write(decimal value)
         {
-            if (Position + 16 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(16);
             Position += BigEndian.CopyBytes(value, Buffer, Position);
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void Write(Guid value)
         {
-            if (Position + 16 >= Buffer.Length)
-            {
-                Grow();
-            }
-
+            Grow(16);
             Array.Copy(value.ToRfcBytes(), 0, Buffer, Position, 16);
             Position += 16;
-            m_length = Position;
+            ExtendToPosition();
         }
 
         #endregion
@@ -146,10 +128,7 @@ namespace Sttp.WireProtocol
                 throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(value));
 
             // write null and empty
-            if (Position + 1 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(1);
 
             if (value == null)
             {
@@ -162,32 +141,25 @@ namespace Sttp.WireProtocol
                 return;
             }
 
-            while (Position + len + 3 >= Buffer.Length)
-            {
-                Grow();
-            }
-
+            Grow(len + 3);
             int length = value.Length + 1; //A length of 0 is null
 
             Position += uint22.Write(Buffer, Position, length); // write len
             Array.Copy(value, 0, Buffer, Position, value.Length); // write data
             Position += len;
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void WriteRaw(byte[] value)
         {
             Array.Copy(value, 0, Buffer, Position, value.Length); // write data
             Position += value.Length;
-            m_length = Position;
+            ExtendToPosition();
         }
 
         public void Write(string value)
         {
-            if (Position + 1 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(1);
 
             if (value == null)
             {
@@ -207,12 +179,25 @@ namespace Sttp.WireProtocol
 
         public void WriteInt15(int value)
         {
-            if (Position + 2 >= Buffer.Length)
-            {
-                Grow();
-            }
+            Grow(2);
             Position += uint15.Write(Buffer, Position, value);
-            m_length = Position;
+            ExtendToPosition();
+        }
+
+        public void WriteInt7Bit(int value)
+        {
+            uint u = *(uint*)&value;
+            WriteUInt7Bit(u);
+        }
+
+        public void WriteUInt7Bit(uint value)
+        {
+            int size = Encoding7Bit.GetSize(value);
+            Grow(size);
+
+            // position is incremented within method.
+            Encoding7Bit.Write(Buffer, ref Position, value);
+            ExtendToPosition();
         }
 
         #region Generics
@@ -226,14 +211,14 @@ namespace Sttp.WireProtocol
         {
             if (collection == null)
             {
-                WriteInt15(0);
+                Write((ushort)0);
                 return;
             }
 
             if (collection.Length > short.MaxValue)
                 throw new ArgumentOutOfRangeException(nameof(collection), "Length must be between 0 and 32767");
 
-            WriteInt15(collection.Length);
+            Write((ushort)collection.Length);
             for (int i = 0; i < collection.Length; i++)
             {
                 Write(collection[i]);

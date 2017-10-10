@@ -20,8 +20,6 @@ namespace Sttp.Tests
             m_reader = new StreamReader();
         }
 
-
-
         [DataTestMethod]
         [DataRow((byte)1)]
         [DataRow(byte.MaxValue)]
@@ -123,6 +121,35 @@ namespace Sttp.Tests
             m_writer.Write(testValue);
             m_reader.Fill(m_writer.ToArray(), 0, m_writer.Length);
             Assert.AreEqual(testValue, m_reader.ReadInt32());
+        }
+
+        [DataTestMethod]
+        [DataRow(-1)]
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(Int32.MaxValue)]
+        [DataRow(Int32.MinValue)]
+        [DataRow(Int32.MaxValue / 2 - 1)]
+        public void TestInt7Bit(Int32 testValue)
+        {
+            m_writer.Clear();
+            m_writer.WriteInt7Bit(testValue);
+            m_reader.Fill(m_writer.ToArray(), 0, m_writer.Length);
+            Assert.AreEqual(testValue, m_reader.ReadInt7Bit());
+        }
+
+        [DataTestMethod]
+        [DataRow(0U)]
+        [DataRow(1U)]
+        [DataRow(UInt32.MaxValue)]
+        [DataRow(UInt32.MinValue)]
+        [DataRow(UInt32.MaxValue / 2 - 1)]
+        public void TestUInt7Bit(UInt32 testValue)
+        {
+            m_writer.Clear();
+            m_writer.WriteUInt7Bit(testValue);
+            m_reader.Fill(m_writer.ToArray(), 0, m_writer.Length);
+            Assert.AreEqual(testValue, m_reader.ReadUInt7Bit());
         }
 
         [DataTestMethod]
