@@ -13,6 +13,14 @@ namespace Sttp.WireProtocol
 
         public int Length => m_length;
 
+        protected void ExtendToPosition()
+        {
+            if (Position > m_length)
+            {
+                m_length = Position;
+            }
+        }
+
         public void Clear()
         {
             Position = 0;
@@ -45,6 +53,14 @@ namespace Sttp.WireProtocol
             }
             m_length = m_length - Position;
             Position = 0;
+        }
+
+        protected void Grow(int neededBytes)
+        {
+            if (Position + neededBytes >= Buffer.Length)
+            {
+                Grow();
+            }
         }
 
         protected void Grow()

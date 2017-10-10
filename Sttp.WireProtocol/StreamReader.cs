@@ -170,12 +170,12 @@ namespace Sttp.WireProtocol
 
             if (length == 0)
             {
-                Position ++;
+                Position++;
                 return null;
             }
             if (length == 1)
             {
-                Position ++;
+                Position++;
                 return StreamBase.Empty;
             }
 
@@ -218,10 +218,46 @@ namespace Sttp.WireProtocol
         {
             EnsureCapacity(1);
 
-            int val =  uint15.Read(Buffer, Position, out int len);
+            int val = uint15.Read(Buffer, Position, out int len);
             Position += len;
 
             return val;
+        }
+
+        public int ReadInt7Bit()
+        {
+            uint u = ReadUInt7Bit();
+            return  *(int*)&u;
+        }
+
+        public uint ReadUInt7Bit()
+        {
+            Read7BitEnsureCapacity();
+            return Encoding7Bit.ReadUInt32(Buffer, ref Position);
+        }
+
+        private void Read7BitEnsureCapacity()
+        {
+            if (Buffer[Position] < 128)
+            {
+                return;
+            }
+            if (Buffer[Position + 1] < 128)
+            {
+                EnsureCapacity(1);
+                return;
+            }
+            if (Buffer[Position + 2] < 128)
+            {
+                EnsureCapacity(2);
+                return;
+            }
+            if (Buffer[Position + 3] < 128)
+            {
+                EnsureCapacity(3);
+                return;
+            }
+            EnsureCapacity(4);
         }
 
         #region Generics
@@ -233,7 +269,7 @@ namespace Sttp.WireProtocol
         /// <returns>Array of T[].</returns>
         public T[] ReadArray<T>()
         {
-            int length = ReadInt15();
+            int length = (int)ReadUInt16();
             var result = new T[length];
             for (int i = 0; i < length; i++)
             {
