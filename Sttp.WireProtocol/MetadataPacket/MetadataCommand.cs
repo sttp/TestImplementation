@@ -53,6 +53,16 @@ namespace Sttp.WireProtocol
         AddValue,
 
         /// <summary>
+        /// Adds a row to an existing table.
+        /// 
+        /// Payload: 
+        /// int tableIndex,
+        /// int rowIndex,
+        /// 
+        /// </summary>
+        AddRow,
+
+        /// <summary>
         /// Removes an entire row of data.
         /// 
         /// Payload: 
@@ -86,43 +96,57 @@ namespace Sttp.WireProtocol
         #region [ Request Subscriber to Publisher ]
 
         //ToDo: Add this in later.
-        ///// <summary>
-        ///// Requests metadata from the specified table.
-        /////  
-        ///// Payload: 
-        ///// 
-        ///// int tableIndex
-        ///// int columnListCount
-        ///// int[] columnIndexes
-        ///// int filterExpressions
-        ///// string[] filterExpressionStrings
-        ///// 
-        ///// Response is a series of these commands:
-        ///// <see cref="AddTable"/>
-        ///// <see cref="AddColumn"/>
-        ///// <see cref="AddValue"/>
-        ///// 
-        ///// </summary>
-        //GetTable,
+        /// <summary>
+        /// Requests metadata from the specified table.
+        ///  
+        /// Payload: 
+        /// Guid majorVersion
+        /// long minorVersion
+        /// int tableIndex
+        /// int columnListCount
+        /// int[] columnIndexes
+        /// int filterExpressions
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        ///     string Expression
+        /// }
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="AddTable"/>
+        /// <see cref="AddColumn"/>
+        /// <see cref="AddValue"/>
+        /// 
+        /// </summary>
+        SyncTable,
 
-        ///// <summary>
-        ///// Requests metadata from the specified table.
-        /////  
-        ///// Payload: 
-        ///// 
-        ///// int columnListCount
-        ///// (int,int)[] Array of (TableIndex, ColumnIndex)
-        ///// int joinFieldsCount
-        ///// (int,int,int)[] Array of (TableIndex, ColumnIndex, ForeignTableIndex) 
-        ///// int filterExpressions
-        ///// (int,int,string)[] Array of (TableIndex, ColumnIndex, Expression) filterExpressionStrings
-        ///// 
-        ///// Response is a series of these commands:
-        ///// <see cref="AddColumn"/>
-        ///// <see cref="AddValue"/>
-        ///// 
-        ///// </summary>
-        //GetQuery,
+        /// <summary>
+        /// Builds a custom query that can be synchronized with the main data source.
+        ///  
+        /// Payload: 
+        /// Guid majorVersion
+        /// long minorVersion
+        /// int columnListCount
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        /// }
+        /// int joinFieldsCount
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        ///     int ForeignTableIndex
+        /// }
+        /// int filterExpressions
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        ///     string Expression
+        /// }
+        /// 
+        /// Note: If any of the fields in the filter expressions or join columns change, this synchronization should fail.
+        /// </summary>
+        SyncQuery,
 
         /// <summary>
         /// Requests the changes to the database since the specified version.
