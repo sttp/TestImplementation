@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Sttp.WireProtocol.MetadataPacket;
@@ -223,6 +224,15 @@ namespace Sttp.WireProtocol
             {
                 Write(collection[i]);
             }
+        }
+
+        public void WriteList<T1, T2>(List<Tuple<T1, T2>> collection)
+        {
+
+        }
+        public void WriteList<T1, T2, T3>(List<Tuple<T1, T2, T3>> collection)
+        {
+
         }
 
         /// <summary>

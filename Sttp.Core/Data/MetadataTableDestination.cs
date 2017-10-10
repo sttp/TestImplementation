@@ -12,15 +12,7 @@ namespace Sttp.Data
 {
     public class MetadataTableDestination
     {
-        /// <summary>
-        /// If logging is enabled, this is the ID for the transaction log.
-        /// </summary>
-        public Guid MajorVersion;
 
-        /// <summary>
-        /// This identifies the transaction number of the supplied log. 
-        /// </summary>
-        public long MinorVersion;
 
         /// <summary>
         /// The name of the table
@@ -48,10 +40,8 @@ namespace Sttp.Data
         /// </summary>
         public int TableIndex;
 
-        public MetadataTableDestination(Guid majorVersion, long minorVersion, string tableName, int tableIndex, TableFlags tableFlags)
+        public MetadataTableDestination(string tableName, int tableIndex, TableFlags tableFlags)
         {
-            MajorVersion = majorVersion;
-            MinorVersion = minorVersion;
             TableName = tableName;
             TableIndex = tableIndex;
             TableFlags = tableFlags;
@@ -99,36 +89,36 @@ namespace Sttp.Data
                     }
                     Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnType);
                     break;
-                case MetadataCommand.AddValue:
-                    var addV = command as MetadataAddValueParams;
+                case MetadataCommand.AddRow:
+                    var addR = command as MetadataAddRowParams;
 
-                    while (Rows.Count <= addV.RowIndex)
+                    while (Rows.Count <= addR.RowIndex)
                     {
                         Rows.Add(null);
                     }
-                    if (Rows[addV.RowIndex] == null)
+                    if (Rows[addR.RowIndex] == null)
                     {
-                        Rows[addV.RowIndex] = new MetadataRow(addV.RowIndex);
+                        Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
                     }
+                    break;
+                case MetadataCommand.AddValue:
+                    var addV = command as MetadataAddValueParams;
                     Rows[addV.RowIndex].ProcessCommand(addV);
-
                     break;
                 case MetadataCommand.DeleteRow:
                     var delRow = command as MetadataDeleteRowParams;
                     Rows[delRow.RowIndex] = null;
                     break;
-                case MetadataCommand.TableVersion:
-                    var tbl = command as MetadataTableVersionParams;
-                    MajorVersion = tbl.MajorVersion;
-                    MinorVersion = tbl.MinorVersion;
-                    break;
-                case MetadataCommand.AddRelationship:
                 case MetadataCommand.AddTable:
-                case MetadataCommand.UseTable:
                 case MetadataCommand.GetTable:
-                case MetadataCommand.SyncTable:
-                case MetadataCommand.SelectAllTablesWithSchema:
-                case MetadataCommand.GetAllTableVersions:
+                case MetadataCommand.Invalid:
+                case MetadataCommand.Clear:
+                case MetadataCommand.DatabaseVersion:
+                case MetadataCommand.GetQuery:
+                case MetadataCommand.SyncDatabase:
+                case MetadataCommand.SyncTableOrQuery:
+                case MetadataCommand.GetDatabaseSchema:
+                case MetadataCommand.GetDatabaseVersion:
                     throw new NotSupportedException();
                 default:
                     throw new ArgumentOutOfRangeException();

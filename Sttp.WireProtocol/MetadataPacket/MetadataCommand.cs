@@ -41,6 +41,16 @@ namespace Sttp.WireProtocol
         AddColumn,
 
         /// <summary>
+        /// Adds a row to an existing table.
+        /// 
+        /// Payload: 
+        /// int tableIndex,
+        /// int rowIndex,
+        /// 
+        /// </summary>
+        AddRow,
+
+        /// <summary>
         /// Adds or updates a value. Deleting a value would be to assign it with null.
         /// 
         /// Payload: 
@@ -53,16 +63,6 @@ namespace Sttp.WireProtocol
         AddValue,
 
         /// <summary>
-        /// Adds a row to an existing table.
-        /// 
-        /// Payload: 
-        /// int tableIndex,
-        /// int rowIndex,
-        /// 
-        /// </summary>
-        AddRow,
-
-        /// <summary>
         /// Removes an entire row of data.
         /// 
         /// Payload: 
@@ -73,17 +73,7 @@ namespace Sttp.WireProtocol
         DeleteRow,
 
         /// <summary>
-        /// Adds a table relationship. Sometimes known as a foreign key relationship.
-        /// 
-        /// Payload:
-        /// int tableIndex
-        /// int columnIndex,
-        /// int foreignTableIndex
-        /// </summary>
-        AddRelationship,
-
-        /// <summary>
-        /// Indicates what the current version of a table is.
+        /// Indicates what the current version of the database is.
         /// 
         /// Payload:
         /// Guid majorVersion, 
@@ -97,17 +87,14 @@ namespace Sttp.WireProtocol
 
         //ToDo: Add this in later.
         /// <summary>
-        /// Requests metadata from the specified table.
+        /// Gets a table from the database.
         ///  
         /// Payload: 
-        /// Guid majorVersion
-        /// long minorVersion
         /// int tableIndex
         /// int columnListCount
         /// int[] columnIndexes
         /// int filterExpressions
         /// ForEach {
-        ///     int TableIndex,
         ///     int ColumnIndex,
         ///     string Expression
         /// }
@@ -118,14 +105,12 @@ namespace Sttp.WireProtocol
         /// <see cref="AddValue"/>
         /// 
         /// </summary>
-        SyncTable,
+        GetTable,
 
         /// <summary>
-        /// Builds a custom query that can be synchronized with the main data source.
+        /// Gets a custom query from the database.
         ///  
         /// Payload: 
-        /// Guid majorVersion
-        /// long minorVersion
         /// int columnListCount
         /// ForEach {
         ///     int TableIndex,
@@ -144,9 +129,8 @@ namespace Sttp.WireProtocol
         ///     string Expression
         /// }
         /// 
-        /// Note: If any of the fields in the filter expressions or join columns change, this synchronization should fail.
         /// </summary>
-        SyncQuery,
+        GetQuery,
 
         /// <summary>
         /// Requests the changes to the database since the specified version.
@@ -171,6 +155,36 @@ namespace Sttp.WireProtocol
         /// 
         /// </summary>
         SyncDatabase,
+
+        /// <summary>
+        /// Requests all changes to the database for the specified columns. If any of the critical columns
+        /// have changes, this request must be denied and the user will have to reacquire the table/query
+        /// 
+        /// MajorVersion == Guid.Empty if the local database is empty.
+        /// 
+        /// Payload: 
+        /// Guid majorVersion
+        /// long minorVersion
+        /// int columnListCount
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        /// }
+        /// int criticalColumns  //These are columns that exist as filter expressions or join columns.
+        /// ForEach {
+        ///     int TableIndex,
+        ///     int ColumnIndex,
+        /// }
+        /// 
+        /// Response is a series of these commands:
+        /// <see cref="AddTable"/> Note: Only if the table cannot be patched and a replacement is required.
+        /// <see cref="AddColumn"/>
+        /// <see cref="AddValue"/>
+        /// <see cref="DeleteRow"/>
+        /// <see cref="DatabaseVersion"/>
+        /// 
+        /// </summary>
+        SyncTableOrQuery,
 
         /// <summary>
         /// Gets the schema for the database, This is all tables and columns

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.Data.Raw
@@ -54,104 +55,122 @@ namespace Sttp.WireProtocol.Data.Raw
 
         #region [ Response Publisher to Subscriber ]
 
-        public void UseTable(int tableIndex)
+        public void Clear()
         {
-            EnsureCapacity(3);
-            m_stream.Write(MetadataCommand.UseTable);
-            m_stream.WriteInt15(tableIndex);
+            EnsureCapacity(1);
+            m_stream.Write(MetadataCommand.Clear);
         }
 
-        public void AddTable(Guid majorVersion, long minorVersion, string tableName, TableFlags tableFlags)
+        public void AddTable(int tableIndex, string tableName, TableFlags tableFlags)
         {
-            EnsureCapacity(1 + 16 + 8 + 3 + tableName.Length * 2 + 1);
-
+            EnsureCapacity(1 + 2 + 3 + tableName.Length * 2 + 1);
             m_stream.Write(MetadataCommand.AddTable);
+            m_stream.WriteInt15(tableIndex);
             m_stream.Write(tableName);
             m_stream.Write(tableFlags);
-            m_stream.Write(majorVersion);
-            m_stream.Write(minorVersion);
         }
 
-        public void AddColumn(int columnIndex, string columnName, ValueType columnType)
+        public void AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType)
         {
-            EnsureCapacity(1 + 2 + 3 + columnName.Length * 2 + 1);
+            EnsureCapacity(1 + 2 + 2 + 3 + columnName.Length * 2 + 1);
 
             m_stream.Write(MetadataCommand.AddColumn);
+            m_stream.WriteInt15(tableIndex);
             m_stream.WriteInt15(columnIndex);
             m_stream.Write(columnName);
             m_stream.Write(columnType);
         }
 
-        public void AddValue(int columnIndex, int rowIndex, byte[] value)
+        public void AddRow(int tableIndex, int rowIndex)
         {
-            EnsureCapacity(1 + 2 + 4 + 3 + (value?.Length ?? 0) * 2);
+            EnsureCapacity(5 + 2);
+            m_stream.Write(MetadataCommand.AddRow);
+            m_stream.WriteInt15(tableIndex);
+            m_stream.Write(rowIndex);
+        }
+
+        public void AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value)
+        {
+            EnsureCapacity(1 + 2 + 2 + 4 + 3 + (value?.Length ?? 0) * 2);
 
             m_stream.Write(MetadataCommand.AddValue);
+            m_stream.WriteInt15(tableIndex);
             m_stream.WriteInt15(columnIndex);
             m_stream.Write(rowIndex);
             m_stream.Write(value);
         }
 
-        public void DeleteRow(int rowIndex)
+        public void DeleteRow(int tableIndex, int rowIndex)
         {
-            EnsureCapacity(5);
+            EnsureCapacity(5 + 2);
             m_stream.Write(MetadataCommand.DeleteRow);
+            m_stream.WriteInt15(tableIndex);
             m_stream.Write(rowIndex);
         }
 
-        public void TableVersion(int tableIndex, Guid majorVersion, long minorVersion)
+        public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            EnsureCapacity(1 + 2 + 16 + 8);
-            m_stream.Write(MetadataCommand.TableVersion);
-            m_stream.WriteInt15(tableIndex);
+            EnsureCapacity(1 + 16 + 8);
+            m_stream.Write(MetadataCommand.DatabaseVersion);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
-        }
-
-        public void AddRelationship(int tableIndex, int columnIndex, int foreignTableIndex)
-        {
-            EnsureCapacity(1 + 2 + 2 + 2);
-            m_stream.Write(MetadataCommand.TableVersion);
-            m_stream.WriteInt15(tableIndex);
-            m_stream.WriteInt15(columnIndex);
-            m_stream.WriteInt15(foreignTableIndex);
         }
 
         #endregion
 
         #region [ Request Subscriber to Publisher ]
 
-        public void GetTable(int tableIndex, int[] columnList, string[] filterExpression)
+        public void GetTable(int tableIndex, int[] columnList, List<Tuple<int, string>> filterExpression)
         {
             EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
 
             m_stream.Write(MetadataCommand.GetTable);
             m_stream.WriteInt15(tableIndex);
             m_stream.WriteArray(columnList);
-            m_stream.WriteArray(filterExpression);
+            m_stream.WriteList(filterExpression);
         }
 
-        public void SyncTable(int tableIndex, Guid majorVersion, long minorVersion, int[] columnList)
+        public void GetQuery(List<Tuple<int, int>> columnList, List<Tuple<int, int, int>> joinFields, List<Tuple<int, int, string>> filterExpression)
         {
             EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
 
-            m_stream.Write(MetadataCommand.SyncTable);
-            m_stream.WriteInt15(tableIndex);
+            m_stream.Write(MetadataCommand.GetTable);
+            m_stream.WriteList(columnList);
+            m_stream.WriteList(joinFields);
+            m_stream.WriteList(filterExpression);
+        }
+
+        public void SyncDatabase(Guid majorVersion, long minorVersion, List<Tuple<int, int>> columnList)
+        {
+            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
+
+            m_stream.Write(MetadataCommand.SyncDatabase);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
-            m_stream.WriteArray(columnList);
+            m_stream.WriteList(columnList);
         }
 
-        public void SelectAllTablesWithSchema()
+        public void SyncTableOrQuery(Guid majorVersion, long minorVersion, List<Tuple<int, int>> columnList, List<Tuple<int, int>> criticalColumnList)
         {
-            EnsureCapacity(1);
-            m_stream.Write((byte)MetadataCommand.SelectAllTablesWithSchema);
+            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
+
+            m_stream.Write(MetadataCommand.SyncTableOrQuery);
+            m_stream.Write(majorVersion);
+            m_stream.Write(minorVersion);
+            m_stream.WriteList(columnList);
+            m_stream.WriteList(criticalColumnList);
         }
 
-        public void GetAllTableVersions()
+        public void GetDatabaseSchema()
         {
             EnsureCapacity(1);
-            m_stream.Write((byte)MetadataCommand.GetAllTableVersions);
+            m_stream.Write((byte)MetadataCommand.GetDatabaseSchema);
+        }
+
+        public void GetDatabaseVersion()
+        {
+            EnsureCapacity(1);
+            m_stream.Write((byte)MetadataCommand.GetDatabaseVersion);
         }
 
         #endregion

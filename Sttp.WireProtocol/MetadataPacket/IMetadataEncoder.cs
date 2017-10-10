@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.Data
@@ -10,21 +11,26 @@ namespace Sttp.WireProtocol.Data
 
         #region [ Response Publisher to Subscriber ]
 
+        void Clear();
         void AddTable(int tableIndex, string tableName, TableFlags tableFlags);
         void AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType);
+        void AddRow(int tableIndex, int rowIndex);
         void AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value);
         void DeleteRow(int tableIndex, int rowIndex);
         void DatabaseVersion(Guid majorVersion, long minorVersion);
-        void AddRelationship(int tableIndex, int columnIndex, int foreignTableIndex);
 
         #endregion
 
         #region [ Request Subscriber to Publisher ]
 
-        void GetTable(int tableIndex, int[] columnList, string[] filterExpression);
-        void SyncTable(int tableIndex, Guid majorVersion, long minorVersion, int[] columnList);
-        void SelectAllTablesWithSchema();
-        void GetAllTableVersions();
+        void GetTable(int tableIndex, int[] columnList, List<Tuple<int, string>> filterExpression);
+        void GetQuery(List<Tuple<int, int>> columnList, List<Tuple<int, int, int>> joinFields, List<Tuple<int, int, string>> filterExpression);
+
+        void SyncDatabase(Guid majorVersion, long minorVersion, List<Tuple<int, int>> columnList);
+        void SyncTableOrQuery(Guid majorVersion, long minorVersion, List<Tuple<int, int>> columnList, List<Tuple<int, int>> criticalColumnList);
+
+        void GetDatabaseSchema();
+        void GetDatabaseVersion();
 
         #endregion
 

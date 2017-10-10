@@ -1,10 +1,13 @@
-﻿namespace Sttp.WireProtocol.Data
+﻿using System;
+using System.Collections.Generic;
+
+namespace Sttp.WireProtocol.Data
 {
     public class MetadataGetTableParams : IMetadataParams
     {
         public MetadataCommand Command => MetadataCommand.GetTable;
         public int TableIndex;
         public int[] ColumnList;
-        public string[] FilterExpression;
+        public List<Tuple<int,string>> FilterExpression;
     }
 }

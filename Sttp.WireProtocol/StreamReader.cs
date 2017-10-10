@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Sttp.WireProtocol.MetadataPacket;
 
@@ -227,7 +228,7 @@ namespace Sttp.WireProtocol
         public int ReadInt7Bit()
         {
             uint u = ReadUInt7Bit();
-            return  *(int*)&u;
+            return *(int*)&u;
         }
 
         public uint ReadUInt7Bit()
@@ -262,6 +263,16 @@ namespace Sttp.WireProtocol
 
         #region Generics
 
+        public List<Tuple<T1, T2, T3>> ReadList<T1, T2, T3>()
+        {
+            return null;
+        }
+
+        public List<Tuple<T1, T2>> ReadList<T1, T2>()
+        {
+            return null;
+        }
+
         /// <summary>
         /// Generic interface for reading an Array of values.
         /// </summary>
@@ -278,6 +289,7 @@ namespace Sttp.WireProtocol
 
             return result;
         }
+
 
         /// <summary>
         /// Generic interface for reading data.
