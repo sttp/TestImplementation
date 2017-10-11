@@ -7,6 +7,11 @@ namespace Sttp.WireProtocol
 {
     public unsafe class StreamReader : StreamBase
     {
+        public StreamReader(ushort initialSize = 512) : base(initialSize)
+        {
+
+        }
+
         public int PendingBytes => m_length - Position;
 
         #region [ 1 byte values ]
@@ -165,39 +170,21 @@ namespace Sttp.WireProtocol
 
         public byte[] ReadBytes()
         {
-            EnsureCapacity(1);
-            int length = Buffer[Position];
-
-
+            int length = (int)ReadUInt7Bit();
             if (length == 0)
             {
-                Position++;
                 return null;
             }
             if (length == 1)
             {
-                Position++;
-                return StreamBase.Empty;
+                return Empty;
             }
 
-            if (length >= 128)
-            {
-                EnsureCapacity(3);
-                int pos = uint22.Read(Buffer, Position, out length);
-                EnsureCapacity(pos + (length - 1));
-                Position += pos;
-            }
-            else
-            {
-                EnsureCapacity(length);
-                Position++;
-            }
-
-            length--;
+            length--; // minus one, because 1 added to len before writing since (1) is used for empty.
+            EnsureCapacity(length);
 
             byte[] rv = new byte[length];
             Array.Copy(Buffer, Position, rv, 0, length);
-
             Position += length;
             return rv;
         }
@@ -283,7 +270,7 @@ namespace Sttp.WireProtocol
 
             for (int i = 0; i < length; i++)
             {
-                collection.Add(new Tuple<T1, T2, T3>(Read<T1>(), Read<T2>(),Read<T3>()));
+                collection.Add(new Tuple<T1, T2, T3>(Read<T1>(), Read<T2>(), Read<T3>()));
             }
 
             return collection;

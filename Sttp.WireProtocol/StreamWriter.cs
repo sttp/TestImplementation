@@ -3,12 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Sttp.IO;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
     public unsafe class StreamWriter : StreamBase
     {
+        public StreamWriter(ushort initialSize = 512) : base(initialSize)
+        {
+
+        }
+
         #region [ 1 byte values ]
 
         public void Write(byte value)
@@ -123,11 +129,38 @@ namespace Sttp.WireProtocol
         #endregion
 
         #region Variable Length Types
-        public void Write(byte[] value)
+
+        public void Write(System.IO.Stream stream, long start, int length)
         {
-            int len = value?.Length ?? 1;
-            if (len > 1024 * 1024)
-                throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(value));
+            if (length > 1024 * 1024)
+                throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
+
+            // write null and empty
+            Grow(1);
+
+            if (stream == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            if (length == 0)
+            {
+                Write((byte)1);
+                return;
+            }
+
+            Grow(Encoding7Bit.GetSize((uint)(length + 1)) + length);
+            WriteUInt7Bit((uint)(length + 1));
+
+            stream.Read(Buffer, Position, length);
+            Position += length;
+            ExtendToPosition();
+        }
+
+        public void Write(byte[] value, long start, int length)
+        {
+            if (length > 1024 * 1024)
+                throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
 
             // write null and empty
             Grow(1);
@@ -143,20 +176,17 @@ namespace Sttp.WireProtocol
                 return;
             }
 
-            Grow(len + 3);
-            int length = value.Length + 1; //A length of 0 is null
+            Grow(Encoding7Bit.GetSize((uint)(length + 1)) + length);
+            WriteUInt7Bit((uint)(length + 1));
 
-            Position += uint22.Write(Buffer, Position, length); // write len
-            Array.Copy(value, 0, Buffer, Position, value.Length); // write data
-            Position += len;
+            Array.Copy(value, start, Buffer, Position, length); // write data
+            Position += length;
             ExtendToPosition();
         }
 
-        public void WriteRaw(byte[] value)
+        public void Write(byte[] value)
         {
-            Array.Copy(value, 0, Buffer, Position, value.Length); // write data
-            Position += value.Length;
-            ExtendToPosition();
+            Write(value, 0, value?.Length ?? 0);
         }
 
         public void Write(string value)

@@ -6,12 +6,17 @@ namespace Sttp.WireProtocol
     public abstract class StreamBase
     {
         protected static readonly byte[] Empty = new byte[0];
-        internal byte[] Buffer = new byte[512];
+        internal byte[] Buffer;
 
         public int Position;
         protected int m_length;
 
         public int Length => m_length;
+
+        protected StreamBase(ushort initialSize = 512)
+        {
+            Buffer = initialSize > 0 ? new byte[initialSize] : new byte[512];
+        }
 
         protected void ExtendToPosition()
         {

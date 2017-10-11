@@ -18,9 +18,17 @@ namespace Sttp.Tests
         private MetadataEncoder m_encoder;
 
 
-        private void CompareCollection<T>(IList<T> a, IList<T> b)
+        public static void CompareCollection<T>(IList<T> a, IList<T> b)
         {
+            if (a == null && b == null)
+            {
+                Assert.IsNull(a);
+                Assert.IsNull(b);
+                return;
+            }
+
             Assert.AreEqual(a.Count, b.Count);
+            
 
             for (int i = 0; i < a.Count; i++)
             {
@@ -61,8 +69,8 @@ namespace Sttp.Tests
         }
 
         [DataTestMethod]
-        [DataRow(1, 0, "col1", WireProtocol.ValueType.Int32)]
-        public void TestAddColumn(int tableIndex, int columnIndex, string columnName, WireProtocol.ValueType columnType)
+        [DataRow(1, 0, "col1", Sttp.WireProtocol.ValueType.Int32)]
+        public void TestAddColumn(int tableIndex, int columnIndex, string columnName, Sttp.WireProtocol.ValueType columnType)
         {
             m_encoder.BeginCommand();
             m_encoder.AddColumn(tableIndex, columnIndex, columnName, columnType);
@@ -144,7 +152,7 @@ namespace Sttp.Tests
         [DataRow(1, new[] { 1, 2, 3 })]
         public void TestGetTable(int tableIndex, int[] columnList)
         {
-            var filterExpression = new List<Tuple<int, string>> {new Tuple<int, string>(1, "one"), new Tuple<int, string>(2, "two")};
+            var filterExpression = new List<Tuple<int, string>> { new Tuple<int, string>(1, "one"), new Tuple<int, string>(2, "two") };
 
             m_encoder.BeginCommand();
             m_encoder.GetTable(tableIndex, columnList, filterExpression);
