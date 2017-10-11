@@ -40,6 +40,11 @@ namespace Sttp.WireProtocol
                 BaseStreamOffset = 0
             };
 
+            if (gzip)
+            {
+                throw new NotImplementedException();
+            }
+
             var task = new Task<BulkTransportStreamTracking>(t =>
             {
                 var tracker = t as BulkTransportStreamTracking;
@@ -90,21 +95,21 @@ namespace Sttp.WireProtocol
         /// </summary>
         public Task<BulkTransportStreamTracking> SendStream(System.IO.Stream stream, BulkTransportMode mode, bool gzip, IProgress<long> progress = null, CancellationToken cancel = default(CancellationToken))
         {
-            if (gzip)
-            {
-                // wrap stream.
-                stream = new GZipStream(stream, CompressionMode.Compress, true);
-            }
 
             var streamTracker = new BulkTransportStreamTracking
             {
                 Id = Guid.NewGuid(),
                 IsGZip = gzip,
                 Mode = mode,
-                OriginalSize = stream.Length,
+                OriginalSize = stream.Length - stream.Position,
                 Position = stream.Position,
                 BaseStreamOffset = stream.Position
             };
+
+            if (gzip)
+            {
+                throw new NotImplementedException();
+            }
 
             var task = new Task<BulkTransportStreamTracking>(t =>
             {

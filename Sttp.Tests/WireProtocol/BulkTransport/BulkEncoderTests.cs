@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO.Compression;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sttp.IO;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.BulkTransportPacket;
 using MemoryStream = System.IO.MemoryStream;
@@ -65,10 +66,11 @@ namespace Sttp.Tests.WireProtocol.BulkTransport
             m_encoder = new BulkTransportEncoder(ReceivePacket);
         }
 
-        [TestMethod]
-        public void TestStream()
+        [DataTestMethod]
+        [DataRow(10000, false)]
+        [DataRow(10000, true)]
+        public void TestStream(int size, bool gzip)
         {
-            int size = 10000;
             var rand = new Random();
             var b = new byte[size];
             rand.NextBytes(b);
@@ -78,7 +80,7 @@ namespace Sttp.Tests.WireProtocol.BulkTransport
                 s.Write(b, 0, size);
                 s.Position = 0;
 
-                var t = m_encoder.SendStream(s, BulkTransportMode.DataPacket, false);
+                var t = m_encoder.SendStream(s, BulkTransportMode.DataPacket, gzip);
                 tracker = t.AsyncState as BulkTransportStreamTracking;
 
                 t.Wait();
