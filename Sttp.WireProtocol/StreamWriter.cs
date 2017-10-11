@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -203,6 +204,21 @@ namespace Sttp.WireProtocol
 
         #region Generics
 
+        private bool WriteCollectionHeader<T>(IList<T> collection)
+        {
+            if (collection == null)
+            {
+                Write((ushort)0);
+                return false;
+            }
+
+            if (collection.Count > short.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(collection), "Length must be between 0 and 32767");
+
+            Write((ushort)collection.Count);
+            return true;
+        }
+
         /// <summary>
         /// Writes a collection to the buffer.
         /// </summary>
@@ -210,29 +226,35 @@ namespace Sttp.WireProtocol
         /// <param name="collection"></param>
         public void WriteArray<T>(T[] collection)
         {
-            if (collection == null)
-            {
-                Write((ushort)0);
-                return;
-            }
+            if (!WriteCollectionHeader(collection)) return;
 
-            if (collection.Length > short.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(collection), "Length must be between 0 and 32767");
-
-            Write((ushort)collection.Length);
             for (int i = 0; i < collection.Length; i++)
             {
                 Write(collection[i]);
             }
         }
 
-        public void WriteList<T1, T2>(List<Tuple<T1, T2>> collection)
+        public void WriteList<T1, T2>(IList<Tuple<T1, T2>> collection)
         {
+            if (!WriteCollectionHeader(collection)) return;
 
+            for (var i = 0; i < collection.Count; i++)
+            {
+                Write(collection[i].Item1);
+                Write(collection[i].Item2);
+            }
         }
+
         public void WriteList<T1, T2, T3>(List<Tuple<T1, T2, T3>> collection)
         {
+            if (!WriteCollectionHeader(collection)) return;
 
+            for (var i = 0; i < collection.Count; i++)
+            {
+                Write(collection[i].Item1);
+                Write(collection[i].Item2);
+                Write(collection[i].Item3);
+            }
         }
 
         /// <summary>

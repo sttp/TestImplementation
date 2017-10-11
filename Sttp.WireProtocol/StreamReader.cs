@@ -263,14 +263,30 @@ namespace Sttp.WireProtocol
 
         #region Generics
 
-        public List<Tuple<T1, T2, T3>> ReadList<T1, T2, T3>()
-        {
-            return null;
-        }
-
         public List<Tuple<T1, T2>> ReadList<T1, T2>()
         {
-            return null;
+            int length = (int)ReadUInt16();
+            var collection = new List<Tuple<T1, T2>>();
+
+            for (int i = 0; i < length; i++)
+            {
+                collection.Add(new Tuple<T1, T2>(Read<T1>(), Read<T2>()));
+            }
+
+            return collection;
+        }
+
+        public List<Tuple<T1, T2, T3>> ReadList<T1, T2, T3>()
+        {
+            int length = (int)ReadUInt16();
+            var collection = new List<Tuple<T1, T2, T3>>();
+
+            for (int i = 0; i < length; i++)
+            {
+                collection.Add(new Tuple<T1, T2, T3>(Read<T1>(), Read<T2>(),Read<T3>()));
+            }
+
+            return collection;
         }
 
         /// <summary>
