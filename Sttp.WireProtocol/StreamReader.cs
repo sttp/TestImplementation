@@ -257,7 +257,10 @@ namespace Sttp.WireProtocol
 
             for (int i = 0; i < length; i++)
             {
-                collection.Add(new Tuple<T1, T2>(Read<T1>(), Read<T2>()));
+                T1 item1 = Read<T1>();
+                T2 item2 = Read<T2>();
+
+                collection.Add(new Tuple<T1, T2>(item1, item2));
             }
 
             return collection;
@@ -270,7 +273,11 @@ namespace Sttp.WireProtocol
 
             for (int i = 0; i < length; i++)
             {
-                collection.Add(new Tuple<T1, T2, T3>(Read<T1>(), Read<T2>(), Read<T3>()));
+                T1 item1 = Read<T1>();
+                T2 item2 = Read<T2>();
+                T3 item3 = Read<T3>();
+
+                collection.Add(new Tuple<T1, T2, T3>(item1, item2, item3));
             }
 
             return collection;
