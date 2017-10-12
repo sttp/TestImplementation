@@ -121,7 +121,6 @@ namespace Sttp.Tests
                     }
                 }
             }
-
         }
     }
 }

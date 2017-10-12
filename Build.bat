@@ -13,6 +13,8 @@ mkdir Test\Results
 if EXIST Test\Reports (rd /S /Q Test\Reports)
 mkdir Test\Reports
 
+IF NOT EXIST Test\History mkdir Test\Reports
+
 :: Restore Packages
 dotnet restore SttpPrototype.sln
 ::dotnet build SttpPrototype.sln
@@ -21,7 +23,7 @@ dotnet restore SttpPrototype.sln
 "%oc%" -oldstyle -register:user -target:"%dn%" -targetargs:"test --logger:trx;LogFileName=\"%~dp0\Test\Results\Sttp.Tests.trx\" /p:DebugType=full \"%~dp0\Sttp.Tests\Sttp.Tests.csproj\"" -filter:"+[*]* -[*]*Tests*" -excludebyattribute:"*.ExcludeFromCodeCoverage*" -output:"%~dp0\Test\Results\coverage-opencover-sttp.xml"
 
 :: Generate and Launch Report
-"%rg%" -reports:"%~dp0\Test\Results\coverage-opencover-sttp.xml" -targetdir:"%~dp0\Test\Reports"
+"%rg%" -reports:"%~dp0\Test\Results\coverage-opencover-sttp.xml" -targetdir:"%~dp0\Test\Reports" -historydir:"%~dp0\Test\History
 start "report" "%~dp0\Test\Reports\index.htm"
 
 :: done

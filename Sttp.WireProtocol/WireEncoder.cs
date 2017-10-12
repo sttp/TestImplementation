@@ -29,6 +29,8 @@ namespace Sttp.WireProtocol
 
         private NegotiateSessionEncoder m_negotiateSession;
 
+        private BulkTransportEncoder m_bulkEncoder;
+
         private CommandCode m_lastCode;
 
         /// <summary>
@@ -43,11 +45,23 @@ namespace Sttp.WireProtocol
             //m_dataPoint = new DataPointEncoder(SendPacket);
             //m_negotiateSession = new NegotiateSessionEncoder(SendPacket);
             m_metadata = new MetadataEncoder(SendNewPacket, m_autoFlushPacketSize);
+            m_bulkEncoder = new BulkTransportEncoder(SendNewPacket);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
         {
             NewPacket?.Invoke(buffer, position, length);
+        }
+
+        public BulkTransportEncoder BeginBulkTransferPacket()
+        {
+            if (m_lastCode != CommandCode.BulkTransport)
+            {
+                EndPacket();
+                m_lastCode = CommandCode.BulkTransport;
+            }
+            
+            return m_bulkEncoder;
         }
 
         public MetadataEncoder BeginMetadataPacket()
@@ -74,6 +88,8 @@ namespace Sttp.WireProtocol
                     return;
                 case CommandCode.Metadata:
                     m_metadata.EndCommand();
+                    return;
+                case CommandCode.BulkTransport:
                     return;
                 default:
                     throw new NotImplementedException("This command was not coded.");

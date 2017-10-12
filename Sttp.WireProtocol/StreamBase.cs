@@ -6,7 +6,7 @@ namespace Sttp.WireProtocol
     public abstract class StreamBase
     {
         protected static readonly byte[] Empty = new byte[0];
-        internal byte[] Buffer;
+        public byte[] Buffer;
 
         public int Position;
         protected int m_length;
@@ -44,6 +44,17 @@ namespace Sttp.WireProtocol
             m_length += length;
         }
 
+        public void Fill(Stream stream, int length)
+        {
+            while (length + m_length >= Buffer.Length)
+            {
+                Grow();
+            }
+
+            stream.Read(Buffer, 0, length);
+            m_length += length;
+        }
+
         protected void Fill()
         {
             throw new EndOfStreamException();
@@ -53,7 +64,7 @@ namespace Sttp.WireProtocol
         {
             if (Position > 0 && Position != m_length)
             {
-                //Compact
+                // Compact - trims all data before current position if position is in middle of stream
                 Array.Copy(Buffer, Position, Buffer, 0, m_length - Position);
             }
             m_length = m_length - Position;
@@ -80,6 +91,16 @@ namespace Sttp.WireProtocol
             byte[] rv = new byte[m_length];
             Array.Copy(Buffer, 0, rv, 0, m_length);
             return rv;
+        }
+
+        public void CopyTo(Array desination, int destinationPosition)
+        {
+            Array.Copy(Buffer, 0, desination, 0, m_length);
+        }
+
+        public void CopyTo(Stream stream)
+        {
+            stream.Write(Buffer, 0, m_length);
         }
     }
 }

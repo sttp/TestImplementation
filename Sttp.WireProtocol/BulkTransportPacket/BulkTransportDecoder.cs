@@ -14,29 +14,36 @@ namespace Sttp.WireProtocol
 
         public CommandCode CommandCode => CommandCode.BulkTransport;
 
-        public IBulkTransportParams Read(StreamReader buffer)
+        private StreamReader m_buffer;
+
+        public void Fill(StreamReader reader)
         {
-            if (buffer.Position == buffer.Length)
+            m_buffer = reader;
+        }
+
+        public IBulkTransportParams Read()
+        {
+            if (m_buffer.Position == m_buffer.Length)
                 return null;
 
-            BulkTransportCommand command = buffer.Read<BulkTransportCommand>();
+            BulkTransportCommand command = m_buffer.Read<BulkTransportCommand>();
 
             switch (command)
             {
                 case BulkTransportCommand.BeginBulkTransport:
-                    m_begin.Id = buffer.ReadGuid();
-                    m_begin.OriginalSize = buffer.ReadInt64();
-                    m_begin.Mode = buffer.Read<BulkTransportMode>();
-                    m_begin.IsGZip = buffer.ReadBoolean();
-                    m_begin.Content = buffer.ReadBytes();
+                    m_begin.Id = m_buffer.ReadGuid();
+                    m_begin.OriginalSize = m_buffer.ReadInt64();
+                    m_begin.Mode = m_buffer.Read<BulkTransportMode>();
+                    m_begin.IsGZip = m_buffer.ReadBoolean();
+                    m_begin.Content = m_buffer.ReadBytes();
                     return m_begin;
                 case BulkTransportCommand.CancelBulkTransport:
-                    m_cancel.Id = buffer.ReadGuid();
+                    m_cancel.Id = m_buffer.ReadGuid();
                     return m_cancel;
                 case BulkTransportCommand.SendFragment:
-                    m_fragment.Id = buffer.ReadGuid();
-                    m_fragment.Offset = buffer.ReadInt64();
-                    m_fragment.Content = buffer.ReadBytes();
+                    m_fragment.Id = m_buffer.ReadGuid();
+                    m_fragment.Offset = m_buffer.ReadInt64();
+                    m_fragment.Content = m_buffer.ReadBytes();
                     return m_fragment;
                 default:
                     throw new ArgumentOutOfRangeException();
