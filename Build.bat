@@ -4,7 +4,7 @@ CD %~dp0
 :: Executables
 set dn=C:\Program Files\dotnet\dotnet.exe
 set oc=%userprofile%\.nuget\packages\opencover\4.6.519\tools\OpenCover.Console.exe
-set rg=%userprofile%\.nuget\packages\reportgenerator\3.0.1\tools\ReportGenerator.exe
+set rg=%userprofile%\.nuget\packages\reportgenerator\3.0.2\tools\ReportGenerator.exe
 
 :: Set Up Directories
 if EXIST Test\Results (rd /S /Q Test\Results)

@@ -3,7 +3,7 @@
 namespace Sttp.WireProtocol
 {
     [Flags]
-    public enum TimeQualityFlags
+    public enum TimeQualityFlags : byte
     {
         None = 0,
         TimeQualityMask = 0xF,          // Mask for TimeQuality

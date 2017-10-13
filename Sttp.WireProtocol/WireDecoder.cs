@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
         private DataPointDecoder m_dataPointDecoder;
         private NegotiateSessionDecoder m_negotiateSessionDecoder;
         private SubscriptionDecoder m_subscriptionDecoder;
-
+        private BulkTransportDecoder m_bulkDecoder;
         private StreamReader m_buffer = new StreamReader();
 
         public WireDecoder()
@@ -23,6 +23,7 @@ namespace Sttp.WireProtocol
             m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSessionDecoder = new NegotiateSessionDecoder();
             m_subscriptionDecoder = new SubscriptionDecoder();
+            m_bulkDecoder = new BulkTransportDecoder();
         }
 
         /// <summary>
@@ -66,6 +67,9 @@ namespace Sttp.WireProtocol
                 case CommandCode.Metadata:
                     m_metadataDecoder.Fill(m_buffer);
                     return m_metadataDecoder;
+                case CommandCode.BulkTransport:
+                    m_bulkDecoder.Fill(m_buffer);
+                    return m_bulkDecoder;
                 case CommandCode.Subscribe:
                     m_subscriptionDecoder.Fill(m_buffer);
                     return m_subscriptionDecoder;

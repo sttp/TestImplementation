@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol.Codec.DataPointPacket
 {
-    public enum DataPointCommand
+    public enum DataPointCommand : byte
     {
         /// <summary>
         /// Map a new runtime point id.

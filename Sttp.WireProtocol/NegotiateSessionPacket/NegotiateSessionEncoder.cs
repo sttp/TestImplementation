@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
             m_baseEncoder = baseEncoder;
         }
 
-        public enum EncryptionOptions
+        public enum EncryptionOptions : byte
         {
             /// <summary>
             /// A TLS 1.2 channel, requiring only a client certificate
@@ -40,7 +40,7 @@ namespace Sttp.WireProtocol
             None,
         }
 
-        public enum AuthenticationOptions
+        public enum AuthenticationOptions : byte
         {
             None,
 

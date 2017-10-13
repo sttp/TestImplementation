@@ -3,7 +3,7 @@
     /// <summary>
     /// Flags associated with Metadata Tables
     /// </summary>
-    public enum TableFlags
+    public enum TableFlags : byte
     {
         None,
         /// <summary>

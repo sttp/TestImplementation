@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Core;
 using Sttp.IO;
@@ -16,8 +19,8 @@ namespace Sttp.Tests.WireProtocol.BulkTransport
     {
         private WireDecoder m_wireDecoder;
         private WireEncoder m_wireEncoder;
-        
 
+        private AutoResetEvent finished;
         private BulkTransportSender m_btx;
         private BulkTransportReceiver m_brx;
 
@@ -29,12 +32,36 @@ namespace Sttp.Tests.WireProtocol.BulkTransport
         [TestInitialize]
         public void Init()
         {
+            finished = new AutoResetEvent(false);
             m_wireDecoder = new WireDecoder();
 
             m_wireEncoder = new WireEncoder(1500);
             m_wireEncoder.NewPacket += Encoder_NewPacket;
-
+            m_btx = new BulkTransportSender(m_wireEncoder.BeginBulkTransferPacket());
             m_brx = new BulkTransportReceiver();
+            m_brx.OnStreamFinished += BulkTransportReceiver_OnStreamFinished;
+        }
+
+        private void BulkTransportReceiver_OnStreamFinished(object sender, EventArgs<Guid> e)
+        {
+            var r = sender as BulkTransportReceiver;
+            Assert.IsNotNull(r);
+
+            var streamParams = r.ActiveStreams[e.Argument];
+
+            var stream = streamParams.Item2;
+            stream.Position = 0;
+
+            if (streamParams.Item1.Compression == BulkTransportCompression.GZipStream)
+            {
+                stream = new GZipStream(stream, CompressionMode.Decompress, true);
+            }
+
+            receivedData = new byte[(int)streamParams.Item1.OriginalSize];
+            stream.Read(receivedData, 0, (int)streamParams.Item1.OriginalSize);
+
+            stream?.Close();
+            r.DisposeStream(streamParams.Item1.Id);
         }
 
         private void Encoder_NewPacket(byte[] data, int position, int length)
@@ -64,39 +91,43 @@ namespace Sttp.Tests.WireProtocol.BulkTransport
         }
 
         [DataTestMethod]
-        [DataRow(10000, false)]
-        [DataRow(10000, true)]
-        public void TestStream(int size, bool gzip)
+        [DataRow(10000, BulkTransportCompression.None)]
+        [DataRow(10000, BulkTransportCompression.GZipPacket)]
+        [DataRow(10000, BulkTransportCompression.GZipStream)]
+        [DataRow(1024 * 1024, BulkTransportCompression.None)]
+        [DataRow(1024 * 1024, BulkTransportCompression.GZipPacket)]
+        [DataRow(1024 * 1024, BulkTransportCompression.GZipStream)]
+        public void TestStream(int size, BulkTransportCompression compression)
         {
             var rand = new Random();
             var b = new byte[size];
             rand.NextBytes(b);
 
-            using (var s = new MemoryStream())
+            using (var s = new MemoryStream(b))
             {
-                s.Write(b, 0, size);
-                s.Position = 0;
-
-                var t = m_btx.SendStream(s, BulkTransportMode.DataPacket, gzip);
+                var t = m_btx.SendStream(s, BulkTransportMode.DataPacket, compression);
                 tracker = t.AsyncState as BulkTransportStreamTracking;
 
                 t.Wait();
             }
 
             MetadataEncoderTests.CompareCollection(b, receivedData);
-
         }
 
         [DataTestMethod]
-        [DataRow(10000, false)]
-        [DataRow(10000, true)]
-        public void TestRaw(int size, bool gzip)
+        [DataRow(10000, BulkTransportCompression.None)]
+        [DataRow(10000, BulkTransportCompression.GZipPacket)]
+        [DataRow(10000, BulkTransportCompression.GZipStream)]
+        [DataRow(1024 * 1024, BulkTransportCompression.None)]
+        [DataRow(1024 * 1024, BulkTransportCompression.GZipPacket)]
+        [DataRow(1024 * 1024, BulkTransportCompression.GZipStream)]
+        public void TestRaw(int size, BulkTransportCompression compression)
         {
             var rand = new Random();
             var b = new byte[size];
             rand.NextBytes(b);
 
-            var t = m_btx.SendRaw(b, BulkTransportMode.DataPacket, false);
+            var t = m_btx.SendRaw(b, BulkTransportMode.DataPacket, compression, new Progress<int>(p => Debug.WriteLine($"Progress: {p} %")));
             tracker = t.AsyncState as BulkTransportStreamTracking;
 
             t.Wait();

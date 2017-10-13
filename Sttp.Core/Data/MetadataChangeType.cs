@@ -1,6 +1,6 @@
 ﻿namespace Sttp.Data
 {
-    public enum MetadataChangeType
+    public enum MetadataChangeType : byte
     {
         AddColumn,
         AddValue,

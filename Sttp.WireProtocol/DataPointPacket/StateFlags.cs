@@ -3,7 +3,7 @@
 namespace Sttp.WireProtocol
 {
     [Flags]
-    public enum StateFlags
+    public enum StateFlags : ushort
     {
         TimestampTypeMask = 0x3,      // Mask for TimestampType
         Quality = 1 << 2,             // State includes QualityFlags

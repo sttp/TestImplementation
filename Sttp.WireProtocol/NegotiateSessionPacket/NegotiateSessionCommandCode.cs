@@ -1,7 +1,7 @@
 
 namespace Sttp.WireProtocol
 {
-    public enum NegotiateSessionCommandCode
+    public enum NegotiateSessionCommandCode : byte
     {
         /// <summary>
         /// Changes the default instance name for subscribing from.

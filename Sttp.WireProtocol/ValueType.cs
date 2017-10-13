@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol
 {
-    public enum ValueType
+    public enum ValueType : byte
     {
         // SEC: I'm having a hard time understanding why a point that can only contain null values would be useful.
         // JRC: Time and state are valid quantities even without a measured value.

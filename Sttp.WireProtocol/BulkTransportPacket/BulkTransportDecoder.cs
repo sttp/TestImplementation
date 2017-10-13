@@ -32,9 +32,9 @@ namespace Sttp.WireProtocol
             {
                 case BulkTransportCommand.BeginBulkTransport:
                     m_begin.Id = m_buffer.ReadGuid();
-                    m_begin.OriginalSize = m_buffer.ReadInt64();
                     m_begin.Mode = m_buffer.Read<BulkTransportMode>();
-                    m_begin.IsGZip = m_buffer.ReadBoolean();
+                    m_begin.Compression = m_buffer.Read<BulkTransportCompression>();
+                    m_begin.OriginalSize = m_buffer.ReadInt64();
                     m_begin.Content = m_buffer.ReadBytes();
                     return m_begin;
                 case BulkTransportCommand.CancelBulkTransport:
@@ -42,7 +42,7 @@ namespace Sttp.WireProtocol
                     return m_cancel;
                 case BulkTransportCommand.SendFragment:
                     m_fragment.Id = m_buffer.ReadGuid();
-                    m_fragment.Offset = m_buffer.ReadInt64();
+                    m_fragment.BytesRemaining = m_buffer.ReadInt64();
                     m_fragment.Content = m_buffer.ReadBytes();
                     return m_fragment;
                 default:
@@ -60,9 +60,9 @@ namespace Sttp.WireProtocol
     {
         public BulkTransportCommand Command => BulkTransportCommand.BeginBulkTransport;
         public Guid Id;
-        public long OriginalSize;
         public BulkTransportMode Mode;
-        public bool IsGZip;
+        public BulkTransportCompression Compression;
+        public long OriginalSize;
         public byte[] Content;
     }
 
@@ -76,7 +76,7 @@ namespace Sttp.WireProtocol
     {
         public BulkTransportCommand Command => BulkTransportCommand.SendFragment;
         public Guid Id;
-        public long Offset;
+        public long BytesRemaining;
         public byte[] Content;
     }
 }
