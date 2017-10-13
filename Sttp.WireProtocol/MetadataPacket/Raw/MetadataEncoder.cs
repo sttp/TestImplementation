@@ -107,7 +107,7 @@ namespace Sttp.WireProtocol.Data.Raw
         {
             EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
 
-            m_stream.Write(MetadataCommand.GetTable);
+            m_stream.Write(MetadataCommand.GetQuery);
             m_stream.WriteList(columnList);
             m_stream.WriteList(joinFields);
             m_stream.WriteList(filterExpression);

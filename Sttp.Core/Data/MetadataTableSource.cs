@@ -96,6 +96,7 @@ namespace Sttp.Data
             {
                 if (permissionFilter == null || permissionFilter.PermitRow(row))
                 {
+                    encoder.AddRow(TableIndex, row.RowIndex);
                     for (var columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
                     {
                         var field = row.Fields[columnIndex];

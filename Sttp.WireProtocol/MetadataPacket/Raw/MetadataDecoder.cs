@@ -73,7 +73,6 @@ namespace Sttp.WireProtocol.Data.Raw
                     m_getTable.FilterExpression = m_stream.ReadList<int, string>();
                     return m_getTable;
                 case MetadataCommand.GetQuery:
-                    m_getQuery.TableIndex = m_stream.ReadInt15();
                     m_getQuery.ColumnList = m_stream.ReadList<int, int>();
                     m_getQuery.JoinFields = m_stream.ReadList<int, int, int>();
                     m_getQuery.FilterExpression = m_stream.ReadList<int, int, string>();

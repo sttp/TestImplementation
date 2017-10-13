@@ -75,7 +75,7 @@ namespace Sttp.Data
                         m_tables[(command as MetadataAddRowParams).TableIndex].ProcessCommand(command);
                         break;
                     case MetadataCommand.DatabaseVersion:
-                        var db = decoder as MetadataDatabaseVersionParams;
+                        var db = command as MetadataDatabaseVersionParams;
                         MajorVersion = db.MajorVersion;
                         MinorVersion = db.MinorVersion;
                         break;
