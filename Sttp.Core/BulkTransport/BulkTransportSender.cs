@@ -118,7 +118,7 @@ namespace Sttp.Core
                 {
                     if (cancel.IsCancellationRequested)
                     {
-                        m_encoder.CancelCommand(tracker.Id);
+                        m_encoder.CancelSend(tracker.Id);
                         throw new OperationCanceledException(cancel);
                     }
                     
@@ -162,7 +162,7 @@ namespace Sttp.Core
     }
 
 
-    public class BulkTransportStreamTracking : BulkTransportBeginParams
+    public class BulkTransportStreamTracking : BulkTransportBeginSendParams
     {
         public long Position;
         public long BaseStreamOffset;

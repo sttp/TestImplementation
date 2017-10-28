@@ -13,9 +13,9 @@ namespace Sttp.Core
         #region Temporary for testing
         public event EventHandler<EventArgs<Guid>> OnStreamFinished;
 
-        private Dictionary<Guid, Tuple<BulkTransportBeginParams, Stream>> _activeStreams = new Dictionary<Guid, Tuple<BulkTransportBeginParams, Stream>>();
+        private Dictionary<Guid, Tuple<BulkTransportBeginSendParams, Stream>> _activeStreams = new Dictionary<Guid, Tuple<BulkTransportBeginSendParams, Stream>>();
 
-        public Dictionary<Guid, Tuple<BulkTransportBeginParams, Stream>> ActiveStreams => _activeStreams;
+        public Dictionary<Guid, Tuple<BulkTransportBeginSendParams, Stream>> ActiveStreams => _activeStreams;
 
         #endregion Temporary for testing
 
@@ -30,10 +30,10 @@ namespace Sttp.Core
             {
                 switch (command.Command)
                 {
-                    case BulkTransportCommand.BeginBulkTransport:
+                    case BulkTransportCommand.BeginSend:
                         {
-                            var begin = (command as BulkTransportBeginParams);
-                            var stream = new Tuple<BulkTransportBeginParams, Stream>(begin, CreateOutputStream(begin.Id, begin.OriginalSize, ".sttp_rx"));
+                            var begin = (command as BulkTransportBeginSendParams);
+                            var stream = new Tuple<BulkTransportBeginSendParams, Stream>(begin, CreateOutputStream(begin.Id, begin.OriginalSize, ".sttp_rx"));
                             lock (ActiveStreams)
                             {
                                 ActiveStreams[begin.Id] = stream;
@@ -49,7 +49,7 @@ namespace Sttp.Core
                             }
                         }
                         break;
-                    case BulkTransportCommand.CancelBulkTransport:
+                    case BulkTransportCommand.CancelSend:
                         {
                             var cancel = (command as BulkTransportSendFragmentParams);
                             DisposeStream(cancel.Id);
@@ -58,7 +58,7 @@ namespace Sttp.Core
                     case BulkTransportCommand.SendFragment:
                         {
                             var fragment = (command as BulkTransportSendFragmentParams);
-                            if (ActiveStreams.TryGetValue(fragment.Id, out Tuple<BulkTransportBeginParams, Stream> stream))
+                            if (ActiveStreams.TryGetValue(fragment.Id, out Tuple<BulkTransportBeginSendParams, Stream> stream))
                             {
                                 int size = AppendDataToStream(stream, fragment.Content);
                                 if (fragment.BytesRemaining - size <= 0)
@@ -83,7 +83,7 @@ namespace Sttp.Core
         public void DisposeStream(Guid id)
         {
 
-            if (ActiveStreams.TryGetValue(id, out Tuple<BulkTransportBeginParams, Stream> stream))
+            if (ActiveStreams.TryGetValue(id, out Tuple<BulkTransportBeginSendParams, Stream> stream))
             {
                 lock (ActiveStreams)
                 {
@@ -114,7 +114,7 @@ namespace Sttp.Core
         }
 
 
-        private static int AppendDataToStream(Tuple<BulkTransportBeginParams, Stream> stream, byte[] content)
+        private static int AppendDataToStream(Tuple<BulkTransportBeginSendParams, Stream> stream, byte[] content)
         {
             switch (stream.Item1.Compression)
             {

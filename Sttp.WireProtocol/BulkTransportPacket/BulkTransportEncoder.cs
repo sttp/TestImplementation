@@ -26,19 +26,7 @@ namespace Sttp.WireProtocol
         public void SendBegin(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, long position, int length)
         {
             BeginCommand();
-            m_stream.Write(BulkTransportCommand.BeginBulkTransport);
-            m_stream.Write(id);
-            m_stream.Write(mode);
-            m_stream.Write(compression);
-            m_stream.Write(originalSize);
-            m_stream.Write(source, position, length);
-            EndCommand();
-        }
-
-        public void SendBegin(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, Stream source, long position, int length)
-        {
-            BeginCommand();
-            m_stream.Write(BulkTransportCommand.BeginBulkTransport);
+            m_stream.Write(BulkTransportCommand.BeginSend);
             m_stream.Write(id);
             m_stream.Write(mode);
             m_stream.Write(compression);
@@ -57,20 +45,10 @@ namespace Sttp.WireProtocol
             EndCommand();
         }
 
-        public void SendFragment(Guid id, long bytesRemaining, System.IO.Stream content, long position, int length)
+        public void CancelSend(Guid id)
         {
             BeginCommand();
-            m_stream.Write(BulkTransportCommand.SendFragment);
-            m_stream.Write(id);
-            m_stream.Write(bytesRemaining);
-            m_stream.Write(content, position, length);
-            EndCommand();
-        }
-
-        public void CancelCommand(Guid id)
-        {
-            BeginCommand();
-            m_stream.Write(BulkTransportCommand.CancelBulkTransport);
+            m_stream.Write(BulkTransportCommand.CancelSend);
             m_stream.Write(id);
             EndCommand();
         }

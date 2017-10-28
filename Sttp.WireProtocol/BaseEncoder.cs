@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.Data.Raw
+namespace Sttp.WireProtocol
 {
     public abstract class BaseEncoder
     {

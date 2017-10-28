@@ -8,8 +8,8 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class BulkTransportDecoder : IPacketDecoder
     {
-        private BulkTransportBeginParams m_begin = new BulkTransportBeginParams();
-        private BulkTransportCancelParams m_cancel = new BulkTransportCancelParams();
+        private BulkTransportBeginSendParams m_beginSend = new BulkTransportBeginSendParams();
+        private BulkTransportCancelSendParams m_cancelSend = new BulkTransportCancelSendParams();
         private BulkTransportSendFragmentParams m_fragment = new BulkTransportSendFragmentParams();
 
         public CommandCode CommandCode => CommandCode.BulkTransport;
@@ -30,16 +30,16 @@ namespace Sttp.WireProtocol
 
             switch (command)
             {
-                case BulkTransportCommand.BeginBulkTransport:
-                    m_begin.Id = m_buffer.ReadGuid();
-                    m_begin.Mode = m_buffer.Read<BulkTransportMode>();
-                    m_begin.Compression = m_buffer.Read<BulkTransportCompression>();
-                    m_begin.OriginalSize = m_buffer.ReadInt64();
-                    m_begin.Content = m_buffer.ReadBytes();
-                    return m_begin;
-                case BulkTransportCommand.CancelBulkTransport:
-                    m_cancel.Id = m_buffer.ReadGuid();
-                    return m_cancel;
+                case BulkTransportCommand.BeginSend:
+                    m_beginSend.Id = m_buffer.ReadGuid();
+                    m_beginSend.Mode = m_buffer.Read<BulkTransportMode>();
+                    m_beginSend.Compression = m_buffer.Read<BulkTransportCompression>();
+                    m_beginSend.OriginalSize = m_buffer.ReadInt64();
+                    m_beginSend.Content = m_buffer.ReadBytes();
+                    return m_beginSend;
+                case BulkTransportCommand.CancelSend:
+                    m_cancelSend.Id = m_buffer.ReadGuid();
+                    return m_cancelSend;
                 case BulkTransportCommand.SendFragment:
                     m_fragment.Id = m_buffer.ReadGuid();
                     m_fragment.BytesRemaining = m_buffer.ReadInt64();

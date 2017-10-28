@@ -18,12 +18,22 @@ namespace Sttp.WireProtocol.BulkTransportPacket
         /// 
         /// Payload:
         /// Guid ID,
+        /// BulkTransportMode mode,
+        /// BulkTransportCompression compression,
         /// ulong OrigionalSize,
-        /// Enum Mode: {Data Packet; Metadata packet; Internal Fragment; User Defined}
-        /// bool isGzip
         /// byte[] Data
         /// </summary>
-        BeginBulkTransport,
+        BeginSend,
+
+        /// <summary>
+        /// Sends a fragment for the previously defined bulk transport. Maximum bytes sent per command is 1000 bytes
+        /// 
+        /// Payload: 
+        /// Guid ID,
+        /// ulong bytesRemaining 
+        /// byte[] Data
+        /// </summary>
+        SendFragment,
 
         /// <summary>
         /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
@@ -31,18 +41,7 @@ namespace Sttp.WireProtocol.BulkTransportPacket
         /// Payload: 
         /// Guid ID,
         /// </summary>
-        CancelBulkTransport,
-
-        /// <summary>
-        /// Sends a fragment for the previously defined bulk transport. Maximum bytes sent per command is 1000 bytes
-        /// 
-        /// Payload: 
-        /// Guid ID,
-        /// ulong Offset 
-        /// byte[] Data
-        /// </summary>
-        SendFragment
-
+        CancelSend,
     }
 
     public enum BulkTransportMode : byte
