@@ -1,7 +1,6 @@
 ﻿using System;
 using Sttp.WireProtocol.Codec.DataPointPacket;
 using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.Data.Raw;
 
 namespace Sttp.WireProtocol
 {
@@ -10,7 +9,7 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class WireDecoder
     {
-        private IMetadataDecoder m_metadataDecoder;
+        private MetadataDecoder m_metadataDecoder;
         private DataPointDecoder m_dataPointDecoder;
         private NegotiateSessionDecoder m_negotiateSessionDecoder;
         private SubscriptionDecoder m_subscriptionDecoder;

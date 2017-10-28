@@ -1,9 +1,9 @@
 ﻿using System;
 using Sttp.WireProtocol.MetadataPacket;
 
-namespace Sttp.WireProtocol.Data.Raw
+namespace Sttp.WireProtocol.Data
 {
-    public class MetadataDecoder : IMetadataDecoder
+    public class MetadataDecoder : IPacketDecoder
     {
         private MetadataClearParams m_clear = new MetadataClearParams();
         private MetadataAddTableParams m_addTable = new MetadataAddTableParams();
@@ -39,28 +39,28 @@ namespace Sttp.WireProtocol.Data.Raw
                 case MetadataCommand.Clear:
                     return m_clear;
                 case MetadataCommand.AddTable:
-                    m_addTable.TableIndex = m_stream.ReadInt15();
+                    m_addTable.TableIndex = m_stream.ReadInt32();
                     m_addTable.TableName = m_stream.ReadString();
                     m_addTable.TableFlags = m_stream.Read<TableFlags>();
                     return m_addTable;
                 case MetadataCommand.AddColumn:
-                    m_addColumn.TableIndex = m_stream.ReadInt15();
-                    m_addColumn.ColumnIndex = m_stream.ReadInt15();
+                    m_addColumn.TableIndex = m_stream.ReadInt32();
+                    m_addColumn.ColumnIndex = m_stream.ReadInt32();
                     m_addColumn.ColumnName = m_stream.ReadString();
                     m_addColumn.ColumnType = m_stream.Read<ValueType>();
                     return m_addColumn;
                 case MetadataCommand.AddRow:
-                    m_addRow.TableIndex = m_stream.ReadInt15();
+                    m_addRow.TableIndex = m_stream.ReadInt32();
                     m_addRow.RowIndex = m_stream.ReadInt32();
                     return m_addRow;
                 case MetadataCommand.AddValue:
-                    m_addValue.TableIndex = m_stream.ReadInt15();
-                    m_addValue.ColumnIndex = m_stream.ReadInt15();
+                    m_addValue.TableIndex = m_stream.ReadInt32();
+                    m_addValue.ColumnIndex = m_stream.ReadInt32();
                     m_addValue.RowIndex = m_stream.ReadInt32();
                     m_addValue.Value = m_stream.ReadBytes();
                     return m_addValue;
                 case MetadataCommand.DeleteRow:
-                    m_deleteRow.TableIndex = m_stream.ReadInt15();
+                    m_deleteRow.TableIndex = m_stream.ReadInt32();
                     m_deleteRow.RowIndex = m_stream.ReadInt32();
                     return m_deleteRow;
                 case MetadataCommand.DatabaseVersion:
@@ -68,7 +68,7 @@ namespace Sttp.WireProtocol.Data.Raw
                     m_databaseVersion.MinorVersion = m_stream.ReadInt64();
                     return m_databaseVersion;
                 case MetadataCommand.GetTable:
-                    m_getTable.TableIndex = m_stream.ReadInt15();
+                    m_getTable.TableIndex = m_stream.ReadInt32();
                     m_getTable.ColumnList = m_stream.ReadArray<int>();
                     m_getTable.FilterExpression = m_stream.ReadList<int, string>();
                     return m_getTable;

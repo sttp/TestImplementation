@@ -73,7 +73,7 @@ namespace Sttp.Data
         /// Replies with all of the tables with their schema
         /// </summary>
         /// <returns></returns>
-        public void RequestAllTablesWithSchema(IMetadataEncoder encoder)
+        public void RequestAllTablesWithSchema(MetadataEncoder encoder)
         {
             encoder.DatabaseVersion(MajorVersion, MinorVersion);
             foreach (var table in m_tables)
@@ -86,7 +86,7 @@ namespace Sttp.Data
             }
         }
 
-        public void RequestTableData(IMetadataEncoder encoder, int tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
+        public void RequestTableData(MetadataEncoder encoder, int tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
         {
             if (m_changeLog.TrySyncTableVersion(majorVersion, minorVersion, out List<MetadataChangeLogRecord> data))
             {

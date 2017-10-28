@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Data;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.Data.Raw;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.Tests

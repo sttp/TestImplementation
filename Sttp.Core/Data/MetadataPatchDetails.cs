@@ -154,7 +154,7 @@ namespace Sttp.Data
 
 
 
-        public void Save(IMetadataEncoder encoder)
+        public void Save(MetadataEncoder encoder)
         {
             switch (ChangeType)
             {

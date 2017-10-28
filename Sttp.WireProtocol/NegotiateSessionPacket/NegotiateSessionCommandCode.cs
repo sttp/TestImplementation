@@ -26,5 +26,16 @@ namespace Sttp.WireProtocol
         /// </summary>
         InstanceList,
         
+        /// <summary>
+        /// Specifies a number of limits for the protocol if they differ from the default limits. The negotiated limit will be the
+        /// smaller of the client/server limits.
+        /// 
+        /// int NumberOfLimits
+        /// {
+        ///     String LimitName,
+        ///     int Value,
+        /// }
+        /// </summary>
+        SpecifyLimits,
     }
 }

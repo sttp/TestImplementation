@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using Sttp.WireProtocol.MetadataPacket;
 
-namespace Sttp.WireProtocol.Data.Raw
+namespace Sttp.WireProtocol.Data
 {
     /// <summary>
     /// Encodes a metadata packet.
     /// </summary>
-    public class MetadataEncoder : BaseEncoder, IMetadataEncoder
+    public class MetadataEncoder : BaseEncoder
     {
         public override CommandCode Code => CommandCode.Metadata;
         private int m_autoFlushLevel;
@@ -38,7 +38,7 @@ namespace Sttp.WireProtocol.Data.Raw
         {
             EnsureCapacity(1 + 2 + 3 + tableName.Length * 2 + 1);
             m_stream.Write(MetadataCommand.AddTable);
-            m_stream.WriteInt15(tableIndex);
+            m_stream.Write(tableIndex);
             m_stream.Write(tableName);
             m_stream.Write(tableFlags);
         }
@@ -48,8 +48,8 @@ namespace Sttp.WireProtocol.Data.Raw
             EnsureCapacity(1 + 2 + 2 + 3 + columnName.Length * 2 + 1);
 
             m_stream.Write(MetadataCommand.AddColumn);
-            m_stream.WriteInt15(tableIndex);
-            m_stream.WriteInt15(columnIndex);
+            m_stream.Write(tableIndex);
+            m_stream.Write(columnIndex);
             m_stream.Write(columnName);
             m_stream.Write(columnType);
         }
@@ -58,7 +58,7 @@ namespace Sttp.WireProtocol.Data.Raw
         {
             EnsureCapacity(5 + 2);
             m_stream.Write(MetadataCommand.AddRow);
-            m_stream.WriteInt15(tableIndex);
+            m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }
 
@@ -67,8 +67,8 @@ namespace Sttp.WireProtocol.Data.Raw
             EnsureCapacity(1 + 2 + 2 + 4 + 3 + (value?.Length ?? 0) * 2);
 
             m_stream.Write(MetadataCommand.AddValue);
-            m_stream.WriteInt15(tableIndex);
-            m_stream.WriteInt15(columnIndex);
+            m_stream.Write(tableIndex);
+            m_stream.Write(columnIndex);
             m_stream.Write(rowIndex);
             m_stream.Write(value);
         }
@@ -77,7 +77,7 @@ namespace Sttp.WireProtocol.Data.Raw
         {
             EnsureCapacity(5 + 2);
             m_stream.Write(MetadataCommand.DeleteRow);
-            m_stream.WriteInt15(tableIndex);
+            m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }
 
@@ -98,7 +98,7 @@ namespace Sttp.WireProtocol.Data.Raw
             EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
 
             m_stream.Write(MetadataCommand.GetTable);
-            m_stream.WriteInt15(tableIndex);
+            m_stream.Write(tableIndex);
             m_stream.WriteArray(columnList);
             m_stream.WriteList(filterExpression);
         }

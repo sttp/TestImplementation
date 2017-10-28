@@ -73,7 +73,7 @@ namespace Sttp.WireProtocol
         DeleteRow,
 
         /// <summary>
-        /// Indicates what the current version of the database is.
+        /// Indicates the current version of the database.
         /// 
         /// Payload:
         /// Guid majorVersion, 
@@ -85,7 +85,6 @@ namespace Sttp.WireProtocol
 
         #region [ Request Subscriber to Publisher ]
 
-        //ToDo: Add this in later.
         /// <summary>
         /// Gets a table from the database.
         ///  
@@ -93,7 +92,7 @@ namespace Sttp.WireProtocol
         /// int tableIndex
         /// int columnListCount
         /// int[] columnIndexes
-        /// int filterExpressions
+        /// int filterExpressionCount
         /// ForEach {
         ///     int ColumnIndex,
         ///     string Expression

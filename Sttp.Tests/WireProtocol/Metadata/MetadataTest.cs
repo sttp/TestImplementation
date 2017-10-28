@@ -64,7 +64,7 @@ namespace Sttp.Tests
                     case CommandCode.Invalid:
                         throw new NotSupportedException();
                     case CommandCode.Metadata:
-                        m_testDestinationSet.Process(decoder as IMetadataDecoder);
+                        m_testDestinationSet.Process(decoder as MetadataDecoder);
                         break;
                 }
             }

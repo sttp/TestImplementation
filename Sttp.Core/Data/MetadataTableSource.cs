@@ -85,7 +85,7 @@ namespace Sttp.Data
             m_changeLog.DeleteRow(TableIndex, rowIndex);
         }
 
-        public void RequestTableData(IMetadataEncoder encoder, MetadataTableFilter permissionFilter)
+        public void RequestTableData(MetadataEncoder encoder, MetadataTableFilter permissionFilter)
         {
             encoder.AddTable(TableIndex, TableName, TableFlags);
             foreach (var column in Columns)

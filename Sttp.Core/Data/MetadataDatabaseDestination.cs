@@ -43,7 +43,7 @@ namespace Sttp.Data
         /// Fills a new dataset with the results of RequestAllTablesWithSchema
         /// </summary>
         /// <returns></returns>
-        public void Process(IMetadataDecoder decoder)
+        public void Process(MetadataDecoder decoder)
         {
             IMetadataParams command;
             while ((command = decoder.NextCommand()) != null)

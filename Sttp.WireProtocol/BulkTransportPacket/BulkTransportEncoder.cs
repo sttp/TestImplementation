@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sttp.IO;
 using Sttp.WireProtocol.BulkTransportPacket;
-using Sttp.WireProtocol.Data.Raw;
 
 namespace Sttp.WireProtocol
 {
