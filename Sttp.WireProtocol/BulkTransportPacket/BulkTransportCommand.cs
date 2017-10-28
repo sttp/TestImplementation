@@ -26,7 +26,7 @@ namespace Sttp.WireProtocol.BulkTransportPacket
         BeginBulkTransport,
 
         /// <summary>
-        /// Indicates that the pending bulk transer is to be canceled. Can be sent in either direction.
+        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
         /// 
         /// Payload: 
         /// Guid ID,

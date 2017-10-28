@@ -50,33 +50,4 @@ namespace Sttp.WireProtocol
             }
         }
     }
-
-    public interface IBulkTransportParams
-    {
-        BulkTransportCommand Command { get; }
-    }
-
-    public class BulkTransportBeginParams : IBulkTransportParams
-    {
-        public BulkTransportCommand Command => BulkTransportCommand.BeginBulkTransport;
-        public Guid Id;
-        public BulkTransportMode Mode;
-        public BulkTransportCompression Compression;
-        public long OriginalSize;
-        public byte[] Content;
-    }
-
-    public class BulkTransportCancelParams : IBulkTransportParams
-    {
-        public BulkTransportCommand Command => BulkTransportCommand.CancelBulkTransport;
-        public Guid Id;
-    }
-
-    public class BulkTransportSendFragmentParams : IBulkTransportParams
-    {
-        public BulkTransportCommand Command => BulkTransportCommand.SendFragment;
-        public Guid Id;
-        public long BytesRemaining;
-        public byte[] Content;
-    }
 }

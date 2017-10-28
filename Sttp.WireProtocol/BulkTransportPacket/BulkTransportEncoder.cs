@@ -17,7 +17,8 @@ namespace Sttp.WireProtocol
     {
         public override CommandCode Code => CommandCode.BulkTransport;
 
-        public BulkTransportEncoder(Action<byte[], int, int> sendPacket) : base(sendPacket, 1500)
+        public BulkTransportEncoder(Action<byte[], int, int> sendPacket) 
+            : base(sendPacket, 1500)
         {
 
         }
@@ -45,7 +46,6 @@ namespace Sttp.WireProtocol
             m_stream.Write(source, position, length);
             EndCommand();
         }
-
 
         public void SendFragment(Guid id, long bytesRemaining, byte[] content, long position, int length)
         {
