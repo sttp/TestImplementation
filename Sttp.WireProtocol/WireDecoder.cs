@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
         private NegotiateSessionDecoder m_negotiateSessionDecoder;
         private SubscriptionDecoder m_subscriptionDecoder;
         private BulkTransportDecoder m_bulkDecoder;
-        private StreamReader m_buffer = new StreamReader();
+        private PacketReader m_buffer = new PacketReader(new SessionDetails());
         private SessionDetails m_sessionDetails = new SessionDetails();
 
         public WireDecoder()

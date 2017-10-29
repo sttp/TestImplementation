@@ -30,16 +30,34 @@ namespace Sttp.WireProtocol
         /// </summary>
         DeflatePacket = 0x04,
 
+        /// <summary>
+        /// Indicates that a fragmented packet is being sent. Fragmented packets 
+        /// are for the wire protocol to ensure every packet fits the MSS size. Users
+        /// must send their bulk data over BulkTransport.
+        /// 
+        /// Fragmented packets must be sent one at a time in sequence and cannot be 
+        /// interwoven with any other kind of packet.
+        /// 
+        /// Fragments are limited to a size configure in the SessionDetails, but is on the order 
+        /// of MB's.
+        /// 
+        /// Payload:
+        /// int FragmentID     - A sequential counter to ensure that fragments are not interwoven.
+        /// int OrigionalSize  - The size of the original packet.
+        /// int Offset         - The offset of the incoming data in respects to the original data.
+        /// short fragmentSize - MSS cannot exceed 32KB
+        /// byte[] data
+        /// 
+        /// </summary>
+        Fragment,
+
         // TODO : assign values
         NegotiateSession,
         Subscribe,
         SecureDataChannel,
         RuntimeIDMapping,
         DataPointPacket,
-        /// <summary>
-        /// Indicates that a fragmented packet is being sent
-        /// </summary>
-        Fragment,
+        
 
         
 

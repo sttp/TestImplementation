@@ -9,20 +9,20 @@ namespace Sttp.WireProtocol
 {
     public unsafe class PacketWriter
     {
-        private const int ReservedHeaderLength = 30;
+        private const int UserDataPosition = 30;
         private static readonly byte[] Empty = new byte[0];
         private byte[] m_buffer;
         private int m_position;
         private CommandCode m_command;
-        private bool m_supportsDeflate;
-        private int m_maximumPacketSize;
+        private SessionDetails m_sessionDetails;
 
-        public PacketWriter()
+        public PacketWriter(SessionDetails sessionDetails)
         {
+            m_sessionDetails = sessionDetails;
             m_buffer = new byte[512];
         }
 
-        public int Length => m_position;
+        public int UserData => m_position - UserDataPosition;
 
         private void Grow(int neededBytes)
         {
@@ -32,6 +32,13 @@ namespace Sttp.WireProtocol
             }
         }
 
+        private void Grow()
+        {
+            byte[] newBuffer = new byte[m_buffer.Length * 2];
+            m_buffer.CopyTo(newBuffer, 0);
+            m_buffer = newBuffer;
+        }
+
         public byte[] ToArray()
         {
             byte[] rv = new byte[m_position];
@@ -39,36 +46,42 @@ namespace Sttp.WireProtocol
             return rv;
         }
 
-        public void BeginCommand(CommandCode command, bool supportsDeflate, int maximumPacketSize)
+        public void BeginCommand(CommandCode command)
         {
             Clear();
             m_command = command;
-            m_supportsDeflate = supportsDeflate;
-            m_maximumPacketSize = maximumPacketSize;
-            m_position = ReservedHeaderLength; //Allow 30 bytes at the beginning of the frame to place a header if chunking will be required.
+            m_position = UserDataPosition;
         }
 
         public void EndCommand(Action<byte[], int, int> sendPacket)
         {
-            int length = m_position;
+            int length = UserData;
+            int position = UserDataPosition - 5;
+
             if (length == 0)
                 return;
 
             length += 5;
-            int position = ReservedHeaderLength - 5;
             m_position = position;
             Write(m_command);
             Write(length);
 
-            if (m_supportsDeflate)
+            if (length > m_sessionDetails.Limits.MetadataResponseSizeLimit)
             {
+                //ToDo: Properly enforce limits based on packet sizes.
+                throw new Exception("Exceeded a limit");
+            }
+
+            if (m_sessionDetails.SupportsDeflate)
+            {
+                //ToDo: Determine if the specific packet should be deflated. 
                 //Encapsulate the current packet into a deflate packet.
                 int deflatedSize;
                 using (var ms = new MemoryStream())
                 {
                     using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
                     {
-                        deflate.Write(m_buffer, ReservedHeaderLength - 5, Length - ReservedHeaderLength + 5);
+                        deflate.Write(m_buffer, UserDataPosition - 5, UserData - UserDataPosition + 5);
                     }
                     ms.Position = 0;
                     deflatedSize = (int)ms.Length;
@@ -76,10 +89,10 @@ namespace Sttp.WireProtocol
                     {
                         Grow();
                     }
-                    ms.ReadAll(m_buffer, ReservedHeaderLength, (int)ms.Length);
+                    ms.ReadAll(m_buffer, UserDataPosition, (int)ms.Length);
                 }
 
-                position = ReservedHeaderLength - 11;
+                position = UserDataPosition - 11;
                 m_position = position;
                 Write(CommandCode.DeflatePacket);
                 Write(11 + deflatedSize);
@@ -88,13 +101,31 @@ namespace Sttp.WireProtocol
                 length = deflatedSize + 11;
             }
 
-            if (length < m_maximumPacketSize)
+            if (length < m_sessionDetails.MaximumSegmentSize)
             {
                 sendPacket(m_buffer, position, length);
             }
             else
             {
-                //ToDo: Send this as a bulk transport packet.
+                int userPosition = position;
+                int remainingLength = length;
+                int fragmentId = m_sessionDetails.NextFragmentID++;
+
+                while (remainingLength > 0)
+                {
+                    m_position = userPosition - 5 - 16;
+                    int fragmentLength = Math.Min(remainingLength, m_sessionDetails.MaximumSegmentSize - 5 - 16);
+
+                    Write(CommandCode.Fragment);
+                    Write(fragmentLength + 5 + 16);
+                    Write(fragmentId);
+                    Write(length);
+                    Write(userPosition);
+                    Write((short)fragmentLength);
+
+                    userPosition += fragmentLength;
+                    remainingLength -= fragmentLength;
+                }
             }
         }
 
@@ -105,12 +136,6 @@ namespace Sttp.WireProtocol
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
 
-        private void Grow()
-        {
-            byte[] newBuffer = new byte[m_buffer.Length * 2];
-            m_buffer.CopyTo(newBuffer, 0);
-            m_buffer = newBuffer;
-        }
 
         #region [ Write Methods ]
 

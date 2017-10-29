@@ -11,6 +11,11 @@ namespace Sttp.WireProtocol
     public class SessionDetails
     {
         public readonly ProtocolLimits Limits = new ProtocolLimits();
-        public bool SupportsDeflate;
+        public bool SupportsDeflate = false;
+        public int MaximumSegmentSize = 1500;
+        /// <summary>
+        /// This variable is not negotiated.
+        /// </summary>
+        public int NextFragmentID = 0;
     }
 }

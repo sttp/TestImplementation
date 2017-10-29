@@ -33,19 +33,22 @@ namespace Sttp.WireProtocol
 
         private CommandCode m_lastCode;
 
+        private SessionDetails m_sessionDetails;
+
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
         /// <param name="autoflushPacketSize"></param>
         public WireEncoder(int autoflushPacketSize)
         {
+            m_sessionDetails = new SessionDetails();
             m_lastCode = CommandCode.Invalid;
             m_autoFlushPacketSize = autoflushPacketSize;
             //m_subscription = new SubscriptionEncoder(SendPacket);
             //m_dataPoint = new DataPointEncoder(SendPacket);
             //m_negotiateSession = new NegotiateSessionEncoder(SendPacket);
-            m_metadata = new MetadataEncoder(SendNewPacket, m_autoFlushPacketSize);
-            m_bulkEncoder = new BulkTransportEncoder(SendNewPacket);
+            m_metadata = new MetadataEncoder(SendNewPacket, m_sessionDetails);
+            m_bulkEncoder = new BulkTransportEncoder(SendNewPacket, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
@@ -60,7 +63,7 @@ namespace Sttp.WireProtocol
                 EndPacket();
                 m_lastCode = CommandCode.BulkTransport;
             }
-            
+
             return m_bulkEncoder;
         }
 

@@ -19,7 +19,7 @@ namespace Sttp.WireProtocol.Data
         private MetadataGetDatabaseSchemaParams m_getDatabaseSchema = new MetadataGetDatabaseSchemaParams();
         private MetadataGetDatabaseVersionParams m_getDatabaseVersion = new MetadataGetDatabaseVersionParams();
 
-        private StreamReader m_stream = new StreamReader();
+        private PacketReader m_packet = new PacketReader(new SessionDetails());
         private SessionDetails m_details;
 
         public MetadataDecoder(SessionDetails details)
@@ -29,70 +29,70 @@ namespace Sttp.WireProtocol.Data
 
         public CommandCode CommandCode => CommandCode.Metadata;
 
-        public void Fill(StreamReader buffer)
+        public void Fill(PacketReader buffer)
         {
-            m_stream = buffer;
+            m_packet = buffer;
         }
 
         public IMetadataParams NextCommand()
         {
-            if (m_stream.Position == m_stream.Length)
+            if (m_packet.Position == m_packet.Length)
                 return null;
 
-            MetadataCommand command = m_stream.Read<MetadataCommand>();
+            MetadataCommand command = m_packet.Read<MetadataCommand>();
             switch (command)
             {
                 case MetadataCommand.Clear:
                     return m_clear;
                 case MetadataCommand.AddTable:
-                    m_addTable.TableIndex = m_stream.ReadInt32();
-                    m_addTable.TableName = m_stream.ReadString();
-                    m_addTable.TableFlags = m_stream.Read<TableFlags>();
+                    m_addTable.TableIndex = m_packet.ReadInt32();
+                    m_addTable.TableName = m_packet.ReadString();
+                    m_addTable.TableFlags = m_packet.Read<TableFlags>();
                     return m_addTable;
                 case MetadataCommand.AddColumn:
-                    m_addColumn.TableIndex = m_stream.ReadInt32();
-                    m_addColumn.ColumnIndex = m_stream.ReadInt32();
-                    m_addColumn.ColumnName = m_stream.ReadString();
-                    m_addColumn.ColumnType = m_stream.Read<ValueType>();
+                    m_addColumn.TableIndex = m_packet.ReadInt32();
+                    m_addColumn.ColumnIndex = m_packet.ReadInt32();
+                    m_addColumn.ColumnName = m_packet.ReadString();
+                    m_addColumn.ColumnType = m_packet.Read<ValueType>();
                     return m_addColumn;
                 case MetadataCommand.AddRow:
-                    m_addRow.TableIndex = m_stream.ReadInt32();
-                    m_addRow.RowIndex = m_stream.ReadInt32();
+                    m_addRow.TableIndex = m_packet.ReadInt32();
+                    m_addRow.RowIndex = m_packet.ReadInt32();
                     return m_addRow;
                 case MetadataCommand.AddValue:
-                    m_addValue.TableIndex = m_stream.ReadInt32();
-                    m_addValue.ColumnIndex = m_stream.ReadInt32();
-                    m_addValue.RowIndex = m_stream.ReadInt32();
-                    m_addValue.Value = m_stream.ReadBytes();
+                    m_addValue.TableIndex = m_packet.ReadInt32();
+                    m_addValue.ColumnIndex = m_packet.ReadInt32();
+                    m_addValue.RowIndex = m_packet.ReadInt32();
+                    m_addValue.Value = m_packet.ReadBytes();
                     return m_addValue;
                 case MetadataCommand.DeleteRow:
-                    m_deleteRow.TableIndex = m_stream.ReadInt32();
-                    m_deleteRow.RowIndex = m_stream.ReadInt32();
+                    m_deleteRow.TableIndex = m_packet.ReadInt32();
+                    m_deleteRow.RowIndex = m_packet.ReadInt32();
                     return m_deleteRow;
                 case MetadataCommand.DatabaseVersion:
-                    m_databaseVersion.MajorVersion = m_stream.ReadGuid();
-                    m_databaseVersion.MinorVersion = m_stream.ReadInt64();
+                    m_databaseVersion.MajorVersion = m_packet.ReadGuid();
+                    m_databaseVersion.MinorVersion = m_packet.ReadInt64();
                     return m_databaseVersion;
                 case MetadataCommand.GetTable:
-                    m_getTable.TableIndex = m_stream.ReadInt32();
-                    m_getTable.ColumnList = m_stream.ReadArray<int>();
-                    m_getTable.FilterExpression = m_stream.ReadList<int, string>();
+                    m_getTable.TableIndex = m_packet.ReadInt32();
+                    m_getTable.ColumnList = m_packet.ReadArray<int>();
+                    m_getTable.FilterExpression = m_packet.ReadList<int, string>();
                     return m_getTable;
                 case MetadataCommand.GetQuery:
-                    m_getQuery.ColumnList = m_stream.ReadList<int, int>();
-                    m_getQuery.JoinFields = m_stream.ReadList<int, int, int>();
-                    m_getQuery.FilterExpression = m_stream.ReadList<int, int, string>();
+                    m_getQuery.ColumnList = m_packet.ReadList<int, int>();
+                    m_getQuery.JoinFields = m_packet.ReadList<int, int, int>();
+                    m_getQuery.FilterExpression = m_packet.ReadList<int, int, string>();
                     return m_getQuery;
                 case MetadataCommand.SyncDatabase:
-                    m_syncDatabase.MajorVersion = m_stream.ReadGuid();
-                    m_syncDatabase.MinorVersion = m_stream.ReadInt64();
-                    m_syncDatabase.ColumnList = m_stream.ReadList<int, int>();
+                    m_syncDatabase.MajorVersion = m_packet.ReadGuid();
+                    m_syncDatabase.MinorVersion = m_packet.ReadInt64();
+                    m_syncDatabase.ColumnList = m_packet.ReadList<int, int>();
                     return m_syncDatabase;
                 case MetadataCommand.SyncTableOrQuery:
-                    m_syncTableOrQuery.MajorVersion = m_stream.ReadGuid();
-                    m_syncTableOrQuery.MinorVersion = m_stream.ReadInt64();
-                    m_syncTableOrQuery.ColumnList = m_stream.ReadList<int, int>();
-                    m_syncTableOrQuery.CriticalColumnList = m_stream.ReadList<int, int>();
+                    m_syncTableOrQuery.MajorVersion = m_packet.ReadGuid();
+                    m_syncTableOrQuery.MinorVersion = m_packet.ReadInt64();
+                    m_syncTableOrQuery.ColumnList = m_packet.ReadList<int, int>();
+                    m_syncTableOrQuery.CriticalColumnList = m_packet.ReadList<int, int>();
                     return m_syncTableOrQuery;
                 case MetadataCommand.GetDatabaseSchema:
                     return m_getDatabaseSchema;

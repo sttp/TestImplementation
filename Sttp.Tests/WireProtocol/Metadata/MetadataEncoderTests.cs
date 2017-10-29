@@ -12,7 +12,7 @@ namespace Sttp.Tests
     [TestClass]
     public class MetadataEncoderTests
     {
-        private StreamReader m_sr;
+        private PacketReader m_sr;
         private MetadataDecoder m_decoder;
         private MetadataEncoder m_encoder;
 
@@ -38,7 +38,7 @@ namespace Sttp.Tests
         [TestInitialize]
         public void Init()
         {
-            m_sr = new StreamReader();
+            m_sr = new PacketReader(new SessionDetails());
             m_decoder = new MetadataDecoder(new SessionDetails());
 
             void ReceivePacket(byte[] data, int position, int length)
@@ -49,7 +49,7 @@ namespace Sttp.Tests
                 Assert.AreEqual(m_sr.Length, m_sr.ReadUInt16());
             }
 
-            m_encoder = new MetadataEncoder(ReceivePacket, 1500);
+            m_encoder = new MetadataEncoder(ReceivePacket, new SessionDetails());
         }
 
         [DataTestMethod]

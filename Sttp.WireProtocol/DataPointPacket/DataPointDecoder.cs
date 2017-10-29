@@ -4,7 +4,7 @@
     {
         public CommandCode CommandCode => CommandCode.DataPointPacket;
 
-        public void Fill(StreamReader buffer)
+        public void Fill(PacketReader buffer)
         {
             throw new System.NotImplementedException();
         }

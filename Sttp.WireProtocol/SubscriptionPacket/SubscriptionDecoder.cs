@@ -9,7 +9,7 @@ namespace Sttp.WireProtocol
     {
         public CommandCode CommandCode => CommandCode.Subscribe;
 
-        public void Fill(StreamReader buffer)
+        public void Fill(PacketReader buffer)
         {
             throw new System.NotImplementedException();
         }

@@ -10,34 +10,22 @@ namespace Sttp.WireProtocol.Data
     public class MetadataEncoder : BaseEncoder
     {
         public override CommandCode Code => CommandCode.Metadata;
-        private int m_autoFlushLevel;
+        private SessionDetails m_sessionDetails;
 
-        public MetadataEncoder(Action<byte[], int, int> sendPacket, int autoFlushLevel) : base(sendPacket)
+        public MetadataEncoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails) 
+            : base(sendPacket,sessionDetails)
         {
-            m_autoFlushLevel = autoFlushLevel;
-        }
-
-        private void EnsureCapacity(int length)
-        {
-            if (m_stream.Length + length > m_autoFlushLevel && m_stream.Length > 3)
-            {
-                //ToDo: Don't do this anymore
-                EndCommand();
-                BeginCommand();
-            }
         }
 
         #region [ Response Publisher to Subscriber ]
 
         public void Clear()
         {
-            EnsureCapacity(1);
             m_stream.Write(MetadataCommand.Clear);
         }
 
         public void AddTable(int tableIndex, string tableName, TableFlags tableFlags)
         {
-            EnsureCapacity(1 + 2 + 3 + tableName.Length * 2 + 1);
             m_stream.Write(MetadataCommand.AddTable);
             m_stream.Write(tableIndex);
             m_stream.Write(tableName);
@@ -46,8 +34,6 @@ namespace Sttp.WireProtocol.Data
 
         public void AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType)
         {
-            EnsureCapacity(1 + 2 + 2 + 3 + columnName.Length * 2 + 1);
-
             m_stream.Write(MetadataCommand.AddColumn);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
@@ -57,7 +43,6 @@ namespace Sttp.WireProtocol.Data
 
         public void AddRow(int tableIndex, int rowIndex)
         {
-            EnsureCapacity(5 + 2);
             m_stream.Write(MetadataCommand.AddRow);
             m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
@@ -65,8 +50,6 @@ namespace Sttp.WireProtocol.Data
 
         public void AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value)
         {
-            EnsureCapacity(1 + 2 + 2 + 4 + 3 + (value?.Length ?? 0) * 2);
-
             m_stream.Write(MetadataCommand.AddValue);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
@@ -76,7 +59,6 @@ namespace Sttp.WireProtocol.Data
 
         public void DeleteRow(int tableIndex, int rowIndex)
         {
-            EnsureCapacity(5 + 2);
             m_stream.Write(MetadataCommand.DeleteRow);
             m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
@@ -84,7 +66,6 @@ namespace Sttp.WireProtocol.Data
 
         public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            EnsureCapacity(1 + 16 + 8);
             m_stream.Write(MetadataCommand.DatabaseVersion);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
@@ -96,8 +77,6 @@ namespace Sttp.WireProtocol.Data
 
         public void GetTable(int tableIndex, int[] columnList, List<Tuple<int, string>> filterExpression)
         {
-            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
-
             m_stream.Write(MetadataCommand.GetTable);
             m_stream.Write(tableIndex);
             m_stream.WriteArray(columnList);
@@ -106,8 +85,6 @@ namespace Sttp.WireProtocol.Data
 
         public void GetQuery(List<Tuple<int, int>> columnList, List<Tuple<int, int, int>> joinFields, List<Tuple<int, int, string>> filterExpression)
         {
-            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
-
             m_stream.Write(MetadataCommand.GetQuery);
             m_stream.WriteList(columnList);
             m_stream.WriteList(joinFields);
@@ -116,8 +93,6 @@ namespace Sttp.WireProtocol.Data
 
         public void SyncDatabase(Guid majorVersion, long minorVersion, List<Tuple<int, int>> columnList)
         {
-            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
-
             m_stream.Write(MetadataCommand.SyncDatabase);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
@@ -126,8 +101,6 @@ namespace Sttp.WireProtocol.Data
 
         public void SyncTableOrQuery(Guid majorVersion, long minorVersion, List<Tuple<int, int>> columnList, List<Tuple<int, int>> criticalColumnList)
         {
-            EnsureCapacity(500); //Overflowing this packet size isn't that big of a deal.
-
             m_stream.Write(MetadataCommand.SyncTableOrQuery);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
@@ -137,13 +110,11 @@ namespace Sttp.WireProtocol.Data
 
         public void GetDatabaseSchema()
         {
-            EnsureCapacity(1);
             m_stream.Write((byte)MetadataCommand.GetDatabaseSchema);
         }
 
         public void GetDatabaseVersion()
         {
-            EnsureCapacity(1);
             m_stream.Write((byte)MetadataCommand.GetDatabaseVersion);
         }
 

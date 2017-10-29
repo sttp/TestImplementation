@@ -6,15 +6,17 @@ using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class StreamReader
+    public unsafe class PacketReader
     {
         private static readonly byte[] Empty = new byte[0];
         private byte[] m_buffer;
         private int m_position;
         private int m_length;
+        private SessionDetails m_sessionDetails;
 
-        public StreamReader()
+        public PacketReader(SessionDetails sessionDetails)
         {
+            m_sessionDetails = sessionDetails;
             m_buffer = new byte[512];
         }
 

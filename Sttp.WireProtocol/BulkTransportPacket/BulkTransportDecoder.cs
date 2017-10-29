@@ -14,9 +14,9 @@ namespace Sttp.WireProtocol
 
         public CommandCode CommandCode => CommandCode.BulkTransport;
 
-        private StreamReader m_buffer;
+        private PacketReader m_buffer;
 
-        public void Fill(StreamReader reader)
+        public void Fill(PacketReader reader)
         {
             m_buffer = reader;
         }

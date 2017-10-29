@@ -10,9 +10,9 @@ namespace Sttp.WireProtocol
 
         protected Action<byte[], int, int> m_sendPacket;
 
-        protected BaseEncoder(Action<byte[], int, int> sendPacket)
+        protected BaseEncoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
         {
-            m_stream = new PacketWriter();
+            m_stream = new PacketWriter(sessionDetails);
             m_sendPacket = sendPacket;
         }
 
@@ -21,7 +21,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public void BeginCommand()
         {
-            m_stream.BeginCommand(Code, false, 1500);
+            m_stream.BeginCommand(Code);
         }
 
         /// <summary>
