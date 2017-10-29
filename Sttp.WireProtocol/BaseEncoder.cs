@@ -6,13 +6,13 @@ namespace Sttp.WireProtocol
     {
         public abstract CommandCode Code { get; }
 
-        internal StreamWriter m_stream;
+        internal PacketWriter m_stream;
 
         protected Action<byte[], int, int> m_sendPacket;
 
         protected BaseEncoder(Action<byte[], int, int> sendPacket)
         {
-            m_stream = new StreamWriter();
+            m_stream = new PacketWriter();
             m_sendPacket = sendPacket;
         }
 
@@ -21,9 +21,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public void BeginCommand()
         {
-            m_stream.Clear();
-            m_stream.Write(Code);
-            m_stream.Write((ushort)0); //Packet Length
+            m_stream.BeginCommand(Code, false, 1500);
         }
 
         /// <summary>
@@ -32,12 +30,7 @@ namespace Sttp.WireProtocol
         /// <returns></returns>
         public void EndCommand()
         {
-            if (m_stream.Position <= 3) //3 bytes means nothing will be sent.
-                return;
-            int length = m_stream.Length;
-            m_stream.Position = 1;
-            m_stream.Write((ushort)length);
-            m_sendPacket(m_stream.Buffer, 0, length);
+            m_stream.EndCommand(m_sendPacket);
         }
     }
 }

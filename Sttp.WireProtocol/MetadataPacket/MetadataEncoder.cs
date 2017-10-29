@@ -19,8 +19,9 @@ namespace Sttp.WireProtocol.Data
 
         private void EnsureCapacity(int length)
         {
-            if (m_stream.Length + length > m_autoFlushLevel && m_stream.Position > 3)
+            if (m_stream.Length + length > m_autoFlushLevel && m_stream.Length > 3)
             {
+                //ToDo: Don't do this anymore
                 EndCommand();
                 BeginCommand();
             }

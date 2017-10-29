@@ -21,7 +21,14 @@ namespace Sttp.WireProtocol
         /// </summary>
         BulkTransport = 0x03,
 
-
+        /// <summary>
+        /// Indicates that this packet is a deflate encapsulated packet.
+        /// 
+        /// Payload:
+        /// int Length,
+        /// byte[] CompressedData
+        /// </summary>
+        DeflatePacket = 0x04,
 
         // TODO : assign values
         NegotiateSession,
@@ -33,6 +40,8 @@ namespace Sttp.WireProtocol
         /// Indicates that a fragmented packet is being sent
         /// </summary>
         Fragment,
+
+        
 
         NoOp = 0xFF,
     }

@@ -8,62 +8,73 @@ namespace Sttp.WireProtocol
 {
     public unsafe class StreamReader
     {
-        protected static readonly byte[] Empty = new byte[0];
-        public byte[] Buffer;
-        public int Position;
-        protected int m_length;
-        public int Length => m_length;
+        private static readonly byte[] Empty = new byte[0];
+        private byte[] m_buffer;
+        private int m_position;
+        private int m_length;
 
         public StreamReader()
         {
-            Buffer = new byte[512];
+            m_buffer = new byte[512];
         }
 
-        public int PendingBytes => m_length - Position;
+        public int AvailableBytes => m_length - m_position;
+        public int Length => m_length;
+        public int Position { get => m_position; set => m_position = value; }
 
-        protected void Fill()
+        public void Fill(byte[] data, int position, int length)
+        {
+            while (length + m_length >= m_buffer.Length)
+            {
+                Grow();
+            }
+            Array.Copy(data, position, m_buffer, m_length, length);
+            m_length += length;
+        }
+
+        protected void Fill(int length)
         {
             throw new EndOfStreamException();
         }
 
-        public void Fill(byte[] data, int position, int length)
-        {
-            while (length + m_length >= Buffer.Length)
-            {
-                Grow();
-            }
-            Array.Copy(data, position, Buffer, m_length, length);
-            m_length += length;
-        }
-
         public void Compact()
         {
-            if (Position > 0 && Position != m_length)
+            if (m_position > 0 && m_position != m_length)
             {
                 // Compact - trims all data before current position if position is in middle of stream
-                Array.Copy(Buffer, Position, Buffer, 0, m_length - Position);
+                Array.Copy(m_buffer, m_position, m_buffer, 0, m_length - m_position);
             }
-            m_length = m_length - Position;
-            Position = 0;
+            m_length = m_length - m_position;
+            m_position = 0;
         }
 
         protected void Grow()
         {
-            byte[] newBuffer = new byte[Buffer.Length * 2];
-            Buffer.CopyTo(newBuffer, 0);
-            Buffer = newBuffer;
+            byte[] newBuffer = new byte[m_buffer.Length * 2];
+            m_buffer.CopyTo(newBuffer, 0);
+            m_buffer = newBuffer;
         }
+
+        private void EnsureCapacity(int length)
+        {
+            if (AvailableBytes < length)
+            {
+                Fill(length);
+            }
+        }
+
+        #region [ Read Methods ]
 
         #region [ 1 byte values ]
 
         public byte ReadByte()
         {
-            if (Position + 1 > m_length)
+            if (m_position + 1 > m_length)
             {
-                Fill();
+                Fill(1);
             }
-            byte rv = Buffer[Position];
-            Position++;
+            byte rv = m_buffer[m_position];
+            m_position++;
             return rv;
         }
 
@@ -83,12 +94,12 @@ namespace Sttp.WireProtocol
 
         public short ReadInt16()
         {
-            if (Position + 2 > m_length)
+            if (m_position + 2 > m_length)
             {
-                Fill();
+                Fill(2);
             }
-            short rv = BigEndian.ToInt16(Buffer, Position);
-            Position += 2;
+            short rv = BigEndian.ToInt16(m_buffer, m_position);
+            m_position += 2;
             return rv;
         }
 
@@ -108,12 +119,12 @@ namespace Sttp.WireProtocol
 
         public int ReadInt32()
         {
-            if (Position + 4 > m_length)
+            if (m_position + 4 > m_length)
             {
-                Fill();
+                Fill(4);
             }
-            int rv = BigEndian.ToInt32(Buffer, Position);
-            Position += 4;
+            int rv = BigEndian.ToInt32(m_buffer, m_position);
+            m_position += 4;
             return rv;
         }
 
@@ -134,12 +145,12 @@ namespace Sttp.WireProtocol
 
         public long ReadInt64()
         {
-            if (Position + 8 > m_length)
+            if (m_position + 8 > m_length)
             {
-                Fill();
+                Fill(8);
             }
-            long rv = BigEndian.ToInt64(Buffer, Position);
-            Position += 8;
+            long rv = BigEndian.ToInt64(m_buffer, m_position);
+            m_position += 8;
             return rv;
         }
 
@@ -163,48 +174,39 @@ namespace Sttp.WireProtocol
 
         #region [ 16-byte values ]
 
-
         public decimal ReadDecimal()
         {
-            if (Position + 16 > m_length)
+            if (m_position + 16 > m_length)
             {
-                Fill();
+                Fill(16);
             }
-            decimal rv = BigEndian.ToDecimal(Buffer, Position);
-            Position += 16;
+            decimal rv = BigEndian.ToDecimal(m_buffer, m_position);
+            m_position += 16;
             return rv;
         }
 
         public Guid ReadGuid()
         {
-            if (Position + 16 > m_length)
+            if (m_position + 16 > m_length)
             {
-                Fill();
+                Fill(16);
             }
 
-            Guid rv = GuidExtensions.ToRfcGuid(Buffer, Position);
-            Position += 16;
+            Guid rv = GuidExtensions.ToRfcGuid(m_buffer, m_position);
+            m_position += 16;
             return rv;
         }
 
         #endregion
 
-        private void EnsureCapacity(int length)
-        {
-            if (Position + length > m_length)
-            {
-                Fill();
-            }
-        }
-
-        #region Variable Length
+        #region [ Variable Length ]
 
         public byte[] ReadRawBytes(int length)
         {
             byte[] rv = new byte[length];
-            Array.Copy(Buffer, Position, rv, 0, length);
+            Array.Copy(m_buffer, m_position, rv, 0, length);
 
-            Position += length;
+            m_position += length;
             return rv;
         }
 
@@ -224,8 +226,8 @@ namespace Sttp.WireProtocol
             EnsureCapacity(length);
 
             byte[] rv = new byte[length];
-            Array.Copy(Buffer, Position, rv, 0, length);
-            Position += length;
+            Array.Copy(m_buffer, m_position, rv, 0, length);
+            m_position += length;
             return rv;
         }
 
@@ -242,12 +244,14 @@ namespace Sttp.WireProtocol
 
         #endregion
 
+        #region [ ReadBits ]
+
         public int ReadInt15()
         {
             EnsureCapacity(1);
 
-            int val = uint15.Read(Buffer, Position, out int len);
-            Position += len;
+            int val = uint15.Read(m_buffer, m_position, out int len);
+            m_position += len;
 
             return val;
         }
@@ -261,26 +265,26 @@ namespace Sttp.WireProtocol
         public uint ReadUInt7Bit()
         {
             Read7BitEnsureCapacity();
-            return Encoding7Bit.ReadUInt32(Buffer, ref Position);
+            return Encoding7Bit.ReadUInt32(m_buffer, ref m_position);
         }
 
         private void Read7BitEnsureCapacity()
         {
-            if (Buffer[Position] < 128)
+            if (m_buffer[m_position] < 128)
             {
                 return;
             }
-            if (Buffer[Position + 1] < 128)
+            if (m_buffer[m_position + 1] < 128)
             {
                 EnsureCapacity(1);
                 return;
             }
-            if (Buffer[Position + 2] < 128)
+            if (m_buffer[m_position + 2] < 128)
             {
                 EnsureCapacity(2);
                 return;
             }
-            if (Buffer[Position + 3] < 128)
+            if (m_buffer[m_position + 3] < 128)
             {
                 EnsureCapacity(3);
                 return;
@@ -288,7 +292,9 @@ namespace Sttp.WireProtocol
             EnsureCapacity(4);
         }
 
-        #region Generics
+        #endregion
+
+        #region [ Generics ]
 
         public List<Tuple<T1, T2>> ReadList<T1, T2>()
         {
@@ -395,5 +401,8 @@ namespace Sttp.WireProtocol
         }
 
         #endregion Generics
+
+        #endregion
+
     }
 }

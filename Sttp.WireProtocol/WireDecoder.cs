@@ -46,14 +46,14 @@ namespace Sttp.WireProtocol
         public IPacketDecoder NextPacket()
         {
             //A message fewer than 2 bytes are not valid.
-            if (m_buffer.PendingBytes < 2)
+            if (m_buffer.AvailableBytes < 2)
                 return null;
 
             int origPosition = m_buffer.Position;
             CommandCode commandCode = m_buffer.Read<CommandCode>();
             int messageLength = m_buffer.ReadUInt16();
 
-            if (messageLength > m_buffer.PendingBytes + 3)
+            if (messageLength > m_buffer.AvailableBytes + 3)
             {
                 m_buffer.Position = origPosition;
                 return null;

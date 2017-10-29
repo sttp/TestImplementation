@@ -1,71 +1,126 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
 using Sttp.IO;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class StreamWriter 
+    public unsafe class PacketWriter
     {
-        protected static readonly byte[] Empty = new byte[0];
-        public byte[] Buffer;
+        private const int ReservedHeaderLength = 30;
+        private static readonly byte[] Empty = new byte[0];
+        private byte[] m_buffer;
+        private int m_position;
+        private CommandCode m_command;
+        private bool m_supportsDeflate;
+        private int m_maximumPacketSize;
 
-        public int Position;
-        protected int m_length;
-
-        public StreamWriter()
+        public PacketWriter()
         {
-            Buffer = new byte[512];
+            m_buffer = new byte[512];
         }
 
-        public int Length => m_length;
+        public int Length => m_position;
 
-        protected void Grow(int neededBytes)
+        private void Grow(int neededBytes)
         {
-            if (Position + neededBytes >= Buffer.Length)
+            if (m_position + neededBytes >= m_buffer.Length)
             {
                 Grow();
             }
         }
+
         public byte[] ToArray()
         {
-            byte[] rv = new byte[m_length];
-            Array.Copy(Buffer, 0, rv, 0, m_length);
+            byte[] rv = new byte[m_position];
+            Array.Copy(m_buffer, 0, rv, 0, m_position);
             return rv;
         }
-        public void Clear()
-        {
-            Position = 0;
-            m_length = 0;
 
-            Array.Clear(Buffer, 0, Buffer.Length);
-        }
-        protected void Grow()
+        public void BeginCommand(CommandCode command, bool supportsDeflate, int maximumPacketSize)
         {
-            byte[] newBuffer = new byte[Buffer.Length * 2];
-            Buffer.CopyTo(newBuffer, 0);
-            Buffer = newBuffer;
+            Clear();
+            m_command = command;
+            m_supportsDeflate = supportsDeflate;
+            m_maximumPacketSize = maximumPacketSize;
+            m_position = ReservedHeaderLength; //Allow 30 bytes at the beginning of the frame to place a header if chunking will be required.
         }
 
-        protected void ExtendToPosition()
+        public void EndCommand(Action<byte[], int, int> sendPacket)
         {
-            if (Position > m_length)
+            int length = m_position;
+            if (length == 0)
+                return;
+
+            length += 5;
+            int position = ReservedHeaderLength - 5;
+            m_position = position;
+            Write(m_command);
+            Write(length);
+
+            if (m_supportsDeflate)
             {
-                m_length = Position;
+                //Encapsulate the current packet into a deflate packet.
+                int deflatedSize;
+                using (var ms = new MemoryStream())
+                {
+                    using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
+                    {
+                        deflate.Write(m_buffer, ReservedHeaderLength - 5, Length - ReservedHeaderLength + 5);
+                    }
+                    ms.Position = 0;
+                    deflatedSize = (int)ms.Length;
+                    while (m_buffer.Length < ms.Length + 30)
+                    {
+                        Grow();
+                    }
+                    ms.ReadAll(m_buffer, ReservedHeaderLength, (int)ms.Length);
+                }
+
+                position = ReservedHeaderLength - 11;
+                m_position = position;
+                Write(CommandCode.DeflatePacket);
+                Write(11 + deflatedSize);
+                Write(length);
+
+                length = deflatedSize + 11;
+            }
+
+            if (length < m_maximumPacketSize)
+            {
+                sendPacket(m_buffer, position, length);
+            }
+            else
+            {
+                //ToDo: Send this as a bulk transport packet.
             }
         }
+
+        public void Clear()
+        {
+            m_position = 0;
+            //Note: Clearing the array isn't required since this class prohibits advancing the position.
+            //Array.Clear(m_buffer, 0, m_buffer.Length);
+        }
+
+        private void Grow()
+        {
+            byte[] newBuffer = new byte[m_buffer.Length * 2];
+            m_buffer.CopyTo(newBuffer, 0);
+            m_buffer = newBuffer;
+        }
+
+        #region [ Write Methods ]
 
         #region [ 1 byte values ]
 
         public void Write(byte value)
         {
             Grow(1);
-            Buffer[Position] = value;
-            Position++;
-            ExtendToPosition();
+            m_buffer[m_position] = value;
+            m_position++;
         }
 
         public void Write(bool value)
@@ -88,8 +143,7 @@ namespace Sttp.WireProtocol
         public void Write(short value)
         {
             Grow(2);
-            Position += BigEndian.CopyBytes(value, Buffer, Position);
-            ExtendToPosition();
+            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
         public void Write(ushort value)
@@ -104,14 +158,12 @@ namespace Sttp.WireProtocol
 
         #endregion
 
-
         #region [ 4-byte values ]
 
         public void Write(int value)
         {
             Grow(4);
-            Position += BigEndian.CopyBytes(value, Buffer, Position);
-            ExtendToPosition();
+            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
         public void Write(uint value)
@@ -131,8 +183,7 @@ namespace Sttp.WireProtocol
         public void Write(long value)
         {
             Grow(8);
-            Position += BigEndian.CopyBytes(value, Buffer, Position);
-            ExtendToPosition();
+            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
         public void Write(ulong value)
@@ -157,21 +208,19 @@ namespace Sttp.WireProtocol
         public void Write(decimal value)
         {
             Grow(16);
-            Position += BigEndian.CopyBytes(value, Buffer, Position);
-            ExtendToPosition();
+            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
         public void Write(Guid value)
         {
             Grow(16);
-            Array.Copy(value.ToRfcBytes(), 0, Buffer, Position, 16);
-            Position += 16;
-            ExtendToPosition();
+            Array.Copy(value.ToRfcBytes(), 0, m_buffer, m_position, 16);
+            m_position += 16;
         }
 
         #endregion
 
-        #region Variable Length Types
+        #region [ Variable Length Types ]
 
         public void Write(System.IO.Stream stream, long start, int length)
         {
@@ -195,9 +244,8 @@ namespace Sttp.WireProtocol
             Grow(Encoding7Bit.GetSize((uint)(length + 1)) + length);
             WriteUInt7Bit((uint)(length + 1));
 
-            stream.Read(Buffer, Position, length);
-            Position += length;
-            ExtendToPosition();
+            stream.Read(m_buffer, m_position, length);
+            m_position += length;
         }
 
         public void Write(byte[] value, long start, int length)
@@ -222,9 +270,8 @@ namespace Sttp.WireProtocol
             Grow(Encoding7Bit.GetSize((uint)(length + 1)) + length);
             WriteUInt7Bit((uint)(length + 1));
 
-            Array.Copy(value, start, Buffer, Position, length); // write data
-            Position += length;
-            ExtendToPosition();
+            Array.Copy(value, start, m_buffer, m_position, length); // write data
+            m_position += length;
         }
 
         public void Write(byte[] value)
@@ -252,14 +299,13 @@ namespace Sttp.WireProtocol
 
         #endregion
 
+        #region [ Write Bits ]
+
         public void WriteInt15(int value)
         {
             Grow(2);
-            Position += uint15.Write(Buffer, Position, value);
-            ExtendToPosition();
+            m_position += uint15.Write(m_buffer, m_position, value);
         }
-
-       
 
         public void WriteInt7Bit(int value)
         {
@@ -273,9 +319,10 @@ namespace Sttp.WireProtocol
             Grow(size);
 
             // position is incremented within method.
-            Encoding7Bit.Write(Buffer, ref Position, value);
-            ExtendToPosition();
+            Encoding7Bit.Write(m_buffer, ref m_position, value);
         }
+
+        #endregion
 
         #region Generics
 
@@ -405,6 +452,7 @@ namespace Sttp.WireProtocol
 
         #endregion Generics
 
+        #endregion
     }
 }
 

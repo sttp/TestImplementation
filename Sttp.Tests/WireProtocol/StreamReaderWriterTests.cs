@@ -11,12 +11,12 @@ namespace Sttp.Tests
     public class StreamReaderWriterTests
     {
         private StreamReader m_reader;
-        private StreamWriter m_writer;
+        private PacketWriter m_writer;
 
         [TestInitialize]
         public void Init()
         {
-            m_writer = new StreamWriter();
+            m_writer = new PacketWriter();
             m_reader = new StreamReader();
         }
 
