@@ -20,6 +20,12 @@ namespace Sttp.WireProtocol.Data
         private MetadataGetDatabaseVersionParams m_getDatabaseVersion = new MetadataGetDatabaseVersionParams();
 
         private StreamReader m_stream = new StreamReader();
+        private SessionDetails m_details;
+
+        public MetadataDecoder(SessionDetails details)
+        {
+            m_details = details;
+        }
 
         public CommandCode CommandCode => CommandCode.Metadata;
 

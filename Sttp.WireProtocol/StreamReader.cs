@@ -1,18 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class StreamReader : StreamBase
+    public unsafe class StreamReader
     {
-        public StreamReader(ushort initialSize = 512) : base(initialSize)
-        {
+        protected static readonly byte[] Empty = new byte[0];
+        public byte[] Buffer;
+        public int Position;
+        protected int m_length;
+        public int Length => m_length;
 
+        public StreamReader()
+        {
+            Buffer = new byte[512];
         }
 
         public int PendingBytes => m_length - Position;
+
+        protected void Fill()
+        {
+            throw new EndOfStreamException();
+        }
+
+        public void Fill(byte[] data, int position, int length)
+        {
+            while (length + m_length >= Buffer.Length)
+            {
+                Grow();
+            }
+            Array.Copy(data, position, Buffer, m_length, length);
+            m_length += length;
+        }
+
+        public void Compact()
+        {
+            if (Position > 0 && Position != m_length)
+            {
+                // Compact - trims all data before current position if position is in middle of stream
+                Array.Copy(Buffer, Position, Buffer, 0, m_length - Position);
+            }
+            m_length = m_length - Position;
+            Position = 0;
+        }
+
+        protected void Grow()
+        {
+            byte[] newBuffer = new byte[Buffer.Length * 2];
+            Buffer.CopyTo(newBuffer, 0);
+            Buffer = newBuffer;
+        }
 
         #region [ 1 byte values ]
 

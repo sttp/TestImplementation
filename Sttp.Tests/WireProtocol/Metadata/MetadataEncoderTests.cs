@@ -39,7 +39,7 @@ namespace Sttp.Tests
         public void Init()
         {
             m_sr = new StreamReader();
-            m_decoder = new MetadataDecoder();
+            m_decoder = new MetadataDecoder(new SessionDetails());
 
             void ReceivePacket(byte[] data, int position, int length)
             {

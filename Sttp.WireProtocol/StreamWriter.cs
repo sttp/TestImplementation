@@ -8,11 +8,54 @@ using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class StreamWriter : StreamBase
+    public unsafe class StreamWriter 
     {
-        public StreamWriter(ushort initialSize = 512) : base(initialSize)
-        {
+        protected static readonly byte[] Empty = new byte[0];
+        public byte[] Buffer;
 
+        public int Position;
+        protected int m_length;
+
+        public StreamWriter()
+        {
+            Buffer = new byte[512];
+        }
+
+        public int Length => m_length;
+
+        protected void Grow(int neededBytes)
+        {
+            if (Position + neededBytes >= Buffer.Length)
+            {
+                Grow();
+            }
+        }
+        public byte[] ToArray()
+        {
+            byte[] rv = new byte[m_length];
+            Array.Copy(Buffer, 0, rv, 0, m_length);
+            return rv;
+        }
+        public void Clear()
+        {
+            Position = 0;
+            m_length = 0;
+
+            Array.Clear(Buffer, 0, Buffer.Length);
+        }
+        protected void Grow()
+        {
+            byte[] newBuffer = new byte[Buffer.Length * 2];
+            Buffer.CopyTo(newBuffer, 0);
+            Buffer = newBuffer;
+        }
+
+        protected void ExtendToPosition()
+        {
+            if (Position > m_length)
+            {
+                m_length = Position;
+            }
         }
 
         #region [ 1 byte values ]
@@ -215,6 +258,8 @@ namespace Sttp.WireProtocol
             Position += uint15.Write(Buffer, Position, value);
             ExtendToPosition();
         }
+
+       
 
         public void WriteInt7Bit(int value)
         {

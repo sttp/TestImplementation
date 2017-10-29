@@ -15,10 +15,11 @@ namespace Sttp.WireProtocol
         private SubscriptionDecoder m_subscriptionDecoder;
         private BulkTransportDecoder m_bulkDecoder;
         private StreamReader m_buffer = new StreamReader();
+        private SessionDetails m_sessionDetails = new SessionDetails();
 
         public WireDecoder()
         {
-            m_metadataDecoder = new MetadataDecoder();
+            m_metadataDecoder = new MetadataDecoder(m_sessionDetails);
             m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSessionDecoder = new NegotiateSessionDecoder();
             m_subscriptionDecoder = new SubscriptionDecoder();

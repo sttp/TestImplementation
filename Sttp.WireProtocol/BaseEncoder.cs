@@ -10,9 +10,9 @@ namespace Sttp.WireProtocol
 
         protected Action<byte[], int, int> m_sendPacket;
 
-        protected BaseEncoder(Action<byte[], int, int> sendPacket, ushort streamSize = 512)
+        protected BaseEncoder(Action<byte[], int, int> sendPacket)
         {
-            m_stream = new StreamWriter(streamSize);
+            m_stream = new StreamWriter();
             m_sendPacket = sendPacket;
         }
 

@@ -17,7 +17,7 @@ namespace Sttp.WireProtocol
         public override CommandCode Code => CommandCode.BulkTransport;
 
         public BulkTransportEncoder(Action<byte[], int, int> sendPacket) 
-            : base(sendPacket, 1500)
+            : base(sendPacket)
         {
 
         }
