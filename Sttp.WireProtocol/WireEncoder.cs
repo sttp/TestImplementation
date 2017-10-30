@@ -9,12 +9,6 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class WireEncoder
     {
-
-        /// <summary>
-        /// Once this size has been reached, the protocol will automatically call 
-        /// </summary>
-        private int m_autoFlushPacketSize;
-
         /// <summary>
         /// Occurs when a packet of data must be sent on the wire. This is called immediately
         /// after completing a Packet;
@@ -38,12 +32,10 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
-        /// <param name="autoflushPacketSize"></param>
-        public WireEncoder(int autoflushPacketSize)
+        public WireEncoder()
         {
             m_sessionDetails = new SessionDetails();
             m_lastCode = CommandCode.Invalid;
-            m_autoFlushPacketSize = autoflushPacketSize;
             //m_subscription = new SubscriptionEncoder(SendPacket);
             //m_dataPoint = new DataPointEncoder(SendPacket);
             //m_negotiateSession = new NegotiateSessionEncoder(SendPacket);
@@ -65,6 +57,16 @@ namespace Sttp.WireProtocol
             }
 
             return m_bulkEncoder;
+        }
+
+        public MetadataGetSchemaBuilder MetadataGetSchema()
+        {
+            return new MetadataGetSchemaBuilder(m_metadata);
+        }
+
+        public MetadataEncoder MetadataGetData()
+        {
+            return null;
         }
 
         public MetadataEncoder BeginMetadataPacket()

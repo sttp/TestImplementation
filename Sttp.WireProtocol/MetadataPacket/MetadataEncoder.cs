@@ -101,7 +101,6 @@ namespace Sttp.WireProtocol.Data
             m_stream.Write(columnIndex);
             m_stream.Write(items);
         }
-
        
         public void WhereCompare(short tableIndex, short columnIndex, MetadataCompareMethod compareOperator, byte[] item)
         {
@@ -111,8 +110,6 @@ namespace Sttp.WireProtocol.Data
             m_stream.Write(compareOperator);
             m_stream.Write(item);
         }
-
-        
 
         public void WhereOperator(MetadataOperatorMethod operatorCode)
         {

@@ -19,7 +19,7 @@ namespace Sttp.WireProtocol
 
         public WireDecoder()
         {
-            m_metadataDecoder = new MetadataDecoder(m_sessionDetails);
+            m_metadataDecoder = new MetadataDecoder();
             m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSessionDecoder = new NegotiateSessionDecoder();
             m_subscriptionDecoder = new SubscriptionDecoder();
@@ -53,7 +53,6 @@ namespace Sttp.WireProtocol
                 case CommandCode.NegotiateSession:
                     m_negotiateSessionDecoder.Fill(reader);
                     return m_negotiateSessionDecoder;
-                case CommandCode.Metadata:
                     m_metadataDecoder.Fill(reader);
                     return m_metadataDecoder;
                 case CommandCode.BulkTransport:
@@ -72,55 +71,25 @@ namespace Sttp.WireProtocol
                     return m_dataPointDecoder;
                 case CommandCode.NoOp:
                     break;
+                case CommandCode.Invalid:
+                    break;
+                case CommandCode.BeginFragment:
+                    break;
+                case CommandCode.NextFragment:
+                    break;
+                case CommandCode.CompressedPacket:
+                    break;
+                case CommandCode.MetadataGetSchema:
+                    break;
+                case CommandCode.MetadataGetData:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
             return null;
         }
 
-        public void NegotiateSessionStep1(out ProtocolVersions protocolVersionNumber)
-        {
-            throw new NotImplementedException();
-        }
-        public void NegotiateSessionStep1Reply(out OperationalModes modes)
-        {
-            throw new NotImplementedException();
-        }
-        public void NegotiateSessionStep2(out OperationalModes modes)
-        {
-            throw new NotImplementedException();
-        }
-        public void CommandSuccess(out CommandCode command, out string response)
-        {
-            throw new NotImplementedException();
-        }
-        public void CommandFailed(out CommandCode command, out string response)
-        {
-            throw new NotImplementedException();
-        }
-        public void RequestMetadataTables()
-        {
-            //Do nothing, just here to be complete.
-        }
-        //public void RequestMetadataTablesReply(out MetadataTableSource[] tableSourceDefinitions)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public void RequestMetadata(out string tableName, out Guid cachedBaseVersionNumber, out int versionNumber, out string filterString)
-        {
-            throw new NotImplementedException();
-        }
-
-        //public void RequestMetadataReply(out Guid cachedBaseVersionNumber, out int versionNumber, out MetadataRow[] rows)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public void Subscribe(out string subscriptionString, out bool augment)
-        {
-            throw new NotImplementedException();
-        }
+       
 
     }
 }

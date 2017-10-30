@@ -8,14 +8,10 @@ namespace Sttp.WireProtocol.Data
     {
         private IMetadataParams[] m_commands;
 
-
         private PacketReader m_packet = new PacketReader(new SessionDetails());
-        private SessionDetails m_details;
 
-        public MetadataDecoder(SessionDetails details)
+        public MetadataDecoder()
         {
-            m_details = details;
-
             m_commands = new IMetadataParams[20];
             m_commands[(byte)MetadataSubCommand.Clear] = new MetadataClearParams();
             m_commands[(byte)MetadataSubCommand.AddTable] = new MetadataAddTableParams();
@@ -32,7 +28,6 @@ namespace Sttp.WireProtocol.Data
             m_commands[(byte)MetadataSubCommand.WhereOperator] = new MetadataWhereOperatorParams();
             m_commands[(byte)MetadataSubCommand.GetDatabaseSchema] = new MetadataGetDatabaseSchemaParams();
             m_commands[(byte)MetadataSubCommand.GetDatabaseVersion] = new MetadataGetDatabaseVersionParams();
-
         }
 
         public CommandCode CommandCode => CommandCode.Metadata;

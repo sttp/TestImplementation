@@ -1,7 +1,80 @@
-﻿namespace Prototype.Codec.Metadata
+﻿using System;
+using Sttp.WireProtocol;
+
+namespace Prototype.Codec.Metadata
 {
     public static class Test
     {
+        public static void ImTheServer()
+        {
+            //This code is here to demonstrate how to use the wireAPI, it's not intended to work.
+
+            var send = new WireEncoder();
+            var receive = new WireDecoder();
+
+            IPacketDecoder nextCommand;
+            while ((nextCommand = receive.NextPacket()) != null)
+            {
+                switch (nextCommand.CommandCode)
+                {
+                    case CommandCode.Invalid:
+                        break;
+                    case CommandCode.BulkTransport:
+                        break;
+                    case CommandCode.BeginFragment:
+                        break;
+                    case CommandCode.NextFragment:
+                        break;
+                    case CommandCode.CompressedPacket:
+                        break;
+                    case CommandCode.MetadataGetSchema:
+                        break;
+                    case CommandCode.MetadataGetData:
+                        break;
+                    case CommandCode.NegotiateSession:
+                        break;
+                    case CommandCode.Subscribe:
+                        break;
+                    case CommandCode.SecureDataChannel:
+                        break;
+                    case CommandCode.RuntimeIDMapping:
+                        break;
+                    case CommandCode.DataPointPacket:
+                        break;
+                    case CommandCode.NoOp:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+
+        }
+
+        public static void ImTheClient()
+        {
+            //This code is here to demonstrate how to use the wireAPI, it's not intended to work.
+
+            var send = new WireEncoder();
+            var receive = new WireDecoder();
+
+            var cmd1 = send.MetadataGetSchema();
+            cmd1.RequestDatabaseVersion = true;
+            cmd1.RequestDatabaseSchema = true;
+            cmd1.Send();
+
+            IPacketDecoder nextCommand;
+            while ((nextCommand = receive.NextPacket()) != null)
+            {
+                if (nextCommand.CommandCode == CommandCode.MetadataGetSchemaResponse)
+                {
+                }
+            }
+
+        }
+
+
+
         //public static void Test1()
         //{
         //    var codec = new MetadataEncoder(null);

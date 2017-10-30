@@ -12,11 +12,6 @@ namespace Sttp.WireProtocol
         Invalid = 0x00,
 
         /// <summary>
-        /// Contains Metadata related commands.
-        /// </summary>
-        Metadata = 0x02,
-
-        /// <summary>
         /// Capable of sending large blocks of data over STTP.
         /// </summary>
         BulkTransport = 0x03,
@@ -82,7 +77,8 @@ namespace Sttp.WireProtocol
         /// IF (GetDatabaseVerion)
         /// Subcommands: DatabaseVersion
         /// </summary>
-        MetadataGetSchema,
+        GetMetadataSchema,
+        GetMetadataSchemaResponse,
 
         /// <summary>
         /// Requests queries from the metadata repository.
@@ -113,11 +109,9 @@ namespace Sttp.WireProtocol
         /// Subcommands: DeleteRow          - This command will only appear if syncing a data source.
         /// 
         /// </summary>
-        MetadataGetData,
-
-
-
-
+        GetMetadata,
+        GetMetadataResponse,
+        
         // TODO : assign values
         NegotiateSession,
         Subscribe,

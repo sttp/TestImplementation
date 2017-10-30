@@ -16,7 +16,6 @@ namespace Sttp.Tests
         private MetadataDecoder m_decoder;
         private MetadataEncoder m_encoder;
 
-
         public static void CompareCollection<T>(IList<T> a, IList<T> b)
         {
             if (a == null && b == null)
@@ -39,7 +38,7 @@ namespace Sttp.Tests
         public void Init()
         {
             m_sr = new PacketReader(new SessionDetails());
-            m_decoder = new MetadataDecoder(new SessionDetails());
+            m_decoder = new MetadataDecoder();
 
             void ReceivePacket(byte[] data, int position, int length)
             {
