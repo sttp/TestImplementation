@@ -16,7 +16,7 @@ namespace Sttp.Data
             Fields = new List<MetadataField>();
         }
 
-        internal void FillData(int tableIndex, MetadataChangeLog changeLog, MetadataColumn column, object value)
+        internal void FillData(short tableIndex, MetadataChangeLog changeLog, MetadataColumn column, object value)
         {
             MetadataField field;
 

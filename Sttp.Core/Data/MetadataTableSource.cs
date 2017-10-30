@@ -29,33 +29,33 @@ namespace Sttp.Data
         /// <summary>
         /// lookup columns by their name
         /// </summary>
-        private Dictionary<string, int> m_columnLookup;
+        private Dictionary<string, short> m_columnLookup;
 
         /// <summary>
         /// All possible rows.
         /// </summary>
         public List<MetadataRow> Rows;
 
-        public int TableIndex;
+        public short TableIndex;
 
-        public MetadataTableSource(MetadataChangeLog changeLog, int tableIndex, string tableName, TableFlags tableFlags)
+        public MetadataTableSource(MetadataChangeLog changeLog, short tableIndex, string tableName, TableFlags tableFlags)
         {
             m_changeLog = changeLog;
             TableIndex = tableIndex;
             TableName = tableName;
             TableFlags = tableFlags;
-            m_columnLookup = new Dictionary<string, int>();
+            m_columnLookup = new Dictionary<string, short>();
             Columns = new List<MetadataColumn>();
             Rows = new List<MetadataRow>();
         }
 
         public void AddColumn(string columnName, ValueType columnType)
         {
-            int columnId;
+            short columnId;
             MetadataColumn column;
             if (!m_columnLookup.TryGetValue(columnName, out columnId))
             {
-                column = new MetadataColumn(Columns.Count, columnName, columnType);
+                column = new MetadataColumn((short)Columns.Count, columnName, columnType);
                 Columns.Add(column);
                 m_changeLog.AddColumn(TableIndex, column);
                 m_columnLookup[columnName] = column.Index;
@@ -97,7 +97,7 @@ namespace Sttp.Data
                 if (permissionFilter == null || permissionFilter.PermitRow(row))
                 {
                     encoder.AddRow(TableIndex, row.RowIndex);
-                    for (var columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
+                    for (short columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
                     {
                         var field = row.Fields[columnIndex];
                         if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))

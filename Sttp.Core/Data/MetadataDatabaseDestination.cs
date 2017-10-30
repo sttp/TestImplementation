@@ -12,7 +12,7 @@ namespace Sttp.Data
     /// </summary>
     public class MetadataDatabaseDestination
     {
-        private Dictionary<string, int> m_tableLookup;
+        private Dictionary<string, short> m_tableLookup;
         private List<MetadataTableDestination> m_tables;
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace Sttp.Data
         public MetadataDatabaseDestination()
         {
             m_tables = new List<MetadataTableDestination>();
-            m_tableLookup = new Dictionary<string, int>();
+            m_tableLookup = new Dictionary<string, short>();
         }
 
         public MetadataTableDestination this[string tableName]
@@ -48,9 +48,9 @@ namespace Sttp.Data
             IMetadataParams command;
             while ((command = decoder.NextCommand()) != null)
             {
-                switch (command.Command)
+                switch (command.SubCommand)
                 {
-                    case MetadataCommand.AddTable:
+                    case MetadataSubCommand.AddTable:
                         {
                             var cmd = command as MetadataAddTableParams;
                             var table = new MetadataTableDestination(cmd.TableName, cmd.TableIndex, cmd.TableFlags);
@@ -62,31 +62,27 @@ namespace Sttp.Data
                             m_tables[cmd.TableIndex] = table;
                         }
                         break;
-                    case MetadataCommand.AddColumn:
+                    case MetadataSubCommand.AddColumn:
                         m_tables[(command as MetadataAddColumnParams).TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataCommand.AddValue:
+                    case MetadataSubCommand.AddValue:
                         m_tables[(command as MetadataAddValueParams).TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataCommand.DeleteRow:
+                    case MetadataSubCommand.DeleteRow:
                         m_tables[(command as MetadataDeleteRowParams).TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataCommand.AddRow:
+                    case MetadataSubCommand.AddRow:
                         m_tables[(command as MetadataAddRowParams).TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataCommand.DatabaseVersion:
+                    case MetadataSubCommand.DatabaseVersion:
                         var db = command as MetadataDatabaseVersionParams;
                         MajorVersion = db.MajorVersion;
                         MinorVersion = db.MinorVersion;
                         break;
-                    case MetadataCommand.GetTable:
-                    case MetadataCommand.Invalid:
-                    case MetadataCommand.Clear:
-                    case MetadataCommand.GetQuery:
-                    case MetadataCommand.SyncDatabase:
-                    case MetadataCommand.SyncTableOrQuery:
-                    case MetadataCommand.GetDatabaseSchema:
-                    case MetadataCommand.GetDatabaseVersion:
+                    case MetadataSubCommand.Invalid:
+                    case MetadataSubCommand.Clear:
+                    case MetadataSubCommand.GetDatabaseSchema:
+                    case MetadataSubCommand.GetDatabaseVersion:
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

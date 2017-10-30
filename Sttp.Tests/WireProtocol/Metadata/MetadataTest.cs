@@ -35,7 +35,7 @@ namespace Sttp.Tests
 
             UpdateDataSet(testSet, testSourceSet);
 
-            for (int x = 0; x < testSet.Tables.Count; x++)
+            for (short x = 0; x < testSet.Tables.Count; x++)
             {
                 testSourceSet.RequestTableData(encoder.BeginMetadataPacket(), x);
             }
@@ -96,7 +96,7 @@ namespace Sttp.Tests
         {
             foreach (DataTable table in dataSet.Tables)
             {
-                for (var columnIndex = 0; columnIndex < table.Columns.Count; columnIndex++)
+                for (short columnIndex = 0; columnIndex < table.Columns.Count; columnIndex++)
                 {
                     DataColumn column = table.Columns[columnIndex];
                     var col2 = set[table.TableName].Columns[columnIndex];
@@ -108,7 +108,7 @@ namespace Sttp.Tests
                 for (var rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
                 {
                     DataRow row = table.Rows[rowIndex];
-                    for (int col = 0; col < table.Columns.Count; col++)
+                    for (short col = 0; col < table.Columns.Count; col++)
                     {
                         object value = row[col];
                         object value2 = set[table.TableName].GetValue(rowIndex, col);

@@ -17,7 +17,7 @@ namespace Sttp.Data
             throw new NotImplementedException();
         }
 
-        public bool PermitField(int rowRowIndex, int columnIndex, byte[] value)
+        public bool PermitField(int rowRowIndex, short columnIndex, byte[] value)
         {
             throw new NotImplementedException();
         }

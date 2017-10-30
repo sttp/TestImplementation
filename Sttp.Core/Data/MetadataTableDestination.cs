@@ -12,8 +12,6 @@ namespace Sttp.Data
 {
     public class MetadataTableDestination
     {
-
-
         /// <summary>
         /// The name of the table
         /// </summary>
@@ -29,7 +27,7 @@ namespace Sttp.Data
         /// <summary>
         /// lookup columns by their name
         /// </summary>
-        private Dictionary<string, int> m_columnLookup;
+        private Dictionary<string, short> m_columnLookup;
 
         /// <summary>
         /// All possible rows.
@@ -40,12 +38,12 @@ namespace Sttp.Data
         /// </summary>
         public int TableIndex;
 
-        public MetadataTableDestination(string tableName, int tableIndex, TableFlags tableFlags)
+        public MetadataTableDestination(string tableName, short tableIndex, TableFlags tableFlags)
         {
             TableName = tableName;
             TableIndex = tableIndex;
             TableFlags = tableFlags;
-            m_columnLookup = new Dictionary<string, int>();
+            m_columnLookup = new Dictionary<string, short>();
             Columns = new List<MetadataColumn>();
             Rows = new List<MetadataRow>();
         }
@@ -68,7 +66,7 @@ namespace Sttp.Data
             }
         }
 
-        public void AddColumn(int index, string name, ValueType type)
+        public void AddColumn(short index, string name, ValueType type)
         {
             while (Columns.Count <= index)
             {
@@ -79,9 +77,9 @@ namespace Sttp.Data
 
         public void ProcessCommand(IMetadataParams command)
         {
-            switch (command.Command)
+            switch (command.SubCommand)
             {
-                case MetadataCommand.AddColumn:
+                case MetadataSubCommand.AddColumn:
                     var addC = command as MetadataAddColumnParams;
                     while (Columns.Count <= addC.ColumnIndex)
                     {
@@ -89,7 +87,7 @@ namespace Sttp.Data
                     }
                     Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnType);
                     break;
-                case MetadataCommand.AddRow:
+                case MetadataSubCommand.AddRow:
                     var addR = command as MetadataAddRowParams;
 
                     while (Rows.Count <= addR.RowIndex)
@@ -101,24 +99,20 @@ namespace Sttp.Data
                         Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
                     }
                     break;
-                case MetadataCommand.AddValue:
+                case MetadataSubCommand.AddValue:
                     var addV = command as MetadataAddValueParams;
                     Rows[addV.RowIndex].ProcessCommand(addV);
                     break;
-                case MetadataCommand.DeleteRow:
+                case MetadataSubCommand.DeleteRow:
                     var delRow = command as MetadataDeleteRowParams;
                     Rows[delRow.RowIndex] = null;
                     break;
-                case MetadataCommand.AddTable:
-                case MetadataCommand.GetTable:
-                case MetadataCommand.Invalid:
-                case MetadataCommand.Clear:
-                case MetadataCommand.DatabaseVersion:
-                case MetadataCommand.GetQuery:
-                case MetadataCommand.SyncDatabase:
-                case MetadataCommand.SyncTableOrQuery:
-                case MetadataCommand.GetDatabaseSchema:
-                case MetadataCommand.GetDatabaseVersion:
+                case MetadataSubCommand.AddTable:
+                case MetadataSubCommand.Invalid:
+                case MetadataSubCommand.Clear:
+                case MetadataSubCommand.DatabaseVersion:
+                case MetadataSubCommand.GetDatabaseSchema:
+                case MetadataSubCommand.GetDatabaseVersion:
                     throw new NotSupportedException();
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -126,7 +120,7 @@ namespace Sttp.Data
 
         }
 
-        public object GetValue(int rowIndex, int columnIndex)
+        public object GetValue(int rowIndex, short columnIndex)
         {
             if (Rows.Count <= rowIndex || Rows[rowIndex] == null)
                 return null;

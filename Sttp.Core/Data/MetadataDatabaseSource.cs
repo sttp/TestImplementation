@@ -32,13 +32,13 @@ namespace Sttp.Data
             set => m_changeLog.TrackChanges = value;
         }
 
-        private Dictionary<string, int> m_tableLookup;
+        private Dictionary<string, short> m_tableLookup;
         private List<MetadataTableSource> m_tables;
 
         public MetadataDatabaseSource()
         {
             m_tables = new List<MetadataTableSource>();
-            m_tableLookup = new Dictionary<string, int>();
+            m_tableLookup = new Dictionary<string, short>();
         }
 
         public MetadataTableSource this[string tableName]
@@ -53,7 +53,7 @@ namespace Sttp.Data
         {
             if (!m_tableLookup.ContainsKey(tableName))
             {
-                var tbl = new MetadataTableSource(m_changeLog, m_tables.Count, tableName, flags);
+                var tbl = new MetadataTableSource(m_changeLog, (short)m_tables.Count, tableName, flags);
                 m_tables.Add(tbl);
                 m_tableLookup[tableName] = tbl.TableIndex;
                 m_changeLog.AddTable(tbl.TableIndex, tableName, flags);
@@ -86,7 +86,7 @@ namespace Sttp.Data
             }
         }
 
-        public void RequestTableData(MetadataEncoder encoder, int tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
+        public void RequestTableData(MetadataEncoder encoder, short tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
         {
             if (m_changeLog.TrySyncTableVersion(majorVersion, minorVersion, out List<MetadataChangeLogRecord> data))
             {

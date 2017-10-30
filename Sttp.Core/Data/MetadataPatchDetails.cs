@@ -11,8 +11,8 @@ namespace Sttp.Data
     {
         public MetadataChangeType ChangeType;
         private ValueType m_columnType;
-        private int m_tableIndex;
-        private int m_columnIndex;
+        private short m_tableIndex;
+        private short m_columnIndex;
         private int m_rowIndex;
         private string m_columnName;
         private byte[] m_value;
@@ -27,12 +27,12 @@ namespace Sttp.Data
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    m_columnIndex = stream.ReadInt32();
+                    m_columnIndex = stream.ReadInt16();
                     m_columnName = stream.ReadString();
                     m_columnType = (ValueType)stream.ReadNextByte();
                     break;
                 case MetadataChangeType.AddValue:
-                    m_columnIndex = stream.ReadInt32();
+                    m_columnIndex = stream.ReadInt16();
                     m_rowIndex = stream.ReadInt32();
                     if (stream.ReadBoolean())
                         m_value = stream.ReadBytes();
@@ -75,7 +75,7 @@ namespace Sttp.Data
             }
         }
 
-        public int ColumnIndex
+        public short ColumnIndex
         {
             get
             {
@@ -118,7 +118,7 @@ namespace Sttp.Data
             }
         }
 
-        public static MetadataChangeLogRecord AddColumn(int tableIndex, int columnIndex, string columnName, ValueType columnType)
+        public static MetadataChangeLogRecord AddColumn(short tableIndex, short columnIndex, string columnName, ValueType columnType)
         {
             return new MetadataChangeLogRecord()
             {
@@ -130,7 +130,7 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataChangeLogRecord AddValue(int tableIndex, int columnIndex, int rowIndex, byte[] value)
+        public static MetadataChangeLogRecord AddValue(short tableIndex, short columnIndex, int rowIndex, byte[] value)
         {
             return new MetadataChangeLogRecord()
             {
@@ -142,7 +142,7 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataChangeLogRecord DeleteRow(int tableIndex, int rowIndex)
+        public static MetadataChangeLogRecord DeleteRow(short tableIndex, int rowIndex)
         {
             return new MetadataChangeLogRecord()
             {
@@ -152,7 +152,10 @@ namespace Sttp.Data
             };
         }
 
-
+        public static MetadataChangeLogRecord AddTable(short tableIndex, string tableName, TableFlags flags)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Save(MetadataEncoder encoder)
         {
@@ -172,9 +175,6 @@ namespace Sttp.Data
             }
         }
 
-        public static MetadataChangeLogRecord AddTable(int tableIndex, string tableName, TableFlags flags)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

@@ -8,7 +8,7 @@ namespace Sttp.Data
         /// <summary>
         /// The 0 based index of this column in the data table.
         /// </summary>
-        public readonly int Index;
+        public readonly short Index;
         /// <summary>
         /// The name of the column
         /// </summary>
@@ -18,7 +18,7 @@ namespace Sttp.Data
         /// </summary>
         public readonly ValueType Type;
 
-        public MetadataColumn(int index, string name, ValueType type)
+        public MetadataColumn(short index, string name, ValueType type)
         {
             Index = index;
             Type = type;

@@ -401,7 +401,7 @@ namespace Sttp.Tests
 
             // some enums
             var code = CommandCode.Metadata;
-            var meta = MetadataCommand.AddColumn;
+            var meta = MetadataSubCommand.AddColumn;
 
 
             m_writer.Clear();
@@ -422,7 +422,7 @@ namespace Sttp.Tests
             m_writer.Write<string>(@string);
             m_writer.Write<CommandCode>(code); // explicit
             m_writer.Write(code); // implicit
-            m_writer.Write<MetadataCommand>(meta);
+            m_writer.Write<MetadataSubCommand>(meta);
 
             m_reader.SetBuffer(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
 
@@ -444,7 +444,7 @@ namespace Sttp.Tests
             Assert.AreEqual(@string, m_reader.Read<string>());
             Assert.AreEqual(code, m_reader.Read<CommandCode>());
             Assert.AreEqual(code, m_reader.Read<CommandCode>());
-            Assert.AreEqual(meta, m_reader.Read<MetadataCommand>());
+            Assert.AreEqual(meta, m_reader.Read<MetadataSubCommand>());
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     public interface IMetadataParams
     {
-        MetadataCommand Command { get; }
+        MetadataSubCommand SubCommand { get; }
+        void Load(PacketReader reader);
     }
 }

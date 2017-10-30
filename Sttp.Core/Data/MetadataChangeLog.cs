@@ -90,25 +90,25 @@ namespace Sttp.Data
             }
         }
 
-        public void AddColumn(int tableIndex, MetadataColumn column)
+        public void AddColumn(short tableIndex, MetadataColumn column)
         {
             if (TrackChanges)
                 m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddColumn(tableIndex, column.Index, column.Name, column.Type);
         }
 
-        public void AddValue(int tableIndex, int columnIndex, int recordIndex, byte[] value)
+        public void AddValue(short tableIndex, short columnIndex, int recordIndex, byte[] value)
         {
             if (TrackChanges)
                 m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddValue(tableIndex, columnIndex, recordIndex, value);
         }
 
-        public void DeleteRow(int tableIndex, int rowIndex)
+        public void DeleteRow(short tableIndex, int rowIndex)
         {
             if (TrackChanges)
                 m_revisions[++MinorVersion] = MetadataChangeLogRecord.DeleteRow(tableIndex, rowIndex);
         }
 
-        public void AddTable(int tableIndex, string tableName, TableFlags flags)
+        public void AddTable(short tableIndex, string tableName, TableFlags flags)
         {
             if (TrackChanges)
                 m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddTable(tableIndex, tableName, flags);
