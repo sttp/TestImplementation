@@ -13,7 +13,6 @@ namespace Sttp.WireProtocol
         private byte[] m_pendingData;
         private byte[] m_pendingData2;
         private PacketReader m_reader;
-        private static readonly byte[] Empty = new byte[0];
         private byte[] m_buffer;
         private int m_position;
         private int m_length;
@@ -42,8 +41,8 @@ namespace Sttp.WireProtocol
             if (m_length < 3)
                 return null;
 
-            CommandCode code = (CommandCode)m_buffer[0];
-            int packetLegth = BigEndian.ToInt16(m_buffer, 1);
+            CommandCode code = (CommandCode)m_buffer[m_position];
+            int packetLegth = BigEndian.ToInt16(m_buffer, m_position + 1);
             if (m_length < packetLegth)
             {
                 return null;
@@ -55,21 +54,20 @@ namespace Sttp.WireProtocol
 
                 m_isProcessingFragments = true;
 
-                m_fragmentTotalSize = BigEndian.ToInt32(m_buffer, 3);
-                m_fragmentTotalRawSize = BigEndian.ToInt32(m_buffer, 7);
-                m_fragmentCommandCode = (CommandCode)m_buffer[11];
-                m_fragmentCompressionMode = m_buffer[12];
+                m_fragmentTotalSize = BigEndian.ToInt32(m_buffer, m_position + 3);
+                m_fragmentTotalRawSize = BigEndian.ToInt32(m_buffer, m_position + 7);
+                m_fragmentCommandCode = (CommandCode)m_buffer[m_position + 11];
+                m_fragmentCompressionMode = m_buffer[m_position + 12];
 
                 if (m_pendingData.Length < m_fragmentTotalSize)
                 {
                     m_pendingData = new byte[m_fragmentTotalSize];
                 }
 
-                Array.Copy(m_buffer, 13, m_pendingData, 0, packetLegth - 13);
+                Array.Copy(m_buffer, m_position + 13, m_pendingData, 0, packetLegth - 13);
                 m_fragmentBytesReceived = packetLegth - 13;
-                m_position = packetLegth;
-
-                Compact();
+                m_position += packetLegth;
+                m_length -= packetLegth;
 
                 if (m_fragmentBytesReceived == m_fragmentTotalSize)
                 {
@@ -82,10 +80,10 @@ namespace Sttp.WireProtocol
                 if (!m_isProcessingFragments)
                     throw new Exception("A fragment has not been defined.");
 
-                Array.Copy(m_buffer, 3, m_pendingData, m_fragmentBytesReceived, packetLegth - 3);
+                Array.Copy(m_buffer, m_position + 3, m_pendingData, m_fragmentBytesReceived, packetLegth - 3);
                 m_fragmentBytesReceived += packetLegth - 3;
-                m_position = packetLegth;
-                Compact();
+                m_position += packetLegth;
+                m_length -= packetLegth;
 
                 if (m_fragmentBytesReceived == m_fragmentTotalSize)
                 {
@@ -95,28 +93,34 @@ namespace Sttp.WireProtocol
             }
             else if (code == CommandCode.CompressedPacket)
             {
-                int totalRawSize = BigEndian.ToInt32(m_buffer, 3);
-                CommandCode commandCode = (CommandCode)m_buffer[7];
-                byte mode = m_buffer[8];
+                int totalRawSize = BigEndian.ToInt32(m_buffer, m_position + 3);
+                CommandCode commandCode = (CommandCode)m_buffer[m_position + 7];
+                byte mode = m_buffer[m_position + 8];
 
                 if (m_pendingData.Length < totalRawSize)
                 {
                     m_pendingData = new byte[totalRawSize];
                 }
                 var ms = new MemoryStream(m_buffer);
-                ms.Position = 9;
+                ms.Position = m_position + 9;
                 using (var inflate = new DeflateStream(ms, CompressionMode.Decompress, true))
                 {
                     inflate.ReadAll(m_pendingData, 0, totalRawSize);
                 }
-                m_reader.Fill(commandCode, m_pendingData, 0, totalRawSize);
+                m_reader.SetBuffer(commandCode, m_pendingData, 0, totalRawSize);
+
+                m_position += packetLegth;
+                m_length -= packetLegth;
+
                 return m_reader;
             }
             else
             {
                 if (m_isProcessingFragments)
                     throw new Exception("Expecting the next fragment");
-                m_reader.Fill(code, m_buffer, 0, packetLegth);
+                m_reader.SetBuffer(code, m_buffer, m_position, packetLegth);
+                m_position += packetLegth;
+                m_length -= packetLegth;
                 return m_reader;
             }
         }
@@ -132,7 +136,7 @@ namespace Sttp.WireProtocol
             {
                 inflate.ReadAll(m_pendingData2, 0, m_fragmentTotalRawSize);
             }
-            m_reader.Fill(m_fragmentCommandCode, m_pendingData2, 0, m_fragmentTotalRawSize);
+            m_reader.SetBuffer(m_fragmentCommandCode, m_pendingData2, 0, m_fragmentTotalRawSize);
             return m_reader;
         }
 

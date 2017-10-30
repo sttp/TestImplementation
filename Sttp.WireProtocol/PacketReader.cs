@@ -9,11 +9,15 @@ namespace Sttp.WireProtocol
     public unsafe class PacketReader
     {
         private static readonly byte[] Empty = new byte[0];
+
         private byte[] m_buffer;
-        private int m_position;
-        private int m_length;
+        private int m_currentPosition;
+        private int m_startingPosition;
+        private int m_lastPosition;
+
         private SessionDetails m_sessionDetails;
-        public CommandCode Command;
+        public CommandCode Command { get; private set; }
+        public int Length { get; private set; }
 
         public PacketReader(SessionDetails sessionDetails)
         {
@@ -21,49 +25,42 @@ namespace Sttp.WireProtocol
             m_buffer = new byte[512];
         }
 
-        public int AvailableBytes => m_length - m_position;
-        public int Length => m_length;
-        public int Position { get => m_position; set => m_position = value; }
-
-        public void Fill(CommandCode code, byte[] data, int position, int length)
+        public int Position
         {
-
-            while (length + m_length >= m_buffer.Length)
+            get
             {
-                Grow();
+                return m_currentPosition - m_startingPosition;
             }
-            Array.Copy(data, position, m_buffer, m_length, length);
-            m_length += length;
+            set
+            {
+                if (value < 0 || value > Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Must be between 0 and Length");
+                }
+                m_currentPosition = value + m_startingPosition;
+            }
         }
 
-        protected void Fill(int length)
+        internal void SetBuffer(CommandCode code, byte[] data, int position, int length)
+        {
+            Command = code;
+            m_buffer = data;
+            m_startingPosition = position;
+            m_currentPosition = position;
+            m_lastPosition = length + position;
+            Length = length;
+        }
+
+        private void ThrowEndOfStreamException()
         {
             throw new EndOfStreamException();
         }
 
-        public void Compact()
-        {
-            if (m_position > 0 && m_position != m_length)
-            {
-                // Compact - trims all data before current position if position is in middle of stream
-                Array.Copy(m_buffer, m_position, m_buffer, 0, m_length - m_position);
-            }
-            m_length = m_length - m_position;
-            m_position = 0;
-        }
-
-        protected void Grow()
-        {
-            byte[] newBuffer = new byte[m_buffer.Length * 2];
-            m_buffer.CopyTo(newBuffer, 0);
-            m_buffer = newBuffer;
-        }
-
         private void EnsureCapacity(int length)
         {
-            if (AvailableBytes < length)
+            if (m_currentPosition + length > m_lastPosition)
             {
-                Fill(length);
+                ThrowEndOfStreamException();
             }
         }
 
@@ -73,12 +70,12 @@ namespace Sttp.WireProtocol
 
         public byte ReadByte()
         {
-            if (m_position + 1 > m_length)
+            if (m_currentPosition + 1 > m_lastPosition)
             {
-                Fill(1);
+                ThrowEndOfStreamException();
             }
-            byte rv = m_buffer[m_position];
-            m_position++;
+            byte rv = m_buffer[m_currentPosition];
+            m_currentPosition++;
             return rv;
         }
 
@@ -98,12 +95,12 @@ namespace Sttp.WireProtocol
 
         public short ReadInt16()
         {
-            if (m_position + 2 > m_length)
+            if (m_currentPosition + 2 > m_lastPosition)
             {
-                Fill(2);
+                ThrowEndOfStreamException();
             }
-            short rv = BigEndian.ToInt16(m_buffer, m_position);
-            m_position += 2;
+            short rv = BigEndian.ToInt16(m_buffer, m_currentPosition);
+            m_currentPosition += 2;
             return rv;
         }
 
@@ -123,12 +120,12 @@ namespace Sttp.WireProtocol
 
         public int ReadInt32()
         {
-            if (m_position + 4 > m_length)
+            if (m_currentPosition + 4 > m_lastPosition)
             {
-                Fill(4);
+                ThrowEndOfStreamException();
             }
-            int rv = BigEndian.ToInt32(m_buffer, m_position);
-            m_position += 4;
+            int rv = BigEndian.ToInt32(m_buffer, m_currentPosition);
+            m_currentPosition += 4;
             return rv;
         }
 
@@ -149,12 +146,12 @@ namespace Sttp.WireProtocol
 
         public long ReadInt64()
         {
-            if (m_position + 8 > m_length)
+            if (m_currentPosition + 8 > m_lastPosition)
             {
-                Fill(8);
+                ThrowEndOfStreamException();
             }
-            long rv = BigEndian.ToInt64(m_buffer, m_position);
-            m_position += 8;
+            long rv = BigEndian.ToInt64(m_buffer, m_currentPosition);
+            m_currentPosition += 8;
             return rv;
         }
 
@@ -180,24 +177,24 @@ namespace Sttp.WireProtocol
 
         public decimal ReadDecimal()
         {
-            if (m_position + 16 > m_length)
+            if (m_currentPosition + 16 > m_lastPosition)
             {
-                Fill(16);
+                ThrowEndOfStreamException();
             }
-            decimal rv = BigEndian.ToDecimal(m_buffer, m_position);
-            m_position += 16;
+            decimal rv = BigEndian.ToDecimal(m_buffer, m_currentPosition);
+            m_currentPosition += 16;
             return rv;
         }
 
         public Guid ReadGuid()
         {
-            if (m_position + 16 > m_length)
+            if (m_currentPosition + 16 > m_lastPosition)
             {
-                Fill(16);
+                ThrowEndOfStreamException();
             }
 
-            Guid rv = GuidExtensions.ToRfcGuid(m_buffer, m_position);
-            m_position += 16;
+            Guid rv = GuidExtensions.ToRfcGuid(m_buffer, m_currentPosition);
+            m_currentPosition += 16;
             return rv;
         }
 
@@ -208,9 +205,9 @@ namespace Sttp.WireProtocol
         public byte[] ReadRawBytes(int length)
         {
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_position, rv, 0, length);
+            Array.Copy(m_buffer, m_currentPosition, rv, 0, length);
 
-            m_position += length;
+            m_currentPosition += length;
             return rv;
         }
 
@@ -230,8 +227,8 @@ namespace Sttp.WireProtocol
             EnsureCapacity(length);
 
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_position, rv, 0, length);
-            m_position += length;
+            Array.Copy(m_buffer, m_currentPosition, rv, 0, length);
+            m_currentPosition += length;
             return rv;
         }
 
@@ -254,8 +251,8 @@ namespace Sttp.WireProtocol
         {
             EnsureCapacity(1);
 
-            int val = uint15.Read(m_buffer, m_position, out int len);
-            m_position += len;
+            int val = uint15.Read(m_buffer, m_currentPosition, out int len);
+            m_currentPosition += len;
 
             return val;
         }
@@ -269,26 +266,26 @@ namespace Sttp.WireProtocol
         public uint ReadUInt7Bit()
         {
             Read7BitEnsureCapacity();
-            return Encoding7Bit.ReadUInt32(m_buffer, ref m_position);
+            return Encoding7Bit.ReadUInt32(m_buffer, ref m_currentPosition);
         }
 
         private void Read7BitEnsureCapacity()
         {
-            if (m_buffer[m_position] < 128)
+            if (m_buffer[m_currentPosition] < 128)
             {
                 return;
             }
-            if (m_buffer[m_position + 1] < 128)
+            if (m_buffer[m_currentPosition + 1] < 128)
             {
                 EnsureCapacity(1);
                 return;
             }
-            if (m_buffer[m_position + 2] < 128)
+            if (m_buffer[m_currentPosition + 2] < 128)
             {
                 EnsureCapacity(2);
                 return;
             }
-            if (m_buffer[m_position + 3] < 128)
+            if (m_buffer[m_currentPosition + 3] < 128)
             {
                 EnsureCapacity(3);
                 return;

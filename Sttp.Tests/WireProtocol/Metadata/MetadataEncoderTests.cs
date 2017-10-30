@@ -43,7 +43,7 @@ namespace Sttp.Tests
 
             void ReceivePacket(byte[] data, int position, int length)
             {
-                m_sr.Fill(CommandCode.Metadata, data, position, length);
+                m_sr.SetBuffer(CommandCode.Metadata, data, position, length);
                 m_decoder.Fill(m_sr);
                 Assert.AreEqual(CommandCode.Metadata, m_sr.Read<CommandCode>());
                 Assert.AreEqual(m_sr.Length, m_sr.ReadUInt16());
