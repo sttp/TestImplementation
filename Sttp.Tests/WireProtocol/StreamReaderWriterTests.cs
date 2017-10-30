@@ -29,7 +29,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadByte());
         }
 
@@ -42,7 +42,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             MetadataEncoderTests.CompareCollection(testValue, m_reader.ReadBytes());
         }
 
@@ -52,7 +52,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue, start, length);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
 
             byte[] sourceCompare = new byte[length];
             Array.Copy(testValue, start, sourceCompare, 0, length);
@@ -72,7 +72,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadSByte());
         }
 
@@ -83,7 +83,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadBoolean());
         }
 
@@ -102,7 +102,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadChar());
         }
 
@@ -117,7 +117,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.WriteInt15(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadInt15());
             if (testValue < 128)
                 Assert.IsTrue(m_writer.UserData == 1);
@@ -134,7 +134,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadInt16());
         }
 
@@ -149,7 +149,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadInt32());
         }
 
@@ -164,7 +164,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.WriteInt7Bit(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadInt7Bit());
         }
 
@@ -178,7 +178,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.WriteUInt7Bit(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadUInt7Bit());
         }
 
@@ -193,7 +193,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadInt64());
         }
 
@@ -207,7 +207,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadUInt16());
         }
 
@@ -220,7 +220,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadUInt32());
         }
 
@@ -233,7 +233,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadUInt64());
         }
 
@@ -248,7 +248,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadDouble());
         }
 
@@ -263,7 +263,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadSingle());
         }
 
@@ -278,7 +278,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadDecimal());
         }
 
@@ -295,7 +295,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadDateTime());
         }
 
@@ -310,7 +310,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadGuid());
         }
 
@@ -325,7 +325,7 @@ namespace Sttp.Tests
         {
             m_writer.Clear();
             m_writer.Write(testValue);
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             Assert.AreEqual(testValue, m_reader.ReadString());
         }
 
@@ -344,7 +344,7 @@ namespace Sttp.Tests
             m_writer.WriteArray(lots);
 
 
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
             var strResult = m_reader.ReadArray<string>();
             var shrtResult = m_reader.ReadArray<short>();
             var fltResult = m_reader.ReadArray<float>();
@@ -424,7 +424,7 @@ namespace Sttp.Tests
             m_writer.Write(code); // implicit
             m_writer.Write<MetadataCommand>(meta);
 
-            m_reader.Fill(m_writer.ToArray(), 0, m_writer.UserData);
+            m_reader.Fill(CommandCode.Invalid, m_writer.ToArray(), 0, m_writer.UserData);
 
 
             Assert.AreEqual(guid, m_reader.Read<Guid>());

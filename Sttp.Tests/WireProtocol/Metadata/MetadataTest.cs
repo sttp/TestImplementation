@@ -59,7 +59,6 @@ namespace Sttp.Tests
                     case CommandCode.SecureDataChannel:
                     case CommandCode.RuntimeIDMapping:
                     case CommandCode.DataPointPacket:
-                    case CommandCode.Fragment:
                     case CommandCode.NoOp:
                     case CommandCode.Invalid:
                         throw new NotSupportedException();

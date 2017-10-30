@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
         private NegotiateSessionDecoder m_negotiateSessionDecoder;
         private SubscriptionDecoder m_subscriptionDecoder;
         private BulkTransportDecoder m_bulkDecoder;
-        private PacketReader m_buffer = new PacketReader(new SessionDetails());
+        private PacketDecoder m_packetDecoder = new PacketDecoder(new SessionDetails());
         private SessionDetails m_sessionDetails = new SessionDetails();
 
         public WireDecoder()
@@ -34,8 +34,7 @@ namespace Sttp.WireProtocol
         /// <param name="length">the length</param>
         public void WriteData(byte[] data, int position, int length)
         {
-            m_buffer.Compact();
-            m_buffer.Fill(data, position, length);
+            m_packetDecoder.WriteData(data, position, length);
         }
 
         /// <summary>
@@ -45,41 +44,31 @@ namespace Sttp.WireProtocol
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
         public IPacketDecoder NextPacket()
         {
-            //A message fewer than 2 bytes are not valid.
-            if (m_buffer.AvailableBytes < 2)
+            PacketReader reader = m_packetDecoder.NextPacket();
+            if (reader == null)
                 return null;
 
-            int origPosition = m_buffer.Position;
-            CommandCode commandCode = m_buffer.Read<CommandCode>();
-            int messageLength = m_buffer.ReadUInt16();
-
-            if (messageLength > m_buffer.AvailableBytes + 3)
-            {
-                m_buffer.Position = origPosition;
-                return null;
-            }
-
-            switch (commandCode)
+            switch (reader.Command)
             {
                 case CommandCode.NegotiateSession:
-                    m_negotiateSessionDecoder.Fill(m_buffer);
+                    m_negotiateSessionDecoder.Fill(reader);
                     return m_negotiateSessionDecoder;
                 case CommandCode.Metadata:
-                    m_metadataDecoder.Fill(m_buffer);
+                    m_metadataDecoder.Fill(reader);
                     return m_metadataDecoder;
                 case CommandCode.BulkTransport:
-                    m_bulkDecoder.Fill(m_buffer);
+                    m_bulkDecoder.Fill(reader);
                     return m_bulkDecoder;
                 case CommandCode.Subscribe:
-                    m_subscriptionDecoder.Fill(m_buffer);
+                    m_subscriptionDecoder.Fill(reader);
                     return m_subscriptionDecoder;
                 case CommandCode.SecureDataChannel:
                     break;
                 case CommandCode.RuntimeIDMapping:
-                    m_dataPointDecoder.Fill(m_buffer);
+                    m_dataPointDecoder.Fill(reader);
                     return m_dataPointDecoder;
                 case CommandCode.DataPointPacket:
-                    m_dataPointDecoder.Fill(m_buffer);
+                    m_dataPointDecoder.Fill(reader);
                     return m_dataPointDecoder;
                 case CommandCode.NoOp:
                     break;

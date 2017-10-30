@@ -13,6 +13,7 @@ namespace Sttp.WireProtocol
         private int m_position;
         private int m_length;
         private SessionDetails m_sessionDetails;
+        public CommandCode Command;
 
         public PacketReader(SessionDetails sessionDetails)
         {
@@ -24,8 +25,9 @@ namespace Sttp.WireProtocol
         public int Length => m_length;
         public int Position { get => m_position; set => m_position = value; }
 
-        public void Fill(byte[] data, int position, int length)
+        public void Fill(CommandCode code, byte[] data, int position, int length)
         {
+
             while (length + m_length >= m_buffer.Length)
             {
                 Grow();

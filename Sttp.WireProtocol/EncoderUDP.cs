@@ -46,21 +46,21 @@ namespace Sttp.WireProtocol
 
         internal void SendPacket(byte[] data, int position, int length)
         {
-            if (length > m_autoFlushPacketSize)
-            {
-                //Segment the frame;
-                for (int x = 0; x < length / 1000; x++)
-                {
-                    m_buffer[0] = (byte)CommandCode.Fragment;
-                    BigEndian.CopyBytes(1013, m_buffer, 1);
-                    BigEndian.CopyBytes(m_largeSequenceIndex++, m_buffer, 5);
-                    BigEndian.CopyBytes(length, m_buffer, 9);
-                    BigEndian.CopyBytes(x, m_buffer, 13);
-                    Array.Copy(data, position + 1000 * x, m_buffer, 13, 1000);
-                    NewPacket?.Invoke(data, position, length);
-                }
-                return;
-            }
+            //if (length > m_autoFlushPacketSize)
+            //{
+            //    //Segment the frame;
+            //    for (int x = 0; x < length / 1000; x++)
+            //    {
+            //        m_buffer[0] = (byte)CommandCode.PayloadEncapsulation;
+            //        BigEndian.CopyBytes(1013, m_buffer, 1);
+            //        BigEndian.CopyBytes(m_largeSequenceIndex++, m_buffer, 5);
+            //        BigEndian.CopyBytes(length, m_buffer, 9);
+            //        BigEndian.CopyBytes(x, m_buffer, 13);
+            //        Array.Copy(data, position + 1000 * x, m_buffer, 13, 1000);
+            //        NewPacket?.Invoke(data, position, length);
+            //    }
+            //    return;
+            //}
             NewPacket?.Invoke(data, position, length);
         }
 

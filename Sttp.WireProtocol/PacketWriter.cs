@@ -56,13 +56,11 @@ namespace Sttp.WireProtocol
         public void EndCommand(Action<byte[], int, int> sendPacket)
         {
             int length = UserData;
-            int position = UserDataPosition - 5;
-
+            int offset = UserDataPosition;
             if (length == 0)
                 return;
 
-            length += 5;
-            m_position = position;
+            m_position = offset;
             Write(m_command);
             Write(length);
 
@@ -74,59 +72,100 @@ namespace Sttp.WireProtocol
 
             if (m_sessionDetails.SupportsDeflate)
             {
-                //ToDo: Determine if the specific packet should be deflated. 
-                //Encapsulate the current packet into a deflate packet.
-                int deflatedSize;
-                using (var ms = new MemoryStream())
-                {
-                    using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
-                    {
-                        deflate.Write(m_buffer, UserDataPosition - 5, UserData - UserDataPosition + 5);
-                    }
-                    ms.Position = 0;
-                    deflatedSize = (int)ms.Length;
-                    while (m_buffer.Length < ms.Length + 30)
-                    {
-                        Grow();
-                    }
-                    ms.ReadAll(m_buffer, UserDataPosition, (int)ms.Length);
-                }
-
-                position = UserDataPosition - 11;
-                m_position = position;
-                Write(CommandCode.DeflatePacket);
-                Write(11 + deflatedSize);
-                Write(length);
-
-                length = deflatedSize + 11;
+                SendCompressed(sendPacket, offset, length);
+                return;
             }
 
-            if (length < m_sessionDetails.MaximumSegmentSize)
+            if (length + 3 < m_sessionDetails.MaximumSegmentSize)
             {
-                sendPacket(m_buffer, position, length);
+                offset -= 3;
+                length += 3;
+                m_position = offset;
+                Write(m_command);
+                Write((short)length);
+                sendPacket(m_buffer, offset, length);
             }
             else
             {
-                int userPosition = position;
-                int remainingLength = length;
-                int fragmentId = m_sessionDetails.NextFragmentID++;
-
-                while (remainingLength > 0)
-                {
-                    m_position = userPosition - 5 - 16;
-                    int fragmentLength = Math.Min(remainingLength, m_sessionDetails.MaximumSegmentSize - 5 - 16);
-
-                    Write(CommandCode.Fragment);
-                    Write(fragmentLength + 5 + 16);
-                    Write(fragmentId);
-                    Write(length);
-                    Write(userPosition);
-                    Write((short)fragmentLength);
-
-                    userPosition += fragmentLength;
-                    remainingLength -= fragmentLength;
-                }
+                SendFragmentedPacket(sendPacket, length, length, 0, offset, length);
             }
+        }
+
+        private void SendCompressed(Action<byte[], int, int> sendPacket, int offset, int length)
+        {
+            //ToDo: Determine if and what kind of compression should occur
+
+            int compressedSize;
+            using (var ms = new MemoryStream())
+            {
+                using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
+                {
+                    deflate.Write(m_buffer, offset, length);
+                }
+                ms.Position = 0;
+                compressedSize = (int)ms.Length;
+                while (m_buffer.Length < ms.Length + UserDataPosition)
+                {
+                    Grow();
+                }
+                ms.ReadAll(m_buffer, UserDataPosition, compressedSize);
+            }
+
+            if (compressedSize + 3 + 9 <= m_sessionDetails.MaximumSegmentSize)
+            {
+                SendCompressedPacket(sendPacket, length, 1, UserDataPosition, compressedSize);
+                return;
+            }
+
+            SendFragmentedPacket(sendPacket, compressedSize, length, 1, UserDataPosition, compressedSize);
+        }
+
+        private void SendFragmentedPacket(Action<byte[], int, int> sendPacket, int totalFragmentedSize, int totalRawSize, byte compressionMode, int offset, int length)
+        {
+            const int Overhead = 1 + 2 + 4 + 4 + 1 + 1; //13 bytes.
+            const int Overhead2 = 1 + 2; //3 bytes.
+
+            int sentLength = Math.Min(m_sessionDetails.MaximumSegmentSize - Overhead, length);
+
+            m_position = offset - Overhead;
+            Write(CommandCode.BeginFragment);
+            Write((short)(sentLength + Overhead));
+            Write(totalFragmentedSize);
+            Write(totalRawSize);
+            Write(m_command);
+            Write(compressionMode);
+            sendPacket(m_buffer, offset - Overhead, sentLength + Overhead);
+
+            offset += sentLength;
+            while (sentLength < length)
+            {
+                int nextLength = Math.Min(m_sessionDetails.MaximumSegmentSize - Overhead2, length - sentLength);
+
+                m_position = offset - Overhead2;
+                Write(CommandCode.NextFragment);
+                Write((short)(nextLength + Overhead2));
+                Write(nextLength);
+
+                sendPacket(m_buffer, offset - Overhead2, nextLength + Overhead2);
+
+                sentLength += nextLength;
+                offset += nextLength;
+            }
+
+        }
+
+        private void SendCompressedPacket(Action<byte[], int, int> sendPacket, int totalSize, byte compressionMode,  int offset, int length)
+        {
+            const int Overhead = 1 + 2 + 4 + 1 + 1; //9 bytes.
+            offset -= Overhead;
+            length += Overhead;
+            m_position = offset - Overhead;
+            Write(CommandCode.CompressedPacket);
+            Write((short)(length + Overhead));
+            Write(totalSize);
+            Write(m_command);
+            Write(compressionMode);
+            sendPacket(m_buffer, offset - Overhead, length + Overhead);
         }
 
         public void Clear()
@@ -247,7 +286,7 @@ namespace Sttp.WireProtocol
 
         #region [ Variable Length Types ]
 
-        public void Write(System.IO.Stream stream, long start, int length)
+        public void Write(Stream stream, long start, int length)
         {
             if (length > 1024 * 1024)
                 throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));

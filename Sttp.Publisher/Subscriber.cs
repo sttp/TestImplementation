@@ -305,8 +305,6 @@ namespace Sttp.Publisher
                         break;
                     case CommandCode.DataPointPacket:
                         break;
-                    case CommandCode.Fragment:
-                        break;
                     case CommandCode.NoOp:
                         break;
                     default:

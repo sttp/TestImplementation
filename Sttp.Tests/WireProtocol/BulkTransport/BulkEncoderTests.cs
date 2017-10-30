@@ -81,7 +81,6 @@ namespace Sttp.Tests.WireProtocol.BulkTransport
                     case CommandCode.SecureDataChannel:
                     case CommandCode.RuntimeIDMapping:
                     case CommandCode.DataPointPacket:
-                    case CommandCode.Fragment:
                     case CommandCode.NoOp:
                     case CommandCode.Invalid:
                     case CommandCode.Metadata:

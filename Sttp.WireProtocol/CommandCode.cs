@@ -22,15 +22,6 @@ namespace Sttp.WireProtocol
         BulkTransport = 0x03,
 
         /// <summary>
-        /// Indicates that this packet is a deflate encapsulated packet.
-        /// 
-        /// Payload:
-        /// int Length,
-        /// byte[] CompressedData
-        /// </summary>
-        DeflatePacket = 0x04,
-
-        /// <summary>
         /// Indicates that a fragmented packet is being sent. Fragmented packets 
         /// are for the wire protocol to ensure every packet fits the MSS size. Users
         /// must send their bulk data over BulkTransport.
@@ -41,15 +32,44 @@ namespace Sttp.WireProtocol
         /// Fragments are limited to a size configure in the SessionDetails, but is on the order 
         /// of MB's.
         /// 
-        /// Payload:
-        /// int FragmentID     - A sequential counter to ensure that fragments are not interwoven.
-        /// int OrigionalSize  - The size of the original packet.
-        /// int Offset         - The offset of the incoming data in respects to the original data.
-        /// short fragmentSize - MSS cannot exceed 32KB
-        /// byte[] data
+        /// Fragmented packets can have a compression=none.
         /// 
+        /// Layout:
+        /// byte CommandCode.BeginFragment 
+        /// short PacketLength
+        /// int TotalFragmentSize     - The size of all fragments.
+        /// int TotalRawSize          - The uncompressed data size.
+        /// byte CommandCode          - The Command of the data that is encapsulated.
+        /// byte CompressionMode      - The algorithm that is used to compress the data.
+        /// (Implied) Length of first fragment
+        /// byte[] firstFragment
         /// </summary>
-        Fragment,
+        BeginFragment,
+
+        /// <summary>
+        /// Specifies the next fragment of data. When Offset + Length of data == TotalFragmentSize, the fragment is completed.
+        /// 
+        /// Layout:
+        /// byte CommandCode.NextFragment 
+        /// short PacketLength
+        /// (Implied) Length of fragment
+        /// byte[] Fragment               
+        /// </summary>
+        NextFragment,
+
+        /// <summary>
+        /// Indicates a packet that is compressed but not fragmented. This will decrease the overhead 
+        /// 
+        /// Layout:
+        /// byte CommandCode.CompressedPacket 
+        /// short PacketLength
+        /// int TotalRawSize          - The uncompressed data size.
+        /// byte CommandCode,         - The Command of the data that is encapsulated.
+        /// byte CompressionMode      - The algorithm that is used to compress the data.
+        /// (Implied) Length of compressed data.
+        /// byte[] CompressedData
+        /// </summary>
+        CompressedPacket,
 
         // TODO : assign values
         NegotiateSession,
@@ -57,9 +77,6 @@ namespace Sttp.WireProtocol
         SecureDataChannel,
         RuntimeIDMapping,
         DataPointPacket,
-        
-
-        
 
         NoOp = 0xFF,
     }
