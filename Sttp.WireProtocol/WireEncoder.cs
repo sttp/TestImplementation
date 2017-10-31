@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
 
-        private DataPointEncoder m_dataPoint;
+        //private DataPointEncoder m_dataPoint;
 
         private SubscriptionEncoder m_subscription;
 

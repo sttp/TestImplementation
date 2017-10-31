@@ -9,7 +9,7 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class WireDecoder
     {
-        private DataPointDecoder m_dataPointDecoder;
+        //private DataPointDecoder m_dataPointDecoder;
         private NegotiateSessionDecoder m_negotiateSessionDecoder;
         private SubscriptionDecoder m_subscriptionDecoder;
         private BulkTransportDecoder m_bulkDecoder;
@@ -23,7 +23,7 @@ namespace Sttp.WireProtocol
 
         public WireDecoder()
         {
-            m_dataPointDecoder = new DataPointDecoder();
+           // m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSessionDecoder = new NegotiateSessionDecoder();
             m_subscriptionDecoder = new SubscriptionDecoder();
             m_bulkDecoder = new BulkTransportDecoder();
@@ -70,11 +70,13 @@ namespace Sttp.WireProtocol
                 case CommandCode.SecureDataChannel:
                     break;
                 case CommandCode.RegisterDataPoint:
-                    m_dataPointDecoder.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_dataPointDecoder);
+                    break;
+                    //m_dataPointDecoder.Fill(reader);
+                    //return new CommandDecoder(reader.Command, m_dataPointDecoder);
                 case CommandCode.SendDataPoints:
-                    m_dataPointDecoder.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_dataPointDecoder);
+                    break;
+                    //m_dataPointDecoder.Fill(reader);
+                    //return new CommandDecoder(reader.Command, m_dataPointDecoder);
                 case CommandCode.NoOp:
                     break;
                 case CommandCode.Invalid:

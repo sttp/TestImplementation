@@ -32,7 +32,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
 
-        public DataPointEncoder DataPoint { get; private set; }
+        //public DataPointEncoder DataPoint { get; private set; }
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -41,7 +41,7 @@ namespace Sttp.WireProtocol
         public EncoderUDP(int autoflushPacketSize)
         {
             m_autoFlushPacketSize = autoflushPacketSize;
-            DataPoint = new DataPointEncoder(SendPacket);
+            //DataPoint = new DataPointEncoder(SendPacket);
         }
 
         internal void SendPacket(byte[] data, int position, int length)

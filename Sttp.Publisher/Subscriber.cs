@@ -149,24 +149,24 @@ namespace Sttp.Publisher
 
                 //m_encoder.DataPoint.BeginCommand();
 
-                foreach (var point in dataPoints)
-                {
-                    wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
-                    Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
-                    wire.BulkDataValueID = 0;
-                    wire.Length = (uint)point.ValueLength;
-                    wire.Time = new SttpTimestamp(point.Time);
-                    wire.Flags = point.Flags;
-                    wire.QualityFlags = point.QualityFlags;
+                //foreach (var point in dataPoints)
+                //{
+                //    wire.ID = m_signalMapping[point.Key.UniqueID].RuntimeID;
+                //    Array.Copy(point.Value, 0, wire.Value, 0, point.ValueLength);
+                //    wire.BulkDataValueID = 0;
+                //    wire.ValueLength = (uint)point.ValueLength;
+                //    wire.Time = new SttpTimestamp(point.Time);
+                //    wire.TimeQualityFlags = point.Flags;
+                //    wire.DataQualityFlags = point.QualityFlags;
 
-                    //m_encoder.DataPoint.SendDataPoint(wire);
-                }
+                //    //m_encoder.DataPoint.SendDataPoint(wire);
+                //}
 
                 //m_encoder.DataPoint.EndCommand();
             }
         }
 
-        private Dictionary<Guid, DataPointKeyWire> m_signalMapping = new Dictionary<Guid, DataPointKeyWire>();
+        //private Dictionary<Guid, DataPointKeyWire> m_signalMapping = new Dictionary<Guid, DataPointKeyWire>();
         private uint m_nextRuntimeIDIndex = 0;
         private uint m_nextBulkValueID = 1;
 
@@ -174,17 +174,17 @@ namespace Sttp.Publisher
         {
             foreach (var point in dataPoints)
             {
-                DataPointKeyWire map;
-                if (!(m_signalMapping.TryGetValue(point.Key.UniqueID, out map) && map.Type == point.Key.Type))
-                {
-                    map = new DataPointKeyWire();
-                    map.UniqueID = point.Key.UniqueID;
-                    map.Flags = StateFlags.Quality;
-                    map.Type = point.Key.Type;
-                    map.RuntimeID = m_nextRuntimeIDIndex;
-                    m_nextRuntimeIDIndex++;
-                    //m_encoder.DataPoint.MapRuntimeID(map);
-                }
+                //DataPointKeyWire map;
+                //if (!(m_signalMapping.TryGetValue(point.Key.UniqueID, out map) && map.Type == point.Key.Type))
+                //{
+                //    map = new DataPointKeyWire();
+                //    map.UniqueID = point.Key.UniqueID;
+                //    map.Flags = StateFlags.Quality;
+                //    map.Type = point.Key.Type;
+                //    map.RuntimeID = m_nextRuntimeIDIndex;
+                //    m_nextRuntimeIDIndex++;
+                //    //m_encoder.DataPoint.MapRuntimeID(map);
+                //}
             }
         }
 

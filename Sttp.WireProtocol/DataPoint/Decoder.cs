@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol.SendDataPoints
 {
-    public class DataPointDecoder
+    public class Decoder
     {
         public CommandCode CommandCode => CommandCode.SendDataPoints;
 

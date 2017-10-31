@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.SendDataPoints
+namespace Sttp.WireProtocol
 {
     [Flags]
     public enum StateFlags : ushort
