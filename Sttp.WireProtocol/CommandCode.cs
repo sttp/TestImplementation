@@ -111,10 +111,39 @@ namespace Sttp.WireProtocol
         /// </summary>
         GetMetadata,
         GetMetadataResponse,
+
+        /// <summary>
+        /// Updates the subscription for new measurements. This subscription can be realtime or historical.
+        /// 
+        /// Layout:
+        /// Subcommand: IsAugmentedSubscription         - Specifies that the subscription request is intended to augment the existing subscription.
         
+        /// Subcommand: DownSamplingPerDay              - Sets the down-sampling mode for this subscription to be a certain number of samples per day.
+        ///                                               This is valid for all data points defined after this point.
+        /// Subcommand: DownSamplingSamplesPerSecond    - Sets the down-sampling mode for this subscription to be a value every 'X' number of seconds.
+        ///                                               This is valid for all data points defined after this point.
+        /// Subcommand: Priority                        - Sets the priority 
+        ///                                               This is valid for all data points defined after this point.
+        /// Subcommand: SubscribeToTheFollowing         - Indicates that all of the following data points should be added the subscription.
+        /// Subcommand: UnsubscribeFromTheFollowing     - Indicates that all of the following data points should be removed from the subscription.
+       
+        
+        /// Subcommand: AllDataPoints                   - Identifies all data points.
+        /// Subcommand: TableDataPoints                 - Identifies all Data Points listed in a table
+        /// Subcommand: DataPointByID                   - Specifies a DataPoint by ID
+        /// Subcommand: StartTime                       - Sets the start time for a subscription for historical data.
+        /// Subcommand: StopTime                        - Sets the stop time for a subscription for historical data.
+        /// 
+        /// 
+        /// 
+        /// </summary>
+        Subscribe,
+        SubscribeResponse,
+
+
         // TODO : assign values
         NegotiateSession,
-        Subscribe,
+
         SecureDataChannel,
         RuntimeIDMapping,
         DataPointPacket,

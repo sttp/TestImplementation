@@ -14,60 +14,29 @@ namespace Sttp.WireProtocol.SubscriptionPacket
         Invalid = 0x00,
 
         /// <summary>
-        /// Indicates that a request for data is being populated.
-        /// Payload: 
-        /// None
-        /// </summary>
-        BeginRequest,
-
-        /// <summary>
-        /// Indicates that the request for data has been completed and should be executed upon.
-        /// Payload: 
-        /// None
-        /// </summary>
-        CompleteRequest,
-
-        /// <summary>
-        /// Determines if this subscription is an augmentation of an existing subscription. Default is false.
-        /// 
-        /// Payload:
-        /// bool isAugmentationSubscription
+        /// Specifies that this subscription is an augmentation of an existing subscription. 
         /// </summary>
         IsAugmentedSubscription,
 
         /// <summary>
-        /// Sets the down-sampling mode for this subscription to be a certain number of samples per day.
-        /// This is valid for all data points defined after this point.
+        /// Sets the state information for every data point that is specified after this state. 
+        /// Note: This typically will be specified once, then a list of points will follow, 
+        /// however, this can be specified for each point if the publisher supports this level
+        /// of granularity.
         /// 
-        /// long desiredSamplesPerDay
-        /// </summary>
-        SetDownSamplingPerDay,
-
-        /// <summary>
-        /// Sets the down-sampling mode for this subscription to be a value every 'X' number of seconds.
-        /// This is valid for all data points defined after this point.
+        /// Payload:
+        /// long DownSamplingSamplesPerSecond = -1
+        /// long DownSamplingPerDay = -1
+        /// PriorityFlags flags = Normal
+        /// ReliabilityFlags flags = Normal
+        /// VerificationFlags flags = Normal
+        /// PublishByException flags = Normal
+        /// ShouldUnsubscribe = false
         /// 
-        /// long secondsPerSample,
         /// </summary>
-        SetDownSamplingSamplesPerSecond,
+        ConfigureDataPointState,
 
-        /// <summary>
-        /// Sets the priority 
-        /// This is valid for all data points defined after this point.
-        /// 
-        /// PriorityFlags flags.
-        /// </summary>
-        SetPriority,
 
-        /// <summary>
-        /// Indicates that all of the following data points should be added the subscription.
-        /// </summary>
-        SubscribeToTheFollowing,
-
-        /// <summary>
-        /// Indicates that all of the following data points should be removed from the subscription.
-        /// </summary>
-        UnsubscribeToTheFollowing,
 
         /// <summary>
         /// Identifies all data points.
@@ -88,7 +57,7 @@ namespace Sttp.WireProtocol.SubscriptionPacket
         /// Payload: 
         /// int DataPointID
         /// </summary>
-        DatapointByID,
+        DataPointByID,
 
         /// <summary>
         /// Sets the start time for a subscription for historical data. Default is null.
@@ -97,7 +66,7 @@ namespace Sttp.WireProtocol.SubscriptionPacket
         /// bool HasValue
         /// SttpTimestamp startTime
         /// </summary>
-        SetStartTime,
+        StartTime,
 
         /// <summary>
         /// Sets the stop time for a subscription for historical data. Default is null.
@@ -106,7 +75,7 @@ namespace Sttp.WireProtocol.SubscriptionPacket
         /// bool HasValue
         /// SttpTimestamp stopTime
         /// </summary>
-        SetStopTime,
-        
+        StopTime,
+
     }
 }
