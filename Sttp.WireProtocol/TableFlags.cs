@@ -1,4 +1,4 @@
-﻿namespace Sttp.WireProtocol.MetadataPacket
+﻿namespace Sttp.WireProtocol
 {
     /// <summary>
     /// Flags associated with Metadata Tables
