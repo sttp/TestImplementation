@@ -4,8 +4,7 @@ using System.Data;
 using System.IO;
 using Sttp.IO;
 using Sttp.WireProtocol;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
+using Sttp.WireProtocol.GetMetadataResponse;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -75,21 +74,20 @@ namespace Sttp.Data
             Columns[index] = new MetadataColumn(index, name, type);
         }
 
-        public void ProcessCommand(IMetadataParams command)
+        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.ICmd command)
         {
             switch (command.SubCommand)
             {
-                case MetadataSubCommand.AddColumn:
-                    var addC = command as MetadataAddColumnParams;
+                case SubCommand.AddColumn:
+                    var addC = command.AddColumn;
                     while (Columns.Count <= addC.ColumnIndex)
                     {
                         Columns.Add(null);
                     }
                     Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnType);
                     break;
-                case MetadataSubCommand.AddRow:
-                    var addR = command as MetadataAddRowParams;
-
+                case SubCommand.AddRow:
+                    var addR = command.AddRow;
                     while (Rows.Count <= addR.RowIndex)
                     {
                         Rows.Add(null);
@@ -99,20 +97,18 @@ namespace Sttp.Data
                         Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
                     }
                     break;
-                case MetadataSubCommand.AddValue:
-                    var addV = command as MetadataAddValueParams;
+                case SubCommand.AddValue:
+                    var addV = command.AddValue;
                     Rows[addV.RowIndex].ProcessCommand(addV);
                     break;
-                case MetadataSubCommand.DeleteRow:
-                    var delRow = command as MetadataDeleteRowParams;
+                case SubCommand.DeleteRow:
+                    var delRow = command.DeleteRow;
                     Rows[delRow.RowIndex] = null;
                     break;
-                case MetadataSubCommand.AddTable:
-                case MetadataSubCommand.Invalid:
-                case MetadataSubCommand.Clear:
-                case MetadataSubCommand.DatabaseVersion:
-                case MetadataSubCommand.GetDatabaseSchema:
-                case MetadataSubCommand.GetDatabaseVersion:
+                case SubCommand.AddTable:
+                case SubCommand.Clear:
+                case SubCommand.DatabaseVersion:
+                case SubCommand.Invalid:
                     throw new NotSupportedException();
                 default:
                     throw new ArgumentOutOfRangeException();

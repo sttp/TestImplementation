@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.WireProtocol.Data;
 
 namespace Sttp.WireProtocol.GetMetadata
 {
@@ -65,7 +64,7 @@ namespace Sttp.WireProtocol.GetMetadata
 
         public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            m_stream.Write(MetadataSubCommand.DatabaseVersion);
+            m_stream.Write(SubCommand.DatabaseVersion);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
         }

@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using Sttp.IO;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol
 {

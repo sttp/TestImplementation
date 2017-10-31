@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.WireProtocol.Data;
 
 namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 {

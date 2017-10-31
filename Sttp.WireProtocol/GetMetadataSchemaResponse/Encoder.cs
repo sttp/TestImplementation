@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 {
@@ -19,7 +17,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         public void AddTable(short tableIndex, string tableName, TableFlags tableFlags)
         {
-            m_stream.Write(MetadataSubCommand.AddTable);
+            m_stream.Write(SubCommand.AddTable);
             m_stream.Write(tableIndex);
             m_stream.Write(tableName);
             m_stream.Write(tableFlags);
@@ -27,7 +25,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         public void AddColumn(short tableIndex, short columnIndex, string columnName, ValueType columnType)
         {
-            m_stream.Write(MetadataSubCommand.AddColumn);
+            m_stream.Write(SubCommand.AddColumn);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(columnName);
@@ -36,7 +34,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            m_stream.Write(MetadataSubCommand.DatabaseVersion);
+            m_stream.Write(SubCommand.DatabaseVersion);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
         }

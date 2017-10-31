@@ -12,8 +12,8 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            IPacketDecoder nextCommand;
-            while ((nextCommand = receive.NextPacket()) != null)
+            CommandDecoder nextCommand;
+            while ((nextCommand = receive.NextCommand()) != null)
             {
                 switch (nextCommand.CommandCode)
                 {
@@ -26,10 +26,6 @@ namespace Prototype.Codec.Metadata
                     case CommandCode.NextFragment:
                         break;
                     case CommandCode.CompressedPacket:
-                        break;
-                    case CommandCode.MetadataGetSchema:
-                        break;
-                    case CommandCode.MetadataGetData:
                         break;
                     case CommandCode.NegotiateSession:
                         break;
@@ -58,15 +54,16 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            var cmd1 = send.MetadataGetSchema();
-            cmd1.RequestDatabaseVersion = true;
-            cmd1.RequestDatabaseSchema = true;
-            cmd1.Send();
+            var cmd1 = send.GetMetadataSchema();
+            cmd1.BeginCommand();
+            cmd1.GetDatabaseSchema();
+            cmd1.GetDatabaseVersion();
+            cmd1.EndCommand();
 
-            IPacketDecoder nextCommand;
-            while ((nextCommand = receive.NextPacket()) != null)
+            CommandDecoder nextCommand;
+            while ((nextCommand = receive.NextCommand()) != null)
             {
-                if (nextCommand.CommandCode == CommandCode.MetadataGetSchemaResponse)
+                if (nextCommand.CommandCode == CommandCode.GetMetadataSchemaResponse)
                 {
                 }
             }

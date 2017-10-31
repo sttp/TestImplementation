@@ -45,7 +45,7 @@ namespace Sttp.Publisher
             m_dataThread = new Thread(CollateData);
             m_dataThread.Start();
 
-            m_wireEncoder = new WireEncoder(1024);
+            m_wireEncoder = new WireEncoder();
             m_wireDecoder = new WireDecoder();
             m_wireEncoder.NewPacket += WireEncoderNewPacket;
             // Setup data reception event or handler, etc...
@@ -190,7 +190,7 @@ namespace Sttp.Publisher
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
             m_wireDecoder.WriteData(buffer, startIndex, length);
-            var packet = m_wireDecoder.NextPacket();
+            var packet = m_wireDecoder.NextCommand();
             while (packet != null)
             {
                 switch (packet.CommandCode)
@@ -295,8 +295,6 @@ namespace Sttp.Publisher
                     //    break;
                     case CommandCode.NegotiateSession:
                         break;
-                    case CommandCode.Metadata:
-                        break;
                     case CommandCode.Subscribe:
                         break;
                     case CommandCode.SecureDataChannel:
@@ -310,7 +308,7 @@ namespace Sttp.Publisher
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                packet = m_wireDecoder.NextPacket();
+                packet = m_wireDecoder.NextCommand();
             }
         }
 

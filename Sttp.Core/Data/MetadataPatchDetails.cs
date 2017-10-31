@@ -1,8 +1,7 @@
 using Sttp.IO;
 using System;
 using System.IO;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
+using Sttp.WireProtocol;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -157,7 +156,7 @@ namespace Sttp.Data
             throw new NotImplementedException();
         }
 
-        public void Save(MetadataEncoder encoder)
+        public void Save(Sttp.WireProtocol.GetMetadataResponse.Encoder encoder)
         {
             switch (ChangeType)
             {
@@ -175,6 +174,5 @@ namespace Sttp.Data
             }
         }
 
-        
     }
 }

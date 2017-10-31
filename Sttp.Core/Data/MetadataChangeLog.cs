@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Sttp.WireProtocol.MetadataPacket;
+using Sttp.WireProtocol;
 
 namespace Sttp.Data
 {

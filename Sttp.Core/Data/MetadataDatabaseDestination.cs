@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using Sttp.WireProtocol;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
+using Sttp.WireProtocol.GetMetadataResponse;
 
 namespace Sttp.Data
 {
@@ -43,16 +42,25 @@ namespace Sttp.Data
         /// Fills a new dataset with the results of RequestAllTablesWithSchema
         /// </summary>
         /// <returns></returns>
-        public void Process(MetadataDecoder decoder)
+        public void Process(Sttp.WireProtocol.GetMetadataResponse.Decoder decoder)
         {
-            IMetadataParams command;
+            Sttp.WireProtocol.GetMetadataResponse.ICmd command;
             while ((command = decoder.NextCommand()) != null)
             {
                 switch (command.SubCommand)
                 {
-                    case MetadataSubCommand.AddTable:
+                    case SubCommand.Invalid:
+                        break;
+                    case SubCommand.DatabaseVersion:
+                        var db = command.DatabaseVersion;
+                        MajorVersion = db.MajorVersion;
+                        MinorVersion = db.MinorVersion;
+                        break;
+                    case SubCommand.Clear:
+                        break;
+                    case SubCommand.AddTable:
                         {
-                            var cmd = command as MetadataAddTableParams;
+                            var cmd = command.AddTable;
                             var table = new MetadataTableDestination(cmd.TableName, cmd.TableIndex, cmd.TableFlags);
                             m_tableLookup.Add(table.TableName, cmd.TableIndex);
                             while (m_tables.Count <= table.TableIndex)
@@ -62,27 +70,17 @@ namespace Sttp.Data
                             m_tables[cmd.TableIndex] = table;
                         }
                         break;
-                    case MetadataSubCommand.AddColumn:
-                        m_tables[(command as MetadataAddColumnParams).TableIndex].ProcessCommand(command);
+                    case SubCommand.AddColumn:
+                        m_tables[command.AddColumn.TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataSubCommand.AddValue:
-                        m_tables[(command as MetadataAddValueParams).TableIndex].ProcessCommand(command);
+                    case SubCommand.AddRow:
+                        m_tables[command.AddRow.TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataSubCommand.DeleteRow:
-                        m_tables[(command as MetadataDeleteRowParams).TableIndex].ProcessCommand(command);
+                    case SubCommand.AddValue:
+                        m_tables[command.AddValue.TableIndex].ProcessCommand(command);
                         break;
-                    case MetadataSubCommand.AddRow:
-                        m_tables[(command as MetadataAddRowParams).TableIndex].ProcessCommand(command);
-                        break;
-                    case MetadataSubCommand.DatabaseVersion:
-                        var db = command as MetadataDatabaseVersionParams;
-                        MajorVersion = db.MajorVersion;
-                        MinorVersion = db.MinorVersion;
-                        break;
-                    case MetadataSubCommand.Invalid:
-                    case MetadataSubCommand.Clear:
-                    case MetadataSubCommand.GetDatabaseSchema:
-                    case MetadataSubCommand.GetDatabaseVersion:
+                    case SubCommand.DeleteRow:
+                        m_tables[command.DeleteRow.TableIndex].ProcessCommand(command);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

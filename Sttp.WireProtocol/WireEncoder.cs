@@ -1,6 +1,5 @@
 ﻿using System;
 using Sttp.WireProtocol.Codec.DataPointPacket;
-using Sttp.WireProtocol.Data;
 
 namespace Sttp.WireProtocol
 {
@@ -15,8 +14,6 @@ namespace Sttp.WireProtocol
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
 
-        private MetadataEncoder m_metadata;
-
         private DataPointEncoder m_dataPoint;
 
         private SubscriptionEncoder m_subscription;
@@ -29,6 +26,12 @@ namespace Sttp.WireProtocol
 
         private SessionDetails m_sessionDetails;
 
+        private GetMetadataSchema.Encoder m_getMetadataSchema;
+        private GetMetadataSchemaResponse.Encoder m_getMetadataSchemaResponse;
+        private GetMetadata.Encoder m_getMetadata;
+        private GetMetadataResponse.Encoder m_getMetadataResponse;
+
+
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
@@ -36,10 +39,14 @@ namespace Sttp.WireProtocol
         {
             m_sessionDetails = new SessionDetails();
             m_lastCode = CommandCode.Invalid;
+            m_getMetadataSchema = new GetMetadataSchema.Encoder(SendNewPacket, m_sessionDetails);
+            m_getMetadataSchemaResponse = new GetMetadataSchemaResponse.Encoder(SendNewPacket, m_sessionDetails);
+            m_getMetadata = new GetMetadata.Encoder(SendNewPacket, m_sessionDetails);
+            m_getMetadataResponse = new GetMetadataResponse.Encoder(SendNewPacket, m_sessionDetails);
+
             //m_subscription = new SubscriptionEncoder(SendPacket);
             //m_dataPoint = new DataPointEncoder(SendPacket);
             //m_negotiateSession = new NegotiateSessionEncoder(SendPacket);
-            m_metadata = new MetadataEncoder(SendNewPacket, m_sessionDetails);
             m_bulkEncoder = new BulkTransportEncoder(SendNewPacket, m_sessionDetails);
         }
 
@@ -52,55 +59,32 @@ namespace Sttp.WireProtocol
         {
             if (m_lastCode != CommandCode.BulkTransport)
             {
-                EndPacket();
                 m_lastCode = CommandCode.BulkTransport;
             }
 
             return m_bulkEncoder;
         }
 
-        public MetadataGetSchemaBuilder MetadataGetSchema()
+        public GetMetadataSchema.Encoder GetMetadataSchema()
         {
-            return new MetadataGetSchemaBuilder(m_metadata);
+            return m_getMetadataSchema;
         }
-
-        public MetadataEncoder MetadataGetData()
+        public GetMetadataSchemaResponse.Encoder GetMetadataSchemaResponse()
         {
-            return null;
+            return m_getMetadataSchemaResponse;
         }
-
-        public MetadataEncoder BeginMetadataPacket()
+        public GetMetadata.Encoder GetMetadata()
         {
-            if (m_lastCode != CommandCode.Metadata)
-            {
-                EndPacket();
-                m_lastCode = CommandCode.Metadata;
-            }
-            m_metadata.BeginCommand();
-            return m_metadata;
+            return m_getMetadata;
+        }
+        public GetMetadataResponse.Encoder GetMetadataResponse()
+        {
+            return m_getMetadataResponse;
         }
 
         public void Flush()
         {
-            EndPacket();
         }
-
-        public void EndPacket()
-        {
-            switch (m_lastCode)
-            {
-                case CommandCode.Invalid:
-                    return;
-                case CommandCode.Metadata:
-                    m_metadata.EndCommand();
-                    return;
-                case CommandCode.BulkTransport:
-                    return;
-                default:
-                    throw new NotImplementedException("This command was not coded.");
-            }
-        }
-
 
 
     }

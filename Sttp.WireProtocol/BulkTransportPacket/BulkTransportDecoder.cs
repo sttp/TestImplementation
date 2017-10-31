@@ -6,7 +6,7 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// Responsible for encoding each command into bytes
     /// </summary>
-    public class BulkTransportDecoder : IPacketDecoder
+    public class BulkTransportDecoder 
     {
         private BulkTransportBeginSendParams m_beginSend = new BulkTransportBeginSendParams();
         private BulkTransportCancelSendParams m_cancelSend = new BulkTransportCancelSendParams();

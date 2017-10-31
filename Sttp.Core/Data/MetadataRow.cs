@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Sttp.WireProtocol.Data;
 
 namespace Sttp.Data
 {
@@ -41,7 +40,7 @@ namespace Sttp.Data
 
         }
 
-        public void ProcessCommand(MetadataAddValueParams patch)
+        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.CmdAddValue patch)
         {
             while (Fields.Count <= patch.ColumnIndex)
             {

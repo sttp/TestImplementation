@@ -1,5 +1,4 @@
 ﻿using System;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 {

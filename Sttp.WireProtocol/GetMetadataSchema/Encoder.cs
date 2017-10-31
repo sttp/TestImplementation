@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.GetMetadataSchema
 {
@@ -19,12 +17,12 @@ namespace Sttp.WireProtocol.GetMetadataSchema
 
         public void GetDatabaseSchema()
         {
-            m_stream.Write((byte)MetadataSubCommand.GetDatabaseSchema);
+            m_stream.Write((byte)SubCommand.GetDatabaseSchema);
         }
 
         public void GetDatabaseVersion()
         {
-            m_stream.Write((byte)MetadataSubCommand.GetDatabaseVersion);
+            m_stream.Write((byte)SubCommand.GetDatabaseVersion);
         }
 
     }

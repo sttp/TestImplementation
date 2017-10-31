@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
+using Sttp.WireProtocol;
 using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
@@ -85,7 +84,7 @@ namespace Sttp.Data
             m_changeLog.DeleteRow(TableIndex, rowIndex);
         }
 
-        public void RequestTableData(MetadataEncoder encoder, MetadataTableFilter permissionFilter)
+        public void RequestTableData(WireProtocol.GetMetadataResponse.Encoder encoder, MetadataTableFilter permissionFilter)
         {
             encoder.AddTable(TableIndex, TableName, TableFlags);
             foreach (var column in Columns)

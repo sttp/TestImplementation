@@ -3,8 +3,6 @@ using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Data;
 using Sttp.WireProtocol;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.Tests
 {
@@ -30,14 +28,14 @@ namespace Sttp.Tests
             m_wireDecoder = new WireDecoder();
 
             m_testDestinationSet = new MetadataDatabaseDestination();
-            WireEncoder encoder = new WireEncoder(1500);
+            WireEncoder encoder = new WireEncoder();
             encoder.NewPacket += Encoder_NewPacket;
 
             UpdateDataSet(testSet, testSourceSet);
 
             for (short x = 0; x < testSet.Tables.Count; x++)
             {
-                testSourceSet.RequestTableData(encoder.BeginMetadataPacket(), x);
+                testSourceSet.RequestTableData(encoder.GetMetadataResponse(), x);
             }
             encoder.Flush();
 
@@ -49,8 +47,8 @@ namespace Sttp.Tests
         {
             m_wireDecoder.WriteData(data, position, length);
 
-            IPacketDecoder decoder;
-            while ((decoder = m_wireDecoder.NextPacket()) != null)
+            CommandDecoder decoder;
+            while ((decoder = m_wireDecoder.NextCommand()) != null)
             {
                 switch (decoder.CommandCode)
                 {
@@ -61,10 +59,19 @@ namespace Sttp.Tests
                     case CommandCode.DataPointPacket:
                     case CommandCode.NoOp:
                     case CommandCode.Invalid:
+                    case CommandCode.BulkTransport:
+                    case CommandCode.BeginFragment:
+                    case CommandCode.NextFragment:
+                    case CommandCode.CompressedPacket:
+                    case CommandCode.GetMetadataSchema:
+                    case CommandCode.GetMetadataSchemaResponse:
+                    case CommandCode.GetMetadata:
                         throw new NotSupportedException();
-                    case CommandCode.Metadata:
-                        m_testDestinationSet.Process(decoder as MetadataDecoder);
+                    case CommandCode.GetMetadataResponse:
+                        m_testDestinationSet.Process(decoder.GetMetadataResponse);
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }

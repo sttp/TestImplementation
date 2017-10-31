@@ -1,6 +1,5 @@
 ﻿using System;
 using Sttp.WireProtocol.Codec.DataPointPacket;
-using Sttp.WireProtocol.Data;
 
 namespace Sttp.WireProtocol
 {
@@ -9,7 +8,6 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class WireDecoder
     {
-        private MetadataDecoder m_metadataDecoder;
         private DataPointDecoder m_dataPointDecoder;
         private NegotiateSessionDecoder m_negotiateSessionDecoder;
         private SubscriptionDecoder m_subscriptionDecoder;
@@ -17,13 +15,22 @@ namespace Sttp.WireProtocol
         private PacketDecoder m_packetDecoder = new PacketDecoder(new SessionDetails());
         private SessionDetails m_sessionDetails = new SessionDetails();
 
+        private GetMetadataSchema.Decoder m_getMetadataSchema;
+        private GetMetadataSchemaResponse.Decoder m_getMetadataSchemaResponse;
+        private GetMetadata.Decoder m_getMetadata;
+        private GetMetadataResponse.Decoder m_getMetadataResponse;
+
         public WireDecoder()
         {
-            m_metadataDecoder = new MetadataDecoder();
             m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSessionDecoder = new NegotiateSessionDecoder();
             m_subscriptionDecoder = new SubscriptionDecoder();
             m_bulkDecoder = new BulkTransportDecoder();
+
+            m_getMetadataSchema = new GetMetadataSchema.Decoder();
+            m_getMetadataSchemaResponse = new GetMetadataSchemaResponse.Decoder();
+            m_getMetadata = new GetMetadata.Decoder();
+            m_getMetadataResponse = new GetMetadataResponse.Decoder();
         }
 
         /// <summary>
@@ -42,7 +49,7 @@ namespace Sttp.WireProtocol
         /// messages before the next block of data is added to the decoder via <see cref="WriteData"/>
         /// </summary>
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
-        public IPacketDecoder NextPacket()
+        public CommandDecoder NextCommand()
         {
             PacketReader reader = m_packetDecoder.NextPacket();
             if (reader == null)
@@ -52,23 +59,21 @@ namespace Sttp.WireProtocol
             {
                 case CommandCode.NegotiateSession:
                     m_negotiateSessionDecoder.Fill(reader);
-                    return m_negotiateSessionDecoder;
-                    m_metadataDecoder.Fill(reader);
-                    return m_metadataDecoder;
+                    return new CommandDecoder(reader.Command, m_negotiateSessionDecoder);
                 case CommandCode.BulkTransport:
                     m_bulkDecoder.Fill(reader);
-                    return m_bulkDecoder;
+                    return new CommandDecoder(reader.Command, m_bulkDecoder);
                 case CommandCode.Subscribe:
                     m_subscriptionDecoder.Fill(reader);
-                    return m_subscriptionDecoder;
+                    return new CommandDecoder(reader.Command, m_subscriptionDecoder);
                 case CommandCode.SecureDataChannel:
                     break;
                 case CommandCode.RuntimeIDMapping:
                     m_dataPointDecoder.Fill(reader);
-                    return m_dataPointDecoder;
+                    return new CommandDecoder(reader.Command, m_dataPointDecoder);
                 case CommandCode.DataPointPacket:
                     m_dataPointDecoder.Fill(reader);
-                    return m_dataPointDecoder;
+                    return new CommandDecoder(reader.Command, m_dataPointDecoder);
                 case CommandCode.NoOp:
                     break;
                 case CommandCode.Invalid:
@@ -79,10 +84,18 @@ namespace Sttp.WireProtocol
                     break;
                 case CommandCode.CompressedPacket:
                     break;
-                case CommandCode.MetadataGetSchema:
-                    break;
-                case CommandCode.MetadataGetData:
-                    break;
+                case CommandCode.GetMetadataSchema:
+                    m_getMetadataSchema.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_getMetadataSchema);
+                case CommandCode.GetMetadataSchemaResponse:
+                    m_getMetadataSchemaResponse.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_getMetadataSchemaResponse);
+                case CommandCode.GetMetadata:
+                    m_getMetadata.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_getMetadata);
+                case CommandCode.GetMetadataResponse:
+                    m_getMetadataResponse.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_getMetadataResponse);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
+using Sttp.WireProtocol;
 
 namespace Sttp.Data
 {
@@ -73,7 +72,7 @@ namespace Sttp.Data
         /// Replies with all of the tables with their schema
         /// </summary>
         /// <returns></returns>
-        public void RequestAllTablesWithSchema(MetadataEncoder encoder)
+        public void RequestAllTablesWithSchema(WireProtocol.GetMetadataSchemaResponse.Encoder encoder)
         {
             encoder.DatabaseVersion(MajorVersion, MinorVersion);
             foreach (var table in m_tables)
@@ -86,7 +85,7 @@ namespace Sttp.Data
             }
         }
 
-        public void RequestTableData(MetadataEncoder encoder, short tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
+        public void RequestTableData(WireProtocol.GetMetadataResponse.Encoder encoder, short tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
         {
             if (m_changeLog.TrySyncTableVersion(majorVersion, minorVersion, out List<MetadataChangeLogRecord> data))
             {

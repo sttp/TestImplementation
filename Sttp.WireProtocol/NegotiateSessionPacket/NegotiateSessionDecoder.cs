@@ -3,7 +3,7 @@
     /// <summary>
     /// Responsible for decoding each packet into commands.
     /// </summary>
-    public class NegotiateSessionDecoder : IPacketDecoder
+    public class NegotiateSessionDecoder
     {
         public CommandCode CommandCode => CommandCode.NegotiateSession;
 

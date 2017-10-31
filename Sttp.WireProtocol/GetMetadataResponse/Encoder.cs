@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.WireProtocol.Data;
-using Sttp.WireProtocol.MetadataPacket;
 
 namespace Sttp.WireProtocol.GetMetadataResponse
 {
@@ -19,12 +17,12 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void Clear()
         {
-            m_stream.Write(MetadataSubCommand.Clear);
+            m_stream.Write(SubCommand.Clear);
         }
 
         public void AddTable(short tableIndex, string tableName, TableFlags tableFlags)
         {
-            m_stream.Write(MetadataSubCommand.AddTable);
+            m_stream.Write(SubCommand.AddTable);
             m_stream.Write(tableIndex);
             m_stream.Write(tableName);
             m_stream.Write(tableFlags);
@@ -32,7 +30,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void AddColumn(short tableIndex, short columnIndex, string columnName, ValueType columnType)
         {
-            m_stream.Write(MetadataSubCommand.AddColumn);
+            m_stream.Write(SubCommand.AddColumn);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(columnName);
@@ -41,14 +39,14 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void AddRow(short tableIndex, int rowIndex)
         {
-            m_stream.Write(MetadataSubCommand.AddRow);
+            m_stream.Write(SubCommand.AddRow);
             m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }
 
         public void AddValue(short tableIndex, short columnIndex, int rowIndex, byte[] value)
         {
-            m_stream.Write(MetadataSubCommand.AddValue);
+            m_stream.Write(SubCommand.AddValue);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(rowIndex);
@@ -57,14 +55,14 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void DeleteRow(short tableIndex, int rowIndex)
         {
-            m_stream.Write(MetadataSubCommand.DeleteRow);
+            m_stream.Write(SubCommand.DeleteRow);
             m_stream.Write(tableIndex);
             m_stream.Write(rowIndex);
         }
 
         public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            m_stream.Write(MetadataSubCommand.DatabaseVersion);
+            m_stream.Write(SubCommand.DatabaseVersion);
             m_stream.Write(majorVersion);
             m_stream.Write(minorVersion);
         }
