@@ -1,42 +1,37 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Sttp.WireProtocol.SendDataPoints
 {
+/// <summary>
+/// This kind of data point can be extremely compact.
+/// </summary>
+public class CompactDataPoint
+{
+    public long ShortTime;     //Same scale as DateTime. Must be universal time. Bit63 is reserved for LeapSecondInProgress. 
+    public uint DataPointID;   
+    public uint Value;         //Must be a 32 bit value or smaller.
+    public uint TimeQuality;   //32-bit user defined time quality flags. These must rarely change.
+    public uint ValueQuality;  
+}   //24 bytes in size.
+
+/// <summary>
+/// This is the normal fully loaded data point. Not so compact.
+/// </summary>
+public class DataPoint
+{
+    public uint DataPointID;
+    public SttpTimestamp Time;
+    public byte ValueLength;
+    public readonly byte[] Value = new byte[64];
+    public uint TimeQuality;
+    public uint ValueQuality;
+
     /// <summary>
-    /// This data point is what is used to communicating with the <see cref="WireEncoder"/>/<see cref="WireDecoder"/>. 
+    /// If this data cannot fit in a 64 byte payload, 
+    /// it will come out of bounds at a later time.
     /// </summary>
-    public class DataPointWire
-    {
-        /// <summary>
-        /// Maps to DataPointKeyWire.RuntimeID
-        /// </summary>
-        public uint DataPointID;
+    public uint LargeValueID;
+}
 
-        public SttpTimestamp Time;
-
-        /// <summary>
-        /// The type of the Value field.
-        /// </summary>
-        public ValueType ValueType;
-
-        /// <summary>
-        /// Contains the Value.
-        /// </summary>
-        public readonly byte[] Value = new byte[64];
-
-        /// <summary>
-        /// The length of the value field
-        /// </summary>
-        public uint ValueLength;
-
-        /// <summary>
-        /// The ID assigned to the bulk data since this packet could not be sized in 64 bytes.
-        /// </summary>
-        public Guid BulkDataValueID;
-
-        public TimeQualityFlags TimeQualityFlags;
-
-        public DataQualityFlags DataQualityFlags;
-
-    }
 }
