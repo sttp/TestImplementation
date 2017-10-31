@@ -55,8 +55,8 @@ namespace Sttp.Tests
                     case CommandCode.NegotiateSession:
                     case CommandCode.Subscribe:
                     case CommandCode.SecureDataChannel:
-                    case CommandCode.RuntimeIDMapping:
-                    case CommandCode.DataPointPacket:
+                    case CommandCode.RegisterDataPoint:
+                    case CommandCode.SendDataPoints:
                     case CommandCode.NoOp:
                     case CommandCode.Invalid:
                     case CommandCode.BulkTransport:

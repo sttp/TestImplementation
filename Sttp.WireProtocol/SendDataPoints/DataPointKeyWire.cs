@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol
+namespace Sttp.WireProtocol.SendDataPoints
 {
     /// <summary>
     /// This is the data point key that is used by the <see cref="WireEncoder"/>/<see cref="WireDecoder"/> and maintains the 

@@ -33,9 +33,9 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.SecureDataChannel:
                         break;
-                    case CommandCode.RuntimeIDMapping:
+                    case CommandCode.RegisterDataPoint:
                         break;
-                    case CommandCode.DataPointPacket:
+                    case CommandCode.SendDataPoints:
                         break;
                     case CommandCode.NoOp:
                         break;

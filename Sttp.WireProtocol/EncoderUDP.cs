@@ -1,5 +1,5 @@
 ﻿using System;
-using Sttp.WireProtocol.Codec.DataPointPacket;
+using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp.WireProtocol
 {

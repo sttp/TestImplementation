@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol
+namespace Sttp.WireProtocol.SendDataPoints
 {
     [Flags]
     public enum DataQualityFlags : byte

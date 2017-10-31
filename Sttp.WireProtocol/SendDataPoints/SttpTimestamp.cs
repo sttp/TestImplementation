@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol
+namespace Sttp.WireProtocol.SendDataPoints
 {
     /// <summary>
     /// The wireline type for transmitting time.

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using Sttp.Data;
 using Sttp.WireProtocol;
+using Sttp.WireProtocol.SendDataPoints;
 using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
@@ -299,9 +300,9 @@ namespace Sttp.Publisher
                         break;
                     case CommandCode.SecureDataChannel:
                         break;
-                    case CommandCode.RuntimeIDMapping:
+                    case CommandCode.RegisterDataPoint:
                         break;
-                    case CommandCode.DataPointPacket:
+                    case CommandCode.SendDataPoints:
                         break;
                     case CommandCode.NoOp:
                         break;

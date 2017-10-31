@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace Sttp.WireProtocol.Codec.DataPointPacket
+namespace Sttp.WireProtocol.SendDataPoints
 {
     public class DataPointEncoder
     {
@@ -35,7 +35,7 @@ namespace Sttp.WireProtocol.Codec.DataPointPacket
 
         public void MapRuntimeID(DataPointKeyWire point)
         {
-            m_stream.Write((byte)DataPointCommand.MapRuntimeID);
+            m_stream.Write((byte)DataPointCommand.RegisterDataPoint);
             m_stream.Write(point.UniqueID);
             m_stream.Write(point.RuntimeID);
             m_stream.Write((byte)point.Type);

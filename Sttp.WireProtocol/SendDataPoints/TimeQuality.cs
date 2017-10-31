@@ -1,4 +1,4 @@
-﻿namespace Sttp.WireProtocol
+﻿namespace Sttp.WireProtocol.SendDataPoints
 {
     public enum TimeQuality : byte
     {

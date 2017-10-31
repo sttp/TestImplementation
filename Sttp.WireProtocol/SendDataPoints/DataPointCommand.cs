@@ -1,19 +1,19 @@
-﻿namespace Sttp.WireProtocol.Codec.DataPointPacket
+﻿namespace Sttp.WireProtocol.SendDataPoints
 {
     public enum DataPointCommand : byte
     {
         /// <summary>
         /// Map a new runtime point id.
         /// </summary>
-        MapRuntimeID,
+        RegisterDataPoint,
 
         /// <summary>
-        /// Sends a data point of the normal size.
+        /// Sends an individual data point.
         /// </summary>
         SendDataPoint,
 
         /// <summary>
-        /// Sends a data point that is larger than 64bytes in size.
+        /// Sends a data point that is larger than 64 bytes in size.
         /// </summary>
         SendLargeDataPoint,
     }

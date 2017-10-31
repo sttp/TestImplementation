@@ -1,4 +1,4 @@
-﻿namespace Sttp.WireProtocol
+﻿namespace Sttp.WireProtocol.SendDataPoints
 {
     /// <summary>
     /// This data point is what is used to communicating with the <see cref="WireEncoder"/>/<see cref="WireDecoder"/>. 

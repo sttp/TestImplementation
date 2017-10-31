@@ -140,13 +140,31 @@ namespace Sttp.WireProtocol
         Subscribe,
         SubscribeResponse,
 
+        /// <summary>
+        /// Sends a series of DataPoints as a single packet. 
+        /// The encoding of this packet can be rather complex depending on the 
+        /// advance encoding algorithm that is specified.
+        /// </summary>
+        SendDataPoints,
+
+        /// <summary>
+        /// Registers a new data point. 
+        /// 
+        /// Before a data point can be exchanged, it must be first registered on both ends. This registration
+        /// establishes a runtime ID that will be used to exchange the data, along with the data type. Only make a habit of 
+        /// registering points that will actually be sent. Registering all of the point will create an unnecessarily large lookup table.
+        /// 
+        /// Registration can happen on the fly, it however must be completed before the other end receives the data point or the connection will 
+        /// be terminated.
+        /// </summary>
+        RegisterDataPoint,
 
         // TODO : assign values
         NegotiateSession,
-
         SecureDataChannel,
-        RuntimeIDMapping,
-        DataPointPacket,
+
+
+        
 
         NoOp = 0xFF,
     }

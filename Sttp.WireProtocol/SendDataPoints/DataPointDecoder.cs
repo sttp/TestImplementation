@@ -1,8 +1,8 @@
-﻿namespace Sttp.WireProtocol.Codec.DataPointPacket
+﻿namespace Sttp.WireProtocol.SendDataPoints
 {
     public class DataPointDecoder
     {
-        public CommandCode CommandCode => CommandCode.DataPointPacket;
+        public CommandCode CommandCode => CommandCode.SendDataPoints;
 
         public void Fill(PacketReader buffer)
         {

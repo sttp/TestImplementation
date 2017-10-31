@@ -1,5 +1,6 @@
 ﻿using System;
-using Sttp.WireProtocol.Codec.DataPointPacket;
+using Sttp.WireProtocol;
+using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp.WireProtocol
 {
@@ -68,10 +69,10 @@ namespace Sttp.WireProtocol
                     return new CommandDecoder(reader.Command, m_subscriptionDecoder);
                 case CommandCode.SecureDataChannel:
                     break;
-                case CommandCode.RuntimeIDMapping:
+                case CommandCode.RegisterDataPoint:
                     m_dataPointDecoder.Fill(reader);
                     return new CommandDecoder(reader.Command, m_dataPointDecoder);
-                case CommandCode.DataPointPacket:
+                case CommandCode.SendDataPoints:
                     m_dataPointDecoder.Fill(reader);
                     return new CommandDecoder(reader.Command, m_dataPointDecoder);
                 case CommandCode.NoOp:
