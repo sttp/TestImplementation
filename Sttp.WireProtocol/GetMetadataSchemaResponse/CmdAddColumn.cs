@@ -6,14 +6,14 @@
         public short TableIndex;
         public short ColumnIndex;
         public string ColumnName;
-        public ValueType ColumnType;
+        public SttpValueTypeCode ColumnTypeCode;
 
         public void Load(PacketReader reader)
         {
             TableIndex = reader.ReadInt16();
             ColumnIndex = reader.ReadInt16();
             ColumnName = reader.ReadString();
-            ColumnType = reader.Read<ValueType>();
+            ColumnTypeCode = reader.Read<SttpValueTypeCode>();
         }
 
         CmdDatabaseVersion ICmd.DatabaseVersion => null;

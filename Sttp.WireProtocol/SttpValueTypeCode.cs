@@ -1,6 +1,6 @@
 ﻿namespace Sttp.WireProtocol
 {
-    public enum ValueType : byte
+    public enum SttpValueTypeCode : byte
     {
         // SEC: I'm having a hard time understanding why a point that can only contain null values would be useful.
         // JRC: Time and state are valid quantities even without a measured value.
@@ -18,14 +18,17 @@
         Single = 11,  // 4-bytes
         // SEC: Would this be for Timespan, or Date. Do we need separate ones. Should we standardize the time format?
         // JRC: Good questions - also, should we drop this altogether and let people pass a time "value" through one of the numerics to simplify available types?
-        Ticks = 12,   // 8-bytes
-        Bool = 13,    // 1-byte
-        Guid = 14,    // 16-bytes
+        DateTime = 12,   // 8-bytes
+        TimeSpan = 13,
+        Char = 14,    // 1-byte
+        Bool = 15,    // 1-byte
+        Guid = 16,    // 16-bytes
         // SEC: 16 bytes is too small.
         // JRC: It is small - goal is something simple to encode and especially compress - however, I don't think the size matters much since publisher API can
         //      take a variable length string or byte array then fragment it into chunks, sequence them and have the subscriber API re-collate them.
-        String = 15,  // 16-bytes, max
-        Buffer = 16   // 16-bytes, max
+        String = 17,  // 16-bytes, max
+        Buffer = 18,   // 16-bytes, max
+        UDFType,
     }
     // sizeof(uint8), 1-byte
 }

@@ -85,7 +85,7 @@ namespace Sttp.Tests
 
                 foreach (DataColumn column in table.Columns)
                 {
-                    set[table.TableName].AddColumn(column.ColumnName, ValueTypeCodec.FromType(column.DataType));
+                    set[table.TableName].AddColumn(column.ColumnName, SttpValueTypeCodec.FromType(column.DataType));
                 }
 
                 for (var rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)
@@ -109,7 +109,7 @@ namespace Sttp.Tests
                     var col2 = set[table.TableName].Columns[columnIndex];
 
                     Assert.AreEqual(column.ColumnName, col2.Name, "Column Name");
-                    Assert.AreEqual(col2.Type, ValueTypeCodec.FromType(column.DataType), "Column Data Type");
+                    Assert.AreEqual(col2.TypeCode, SttpValueTypeCodec.FromType(column.DataType), "Column Data Type");
                 }
 
                 for (var rowIndex = 0; rowIndex < table.Rows.Count; rowIndex++)

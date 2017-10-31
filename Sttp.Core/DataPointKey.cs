@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
         /// Unique data point identifier
         /// </summary>
         public readonly Guid UniqueID;
-        public readonly ValueType Type;   // Value type of `DataPoint`
+        public readonly SttpValueTypeCode TypeCode;   // Value type of `DataPoint`
         public readonly bool HasQuality;
 
         /// <summary>

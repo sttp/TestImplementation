@@ -2,14 +2,13 @@ using Sttp.IO;
 using System;
 using System.IO;
 using Sttp.WireProtocol;
-using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {
     public class MetadataChangeLogRecord
     {
         public MetadataChangeType ChangeType;
-        private ValueType m_columnType;
+        private SttpValueTypeCode m_columnTypeCode;
         private short m_tableIndex;
         private short m_columnIndex;
         private int m_rowIndex;
@@ -28,7 +27,7 @@ namespace Sttp.Data
                 case MetadataChangeType.AddColumn:
                     m_columnIndex = stream.ReadInt16();
                     m_columnName = stream.ReadString();
-                    m_columnType = (ValueType)stream.ReadNextByte();
+                    m_columnTypeCode = (SttpValueTypeCode)stream.ReadNextByte();
                     break;
                 case MetadataChangeType.AddValue:
                     m_columnIndex = stream.ReadInt16();
@@ -103,21 +102,21 @@ namespace Sttp.Data
             }
         }
 
-        public ValueType ColumnType
+        public SttpValueTypeCode ColumnTypeCode
         {
             get
             {
                 switch (ChangeType)
                 {
                     case MetadataChangeType.AddColumn:
-                        return m_columnType;
+                        return m_columnTypeCode;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
         }
 
-        public static MetadataChangeLogRecord AddColumn(short tableIndex, short columnIndex, string columnName, ValueType columnType)
+        public static MetadataChangeLogRecord AddColumn(short tableIndex, short columnIndex, string columnName, SttpValueTypeCode columnTypeCode)
         {
             return new MetadataChangeLogRecord()
             {
@@ -125,7 +124,7 @@ namespace Sttp.Data
                 ChangeType = MetadataChangeType.AddColumn,
                 m_columnName = columnName,
                 m_columnIndex = columnIndex,
-                m_columnType = columnType
+                m_columnTypeCode = columnTypeCode
             };
         }
 
@@ -161,7 +160,7 @@ namespace Sttp.Data
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    encoder.AddColumn(m_tableIndex, m_columnIndex, m_columnName, m_columnType);
+                    encoder.AddColumn(m_tableIndex, m_columnIndex, m_columnName, m_columnTypeCode);
                     break;
                 case MetadataChangeType.AddValue:
                     encoder.AddValue(m_tableIndex, m_columnIndex, m_rowIndex, m_value);

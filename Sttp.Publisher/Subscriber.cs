@@ -143,7 +143,7 @@ namespace Sttp.Publisher
                     m_dataPointQueue.Clear();
                 }
 
-                DataPointWire wire = new DataPointWire();
+                SttpDataPoint wire = new SttpDataPoint();
 
                 PatchSignalMapping(dataPoints);
 

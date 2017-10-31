@@ -80,7 +80,7 @@ namespace Sttp.Data
                 encoder.AddTable(table.TableIndex, table.TableName, table.TableFlags);
                 foreach (var column in table.Columns)
                 {
-                    encoder.AddColumn(table.TableIndex, column.Index, column.Name, column.Type);
+                    encoder.AddColumn(table.TableIndex, column.Index, column.Name, column.TypeCode);
                 }
             }
         }

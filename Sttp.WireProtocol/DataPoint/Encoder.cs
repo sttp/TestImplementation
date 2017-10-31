@@ -9,23 +9,23 @@ namespace Sttp.WireProtocol.SendDataPoints
     {
         private Action<byte[], int, int> m_sendPacket;
         private PacketWriter m_stream;
-        private List<DataPointWire> m_newPointKeys;
-        private List<DataPointWire> m_newPoints;
+        private List<SttpDataPoint> m_newPointKeys;
+        private List<SttpDataPoint> m_newPoints;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
         {
             m_sendPacket = sendPacket;
-            m_newPointKeys = new List<DataPointWire>();
-            m_newPoints = new List<DataPointWire>();
+            m_newPointKeys = new List<SttpDataPoint>();
+            m_newPoints = new List<SttpDataPoint>();
             m_stream = new PacketWriter(sessionDetails);
         }
 
-        public void RegisterDataPoint(DataPointWire dataPointKey)
+        public void RegisterDataPoint(SttpDataPoint dataPointKey)
         {
             m_newPointKeys.Add(dataPointKey);
         }
 
-        public void SendDataPoint(DataPointWire point)
+        public void SendDataPoint(SttpDataPoint point)
         {
             m_newPoints.Add(point);
         }
@@ -55,9 +55,8 @@ namespace Sttp.WireProtocol.SendDataPoints
                     m_stream.Write(point.Time.Seconds);
                     m_stream.Write(point.Time.Fraction);
                     m_stream.Write(point.ValueLength);
-                    m_stream.Write((byte)point.TimeQualityFlags);
-                    m_stream.Write((byte)point.DataQualityFlags);
-                    m_stream.Write(point.BulkDataValueID);
+                    m_stream.Write(point.TimeQuality);
+                    m_stream.Write(point.ValueQuality);
                     m_stream.Write(point.Value);
                 }
                 m_stream.EndCommand(m_sendPacket);

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Sttp.WireProtocol;
-using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {
@@ -48,13 +47,13 @@ namespace Sttp.Data
             Rows = new List<MetadataRow>();
         }
 
-        public void AddColumn(string columnName, ValueType columnType)
+        public void AddColumn(string columnName, SttpValueTypeCode columnTypeCode)
         {
             short columnId;
             MetadataColumn column;
             if (!m_columnLookup.TryGetValue(columnName, out columnId))
             {
-                column = new MetadataColumn((short)Columns.Count, columnName, columnType);
+                column = new MetadataColumn((short)Columns.Count, columnName, columnTypeCode);
                 Columns.Add(column);
                 m_changeLog.AddColumn(TableIndex, column);
                 m_columnLookup[columnName] = column.Index;
@@ -89,7 +88,7 @@ namespace Sttp.Data
             encoder.AddTable(TableIndex, TableName, TableFlags);
             foreach (var column in Columns)
             {
-                encoder.AddColumn(TableIndex, column.Index, column.Name, column.Type);
+                encoder.AddColumn(TableIndex, column.Index, column.Name, column.TypeCode);
             }
             foreach (var row in Rows)
             {

@@ -28,13 +28,13 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             m_stream.Write(tableFlags);
         }
 
-        public void AddColumn(short tableIndex, short columnIndex, string columnName, ValueType columnType)
+        public void AddColumn(short tableIndex, short columnIndex, string columnName, SttpValueTypeCode columnTypeCode)
         {
             m_stream.Write(SubCommand.AddColumn);
             m_stream.Write(tableIndex);
             m_stream.Write(columnIndex);
             m_stream.Write(columnName);
-            m_stream.Write(columnType);
+            m_stream.Write(columnTypeCode);
         }
 
         public void AddRow(short tableIndex, int rowIndex)

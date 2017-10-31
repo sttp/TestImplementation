@@ -11,11 +11,11 @@ namespace Sttp.WireProtocol
         private Dictionary<string, Table> m_tables;
 
         public int Version { get; private set; } //a change counter
-        public void Set(string table, string attributeName, ValueType attributeType, object value)
+        public void Set(string table, string attributeName, SttpValueTypeCode attributeTypeCode, object value)
         {
             //ToDO: Update and the sort
 
-            this[table][attributeName, attributeType].Value = value;
+            this[table][attributeName, attributeTypeCode].Value = value;
             Version++;
         }
 
@@ -33,13 +33,13 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public IEnumerable<Tuple<string, string, ValueType>> GetSchema()
+        public IEnumerable<Tuple<string, string, SttpValueTypeCode>> GetSchema()
         {
             foreach (var table in m_tables)
             {
                 foreach (var columns in table.Value.Columns)
                 {
-                    yield return Tuple.Create(table.Key, columns.Key, columns.Value.ColumnType);
+                    yield return Tuple.Create(table.Key, columns.Key, columns.Value.ColumnTypeCode);
                 }
             }
         }
@@ -59,14 +59,14 @@ namespace Sttp.WireProtocol
         {
             public Dictionary<string, Column> Columns;
 
-            public Column this[string columnName, ValueType columnType]
+            public Column this[string columnName, SttpValueTypeCode columnTypeCode]
             {
                 get
                 {
                     Column rv;
                     if (Columns.TryGetValue(columnName, out rv))
                     {
-                        rv = new Column(columnType);
+                        rv = new Column(columnTypeCode);
                         Columns[columnName] = rv;
                     }
                     return rv;
@@ -76,13 +76,13 @@ namespace Sttp.WireProtocol
 
         private class Column
         {
-            public ValueType ColumnType;
+            public SttpValueTypeCode ColumnTypeCode;
 
             public object Value;
 
-            public Column(ValueType columnType)
+            public Column(SttpValueTypeCode columnTypeCode)
             {
-                ColumnType = columnType;
+                ColumnTypeCode = columnTypeCode;
             }
         }
     }

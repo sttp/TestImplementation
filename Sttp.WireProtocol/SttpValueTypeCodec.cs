@@ -3,93 +3,93 @@ using System.Text;
 
 namespace Sttp.WireProtocol
 {
-    public static class ValueTypeCodec
+    public static class SttpValueTypeCodec
     {
-        public static byte[] Encode(ValueType type, object value)
+        public static byte[] Encode(SttpValueTypeCode typeCode, object value)
         {
             //ToDo: Cast if it implements IConvertable.
             if (value == null)
                 return null;
-            switch (type)
+            switch (typeCode)
             {
-                case ValueType.Null:
+                case SttpValueTypeCode.Null:
                     return null;
-                case ValueType.SByte:
+                case SttpValueTypeCode.SByte:
                     return new byte[] { (byte)(sbyte)value };
-                case ValueType.Int16:
+                case SttpValueTypeCode.Int16:
                     return BigEndian.GetBytes((short)value);
-                case ValueType.Int32:
+                case SttpValueTypeCode.Int32:
                     return BigEndian.GetBytes((int)value);
-                case ValueType.Int64:
+                case SttpValueTypeCode.Int64:
                     return BigEndian.GetBytes((long)value);
-                case ValueType.Byte:
+                case SttpValueTypeCode.Byte:
                     return new byte[] { (byte)value };
-                case ValueType.UInt16:
+                case SttpValueTypeCode.UInt16:
                     return BigEndian.GetBytes((ushort)value);
-                case ValueType.UInt32:
+                case SttpValueTypeCode.UInt32:
                     return BigEndian.GetBytes((uint)value);
-                case ValueType.UInt64:
+                case SttpValueTypeCode.UInt64:
                     return BigEndian.GetBytes((ulong)value);
-                case ValueType.Decimal:
+                case SttpValueTypeCode.Decimal:
                     return BigEndian.GetBytes((decimal)value);
-                case ValueType.Double:
+                case SttpValueTypeCode.Double:
                     return BigEndian.GetBytes((double)value);
-                case ValueType.Single:
+                case SttpValueTypeCode.Single:
                     return BigEndian.GetBytes((float)value);
-                case ValueType.Ticks:
+                case SttpValueTypeCode.DateTime:
                     return BigEndian.GetBytes(((DateTime)value).Ticks);
-                case ValueType.Bool:
+                case SttpValueTypeCode.Bool:
                     return BigEndian.GetBytes((bool)value);
-                case ValueType.Guid:
+                case SttpValueTypeCode.Guid:
                     return ((Guid)value).ToRfcBytes();
-                case ValueType.String:
+                case SttpValueTypeCode.String:
                     return Encoding.UTF8.GetBytes((string)value);
-                case ValueType.Buffer:
+                case SttpValueTypeCode.Buffer:
                     return (byte[])value;
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        public static object Decode(ValueType type, byte[] data)
+        public static object Decode(SttpValueTypeCode typeCode, byte[] data)
         {
             if (data == null)
                 return null;
-            switch (type)
+            switch (typeCode)
             {
-                case ValueType.Null:
+                case SttpValueTypeCode.Null:
                     return null;
-                case ValueType.SByte:
+                case SttpValueTypeCode.SByte:
                     return (sbyte)data[0];
-                case ValueType.Int16:
+                case SttpValueTypeCode.Int16:
                     return BigEndian.ToInt16(data, 0);
-                case ValueType.Int32:
+                case SttpValueTypeCode.Int32:
                     return BigEndian.ToInt32(data, 0);
-                case ValueType.Int64:
+                case SttpValueTypeCode.Int64:
                     return BigEndian.ToInt64(data, 0);
-                case ValueType.Byte:
+                case SttpValueTypeCode.Byte:
                     return data[0];
-                case ValueType.UInt16:
+                case SttpValueTypeCode.UInt16:
                     return BigEndian.ToUInt16(data, 0);
-                case ValueType.UInt32:
+                case SttpValueTypeCode.UInt32:
                     return BigEndian.ToUInt32(data, 0);
-                case ValueType.UInt64:
+                case SttpValueTypeCode.UInt64:
                     return BigEndian.ToUInt64(data, 0);
-                case ValueType.Decimal:
+                case SttpValueTypeCode.Decimal:
                     return BigEndian.ToDecimal(data, 0);
-                case ValueType.Double:
+                case SttpValueTypeCode.Double:
                     return BigEndian.ToDouble(data, 0);
-                case ValueType.Single:
+                case SttpValueTypeCode.Single:
                     return BigEndian.ToSingle(data, 0);
-                case ValueType.Ticks:
+                case SttpValueTypeCode.DateTime:
                     return new DateTime(BigEndian.ToInt64(data, 0));
-                case ValueType.Bool:
+                case SttpValueTypeCode.Bool:
                     return BigEndian.ToBoolean(data, 0);
-                case ValueType.Guid:
+                case SttpValueTypeCode.Guid:
                     return data.ToRfcGuid();
-                case ValueType.String:
+                case SttpValueTypeCode.String:
                     return Encoding.UTF8.GetString(data);
-                case ValueType.Buffer:
+                case SttpValueTypeCode.Buffer:
                     return data;
                 default:
                     throw new NotSupportedException();
@@ -97,42 +97,42 @@ namespace Sttp.WireProtocol
 
         }
 
-        public static ValueType FromType(Type columnDataType)
+        public static SttpValueTypeCode FromType(Type columnDataType)
         {
             if (columnDataType == typeof(sbyte))
-                return ValueType.SByte;
+                return SttpValueTypeCode.SByte;
             if (columnDataType == typeof(Int16))
-                return ValueType.Int16;
+                return SttpValueTypeCode.Int16;
             if (columnDataType == typeof(Int32))
-                return ValueType.Int32;
+                return SttpValueTypeCode.Int32;
             if (columnDataType == typeof(Int64))
-                return ValueType.Int64;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Byte))
-                return ValueType.Byte;
+                return SttpValueTypeCode.Byte;
             if (columnDataType == typeof(UInt16))
-                return ValueType.UInt16;
+                return SttpValueTypeCode.UInt16;
             if (columnDataType == typeof(UInt32))
-                return ValueType.UInt32;
+                return SttpValueTypeCode.UInt32;
             if (columnDataType == typeof(UInt64))
-                return ValueType.UInt64;
+                return SttpValueTypeCode.UInt64;
             if (columnDataType == typeof(Decimal))
-                return ValueType.Decimal;
+                return SttpValueTypeCode.Decimal;
             if (columnDataType == typeof(Double))
-                return ValueType.Double;
+                return SttpValueTypeCode.Double;
             if (columnDataType == typeof(Single))
-                return ValueType.Single;
+                return SttpValueTypeCode.Single;
             if (columnDataType == typeof(DateTime))
-                return ValueType.Ticks;
+                return SttpValueTypeCode.DateTime;
             if (columnDataType == typeof(bool))
-                return ValueType.Bool;
+                return SttpValueTypeCode.Bool;
             if (columnDataType == typeof(Guid))
-                return ValueType.Guid;
+                return SttpValueTypeCode.Guid;
             if (columnDataType == typeof(String))
-                return ValueType.String;
+                return SttpValueTypeCode.String;
             if (columnDataType == typeof(byte[]))
-                return ValueType.Buffer;
+                return SttpValueTypeCode.Buffer;
 
-            return ValueType.Null;
+            return SttpValueTypeCode.Null;
         }
     }
 }

@@ -5,7 +5,6 @@ using System.IO;
 using Sttp.IO;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.GetMetadataResponse;
-using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {
@@ -65,13 +64,13 @@ namespace Sttp.Data
             }
         }
 
-        public void AddColumn(short index, string name, ValueType type)
+        public void AddColumn(short index, string name, SttpValueTypeCode typeCode)
         {
             while (Columns.Count <= index)
             {
                 Columns.Add(null);
             }
-            Columns[index] = new MetadataColumn(index, name, type);
+            Columns[index] = new MetadataColumn(index, name, typeCode);
         }
 
         public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.ICmd command)
@@ -84,7 +83,7 @@ namespace Sttp.Data
                     {
                         Columns.Add(null);
                     }
-                    Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnType);
+                    Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnTypeCode);
                     break;
                 case SubCommand.AddRow:
                     var addR = command.AddRow;

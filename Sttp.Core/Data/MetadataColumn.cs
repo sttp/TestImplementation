@@ -1,5 +1,4 @@
 using Sttp.WireProtocol;
-using ValueType = Sttp.WireProtocol.ValueType;
 
 namespace Sttp.Data
 {
@@ -16,23 +15,23 @@ namespace Sttp.Data
         /// <summary>
         /// The type of this column
         /// </summary>
-        public readonly ValueType Type;
+        public readonly SttpValueTypeCode TypeCode;
 
-        public MetadataColumn(short index, string name, ValueType type)
+        public MetadataColumn(short index, string name, SttpValueTypeCode typeCode)
         {
             Index = index;
-            Type = type;
+            TypeCode = typeCode;
             Name = name;
         }
 
         public byte[] Encode(object value)
         {
-            return ValueTypeCodec.Encode(Type, value);
+            return SttpValueTypeCodec.Encode(TypeCode, value);
         }
 
         public object Decode(byte[] data)
         {
-            return ValueTypeCodec.Decode(Type, data);
+            return SttpValueTypeCodec.Decode(TypeCode, data);
         }
 
     }
