@@ -15,7 +15,7 @@ namespace Sttp.WireProtocol
     /// reuse is the normal case.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public class SttpDataPoint
+    public class SttpDataPoint : ISttpValue
     {
         // Since 99% of the class instances Data Points going to be small 32 or 64 bit values
         // this class has been optimized to contain an object field that gets expanded 

@@ -9,9 +9,9 @@ namespace Sttp.WireProtocol
     /// <summary>
     /// Extension methods for SttpDataPoint to ease usability.
     /// </summary>
-    public static class SttpDataPointExtensions
+    public static class ISttpValueExtensions
     {
-        public static void SetValue(this SttpDataPoint dataPoint, object value)
+        public static void SetValue(this ISttpValue dataPoint, object value)
         {
             if (value == null || value == DBNull.Value)
             {
@@ -98,88 +98,88 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, byte value)
+        public static void SetValue(this ISttpValue dataPoint, byte value)
         {
             dataPoint.AsInt32 = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, short value)
+        public static void SetValue(this ISttpValue dataPoint, short value)
         {
             dataPoint.AsInt32 = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, int value)
+        public static void SetValue(this ISttpValue dataPoint, int value)
         {
             dataPoint.AsInt32 = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, long value)
+        public static void SetValue(this ISttpValue dataPoint, long value)
         {
             dataPoint.AsInt64 = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, ushort value)
+        public static void SetValue(this ISttpValue dataPoint, ushort value)
         {
             dataPoint.AsInt32 = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, uint value)
+        public static void SetValue(this ISttpValue dataPoint, uint value)
         {
             dataPoint.AsInt32 = (int)value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, ulong value)
+        public static void SetValue(this ISttpValue dataPoint, ulong value)
         {
             dataPoint.AsInt64 = (long)value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, decimal value)
+        public static void SetValue(this ISttpValue dataPoint, decimal value)
         {
             dataPoint.AsBuffer = BigEndian.GetBytes(value);
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, double value)
+        public static void SetValue(this ISttpValue dataPoint, double value)
         {
             dataPoint.AsDouble = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, float value)
+        public static void SetValue(this ISttpValue dataPoint, float value)
         {
             dataPoint.AsSingle = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, DateTime value)
+        public static void SetValue(this ISttpValue dataPoint, DateTime value)
         {
             dataPoint.AsBuffer = BigEndian.GetBytes(value);
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, TimeSpan value)
+        public static void SetValue(this ISttpValue dataPoint, TimeSpan value)
         {
             dataPoint.AsBuffer = BigEndian.GetBytes(value);
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, char value)
+        public static void SetValue(this ISttpValue dataPoint, char value)
         {
             dataPoint.AsInt32 = value;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, bool value)
+        public static void SetValue(this ISttpValue dataPoint, bool value)
         {
             dataPoint.AsInt32 = value ? 1 : 0;
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, Guid value)
+        public static void SetValue(this ISttpValue dataPoint, Guid value)
         {
             dataPoint.AsBuffer = BigEndian.GetBytes(value);
         }
 
-        public static void SetValue(this SttpDataPoint dataPoint, string value)
+        public static void SetValue(this ISttpValue dataPoint, string value)
         {
             dataPoint.AsString = value;
         }
 
 
-        public static void SetValue(this SttpDataPoint dataPoint, byte[] value)
+        public static void SetValue(this ISttpValue dataPoint, byte[] value)
         {
             dataPoint.AsBuffer = value;
         }
@@ -189,7 +189,7 @@ namespace Sttp.WireProtocol
         /// This is useful if you want to use other conversion methods such as those present in <see cref="DataTable"/>
         /// </summary>
         /// <returns></returns>
-        public static object ToFundamentalType(this SttpDataPoint dataPoint)
+        public static object ToFundamentalType(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -217,7 +217,7 @@ namespace Sttp.WireProtocol
         /// This is useful if you want to use other conversion methods such as those present in <see cref="DataTable"/>
         /// </summary>
         /// <returns></returns>
-        public static object ToNativeType(this SttpDataPoint dataPoint, SttpValueTypeCode nativeType)
+        public static object ToNativeType(this ISttpValue dataPoint, SttpValueTypeCode nativeType)
         {
             if (dataPoint.IsNull)
                 return DBNull.Value;
@@ -267,7 +267,7 @@ namespace Sttp.WireProtocol
 
         #region [ implicit operators Cast From EcaMeasurementValue ]
 
-        public static byte ToByte(this SttpDataPoint dataPoint)
+        public static byte ToByte(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -290,7 +290,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static short ToInt16(this SttpDataPoint dataPoint)
+        public static short ToInt16(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -313,7 +313,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static int ToInt32(this SttpDataPoint dataPoint)
+        public static int ToInt32(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -336,7 +336,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static long ToInt64(this SttpDataPoint dataPoint)
+        public static long ToInt64(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -359,7 +359,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static ushort ToUInt16(this SttpDataPoint dataPoint)
+        public static ushort ToUInt16(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -382,7 +382,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static uint ToUInt32(this SttpDataPoint dataPoint)
+        public static uint ToUInt32(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -405,7 +405,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static ulong ToUInt64(this SttpDataPoint dataPoint)
+        public static ulong ToUInt64(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -428,7 +428,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static decimal ToDecimal(this SttpDataPoint dataPoint)
+        public static decimal ToDecimal(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -451,7 +451,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static double ToDouble(this SttpDataPoint dataPoint)
+        public static double ToDouble(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -474,7 +474,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static float ToSingle(this SttpDataPoint dataPoint)
+        public static float ToSingle(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -497,7 +497,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static DateTime ToDateTime(this SttpDataPoint dataPoint)
+        public static DateTime ToDateTime(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -520,7 +520,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static TimeSpan ToTimeSpan(this SttpDataPoint dataPoint)
+        public static TimeSpan ToTimeSpan(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -543,7 +543,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static char ToChar(this SttpDataPoint dataPoint)
+        public static char ToChar(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -566,7 +566,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static bool ToBool(this SttpDataPoint dataPoint)
+        public static bool ToBool(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -589,7 +589,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static Guid ToGuid(this SttpDataPoint dataPoint)
+        public static Guid ToGuid(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -612,7 +612,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public static string AsString(this SttpDataPoint dataPoint)
+        public static string AsString(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
             {
@@ -637,7 +637,7 @@ namespace Sttp.WireProtocol
 
         #endregion
 
-        public static byte[] ToBuffer(this SttpDataPoint dataPoint)
+        public static byte[] ToBuffer(this ISttpValue dataPoint)
         {
             return null;
         }
