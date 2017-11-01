@@ -70,7 +70,7 @@ namespace Sttp
     /// will not be checked as part of this function call, if bounds are violated, the exception
     /// will be thrown at the <see cref="Array"/> level.
     /// </remarks>
-    public static class BigEndian
+    public static unsafe class BigEndian
     {
         #region [ ToValue Pointer ]
 
@@ -725,6 +725,36 @@ namespace Sttp
         public static byte[] GetBytes(ulong value)
         {
             return GetBytes((long)value);
+        }
+
+        /// <summary>
+        /// Returns the specified 64-bit unsigned integer value as an array of bytes.
+        /// </summary>
+        /// <param name="value">The number to convert.</param>
+        /// <returns>An array of bytes with length 8.</returns>
+        public static byte[] GetBytes(DateTime value)
+        {
+            return GetBytes(*(long*)&value);
+        }
+
+        /// <summary>
+        /// Returns the specified 64-bit unsigned integer value as an array of bytes.
+        /// </summary>
+        /// <param name="value">The number to convert.</param>
+        /// <returns>An array of bytes with length 8.</returns>
+        public static byte[] GetBytes(TimeSpan value)
+        {
+            return GetBytes(*(long*)&value);
+        }
+
+        /// <summary>
+        /// Returns the specified 64-bit unsigned integer value as an array of bytes.
+        /// </summary>
+        /// <param name="value">The number to convert.</param>
+        /// <returns>An array of bytes with length 8.</returns>
+        public static byte[] GetBytes(Guid value)
+        {
+            return value.ToRfcBytes();
         }
 
         /// <summary>

@@ -2,43 +2,48 @@
 
 namespace Sttp.WireProtocol.SendDataPoints
 {
-    /// <summary>
-    /// The highest precision timestamp.
-    /// </summary>
-    public struct SttpLongTimestamp
-    {
-        private const long LeapsecondFlag = 1L << 62;
+    
 
-        public readonly long Ticks;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
-        public readonly uint ExtraPrecision;  // Normally 0, but for scientific data, 
-                                              // Bit 31 - When 1, Bits 0-30 are used for extending +/- billions of years.
-                                              //          When 0, Bits 24-30 brings the precision to Nanoseconds that are missing from Ticks. Ticks are 100ns. This provides 2 bits.
-                                              //                  Bits 14-23 are picoseconds
-                                              //                  Bits 4-23 are femtoseconds
-                                              //                  Bits 0-3 are 100 attosecond.
+    ///// <summary>
+    ///// The highest precision timestamp.
+    ///// </summary>
+    //public struct SttpLongTimestamp
+    //{
+    //    //Consider this 
 
-        public bool LeapsecondInProgress => (Ticks & LeapsecondFlag) > 0;
-        public bool IsHighPrecision => ExtraPrecision != 0;
 
-        public SttpLongTimestamp(DateTime time, bool leapSecondInProgress = false)
-        {
-            Ticks = time.Ticks;
-            ExtraPrecision = 0;
-            if (leapSecondInProgress)
-                Ticks |= LeapsecondFlag;
-        }
+    //    private const long LeapsecondFlag = 1L << 62;
 
-        public SttpLongTimestamp(long rawTicks, uint extraPrecision)
-        {
-            Ticks = rawTicks;
-            ExtraPrecision = extraPrecision;
-        }
+    //    public readonly long Ticks;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
+    //    public readonly uint ExtraPrecision;  // Normally 0, but for scientific data, 
+    //                                          // Bit 31 - When 1, Bits 0-30 are used for extending +/- billions of years.
+    //                                          //          When 0, Bits 24-30 brings the precision to Nanoseconds that are missing from Ticks. Ticks are 100ns. This provides 2 bits.
+    //                                          //                  Bits 14-23 are picoseconds
+    //                                          //                  Bits 4-23 are femtoseconds
+    //                                          //                  Bits 0-3 are 100 attosecond.
 
-        public SttpTimestamp ToSttpTimestamp()
-        {
-            return new SttpTimestamp(Ticks);
-        }
-    } // 12-bytes
+    //    public bool LeapsecondInProgress => (Ticks & LeapsecondFlag) > 0;
+    //    public bool IsHighPrecision => ExtraPrecision != 0;
+
+    //    public SttpLongTimestamp(DateTime time, bool leapSecondInProgress = false)
+    //    {
+    //        Ticks = time.Ticks;
+    //        ExtraPrecision = 0;
+    //        if (leapSecondInProgress)
+    //            Ticks |= LeapsecondFlag;
+    //    }
+
+    //    public SttpLongTimestamp(long rawTicks, uint extraPrecision)
+    //    {
+    //        Ticks = rawTicks;
+    //        ExtraPrecision = extraPrecision;
+    //    }
+
+    //    public SttpTimestamp ToSttpTimestamp()
+    //    {
+    //        return new SttpTimestamp(Ticks);
+    //    }
+    //} // 12-bytes
 
 
     /// <summary>
@@ -63,10 +68,5 @@ namespace Sttp.WireProtocol.SendDataPoints
             Ticks = raw;
         }
 
-        public SttpLongTimestamp ToLongTimestamp()
-        {
-            return new SttpLongTimestamp(Ticks, 0);
-        }
     } // 8-bytes
-
 }

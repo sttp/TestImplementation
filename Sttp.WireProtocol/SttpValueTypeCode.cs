@@ -28,7 +28,7 @@
         //      take a variable length string or byte array then fragment it into chunks, sequence them and have the subscriber API re-collate them.
         String = 17,  // 16-bytes, max
         Buffer = 18,   // 16-bytes, max
-        UDFType,
     }
+
     // sizeof(uint8), 1-byte
 }
