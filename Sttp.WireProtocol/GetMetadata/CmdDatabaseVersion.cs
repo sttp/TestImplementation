@@ -14,7 +14,6 @@ namespace Sttp.WireProtocol.GetMetadata
             MinorVersion = reader.ReadInt64();
         }
 
-
         CmdDatabaseVersion ICmd.DatabaseVersion => this;
         CmdJoin ICmd.Join => null;
         CmdSelect ICmd.Select => null;

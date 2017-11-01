@@ -635,11 +635,13 @@ namespace Sttp.WireProtocol
             }
         }
 
-        #endregion
-
         public static byte[] ToBuffer(this ISttpValue dataPoint)
         {
             return null;
         }
+
+        #endregion
+
+
     }
 }
