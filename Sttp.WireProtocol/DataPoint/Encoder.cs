@@ -52,12 +52,11 @@ namespace Sttp.WireProtocol.SendDataPoints
                 foreach (var point in m_newPoints)
                 {
                     m_stream.Write(point.DataPointID);
-                    m_stream.Write(point.Time.Ticks);
-                    //m_stream.Write(point.Time.Fraction);
-                    m_stream.Write(point.ValueLength);
+                    m_stream.Write(point.LongTimestamp.Ticks);
+                    m_stream.Write(point.LongTimestamp.ExtraPrecision);
+                    m_stream.Write(point.ToByteArray());
                     m_stream.Write(point.TimeQuality);
                     m_stream.Write(point.ValueQuality);
-                    m_stream.Write(point.Value);
                 }
                 m_stream.EndCommand(m_sendPacket);
             }
