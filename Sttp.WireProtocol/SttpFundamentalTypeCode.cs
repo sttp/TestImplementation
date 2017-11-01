@@ -11,6 +11,7 @@
         Int64 = 2,    //Int64, UInt64
         Single = 3,   //Single
         Double = 4,   //Double
-        Buffer = 5,   //DateTime, TimeSpan, Strings, Guid, Decimal, Custom User Defined Types
+        String = 5,   //Strings
+        Buffer = 6,   //DateTime, TimeSpan, , Guid, Decimal, Custom User Defined Types
     }
 }

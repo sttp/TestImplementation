@@ -23,7 +23,7 @@ namespace Sttp.WireProtocol
         private class NestedObjects
         {
             public object DataPointKeyToken;
-            public byte[] ValueBuffer;
+            public object ValueObject; //Can be a string or a byte[]
             public SttpScientificTime Time;
 
             public NestedObjects Clone()
@@ -299,7 +299,7 @@ namespace Sttp.WireProtocol
             get
             {
                 if (m_fundamentalTypeCode == SttpFundamentalTypeCode.Buffer)
-                    return ((NestedObjects)m_dataPointKeyToken).ValueBuffer;
+                    return (byte[])((NestedObjects)m_dataPointKeyToken).ValueObject;
                 throw new NotSupportedException();
             }
             set
@@ -316,12 +316,44 @@ namespace Sttp.WireProtocol
                     {
                         m_isNestedObject = true;
                         var obj = new NestedObjects();
-                        obj.ValueBuffer = value;
+                        obj.ValueObject = value;
                         obj.DataPointKeyToken = m_dataPointKeyToken;
                         m_dataPointKeyToken = obj;
                         return;
                     }
-                    ((NestedObjects)m_dataPointKeyToken).ValueBuffer = value;
+                    ((NestedObjects)m_dataPointKeyToken).ValueObject = value;
+                }
+            }
+        }
+
+        public string AsString
+        {
+            get
+            {
+                if (m_fundamentalTypeCode == SttpFundamentalTypeCode.String)
+                    return (string)((NestedObjects)m_dataPointKeyToken).ValueObject;
+                throw new NotSupportedException();
+            }
+            set
+            {
+                CheckImmutable();
+                if (value == null)
+                {
+                    IsNull = true;
+                }
+                else
+                {
+                    m_fundamentalTypeCode = SttpFundamentalTypeCode.String;
+                    if (!m_isNestedObject)
+                    {
+                        m_isNestedObject = true;
+                        var obj = new NestedObjects();
+                        obj.ValueObject = value;
+                        obj.DataPointKeyToken = m_dataPointKeyToken;
+                        m_dataPointKeyToken = obj;
+                        return;
+                    }
+                    ((NestedObjects)m_dataPointKeyToken).ValueObject = value;
                 }
             }
         }
@@ -343,7 +375,7 @@ namespace Sttp.WireProtocol
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
                 if (m_isNestedObject)
                 {
-                    ((NestedObjects)m_dataPointKeyToken).ValueBuffer = null;
+                    ((NestedObjects)m_dataPointKeyToken).ValueObject = null;
                 }
             }
         }
