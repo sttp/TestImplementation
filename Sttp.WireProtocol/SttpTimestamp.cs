@@ -3,40 +3,50 @@
 namespace Sttp.WireProtocol.SendDataPoints
 {
     /// <summary>
-    /// The wireline type for transmitting time.
+    /// The highest precision timestamp.
     /// </summary>
-    public class SttpTimestamp
+    public struct SttpLongTimestamp
     {
-        private const ulong LeapsecondFlag = 0x1000000000000000;
+        private const long LeapsecondFlag = 1L << 62;
 
-        public readonly long Seconds;    // Seconds since 1/1/0001 +/-292 billion years
-                                         // Stored normally.
-        public readonly ulong Fraction;  // 10 bits for milliseconds, 10 bits for microseconds, 10 bits for nanoseconds, 10 bits for picoseconds,
-                                         // 10 bits for femtoseconds, 10 bits for attoseconds, 1 bit for leapsecond, 3 bits reserved.
-        public int Milliseconds => (int)((Fraction >> 50) & 1023);
-        public int Microseconds => (int)((Fraction >> 40) & 1023);
-        public int Nanoseconds => (int)((Fraction >> 30) & 1023);
-        public int Picoseconds => (int)((Fraction >> 20) & 1023);
-        public int Femtsoeconds => (int)((Fraction >> 10) & 1023);
-        public int Attoseconds => (int)(Fraction & 1023);
-        public bool LeapsecondInProgress => (Fraction & LeapsecondFlag) > 0;
+        public readonly long Ticks;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
+        public readonly uint ExtraPrecision;  // Normally 0, but for scientific data, 
+                                                // Bit 31 - When 1, Bits 0-30 are used for extending +/- billions of years.
+                                                //          When 0, Bits 24-30 brings the precision to Nanoseconds that are missing from Ticks. Ticks are 100ns. This provides 2 bits.
+                                                //                  Bits 14-23 are picoseconds
+                                                //                  Bits 4-23 are femtoseconds
+                                                //                  Bits 0-3 are 100 attosecond.
+
+        public bool LeapsecondInProgress => (Ticks & LeapsecondFlag) > 0;
+        public bool IsHighPrecision => ExtraPrecision != 0;
+
+        public SttpLongTimestamp(DateTime time, bool leapSecondInProgress = false)
+        {
+            Ticks = time.Ticks;
+            ExtraPrecision = 0;
+            if (leapSecondInProgress)
+                Ticks |= LeapsecondFlag;
+        }
+    } // 12-bytes
+
+
+    /// <summary>
+    /// The highest precision timestamp.
+    /// </summary>
+    public struct SttpTimestamp
+    {
+        private const long LeapsecondFlag = 1L << 62;
+
+        public readonly long Ticks;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
+
+        public bool LeapsecondInProgress => (Ticks & LeapsecondFlag) > 0;
 
         public SttpTimestamp(DateTime time, bool leapSecondInProgress = false)
         {
-            Seconds = time.Ticks / TimeSpan.TicksPerSecond;
-            ulong milliseconds = (uint)(time.Ticks / TimeSpan.TicksPerMillisecond % 1000);
-            ulong microseconds = (uint)(time.Ticks / 10 % 1000);
-            ulong nanoseconds = (uint)(time.Ticks % 10 * 1000);
-            Fraction = (milliseconds << 50) | (microseconds << 40) | (nanoseconds << 30);
-
+            Ticks = time.Ticks;
             if (leapSecondInProgress)
-                Fraction |= LeapsecondFlag;
+                Ticks |= LeapsecondFlag;
         }
-        public SttpTimestamp(long seconds, ulong fraction)
-        {
-            Seconds = seconds;
-            Fraction = fraction;
-        }        
-    }
-    // 16-bytes
+    } // 8-bytes
+
 }
