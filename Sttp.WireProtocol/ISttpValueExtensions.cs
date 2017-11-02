@@ -100,7 +100,7 @@ namespace Sttp.WireProtocol
 
         public static void SetValue(this ISttpValue dataPoint, byte value)
         {
-            dataPoint.AsInt64 = value;
+            dataPoint.AsUInt64 = value;
         }
 
         public static void SetValue(this ISttpValue dataPoint, short value)
@@ -120,17 +120,17 @@ namespace Sttp.WireProtocol
 
         public static void SetValue(this ISttpValue dataPoint, ushort value)
         {
-            dataPoint.AsInt64 = value;
+            dataPoint.AsUInt64 = value;
         }
 
         public static void SetValue(this ISttpValue dataPoint, uint value)
         {
-            dataPoint.AsInt64 = value;
+            dataPoint.AsUInt64 = value;
         }
 
         public static void SetValue(this ISttpValue dataPoint, ulong value)
         {
-            dataPoint.AsInt64 = (long)value;
+            dataPoint.AsUInt64 = (ulong)value;
         }
 
         public static void SetValue(this ISttpValue dataPoint, decimal value)
@@ -160,12 +160,12 @@ namespace Sttp.WireProtocol
 
         public static void SetValue(this ISttpValue dataPoint, char value)
         {
-            dataPoint.AsInt64 = value;
+            dataPoint.AsUInt64 = value;
         }
 
         public static void SetValue(this ISttpValue dataPoint, bool value)
         {
-            dataPoint.AsInt64 = value ? 1 : 0;
+            dataPoint.AsUInt64 = value ? 1u : 0u;
         }
 
         public static void SetValue(this ISttpValue dataPoint, Guid value)
@@ -177,7 +177,6 @@ namespace Sttp.WireProtocol
         {
             dataPoint.AsString = value;
         }
-
 
         public static void SetValue(this ISttpValue dataPoint, byte[] value)
         {
@@ -197,6 +196,8 @@ namespace Sttp.WireProtocol
                     return null;
                 case SttpFundamentalTypeCode.Int64:
                     return dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -265,6 +266,7 @@ namespace Sttp.WireProtocol
 
         #region [ implicit operators Cast From EcaMeasurementValue ]
 
+        //ToDo: Consider bounds checking for all of these conversions.
         public static byte ToByte(this ISttpValue dataPoint)
         {
             switch (dataPoint.FundamentalTypeCode)
@@ -273,6 +275,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (byte)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (byte)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (byte)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -294,6 +298,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (short)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (short)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (short)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -315,6 +321,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (int)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (int)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (int)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -336,6 +344,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (long)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (long)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (long)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -357,6 +367,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (ushort)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (ushort)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (ushort)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -378,6 +390,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (uint)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (uint)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (uint)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -399,6 +413,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (ulong)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (ulong)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (ulong)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -420,6 +436,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (decimal)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (decimal)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (decimal)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -441,6 +459,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (double)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (double)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (double)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -462,6 +482,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (float)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (float)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (float)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -483,6 +505,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     throw new InvalidCastException("Cannot convert from Int64");
+                case SttpFundamentalTypeCode.UInt64:
+                    throw new InvalidCastException("Cannot convert from UInt64");
                 case SttpFundamentalTypeCode.Single:
                     throw new InvalidCastException("Cannot convert from Single");
                 case SttpFundamentalTypeCode.Double:
@@ -504,6 +528,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     throw new InvalidCastException("Cannot convert from Int64");
+                case SttpFundamentalTypeCode.UInt64:
+                    throw new InvalidCastException("Cannot convert from UInt64");
                 case SttpFundamentalTypeCode.Single:
                     throw new InvalidCastException("Cannot convert from Single");
                 case SttpFundamentalTypeCode.Double:
@@ -525,6 +551,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return (char)dataPoint.AsInt64;
+                case SttpFundamentalTypeCode.UInt64:
+                    return (char)dataPoint.AsUInt64;
                 case SttpFundamentalTypeCode.Single:
                     return (char)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
@@ -546,6 +574,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Null");
                 case SttpFundamentalTypeCode.Int64:
                     return dataPoint.AsInt64 != 0;
+                case SttpFundamentalTypeCode.UInt64:
+                    return dataPoint.AsUInt64 != 0;
                 case SttpFundamentalTypeCode.Single:
                     return Math.Abs(dataPoint.AsSingle) > 0.75;
                 case SttpFundamentalTypeCode.Double:
@@ -565,6 +595,8 @@ namespace Sttp.WireProtocol
             {
                 case SttpFundamentalTypeCode.Null:
                     throw new InvalidCastException("Cannot convert from Null");
+                case SttpFundamentalTypeCode.UInt64:
+                    throw new InvalidCastException("Cannot convert from UInt64");
                 case SttpFundamentalTypeCode.Int64:
                     throw new InvalidCastException("Cannot convert from Int64");
                 case SttpFundamentalTypeCode.Single:
@@ -586,6 +618,8 @@ namespace Sttp.WireProtocol
             {
                 case SttpFundamentalTypeCode.Null:
                     return null;
+                case SttpFundamentalTypeCode.UInt64:
+                    return dataPoint.AsUInt64.ToString();
                 case SttpFundamentalTypeCode.Int64:
                     return dataPoint.AsInt64.ToString();
                 case SttpFundamentalTypeCode.Single:

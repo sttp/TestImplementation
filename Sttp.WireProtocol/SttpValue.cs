@@ -18,6 +18,8 @@ namespace Sttp.WireProtocol
         private ulong m_bytes0to7; //Used for cloning data.
 
         [FieldOffset(0)]
+        private ulong m_valueUInt64;
+        [FieldOffset(0)]
         private long m_valueInt64;
         [FieldOffset(0)]
         private float m_valueSingle;
@@ -66,6 +68,22 @@ namespace Sttp.WireProtocol
             {
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Int64;
                 m_valueInt64 = value;
+                m_objectValue = null;
+            }
+        }
+
+        public ulong AsUInt64
+        {
+            get
+            {
+                if (m_fundamentalTypeCode == SttpFundamentalTypeCode.UInt64)
+                    return m_valueUInt64;
+                throw new NotSupportedException();
+            }
+            set
+            {
+                m_fundamentalTypeCode = SttpFundamentalTypeCode.UInt64;
+                m_valueUInt64 = value;
                 m_objectValue = null;
             }
         }
@@ -210,6 +228,9 @@ namespace Sttp.WireProtocol
                 case SttpFundamentalTypeCode.Int64:
                     writer.Write(AsInt64);
                     break;
+                case SttpFundamentalTypeCode.UInt64:
+                    writer.Write(AsUInt64);
+                    break;
                 case SttpFundamentalTypeCode.Single:
                     writer.Write(AsSingle);
                     break;
@@ -236,6 +257,9 @@ namespace Sttp.WireProtocol
                     break;
                 case SttpFundamentalTypeCode.Int64:
                     AsInt64 = reader.ReadInt64();
+                    break;
+                case SttpFundamentalTypeCode.UInt64:
+                    AsUInt64 = reader.ReadUInt64();
                     break;
                 case SttpFundamentalTypeCode.Single:
                     AsSingle = reader.ReadSingle();
@@ -269,10 +293,10 @@ namespace Sttp.WireProtocol
                 case SttpFundamentalTypeCode.Null:
                     return true;
                 case SttpFundamentalTypeCode.Single:
-                    return a.m_bytes0to7 == b.m_bytes0to7;
+                case SttpFundamentalTypeCode.UInt64:
                 case SttpFundamentalTypeCode.Int64:
                 case SttpFundamentalTypeCode.Double:
-                    return a.m_valueInt64 == b.m_valueInt64;
+                    return a.m_bytes0to7 == b.m_bytes0to7;
                 case SttpFundamentalTypeCode.String:
                     return a.AsString == b.AsString;
                 case SttpFundamentalTypeCode.Buffer:

@@ -7,10 +7,13 @@
     public enum SttpFundamentalTypeCode : byte
     {
         Null = 0,     //All values are nullable.
-        Int64 = 1,    //Int64, UInt64, SByte, Byte, Int16, Int32, UInt16, UInt32, Bool, Char
-        Single = 2,   //Single
-        Double = 3,   //Double
-        String = 4,   //Strings
-        Buffer = 5,   //DateTime, TimeSpan, Guid, Decimal, Custom User Defined Types
+        Int64 = 1,    //Int64, SByte, Int16, Int32, Char
+        //Note: I have UInt64 and Int64 because when I was encoding, I was already having to detect sign and add a bit for it. So no space is saved.
+        //but special treatment should occur for signed and unsigned values. Such as overflow detection.
+        UInt64 = 2,   //UInt64, Byte, UInt16, UInt32, Bool, Char (According to .NET source code, it's unsigned. Look at the IL Code for Char.CompareTo())
+        Single = 3,   //Single
+        Double = 4,   //Double
+        String = 5,   //Strings
+        Buffer = 6,   //DateTime, TimeSpan, Guid, Decimal, Custom User Defined Types
     }
 }
