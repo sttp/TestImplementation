@@ -13,6 +13,11 @@
         UInt64 = 2,         //UInt64, Byte, UInt16, UInt32, Bool, Char (According to .NET source code, it's unsigned. Look at the IL Code for Char.CompareTo())
         Single = 3,         //Single
         Double = 4,         //Double
-        Buffer = 5,         //ScientificTime, DateTime, DateTimeOffset, Time, TimeSpan, Numeric, Custom User Defined Types
+        Buffer = 5,         //Numeric, Custom User Defined Types
+
+        //All of these fields are fixed length fields that don't behave like the fundamental types listed above. However, they will be transmitted as structs and not classes.
+        Fixed32 = 6,        //Time
+        Fixed64 = 7,        //TimeSpan, DateTime
+        Fixed128 = 8,       //ScientificTime, DateTimeOffset, Guid, Decimal, ShortString,
     }
 }
