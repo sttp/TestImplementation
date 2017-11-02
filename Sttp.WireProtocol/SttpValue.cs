@@ -18,8 +18,6 @@ namespace Sttp.WireProtocol
         private ulong m_bytes0to7; //Used for cloning data.
 
         [FieldOffset(0)]
-        private int m_valueInt32;
-        [FieldOffset(0)]
         private long m_valueInt64;
         [FieldOffset(0)]
         private float m_valueSingle;
@@ -56,22 +54,6 @@ namespace Sttp.WireProtocol
 
         #region [ Properties ]
 
-        public int AsInt32
-        {
-            get
-            {
-                if (m_fundamentalTypeCode == SttpFundamentalTypeCode.Int32)
-                    return m_valueInt32;
-                throw new NotSupportedException();
-            }
-            set
-            {
-                m_fundamentalTypeCode = SttpFundamentalTypeCode.Int32;
-                m_valueInt32 = value;
-                m_objectValue = null;
-            }
-        }
-
         public long AsInt64
         {
             get
@@ -99,6 +81,7 @@ namespace Sttp.WireProtocol
             set
             {
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Single;
+                m_bytes0to7 = 0;
                 m_valueSingle = value;
                 m_objectValue = null;
             }
@@ -137,6 +120,7 @@ namespace Sttp.WireProtocol
                 else
                 {
                     m_fundamentalTypeCode = SttpFundamentalTypeCode.Buffer;
+                    m_bytes0to7 = 0;
                     m_objectValue = value;
                 }
             }
@@ -159,6 +143,7 @@ namespace Sttp.WireProtocol
                 else
                 {
                     m_fundamentalTypeCode = SttpFundamentalTypeCode.String;
+                    m_bytes0to7 = 0;
                     m_objectValue = value;
                 }
             }
@@ -179,6 +164,8 @@ namespace Sttp.WireProtocol
                 if (!value)
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
                 m_objectValue = null;
+                m_bytes0to7 = 0;
+                m_fundamentalTypeCode = SttpFundamentalTypeCode.Null;
             }
         }
 
@@ -220,9 +207,6 @@ namespace Sttp.WireProtocol
             {
                 case SttpFundamentalTypeCode.Null:
                     break;
-                case SttpFundamentalTypeCode.Int32:
-                    writer.Write(AsInt32);
-                    break;
                 case SttpFundamentalTypeCode.Int64:
                     writer.Write(AsInt64);
                     break;
@@ -249,9 +233,6 @@ namespace Sttp.WireProtocol
             {
                 case SttpFundamentalTypeCode.Null:
                     IsNull = true;
-                    break;
-                case SttpFundamentalTypeCode.Int32:
-                    AsInt32 = reader.ReadInt32();
                     break;
                 case SttpFundamentalTypeCode.Int64:
                     AsInt64 = reader.ReadInt64();
@@ -287,9 +268,8 @@ namespace Sttp.WireProtocol
             {
                 case SttpFundamentalTypeCode.Null:
                     return true;
-                case SttpFundamentalTypeCode.Int32:
                 case SttpFundamentalTypeCode.Single:
-                    return a.m_valueInt32 == b.m_valueInt32;
+                    return a.m_bytes0to7 == b.m_bytes0to7;
                 case SttpFundamentalTypeCode.Int64:
                 case SttpFundamentalTypeCode.Double:
                     return a.m_valueInt64 == b.m_valueInt64;

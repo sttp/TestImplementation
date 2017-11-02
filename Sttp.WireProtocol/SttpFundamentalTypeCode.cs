@@ -7,11 +7,10 @@
     public enum SttpFundamentalTypeCode : byte
     {
         Null = 0,     //All values are nullable.
-        Int32 = 1,    //SByte, Byte, Int16, Int32, UInt16, UInt32, Bool, Char
-        Int64 = 2,    //Int64, UInt64
-        Single = 3,   //Single
-        Double = 4,   //Double
-        String = 5,   //Strings
-        Buffer = 6,   //DateTime, TimeSpan, , Guid, Decimal, Custom User Defined Types
+        Int64 = 1,    //Int64, UInt64, SByte, Byte, Int16, Int32, UInt16, UInt32, Bool, Char
+        Single = 2,   //Single
+        Double = 3,   //Double
+        String = 4,   //Strings
+        Buffer = 5,   //DateTime, TimeSpan, Guid, Decimal, Custom User Defined Types
     }
 }

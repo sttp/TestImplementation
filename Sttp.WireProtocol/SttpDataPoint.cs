@@ -52,8 +52,6 @@ namespace Sttp.WireProtocol
         private ulong m_bytes32to39; //Used for cloning data.
 
         [FieldOffset(0)]
-        private int m_valueInt32;
-        [FieldOffset(0)]
         private long m_valueInt64;
         [FieldOffset(0)]
         private float m_valueSingle;
@@ -230,22 +228,6 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public int AsInt32
-        {
-            get
-            {
-                if (m_fundamentalTypeCode == SttpFundamentalTypeCode.Int32)
-                    return m_valueInt32;
-                throw new NotSupportedException();
-            }
-            set
-            {
-                CheckImmutable();
-                m_fundamentalTypeCode = SttpFundamentalTypeCode.Int32;
-                m_valueInt32 = value;
-            }
-        }
-
         public long AsInt64
         {
             get
@@ -274,6 +256,7 @@ namespace Sttp.WireProtocol
             {
                 CheckImmutable();
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Single;
+                m_bytes0to7 = 0;
                 m_valueSingle = value;
             }
         }
@@ -377,6 +360,7 @@ namespace Sttp.WireProtocol
                 {
                     ((NestedObjects)m_dataPointKeyToken).ValueObject = null;
                 }
+                m_bytes0to7 = 0;
             }
         }
 
