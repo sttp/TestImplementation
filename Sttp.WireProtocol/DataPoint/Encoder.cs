@@ -52,7 +52,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 foreach (var point in m_newPoints)
                 {
                     m_stream.Write(point.DataPointID);
-                    m_stream.Write(point.Timestamp);
+                    m_stream.Write(point.Ticks);
                     //m_stream.Write(point.ToBuffer());
                     m_stream.Write(point.TimeQuality);
                     m_stream.Write(point.ValueQuality);

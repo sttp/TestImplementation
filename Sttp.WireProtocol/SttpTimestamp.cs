@@ -1,72 +1,99 @@
 ﻿using System;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using Sttp.WireProtocol.SendDataPoints;
 
-namespace Sttp.WireProtocol.SendDataPoints
+namespace Sttp.WireProtocol
 {
-    
-
-    ///// <summary>
-    ///// The highest precision timestamp.
-    ///// </summary>
-    //public struct SttpLongTimestamp
-    //{
-    //    //Consider this 
-
-
-    //    private const long LeapsecondFlag = 1L << 62;
-
-    //    public readonly long Ticks;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
-    //    public readonly uint ExtraPrecision;  // Normally 0, but for scientific data, 
-    //                                          // Bit 31 - When 1, Bits 0-30 are used for extending +/- billions of years.
-    //                                          //          When 0, Bits 24-30 brings the precision to Nanoseconds that are missing from Ticks. Ticks are 100ns. This provides 2 bits.
-    //                                          //                  Bits 14-23 are picoseconds
-    //                                          //                  Bits 4-23 are femtoseconds
-    //                                          //                  Bits 0-3 are 100 attosecond.
-
-    //    public bool LeapsecondInProgress => (Ticks & LeapsecondFlag) > 0;
-    //    public bool IsHighPrecision => ExtraPrecision != 0;
-
-    //    public SttpLongTimestamp(DateTime time, bool leapSecondInProgress = false)
-    //    {
-    //        Ticks = time.Ticks;
-    //        ExtraPrecision = 0;
-    //        if (leapSecondInProgress)
-    //            Ticks |= LeapsecondFlag;
-    //    }
-
-    //    public SttpLongTimestamp(long rawTicks, uint extraPrecision)
-    //    {
-    //        Ticks = rawTicks;
-    //        ExtraPrecision = extraPrecision;
-    //    }
-
-    //    public SttpTimestamp ToSttpTimestamp()
-    //    {
-    //        return new SttpTimestamp(Ticks);
-    //    }
-    //} // 12-bytes
-
+    public enum SttpTimestampTypeCode
+    {
+        SttpTicks,       // A 64-bit UTC timestamp that holds leap second data.
+        SttpTicksPlus,   // A 128-bit value that contains an extra 64-bits to be defined by the API level protocol.
+    }
 
     /// <summary>
-    /// The highest precision timestamp.
+    /// This class contains the allowable PointID types for the STTP protocol. All pointIDs will be mapped to a 32-bit RuntimeID.
     /// </summary>
-    public struct SttpTimestamp
+    [StructLayout(LayoutKind.Explicit)]
+    public class SttpTimestamp
     {
-        private const long LeapsecondFlag = 1L << 62;
+        #region [ Members ]
 
-        public readonly long Ticks;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
+        [FieldOffset(0)]
+        private long m_valueTicks;
 
-        public bool LeapsecondInProgress => (Ticks & LeapsecondFlag) > 0;
+        [FieldOffset(8)]
+        private long m_valueFlags;
 
-        public SttpTimestamp(DateTime time, bool leapSecondInProgress = false)
+        [FieldOffset(17)]
+        private SttpTimestampTypeCode m_typeCode;
+
+        #endregion
+
+        #region [ Constructors ]
+
+        public SttpTimestamp()
         {
-            Ticks = time.Ticks;
-            if (leapSecondInProgress)
-                Ticks |= LeapsecondFlag;
-        }
-        public SttpTimestamp(long raw)
-        {
-            Ticks = raw;
         }
 
-    } // 8-bytes
+        /// <summary>
+        /// Clones an <see cref="SttpValue"/>. 
+        /// </summary>
+        /// <param name="value">the value to clone</param>
+        public SttpTimestamp(SttpTimestamp value)
+        {
+            m_valueTicks = value.m_valueTicks;
+            m_valueFlags = value.m_valueFlags;
+            m_typeCode = value.m_typeCode;
+        }
+
+        #endregion
+
+        #region [ Properties ]
+
+        /// <summary>
+        /// The type code of the raw value.
+        /// </summary>
+        public SttpTimestampTypeCode TypeCode
+        {
+            get
+            {
+                return m_typeCode;
+            }
+        }
+
+        public long Ticks
+        {
+            get
+            {
+                return m_valueTicks;
+            }
+            set
+            {
+                m_typeCode = SttpTimestampTypeCode.SttpTicks;
+                m_valueTicks = value;
+            }
+        }
+
+        public long Flags
+        {
+            get
+            {
+                if (m_typeCode == SttpTimestampTypeCode.SttpTicks)
+                    return m_valueFlags;
+                throw new NotSupportedException();
+            }
+            set
+            {
+                m_typeCode = SttpTimestampTypeCode.SttpTicks;
+                m_valueFlags = value;
+            }
+        }
+
+
+
+        #endregion
+
+    }
 }

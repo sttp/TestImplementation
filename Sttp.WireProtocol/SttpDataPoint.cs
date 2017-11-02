@@ -119,11 +119,11 @@ namespace Sttp.WireProtocol
 
         #region [ Properties ]
 
-        public SttpTimestamp Timestamp
+        public SttpTicks Ticks
         {
             get
             {
-                return new SttpTimestamp(m_timestamp);
+                return new SttpTicks(m_timestamp);
             }
             set
             {
@@ -143,7 +143,7 @@ namespace Sttp.WireProtocol
             {
                 if (m_advTime)
                     return ((NestedObjects)m_dataPointKeyToken).Time;
-                return new SttpScientificTime(new SttpTimestamp(m_timestamp));
+                return new SttpScientificTime(new SttpTicks(m_timestamp));
             }
             set
             {
