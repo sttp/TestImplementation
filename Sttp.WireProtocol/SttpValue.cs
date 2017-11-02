@@ -144,6 +144,66 @@ namespace Sttp.WireProtocol
         }
 
         /// <summary>
+        /// Gets/Sets the native type of the STTP Wire Protocol.
+        /// </summary>
+        public object AsObject
+        {
+            get
+            {
+                switch (m_fundamentalTypeCode)
+                {
+                    case SttpFundamentalTypeCode.Null:
+                        return null;
+                    case SttpFundamentalTypeCode.Int64:
+                        return AsInt64;
+                    case SttpFundamentalTypeCode.UInt64:
+                        return AsUInt64;
+                    case SttpFundamentalTypeCode.Single:
+                        return AsSingle;
+                    case SttpFundamentalTypeCode.Double:
+                        return AsDouble;
+                    case SttpFundamentalTypeCode.Buffer:
+                        return AsBuffer;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            set
+            {
+                if (value == null)
+                {
+                    IsNull = true;
+                    return;
+                }
+                var type = value.GetType();
+                if (type == typeof(long))
+                {
+                    AsInt64 = (long)value;
+                }
+                else if (type == typeof(ulong))
+                {
+                    AsUInt64 = (ulong)value;
+                }
+                else if (type == typeof(double))
+                {
+                    AsDouble = (double)value;
+                }
+                else if (type == typeof(float))
+                {
+                    AsSingle = (float)value;
+                }
+                else if (type == typeof(byte[]))
+                {
+                    AsBuffer = (byte[])value;
+                }
+                else
+                {
+                    throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets if this class has a value. Clear this by calling <see cref="SetValueToNull"/>
         /// </summary>
         /// <exception cref="InvalidOperationException">When setting this value to true. Set a value by calling one of the <see cref="SetValue"/> methods.</exception>

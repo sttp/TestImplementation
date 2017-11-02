@@ -88,7 +88,7 @@ namespace Sttp.Data
             encoder.AddTable(TableIndex, TableName, TableFlags);
             foreach (var column in Columns)
             {
-                encoder.AddColumn(TableIndex, column.Index, column.Name, column.TypeCode);
+                encoder.AddColumn(TableIndex, column.Index, column.Name, (byte)column.TypeCode);
             }
             foreach (var row in Rows)
             {

@@ -187,31 +187,6 @@ namespace Sttp.WireProtocol
         /// returns the boxed native type of the value. 
         /// </summary>
         /// <returns></returns>
-        public static object ToFundamentalType(this ISttpValue dataPoint)
-        {
-            switch (dataPoint.FundamentalTypeCode)
-            {
-                case SttpFundamentalTypeCode.Null:
-                    return null;
-                case SttpFundamentalTypeCode.Int64:
-                    return dataPoint.AsInt64;
-                case SttpFundamentalTypeCode.UInt64:
-                    return dataPoint.AsUInt64;
-                case SttpFundamentalTypeCode.Single:
-                    return dataPoint.AsSingle;
-                case SttpFundamentalTypeCode.Double:
-                    return dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.Buffer:
-                    return dataPoint.AsBuffer;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        /// <summary>
-        /// returns the boxed native type of the value. 
-        /// </summary>
-        /// <returns></returns>
         public static object ToNativeType(this ISttpValue dataPoint, SttpValueTypeCode nativeType)
         {
             if (dataPoint.IsNull)

@@ -136,7 +136,7 @@ namespace Sttp.Data
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    encoder.AddColumn(m_tableIndex, m_columnIndex, m_columnName, m_columnTypeCode);
+                    encoder.AddColumn(m_tableIndex, m_columnIndex, m_columnName, (byte)m_columnTypeCode);
                     break;
                 case MetadataChangeType.AddValue:
                     encoder.AddValue(m_tableIndex, m_columnIndex, m_rowIndex, m_value);

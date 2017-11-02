@@ -8,6 +8,7 @@
         ulong AsUInt64 { get; set; }
         float AsSingle { get; set; }
         byte[] AsBuffer { get; set; }
+        object AsObject { get; set; }
         SttpFundamentalTypeCode FundamentalTypeCode { get; }
 
     }

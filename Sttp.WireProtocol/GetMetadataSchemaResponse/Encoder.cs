@@ -23,7 +23,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
             m_stream.Write(tableFlags);
         }
 
-        public void AddColumn(short tableIndex, short columnIndex, string columnName, SttpValueTypeCode columnTypeCode)
+        public void AddColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
         {
             m_stream.Write(SubCommand.AddColumn);
             m_stream.Write(tableIndex);

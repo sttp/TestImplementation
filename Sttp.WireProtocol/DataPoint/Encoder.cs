@@ -53,7 +53,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 {
                     m_stream.Write(point.DataPointID);
                     m_stream.Write(point.Timestamp);
-                    m_stream.Write(point.ToBuffer());
+                    //m_stream.Write(point.ToBuffer());
                     m_stream.Write(point.TimeQuality);
                     m_stream.Write(point.ValueQuality);
                 }

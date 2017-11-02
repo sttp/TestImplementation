@@ -83,7 +83,7 @@ namespace Sttp.Data
                     {
                         Columns.Add(null);
                     }
-                    Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, addC.ColumnTypeCode);
+                    Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, (SttpValueTypeCode)addC.ColumnTypeCode);
                     break;
                 case SubCommand.AddRow:
                     var addR = command.AddRow;
