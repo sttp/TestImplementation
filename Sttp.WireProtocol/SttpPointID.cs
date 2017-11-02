@@ -8,7 +8,6 @@ namespace Sttp.WireProtocol
 {
     public enum SttpPointIDTypeCode
     {
-        RuntimeID, // A 32 bit value that defines a runtime id. Positive numbers have a 1-to-1 distinction for a static PointID, Negative numbers correspond to a session derived type.
         Int64,     // A 64-bit Basic Identifier.
         Guid,      // A 128-bit GUID
         String,    // A variable length string. Can be used for on the fly calculations such as: MW('ID:1234','ID:4562') 
@@ -23,69 +22,87 @@ namespace Sttp.WireProtocol
         #region [ Members ]
 
         [FieldOffset(0)]
-        private ulong m_bytes0to7; //Used for cloning data.
-        [FieldOffset(8)]
-        private ulong m_bytes8to15; //Used for cloning data.
+        private readonly long m_valueInt64;
 
         [FieldOffset(0)]
-        private long m_valueInt64;
-        [FieldOffset(0)]
-        private Guid m_valueGuid;
+        private readonly Guid m_valueGuid;
 
         [FieldOffset(16)]
-        private string m_stringValue;
+        private readonly string m_stringValue;
 
-        [FieldOffset(23)]
-        private SttpPointIDTypeCode m_typeCode;
+        [FieldOffset(25)]
+        public readonly SttpPointIDTypeCode TypeCode;
+
+        /// <summary>
+        /// Defines the mapping code for the provided time quality.
+        /// </summary>
+        [FieldOffset(26)]
+        public readonly short TimeQualityMap;
+
+        /// <summary>
+        /// Defines the mapping code for the provided value quality.
+        /// </summary>
+        [FieldOffset(28)]
+        public readonly short ValueQualityMap;
+
+        /// <summary>
+        /// Defines the value type code for every measurement sent on the wire. 
+        /// Note: value can still be null. But if it is not null, it will be this type.
+        /// </summary>
+        [FieldOffset(30)]
+        public readonly short ValueTypeCode;
+
+        /// <summary>
+        /// The runtimeID associated with the PointID. This PointID must either be globally defined (if positive) or session defined (if negative)
+        /// </summary>
+        [FieldOffset(32)]
+        public readonly int RuntimeID;
 
         #endregion
 
         #region [ Constructors ]
 
-        public SttpPointID()
+        public SttpPointID(string pointID, short timeQualityMap, short valueQualityMap, short valueTypeCode, int runtimeID)
         {
+            TypeCode = SttpPointIDTypeCode.String;
+            m_stringValue = pointID;
+            TimeQualityMap = timeQualityMap;
+            ValueQualityMap = valueQualityMap;
+            ValueTypeCode = valueTypeCode;
+            RuntimeID = runtimeID;
         }
 
-        /// <summary>
-        /// Clones an <see cref="SttpValue"/>. 
-        /// </summary>
-        /// <param name="value">the value to clone</param>
-        public SttpPointID(SttpPointID value)
+        public SttpPointID(Guid pointID, short timeQualityMap, short valueQualityMap, short valueTypeCode, int runtimeID)
         {
-            m_bytes0to7 = value.m_bytes0to7;
-            m_bytes8to15 = value.m_bytes8to15;
-            m_stringValue = value.m_stringValue;
-            m_typeCode = value.m_typeCode;
+            TypeCode = SttpPointIDTypeCode.Guid;
+            m_valueGuid = pointID;
+            TimeQualityMap = timeQualityMap;
+            ValueQualityMap = valueQualityMap;
+            ValueTypeCode = valueTypeCode;
+            RuntimeID = runtimeID;
+        }
+
+        public SttpPointID(long pointID, short timeQualityMap, short valueQualityMap, short valueTypeCode, int runtimeID)
+        {
+            TypeCode = SttpPointIDTypeCode.String;
+            m_valueInt64 = pointID;
+            TimeQualityMap = timeQualityMap;
+            ValueQualityMap = valueQualityMap;
+            ValueTypeCode = valueTypeCode;
+            RuntimeID = runtimeID;
         }
 
         #endregion
 
         #region [ Properties ]
 
-        /// <summary>
-        /// The type code of the raw value.
-        /// </summary>
-        public SttpPointIDTypeCode TypeCode
-        {
-            get
-            {
-                return m_typeCode;
-            }
-        }
-
         public long AsInt64
         {
             get
             {
-                if (m_typeCode == SttpPointIDTypeCode.Int64)
+                if (TypeCode == SttpPointIDTypeCode.Int64)
                     return m_valueInt64;
                 throw new NotSupportedException();
-            }
-            set
-            {
-                m_typeCode = SttpPointIDTypeCode.Int64;
-                m_valueInt64 = value;
-                m_stringValue = null;
             }
         }
 
@@ -93,15 +110,9 @@ namespace Sttp.WireProtocol
         {
             get
             {
-                if (m_typeCode == SttpPointIDTypeCode.Guid)
+                if (TypeCode == SttpPointIDTypeCode.Guid)
                     return m_valueGuid;
                 throw new NotSupportedException();
-            }
-            set
-            {
-                m_typeCode = SttpPointIDTypeCode.Guid;
-                m_valueGuid = value;
-                m_stringValue = null;
             }
         }
 
@@ -109,35 +120,9 @@ namespace Sttp.WireProtocol
         {
             get
             {
-                if (m_typeCode == SttpPointIDTypeCode.String)
+                if (TypeCode == SttpPointIDTypeCode.String)
                     return m_stringValue;
                 throw new NotSupportedException();
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-
-                m_typeCode = SttpPointIDTypeCode.String;
-                m_bytes0to7 = 0;
-                m_bytes8to15 = m_bytes0to7;
-                m_stringValue = value;
-            }
-        }
-
-        public int AsRuntimeID
-        {
-            get
-            {
-                if (m_typeCode == SttpPointIDTypeCode.RuntimeID)
-                    return (int)m_valueInt64;
-                throw new NotSupportedException();
-            }
-            set
-            {
-                m_typeCode = SttpPointIDTypeCode.RuntimeID;
-                m_valueInt64 = value;
-                m_stringValue = null;
             }
         }
 
