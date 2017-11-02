@@ -25,9 +25,8 @@ namespace Sttp.WireProtocol
         private float m_valueSingle;
         [FieldOffset(0)]
         private double m_valueDouble;
-
         [FieldOffset(8)]
-        private object m_objectValue;
+        private byte[] m_bufferValue;
 
         [FieldOffset(16)]
         private SttpFundamentalTypeCode m_fundamentalTypeCode;
@@ -48,7 +47,7 @@ namespace Sttp.WireProtocol
         public SttpValue(SttpValue value)
         {
             m_bytes0to7 = value.m_bytes0to7;
-            m_objectValue = value.m_objectValue;
+            m_bufferValue = value.m_bufferValue;
             m_fundamentalTypeCode = value.m_fundamentalTypeCode;
         }
 
@@ -68,7 +67,7 @@ namespace Sttp.WireProtocol
             {
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Int64;
                 m_valueInt64 = value;
-                m_objectValue = null;
+                m_bufferValue = null;
             }
         }
 
@@ -84,7 +83,7 @@ namespace Sttp.WireProtocol
             {
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.UInt64;
                 m_valueUInt64 = value;
-                m_objectValue = null;
+                m_bufferValue = null;
             }
         }
 
@@ -101,7 +100,7 @@ namespace Sttp.WireProtocol
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Single;
                 m_bytes0to7 = 0;
                 m_valueSingle = value;
-                m_objectValue = null;
+                m_bufferValue = null;
             }
         }
 
@@ -117,7 +116,7 @@ namespace Sttp.WireProtocol
             {
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Double;
                 m_valueDouble = value;
-                m_objectValue = null;
+                m_bufferValue = null;
             }
         }
 
@@ -126,7 +125,7 @@ namespace Sttp.WireProtocol
             get
             {
                 if (m_fundamentalTypeCode == SttpFundamentalTypeCode.Buffer)
-                    return (byte[])m_objectValue;
+                    return (byte[])m_bufferValue;
                 throw new NotSupportedException();
             }
             set
@@ -139,30 +138,7 @@ namespace Sttp.WireProtocol
                 {
                     m_fundamentalTypeCode = SttpFundamentalTypeCode.Buffer;
                     m_bytes0to7 = 0;
-                    m_objectValue = value;
-                }
-            }
-        }
-
-        public string AsString
-        {
-            get
-            {
-                if (m_fundamentalTypeCode == SttpFundamentalTypeCode.String)
-                    return (String)m_objectValue;
-                throw new NotSupportedException();
-            }
-            set
-            {
-                if (value == null)
-                {
-                    IsNull = true;
-                }
-                else
-                {
-                    m_fundamentalTypeCode = SttpFundamentalTypeCode.String;
-                    m_bytes0to7 = 0;
-                    m_objectValue = value;
+                    m_bufferValue = value;
                 }
             }
         }
@@ -181,7 +157,7 @@ namespace Sttp.WireProtocol
             {
                 if (!value)
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
-                m_objectValue = null;
+                m_bufferValue = null;
                 m_bytes0to7 = 0;
                 m_fundamentalTypeCode = SttpFundamentalTypeCode.Null;
             }
@@ -190,7 +166,7 @@ namespace Sttp.WireProtocol
         public void SetValue(SttpValue value)
         {
             m_bytes0to7 = value.m_bytes0to7;
-            m_objectValue = value.m_objectValue;
+            m_bufferValue = value.m_bufferValue;
             m_fundamentalTypeCode = value.m_fundamentalTypeCode;
         }
 
@@ -237,9 +213,6 @@ namespace Sttp.WireProtocol
                 case SttpFundamentalTypeCode.Double:
                     writer.Write(AsDouble);
                     break;
-                case SttpFundamentalTypeCode.String:
-                    writer.Write(AsString);
-                    break;
                 case SttpFundamentalTypeCode.Buffer:
                     writer.Write(AsBuffer);
                     break;
@@ -266,9 +239,6 @@ namespace Sttp.WireProtocol
                     break;
                 case SttpFundamentalTypeCode.Double:
                     AsDouble = reader.ReadDouble();
-                    break;
-                case SttpFundamentalTypeCode.String:
-                    AsString = reader.ReadString();
                     break;
                 case SttpFundamentalTypeCode.Buffer:
                     AsBuffer = reader.ReadBytes();
@@ -297,8 +267,6 @@ namespace Sttp.WireProtocol
                 case SttpFundamentalTypeCode.Int64:
                 case SttpFundamentalTypeCode.Double:
                     return a.m_bytes0to7 == b.m_bytes0to7;
-                case SttpFundamentalTypeCode.String:
-                    return a.AsString == b.AsString;
                 case SttpFundamentalTypeCode.Buffer:
                     return a.AsBuffer.SequenceEqual(b.AsBuffer);
                 default:

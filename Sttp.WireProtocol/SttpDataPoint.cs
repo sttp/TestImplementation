@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp.WireProtocol
@@ -23,7 +19,7 @@ namespace Sttp.WireProtocol
         private class NestedObjects
         {
             public object DataPointKeyToken;
-            public object ValueObject; //Can be a string or a byte[]
+            public byte[] BufferValue; 
             public SttpScientificTime Time;
 
             public NestedObjects Clone()
@@ -300,7 +296,7 @@ namespace Sttp.WireProtocol
             get
             {
                 if (m_fundamentalTypeCode == SttpFundamentalTypeCode.Buffer)
-                    return (byte[])((NestedObjects)m_dataPointKeyToken).ValueObject;
+                    return ((NestedObjects)m_dataPointKeyToken).BufferValue;
                 throw new NotSupportedException();
             }
             set
@@ -317,44 +313,12 @@ namespace Sttp.WireProtocol
                     {
                         m_isNestedObject = true;
                         var obj = new NestedObjects();
-                        obj.ValueObject = value;
+                        obj.BufferValue = value;
                         obj.DataPointKeyToken = m_dataPointKeyToken;
                         m_dataPointKeyToken = obj;
                         return;
                     }
-                    ((NestedObjects)m_dataPointKeyToken).ValueObject = value;
-                }
-            }
-        }
-
-        public string AsString
-        {
-            get
-            {
-                if (m_fundamentalTypeCode == SttpFundamentalTypeCode.String)
-                    return (string)((NestedObjects)m_dataPointKeyToken).ValueObject;
-                throw new NotSupportedException();
-            }
-            set
-            {
-                CheckImmutable();
-                if (value == null)
-                {
-                    IsNull = true;
-                }
-                else
-                {
-                    m_fundamentalTypeCode = SttpFundamentalTypeCode.String;
-                    if (!m_isNestedObject)
-                    {
-                        m_isNestedObject = true;
-                        var obj = new NestedObjects();
-                        obj.ValueObject = value;
-                        obj.DataPointKeyToken = m_dataPointKeyToken;
-                        m_dataPointKeyToken = obj;
-                        return;
-                    }
-                    ((NestedObjects)m_dataPointKeyToken).ValueObject = value;
+                    ((NestedObjects)m_dataPointKeyToken).BufferValue = value;
                 }
             }
         }
@@ -376,7 +340,7 @@ namespace Sttp.WireProtocol
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
                 if (m_isNestedObject)
                 {
-                    ((NestedObjects)m_dataPointKeyToken).ValueObject = null;
+                    ((NestedObjects)m_dataPointKeyToken).BufferValue = null;
                 }
                 m_bytes0to7 = 0;
             }

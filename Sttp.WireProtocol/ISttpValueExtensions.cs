@@ -175,7 +175,7 @@ namespace Sttp.WireProtocol
 
         public static void SetValue(this ISttpValue dataPoint, string value)
         {
-            dataPoint.AsString = value;
+            dataPoint.AsBuffer = Encoding.UTF8.GetBytes(value);
         }
 
         public static void SetValue(this ISttpValue dataPoint, byte[] value)
@@ -185,7 +185,6 @@ namespace Sttp.WireProtocol
 
         /// <summary>
         /// returns the boxed native type of the value. 
-        /// This is useful if you want to use other conversion methods such as those present in <see cref="DataTable"/>
         /// </summary>
         /// <returns></returns>
         public static object ToFundamentalType(this ISttpValue dataPoint)
@@ -202,8 +201,6 @@ namespace Sttp.WireProtocol
                     return dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    return dataPoint.AsString;
                 case SttpFundamentalTypeCode.Buffer:
                     return dataPoint.AsBuffer;
                 default:
@@ -213,7 +210,6 @@ namespace Sttp.WireProtocol
 
         /// <summary>
         /// returns the boxed native type of the value. 
-        /// This is useful if you want to use other conversion methods such as those present in <see cref="DataTable"/>
         /// </summary>
         /// <returns></returns>
         public static object ToNativeType(this ISttpValue dataPoint, SttpValueTypeCode nativeType)
@@ -281,8 +277,6 @@ namespace Sttp.WireProtocol
                     return (byte)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (byte)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -304,8 +298,6 @@ namespace Sttp.WireProtocol
                     return (short)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (short)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -327,8 +319,6 @@ namespace Sttp.WireProtocol
                     return (int)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (int)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -350,8 +340,6 @@ namespace Sttp.WireProtocol
                     return (long)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (long)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -373,8 +361,6 @@ namespace Sttp.WireProtocol
                     return (ushort)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (ushort)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -396,8 +382,6 @@ namespace Sttp.WireProtocol
                     return (uint)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (uint)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -419,8 +403,6 @@ namespace Sttp.WireProtocol
                     return (ulong)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (ulong)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -442,8 +424,6 @@ namespace Sttp.WireProtocol
                     return (decimal)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (decimal)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -465,8 +445,6 @@ namespace Sttp.WireProtocol
                     return (double)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (double)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -488,8 +466,6 @@ namespace Sttp.WireProtocol
                     return (float)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (float)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -511,8 +487,6 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Single");
                 case SttpFundamentalTypeCode.Double:
                     throw new InvalidCastException("Cannot convert from Double");
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -534,8 +508,6 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Single");
                 case SttpFundamentalTypeCode.Double:
                     throw new InvalidCastException("Cannot convert from Double");
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -557,8 +529,6 @@ namespace Sttp.WireProtocol
                     return (char)dataPoint.AsSingle;
                 case SttpFundamentalTypeCode.Double:
                     return (char)dataPoint.AsDouble;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -580,8 +550,6 @@ namespace Sttp.WireProtocol
                     return Math.Abs(dataPoint.AsSingle) > 0.75;
                 case SttpFundamentalTypeCode.Double:
                     return Math.Abs(dataPoint.AsDouble) > 0.75;
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
                 default:
@@ -603,33 +571,8 @@ namespace Sttp.WireProtocol
                     throw new InvalidCastException("Cannot convert from Single");
                 case SttpFundamentalTypeCode.Double:
                     throw new InvalidCastException("Cannot convert from Double");
-                case SttpFundamentalTypeCode.String:
-                    throw new InvalidCastException("Cannot convert from String");
                 case SttpFundamentalTypeCode.Buffer:
                     throw new InvalidCastException("Cannot convert from Buffer");
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        public static string AsString(this ISttpValue dataPoint)
-        {
-            switch (dataPoint.FundamentalTypeCode)
-            {
-                case SttpFundamentalTypeCode.Null:
-                    return null;
-                case SttpFundamentalTypeCode.UInt64:
-                    return dataPoint.AsUInt64.ToString();
-                case SttpFundamentalTypeCode.Int64:
-                    return dataPoint.AsInt64.ToString();
-                case SttpFundamentalTypeCode.Single:
-                    return dataPoint.AsSingle.ToString();
-                case SttpFundamentalTypeCode.Double:
-                    return dataPoint.AsDouble.ToString();
-                case SttpFundamentalTypeCode.String:
-                    return dataPoint.AsString.ToString();
-                case SttpFundamentalTypeCode.Buffer:
-                    return dataPoint.AsBuffer.ToString();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
