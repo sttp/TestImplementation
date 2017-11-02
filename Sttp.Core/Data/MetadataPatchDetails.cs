@@ -13,34 +13,10 @@ namespace Sttp.Data
         private short m_columnIndex;
         private int m_rowIndex;
         private string m_columnName;
-        private byte[] m_value;
+        private SttpValue m_value;
 
         private MetadataChangeLogRecord()
         {
-
-        }
-        public MetadataChangeLogRecord(Stream stream)
-        {
-            ChangeType = (MetadataChangeType)stream.ReadNextByte();
-            switch (ChangeType)
-            {
-                case MetadataChangeType.AddColumn:
-                    m_columnIndex = stream.ReadInt16();
-                    m_columnName = stream.ReadString();
-                    m_columnTypeCode = (SttpValueTypeCode)stream.ReadNextByte();
-                    break;
-                case MetadataChangeType.AddValue:
-                    m_columnIndex = stream.ReadInt16();
-                    m_rowIndex = stream.ReadInt32();
-                    if (stream.ReadBoolean())
-                        m_value = stream.ReadBytes();
-                    break;
-                case MetadataChangeType.DeleteRow:
-                    m_rowIndex = stream.ReadInt32();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
 
         }
 
@@ -88,7 +64,7 @@ namespace Sttp.Data
             }
         }
 
-        public byte[] Data
+        public SttpValue Data
         {
             get
             {
@@ -128,7 +104,7 @@ namespace Sttp.Data
             };
         }
 
-        public static MetadataChangeLogRecord AddValue(short tableIndex, short columnIndex, int rowIndex, byte[] value)
+        public static MetadataChangeLogRecord AddValue(short tableIndex, short columnIndex, int rowIndex, SttpValue value)
         {
             return new MetadataChangeLogRecord()
             {

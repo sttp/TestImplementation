@@ -39,7 +39,7 @@ namespace Sttp.WireProtocol.GetMetadata
             m_stream.Write(items);
         }
 
-        public void WhereInValue(short tableIndex, short columnIndex, byte[][] items)
+        public void WhereInValue(short tableIndex, short columnIndex, SttpValue[] items)
         {
             m_stream.Write(SubCommand.WhereInValue);
             m_stream.Write(tableIndex);
@@ -47,7 +47,7 @@ namespace Sttp.WireProtocol.GetMetadata
             m_stream.Write(items);
         }
 
-        public void WhereCompare(short tableIndex, short columnIndex, CompareMethod compareOperator, byte[] item)
+        public void WhereCompare(short tableIndex, short columnIndex, CompareMethod compareOperator, SttpValue item)
         {
             m_stream.Write(SubCommand.WhereCompare);
             m_stream.Write(tableIndex);

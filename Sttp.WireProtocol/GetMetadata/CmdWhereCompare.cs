@@ -6,14 +6,14 @@
         public short TableIndex;
         public short ColumnIndex;
         public CompareMethod CompareMethod;
-        public byte[] Item;
+        public SttpValue Item;
 
         public void Load(PacketReader reader)
         {
             TableIndex = reader.ReadInt16();
             ColumnIndex = reader.ReadInt16();
             CompareMethod = reader.Read<CompareMethod>();
-            Item = reader.ReadBytes();
+            Item = reader.Read<SttpValue>();
         }
 
         CmdDatabaseVersion ICmd.DatabaseVersion => null;

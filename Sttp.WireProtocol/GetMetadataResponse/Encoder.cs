@@ -44,7 +44,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             m_stream.Write(rowIndex);
         }
 
-        public void AddValue(short tableIndex, short columnIndex, int rowIndex, byte[] value)
+        public void AddValue(short tableIndex, short columnIndex, int rowIndex, SttpValue value)
         {
             m_stream.Write(SubCommand.AddValue);
             m_stream.Write(tableIndex);

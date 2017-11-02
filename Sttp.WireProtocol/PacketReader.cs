@@ -359,6 +359,13 @@ namespace Sttp.WireProtocol
             if (t == typeof(Guid))
                 return (T)(object)ReadGuid();
 
+            if (t == typeof(SttpValue))
+            {
+                var value = new SttpValue();
+                value.Load(this);
+                return (T)(object)value;
+            }
+
             switch (Type.GetTypeCode(t))
             {
                 case TypeCode.Boolean:

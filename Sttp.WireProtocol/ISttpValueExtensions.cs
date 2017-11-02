@@ -185,7 +185,7 @@ namespace Sttp.WireProtocol
         }
 
         /// <summary>
-        /// returns the boxed native type of the value. Returns <see cref="DBNull"/> for null values. 
+        /// returns the boxed native type of the value. 
         /// This is useful if you want to use other conversion methods such as those present in <see cref="DataTable"/>
         /// </summary>
         /// <returns></returns>
@@ -194,7 +194,7 @@ namespace Sttp.WireProtocol
             switch (dataPoint.FundamentalTypeCode)
             {
                 case SttpFundamentalTypeCode.Null:
-                    return DBNull.Value;
+                    return null;
                 case SttpFundamentalTypeCode.Int32:
                     return dataPoint.AsInt32;
                 case SttpFundamentalTypeCode.Int64:
@@ -213,19 +213,19 @@ namespace Sttp.WireProtocol
         }
 
         /// <summary>
-        /// returns the boxed native type of the value. Returns <see cref="DBNull"/> for null values. 
+        /// returns the boxed native type of the value. 
         /// This is useful if you want to use other conversion methods such as those present in <see cref="DataTable"/>
         /// </summary>
         /// <returns></returns>
         public static object ToNativeType(this ISttpValue dataPoint, SttpValueTypeCode nativeType)
         {
             if (dataPoint.IsNull)
-                return DBNull.Value;
+                return null;
 
             switch (nativeType)
             {
                 case SttpValueTypeCode.Null:
-                    return DBNull.Value;
+                    return null;
                 case SttpValueTypeCode.Byte:
                     return dataPoint.ToByte();
                 case SttpValueTypeCode.Int16:

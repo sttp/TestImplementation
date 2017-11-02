@@ -6,14 +6,14 @@
         public short TableIndex;
         public short ColumnIndex;
         public int RowIndex;
-        public byte[] Value;
+        public SttpValue Value;
 
         public void Load(PacketReader reader)
         {
             TableIndex = reader.ReadInt16();
             ColumnIndex = reader.ReadInt16();
             RowIndex = reader.ReadInt32();
-            Value = reader.ReadBytes();
+            Value = reader.Read<SttpValue>();
         }
 
         CmdDatabaseVersion ICmd.DatabaseVersion => null;

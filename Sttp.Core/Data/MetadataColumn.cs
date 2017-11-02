@@ -24,12 +24,12 @@ namespace Sttp.Data
             Name = name;
         }
 
-        public byte[] Encode(object value)
+        public SttpValue Encode(object value)
         {
             return SttpValueTypeCodec.Encode(TypeCode, value);
         }
 
-        public object Decode(byte[] data)
+        public object Decode(SttpValue data)
         {
             return SttpValueTypeCodec.Decode(TypeCode, data);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Sttp.WireProtocol.SendDataPoints;
@@ -212,279 +213,98 @@ namespace Sttp.WireProtocol
             return new SttpValue(this);
         }
 
-        public unsafe byte[] Save()
+        public void Save(PacketWriter writer)
         {
-            //Encoding:
-            //Bits 0 - 3: Encoding Method
-            //Bits 4 - 7: Length
-            int code = 0;
-            int length = 0;
-            byte[] buffer;
-
+            writer.Write(m_fundamentalTypeCode);
             switch (m_fundamentalTypeCode)
             {
                 case SttpFundamentalTypeCode.Null:
-                    code = 0;
-                    buffer = new byte[1];
                     break;
                 case SttpFundamentalTypeCode.Int32:
-                    int value = m_valueInt32;
-                    if (value < 0)
-                    {
-                        value = ~value;
-                        code = 1;
-                    }
-                    else
-                    {
-                        code = 2;
-                    }
-                    if (value == 0)
-                    {
-                        length = 0;
-                        buffer = new byte[1];
-                    }
-                    else if (value <= 0xFF)
-                    {
-                        length = 1;
-                        buffer = new byte[2];
-                        buffer[1] = (byte)value;
-                    }
-                    else if (value <= 0xFF)
-                    {
-                        length = 2;
-                        buffer = new byte[3];
-                        buffer[1] = (byte)(value >> 8);
-                        buffer[2] = (byte)value;
-                    }
-                    else if (value <= 0xFFFF)
-                    {
-                        length = 3;
-                        buffer = new byte[4];
-                        buffer[1] = (byte)(value >> 16);
-                        buffer[2] = (byte)(value >> 8);
-                        buffer[3] = (byte)value;
-                    }
-                    else
-                    {
-                        length = 4;
-                        buffer = new byte[5];
-                        buffer[1] = (byte)(value >> 24);
-                        buffer[2] = (byte)(value >> 16);
-                        buffer[3] = (byte)(value >> 8);
-                        buffer[4] = (byte)value;
-                    }
-                    buffer[0] = (byte)(code | (length << 4));
+                    writer.Write(AsInt32);
                     break;
                 case SttpFundamentalTypeCode.Int64:
-                    long valuel = m_valueInt64;
-                    if (valuel < 0)
-                    {
-                        valuel = ~valuel;
-                        code = 1;
-                    }
-                    else
-                    {
-                        code = 2;
-                    }
-                    if (valuel == 0)
-                    {
-                        length = 0;
-                        buffer = new byte[1];
-                    }
-                    else if (valuel <= 0xFF)
-                    {
-                        length = 1;
-                        buffer = new byte[2];
-                        buffer[1] = (byte)valuel;
-                    }
-                    else if (valuel <= 0xFF)
-                    {
-                        length = 2;
-                        buffer = new byte[3];
-                        buffer[1] = (byte)(valuel >> 8);
-                        buffer[2] = (byte)valuel;
-                    }
-                    else if (valuel <= 0xFFFF)
-                    {
-                        length = 3;
-                        buffer = new byte[4];
-                        buffer[1] = (byte)(valuel >> 16);
-                        buffer[2] = (byte)(valuel >> 8);
-                        buffer[3] = (byte)valuel;
-                    }
-                    else if (valuel <= 0xFFFFFF)
-                    {
-                        length = 4;
-                        buffer = new byte[5];
-                        buffer[1] = (byte)(valuel >> 24);
-                        buffer[2] = (byte)(valuel >> 16);
-                        buffer[3] = (byte)(valuel >> 8);
-                        buffer[4] = (byte)valuel;
-                    }
-                    else if (valuel <= 0xFFFFFFFF)
-                    {
-                        length = 5;
-                        buffer = new byte[6];
-                        buffer[1] = (byte)(valuel >> 32);
-                        buffer[2] = (byte)(valuel >> 24);
-                        buffer[3] = (byte)(valuel >> 16);
-                        buffer[4] = (byte)(valuel >> 8);
-                        buffer[5] = (byte)valuel;
-                    }
-                    else if (valuel <= 0xFFFFFFFFFF)
-                    {
-                        length = 6;
-                        buffer = new byte[7];
-                        buffer[1] = (byte)(valuel >> 40);
-                        buffer[2] = (byte)(valuel >> 32);
-                        buffer[3] = (byte)(valuel >> 24);
-                        buffer[4] = (byte)(valuel >> 16);
-                        buffer[5] = (byte)(valuel >> 8);
-                        buffer[6] = (byte)valuel;
-                    }
-                    else if (valuel <= 0xFFFFFFFFFF)
-                    {
-                        length = 7;
-                        buffer = new byte[8];
-                        buffer[1] = (byte)(valuel >> 48);
-                        buffer[2] = (byte)(valuel >> 40);
-                        buffer[3] = (byte)(valuel >> 32);
-                        buffer[4] = (byte)(valuel >> 24);
-                        buffer[5] = (byte)(valuel >> 16);
-                        buffer[6] = (byte)(valuel >> 8);
-                        buffer[7] = (byte)valuel;
-                    }
-                    else
-                    {
-                        length = 8;
-                        buffer = new byte[9];
-                        buffer[1] = (byte)(valuel >> 56);
-                        buffer[2] = (byte)(valuel >> 48);
-                        buffer[3] = (byte)(valuel >> 40);
-                        buffer[4] = (byte)(valuel >> 32);
-                        buffer[5] = (byte)(valuel >> 24);
-                        buffer[6] = (byte)(valuel >> 16);
-                        buffer[3] = (byte)(valuel >> 8);
-                        buffer[8] = (byte)valuel;
-                    }
+                    writer.Write(AsInt64);
                     break;
                 case SttpFundamentalTypeCode.Single:
-                    float valueft = m_valueSingle;
-                    int valuef = *(int*)&valueft;
-
-                    if (valuef == 0)
-                    {
-                        code = 5;
-                        length = 1;
-                        buffer = new byte[1];
-                    }
-                    else
-                    {
-                        code = 6;
-                        length = 4;
-                        buffer = new byte[5];
-                        buffer[1] = (byte)(valuef >> 24);
-                        buffer[2] = (byte)(valuef >> 16);
-                        buffer[3] = (byte)(valuef >> 8);
-                        buffer[4] = (byte)valuef;
-                    }
+                    writer.Write(AsSingle);
                     break;
                 case SttpFundamentalTypeCode.Double:
-                    float valuedt = m_valueSingle;
-                    long valued = *(long*)&valuedt;
-
-                    if (valued == 0)
-                    {
-                        code = 7;
-                        length = 1;
-                        buffer = new byte[1];
-                    }
-                    else
-                    {
-                        code = 8;
-                        length = 8;
-                        buffer = new byte[9];
-                        buffer[1] = (byte)(valued >> 56);
-                        buffer[2] = (byte)(valued >> 48);
-                        buffer[3] = (byte)(valued >> 40);
-                        buffer[4] = (byte)(valued >> 32);
-                        buffer[5] = (byte)(valued >> 24);
-                        buffer[6] = (byte)(valued >> 16);
-                        buffer[3] = (byte)(valued >> 8);
-                        buffer[8] = (byte)valued;
-                    }
+                    writer.Write(AsDouble);
                     break;
                 case SttpFundamentalTypeCode.String:
-                    {
-                        int len = Encoding.UTF8.GetByteCount(AsString);
-                        if (len < 14)
-                        {
-                            length = len;
-                            buffer = new byte[len + 1];
-                            Encoding.UTF8.GetBytes(AsString, 0, AsString.Length, buffer, 1);
-                        }
-                        else
-                        {
-                            buffer = new byte[len + 1];
-                            //Do more work.
-                        }
-                    }
-
+                    writer.Write(AsString);
                     break;
                 case SttpFundamentalTypeCode.Buffer:
-                    {
-                        int len = Encoding.UTF8.GetByteCount(AsString);
-                        if (len < 14)
-                        {
-                            length = len;
-                            buffer = new byte[len + 1];
-                            Encoding.UTF8.GetBytes(AsString, 0, AsString.Length, buffer, 1);
-                        }
-                        else
-                        {
-                            buffer = new byte[len + 1];
-                            //Do more work.
-                        }
-                    }
+                    writer.Write(AsBuffer);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            buffer[0] = (byte)(code | (length << 4));
-            return buffer;
         }
 
-        private static int Measure(int value)
+        public void Load(PacketReader reader)
         {
-            if (value < 0)
-                value = ~value;
-
-            if (value == 0) return 0;
-            if (value <= 0xFF) return 1;
-            if (value <= 0xFFFF) return 2;
-            if (value <= 0xFFFFFF) return 3;
-            return 4;
+            switch (reader.Read<SttpFundamentalTypeCode>())
+            {
+                case SttpFundamentalTypeCode.Null:
+                    IsNull = true;
+                    break;
+                case SttpFundamentalTypeCode.Int32:
+                    AsInt32 = reader.ReadInt32();
+                    break;
+                case SttpFundamentalTypeCode.Int64:
+                    AsInt64 = reader.ReadInt64();
+                    break;
+                case SttpFundamentalTypeCode.Single:
+                    AsSingle = reader.ReadSingle();
+                    break;
+                case SttpFundamentalTypeCode.Double:
+                    AsDouble = reader.ReadDouble();
+                    break;
+                case SttpFundamentalTypeCode.String:
+                    AsString = reader.ReadString();
+                    break;
+                case SttpFundamentalTypeCode.Buffer:
+                    AsBuffer = reader.ReadBytes();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        private static int Measure(long value)
+        public static bool operator ==(SttpValue a, SttpValue b)
         {
-            if (value < 0)
-                value = ~value;
-
-            if (value == 0) return 0;
-            if (value <= 0xFF) return 1;
-            if (value <= 0xFFFF) return 2;
-            if (value <= 0xFFFFFF) return 3;
-            if (value <= 0xFFFFFFFF) return 4;
-            if (value <= 0xFFFFFFFFFF) return 5;
-            if (value <= 0xFFFFFFFFFFFF) return 6;
-            if (value <= 0xFFFFFFFFFFFFFF) return 7;
-            return 8;
+            if (ReferenceEquals(a, b))
+                return true;
+            if (ReferenceEquals(a, null))
+                return false;
+            if (ReferenceEquals(b, null))
+                return false;
+            if (a.m_fundamentalTypeCode != b.m_fundamentalTypeCode)
+                return false;
+            switch (a.m_fundamentalTypeCode)
+            {
+                case SttpFundamentalTypeCode.Null:
+                    return true;
+                case SttpFundamentalTypeCode.Int32:
+                case SttpFundamentalTypeCode.Single:
+                    return a.m_valueInt32 == b.m_valueInt32;
+                case SttpFundamentalTypeCode.Int64:
+                case SttpFundamentalTypeCode.Double:
+                    return a.m_valueInt64 == b.m_valueInt64;
+                case SttpFundamentalTypeCode.String:
+                    return a.AsString == b.AsString;
+                case SttpFundamentalTypeCode.Buffer:
+                    return a.AsBuffer.SequenceEqual(b.AsBuffer);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        public void Load(byte[] data)
+        public static bool operator !=(SttpValue a, SttpValue b)
         {
-
+            return !(a == b);
         }
 
         #endregion

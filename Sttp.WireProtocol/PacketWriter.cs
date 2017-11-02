@@ -154,7 +154,7 @@ namespace Sttp.WireProtocol
 
         }
 
-        private void SendCompressedPacket(Action<byte[], int, int> sendPacket, int totalSize, byte compressionMode,  int offset, int length)
+        private void SendCompressedPacket(Action<byte[], int, int> sendPacket, int totalSize, byte compressionMode, int offset, int length)
         {
             const int Overhead = 1 + 2 + 4 + 1 + 1; //9 bytes.
             offset -= Overhead;
@@ -458,7 +458,10 @@ namespace Sttp.WireProtocol
                 Write((Guid)(object)value);
                 return;
             }
-
+            if (t == typeof(SttpValue))
+            {
+                ((SttpValue)(object)value).Save(this);
+            }
             switch (Type.GetTypeCode(t))
             {
                 case TypeCode.Boolean:

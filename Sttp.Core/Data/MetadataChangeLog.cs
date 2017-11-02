@@ -96,7 +96,7 @@ namespace Sttp.Data
                 m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddColumn(tableIndex, column.Index, column.Name, column.TypeCode);
         }
 
-        public void AddValue(short tableIndex, short columnIndex, int recordIndex, byte[] value)
+        public void AddValue(short tableIndex, short columnIndex, int recordIndex, SttpValue value)
         {
             if (TrackChanges)
                 m_revisions[++MinorVersion] = MetadataChangeLogRecord.AddValue(tableIndex, columnIndex, recordIndex, value);

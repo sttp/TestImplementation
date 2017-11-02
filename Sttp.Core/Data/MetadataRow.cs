@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sttp.WireProtocol;
 
 namespace Sttp.Data
 {
@@ -24,7 +25,8 @@ namespace Sttp.Data
                 Fields.Add(null);
             }
             field = Fields[column.Index];
-            byte[] encoding = column.Encode(value);
+
+            SttpValue encoding = column.Encode(value);
             if (field == null)
             {
                 field = new MetadataField();
@@ -32,7 +34,7 @@ namespace Sttp.Data
                 field.Value = encoding;
                 changeLog.AddValue(tableIndex, column.Index, RowIndex, encoding);
             }
-            else if (!field.Value.SequenceEqual(encoding))
+            else if (field.Value != encoding)
             {
                 changeLog.AddValue(tableIndex, column.Index, RowIndex, encoding);
                 field.Value = encoding;

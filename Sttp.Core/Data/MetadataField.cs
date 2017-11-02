@@ -1,7 +1,9 @@
+using Sttp.WireProtocol;
+
 namespace Sttp.Data
 {
     public class MetadataField
     {
-        public byte[] Value;
+        public SttpValue Value;
     }
 }
