@@ -63,53 +63,53 @@ namespace Sttp.Tests.WireProtocol
             }
         }
 
-        [TestMethod]
-        public void TestAssignments()
-        {
-            ICmd cmd = new CmdAddColumn();
+        //[TestMethod]
+        //public void TestAssignments()
+        //{
+        //    ICmd cmd = new CmdAddColumn();
 
-            for (int i = 0; i < NumIterations; i++)
-            {
-                CmdAddColumn result = cmd.AddColumn;
-                result.ColumnIndex++;
-            }
-        }
+        //    for (int i = 0; i < NumIterations; i++)
+        //    {
+        //        CmdAddColumn result = cmd.AddColumn;
+        //        result.ColumnIndex++;
+        //    }
+        //}
 
-        [TestMethod]
-        public void TestSwitchCommandAssignement()
-        {
-            for (int i = 0; i < NumIterations; i++)
-            {
-                ICmd cmd = commands[i];
-                switch (cmd.SubCommand)
-                {
-                    case SubCommand.DatabaseVersion:
-                        Assert.IsNotNull(cmd.DatabaseVersion);
-                        break;
-                    case SubCommand.Clear:
-                        Assert.IsNotNull(cmd.Clear);
-                        break;
-                    case SubCommand.AddTable:
-                        Assert.IsNotNull(cmd.AddTable);
-                        break;
-                    case SubCommand.AddColumn:
-                        Assert.IsNotNull(cmd.AddColumn);
-                        break;
-                    case SubCommand.AddRow:
-                        Assert.IsNotNull(cmd.AddRow);
-                        break;
-                    case SubCommand.AddValue:
-                        Assert.IsNotNull(cmd.AddValue);
-                        break;
-                    case SubCommand.DeleteRow:
-                        Assert.IsNotNull(cmd.DeleteRow);
-                        break;
-                    case SubCommand.Invalid:
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
+        //[TestMethod]
+        //public void TestSwitchCommandAssignement()
+        //{
+        //    for (int i = 0; i < NumIterations; i++)
+        //    {
+        //        ICmd cmd = commands[i];
+        //        switch (cmd.SubCommand)
+        //        {
+        //            case SubCommand.DatabaseVersion:
+        //                Assert.IsNotNull(cmd.DatabaseVersion);
+        //                break;
+        //            case SubCommand.Clear:
+        //                Assert.IsNotNull(cmd.Clear);
+        //                break;
+        //            case SubCommand.AddTable:
+        //                Assert.IsNotNull(cmd.AddTable);
+        //                break;
+        //            case SubCommand.AddColumn:
+        //                Assert.IsNotNull(cmd.AddColumn);
+        //                break;
+        //            case SubCommand.AddRow:
+        //                Assert.IsNotNull(cmd.AddRow);
+        //                break;
+        //            case SubCommand.AddValue:
+        //                Assert.IsNotNull(cmd.AddValue);
+        //                break;
+        //            case SubCommand.DeleteRow:
+        //                Assert.IsNotNull(cmd.DeleteRow);
+        //                break;
+        //            case SubCommand.Invalid:
+        //            default:
+        //                throw new ArgumentOutOfRangeException();
+        //        }
+        //    }
+        //}
 
         [TestMethod]
         public void TestSwitchCommandCast()

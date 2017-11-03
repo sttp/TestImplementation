@@ -12,13 +12,6 @@
             RowIndex = reader.ReadInt32();
         }
 
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdAddColumn ICmd.AddColumn => null;
-        CmdAddRow ICmd.AddRow => this;
-        CmdAddTable ICmd.AddTable => null;
-        CmdAddValue ICmd.AddValue => null;
-        CmdClear ICmd.Clear => null;
-        CmdDeleteRow ICmd.DeleteRow => null;
 
     }
 }

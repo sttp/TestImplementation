@@ -12,13 +12,5 @@
             ColumnIndex = reader.ReadInt16();
         }
 
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdJoin ICmd.Join => null;
-        CmdSelect ICmd.Select => this;
-        CmdWhereCompare ICmd.WhereCompare => null;
-        CmdWhereInString ICmd.WhereInString => null;
-        CmdWhereInValue ICmd.WhereInValue => null;
-        CmdWhereOperator ICmd.WhereOperator => null;
-
     }
 }

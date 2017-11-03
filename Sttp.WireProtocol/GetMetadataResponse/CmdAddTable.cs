@@ -15,13 +15,5 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             TableName = reader.ReadString();
             TableFlags = reader.Read<TableFlags>();
         }
-
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdAddColumn ICmd.AddColumn => null;
-        CmdAddRow ICmd.AddRow => null;
-        CmdAddTable ICmd.AddTable => this;
-        CmdAddValue ICmd.AddValue => null;
-        CmdClear ICmd.Clear => null;
-        CmdDeleteRow ICmd.DeleteRow => null;
     }
 }

@@ -73,7 +73,7 @@ namespace Sttp.Data
             Columns[index] = new MetadataColumn(index, name, typeCode);
         }
 
-        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.ICmd command)
+        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.Cmd command)
         {
             switch (command.SubCommand)
             {

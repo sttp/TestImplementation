@@ -13,13 +13,5 @@
             ColumnIndex = reader.ReadInt16();
             Items = reader.ReadArray<SttpValue>();
         }
-
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdJoin ICmd.Join => null;
-        CmdSelect ICmd.Select => null;
-        CmdWhereCompare ICmd.WhereCompare => null;
-        CmdWhereInString ICmd.WhereInString => null; 
-        CmdWhereInValue ICmd.WhereInValue => this;
-        CmdWhereOperator ICmd.WhereOperator => null;
     }
 }

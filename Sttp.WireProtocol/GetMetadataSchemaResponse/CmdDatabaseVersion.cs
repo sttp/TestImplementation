@@ -14,8 +14,5 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
             MinorVersion = reader.ReadInt64();
         }
 
-        CmdDatabaseVersion ICmd.DatabaseVersion => this;
-        CmdAddColumn ICmd.AddColumn => null;
-        CmdAddTable ICmd.AddTable => null;
     }
 }

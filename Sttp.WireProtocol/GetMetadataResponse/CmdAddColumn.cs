@@ -15,13 +15,6 @@
             ColumnName = reader.ReadString();
             ColumnTypeCode = reader.ReadByte();
         }
-
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdAddColumn ICmd.AddColumn => this;
-        CmdAddRow ICmd.AddRow => null;
-        CmdAddTable ICmd.AddTable => null;
-        CmdAddValue ICmd.AddValue => null;
-        CmdClear ICmd.Clear => null;
-        CmdDeleteRow ICmd.DeleteRow => null;
+       
     }
 }

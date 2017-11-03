@@ -15,13 +15,6 @@
             RowIndex = reader.ReadInt32();
             Value = reader.Read<SttpValue>();
         }
-
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdAddColumn ICmd.AddColumn => null;
-        CmdAddRow ICmd.AddRow => null;
-        CmdAddTable ICmd.AddTable => null;
-        CmdAddValue ICmd.AddValue => this;
-        CmdClear ICmd.Clear => null;
-        CmdDeleteRow ICmd.DeleteRow => null;
+        
     }
 }

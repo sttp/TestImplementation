@@ -8,7 +8,5 @@
         {
         }
 
-        CmdGetDatabaseSchema ICmd.GetDatabaseSchema => null;
-        CmdGetDatabaseVersion ICmd.GetDatabaseVersion => this;
     }
 }

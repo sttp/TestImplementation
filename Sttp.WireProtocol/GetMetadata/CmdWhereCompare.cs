@@ -16,13 +16,5 @@
             Item = reader.Read<SttpValue>();
         }
 
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdJoin ICmd.Join => null;
-        CmdSelect ICmd.Select => null;
-        CmdWhereCompare ICmd.WhereCompare => this;
-        CmdWhereInString ICmd.WhereInString => null;
-        CmdWhereInValue ICmd.WhereInValue => null;
-        CmdWhereOperator ICmd.WhereOperator => null;
-
     }
 }

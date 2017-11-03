@@ -16,8 +16,5 @@
             ColumnTypeCode = reader.ReadByte();
         }
 
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdAddColumn ICmd.AddColumn => this;
-        CmdAddTable ICmd.AddTable => null;
     }
 }

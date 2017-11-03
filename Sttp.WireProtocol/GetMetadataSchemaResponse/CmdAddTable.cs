@@ -16,8 +16,5 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
             TableFlags = reader.Read<TableFlags>();
         }
 
-        CmdDatabaseVersion ICmd.DatabaseVersion => null;
-        CmdAddColumn ICmd.AddColumn => null;
-        CmdAddTable ICmd.AddTable => this;
     }
 }

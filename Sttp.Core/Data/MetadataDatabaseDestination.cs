@@ -44,7 +44,7 @@ namespace Sttp.Data
         /// <returns></returns>
         public void Process(Sttp.WireProtocol.GetMetadataResponse.Decoder decoder)
         {
-            Sttp.WireProtocol.GetMetadataResponse.ICmd command;
+            Sttp.WireProtocol.GetMetadataResponse.Cmd command;
             while ((command = decoder.NextCommand()) != null)
             {
                 switch (command.SubCommand)
