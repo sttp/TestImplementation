@@ -25,6 +25,7 @@ namespace Sttp.WireProtocol
         private float m_valueSingle;
         [FieldOffset(0)]
         private double m_valueDouble;
+
         [FieldOffset(8)]
         private byte[] m_bufferValue;
 
@@ -204,7 +205,7 @@ namespace Sttp.WireProtocol
         }
 
         /// <summary>
-        /// Gets if this class has a value. Clear this by calling <see cref="SetValueToNull"/>
+        /// Gets if this class has a value. Clear this by setting a value.
         /// </summary>
         /// <exception cref="InvalidOperationException">When setting this value to true. Set a value by calling one of the <see cref="SetValue"/> methods.</exception>
         public bool IsNull

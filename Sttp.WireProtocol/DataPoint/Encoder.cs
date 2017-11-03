@@ -1,5 +1,6 @@
 ﻿using Sttp.IO;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -9,25 +10,28 @@ namespace Sttp.WireProtocol.SendDataPoints
     {
         private Action<byte[], int, int> m_sendPacket;
         private PacketWriter m_stream;
-        private List<SttpDataPoint> m_newPointKeys;
+
+        private List<SttpPointInfo> m_newPointIDs;
         private List<SttpDataPoint> m_newPoints;
+
+        private HashSet<long> m_hasRegistered = new HashSet<long>(); //ToDo: Rethink how to do this. This could be a big list. Maybe BitArray, but what about session defined pointIDs.
+
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
         {
             m_sendPacket = sendPacket;
-            m_newPointKeys = new List<SttpDataPoint>();
+            m_newPointIDs = new List<SttpPointInfo>();
             m_newPoints = new List<SttpDataPoint>();
             m_stream = new PacketWriter(sessionDetails);
         }
 
-        public void RegisterDataPoint(SttpDataPoint dataPointKey)
-        {
-            m_newPointKeys.Add(dataPointKey);
-        }
-
         public void SendDataPoint(SttpDataPoint point)
         {
-            m_newPoints.Add(point);
+            if (!m_hasRegistered.Contains(point.PointInfo.RuntimeID))
+            {
+                m_hasRegistered.Add(point.PointInfo.RuntimeID);
+                m_newPointIDs.Add(point.PointInfo);
+            }
         }
 
         public void Send()
@@ -35,12 +39,10 @@ namespace Sttp.WireProtocol.SendDataPoints
             if (m_newPoints.Count > 0)
             {
                 m_stream.BeginCommand(CommandCode.RegisterDataPoint);
-                m_stream.Write(m_newPointKeys.Count);
-                foreach (var key in m_newPointKeys)
+                m_stream.Write(m_newPointIDs.Count);
+                foreach (var key in m_newPointIDs)
                 {
-                    m_stream.Write(key.DataPointID);
-                    //m_stream.Write(key.Type);
-                    //m_stream.Write(key.Flags);
+                    key.Write(m_stream);
                 }
                 m_stream.EndCommand(m_sendPacket);
             }
@@ -48,14 +50,10 @@ namespace Sttp.WireProtocol.SendDataPoints
             if (m_newPoints.Count > 0)
             {
                 m_stream.BeginCommand(CommandCode.SendDataPoints);
-                m_stream.Write(m_newPointKeys.Count);
+                m_stream.Write(m_newPoints.Count);
                 foreach (var point in m_newPoints)
                 {
-                    m_stream.Write(point.DataPointID);
-                    m_stream.Write(point.Timestamp);
-                    //m_stream.Write(point.ToBuffer());
-                    m_stream.Write(point.TimeQuality);
-                    m_stream.Write(point.ValueQuality);
+                    point.Write(m_stream);
                 }
                 m_stream.EndCommand(m_sendPacket);
             }

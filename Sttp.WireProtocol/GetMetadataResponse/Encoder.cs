@@ -17,54 +17,54 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void Clear()
         {
-            m_stream.Write(SubCommand.Clear);
+            Stream.Write(SubCommand.Clear);
         }
 
         public void AddTable(short tableIndex, string tableName, TableFlags tableFlags)
         {
-            m_stream.Write(SubCommand.AddTable);
-            m_stream.Write(tableIndex);
-            m_stream.Write(tableName);
-            m_stream.Write(tableFlags);
+            Stream.Write(SubCommand.AddTable);
+            Stream.Write(tableIndex);
+            Stream.Write(tableName);
+            Stream.Write(tableFlags);
         }
 
         public void AddColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
         {
-            m_stream.Write(SubCommand.AddColumn);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-            m_stream.Write(columnName);
-            m_stream.Write(columnTypeCode);
+            Stream.Write(SubCommand.AddColumn);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(columnName);
+            Stream.Write(columnTypeCode);
         }
 
         public void AddRow(short tableIndex, int rowIndex)
         {
-            m_stream.Write(SubCommand.AddRow);
-            m_stream.Write(tableIndex);
-            m_stream.Write(rowIndex);
+            Stream.Write(SubCommand.AddRow);
+            Stream.Write(tableIndex);
+            Stream.Write(rowIndex);
         }
 
         public void AddValue(short tableIndex, short columnIndex, int rowIndex, SttpValue value)
         {
-            m_stream.Write(SubCommand.AddValue);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-            m_stream.Write(rowIndex);
-            m_stream.Write(value);
+            Stream.Write(SubCommand.AddValue);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(rowIndex);
+            Stream.Write(value);
         }
 
         public void DeleteRow(short tableIndex, int rowIndex)
         {
-            m_stream.Write(SubCommand.DeleteRow);
-            m_stream.Write(tableIndex);
-            m_stream.Write(rowIndex);
+            Stream.Write(SubCommand.DeleteRow);
+            Stream.Write(tableIndex);
+            Stream.Write(rowIndex);
         }
 
         public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            m_stream.Write(SubCommand.DatabaseVersion);
-            m_stream.Write(majorVersion);
-            m_stream.Write(minorVersion);
+            Stream.Write(SubCommand.DatabaseVersion);
+            Stream.Write(majorVersion);
+            Stream.Write(minorVersion);
         }
 
     }

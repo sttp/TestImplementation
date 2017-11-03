@@ -3,6 +3,7 @@
     /// <summary>
     /// Represents the fundamental data types supported by STTP.
     /// Higher level types must be derived from these types.
+    /// however the higher level derived type must reserve the lower 4 bits of the code for the fundamental type.
     /// </summary>
     public enum SttpFundamentalTypeCode : byte
     {
@@ -14,10 +15,8 @@
         Single = 3,         //Single
         Double = 4,         //Double
         Buffer = 5,         //Numeric, Custom User Defined Types
-
-        //All of these fields are fixed length fields that don't behave like the fundamental types listed above. However, they will be transmitted as structs and not classes.
-        Fixed32 = 6,        //Time
-        Fixed64 = 7,        //TimeSpan, DateTime
-        Fixed128 = 8,       //ScientificTime, DateTimeOffset, Guid, Decimal, ShortString,
+        //Fixed32 = 6,        //Time
+        //Fixed64 = 7,        //TimeSpan, DateTime
+        //Fixed128 = 8,       //Guid, Decimal, ShortString,
     }
 }

@@ -17,12 +17,12 @@ namespace Sttp.WireProtocol.GetMetadataSchema
 
         public void GetDatabaseSchema()
         {
-            m_stream.Write((byte)SubCommand.GetDatabaseSchema);
+            Stream.Write((byte)SubCommand.GetDatabaseSchema);
         }
 
         public void GetDatabaseVersion()
         {
-            m_stream.Write((byte)SubCommand.GetDatabaseVersion);
+            Stream.Write((byte)SubCommand.GetDatabaseVersion);
         }
 
     }

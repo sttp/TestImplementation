@@ -17,56 +17,56 @@ namespace Sttp.WireProtocol.GetMetadata
 
         public void Select(short tableIndex, short columnIndex)
         {
-            m_stream.Write(SubCommand.Select);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
+            Stream.Write(SubCommand.Select);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
         }
 
         public void Join(short tableIndex, short columnIndex, short foreignTableIndex)
         {
-            m_stream.Write(SubCommand.Join);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-            m_stream.Write(foreignTableIndex);
+            Stream.Write(SubCommand.Join);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(foreignTableIndex);
         }
 
         public void WhereInString(short tableIndex, short columnIndex, bool areRegularExpressions, string[] items)
         {
-            m_stream.Write(SubCommand.WhereInString);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-            m_stream.Write(areRegularExpressions);
-            m_stream.Write(items);
+            Stream.Write(SubCommand.WhereInString);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(areRegularExpressions);
+            Stream.Write(items);
         }
 
         public void WhereInValue(short tableIndex, short columnIndex, SttpValue[] items)
         {
-            m_stream.Write(SubCommand.WhereInValue);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-            m_stream.Write(items);
+            Stream.Write(SubCommand.WhereInValue);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(items);
         }
 
         public void WhereCompare(short tableIndex, short columnIndex, CompareMethod compareOperator, SttpValue item)
         {
-            m_stream.Write(SubCommand.WhereCompare);
-            m_stream.Write(tableIndex);
-            m_stream.Write(columnIndex);
-            m_stream.Write(compareOperator);
-            m_stream.Write(item);
+            Stream.Write(SubCommand.WhereCompare);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(compareOperator);
+            Stream.Write(item);
         }
 
         public void WhereOperator(OperatorMethod operatorCode)
         {
-            m_stream.Write(SubCommand.WhereOperator);
-            m_stream.Write(operatorCode);
+            Stream.Write(SubCommand.WhereOperator);
+            Stream.Write(operatorCode);
         }
 
         public void DatabaseVersion(Guid majorVersion, long minorVersion)
         {
-            m_stream.Write(SubCommand.DatabaseVersion);
-            m_stream.Write(majorVersion);
-            m_stream.Write(minorVersion);
+            Stream.Write(SubCommand.DatabaseVersion);
+            Stream.Write(majorVersion);
+            Stream.Write(minorVersion);
         }
 
     }
