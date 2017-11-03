@@ -24,7 +24,7 @@
 using System;
 using Sttp.Collection;
 
-namespace Sttp.DataPoint.TSSC
+namespace Sttp.WireProtocol.DataPoint.TSSC
 {
     /// <summary>
     /// The decoder for the TSSC protocol.

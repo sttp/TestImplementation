@@ -24,21 +24,21 @@ namespace Sttp.WireProtocol
 
         /// <summary>
         /// Defines the mapping code for the provided time quality. A value of 0 means this value will be ignored.
-        /// The lowest 3 bits define how many bytes are provided for this flag.
+        /// The lowest (3 bits + 1) define how many bytes are provided for this flag. 
         /// </summary>
-        public readonly short TimeQualityMap;
+        public readonly ushort TimeQualityMap;
 
         /// <summary>
         /// Defines the mapping code for the provided value quality. A value of 0 means this value will be ignored.
-        /// The lowest 3 bits define how many bytes are provided for this flag.
+        /// The lowest (3 bits + 1) define how many bytes are provided for this flag.
         /// </summary>
-        public readonly short ValueQualityMap;
+        public readonly ushort ValueQualityMap;
 
         /// <summary>
         /// Defines the mapping code for the Extra Flags. A value of 0 means this value will be ignored.
-        /// The lowest 3 bits define how many bytes are provided for this flag.
+        /// The lowest (3 bits + 1) define how many bytes are provided for this flag.
         /// </summary>
-        public readonly short ExtraFlagsMap;
+        public readonly ushort ExtraFlagsMap;
 
         /// <summary>
         /// Defines the value type code for every measurement sent on the wire. 
@@ -46,7 +46,7 @@ namespace Sttp.WireProtocol
         /// If 0, this means 'Value' will not be sent.
         /// If not 0, it's still possible for null to be sent, so all types should support nullable types.
         /// </summary>
-        public readonly short ValueTypeCode;
+        public readonly ushort ValueTypeCode;
 
         /// <summary>
         /// Defines the serialization information that must exist with all SttpDataPoint.
@@ -56,7 +56,7 @@ namespace Sttp.WireProtocol
         /// <param name="valueQualityMap"></param>
         /// <param name="extraFlagsMap"></param>
         /// <param name="valueTypeCode"></param>
-        public SttpPointInfo(long runtimeID, short timeQualityMap, short valueQualityMap, short extraFlagsMap, short valueTypeCode)
+        public SttpPointInfo(long runtimeID, ushort timeQualityMap, ushort valueQualityMap, ushort extraFlagsMap, ushort valueTypeCode)
         {
             RuntimeID = runtimeID;
             TimeQualityMap = timeQualityMap;

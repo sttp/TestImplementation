@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     /// <summary>
     /// All of the attributes that are associated with a measurement key.

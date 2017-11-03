@@ -2,7 +2,7 @@
 using System.Text;
 using Sttp.WireProtocol.SendDataPoints;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     /// <summary>
     /// Represents a single point of data.

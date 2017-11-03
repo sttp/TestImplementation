@@ -1,4 +1,4 @@
-﻿namespace Sttp.WireProtocol
+﻿namespace Sttp
 {
     public enum SttpValueTypeCode : byte
     {

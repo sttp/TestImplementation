@@ -24,7 +24,7 @@
 
 using System;
 
-namespace Sttp.DataPoint.TSSC
+namespace Sttp.WireProtocol.DataPoint.TSSC
 {
     /// <summary>
     /// The metadata kept for each pointID.

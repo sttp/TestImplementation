@@ -21,7 +21,7 @@
 //
 //******************************************************************************************************
 
-namespace Sttp.DataPoint.TSSC
+namespace Sttp.WireProtocol.DataPoint.TSSC
 {
     /// <summary>
     /// The encoding commands supported by TSSC. This class is used by 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     /// <summary>
     /// Maintains information about a DataPoint that does not change. 

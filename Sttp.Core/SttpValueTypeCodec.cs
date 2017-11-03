@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Text;
+using Sttp.WireProtocol;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     public static class SttpValueTypeCodec
     {

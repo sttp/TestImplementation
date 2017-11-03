@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using Sttp.WireProtocol;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     /// <summary>
     /// Extension methods for SttpDataPoint to ease usability.
