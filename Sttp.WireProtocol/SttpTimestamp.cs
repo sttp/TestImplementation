@@ -1,99 +1,33 @@
 ﻿using System;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using Sttp.WireProtocol.SendDataPoints;
 
-namespace Sttp.WireProtocol
+namespace Sttp.WireProtocol.SendDataPoints
 {
-    public enum SttpTimestampTypeCode
-    {
-        SttpTicks,       // A 64-bit UTC timestamp that holds leap second data.
-        SttpTicksPlus,   // A 128-bit value that contains an extra 64-bits to be defined by the API level protocol.
-    }
-
     /// <summary>
-    /// This class contains the allowable PointID types for the STTP protocol. All pointIDs will be mapped to a 32-bit RuntimeID.
+    /// The default timestamp field for STTP.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    public class SttpTimestamp
+    public struct SttpTimestamp
     {
-        #region [ Members ]
+        private const long TicksMask = LeapsecondFlag - 1;
+        private const long LeapsecondFlag = 1L << 62;
 
-        [FieldOffset(0)]
-        private long m_valueTicks;
+        public readonly long RawValue;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
 
-        [FieldOffset(8)]
-        private long m_valueFlags;
-
-        [FieldOffset(17)]
-        private SttpTimestampTypeCode m_typeCode;
-
-        #endregion
-
-        #region [ Constructors ]
-
-        public SttpTimestamp()
+        public SttpTimestamp(DateTime time, bool leapSecondInProgress = false)
         {
+            RawValue = time.Ticks;
+            if (leapSecondInProgress)
+                RawValue |= LeapsecondFlag;
         }
 
-        /// <summary>
-        /// Clones an <see cref="SttpValue"/>. 
-        /// </summary>
-        /// <param name="value">the value to clone</param>
-        public SttpTimestamp(SttpTimestamp value)
+        public SttpTimestamp(long rawValue)
         {
-            m_valueTicks = value.m_valueTicks;
-            m_valueFlags = value.m_valueFlags;
-            m_typeCode = value.m_typeCode;
+            RawValue = rawValue;
         }
 
-        #endregion
+        public DateTime Ticks => new DateTime(RawValue & TicksMask);
 
-        #region [ Properties ]
-
-        /// <summary>
-        /// The type code of the raw value.
-        /// </summary>
-        public SttpTimestampTypeCode TypeCode
-        {
-            get
-            {
-                return m_typeCode;
-            }
-        }
-
-        public long Ticks
-        {
-            get
-            {
-                return m_valueTicks;
-            }
-            set
-            {
-                m_typeCode = SttpTimestampTypeCode.SttpTicks;
-                m_valueTicks = value;
-            }
-        }
-
-        public long Flags
-        {
-            get
-            {
-                if (m_typeCode == SttpTimestampTypeCode.SttpTicks)
-                    return m_valueFlags;
-                throw new NotSupportedException();
-            }
-            set
-            {
-                m_typeCode = SttpTimestampTypeCode.SttpTicks;
-                m_valueFlags = value;
-            }
-        }
+        public bool LeapsecondInProgress => (RawValue & LeapsecondFlag) > 0;
 
 
-
-        #endregion
-
-    }
+    } // 8-bytes
 }

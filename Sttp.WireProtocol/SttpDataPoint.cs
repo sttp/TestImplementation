@@ -20,7 +20,6 @@ namespace Sttp.WireProtocol
         {
             public object DataPointKeyToken;
             public byte[] BufferValue; 
-            public SttpScientificTime Time;
 
             public NestedObjects Clone()
             {
@@ -119,52 +118,20 @@ namespace Sttp.WireProtocol
 
         #region [ Properties ]
 
-        public SttpTicks Ticks
+        public SttpTimestamp Timestamp
         {
             get
             {
-                return new SttpTicks(m_timestamp);
+                return new SttpTimestamp(m_timestamp);
             }
             set
             {
                 CheckImmutable();
                 m_advTime = false;
-                m_timestamp = value.Ticks;
-                if (m_isNestedObject)
-                {
-                    ((NestedObjects)m_dataPointKeyToken).Time = null;
-                }
+                m_timestamp = value.RawValue;
             }
         }
 
-        public SttpScientificTime ScientificTime
-        {
-            get
-            {
-                if (m_advTime)
-                    return ((NestedObjects)m_dataPointKeyToken).Time;
-                return new SttpScientificTime(new SttpTicks(m_timestamp));
-            }
-            set
-            {
-                CheckImmutable();
-                m_advTime = true;
-                m_timestamp = value.ToSttpTimestamp().Ticks;
-
-                if (m_isNestedObject)
-                {
-                    ((NestedObjects)m_dataPointKeyToken).Time = null;
-                }
-                else
-                {
-                    var nested = new NestedObjects();
-                    nested.Time = value;
-                    nested.DataPointKeyToken = m_dataPointKeyToken;
-                    m_dataPointKeyToken = nested;
-                    m_isNestedObject = true;
-                }
-            }
-        }
 
         public uint TimeQuality
         {

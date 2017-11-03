@@ -7,20 +7,30 @@ namespace Sttp.WireProtocol
     public class SttpDataPointNew
     {
         /// <summary>
-        /// The runtimeID associated with the PointID. This will map to a <see cref="SttpPointID"/> that is either globally defined (if positive) or session defined (if negative)
+        /// The identifying information 
         /// </summary>
-        public int RuntimePointID;
+        public SttpPointID PointID;
+       
         /// <summary>
-        /// A 64 or 128 bit timestamp. This combined with RuntimeID is intended to always uniquely define a measurement.
+        /// A 64-bit timestamp
         /// </summary>
-        public SttpTimestamp Time;
+        public SttpTimestamp Timestamp;
 
+        /// <summary>
+        /// User defined flags that combines with PointID and Time to uniquely define a measurement. 
+        /// This can contain sequence numbers, or extra time precision. Most use cases will leave this field 0.
+        /// </summary>
+        public long ExtraFlags;
+
+        /// <summary>
+        /// The value for the data point.
+        /// </summary>
         public SttpValue Value;
 
         /// <summary>
         /// 32-bits for identifying the quality of the time.
         /// </summary>
-        public uint TimeQuality;
+        public uint TimestampQuality;
         /// <summary>
         /// 32-bits for identifying the quality of the value.
         /// </summary>
