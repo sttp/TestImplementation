@@ -10,8 +10,17 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class SessionDetails
     {
+
         public readonly ProtocolLimits Limits = new ProtocolLimits();
+
+        /// <summary>
+        /// Indicate that the protocol supports deflate.
+        /// </summary>
         public bool SupportsDeflate = false;
+
+        /// <summary>
+        /// The maximum size of every packet. After this threshold, the packet will be fragmented.
+        /// </summary>
         public int MaximumSegmentSize = 1500;
 
         /// <summary>
