@@ -11,7 +11,6 @@ namespace Sttp.WireProtocol
     /// reuse is the normal case.
     /// </summary>
     public class SttpDataPoint
-        : ISttpValue
     {
         /// <summary>
         /// The identifying information 
@@ -43,49 +42,6 @@ namespace Sttp.WireProtocol
         /// 64-bits for identifying the quality of the value.
         /// </summary>
         public long ValueQuality;
-
-        public bool IsNull
-        {
-            get => m_value.IsNull;
-            set => m_value.IsNull = value;
-        }
-
-        public double AsDouble
-        {
-            get => m_value.AsDouble;
-            set => m_value.AsDouble = value;
-        }
-
-        public long AsInt64
-        {
-            get => m_value.AsInt64;
-            set => m_value.AsInt64 = value;
-        }
-
-        public ulong AsUInt64
-        {
-            get => m_value.AsUInt64;
-            set => m_value.AsUInt64 = value;
-        }
-        public float AsSingle
-        {
-            get => m_value.AsSingle;
-            set => m_value.AsSingle = value;
-        }
-
-        public byte[] AsBuffer
-        {
-            get => m_value.AsBuffer;
-            set => m_value.AsBuffer = value;
-        }
-
-        public object AsObject
-        {
-            get => m_value.AsObject;
-            set => m_value.AsObject = value;
-        }
-
-        public SttpFundamentalTypeCode FundamentalTypeCode => m_value.FundamentalTypeCode;
 
         public void Write(PacketWriter stream)
         {

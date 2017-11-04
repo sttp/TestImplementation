@@ -43,7 +43,7 @@ namespace Sttp
             if (columnDataType == typeof(Single))
                 return SttpValueTypeCode.Single;
             if (columnDataType == typeof(DateTime))
-                return SttpValueTypeCode.DateTime;
+                return SttpValueTypeCode.SttpTime;
             if (columnDataType == typeof(bool))
                 return SttpValueTypeCode.Bool;
             if (columnDataType == typeof(Guid))
