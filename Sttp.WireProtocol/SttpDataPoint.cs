@@ -13,9 +13,18 @@ namespace Sttp.WireProtocol
     public class SttpDataPoint
     {
         /// <summary>
-        /// The identifying information 
+        /// A token was defined by the API layer when the runtime ID was defined at the protocol level.
+        /// This is only present when <see cref="PointID"/> is a RuntimeID type. This field is only 
+        /// used on the receiving end. The source of the data point does not need to assign this field.
+        /// 
+        /// Suggestions for this token include the properly mapped point identifier and possibly routing information.
         /// </summary>
-        public SttpPointInfo PointInfo;
+        public object PointToken;
+
+        /// <summary>
+        /// The unique identifier for this PointID. Can be int32, GUID, string, SttpNamedSet.
+        /// </summary>
+        public SttpPointID PointID;
 
         /// <summary>
         /// A 64-bit timestamp
@@ -23,37 +32,33 @@ namespace Sttp.WireProtocol
         public SttpTimestamp Timestamp;
 
         /// <summary>
-        /// User defined flags that combines with PointID and Time to uniquely define a measurement. 
-        /// This can contain sequence numbers, or extra time precision. Most use cases will leave this field 0.
-        /// </summary>
-        public long ExtraFlags;
-
-        /// <summary>
         /// The value for the data point.
         /// </summary>
-        private SttpValue m_value = new SttpValue();
+        public SttpValue Value = new SttpValue();
 
         /// <summary>
-        /// 64-bits for identifying the quality of the time.
+        /// 16-bits for identifying the quality of the time.
         /// </summary>
-        public long TimestampQuality;
+        public short TimestampQuality;
 
         /// <summary>
-        /// 64-bits for identifying the quality of the value.
+        /// 16-bits for identifying the quality of the value.
         /// </summary>
-        public long ValueQuality;
+        public short ValueQuality;
 
+        /// <summary>
+        /// An array of extra fields that exist in the protocol. Specific implementations of STTP should define these fields.
+        /// Examples include:
+        ///   An extra timestamp field for more time precision. 
+        ///   Some kind of sequence identifier.
+        ///   Some kind of pivot field. 
+        ///   Extra quality bits.
+        /// </summary>
+        public SttpValue[] ExtraFields;
+        
         public void Write(PacketWriter stream)
         {
-            stream.Write(PointInfo.RuntimeID);
-            stream.Write(Timestamp.RawValue);
-            m_value.Save(stream);
-            if (PointInfo.ExtraFlagsMap != 0)
-                stream.Write(ExtraFlags);
-            if (PointInfo.TimeQualityMap != 0)
-                stream.Write(TimestampQuality);
-            if (PointInfo.ValueQualityMap != 0)
-                stream.Write(ValueQuality);
+            SttpDataPointLayout layout;
         }
     }
 }

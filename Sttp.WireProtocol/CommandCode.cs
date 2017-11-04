@@ -126,15 +126,11 @@ namespace Sttp.WireProtocol
         ///                                               This is valid for all data points defined after this point.
         /// Subcommand: SubscribeToTheFollowing         - Indicates that all of the following data points should be added the subscription.
         /// Subcommand: UnsubscribeFromTheFollowing     - Indicates that all of the following data points should be removed from the subscription.
-       
-        
         /// Subcommand: AllDataPoints                   - Identifies all data points.
         /// Subcommand: TableDataPoints                 - Identifies all Data Points listed in a table
         /// Subcommand: DataPointByID                   - Specifies a DataPoint by ID
         /// Subcommand: StartTime                       - Sets the start time for a subscription for historical data.
         /// Subcommand: StopTime                        - Sets the stop time for a subscription for historical data.
-        /// 
-        /// 
         /// 
         /// </summary>
         Subscribe,
@@ -148,16 +144,16 @@ namespace Sttp.WireProtocol
         SendDataPoints,
 
         /// <summary>
-        /// Registers a new data point. 
+        /// Registers a new data point identifier. 
         /// 
-        /// Before a data point can be exchanged, it must be first registered on both ends. This registration
-        /// establishes a runtime ID that will be used to exchange the data, along with the data type. Only make a habit of 
-        /// registering points that will actually be sent. Registering all of the point will create an unnecessarily large lookup table.
+        /// To minimize the size of SttpDataPackets, their identifiers should be converted into RuntimeIDs. There are a configurable number of 
+        /// runtime IDs that can be mapped, therefore all identifiers do not have to be mapped.
         /// 
-        /// Registration can happen on the fly, it however must be completed before the other end receives the data point or the connection will 
-        /// be terminated.
+        /// Payload:
+        /// int32 RuntimeID
+        /// SttpPointID ID;
         /// </summary>
-        RegisterDataPoint,
+        RegisterDataPointRuntimeIdentifier,
 
         // TODO : assign values
         NegotiateSession,

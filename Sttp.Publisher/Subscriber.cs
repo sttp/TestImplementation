@@ -300,7 +300,7 @@ namespace Sttp.Publisher
                         break;
                     case CommandCode.SecureDataChannel:
                         break;
-                    case CommandCode.RegisterDataPoint:
+                    case CommandCode.RegisterDataPointRuntimeIdentifier:
                         break;
                     case CommandCode.SendDataPoints:
                         break;
