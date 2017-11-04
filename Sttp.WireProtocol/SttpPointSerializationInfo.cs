@@ -64,18 +64,6 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public SttpBaseValueTypeCode BaseValueTypeCode
-        {
-            get
-            {
-                return (SttpBaseValueTypeCode)(RawValue & 7);
-            }
-            set
-            {
-                RawValue = RawValue & (~7uL) | ((uint)value & 7);
-            }
-        }
-
         public int ExtraFlagsLength
         {
             get
