@@ -60,7 +60,7 @@ namespace Sttp.Data
                         break;
                     case SubCommand.DefineTable:
                         {
-                            var cmd = command.AddTable;
+                            var cmd = command.DefineTable;
                             var table = new MetadataTableDestination(cmd.TableName, cmd.TableIndex, cmd.TableFlags);
                             m_tableLookup.Add(table.TableName, cmd.TableIndex);
                             while (m_tables.Count <= table.TableIndex)
@@ -77,7 +77,7 @@ namespace Sttp.Data
                         m_tables[command.DefineRow.TableIndex].ProcessCommand(command);
                         break;
                     case SubCommand.DefineValue:
-                        m_tables[command.AddValue.TableIndex].ProcessCommand(command);
+                        m_tables[command.DefineValue.TableIndex].ProcessCommand(command);
                         break;
                     case SubCommand.RemoveRow:
                         m_tables[command.RemoveRow.TableIndex].ProcessCommand(command);

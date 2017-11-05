@@ -39,5 +39,15 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
             Stream.Write(minorVersion);
         }
 
+
+        public void DefineTableRelationship(short tableIndex, short columnIndex, short foreignTableIndex)
+        {
+            Stream.Write(SubCommand.DefineTableRelationship);
+            Stream.Write(tableIndex);
+            Stream.Write(columnIndex);
+            Stream.Write(foreignTableIndex);
+        }
+
+
     }
 }

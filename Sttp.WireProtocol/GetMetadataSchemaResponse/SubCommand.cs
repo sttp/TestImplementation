@@ -41,6 +41,18 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
         /// 
         /// </summary>
         DefineColumn,
-       
+
+
+        /// <summary>
+        /// Indicates that the specified column is a pointer to a record in another table.
+        /// 
+        /// Payload:
+        /// short tableIndex         - The table that has the foreign key
+        /// short columnIndex        - The column that has the foreign key
+        /// short foreignTableIndex  - The table that this foreign key references. 
+        /// 
+        /// </summary>
+        DefineTableRelationship,
+
     }
 }

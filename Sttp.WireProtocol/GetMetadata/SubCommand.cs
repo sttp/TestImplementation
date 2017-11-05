@@ -31,19 +31,6 @@ namespace Sttp.WireProtocol.GetMetadata
         Select,
 
         /// <summary>
-        /// Specifies join clauses for tables so a filter can be applied on a foreign table.
-        /// The foreign key must be the primary index of the foreign table. 
-        /// Joining data in both tables are not supported.
-        /// 
-        /// Payload:
-        /// short tableIndex         - The table that has the foreign key
-        /// short columnIndex        - The column that has the foreign key
-        /// short foreignTableIndex  - The table that this foreign key references. 
-        /// 
-        /// </summary>
-        Join,
-
-        /// <summary>
         /// Specifies a filter clause to apply to the data. To do a single Like statement, include 1 item in the list.
         /// 
         /// Payload:

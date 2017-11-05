@@ -20,7 +20,6 @@
         public SubCommand SubCommand => m_commandCode;
 
         public CmdDatabaseVersion DatabaseVersion => m_command as CmdDatabaseVersion;
-        public CmdJoin Join => m_command as CmdJoin;
         public CmdSelect Select => m_command as CmdSelect;
         public CmdWhereCompare WhereCompare => m_command as CmdWhereCompare;
         public CmdWhereInString WhereInString => m_command as CmdWhereInString;

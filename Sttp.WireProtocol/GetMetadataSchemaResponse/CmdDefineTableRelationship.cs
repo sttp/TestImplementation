@@ -1,8 +1,8 @@
-﻿namespace Sttp.WireProtocol.GetMetadata
+﻿namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 {
-    public class CmdJoin : ICmd
+    public class CmdDefineTableRelationship : ICmd
     {
-        public SubCommand SubCommand => GetMetadata.SubCommand.Join;
+        public SubCommand SubCommand => GetMetadataSchemaResponse.SubCommand.DefineTableRelationship;
         public short TableIndex;
         public short ColumnIndex;
         public short ForeignTableIndex;

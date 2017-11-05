@@ -20,7 +20,8 @@
         public SubCommand SubCommand => m_commandCode;
 
         public CmdDatabaseVersion DatabaseVersion => m_command as CmdDatabaseVersion;
-        public CmdDefineColumn AddColumn => m_command as CmdDefineColumn;
-        public CmdDefineTable AddTable => m_command as CmdDefineTable;
+        public CmdDefineColumn DefineColumn => m_command as CmdDefineColumn;
+        public CmdDefineTable DefineTable => m_command as CmdDefineTable;
+        public CmdDefineTableRelationship DefineTableRelationship => m_command as CmdDefineTableRelationship;
     }
 }

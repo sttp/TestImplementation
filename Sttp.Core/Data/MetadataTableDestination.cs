@@ -97,7 +97,7 @@ namespace Sttp.Data
                     }
                     break;
                 case SubCommand.DefineValue:
-                    var addV = command.AddValue;
+                    var addV = command.DefineValue;
                     Rows[addV.RowIndex].ProcessCommand(addV);
                     break;
                 case SubCommand.RemoveRow:

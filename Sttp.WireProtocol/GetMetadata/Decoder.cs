@@ -16,7 +16,6 @@ namespace Sttp.WireProtocol.GetMetadata
             m_cmd = new Cmd();
             m_commands = new ICmd[10];
             m_commands[(byte)SubCommand.Select] = new CmdSelect();
-            m_commands[(byte)SubCommand.Join] = new CmdJoin();
             m_commands[(byte)SubCommand.WhereInString] = new CmdWhereInString();
             m_commands[(byte)SubCommand.WhereInValue] = new CmdWhereInValue();
             m_commands[(byte)SubCommand.WhereCompare] = new CmdWhereCompare();

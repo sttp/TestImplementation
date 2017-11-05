@@ -22,13 +22,7 @@ namespace Sttp.WireProtocol.GetMetadata
             Stream.Write(columnIndex);
         }
 
-        public void Join(short tableIndex, short columnIndex, short foreignTableIndex)
-        {
-            Stream.Write(SubCommand.Join);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
-            Stream.Write(foreignTableIndex);
-        }
+       
 
         public void WhereInString(short tableIndex, short columnIndex, bool areRegularExpressions, string[] items)
         {
