@@ -15,8 +15,9 @@ namespace Sttp.WireProtocol
         #region [ Members ]
 
         [FieldOffset(0)]
-        private long m_rawValue;
-
+        private long m_rawBytes0_7;
+        [FieldOffset(8)]
+        private long m_rawBytes8_15;
 
         [FieldOffset(0)]
         private sbyte m_valueSByte;
@@ -39,8 +40,6 @@ namespace Sttp.WireProtocol
         [FieldOffset(0)]
         private float m_valueSingle;
         [FieldOffset(0)]
-        private DateTime m_valueDateTime;
-        [FieldOffset(0)]
         private TimeSpan m_valueTimeSpan;
         [FieldOffset(0)]
         private char m_valueChar;
@@ -56,9 +55,8 @@ namespace Sttp.WireProtocol
         private Guid m_valueGuid;
 
         [FieldOffset(16)]
-        private string m_valueString;
-        [FieldOffset(32)]
-        private byte[] m_bufferValue;
+        private object m_valueObject;
+
         [FieldOffset(33)]
         private SttpValueTypeCode m_valueTypeCode;
 
@@ -77,8 +75,9 @@ namespace Sttp.WireProtocol
         /// <param name="value">the value to clone</param>
         public SttpValue(SttpValue value)
         {
-            m_rawValue = value.m_rawValue;
-            m_bufferValue = value.m_bufferValue;
+            m_rawBytes0_7 = value.m_rawBytes0_7;
+            m_rawBytes8_15 = value.m_rawBytes8_15;
+            m_valueObject = value.m_valueObject;
             m_valueTypeCode = value.m_valueTypeCode;
         }
 
@@ -86,66 +85,6 @@ namespace Sttp.WireProtocol
 
         #region [ Properties ]
 
-        private Guid IsGuid
-        {
-            get
-            {
-                return Guid.Empty;
-            }
-            set
-            {
-
-            }
-        }
-
-        private decimal IsDecimal
-        {
-            get
-            {
-                return 0;
-            }
-            set
-            {
-
-            }
-        }
-
-        private string IsString
-        {
-            get
-            {
-                return null;
-            }
-            set
-            {
-
-            }
-        }
-
-        private SttpTimestampOffset IsSttpTimestampOffset
-        {
-            get
-            {
-                return default(SttpTimestampOffset);
-            }
-            set
-            {
-
-            }
-        }
-
-        private SttpValue[] IsSet
-        {
-            get
-            {
-                return null;
-            }
-            set
-            {
-                
-            }
-        }
-        
         public sbyte AsSByte
         {
             get
@@ -173,7 +112,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (sbyte)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (sbyte)IsDecimal;
+                            return (sbyte)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (sbyte)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -191,7 +130,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return sbyte.Parse(IsString);
+                            return sbyte.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -235,7 +174,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (short)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (short)IsDecimal;
+                            return (short)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (short)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -253,7 +192,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return short.Parse(IsString);
+                            return short.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -298,7 +237,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (int)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (int)IsDecimal;
+                            return (int)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (int)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -316,7 +255,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return int.Parse(IsString);
+                            return int.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -361,7 +300,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (long)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (long)IsDecimal;
+                            return (long)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (long)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -379,7 +318,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return long.Parse(IsString);
+                            return long.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -423,7 +362,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (byte)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (byte)IsDecimal;
+                            return (byte)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (byte)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -441,7 +380,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return byte.Parse(IsString);
+                            return byte.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -485,7 +424,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (ushort)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (ushort)IsDecimal;
+                            return (ushort)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (ushort)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -503,7 +442,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return ushort.Parse(IsString);
+                            return ushort.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -547,7 +486,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (uint)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (uint)IsDecimal;
+                            return (uint)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (uint)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -565,7 +504,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return uint.Parse(IsString);
+                            return uint.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -609,7 +548,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (ulong)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (ulong)IsDecimal;
+                            return (ulong)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (ulong)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -627,7 +566,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return ulong.Parse(IsString);
+                            return ulong.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -644,7 +583,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public decimal AsDecimal1
+        public decimal AsDecimal
         {
             get
             {
@@ -671,7 +610,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (decimal)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (decimal)IsDecimal;
+                            return (decimal)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (decimal)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -689,7 +628,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return decimal.Parse(IsString);
+                            return decimal.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -702,7 +641,7 @@ namespace Sttp.WireProtocol
             set
             {
                 m_valueTypeCode = SttpValueTypeCode.Decimal;
-                IsDecimal = value;
+                m_valueDecimal = value;
             }
         }
 
@@ -733,7 +672,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (double)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (double)IsDecimal;
+                            return (double)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (double)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -751,7 +690,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return double.Parse(IsString);
+                            return double.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -795,7 +734,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (float)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (float)IsDecimal;
+                            return (float)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (float)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -813,7 +752,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return float.Parse(IsString);
+                            return float.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -865,7 +804,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.SttpTime:
                             return m_valueSttpTimestamp;
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return IsSttpTimestampOffset.ToSttpTimestamp();
+                            return m_valueSttpTimestampOffset.ToSttpTimestamp();
                         case SttpValueTypeCode.TimeSpan:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
@@ -875,7 +814,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return SttpTimestamp.Parse(IsString);
+                            return SttpTimestamp.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -927,7 +866,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.SttpTime:
                             return m_valueSttpTimestamp.ToSttpTimestampOffset();
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return IsSttpTimestampOffset;
+                            return m_valueSttpTimestampOffset;
                         case SttpValueTypeCode.TimeSpan:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
@@ -937,7 +876,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return SttpTimestampOffset.Parse(IsString);
+                            return SttpTimestampOffset.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -950,7 +889,7 @@ namespace Sttp.WireProtocol
             set
             {
                 m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
-                IsSttpTimestampOffset = value;
+                m_valueSttpTimestampOffset = value;
             }
         }
 
@@ -999,7 +938,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return TimeSpan.Parse(IsString);
+                            return TimeSpan.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -1043,7 +982,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return (char)m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return (char)IsDecimal;
+                            return (char)m_valueDecimal;
                         case SttpValueTypeCode.Double:
                             return (char)m_valueDouble;
                         case SttpValueTypeCode.Single:
@@ -1061,7 +1000,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return char.Parse(IsString);
+                            return char.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -1105,7 +1044,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return 0 != m_valueUInt64;
                         case SttpValueTypeCode.Decimal:
-                            return Math.Abs(IsDecimal) > 0.75M;
+                            return Math.Abs(m_valueDecimal) > 0.75M;
                         case SttpValueTypeCode.Double:
                             return Math.Abs(m_valueDouble) > 0.75;
                         case SttpValueTypeCode.Single:
@@ -1132,7 +1071,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return bool.Parse(IsString);
+                            return bool.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -1192,9 +1131,9 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Bool:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
-                            return IsGuid;
+                            return m_valueGuid;
                         case SttpValueTypeCode.String:
-                            return Guid.Parse(IsString);
+                            return Guid.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
@@ -1207,7 +1146,7 @@ namespace Sttp.WireProtocol
             set
             {
                 m_valueTypeCode = SttpValueTypeCode.Guid;
-                IsGuid = value;
+                m_valueGuid = value;
             }
         }
 
@@ -1238,7 +1177,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.UInt64:
                             return m_valueUInt64.ToString();
                         case SttpValueTypeCode.Decimal:
-                            return IsDecimal.ToString();
+                            return m_valueDecimal.ToString();
                         case SttpValueTypeCode.Double:
                             return m_valueDouble.ToString();
                         case SttpValueTypeCode.Single:
@@ -1246,7 +1185,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.SttpTime:
                             return m_valueSttpTimestamp.ToString();
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return IsSttpTimestampOffset.ToString();
+                            return m_valueSttpTimestampOffset.ToString();
                         case SttpValueTypeCode.TimeSpan:
                             return m_valueTimeSpan.ToString();
                         case SttpValueTypeCode.Char:
@@ -1254,9 +1193,9 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Bool:
                             return m_valueBool.ToString();
                         case SttpValueTypeCode.Guid:
-                            return IsGuid.ToString();
+                            return m_valueGuid.ToString();
                         case SttpValueTypeCode.String:
-                            return IsString;
+                            return (string)m_valueObject;
                         case SttpValueTypeCode.Buffer:
                             //ToDo: Return a byte string 0x292A78B402;
                             throw new InvalidCastException("Cannot cast from Buffer");
@@ -1270,7 +1209,7 @@ namespace Sttp.WireProtocol
             set
             {
                 m_valueTypeCode = SttpValueTypeCode.String;
-                IsString = value;
+                m_valueObject = value;
             }
         }
 
@@ -1321,7 +1260,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.String:
                             throw new InvalidCastException("Cannot cast from String");
                         case SttpValueTypeCode.Buffer:
-                            return m_bufferValue;
+                            return (byte[])m_valueObject;
                         case SttpValueTypeCode.Set:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
@@ -1332,11 +1271,11 @@ namespace Sttp.WireProtocol
             set
             {
                 m_valueTypeCode = SttpValueTypeCode.Buffer;
-                m_bufferValue = value;
+                m_valueObject = value;
             }
         }
 
-        public SttpValue[] AsSet
+        public SttpSet AsSet
         {
             get
             {
@@ -1385,7 +1324,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
-                            return IsSet;
+                            return (SttpSet)m_valueObject;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -1394,7 +1333,71 @@ namespace Sttp.WireProtocol
             set
             {
                 m_valueTypeCode = SttpValueTypeCode.Set;
-                IsSet = value;
+                m_valueObject = value;
+            }
+        }
+
+        public SttpNamedSet AsNamedSet
+        {
+            get
+            {
+                checked
+                {
+                    switch (m_valueTypeCode)
+                    {
+                        case SttpValueTypeCode.Null:
+                            throw new InvalidCastException("Cannot cast from Null");
+                        case SttpValueTypeCode.SByte:
+                            throw new InvalidCastException("Cannot cast from SByte");
+                        case SttpValueTypeCode.Int16:
+                            throw new InvalidCastException("Cannot cast from Int16");
+                        case SttpValueTypeCode.Int32:
+                            throw new InvalidCastException("Cannot cast from Int32");
+                        case SttpValueTypeCode.Int64:
+                            throw new InvalidCastException("Cannot cast from Int64");
+                        case SttpValueTypeCode.Byte:
+                            throw new InvalidCastException("Cannot cast from Byte");
+                        case SttpValueTypeCode.UInt16:
+                            throw new InvalidCastException("Cannot cast from UInt16");
+                        case SttpValueTypeCode.UInt32:
+                            throw new InvalidCastException("Cannot cast from UInt32");
+                        case SttpValueTypeCode.UInt64:
+                            throw new InvalidCastException("Cannot cast from UInt64");
+                        case SttpValueTypeCode.Decimal:
+                            throw new InvalidCastException("Cannot cast from Decimal");
+                        case SttpValueTypeCode.Double:
+                            throw new InvalidCastException("Cannot cast from Double");
+                        case SttpValueTypeCode.Single:
+                            throw new InvalidCastException("Cannot cast from Single");
+                        case SttpValueTypeCode.SttpTime:
+                            throw new InvalidCastException("Cannot cast from SttpTime");
+                        case SttpValueTypeCode.SttpTimeOffset:
+                            throw new InvalidCastException("Cannot cast from SttpTimeOffset");
+                        case SttpValueTypeCode.TimeSpan:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Char:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Bool:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Guid:
+                            throw new InvalidCastException("Cannot cast from Guid");
+                        case SttpValueTypeCode.String:
+                            throw new InvalidCastException("Cannot cast from String");
+                        case SttpValueTypeCode.Buffer:
+                            throw new InvalidCastException("Cannot cast from Buffer");
+                        case SttpValueTypeCode.Set:
+                            throw new InvalidCastException("Cannot cast from Set");
+                        case SttpValueTypeCode.NamedSet:
+                            return (SttpNamedSet)m_valueObject;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+            set
+            {
+                m_valueTypeCode = SttpValueTypeCode.NamedSet;
+                m_valueObject = value;
             }
         }
 
@@ -1412,8 +1415,7 @@ namespace Sttp.WireProtocol
             {
                 if (!value)
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
-                m_bufferValue = null;
-                m_rawValue = 0;
+                m_valueObject = null;
                 m_valueTypeCode = SttpValueTypeCode.Null;
             }
         }
@@ -1443,6 +1445,206 @@ namespace Sttp.WireProtocol
             return new SttpValue(this);
         }
 
+        public void SetValue(object value)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                IsNull = true;
+                return;
+            }
+
+            var type = value.GetType();
+            if (type == typeof(sbyte))
+            {
+                SetValue((sbyte)value);
+            }
+            else if (type == typeof(short))
+            {
+                SetValue((short)value);
+            }
+            else if (type == typeof(int))
+            {
+                SetValue((int)value);
+            }
+            else if (type == typeof(long))
+            {
+                SetValue((long)value);
+            }
+            else if (type == typeof(byte))
+            {
+                SetValue((byte)value);
+            }
+            else if (type == typeof(ushort))
+            {
+                SetValue((ushort)value);
+            }
+            else if (type == typeof(uint))
+            {
+                SetValue((uint)value);
+            }
+            else if (type == typeof(ulong))
+            {
+                SetValue((ulong)value);
+            }
+            else if (type == typeof(float))
+            {
+                SetValue((float)value);
+            }
+            else if (type == typeof(double))
+            {
+                SetValue((double)value);
+            }
+            else if (type == typeof(decimal))
+            {
+                SetValue((decimal)value);
+            }
+            else if (type == typeof(SttpTimestamp))
+            {
+                SetValue((SttpTimestamp)value);
+            }
+            else if (type == typeof(SttpTimestampOffset))
+            {
+                SetValue((SttpTimestampOffset)value);
+            }
+            else if (type == typeof(DateTime))
+            {
+                SetValue((DateTime)value);
+            }
+            else if (type == typeof(DateTimeOffset))
+            {
+                SetValue((DateTimeOffset)value);
+            }
+            else if (type == typeof(TimeSpan))
+            {
+                SetValue((TimeSpan)value);
+            }
+            else if (type == typeof(bool))
+            {
+                SetValue((bool)value);
+            }
+            else if (type == typeof(char))
+            {
+                SetValue((char)value);
+            }
+            else if (type == typeof(Guid))
+            {
+                SetValue((Guid)value);
+            }
+            else if (type == typeof(string))
+            {
+                SetValue((string)value);
+            }
+            else if (type == typeof(byte[]))
+            {
+                SetValue((byte[])value);
+            }
+            else if (type == typeof(SttpSet))
+            {
+                SetValue((SttpSet)value);
+            }
+            else if (type == typeof(SttpNamedSet))
+            {
+                SetValue((SttpNamedSet)value);
+            }
+            else
+            {
+                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
+            }
+        }
+
+        public void SetValue(sbyte value)
+        {
+            AsSByte = value;
+        }
+        public void SetValue(short value)
+        {
+            AsInt16 = value;
+        }
+        public void SetValue(int value)
+        {
+            AsInt32 = value;
+        }
+        public void SetValue(long value)
+        {
+            AsInt64 = value;
+        }
+        public void SetValue(byte value)
+        {
+            AsByte = value;
+        }
+        public void SetValue(ushort value)
+        {
+            AsUInt16 = value;
+        }
+        public void SetValue(uint value)
+        {
+            AsUInt32 = value;
+        }
+        public void SetValue(ulong value)
+        {
+            AsUInt64 = value;
+        }
+        public void SetValue(float value)
+        {
+            AsSingle = value;
+        }
+        public void SetValue(double value)
+        {
+            AsDouble = value;
+        }
+        public void SetValue(decimal value)
+        {
+            AsDecimal = value;
+        }
+        public void SetValue(SttpTimestamp value)
+        {
+            AsSttpTimestamp = value;
+        }
+        public void SetValue(SttpTimestampOffset value)
+        {
+            AsSttpTimestampOffset = value;
+        }
+        public void SetValue(DateTime value)
+        {
+            AsSttpTimestamp = new SttpTimestamp(value);
+        }
+        public void SetValue(DateTimeOffset value)
+        {
+            AsSttpTimestampOffset = new SttpTimestampOffset(value);
+        }
+        public void SetValue(TimeSpan value)
+        {
+            AsTimeSpan = value;
+        }
+        public void SetValue(bool value)
+        {
+            AsBool = value;
+        }
+        public void SetValue(char value)
+        {
+            AsChar = value;
+        }
+        public void SetValue(Guid value)
+        {
+            AsGuid = value;
+        }
+        public void SetValue(string value)
+        {
+            AsString = value;
+        }
+        public void SetValue(byte[] value)
+        {
+            AsBuffer = value;
+        }
+        public void SetValue(SttpSet value)
+        {
+            AsSet = value;
+        }
+        public void SetValue(SttpNamedSet value)
+        {
+            AsNamedSet = value;
+        }
+
         public static bool operator ==(SttpValue a, SttpValue b)
         {
             if (ReferenceEquals(a, b))
@@ -1464,55 +1666,7 @@ namespace Sttp.WireProtocol
         {
             return !(a == b);
         }
-
-        internal byte GetOne8BitValue()
-        {
-            return m_valueByte;
-        }
-
-        internal short GetOne16BitValue()
-        {
-            return m_valueInt16;
-        }
-
-        internal int GetOne32BitValue()
-        {
-            return m_valueInt32;
-        }
-
-        internal long GetOne64BitValue()
-        {
-            return m_valueInt64;
-        }
-
-        internal byte[] GetRawBuffer()
-        {
-            //ToDo: Check that everything got serialized as desired.
-            return m_bufferValue;
-        }
-
-        internal void SetOne8BitValue(byte value, SttpValueTypeCode code)
-        {
-            
-        }
-        internal void SetOne16BitValue(short value, SttpValueTypeCode code)
-        {
-
-        }
-        internal void SetOne32BitValue(int value, SttpValueTypeCode code)
-        {
-
-        }
-        internal void SetOne64BitValue(long value, SttpValueTypeCode code)
-        {
-
-        }
-
-        internal void SetBuffer(byte[] buffer, SttpValueTypeCode code)
-        {
-            
-        }
-
+        
         #endregion
 
         public void Load(PacketReader packetReader)
@@ -1520,10 +1674,7 @@ namespace Sttp.WireProtocol
             throw new NotImplementedException();
         }
 
-        public void SetValue(object value)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public object ToNativeType(SttpValueTypeCode typeCode)
         {

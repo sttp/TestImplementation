@@ -39,12 +39,12 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// 16-bits for identifying the quality of the time.
         /// </summary>
-        public short TimestampQuality;
+        public TimeQualityFlags TimestampQuality;
 
         /// <summary>
         /// 16-bits for identifying the quality of the value.
         /// </summary>
-        public short ValueQuality;
+        public ValueQualityFlags ValueQuality;
 
         /// <summary>
         /// An array of extra fields that exist in the protocol. Specific implementations of STTP should define these fields.

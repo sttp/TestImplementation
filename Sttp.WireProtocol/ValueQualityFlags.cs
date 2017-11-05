@@ -3,7 +3,7 @@
 namespace Sttp
 {
     [Flags]
-    public enum DataQualityFlags : byte
+    public enum ValueQualityFlags : byte
     {
         Normal = 0,                 // Defines normal state
         BadTime = 1 << 0,           // Defines bad time state

@@ -14,7 +14,7 @@ namespace Sttp
         public int ValueLength;
         public DateTime Time;
         public TimeQualityFlags Flags;
-        public DataQualityFlags QualityFlags;
+        public ValueQualityFlags QualityFlags;
 
         public void SetValue(sbyte value)
         {

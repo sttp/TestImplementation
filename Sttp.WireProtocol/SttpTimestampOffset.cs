@@ -24,6 +24,11 @@ namespace Sttp.WireProtocol.SendDataPoints
             RawValue = rawValue;
         }
 
+        public SttpTimestampOffset(DateTimeOffset rawValue)
+        {
+            throw new NotImplementedException();
+        }
+
         public DateTime Ticks => new DateTime(RawValue & TicksMask);
 
         public bool LeapsecondInProgress => (RawValue & LeapsecondFlag) > 0;
