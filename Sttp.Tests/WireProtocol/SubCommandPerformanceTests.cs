@@ -25,16 +25,16 @@ namespace Sttp.Tests.WireProtocol
                 switch (subcommand)
                 {
                     case 0:
-                        commands.Add(new CmdAddColumn());
+                        commands.Add(new CmdDefineColumn());
                         break;
                     case 1:
-                        commands.Add(new CmdAddRow());
+                        commands.Add(new CmdDefineRow());
                         break;
                     case 2:
-                        commands.Add(new CmdAddTable());
+                        commands.Add(new CmdDefineTable());
                         break;
                     case 3:
-                        commands.Add(new CmdAddValue());
+                        commands.Add(new CmdDefineValue());
                         break;
                     case 4:
                         commands.Add(new CmdDatabaseVersion());
@@ -43,7 +43,7 @@ namespace Sttp.Tests.WireProtocol
                         commands.Add(new CmdClear());
                         break;
                     case 6:
-                        commands.Add(new CmdDeleteRow());
+                        commands.Add(new CmdRemoveRow());
                         break;
                 }
             }
@@ -54,11 +54,11 @@ namespace Sttp.Tests.WireProtocol
         [TestMethod]
         public void TestCasting()
         {
-            ICmd cmd = new CmdAddColumn();
+            ICmd cmd = new CmdDefineColumn();
 
             for (int i = 0; i < NumIterations; i++)
             {
-                CmdAddColumn result = (CmdAddColumn)cmd;
+                CmdDefineColumn result = (CmdDefineColumn)cmd;
                 result.ColumnIndex++;
             }
         }
@@ -127,24 +127,24 @@ namespace Sttp.Tests.WireProtocol
                         var cmdClear = (CmdClear)cmd;
                         Assert.IsNotNull(cmdClear);
                         break;
-                    case SubCommand.AddTable:
-                        var cmdAddTable = (CmdAddTable)cmd;
+                    case SubCommand.DefineTable:
+                        var cmdAddTable = (CmdDefineTable)cmd;
                         Assert.IsNotNull(cmdAddTable);
                         break;
-                    case SubCommand.AddColumn:
-                        var cmdAddColumn = (CmdAddColumn)cmd;
+                    case SubCommand.DefineColumn:
+                        var cmdAddColumn = (CmdDefineColumn)cmd;
                         Assert.IsNotNull(cmdAddColumn);
                         break;
-                    case SubCommand.AddRow:
-                        var cmdAddRow = (CmdAddRow)cmd;
+                    case SubCommand.DefineRow:
+                        var cmdAddRow = (CmdDefineRow)cmd;
                         Assert.IsNotNull(cmdAddRow);
                         break;
-                    case SubCommand.AddValue:
-                        var cmdAddValue = (CmdAddValue)cmd;
+                    case SubCommand.DefineValue:
+                        var cmdAddValue = (CmdDefineValue)cmd;
                         Assert.IsNotNull(cmdAddValue);
                         break;
-                    case SubCommand.DeleteRow:
-                        var cmdDeleteRow = (CmdDeleteRow)cmd;
+                    case SubCommand.RemoveRow:
+                        var cmdDeleteRow = (CmdRemoveRow)cmd;
                         Assert.IsNotNull(cmdDeleteRow);
                         break;
                     case SubCommand.Invalid:
@@ -169,19 +169,19 @@ namespace Sttp.Tests.WireProtocol
                     case CmdClear cmdClear:
                         Assert.IsNotNull(cmdClear);
                         break;
-                    case CmdAddTable cmdAddTable:
+                    case CmdDefineTable cmdAddTable:
                         Assert.IsNotNull(cmdAddTable);
                         break;
-                    case CmdAddColumn cmdAddColumn:
+                    case CmdDefineColumn cmdAddColumn:
                         Assert.IsNotNull(cmdAddColumn);
                         break;
-                    case CmdAddRow cmdAddRow:
+                    case CmdDefineRow cmdAddRow:
                         Assert.IsNotNull(cmdAddRow);
                         break;
-                    case CmdAddValue cmdAddValue:
+                    case CmdDefineValue cmdAddValue:
                         Assert.IsNotNull(cmdAddValue);
                         break;
-                    case CmdDeleteRow cmdDeleteRow:
+                    case CmdRemoveRow cmdDeleteRow:
                         Assert.IsNotNull(cmdDeleteRow);
                         break;
                 }

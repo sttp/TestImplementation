@@ -136,13 +136,13 @@ namespace Sttp.Data
             switch (ChangeType)
             {
                 case MetadataChangeType.AddColumn:
-                    encoder.AddColumn(m_tableIndex, m_columnIndex, m_columnName, (byte)m_columnTypeCode);
+                    encoder.DefineColumn(m_tableIndex, m_columnIndex, m_columnName, (byte)m_columnTypeCode);
                     break;
                 case MetadataChangeType.AddValue:
-                    encoder.AddValue(m_tableIndex, m_columnIndex, m_rowIndex, m_value);
+                    encoder.DefineValue(m_tableIndex, m_columnIndex, m_rowIndex, m_value);
                     break;
                 case MetadataChangeType.DeleteRow:
-                    encoder.DeleteRow(m_tableIndex, m_rowIndex);
+                    encoder.RemoveRow(m_tableIndex, m_rowIndex);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

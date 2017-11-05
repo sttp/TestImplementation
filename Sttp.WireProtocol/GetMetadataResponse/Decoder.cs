@@ -17,12 +17,12 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             m_cmd = new Cmd();
             m_commands = new ICmd[10];
             m_commands[(byte)SubCommand.DatabaseVersion] = new CmdDatabaseVersion();
-            m_commands[(byte)SubCommand.AddColumn] = new CmdAddColumn();
-            m_commands[(byte)SubCommand.AddRow] = new CmdAddRow();
-            m_commands[(byte)SubCommand.AddTable] = new CmdAddTable();
-            m_commands[(byte)SubCommand.AddValue] = new CmdAddValue();
+            m_commands[(byte)SubCommand.DefineColumn] = new CmdDefineColumn();
+            m_commands[(byte)SubCommand.DefineRow] = new CmdDefineRow();
+            m_commands[(byte)SubCommand.DefineTable] = new CmdDefineTable();
+            m_commands[(byte)SubCommand.DefineValue] = new CmdDefineValue();
             m_commands[(byte)SubCommand.Clear] = new CmdClear();
-            m_commands[(byte)SubCommand.DeleteRow] = new CmdDeleteRow();
+            m_commands[(byte)SubCommand.RemoveRow] = new CmdRemoveRow();
         }
 
         public CommandCode CommandCode => CommandCode.GetMetadataResponse;

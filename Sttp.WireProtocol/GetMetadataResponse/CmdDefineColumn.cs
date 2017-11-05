@@ -1,8 +1,8 @@
-﻿namespace Sttp.WireProtocol.GetMetadataSchemaResponse
+﻿namespace Sttp.WireProtocol.GetMetadataResponse
 {
-    public class CmdAddColumn : ICmd
+    public class CmdDefineColumn : ICmd
     {
-        public SubCommand SubCommand => SubCommand.AddColumn;
+        public SubCommand SubCommand => SubCommand.DefineColumn;
         public short TableIndex;
         public short ColumnIndex;
         public string ColumnName;
@@ -15,6 +15,6 @@
             ColumnName = reader.ReadString();
             ColumnTypeCode = reader.ReadByte();
         }
-
+       
     }
 }

@@ -15,17 +15,17 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         }
 
-        public void AddTable(short tableIndex, string tableName, TableFlags tableFlags)
+        public void DefineTable(short tableIndex, string tableName, TableFlags tableFlags)
         {
-            Stream.Write(SubCommand.AddTable);
+            Stream.Write(SubCommand.DefineTable);
             Stream.Write(tableIndex);
             Stream.Write(tableName);
             Stream.Write(tableFlags);
         }
 
-        public void AddColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
+        public void DefineColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
         {
-            Stream.Write(SubCommand.AddColumn);
+            Stream.Write(SubCommand.DefineColumn);
             Stream.Write(tableIndex);
             Stream.Write(columnIndex);
             Stream.Write(columnName);

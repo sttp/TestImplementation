@@ -21,17 +21,17 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
         DatabaseVersion,
 
         /// <summary>
-        /// Adds a table.
+        /// Defines a table.
         /// 
         /// Payload: 
         /// short tableIndex,
         /// string tableName, 
         /// TableFlags flags
         /// </summary>
-        AddTable,
+        DefineTable,
 
         /// <summary>
-        /// Adds a column.
+        /// Defines a column.
         /// 
         /// Payload: 
         /// short tableIndex,
@@ -40,7 +40,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
         /// ValueType columnType
         /// 
         /// </summary>
-        AddColumn,
+        DefineColumn,
        
     }
 }

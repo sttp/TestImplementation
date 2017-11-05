@@ -85,22 +85,22 @@ namespace Sttp.Data
 
         public void RequestTableData(WireProtocol.GetMetadataResponse.Encoder encoder, MetadataTableFilter permissionFilter)
         {
-            encoder.AddTable(TableIndex, TableName, TableFlags);
+            encoder.DefineTable(TableIndex, TableName, TableFlags);
             foreach (var column in Columns)
             {
-                encoder.AddColumn(TableIndex, column.Index, column.Name, (byte)column.TypeCode);
+                encoder.DefineColumn(TableIndex, column.Index, column.Name, (byte)column.TypeCode);
             }
             foreach (var row in Rows)
             {
                 if (permissionFilter == null || permissionFilter.PermitRow(row))
                 {
-                    encoder.AddRow(TableIndex, row.RowIndex);
+                    encoder.DefineRow(TableIndex, row.RowIndex);
                     for (short columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
                     {
                         var field = row.Fields[columnIndex];
                         if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
                         {
-                            encoder.AddValue(TableIndex, columnIndex, row.RowIndex, field.Value);
+                            encoder.DefineValue(TableIndex, columnIndex, row.RowIndex, field.Value);
                         }
                     }
                 }

@@ -45,15 +45,8 @@ namespace Sttp.WireProtocol
         NextFragment,
 
         /// <summary>
-        /// Capable of sending large blocks of data over STTP.
-        /// </summary>
-        BulkTransport,
-
-        
-
-        /// <summary>
         /// Requests the schema for the metadata. Since all I/O for metadata requests occurs 
-        /// with runtime IDs, the response for this packet will provide all table and column
+        /// with Column/Table IDs, the response for this packet will provide all table and column
         /// for the database.
         /// 
         /// Layout:
@@ -62,8 +55,9 @@ namespace Sttp.WireProtocol
         /// 
         /// Response:
         /// IF (GetDatabaseSchema)
-        /// Subcommands: AddTable           
-        /// Subcommands: AddColumn
+        /// Subcommands: DefineTable           
+        /// Subcommands: DefineColumn
+        /// 
         /// 
         /// IF (GetDatabaseVerion)
         /// Subcommands: DatabaseVersion
@@ -93,10 +87,10 @@ namespace Sttp.WireProtocol
         /// Subcommands: Clear              - This indicates that the metadata synchronization 
         ///                                   cannot occur and the entire datasource will be flushed.
         /// Subcommands: DatabaseVersion
-        /// Subcommands: AddTable
-        /// Subcommands: AddColumn
-        /// Subcommands: AddRow
-        /// Subcommands: AddValue
+        /// Subcommands: DefineTable
+        /// Subcommands: DefineColumn
+        /// Subcommands: DefineRow
+        /// Subcommands: DefineValue
         /// Subcommands: DeleteRow          - This command will only appear if syncing a data source.
         /// 
         /// </summary>
@@ -108,7 +102,6 @@ namespace Sttp.WireProtocol
         /// 
         /// Layout:
         /// Subcommand: IsAugmentedSubscription         - Specifies that the subscription request is intended to augment the existing subscription.
-        
         /// Subcommand: DownSamplingPerDay              - Sets the down-sampling mode for this subscription to be a certain number of samples per day.
         ///                                               This is valid for all data points defined after this point.
         /// Subcommand: DownSamplingSamplesPerSecond    - Sets the down-sampling mode for this subscription to be a value every 'X' number of seconds.
@@ -146,13 +139,14 @@ namespace Sttp.WireProtocol
         /// </summary>
         RegisterDataPointRuntimeIdentifier,
 
+        /// <summary>
+        /// Capable of sending large blocks of data over STTP.
+        /// </summary>
+        BulkTransport,
+
         // TODO : assign values
         NegotiateSession,
         SecureDataChannel,
-
-
-        
-
         NoOp = 0xFF,
     }
 }

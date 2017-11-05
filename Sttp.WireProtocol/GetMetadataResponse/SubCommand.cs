@@ -26,17 +26,17 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         Clear,
 
         /// <summary>
-        /// Adds a table.
+        /// Defines a table.
         /// 
         /// Payload: 
         /// short tableIndex,
         /// string tableName, 
         /// TableFlags flags
         /// </summary>
-        AddTable,
+        DefineTable,
 
         /// <summary>
-        /// Adds a column.
+        /// Defines a column.
         /// 
         /// Payload: 
         /// short tableIndex,
@@ -45,20 +45,20 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// ValueType columnType
         /// 
         /// </summary>
-        AddColumn,
+        DefineColumn,
 
         /// <summary>
-        /// Adds a row to an existing table.
+        /// Defines a row to an existing table.
         /// 
         /// Payload: 
         /// short tableIndex,
         /// int rowIndex,
         /// 
         /// </summary>
-        AddRow,
+        DefineRow,
 
         /// <summary>
-        /// Adds or updates a value. Deleting a value would be to assign it with null.
+        /// Defines a value. Deleting a value would be to assign it with null.
         /// 
         /// Payload: 
         /// short tableIndex,
@@ -67,16 +67,16 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// byte[] value
         /// 
         /// </summary>
-        AddValue,
+        DefineValue,
 
         /// <summary>
-        /// Removes an entire row of data.
+        /// Indicates that a row of data has been removed.
         /// 
         /// Payload: 
         /// short tableIndex,
         /// int rowIndex,
         /// 
         /// </summary>
-        DeleteRow,
+        RemoveRow,
     }
 }

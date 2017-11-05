@@ -42,7 +42,7 @@ namespace Sttp.Data
 
         }
 
-        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.CmdAddValue patch)
+        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.CmdDefineValue patch)
         {
             while (Fields.Count <= patch.ColumnIndex)
             {

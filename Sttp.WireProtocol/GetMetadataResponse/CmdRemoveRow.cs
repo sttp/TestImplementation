@@ -1,20 +1,16 @@
 ﻿namespace Sttp.WireProtocol.GetMetadataResponse
 {
-    public class CmdAddValue : ICmd
+    public class CmdRemoveRow : ICmd
     {
-        public SubCommand SubCommand => SubCommand.AddValue;
+        public SubCommand SubCommand => SubCommand.RemoveRow;
         public short TableIndex;
-        public short ColumnIndex;
         public int RowIndex;
-        public SttpValue Value;
 
         public void Load(PacketReader reader)
         {
             TableIndex = reader.ReadInt16();
-            ColumnIndex = reader.ReadInt16();
             RowIndex = reader.ReadInt32();
-            Value = reader.Read<SttpValue>();
         }
-        
+
     }
 }

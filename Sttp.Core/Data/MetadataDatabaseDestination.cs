@@ -58,7 +58,7 @@ namespace Sttp.Data
                         break;
                     case SubCommand.Clear:
                         break;
-                    case SubCommand.AddTable:
+                    case SubCommand.DefineTable:
                         {
                             var cmd = command.AddTable;
                             var table = new MetadataTableDestination(cmd.TableName, cmd.TableIndex, cmd.TableFlags);
@@ -70,17 +70,17 @@ namespace Sttp.Data
                             m_tables[cmd.TableIndex] = table;
                         }
                         break;
-                    case SubCommand.AddColumn:
-                        m_tables[command.AddColumn.TableIndex].ProcessCommand(command);
+                    case SubCommand.DefineColumn:
+                        m_tables[command.DefineColumn.TableIndex].ProcessCommand(command);
                         break;
-                    case SubCommand.AddRow:
-                        m_tables[command.AddRow.TableIndex].ProcessCommand(command);
+                    case SubCommand.DefineRow:
+                        m_tables[command.DefineRow.TableIndex].ProcessCommand(command);
                         break;
-                    case SubCommand.AddValue:
+                    case SubCommand.DefineValue:
                         m_tables[command.AddValue.TableIndex].ProcessCommand(command);
                         break;
-                    case SubCommand.DeleteRow:
-                        m_tables[command.DeleteRow.TableIndex].ProcessCommand(command);
+                    case SubCommand.RemoveRow:
+                        m_tables[command.RemoveRow.TableIndex].ProcessCommand(command);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

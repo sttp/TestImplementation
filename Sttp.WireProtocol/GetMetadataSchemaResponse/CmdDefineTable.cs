@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.GetMetadataResponse
+namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 {
-    public class CmdAddTable : ICmd
+    public class CmdDefineTable : ICmd
     {
-        public SubCommand SubCommand => SubCommand.AddTable;
+        public SubCommand SubCommand => SubCommand.DefineTable;
         public short TableIndex;
         public string TableName;
         public TableFlags TableFlags;
@@ -15,5 +15,6 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             TableName = reader.ReadString();
             TableFlags = reader.Read<TableFlags>();
         }
+
     }
 }

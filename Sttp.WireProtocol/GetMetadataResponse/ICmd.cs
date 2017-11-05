@@ -20,11 +20,11 @@
         public SubCommand SubCommand => m_commandCode;
 
         public CmdDatabaseVersion DatabaseVersion => m_command as CmdDatabaseVersion;
-        public CmdAddColumn AddColumn => m_command as CmdAddColumn;
-        public CmdAddRow AddRow => m_command as CmdAddRow;
-        public CmdAddTable AddTable => m_command as CmdAddTable;
-        public CmdAddValue AddValue => m_command as CmdAddValue;
+        public CmdDefineColumn DefineColumn => m_command as CmdDefineColumn;
+        public CmdDefineRow DefineRow => m_command as CmdDefineRow;
+        public CmdDefineTable AddTable => m_command as CmdDefineTable;
+        public CmdDefineValue AddValue => m_command as CmdDefineValue;
         public CmdClear Clear => m_command as CmdClear;
-        public CmdDeleteRow DeleteRow => m_command as CmdDeleteRow;
+        public CmdRemoveRow RemoveRow => m_command as CmdRemoveRow;
     }
 }

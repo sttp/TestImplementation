@@ -20,42 +20,42 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(SubCommand.Clear);
         }
 
-        public void AddTable(short tableIndex, string tableName, TableFlags tableFlags)
+        public void DefineTable(short tableIndex, string tableName, TableFlags tableFlags)
         {
-            Stream.Write(SubCommand.AddTable);
+            Stream.Write(SubCommand.DefineTable);
             Stream.Write(tableIndex);
             Stream.Write(tableName);
             Stream.Write(tableFlags);
         }
 
-        public void AddColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
+        public void DefineColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
         {
-            Stream.Write(SubCommand.AddColumn);
+            Stream.Write(SubCommand.DefineColumn);
             Stream.Write(tableIndex);
             Stream.Write(columnIndex);
             Stream.Write(columnName);
             Stream.Write(columnTypeCode);
         }
 
-        public void AddRow(short tableIndex, int rowIndex)
+        public void DefineRow(short tableIndex, int rowIndex)
         {
-            Stream.Write(SubCommand.AddRow);
+            Stream.Write(SubCommand.DefineRow);
             Stream.Write(tableIndex);
             Stream.Write(rowIndex);
         }
 
-        public void AddValue(short tableIndex, short columnIndex, int rowIndex, SttpValue value)
+        public void DefineValue(short tableIndex, short columnIndex, int rowIndex, SttpValue value)
         {
-            Stream.Write(SubCommand.AddValue);
+            Stream.Write(SubCommand.DefineValue);
             Stream.Write(tableIndex);
             Stream.Write(columnIndex);
             Stream.Write(rowIndex);
             Stream.Write(value);
         }
 
-        public void DeleteRow(short tableIndex, int rowIndex)
+        public void RemoveRow(short tableIndex, int rowIndex)
         {
-            Stream.Write(SubCommand.DeleteRow);
+            Stream.Write(SubCommand.RemoveRow);
             Stream.Write(tableIndex);
             Stream.Write(rowIndex);
         }

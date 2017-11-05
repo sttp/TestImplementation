@@ -77,16 +77,16 @@ namespace Sttp.Data
         {
             switch (command.SubCommand)
             {
-                case SubCommand.AddColumn:
-                    var addC = command.AddColumn;
+                case SubCommand.DefineColumn:
+                    var addC = command.DefineColumn;
                     while (Columns.Count <= addC.ColumnIndex)
                     {
                         Columns.Add(null);
                     }
                     Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, (SttpValueTypeCode)addC.ColumnTypeCode);
                     break;
-                case SubCommand.AddRow:
-                    var addR = command.AddRow;
+                case SubCommand.DefineRow:
+                    var addR = command.DefineRow;
                     while (Rows.Count <= addR.RowIndex)
                     {
                         Rows.Add(null);
@@ -96,15 +96,15 @@ namespace Sttp.Data
                         Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
                     }
                     break;
-                case SubCommand.AddValue:
+                case SubCommand.DefineValue:
                     var addV = command.AddValue;
                     Rows[addV.RowIndex].ProcessCommand(addV);
                     break;
-                case SubCommand.DeleteRow:
-                    var delRow = command.DeleteRow;
+                case SubCommand.RemoveRow:
+                    var delRow = command.RemoveRow;
                     Rows[delRow.RowIndex] = null;
                     break;
-                case SubCommand.AddTable:
+                case SubCommand.DefineTable:
                 case SubCommand.Clear:
                 case SubCommand.DatabaseVersion:
                 case SubCommand.Invalid:

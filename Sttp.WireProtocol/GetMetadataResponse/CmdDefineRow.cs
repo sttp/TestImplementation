@@ -1,8 +1,8 @@
 ﻿namespace Sttp.WireProtocol.GetMetadataResponse
 {
-    public class CmdDeleteRow : ICmd
+    public class CmdDefineRow : ICmd
     {
-        public SubCommand SubCommand => SubCommand.DeleteRow;
+        public SubCommand SubCommand => SubCommand.DefineRow;
         public short TableIndex;
         public int RowIndex;
 
@@ -11,6 +11,7 @@
             TableIndex = reader.ReadInt16();
             RowIndex = reader.ReadInt32();
         }
+
 
     }
 }
