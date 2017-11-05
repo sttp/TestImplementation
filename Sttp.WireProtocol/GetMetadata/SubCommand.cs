@@ -31,6 +31,20 @@ namespace Sttp.WireProtocol.GetMetadata
         Select,
 
         /// <summary>
+        /// Traverses a predefined table relationship as part of this query.
+        /// 
+        /// Payload:
+        /// short tableIndex         - The table that has the foreign key
+        /// short columnIndex        - The column that has the foreign key
+        /// short foreignTableIndex  - The table that this foreign key references. 
+        /// bool isLeftJoin          - Indicates if this relationship is a left join or an inner join. 
+        ///                            Outer Joins are invalid given the one to many relationship requirement 
+        ///                            for a table relationship.
+        /// 
+        /// </summary>
+        Join,
+
+        /// <summary>
         /// Specifies a filter clause to apply to the data. To do a single Like statement, include 1 item in the list.
         /// 
         /// Payload:
