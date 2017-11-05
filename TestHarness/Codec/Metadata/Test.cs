@@ -25,8 +25,6 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.NextFragment:
                         break;
-                    case CommandCode.CompressedPacket:
-                        break;
                     case CommandCode.NegotiateSession:
                         break;
                     case CommandCode.Subscribe:

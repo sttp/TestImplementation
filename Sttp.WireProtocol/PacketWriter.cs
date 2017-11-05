@@ -111,12 +111,6 @@ namespace Sttp.WireProtocol
                 ms.ReadAll(m_buffer, UserDataPosition, compressedSize);
             }
 
-            if (compressedSize + 3 + 9 <= m_sessionDetails.MaximumSegmentSize)
-            {
-                SendCompressedPacket(sendPacket, length, 1, UserDataPosition, compressedSize);
-                return;
-            }
-
             SendFragmentedPacket(sendPacket, compressedSize, length, 1, UserDataPosition, compressedSize);
         }
 
@@ -152,20 +146,6 @@ namespace Sttp.WireProtocol
                 offset += nextLength;
             }
 
-        }
-
-        private void SendCompressedPacket(Action<byte[], int, int> sendPacket, int totalSize, byte compressionMode, int offset, int length)
-        {
-            const int Overhead = 1 + 2 + 4 + 1 + 1; //9 bytes.
-            offset -= Overhead;
-            length += Overhead;
-            m_position = offset - Overhead;
-            Write(CommandCode.CompressedPacket);
-            Write((short)(length + Overhead));
-            Write(totalSize);
-            Write(m_command);
-            Write(compressionMode);
-            sendPacket(m_buffer, offset - Overhead, length + Overhead);
         }
 
         public void Clear()

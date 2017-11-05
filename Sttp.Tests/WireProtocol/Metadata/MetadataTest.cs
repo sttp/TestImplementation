@@ -62,7 +62,6 @@ namespace Sttp.Tests
                     case CommandCode.BulkTransport:
                     case CommandCode.BeginFragment:
                     case CommandCode.NextFragment:
-                    case CommandCode.CompressedPacket:
                     case CommandCode.GetMetadataSchema:
                     case CommandCode.GetMetadataSchemaResponse:
                     case CommandCode.GetMetadata:

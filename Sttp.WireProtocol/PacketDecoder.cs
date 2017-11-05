@@ -90,29 +90,6 @@ namespace Sttp.WireProtocol
                 }
                 goto TryAgain;
             }
-            else if (code == CommandCode.CompressedPacket)
-            {
-                int totalRawSize = BigEndian.ToInt32(m_buffer, m_position + 3);
-                CommandCode commandCode = (CommandCode)m_buffer[m_position + 7];
-                byte mode = m_buffer[m_position + 8];
-
-                if (m_pendingData.Length < totalRawSize)
-                {
-                    m_pendingData = new byte[totalRawSize];
-                }
-                var ms = new MemoryStream(m_buffer);
-                ms.Position = m_position + 9;
-                using (var inflate = new DeflateStream(ms, CompressionMode.Decompress, true))
-                {
-                    inflate.ReadAll(m_pendingData, 0, totalRawSize);
-                }
-                m_reader.SetBuffer(commandCode, m_pendingData, 0, totalRawSize);
-
-                m_position += packetLegth;
-                m_length -= packetLegth;
-
-                return m_reader;
-            }
             else
             {
                 if (m_isProcessingFragments)

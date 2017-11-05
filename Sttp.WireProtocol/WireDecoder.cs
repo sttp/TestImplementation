@@ -85,8 +85,6 @@ namespace Sttp.WireProtocol
                     break;
                 case CommandCode.NextFragment:
                     break;
-                case CommandCode.CompressedPacket:
-                    break;
                 case CommandCode.GetMetadataSchema:
                     m_getMetadataSchema.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadataSchema);

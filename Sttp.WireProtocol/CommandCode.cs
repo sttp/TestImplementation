@@ -3,18 +3,11 @@ namespace Sttp.WireProtocol
 {
     public enum CommandCode : byte
     {
-        //Finalized Names;
-
         /// <summary>
         /// An invalid command to indicate that nothing is assigned.
         /// This cannot be sent over the wire.
         /// </summary>
         Invalid = 0x00,
-
-        /// <summary>
-        /// Capable of sending large blocks of data over STTP.
-        /// </summary>
-        BulkTransport = 0x03,
 
         /// <summary>
         /// Indicates that a fragmented packet is being sent. Fragmented packets 
@@ -28,6 +21,9 @@ namespace Sttp.WireProtocol
         /// of MB's.
         /// 
         /// Fragmented packets can have a compression=none.
+        /// 
+        /// If TotalFragmentSize == [Length of first fragment], this first fragment is the only fragment.
+        /// This occurs when the packet is compressed, but not fragmented.
         /// 
         /// Layout:
         /// int TotalFragmentSize     - The size of all fragments.
@@ -49,16 +45,11 @@ namespace Sttp.WireProtocol
         NextFragment,
 
         /// <summary>
-        /// Indicates a packet that is compressed but not fragmented. This will decrease the overhead 
-        /// 
-        /// Layout:
-        /// int TotalRawSize          - The uncompressed data size.
-        /// byte CommandCode,         - The Command of the data that is encapsulated.
-        /// byte CompressionMode      - The algorithm that is used to compress the data.
-        /// (Implied) Length of compressed data.
-        /// byte[] CompressedData
+        /// Capable of sending large blocks of data over STTP.
         /// </summary>
-        CompressedPacket,
+        BulkTransport,
+
+        
 
         /// <summary>
         /// Requests the schema for the metadata. Since all I/O for metadata requests occurs 
