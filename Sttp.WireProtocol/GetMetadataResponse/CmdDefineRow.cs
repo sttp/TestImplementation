@@ -3,13 +3,13 @@
     public class CmdDefineRow : ICmd
     {
         public SubCommand SubCommand => SubCommand.DefineRow;
-        public short TableIndex;
-        public int RowIndex;
+        public SttpValue PrimaryKey;
+        public SttpValueSet Values;
 
         public void Load(PacketReader reader)
         {
-            TableIndex = reader.ReadInt16();
-            RowIndex = reader.ReadInt32();
+            PrimaryKey = reader.Read<SttpValue>();
+            Values = reader.Read<SttpValueSet>();
         }
 
 

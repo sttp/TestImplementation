@@ -85,26 +85,26 @@ namespace Sttp.Data
 
         public void RequestTableData(WireProtocol.GetMetadataResponse.Encoder encoder, MetadataTableFilter permissionFilter)
         {
-            encoder.DefineTable(TableIndex, TableName, TableFlags);
-            foreach (var column in Columns)
-            {
-                encoder.DefineColumn(TableIndex, column.Index, column.Name, (byte)column.TypeCode);
-            }
-            foreach (var row in Rows)
-            {
-                if (permissionFilter == null || permissionFilter.PermitRow(row))
-                {
-                    encoder.DefineRow(TableIndex, row.RowIndex);
-                    for (short columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
-                    {
-                        var field = row.Fields[columnIndex];
-                        if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
-                        {
-                            //encoder.DefineValue(TableIndex, columnIndex, row.RowIndex, field.Value);
-                        }
-                    }
-                }
-            }
+            //encoder.DefineTable(TableIndex, TableName, TableFlags);
+            //foreach (var column in Columns)
+            //{
+            //    encoder.DefineColumn(TableIndex, column.Index, column.Name, (byte)column.TypeCode);
+            //}
+            //foreach (var row in Rows)
+            //{
+            //    if (permissionFilter == null || permissionFilter.PermitRow(row))
+            //    {
+            //        encoder.DefineRow(TableIndex, row.RowIndex);
+            //        for (short columnIndex = 0; columnIndex < row.Fields.Count; columnIndex++)
+            //        {
+            //            var field = row.Fields[columnIndex];
+            //            if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
+            //            {
+            //                //encoder.DefineValue(TableIndex, columnIndex, row.RowIndex, field.Value);
+            //            }
+            //        }
+            //    }
+            //}
         }
     }
 }

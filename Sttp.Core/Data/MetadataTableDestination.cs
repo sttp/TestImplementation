@@ -75,39 +75,39 @@ namespace Sttp.Data
 
         public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.Cmd command)
         {
-            switch (command.SubCommand)
-            {
-                case SubCommand.DefineColumn:
-                    var addC = command.DefineColumn;
-                    while (Columns.Count <= addC.ColumnIndex)
-                    {
-                        Columns.Add(null);
-                    }
-                    Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, (SttpValueTypeCode)addC.ColumnTypeCode);
-                    break;
-                case SubCommand.DefineRow:
-                    var addR = command.DefineRow;
-                    while (Rows.Count <= addR.RowIndex)
-                    {
-                        Rows.Add(null);
-                    }
-                    if (Rows[addR.RowIndex] == null)
-                    {
-                        Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
-                    }
-                    break;
-                case SubCommand.UndefineRow:
-                    var delRow = command.UndefineRow;
-                    Rows[delRow.RowIndex] = null;
-                    break;
-                case SubCommand.DefineTable:
-                case SubCommand.VersionNotCompatible:
-                case SubCommand.DatabaseVersion:
-                case SubCommand.Invalid:
-                    throw new NotSupportedException();
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            //switch (command.SubCommand)
+            //{
+            //    case SubCommand.DefineColumn:
+            //        var addC = command.DefineColumn;
+            //        while (Columns.Count <= addC.ColumnIndex)
+            //        {
+            //            Columns.Add(null);
+            //        }
+            //        Columns[addC.ColumnIndex] = new MetadataColumn(addC.ColumnIndex, addC.ColumnName, (SttpValueTypeCode)addC.ColumnTypeCode);
+            //        break;
+            //    case SubCommand.DefineRow:
+            //        var addR = command.DefineRow;
+            //        while (Rows.Count <= addR.RowIndex)
+            //        {
+            //            Rows.Add(null);
+            //        }
+            //        if (Rows[addR.RowIndex] == null)
+            //        {
+            //            Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
+            //        }
+            //        break;
+            //    case SubCommand.UndefineRow:
+            //        var delRow = command.UndefineRow;
+            //        Rows[delRow.RowIndex] = null;
+            //        break;
+            //    case SubCommand.DefineTable:
+            //    case SubCommand.VersionNotCompatible:
+            //    case SubCommand.DatabaseVersion:
+            //    case SubCommand.Invalid:
+            //        throw new NotSupportedException();
+            //    default:
+            //        throw new ArgumentOutOfRangeException();
+            //}
 
         }
 

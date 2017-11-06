@@ -133,17 +133,17 @@ namespace Sttp.Data
 
         public void Save(Sttp.WireProtocol.GetMetadataResponse.Encoder encoder)
         {
-            switch (ChangeType)
-            {
-                case MetadataChangeType.AddColumn:
-                    encoder.DefineColumn(m_tableIndex, m_columnIndex, m_columnName, (byte)m_columnTypeCode);
-                    break;
-                case MetadataChangeType.DeleteRow:
-                    encoder.RemoveRow(m_tableIndex, m_rowIndex);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            //switch (ChangeType)
+            //{
+            //    case MetadataChangeType.AddColumn:
+            //        encoder.DefineColumn(m_tableIndex, m_columnIndex, m_columnName, (byte)m_columnTypeCode);
+            //        break;
+            //    case MetadataChangeType.DeleteRow:
+            //        encoder.UndefineRow(m_tableIndex, m_rowIndex);
+            //        break;
+            //    default:
+            //        throw new ArgumentOutOfRangeException();
+            //}
         }
 
     }

@@ -16,6 +16,5 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
             TableFlags = reader.Read<TableFlags>();
             Columns = reader.ReadList<string, SttpValueTypeCode>();
         }
-
     }
 }

@@ -20,35 +20,32 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(SubCommand.VersionNotCompatible);
         }
 
-        public void DefineTable(short tableIndex, string tableName, TableFlags tableFlags)
+        public void RequestFailed(string reason, string details)
+        {
+            Stream.Write(SubCommand.RequestFailed);
+            Stream.Write(reason);
+            Stream.Write(details);
+        }
+
+        public void DefineTable(string tableName, TableFlags tableFlags, List<Tuple<string, SttpValueTypeCode>> columns)
         {
             Stream.Write(SubCommand.DefineTable);
-            Stream.Write(tableIndex);
             Stream.Write(tableName);
             Stream.Write(tableFlags);
+            Stream.Write(columns);
         }
 
-        public void DefineColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
-        {
-            Stream.Write(SubCommand.DefineColumn);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
-            Stream.Write(columnName);
-            Stream.Write(columnTypeCode);
-        }
-
-        public void DefineRow(short tableIndex, int rowIndex)
+        public void DefineRow(SttpValue primaryKey, SttpValueSet fields)
         {
             Stream.Write(SubCommand.DefineRow);
-            Stream.Write(tableIndex);
-            Stream.Write(rowIndex);
+            Stream.Write(primaryKey);
+            Stream.Write(fields);
         }
 
-        public void RemoveRow(short tableIndex, int rowIndex)
+        public void UndefineRow(SttpValue primaryKey)
         {
             Stream.Write(SubCommand.UndefineRow);
-            Stream.Write(tableIndex);
-            Stream.Write(rowIndex);
+            Stream.Write(primaryKey);
         }
 
         public void DatabaseVersion(Guid schemaVersion, long revision)

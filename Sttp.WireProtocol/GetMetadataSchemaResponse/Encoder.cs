@@ -40,7 +40,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         public void RequestFailed(string reason, string details)
         {
-            Stream.Write(SubCommand.DefineTableRelationship);
+            Stream.Write(SubCommand.RequestFailed);
             Stream.Write(reason);
             Stream.Write(details);
         }

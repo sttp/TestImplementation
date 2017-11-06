@@ -44,45 +44,45 @@ namespace Sttp.Data
         /// <returns></returns>
         public void Process(Sttp.WireProtocol.GetMetadataResponse.Decoder decoder)
         {
-            Sttp.WireProtocol.GetMetadataResponse.Cmd command;
-            while ((command = decoder.NextCommand()) != null)
-            {
-                switch (command.SubCommand)
-                {
-                    case SubCommand.Invalid:
-                        break;
-                    case SubCommand.DatabaseVersion:
-                        var db = command.DatabaseVersion;
-                        MajorVersion = db.SchemaVersion;
-                        MinorVersion = db.Revision;
-                        break;
-                    case SubCommand.VersionNotCompatible:
-                        break;
-                    case SubCommand.DefineTable:
-                        {
-                            var cmd = command.DefineTable;
-                            var table = new MetadataTableDestination(cmd.TableName, cmd.TableIndex, cmd.TableFlags);
-                            m_tableLookup.Add(table.TableName, cmd.TableIndex);
-                            while (m_tables.Count <= table.TableIndex)
-                            {
-                                m_tables.Add(null);
-                            }
-                            m_tables[cmd.TableIndex] = table;
-                        }
-                        break;
-                    case SubCommand.DefineColumn:
-                        m_tables[command.DefineColumn.TableIndex].ProcessCommand(command);
-                        break;
-                    case SubCommand.DefineRow:
-                        m_tables[command.DefineRow.TableIndex].ProcessCommand(command);
-                        break;
-                    case SubCommand.UndefineRow:
-                        m_tables[command.UndefineRow.TableIndex].ProcessCommand(command);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            //Sttp.WireProtocol.GetMetadataResponse.Cmd command;
+            //while ((command = decoder.NextCommand()) != null)
+            //{
+            //    switch (command.SubCommand)
+            //    {
+            //        case SubCommand.Invalid:
+            //            break;
+            //        case SubCommand.DatabaseVersion:
+            //            var db = command.DatabaseVersion;
+            //            MajorVersion = db.SchemaVersion;
+            //            MinorVersion = db.Revision;
+            //            break;
+            //        case SubCommand.VersionNotCompatible:
+            //            break;
+            //        case SubCommand.DefineTable:
+            //            {
+            //                var cmd = command.DefineTable;
+            //                var table = new MetadataTableDestination(cmd.TableName, cmd.TableIndex, cmd.TableFlags);
+            //                m_tableLookup.Add(table.TableName, cmd.TableIndex);
+            //                while (m_tables.Count <= table.TableIndex)
+            //                {
+            //                    m_tables.Add(null);
+            //                }
+            //                m_tables[cmd.TableIndex] = table;
+            //            }
+            //            break;
+            //        case SubCommand.DefineColumn:
+            //            m_tables[command.DefineColumn.TableIndex].ProcessCommand(command);
+            //            break;
+            //        case SubCommand.DefineRow:
+            //            m_tables[command.DefineRow.TableIndex].ProcessCommand(command);
+            //            break;
+            //        case SubCommand.UndefineRow:
+            //            m_tables[command.UndefineRow.TableIndex].ProcessCommand(command);
+            //            break;
+            //        default:
+            //            throw new ArgumentOutOfRangeException();
+            //    }
+            //}
         }
 
         public DataSet CreateDataSet()
