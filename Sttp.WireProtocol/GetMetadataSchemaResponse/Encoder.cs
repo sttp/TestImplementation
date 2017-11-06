@@ -15,37 +15,34 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         }
 
-        public void DefineTable(short tableIndex, string tableName, TableFlags tableFlags)
+        public void DefineTable(string tableName, TableFlags tableFlags, List<Tuple<string,SttpValueTypeCode>> columns)
         {
             Stream.Write(SubCommand.DefineTable);
-            Stream.Write(tableIndex);
             Stream.Write(tableName);
             Stream.Write(tableFlags);
+            Stream.Write(columns);
         }
 
-        public void DefineColumn(short tableIndex, short columnIndex, string columnName, byte columnTypeCode)
-        {
-            Stream.Write(SubCommand.DefineColumn);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
-            Stream.Write(columnName);
-            Stream.Write(columnTypeCode);
-        }
-
-        public void DatabaseVersion(Guid majorVersion, long minorVersion)
+        public void DatabaseVersion(Guid schemaVersion, long revision)
         {
             Stream.Write(SubCommand.DatabaseVersion);
-            Stream.Write(majorVersion);
-            Stream.Write(minorVersion);
+            Stream.Write(schemaVersion);
+            Stream.Write(revision);
         }
 
-
-        public void DefineTableRelationship(short tableIndex, short columnIndex, short foreignTableIndex)
+        public void DefineTableRelationship(string tableName, string columnName, string foreignTableName)
         {
             Stream.Write(SubCommand.DefineTableRelationship);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
-            Stream.Write(foreignTableIndex);
+            Stream.Write(tableName);
+            Stream.Write(columnName);
+            Stream.Write(foreignTableName);
+        }
+
+        public void RequestFailed(string reason, string details)
+        {
+            Stream.Write(SubCommand.DefineTableRelationship);
+            Stream.Write(reason);
+            Stream.Write(details);
         }
 
 

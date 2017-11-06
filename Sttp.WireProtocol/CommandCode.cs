@@ -57,6 +57,7 @@ namespace Sttp.WireProtocol
         /// IF (GetDatabaseSchema)
         /// Subcommands: DefineTable           
         /// Subcommands: DefineColumn
+        /// Subcommands: DefineTableRelationship
         /// 
         /// 
         /// IF (GetDatabaseVerion)

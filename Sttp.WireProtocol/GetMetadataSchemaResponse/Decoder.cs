@@ -17,8 +17,8 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
             m_cmd = new Cmd();
             m_commands = new ICmd[5];
             m_commands[(byte)SubCommand.DatabaseVersion] = new CmdDatabaseVersion();
-            m_commands[(byte)SubCommand.DefineColumn] = new CmdDefineColumn();
             m_commands[(byte)SubCommand.DefineTable] = new CmdDefineTable();
+            m_commands[(byte)SubCommand.RequestFailed] = new CmdRequestFailed();
             m_commands[(byte)SubCommand.DefineTableRelationship] = new CmdDefineTableRelationship();
         }
 

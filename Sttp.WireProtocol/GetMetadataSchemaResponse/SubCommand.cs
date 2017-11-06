@@ -11,12 +11,22 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
         /// </summary>
         Invalid = 0x00,
 
+
+        /// <summary>
+        /// The specified request failed. 
+        /// 
+        /// Payload: 
+        /// string Reason      - A user friendly message for the failure, can be null.
+        /// string Details     - A not so friendly message more helpful for troubleshooters.
+        /// </summary>
+        RequestFailed,
+
         /// <summary>
         /// Indicates the current version of the database.
         /// 
         /// Payload:
-        /// Guid majorVersion, 
-        /// long minorVersion, 
+        /// Guid SchemaVersion, 
+        /// long Revision, 
         /// </summary>
         DatabaseVersion,
 
@@ -24,35 +34,22 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
         /// Defines a table.
         /// 
         /// Payload: 
-        /// short tableIndex,
-        /// string tableName, 
+        /// string tableName,
         /// TableFlags flags
+        /// Array columns{string columnName, SttpValueTypeCode columnType}
+        /// 
         /// </summary>
         DefineTable,
-
-        /// <summary>
-        /// Defines a column.
-        /// 
-        /// Payload: 
-        /// short tableIndex,
-        /// short columnIndex, 
-        /// string columnName, 
-        /// ValueType columnType
-        /// 
-        /// </summary>
-        DefineColumn,
-
 
         /// <summary>
         /// Indicates that the specified column is a pointer to a record in another table.
         /// 
         /// Payload:
-        /// short tableIndex         - The table that has the foreign key
-        /// short columnIndex        - The column that has the foreign key
-        /// short foreignTableIndex  - The table that this foreign key references. 
+        /// string TableName         - The table that has the column with the foreign key.
+        /// string ColumnName        - The name of the column with the foreign key.
+        /// string ForeignTableName  - The foreign table that has the key. It could be itself of course.
         /// 
         /// </summary>
         DefineTableRelationship,
-
     }
 }

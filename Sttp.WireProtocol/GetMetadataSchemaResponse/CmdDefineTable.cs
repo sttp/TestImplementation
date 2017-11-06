@@ -1,19 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 {
     public class CmdDefineTable : ICmd
     {
         public SubCommand SubCommand => SubCommand.DefineTable;
-        public short TableIndex;
         public string TableName;
         public TableFlags TableFlags;
+        public List<Tuple<string, SttpValueTypeCode>> Columns;
 
         public void Load(PacketReader reader)
         {
-            TableIndex = reader.ReadInt16();
             TableName = reader.ReadString();
             TableFlags = reader.Read<TableFlags>();
+            Columns = reader.ReadList<string, SttpValueTypeCode>();
         }
 
     }

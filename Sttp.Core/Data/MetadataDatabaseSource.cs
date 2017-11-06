@@ -77,11 +77,11 @@ namespace Sttp.Data
             encoder.DatabaseVersion(MajorVersion, MinorVersion);
             foreach (var table in m_tables)
             {
-                encoder.DefineTable(table.TableIndex, table.TableName, table.TableFlags);
-                foreach (var column in table.Columns)
-                {
-                    encoder.DefineColumn(table.TableIndex, column.Index, column.Name, (byte)column.TypeCode);
-                }
+                encoder.DefineTable(table.TableName, table.TableFlags, null);
+                //foreach (var column in table.Columns)
+                //{
+                //    encoder.DefineColumn(table.TableIndex, column.Index, column.Name, (byte)column.TypeCode);
+                //}
             }
         }
 
