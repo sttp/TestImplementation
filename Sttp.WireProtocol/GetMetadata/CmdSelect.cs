@@ -3,13 +3,15 @@
     public class CmdSelect : ICmd
     {
         public SubCommand SubCommand => GetMetadata.SubCommand.Select;
-        public short TableIndex;
-        public short ColumnIndex;
+        public string TableName;
+        public string ColumnName;
+        public string AliasName;
 
         public void Load(PacketReader reader)
         {
-            TableIndex = reader.ReadInt16();
-            ColumnIndex = reader.ReadInt16();
+            TableName = reader.ReadString();
+            ColumnName = reader.ReadString();
+            AliasName = reader.ReadString();
         }
 
     }

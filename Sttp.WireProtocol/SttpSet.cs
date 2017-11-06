@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sttp.WireProtocol
 {
-    public class SttpSet
+    public class SttpValueSet
     {
         public List<SttpValue> Values;
     }

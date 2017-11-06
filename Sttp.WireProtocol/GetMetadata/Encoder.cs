@@ -15,44 +15,46 @@ namespace Sttp.WireProtocol.GetMetadata
 
         }
 
-        public void Select(short tableIndex, short columnIndex)
+        public void Select(string tableName, string columnName, string aliasName)
         {
             Stream.Write(SubCommand.Select);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
+            Stream.Write(tableName);
+            Stream.Write(columnName);
+            Stream.Write(aliasName);
         }
 
-        public void Join(short tableIndex, short columnIndex, short foreignTableIndex, bool isLeftJoin)
+        public void Join(string tableName, string columnName, string foreignTableName, string tableAlias, bool isLeftJoin)
         {
             Stream.Write(SubCommand.Join);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
-            Stream.Write(foreignTableIndex);
+            Stream.Write(tableName);
+            Stream.Write(columnName);
+            Stream.Write(foreignTableName);
+            Stream.Write(tableAlias);
             Stream.Write(isLeftJoin);
         }
 
-        public void WhereInString(short tableIndex, short columnIndex, bool areRegularExpressions, string[] items)
+        public void WhereInString(string tableName, string columnName, bool areRegularExpressions, string[] items)
         {
             Stream.Write(SubCommand.WhereInString);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
+            Stream.Write(tableName);
+            Stream.Write(columnName);
             Stream.Write(areRegularExpressions);
             Stream.Write(items);
         }
 
-        public void WhereInValue(short tableIndex, short columnIndex, SttpValue[] items)
+        public void WhereInValue(string tableName, string columnName, SttpValueSet items)
         {
             Stream.Write(SubCommand.WhereInValue);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
+            Stream.Write(tableName);
+            Stream.Write(columnName);
             Stream.Write(items);
         }
 
-        public void WhereCompare(short tableIndex, short columnIndex, CompareMethod compareOperator, SttpValue item)
+        public void WhereCompare(string tableName, string columnName, CompareMethod compareOperator, SttpValue item)
         {
             Stream.Write(SubCommand.WhereCompare);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
+            Stream.Write(tableName);
+            Stream.Write(columnName);
             Stream.Write(compareOperator);
             Stream.Write(item);
         }

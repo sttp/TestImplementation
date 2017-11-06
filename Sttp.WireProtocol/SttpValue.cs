@@ -1275,7 +1275,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public SttpSet AsSet
+        public SttpValueSet AsValueSet
         {
             get
             {
@@ -1324,7 +1324,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.Set:
-                            return (SttpSet)m_valueObject;
+                            return (SttpValueSet)m_valueObject;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -1538,9 +1538,9 @@ namespace Sttp.WireProtocol
             {
                 SetValue((byte[])value);
             }
-            else if (type == typeof(SttpSet))
+            else if (type == typeof(SttpValueSet))
             {
-                SetValue((SttpSet)value);
+                SetValue((SttpValueSet)value);
             }
             else if (type == typeof(SttpNamedSet))
             {
@@ -1636,9 +1636,9 @@ namespace Sttp.WireProtocol
         {
             AsBuffer = value;
         }
-        public void SetValue(SttpSet value)
+        public void SetValue(SttpValueSet value)
         {
-            AsSet = value;
+            AsValueSet = value;
         }
         public void SetValue(SttpNamedSet value)
         {

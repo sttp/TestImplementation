@@ -3,15 +3,15 @@
     public class CmdWhereInValue : ICmd
     {
         public SubCommand SubCommand => SubCommand.WhereInValue;
-        public short TableIndex;
-        public short ColumnIndex;
-        public SttpValue[] Items;
+        public string TableName;
+        public string ColumnName;
+        public SttpValueSet Items;
 
         public void Load(PacketReader reader)
         {
-            TableIndex = reader.ReadInt16();
-            ColumnIndex = reader.ReadInt16();
-            Items = reader.ReadArray<SttpValue>();
+            TableName = reader.ReadString();
+            ColumnName = reader.ReadString();
+            Items = reader.Read<SttpValueSet>();
         }
     }
 }

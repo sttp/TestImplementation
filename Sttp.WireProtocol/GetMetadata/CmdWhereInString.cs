@@ -3,14 +3,16 @@
     public class CmdWhereInString : ICmd
     {
         public SubCommand SubCommand => SubCommand.WhereInString;
-        public short TableIndex;
-        public short ColumnIndex;
+        public string TableName;
+        public string ColumnName;
+        public bool AreRegularExpressions;
         public string[] Items;
 
         public void Load(PacketReader reader)
         {
-            TableIndex = reader.ReadInt16();
-            ColumnIndex = reader.ReadInt16();
+            TableName = reader.ReadString();
+            ColumnName = reader.ReadString();
+            AreRegularExpressions = reader.ReadBoolean();
             Items = reader.ReadArray<string>();
         }
     }
