@@ -53,10 +53,10 @@ namespace Sttp.Data
                         break;
                     case SubCommand.DatabaseVersion:
                         var db = command.DatabaseVersion;
-                        MajorVersion = db.MajorVersion;
-                        MinorVersion = db.MinorVersion;
+                        MajorVersion = db.SchemaVersion;
+                        MinorVersion = db.Revision;
                         break;
-                    case SubCommand.Clear:
+                    case SubCommand.VersionNotCompatible:
                         break;
                     case SubCommand.DefineTable:
                         {
@@ -76,11 +76,8 @@ namespace Sttp.Data
                     case SubCommand.DefineRow:
                         m_tables[command.DefineRow.TableIndex].ProcessCommand(command);
                         break;
-                    case SubCommand.DefineValue:
-                        m_tables[command.DefineValue.TableIndex].ProcessCommand(command);
-                        break;
-                    case SubCommand.RemoveRow:
-                        m_tables[command.RemoveRow.TableIndex].ProcessCommand(command);
+                    case SubCommand.UndefineRow:
+                        m_tables[command.UndefineRow.TableIndex].ProcessCommand(command);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

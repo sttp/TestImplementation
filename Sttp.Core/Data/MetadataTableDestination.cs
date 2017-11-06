@@ -96,16 +96,12 @@ namespace Sttp.Data
                         Rows[addR.RowIndex] = new MetadataRow(addR.RowIndex);
                     }
                     break;
-                case SubCommand.DefineValue:
-                    var addV = command.DefineValue;
-                    Rows[addV.RowIndex].ProcessCommand(addV);
-                    break;
-                case SubCommand.RemoveRow:
-                    var delRow = command.RemoveRow;
+                case SubCommand.UndefineRow:
+                    var delRow = command.UndefineRow;
                     Rows[delRow.RowIndex] = null;
                     break;
                 case SubCommand.DefineTable:
-                case SubCommand.Clear:
+                case SubCommand.VersionNotCompatible:
                 case SubCommand.DatabaseVersion:
                 case SubCommand.Invalid:
                     throw new NotSupportedException();

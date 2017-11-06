@@ -15,21 +15,21 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// Indicates the current version of the database.
         /// 
         /// Payload:
-        /// Guid majorVersion, 
-        /// long minorVersion, 
+        /// Guid schemaVersion, 
+        /// long revision, 
         /// </summary>
         DatabaseVersion,
 
         /// <summary>
-        /// Clears the existing database.
+        /// Specified version is not compatible. Recompile query with the latest schema.
         /// </summary>
-        Clear,
+        VersionNotCompatible,
 
         /// <summary>
-        /// Defines a table.
+        /// Defines a table. 
         /// 
         /// Payload: 
-        /// short tableIndex,
+        /// short tableIndex,      -For joined data, the table is the left most table.
         /// string tableName, 
         /// TableFlags flags
         /// </summary>
@@ -39,44 +39,34 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// Defines a column.
         /// 
         /// Payload: 
-        /// short tableIndex,
-        /// short columnIndex, 
-        /// string columnName, 
+        /// short tableIndex,      -For joined data, the table is the left most table.
+        /// short columnIndex,     -For joined data, this is a numeric sequence.
+        /// string columnName,     -For joined data, this will be the original column name. Renaming will be a client side activity.
         /// ValueType columnType
         /// 
         /// </summary>
         DefineColumn,
 
         /// <summary>
-        /// Defines a row to an existing table.
+        /// Defines a row to an existing table. This will either be a new row, or replacing an exiting one.
         /// 
         /// Payload: 
         /// short tableIndex,
-        /// int rowIndex,
+        /// SttpValue primaryKey,  -The primary key for the data being parsed.
+        /// SttpValueSet fields    -All of the fields for this row.
         /// 
         /// </summary>
         DefineRow,
 
         /// <summary>
-        /// Defines a value. Deleting a value would be to assign it with null.
-        /// 
-        /// Payload: 
-        /// short tableIndex,
-        /// short columnIndex, 
-        /// int rowIndex, 
-        /// byte[] value
-        /// 
-        /// </summary>
-        DefineValue,
-
-        /// <summary>
-        /// Indicates that a row of data has been removed.
+        /// Indicates that a row of data has been removed. It's possible that the client may not have this row. In which case, ignore it.
+        /// This is only valid for queries that are specified as update queries.
         /// 
         /// Payload: 
         /// short tableIndex,
         /// int rowIndex,
         /// 
         /// </summary>
-        RemoveRow,
+        UndefineRow,
     }
 }

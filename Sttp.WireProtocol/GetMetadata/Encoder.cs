@@ -63,11 +63,11 @@ namespace Sttp.WireProtocol.GetMetadata
             Stream.Write(operatorCode);
         }
 
-        public void DatabaseVersion(Guid majorVersion, long minorVersion)
+        public void DatabaseVersion(Guid schemaVersion, long revision)
         {
             Stream.Write(SubCommand.DatabaseVersion);
-            Stream.Write(majorVersion);
-            Stream.Write(minorVersion);
+            Stream.Write(schemaVersion);
+            Stream.Write(revision);
         }
 
     }

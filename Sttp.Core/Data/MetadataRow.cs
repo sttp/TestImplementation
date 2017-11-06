@@ -42,17 +42,17 @@ namespace Sttp.Data
 
         }
 
-        public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.CmdDefineValue patch)
-        {
-            while (Fields.Count <= patch.ColumnIndex)
-            {
-                Fields.Add(null);
-            }
-            if (Fields[patch.ColumnIndex] == null)
-            {
-                Fields[patch.ColumnIndex] = new MetadataField();
-            }
-            Fields[patch.ColumnIndex].Value = patch.Value;
-        }
+        //public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.CmdDefineValue patch)
+        //{
+        //    while (Fields.Count <= patch.ColumnIndex)
+        //    {
+        //        Fields.Add(null);
+        //    }
+        //    if (Fields[patch.ColumnIndex] == null)
+        //    {
+        //        Fields[patch.ColumnIndex] = new MetadataField();
+        //    }
+        //    Fields[patch.ColumnIndex].Value = patch.Value;
+        //}
     }
 }

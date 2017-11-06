@@ -23,8 +23,7 @@
         public CmdDefineColumn DefineColumn => m_command as CmdDefineColumn;
         public CmdDefineRow DefineRow => m_command as CmdDefineRow;
         public CmdDefineTable DefineTable => m_command as CmdDefineTable;
-        public CmdDefineValue DefineValue => m_command as CmdDefineValue;
-        public CmdClear Clear => m_command as CmdClear;
-        public CmdRemoveRow RemoveRow => m_command as CmdRemoveRow;
+        public CmdVersionNotCompatible VersionNotCompatible => m_command as CmdVersionNotCompatible;
+        public CmdUndefineRow UndefineRow => m_command as CmdUndefineRow;
     }
 }

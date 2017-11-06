@@ -138,9 +138,6 @@ namespace Sttp.Data
                 case MetadataChangeType.AddColumn:
                     encoder.DefineColumn(m_tableIndex, m_columnIndex, m_columnName, (byte)m_columnTypeCode);
                     break;
-                case MetadataChangeType.AddValue:
-                    encoder.DefineValue(m_tableIndex, m_columnIndex, m_rowIndex, m_value);
-                    break;
                 case MetadataChangeType.DeleteRow:
                     encoder.RemoveRow(m_tableIndex, m_rowIndex);
                     break;

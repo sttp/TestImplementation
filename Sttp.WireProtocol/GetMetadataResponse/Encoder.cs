@@ -15,9 +15,9 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         }
 
-        public void Clear()
+        public void VersionNotCompatible()
         {
-            Stream.Write(SubCommand.Clear);
+            Stream.Write(SubCommand.VersionNotCompatible);
         }
 
         public void DefineTable(short tableIndex, string tableName, TableFlags tableFlags)
@@ -44,27 +44,18 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(rowIndex);
         }
 
-        public void DefineValue(short tableIndex, short columnIndex, int rowIndex, SttpValue value)
-        {
-            Stream.Write(SubCommand.DefineValue);
-            Stream.Write(tableIndex);
-            Stream.Write(columnIndex);
-            Stream.Write(rowIndex);
-            Stream.Write(value);
-        }
-
         public void RemoveRow(short tableIndex, int rowIndex)
         {
-            Stream.Write(SubCommand.RemoveRow);
+            Stream.Write(SubCommand.UndefineRow);
             Stream.Write(tableIndex);
             Stream.Write(rowIndex);
         }
 
-        public void DatabaseVersion(Guid majorVersion, long minorVersion)
+        public void DatabaseVersion(Guid schemaVersion, long revision)
         {
             Stream.Write(SubCommand.DatabaseVersion);
-            Stream.Write(majorVersion);
-            Stream.Write(minorVersion);
+            Stream.Write(schemaVersion);
+            Stream.Write(revision);
         }
 
     }

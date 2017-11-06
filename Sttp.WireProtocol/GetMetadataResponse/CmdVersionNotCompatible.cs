@@ -2,14 +2,12 @@
 
 namespace Sttp.WireProtocol.GetMetadataResponse
 {
-    public class CmdClear : ICmd
+    public class CmdVersionNotCompatible : ICmd
     {
-        public SubCommand SubCommand => SubCommand.Clear;
+        public SubCommand SubCommand => SubCommand.VersionNotCompatible;
 
         public void Load(PacketReader reader)
         {
         }
-      
-
     }
 }

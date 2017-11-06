@@ -34,16 +34,16 @@ namespace Sttp.Tests.WireProtocol
                         commands.Add(new CmdDefineTable());
                         break;
                     case 3:
-                        commands.Add(new CmdDefineValue());
+                        //commands.Add(new CmdDefineValue());
                         break;
                     case 4:
                         commands.Add(new CmdDatabaseVersion());
                         break;
                     case 5:
-                        commands.Add(new CmdClear());
+                        commands.Add(new CmdVersionNotCompatible());
                         break;
                     case 6:
-                        commands.Add(new CmdRemoveRow());
+                        commands.Add(new CmdUndefineRow());
                         break;
                 }
             }
@@ -123,8 +123,8 @@ namespace Sttp.Tests.WireProtocol
                         var cmdDatabaseVersion = (CmdDatabaseVersion)cmd;
                         Assert.IsNotNull(cmdDatabaseVersion);
                         break;
-                    case SubCommand.Clear:
-                        var cmdClear = (CmdClear)cmd;
+                    case SubCommand.VersionNotCompatible:
+                        var cmdClear = (CmdVersionNotCompatible)cmd;
                         Assert.IsNotNull(cmdClear);
                         break;
                     case SubCommand.DefineTable:
@@ -139,12 +139,8 @@ namespace Sttp.Tests.WireProtocol
                         var cmdAddRow = (CmdDefineRow)cmd;
                         Assert.IsNotNull(cmdAddRow);
                         break;
-                    case SubCommand.DefineValue:
-                        var cmdAddValue = (CmdDefineValue)cmd;
-                        Assert.IsNotNull(cmdAddValue);
-                        break;
-                    case SubCommand.RemoveRow:
-                        var cmdDeleteRow = (CmdRemoveRow)cmd;
+                    case SubCommand.UndefineRow:
+                        var cmdDeleteRow = (CmdUndefineRow)cmd;
                         Assert.IsNotNull(cmdDeleteRow);
                         break;
                     case SubCommand.Invalid:
@@ -166,7 +162,7 @@ namespace Sttp.Tests.WireProtocol
                     case CmdDatabaseVersion cmdDatabaseVersion:
                         Assert.IsNotNull(cmdDatabaseVersion);
                         break;
-                    case CmdClear cmdClear:
+                    case CmdVersionNotCompatible cmdClear:
                         Assert.IsNotNull(cmdClear);
                         break;
                     case CmdDefineTable cmdAddTable:
@@ -178,10 +174,10 @@ namespace Sttp.Tests.WireProtocol
                     case CmdDefineRow cmdAddRow:
                         Assert.IsNotNull(cmdAddRow);
                         break;
-                    case CmdDefineValue cmdAddValue:
-                        Assert.IsNotNull(cmdAddValue);
+                    //case CmdDefineValue cmdAddValue:
+                        //Assert.IsNotNull(cmdAddValue);
                         break;
-                    case CmdRemoveRow cmdDeleteRow:
+                    case CmdUndefineRow cmdDeleteRow:
                         Assert.IsNotNull(cmdDeleteRow);
                         break;
                 }

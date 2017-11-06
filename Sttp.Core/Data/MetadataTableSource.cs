@@ -100,7 +100,7 @@ namespace Sttp.Data
                         var field = row.Fields[columnIndex];
                         if (field != null && (permissionFilter == null || permissionFilter.PermitField(row.RowIndex, columnIndex, row.Fields[columnIndex].Value)))
                         {
-                            encoder.DefineValue(TableIndex, columnIndex, row.RowIndex, field.Value);
+                            //encoder.DefineValue(TableIndex, columnIndex, row.RowIndex, field.Value);
                         }
                     }
                 }

@@ -1,8 +1,8 @@
-﻿namespace Sttp.WireProtocol.SyncMetadataResponse
+﻿namespace Sttp.WireProtocol.GetMetadataResponse
 {
-    public class CmdDefineRow : ICmd
+    public class CmdUndefineRow : ICmd
     {
-        public SubCommand SubCommand => SubCommand.DefineRow;
+        public SubCommand SubCommand => SubCommand.UndefineRow;
         public short TableIndex;
         public int RowIndex;
 
@@ -11,7 +11,6 @@
             TableIndex = reader.ReadInt16();
             RowIndex = reader.ReadInt32();
         }
-
 
     }
 }

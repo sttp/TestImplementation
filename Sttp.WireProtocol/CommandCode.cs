@@ -84,8 +84,8 @@ namespace Sttp.WireProtocol
         ///                                   change in any row, not just the rows of the query.
         /// 
         /// Response: 
-        /// Subcommands: Clear              - This indicates that the metadata synchronization 
-        ///                                   cannot occur and the entire datasource will be flushed.
+        /// Subcommands: VersionNotCompatible  - This indicates that the metadata synchronization 
+        ///                                      cannot occur and the entire datasource will be flushed.
         /// Subcommands: DatabaseVersion
         /// Subcommands: DefineTable
         /// Subcommands: DefineColumn
@@ -96,38 +96,6 @@ namespace Sttp.WireProtocol
         /// </summary>
         GetMetadata,
         GetMetadataResponse,
-
-        /// <summary>
-        /// Requests queries from the metadata repository.
-        /// 
-        /// Results will always be returned as a set of individual tables. 
-        /// The purpose of the JOIN clause is only as a filter on the raw tables. If the client wants to 
-        /// create a single table of the results, they will have to join them on their side after getting the results. 
-        /// 
-        /// Layout: 
-        /// Subcommands: SELECT             - Specifies all of the table.columns to include in the query.
-        /// Subcommands: JOIN               - Specifies all of the fields that will be joined in the query. 
-        ///                                   All tables in SELECT that are not TableFlags.MappedToDataPoint
-        ///                                   must be joined to a table that is TableFlags.MappedToDataPoint
-        /// Subcommands: WHERE              - Specifies filters to apply to the results
-        /// Subcommands: DatabaseVersion    - Specifies the current database version if syncing is supported by the client
-        ///                                   Note: When syncing, if any columns specified in the WHERE or JOIN are modified, 
-        ///                                   Syncing will be denied and the entire query must be refreshed. This includes any
-        ///                                   change in any row, not just the rows of the query.
-        /// 
-        /// Response: 
-        /// Subcommands: Clear              - This indicates that the metadata synchronization 
-        ///                                   cannot occur and the entire datasource will be flushed.
-        /// Subcommands: DatabaseVersion
-        /// Subcommands: DefineTable
-        /// Subcommands: DefineColumn
-        /// Subcommands: DefineRow
-        /// Subcommands: DefineValue
-        /// Subcommands: DeleteRow          - This command will only appear if syncing a data source.
-        /// 
-        /// </summary>
-        SyncMetadata,
-        SyncMetadataResponse,
 
         /// <summary>
         /// Updates the subscription for new measurements. This subscription can be realtime or historical.

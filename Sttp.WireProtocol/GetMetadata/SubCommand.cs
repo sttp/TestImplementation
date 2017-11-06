@@ -15,8 +15,10 @@ namespace Sttp.WireProtocol.GetMetadata
         /// Indicates the current version of the database.
         /// 
         /// Payload:
-        /// Guid majorVersion, 
-        /// long minorVersion, 
+        /// Guid schemaVersion, 
+        /// long revision, 
+        /// bool isUpdateQuery       - Specifies that this query should only be run on rows that has been modified since the specified revision.
+        /// 
         /// </summary>
         DatabaseVersion,
 
@@ -24,7 +26,7 @@ namespace Sttp.WireProtocol.GetMetadata
         /// Specifies a set of columns that are part of a data request.
         /// 
         /// Payload:
-        /// short tableIndex
+        /// short tableIndex         - Can be a renamed joined table.
         /// short columnIndex
         /// 
         /// </summary>
@@ -37,6 +39,7 @@ namespace Sttp.WireProtocol.GetMetadata
         /// short tableIndex         - The table that has the foreign key
         /// short columnIndex        - The column that has the foreign key
         /// short foreignTableIndex  - The table that this foreign key references. 
+        /// short tableAlias         - The joined table will be renamed with this ID. Default to tableIndex. Negative numbers should be used.
         /// bool isLeftJoin          - Indicates if this relationship is a left join or an inner join. 
         ///                            Outer Joins are invalid given the one to many relationship requirement 
         ///                            for a table relationship.
@@ -48,7 +51,7 @@ namespace Sttp.WireProtocol.GetMetadata
         /// Specifies a filter clause to apply to the data. To do a single Like statement, include 1 item in the list.
         /// 
         /// Payload:
-        /// short tableIndex, 
+        /// short tableIndex,        - Can be a renamed joined table.
         /// short columnIndex,
         /// bool areItemsRegularExpressions,
         /// string[] Items,
@@ -59,9 +62,9 @@ namespace Sttp.WireProtocol.GetMetadata
         /// Specifies a filter clause to apply to the data. 
         /// 
         /// Payload:
-        /// short tableIndex, 
+        /// short tableIndex,        - Can be a renamed joined table.
         /// short columnIndex,
-        /// byte[][] Items,
+        /// SttpValueSet Items,
         /// </summary>
         WhereInValue,
 
@@ -70,10 +73,10 @@ namespace Sttp.WireProtocol.GetMetadata
         /// The item's type must match the type for the specified column and must naturally support the specified operator.
         /// 
         /// Payload:
-        /// short tableIndex, 
+        /// short tableIndex,        - Can be a renamed joined table.
         /// short columnIndex,
         /// byte CompareOperator (gt, lt, eq, ne, gte, lte)
-        /// byte[] Item,
+        /// SttpValue Item,
         /// </summary>
         WhereCompare,
 
