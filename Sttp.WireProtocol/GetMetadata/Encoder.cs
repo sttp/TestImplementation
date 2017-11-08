@@ -15,13 +15,14 @@ namespace Sttp.WireProtocol.GetMetadata
 
         }
 
-        public void RequestQuery(Guid schemaVersion, long revision, bool isUpdateQuery, SttpQueryExpression expression)
+        public void GetMetadata(Guid schemaVersion, long revision, bool isUpdateQuery, SttpQueryExpression expression)
         {
-            Stream.Write(SubCommand.RequestQuery);
+            BeginCommand();
             Stream.Write(schemaVersion);
             Stream.Write(revision);
             Stream.Write(isUpdateQuery);
             Stream.Write(expression);
+            EndCommand();
         }
 
     }

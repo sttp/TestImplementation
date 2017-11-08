@@ -7,33 +7,19 @@ namespace Sttp.WireProtocol.GetMetadata
 {
     public class Decoder
     {
-        private ICmd[] m_commands;
-        private Cmd m_cmd;
-        private PacketReader m_packet = new PacketReader(new SessionDetails());
-
-        public Decoder()
-        {
-            m_cmd = new Cmd();
-            m_commands = new ICmd[10];
-            m_commands[(byte)SubCommand.RequestQuery] = new CmdRequestQuery();
-        }
+        public Guid SchemaVersion;
+        public long Revision;
+        public bool IsUpdateQuery;
+        public SttpQueryExpression Expression;
 
         public CommandCode CommandCode => CommandCode.GetMetadata;
 
-        public void Fill(PacketReader buffer)
+        public void Fill(PacketReader reader)
         {
-            m_packet = buffer;
-        }
-
-        public Cmd NextCommand()
-        {
-            if (m_packet.Position == m_packet.Length)
-                return null;
-
-            SubCommand subCommand = m_packet.Read<SubCommand>();
-            m_commands[(byte)subCommand].Load(m_packet);
-            m_cmd.Load(m_commands[(byte)subCommand]);
-            return m_cmd;
+            SchemaVersion = reader.ReadGuid();
+            Revision = reader.ReadInt64();
+            IsUpdateQuery = reader.ReadBoolean();
+            Expression = reader.Read<SttpQueryExpression>();
         }
     }
 }
