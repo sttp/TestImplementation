@@ -20,11 +20,12 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(SubCommand.VersionNotCompatible);
         }
 
-        public void DefineTable(string tableName, TableFlags tableFlags, List<Tuple<string, SttpValueTypeCode>> columns)
+        public void DefineTable(Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
         {
             Stream.Write(SubCommand.DefineTable);
+            Stream.Write(schemaVersion);
+            Stream.Write(revision);
             Stream.Write(tableName);
-            Stream.Write(tableFlags);
             Stream.Write(columns);
         }
 
@@ -41,11 +42,9 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(primaryKey);
         }
 
-        public void DatabaseVersion(Guid schemaVersion, long revision)
+        public void Finished()
         {
-            Stream.Write(SubCommand.DatabaseVersion);
-            Stream.Write(schemaVersion);
-            Stream.Write(revision);
+            Stream.Write(SubCommand.Finished);
         }
 
     }

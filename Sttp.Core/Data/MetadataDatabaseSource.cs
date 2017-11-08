@@ -97,11 +97,11 @@ namespace Sttp.Data
                         record.Save(encoder);
                     }
                 }
-                encoder.DatabaseVersion(MajorVersion, MinorVersion);
+                //encoder.DatabaseVersion(MajorVersion, MinorVersion);
                 return;
             }
             m_tables[tableIndex].RequestTableData(encoder, permissionsFilter);
-            encoder.DatabaseVersion(MajorVersion, MinorVersion);
+            //encoder.DatabaseVersion(MajorVersion, MinorVersion);
 
         }
 

@@ -12,23 +12,16 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         Invalid = 0x00,
 
         /// <summary>
-        /// Indicates the current version of the database.
-        /// 
-        /// Payload:
-        /// Guid schemaVersion, 
-        /// long revision, 
-        /// </summary>
-        DatabaseVersion,
-
-        /// <summary>
         /// Specified version is not compatible. Recompile query with the latest schema.
         /// </summary>
         VersionNotCompatible,
 
         /// <summary>
-        /// Defines a table.
+        /// Defines the table structure of the requested table
         /// 
         /// Payload: 
+        /// Guid schemaVersion, 
+        /// long revision, 
         /// string tableName,
         /// TableFlags flags
         /// Array columns{string columnName, SttpValueTypeCode columnType}
@@ -56,5 +49,10 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// 
         /// </summary>
         UndefineRow,
+
+        /// <summary>
+        /// Indicates that the requested metadata has finished.
+        /// </summary>
+        Finished,
     }
 }
