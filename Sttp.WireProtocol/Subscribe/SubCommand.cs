@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.SubscriptionPacket
+namespace Sttp.WireProtocol.Subscribe
 {
-    public enum SubscriptionCommand : byte
+    public enum SubCommand : byte
     {
         /// <summary>
         /// An invalid command to indicate that nothing is assigned.
@@ -24,6 +24,7 @@ namespace Sttp.WireProtocol.SubscriptionPacket
 
         /// <summary>
         /// Identifies all data points.
+        /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
         /// </summary>
         AllDataPoints,
 
