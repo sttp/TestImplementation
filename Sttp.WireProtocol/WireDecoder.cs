@@ -10,7 +10,7 @@ namespace Sttp.WireProtocol
     public class WireDecoder
     {
         //private DataPointDecoder m_dataPointDecoder;
-        private NegotiateSessionDecoder m_negotiateSessionDecoder;
+        private NegotiateSession.Decoder m_negotiateSessionDecoder;
         private Subscribe.Decoder m_subscriptionDecoder;
         private BulkTransportDecoder m_bulkDecoder;
         private PacketDecoder m_packetDecoder = new PacketDecoder(new SessionDetails());
@@ -24,7 +24,7 @@ namespace Sttp.WireProtocol
         public WireDecoder()
         {
            // m_dataPointDecoder = new DataPointDecoder();
-            m_negotiateSessionDecoder = new NegotiateSessionDecoder();
+            m_negotiateSessionDecoder = new NegotiateSession.Decoder();
             m_subscriptionDecoder = new Subscribe.Decoder();
             m_bulkDecoder = new BulkTransportDecoder();
 

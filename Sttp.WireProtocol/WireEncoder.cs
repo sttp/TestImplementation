@@ -18,7 +18,7 @@ namespace Sttp.WireProtocol
 
         private Subscribe.Encoder m_subscription;
 
-        private NegotiateSessionEncoder m_negotiateSession;
+        private NegotiateSession.Encoder m_negotiateSession;
 
         private BulkTransportEncoder m_bulkEncoder;
 

@@ -147,6 +147,8 @@ namespace Sttp.WireProtocol
 
         // TODO : assign values
         NegotiateSession,
+        NegotiateSessionResponse,
+
         SecureDataChannel,
         NoOp = 0xFF,
     }

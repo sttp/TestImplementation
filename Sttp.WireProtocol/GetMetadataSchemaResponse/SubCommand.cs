@@ -11,7 +11,6 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
         /// </summary>
         Invalid = 0x00,
 
-
         /// <summary>
         /// The specified request failed. 
         /// 
