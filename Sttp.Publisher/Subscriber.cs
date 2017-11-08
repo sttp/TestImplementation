@@ -298,8 +298,6 @@ namespace Sttp.Publisher
                         break;
                     case CommandCode.Subscribe:
                         break;
-                    case CommandCode.SecureDataChannel:
-                        break;
                     case CommandCode.RegisterDataPointRuntimeIdentifier:
                         break;
                     case CommandCode.SendDataPoints:

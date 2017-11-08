@@ -20,13 +20,6 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(SubCommand.VersionNotCompatible);
         }
 
-        public void RequestFailed(string reason, string details)
-        {
-            Stream.Write(SubCommand.RequestFailed);
-            Stream.Write(reason);
-            Stream.Write(details);
-        }
-
         public void DefineTable(string tableName, TableFlags tableFlags, List<Tuple<string, SttpValueTypeCode>> columns)
         {
             Stream.Write(SubCommand.DefineTable);

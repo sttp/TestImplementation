@@ -113,15 +113,27 @@ namespace Sttp.WireProtocol
         RegisterDataPointRuntimeIdentifier,
 
         /// <summary>
+        /// Negotiates session variables and roles.
+        /// </summary>
+        NegotiateSession,
+        NegotiateSessionResponse,
+
+        /// <summary>
+        /// The specified request failed. 
+        /// 
+        /// Payload: 
+        /// CommandCode FailedCommand   - The command code that failed.
+        /// string Reason      - A user friendly message for the failure, can be null.
+        /// string Details     - A not so friendly message more helpful for troubleshooters.
+        /// </summary>
+        RequestFailed,
+
+
+        /// <summary>
         /// Capable of sending large blocks of data over STTP.
         /// </summary>
         BulkTransport,
 
-        // TODO : assign values
-        NegotiateSession,
-        NegotiateSessionResponse,
-
-        SecureDataChannel,
         NoOp = 0xFF,
     }
 }

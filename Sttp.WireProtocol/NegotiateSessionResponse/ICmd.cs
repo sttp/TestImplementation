@@ -19,7 +19,6 @@
 
         public SubCommand SubCommand => m_commandCode;
 
-        public CmdRequestFailed RequestFailed => m_command as CmdRequestFailed;
         public CmdReverseConnectionSuccess ReverseConnectionSuccess => m_command as CmdReverseConnectionSuccess;
         public CmdDesiredOperation DesiredOperation => m_command as CmdDesiredOperation;
         public CmdChangeInstanceSuccess ChangeInstanceSuccess => m_command as CmdChangeInstanceSuccess;

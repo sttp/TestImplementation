@@ -67,8 +67,6 @@ namespace Sttp.WireProtocol
                 case CommandCode.Subscribe:
                     m_subscriptionDecoder.Fill(reader);
                     return new CommandDecoder(reader.Command, m_subscriptionDecoder);
-                case CommandCode.SecureDataChannel:
-                    break;
                 case CommandCode.RegisterDataPointRuntimeIdentifier:
                     break;
                     //m_dataPointDecoder.Fill(reader);

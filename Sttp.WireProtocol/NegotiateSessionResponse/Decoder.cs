@@ -16,7 +16,6 @@ namespace Sttp.WireProtocol.NegotiateSessionResponse
         {
             m_cmd = new Cmd();
             m_commands = new ICmd[10];
-            m_commands[(byte)SubCommand.RequestFailed] = new CmdRequestFailed();
             m_commands[(byte)SubCommand.ReverseConnectionSuccess] = new CmdReverseConnectionSuccess();
             m_commands[(byte)SubCommand.DesiredOperation] = new CmdDesiredOperation();
             m_commands[(byte)SubCommand.ChangeInstanceSuccess] = new CmdChangeInstanceSuccess();

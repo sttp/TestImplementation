@@ -12,15 +12,6 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         Invalid = 0x00,
 
         /// <summary>
-        /// The specified request failed. 
-        /// 
-        /// Payload: 
-        /// string Reason      - A user friendly message for the failure, can be null.
-        /// string Details     - A not so friendly message more helpful for troubleshooters.
-        /// </summary>
-        RequestFailed,
-
-        /// <summary>
         /// Indicates the current version of the database.
         /// 
         /// Payload:

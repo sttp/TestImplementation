@@ -20,7 +20,6 @@
         public SubCommand SubCommand => m_commandCode;
 
         public CmdDatabaseVersion DatabaseVersion => m_command as CmdDatabaseVersion;
-        public CmdRequestFailed DefineColumn => m_command as CmdRequestFailed;
         public CmdDefineRow DefineRow => m_command as CmdDefineRow;
         public CmdDefineTable DefineTable => m_command as CmdDefineTable;
         public CmdVersionNotCompatible VersionNotCompatible => m_command as CmdVersionNotCompatible;

@@ -15,14 +15,6 @@ namespace Sttp.WireProtocol.NegotiateSessionResponse
 
         }
 
-
-        public void RequestFailed(string reason, string details)
-        {
-            Stream.Write(SubCommand.RequestFailed);
-            Stream.Write(reason);
-            Stream.Write(details);
-        }
-
         public void ReverseConnectionSuccess()
         {
             Stream.Write(SubCommand.ReverseConnectionSuccess);
