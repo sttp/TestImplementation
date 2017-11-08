@@ -15,61 +15,13 @@ namespace Sttp.WireProtocol.GetMetadata
 
         }
 
-        public void Select(string tableName, string columnName, string aliasName)
+        public void RequestQuery(Guid schemaVersion, long revision, bool isUpdateQuery, SttpQueryExpression expression)
         {
-            Stream.Write(SubCommand.Select);
-            Stream.Write(tableName);
-            Stream.Write(columnName);
-            Stream.Write(aliasName);
-        }
-
-        public void Join(string tableName, string columnName, string foreignTableName, string tableAlias, bool isLeftJoin)
-        {
-            Stream.Write(SubCommand.Join);
-            Stream.Write(tableName);
-            Stream.Write(columnName);
-            Stream.Write(foreignTableName);
-            Stream.Write(tableAlias);
-            Stream.Write(isLeftJoin);
-        }
-
-        public void WhereInString(string tableName, string columnName, bool areRegularExpressions, string[] items)
-        {
-            Stream.Write(SubCommand.WhereInString);
-            Stream.Write(tableName);
-            Stream.Write(columnName);
-            Stream.Write(areRegularExpressions);
-            Stream.Write(items);
-        }
-
-        public void WhereInValue(string tableName, string columnName, SttpValueSet items)
-        {
-            Stream.Write(SubCommand.WhereInValue);
-            Stream.Write(tableName);
-            Stream.Write(columnName);
-            Stream.Write(items);
-        }
-
-        public void WhereCompare(string tableName, string columnName, CompareMethod compareOperator, SttpValue item)
-        {
-            Stream.Write(SubCommand.WhereCompare);
-            Stream.Write(tableName);
-            Stream.Write(columnName);
-            Stream.Write(compareOperator);
-            Stream.Write(item);
-        }
-
-        public void WhereOperator(OperatorMethod operatorCode)
-        {
-            Stream.Write(SubCommand.WhereOperator);
-            Stream.Write(operatorCode);
-        }
-
-        public void DatabaseVersion(Guid schemaVersion, long revision)
-        {
-            Stream.Write(SubCommand.DatabaseVersion);
+            Stream.Write(SubCommand.RequestQuery);
             Stream.Write(schemaVersion);
             Stream.Write(revision);
+            Stream.Write(isUpdateQuery);
+            Stream.Write(expression);
         }
 
     }
