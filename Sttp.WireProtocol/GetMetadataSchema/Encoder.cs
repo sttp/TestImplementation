@@ -15,15 +15,13 @@ namespace Sttp.WireProtocol.GetMetadataSchema
 
         }
 
-        public void GetDatabaseSchema()
+        public void GetMetadataSchema(bool includeSchema)
         {
-            Stream.Write((byte)SubCommand.GetDatabaseSchema);
+            BeginCommand();
+            Stream.Write(includeSchema);
+            EndCommand();
         }
 
-        public void GetDatabaseVersion()
-        {
-            Stream.Write((byte)SubCommand.GetDatabaseVersion);
-        }
 
     }
 }

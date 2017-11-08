@@ -45,23 +45,14 @@ namespace Sttp.WireProtocol
         NextFragment,
 
         /// <summary>
-        /// Requests the schema for the metadata. Since all I/O for metadata requests occurs 
-        /// with Column/Table IDs, the response for this packet will provide all table and column
-        /// for the database.
+        /// Requests the version of the current database, along with the schema. 
         /// 
-        /// Layout:
-        /// SubCommands: GetDatabaseSchema     - Will return all tables with all columns.
-        /// SubCommands: GetDatabaseVersion    - Will return the version of the current database.
+        /// Payload:
+        /// bool IncludeSchema   - Indicates if only the current version of the database will be returned. Not the schema.
         /// 
         /// Response:
-        /// IF (GetDatabaseSchema)
-        /// Subcommands: DefineTable           
-        /// Subcommands: DefineColumn
-        /// Subcommands: DefineTableRelationship
+        /// MetadataSchema schema
         /// 
-        /// 
-        /// IF (GetDatabaseVerion)
-        /// Subcommands: DatabaseVersion
         /// </summary>
         GetMetadataSchema,
         GetMetadataSchemaResponse,

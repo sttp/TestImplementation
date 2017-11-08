@@ -53,10 +53,7 @@ namespace Prototype.Codec.Metadata
             var receive = new WireDecoder();
 
             var cmd1 = send.GetMetadataSchema();
-            cmd1.BeginCommand();
-            cmd1.GetDatabaseSchema();
-            cmd1.GetDatabaseVersion();
-            cmd1.EndCommand();
+            cmd1.GetMetadataSchema(false);
 
             CommandDecoder nextCommand;
             while ((nextCommand = receive.NextCommand()) != null)

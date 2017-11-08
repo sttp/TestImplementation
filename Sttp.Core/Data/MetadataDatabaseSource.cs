@@ -74,15 +74,16 @@ namespace Sttp.Data
         /// <returns></returns>
         public void RequestAllTablesWithSchema(WireProtocol.GetMetadataSchemaResponse.Encoder encoder)
         {
-            encoder.DatabaseVersion(MajorVersion, MinorVersion);
-            foreach (var table in m_tables)
-            {
-                encoder.DefineTable(table.TableName, table.TableFlags, null);
-                //foreach (var column in table.Columns)
-                //{
-                //    encoder.DefineColumn(table.TableIndex, column.Index, column.Name, (byte)column.TypeCode);
-                //}
-            }
+            
+            //encoder.DatabaseVersion(MajorVersion, MinorVersion);
+            //foreach (var table in m_tables)
+            //{
+            //    encoder.DefineTable(table.TableName, table.TableFlags, null);
+            //    //foreach (var column in table.Columns)
+            //    //{
+            //    //    encoder.DefineColumn(table.TableIndex, column.Index, column.Name, (byte)column.TypeCode);
+            //    //}
+            //}
         }
 
         public void RequestTableData(WireProtocol.GetMetadataResponse.Encoder encoder, short tableIndex, Guid majorVersion = default(Guid), long minorVersion = 0, MetadataTableFilter permissionsFilter = null)
