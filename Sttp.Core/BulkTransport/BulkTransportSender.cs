@@ -2,12 +2,11 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Sttp.IO;
 using Sttp.WireProtocol;
-using Sttp.WireProtocol.BulkTransportPacket;
+using Sttp.WireProtocol.BulkTransport;
 
 namespace Sttp.Core
 {
@@ -16,11 +15,11 @@ namespace Sttp.Core
         private const int MaximumPayloadSize = 1460;
         private const int MaximumReadSize = 1000;
 
-        private BulkTransportEncoder m_encoder;
+        private Encoder m_encoder;
 
-        public BulkTransportEncoder Encoder => m_encoder;
+        public Encoder Encoder => m_encoder;
 
-        public BulkTransportSender(BulkTransportEncoder encoder)
+        public BulkTransportSender(Encoder encoder)
         {
             m_encoder = encoder;
         }
@@ -133,7 +132,7 @@ namespace Sttp.Core
                     if (tracker.Position == 0)
                     {
                         // first message
-                        m_encoder.SendBegin(tracker.Id, tracker.Mode, tracker.Compression, tracker.OriginalSize, payload, 0, payloadSize);
+                        m_encoder.BeginSend(tracker.Id, tracker.Mode, tracker.Compression, tracker.OriginalSize, payload, 0, payloadSize);
                     }
                     else
                     {
@@ -162,7 +161,7 @@ namespace Sttp.Core
     }
 
 
-    public class BulkTransportStreamTracking : BulkTransportBeginSendParams
+    public class BulkTransportStreamTracking : CmdBeginSend
     {
         public long Position;
         public long BaseStreamOffset;

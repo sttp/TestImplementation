@@ -20,7 +20,7 @@ namespace Sttp.WireProtocol
 
         private NegotiateSession.Encoder m_negotiateSession;
 
-        private BulkTransportEncoder m_bulkEncoder;
+        private BulkTransport.Encoder m_bulkEncoder;
 
         private CommandCode m_lastCode;
 
@@ -47,7 +47,7 @@ namespace Sttp.WireProtocol
             //m_subscription = new SubscriptionEncoder(SendPacket);
             //m_dataPoint = new DataPointEncoder(SendPacket);
             //m_negotiateSession = new NegotiateSessionEncoder(SendPacket);
-            m_bulkEncoder = new BulkTransportEncoder(SendNewPacket, m_sessionDetails);
+            m_bulkEncoder = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
@@ -55,13 +55,8 @@ namespace Sttp.WireProtocol
             NewPacket?.Invoke(buffer, position, length);
         }
 
-        public BulkTransportEncoder BeginBulkTransferPacket()
+        public BulkTransport.Encoder BeginBulkTransferPacket()
         {
-            if (m_lastCode != CommandCode.BulkTransport)
-            {
-                m_lastCode = CommandCode.BulkTransport;
-            }
-
             return m_bulkEncoder;
         }
 

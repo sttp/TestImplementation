@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Sttp.WireProtocol.BulkTransportPacket
+namespace Sttp.WireProtocol.BulkTransport
 {
-    public enum BulkTransportCommand : byte
+    /// <summary>
+    /// All of the permitted commands for metadata.
+    /// </summary>
+    public enum SubCommand : byte
     {
         /// <summary>
         /// An invalid command to indicate that nothing is assigned.

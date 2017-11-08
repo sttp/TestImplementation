@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using Sttp.WireProtocol;
-using Sttp.WireProtocol.BulkTransportPacket;
+using Sttp.WireProtocol.BulkTransport;
 
 namespace Sttp.Core
 {
@@ -13,9 +13,9 @@ namespace Sttp.Core
         #region Temporary for testing
         public event EventHandler<EventArgs<Guid>> OnStreamFinished;
 
-        private Dictionary<Guid, Tuple<BulkTransportBeginSendParams, Stream>> _activeStreams = new Dictionary<Guid, Tuple<BulkTransportBeginSendParams, Stream>>();
+        private Dictionary<Guid, Tuple<CmdBeginSend, Stream>> _activeStreams = new Dictionary<Guid, Tuple<CmdBeginSend, Stream>>();
 
-        public Dictionary<Guid, Tuple<BulkTransportBeginSendParams, Stream>> ActiveStreams => _activeStreams;
+        public Dictionary<Guid, Tuple<CmdBeginSend, Stream>> ActiveStreams => _activeStreams;
 
         #endregion Temporary for testing
 
@@ -23,17 +23,17 @@ namespace Sttp.Core
         {
         }
 
-        public void Process(BulkTransportDecoder decoder)
+        public void Process(Decoder decoder)
         {
-            IBulkTransportParams command;
-            while ((command = decoder.Read()) != null)
+            Cmd command;
+            while ((command = decoder.NextCommand()) != null)
             {
-                switch (command.Command)
+                switch (command.SubCommand)
                 {
-                    case BulkTransportCommand.BeginSend:
-                        {
-                            var begin = (command as BulkTransportBeginSendParams);
-                            var stream = new Tuple<BulkTransportBeginSendParams, Stream>(begin, CreateOutputStream(begin.Id, begin.OriginalSize, ".sttp_rx"));
+                    case SubCommand.BeginSend:
+                    {
+                        var begin = command.BeginSend;
+                            var stream = new Tuple<CmdBeginSend, Stream>(begin, CreateOutputStream(begin.Id, begin.OriginalSize, ".sttp_rx"));
                             lock (ActiveStreams)
                             {
                                 ActiveStreams[begin.Id] = stream;
@@ -49,16 +49,16 @@ namespace Sttp.Core
                             }
                         }
                         break;
-                    case BulkTransportCommand.CancelSend:
+                    case SubCommand.CancelSend:
                         {
-                            var cancel = (command as BulkTransportSendFragmentParams);
+                            var cancel = command.CancelSend;
                             DisposeStream(cancel.Id);
                         }
                         break;
-                    case BulkTransportCommand.SendFragment:
+                    case SubCommand.SendFragment:
                         {
-                            var fragment = (command as BulkTransportSendFragmentParams);
-                            if (ActiveStreams.TryGetValue(fragment.Id, out Tuple<BulkTransportBeginSendParams, Stream> stream))
+                            var fragment = command.SendFragment;
+                            if (ActiveStreams.TryGetValue(fragment.Id, out Tuple<CmdBeginSend, Stream> stream))
                             {
                                 int size = AppendDataToStream(stream, fragment.Content);
                                 if (fragment.BytesRemaining - size <= 0)
@@ -73,7 +73,7 @@ namespace Sttp.Core
                             }
                         }
                         break;
-                    case BulkTransportCommand.Invalid:
+                    case SubCommand.Invalid:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -83,7 +83,7 @@ namespace Sttp.Core
         public void DisposeStream(Guid id)
         {
 
-            if (ActiveStreams.TryGetValue(id, out Tuple<BulkTransportBeginSendParams, Stream> stream))
+            if (ActiveStreams.TryGetValue(id, out Tuple<CmdBeginSend, Stream> stream))
             {
                 lock (ActiveStreams)
                 {
@@ -114,7 +114,7 @@ namespace Sttp.Core
         }
 
 
-        private static int AppendDataToStream(Tuple<BulkTransportBeginSendParams, Stream> stream, byte[] content)
+        private static int AppendDataToStream(Tuple<CmdBeginSend, Stream> stream, byte[] content)
         {
             switch (stream.Item1.Compression)
             {
