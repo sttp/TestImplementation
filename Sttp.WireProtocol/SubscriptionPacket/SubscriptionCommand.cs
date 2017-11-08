@@ -14,29 +14,13 @@ namespace Sttp.WireProtocol.SubscriptionPacket
         Invalid = 0x00,
 
         /// <summary>
-        /// Specifies that this subscription is an augmentation of an existing subscription. 
-        /// </summary>
-        IsAugmentedSubscription,
-
-        /// <summary>
-        /// Sets the state information for every data point that is specified after this state. 
-        /// Note: This typically will be specified once, then a list of points will follow, 
-        /// however, this can be specified for each point if the publisher supports this level
-        /// of granularity.
+        /// Specifies an option based connection string to configure the request. 
         /// 
         /// Payload:
-        /// long DownSamplingSamplesPerSecond = -1
-        /// long DownSamplingPerDay = -1
-        /// PriorityFlags flags = Normal
-        /// ReliabilityFlags flags = Normal
-        /// VerificationFlags flags = Normal
-        /// PublishByException flags = Normal
-        /// ShouldUnsubscribe = false
+        /// SttpNamedSet options
         /// 
         /// </summary>
-        ConfigureDataPointState,
-
-
+        ConfigureOptions,
 
         /// <summary>
         /// Identifies all data points.
@@ -44,38 +28,26 @@ namespace Sttp.WireProtocol.SubscriptionPacket
         AllDataPoints,
 
         /// <summary>
-        /// Identifies all Data Points listed in a table
+        /// Requests all the measurements base as the result of a query. The column selected must be a pointID.
+        /// 
+        /// Example SELECT Magnitude, Angle, Real, Imaginary FROM VIPair WHERE IsCurrent=true
         /// 
         /// Payload:
-        /// TableIndex
+        /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
+        /// SttpQueryExpression expression          - An sttp query expression.
+        /// 
         /// </summary>
-        TableDataPoints,
+        ByQuery,
 
         /// <summary>
-        /// Specifies a DataPoint by ID
+        /// Requests an 
         /// 
         /// Payload: 
-        /// int DataPointID
+        /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
+        /// SttpPointID[] Points
         /// </summary>
         DataPointByID,
-
-        /// <summary>
-        /// Sets the start time for a subscription for historical data. Default is null.
-        /// 
-        /// Payload: 
-        /// bool HasValue
-        /// SttpTimestamp startTime
-        /// </summary>
-        StartTime,
-
-        /// <summary>
-        /// Sets the stop time for a subscription for historical data. Default is null.
-        /// 
-        /// Payload:
-        /// bool HasValue
-        /// SttpTimestamp stopTime
-        /// </summary>
-        StopTime,
-
     }
+
+   
 }

@@ -7,7 +7,7 @@
         public string ColumnName;
         public string ForeignTableName;
         public string TableAlias;
-        public bool  IsLeftJoin;
+        public bool IsLeftJoin;
 
         public void Load(PacketReader reader)
         {
