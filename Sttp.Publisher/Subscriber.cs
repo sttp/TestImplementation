@@ -8,7 +8,6 @@ using System.Threading;
 using Sttp.Data;
 using Sttp.WireProtocol;
 using Sttp.WireProtocol.SendDataPoints;
-using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
 {
@@ -98,7 +97,7 @@ namespace Sttp.Publisher
         public void Start()
         {
             // Start session negotiation - first step is to declare supported protocol versions...
-            ProtocolVersions versions = new ProtocolVersions { Versions = new[] { OnePointZero } };
+            //ProtocolVersions versions = new ProtocolVersions { Versions = new[] { OnePointZero } };
             //m_encoder.NegotiateSession.SupportedVersions(versions);
             // Start timer to wait on subscriber response - then disconnect otherwise
         }

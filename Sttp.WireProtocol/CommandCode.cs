@@ -48,7 +48,7 @@ namespace Sttp.WireProtocol
         /// Requests the version of the current database, along with the schema. 
         /// 
         /// Payload:
-        /// bool IncludeSchema   - Indicates if only the current version of the database will be returned. Not the schema.
+        /// bool includeSchema   - Indicates if only the current version of the database will be returned. Not the schema.
         /// 
         /// Response:
         /// MetadataSchema schema
@@ -65,6 +65,8 @@ namespace Sttp.WireProtocol
         /// long revision,                      - The revisionID that the schema was on. Ignored if IsUpdateQuery is false.
         /// bool isUpdateQuery                  - Specifies that this query should only be run on rows that has been modified since the specified revision.
         /// SttpQueryExpression expression      - An sttp query expression.
+        /// 
+        /// Response:
         /// 
         /// </summary>
         GetMetadata,
@@ -109,8 +111,8 @@ namespace Sttp.WireProtocol
         /// 
         /// Payload: 
         /// CommandCode FailedCommand   - The command code that failed.
-        /// string Reason      - A user friendly message for the failure, can be null.
-        /// string Details     - A not so friendly message more helpful for troubleshooters.
+        /// string Reason               - A user friendly message for the failure, can be null.
+        /// string Details              - A not so friendly message more helpful for troubleshooters.
         /// </summary>
         RequestFailed,
 

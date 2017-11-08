@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Sttp.Data;
 using Sttp.WireProtocol;
-using Version = Sttp.WireProtocol.Version;
 
 namespace Sttp.Publisher
 {

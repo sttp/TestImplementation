@@ -133,7 +133,7 @@ namespace Sttp.WireProtocol
                             return sbyte.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -195,7 +195,7 @@ namespace Sttp.WireProtocol
                             return short.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -258,7 +258,7 @@ namespace Sttp.WireProtocol
                             return int.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -321,7 +321,7 @@ namespace Sttp.WireProtocol
                             return long.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -383,7 +383,7 @@ namespace Sttp.WireProtocol
                             return byte.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -445,7 +445,7 @@ namespace Sttp.WireProtocol
                             return ushort.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -507,7 +507,7 @@ namespace Sttp.WireProtocol
                             return uint.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -569,7 +569,7 @@ namespace Sttp.WireProtocol
                             return ulong.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -631,7 +631,7 @@ namespace Sttp.WireProtocol
                             return decimal.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -693,7 +693,7 @@ namespace Sttp.WireProtocol
                             return double.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -755,7 +755,7 @@ namespace Sttp.WireProtocol
                             return float.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -817,7 +817,7 @@ namespace Sttp.WireProtocol
                             return SttpTimestamp.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -879,7 +879,7 @@ namespace Sttp.WireProtocol
                             return SttpTimestampOffset.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -941,7 +941,7 @@ namespace Sttp.WireProtocol
                             return TimeSpan.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1003,7 +1003,7 @@ namespace Sttp.WireProtocol
                             return char.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1074,7 +1074,7 @@ namespace Sttp.WireProtocol
                             return bool.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1136,7 +1136,7 @@ namespace Sttp.WireProtocol
                             return Guid.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1199,7 +1199,7 @@ namespace Sttp.WireProtocol
                         case SttpValueTypeCode.Buffer:
                             //ToDo: Return a byte string 0x292A78B402;
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1261,7 +1261,7 @@ namespace Sttp.WireProtocol
                             throw new InvalidCastException("Cannot cast from String");
                         case SttpValueTypeCode.Buffer:
                             return (byte[])m_valueObject;
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1323,7 +1323,7 @@ namespace Sttp.WireProtocol
                             throw new InvalidCastException("Cannot cast from String");
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             return (SttpValueSet)m_valueObject;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1332,7 +1332,7 @@ namespace Sttp.WireProtocol
             }
             set
             {
-                m_valueTypeCode = SttpValueTypeCode.Set;
+                m_valueTypeCode = SttpValueTypeCode.ValueSet;
                 m_valueObject = value;
             }
         }
@@ -1385,7 +1385,7 @@ namespace Sttp.WireProtocol
                             throw new InvalidCastException("Cannot cast from String");
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.Set:
+                        case SttpValueTypeCode.ValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         case SttpValueTypeCode.NamedSet:
                             return (SttpNamedSet)m_valueObject;

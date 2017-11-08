@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol.GetMetadataSchemaResponse
+namespace Sttp.WireProtocol
 {
     public class MetadataSchema
     {

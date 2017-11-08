@@ -24,7 +24,7 @@
         Guid = 17,            // 16-bytes
         String = 18,          // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
         Buffer = 19,          // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
-        Set = 20,             // An array of SttpValue. Up to 255 elements.
+        ValueSet = 20,        // An array of SttpValue. Up to 255 elements.
         NamedSet = 21,        // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
     }
 

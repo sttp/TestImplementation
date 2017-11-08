@@ -44,14 +44,13 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// This is only valid for queries that are specified as update queries.
         /// 
         /// Payload: 
-        /// short tableIndex,
-        /// int rowIndex,
+        /// SttpValue primaryKey,
         /// 
         /// </summary>
         UndefineRow,
 
         /// <summary>
-        /// Indicates that the requested metadata has finished.
+        /// Indicates that the requested metadata has finished streaming.
         /// </summary>
         Finished,
     }
