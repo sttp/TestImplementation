@@ -11,8 +11,9 @@ namespace Sttp.WireProtocol
 
         /// <summary>
         /// Indicates that a fragmented packet is being sent. Fragmented packets 
-        /// are for the wire protocol to ensure every packet fits the MSS size. Users
-        /// must send their bulk data over BulkTransport.
+        /// are for the wire protocol to ensure every packet fits the desired transport size. 
+        /// This functionality is handled internally and not exposed for use. To send large packets
+        /// over the wire, the user must send their data with the BulkTransport command.
         /// 
         /// Fragmented packets must be sent one at a time in sequence and cannot be 
         /// interwoven with any other kind of packet.
@@ -32,13 +33,16 @@ namespace Sttp.WireProtocol
         /// byte CompressionMode      - The algorithm that is used to compress the data.
         /// (Implied) Length of first fragment
         /// byte[] firstFragment
+        /// 
         /// </summary>
         BeginFragment,
 
         /// <summary>
-        /// Specifies the next fragment of data. When Offset + Length of data == TotalFragmentSize, the fragment is completed.
+        /// Specifies the next fragment of data. When Offset + Length of Fragment == TotalFragmentSize, the fragment is completed.
+        /// Since fragments are sequential, the offset is known, and the length is computed from the packet overhead.
         /// 
         /// Layout:
+        /// (Implied) Offset position in Fragment
         /// (Implied) Length of fragment
         /// byte[] Fragment               
         /// </summary>
@@ -48,7 +52,7 @@ namespace Sttp.WireProtocol
         /// Requests the version of the current database, along with the schema. 
         /// 
         /// Payload:
-        /// bool includeSchema   - Indicates if only the current version of the database will be returned. Not the schema.
+        /// bool includeSchema     - Indicates if only the current version of the database will be returned. Not the schema.
         /// 
         /// Response:
         /// MetadataSchema schema
@@ -58,28 +62,42 @@ namespace Sttp.WireProtocol
         GetMetadataSchemaResponse,
 
         /// <summary>
-        /// Gets metadata from the server.
+        /// Queries metadata from the server.
         /// 
         /// Payload:
-        /// Guid schemaVersion,                 - Can be Guid.Empty. If not empty an error is returned if the schema has changed.
-        /// long revision,                      - The revisionID that the schema was on. Ignored if IsUpdateQuery is false.
-        /// bool isUpdateQuery                  - Specifies that this query should only be run on rows that has been modified since the specified revision.
+        /// Guid schemaVersion,                 - Can be Guid.Empty. If not empty an error is returned if the schema has changed and the client is out of sync.
+        /// long revision,                      - The revisionID that the database was on. Ignored if IsUpdateQuery is false.
+        /// bool isUpdateQuery                  - Specifies that this query should only be run on rows that have been modified since the specified revision.
         /// SttpQueryExpression expression      - An sttp query expression.
         /// 
         /// Response:
+        /// VersionNotCompatible                - If SchemaVersion does not match the current one, or if revision is too old to do an update query on.
+        /// 
+        /// OR
+        /// 
+        /// DefineTable                         - Defines the response Table
+        /// DefineRow                           - Defines a row of the data
+        /// UndefineRow                         - For update queries, indicates this row should be removed if it exists.
+        /// Finished                            - Indicates that the streaming of the table has completed.
+        /// 
+        /// Note: this response can span multiple packets
         /// 
         /// </summary>
         GetMetadata,
         GetMetadataResponse,
 
         /// <summary>
-        /// Updates the subscription for new measurements. This subscription can be realtime or historical.
+        /// Updates the subscription for new measurements. 
         /// 
-        /// Layout:
+        /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as priority; dead-banding; start/stop times; sample resolution.
+        /// Subcommand: AllDataPoints           - Subscribes to everything
+        /// Subcommand: DataPointByID           - Specifies individual data points
+        /// Subcommand: ByQuery                 - Specifies some kind of query to use to select the measurements.
+        /// 
+        /// Success/Failed
         /// 
         /// </summary>
         Subscribe,
-        SubscribeResponse,
 
         /// <summary>
         /// Sends a series of DataPoints as a single packet. 
@@ -97,11 +115,27 @@ namespace Sttp.WireProtocol
         /// Payload:
         /// int32 RuntimeID
         /// SttpPointID ID;
+        /// 
         /// </summary>
         RegisterDataPointRuntimeIdentifier,
 
         /// <summary>
         /// Negotiates session variables and roles.
+        /// 
+        /// Subcommand: InitiateReverseConnection     - The connecting client desires to act as the server.
+        /// Subcommand: GetAllInstances               - Request all named instances on the server.
+        /// Subcommand: ChangeInstance                - Requests to change the instance connected to.
+        /// Subcommand: SupportedFuncationality       - Tell the server what functions/versions are supported by your client
+        /// Subcommand: ChangeUdpCipher               - Indicates that the UDP cipher needs to be changed.
+        /// 
+        /// 
+        /// Response: 
+        /// Subcommand: ChangeInstanceSuccess
+        /// Subcommand: ChangeUdpCipherResponse       - Returns data and agrees to change the UDP cipher.
+        /// Subcommand: DesiredOperation              - Reply to SupportedFunctionality, indicates the selected mode of operation.
+        /// Subcommand: InstanceList                  - The list of all instances this server has.
+        /// Subcommand: ReverseConnectionSuccess      - Transfers the role of server to the client.
+        /// 
         /// </summary>
         NegotiateSession,
         NegotiateSessionResponse,
@@ -111,17 +145,39 @@ namespace Sttp.WireProtocol
         /// 
         /// Payload: 
         /// CommandCode FailedCommand   - The command code that failed.
+        /// bool TerminateConnection    - Indicates that the connection should be terminated for a failure.
         /// string Reason               - A user friendly message for the failure, can be null.
         /// string Details              - A not so friendly message more helpful for troubleshooters.
         /// </summary>
         RequestFailed,
-
+        /// <summary>
+        /// The specified request Succeeded. 
+        /// 
+        /// Payload: 
+        /// CommandCode SuccessCommand  - The command code that succeeded.
+        /// string Reason               - A user friendly message for the success, can be null.
+        /// string Details              - A not so friendly message more helpful for troubleshooters.
+        /// </summary>
+        RequestSucceeded,
 
         /// <summary>
         /// Capable of sending large blocks of data over STTP.
+        /// 
+        /// Payload:
+        /// Subcommand: BeginSend       - Indicates a new large block of data is on its way.
+        /// Subcommand: SendFragment    - Indicates that a new fragment of data is being sent.
+        /// Subcommand: CancelSend      - Indicates that a send operation is being canceled.
+        /// 
         /// </summary>
         BulkTransport,
 
+        /// <summary>
+        /// A keep-alive packet.
+        /// 
+        /// Payload: 
+        /// bool ShouldEcho              - Indicates if this packet should be echoed back. 
+        /// 
+        /// </summary>
         NoOp = 0xFF,
     }
 }

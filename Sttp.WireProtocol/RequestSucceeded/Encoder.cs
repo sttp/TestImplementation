@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.RequestFailed
+namespace Sttp.WireProtocol.RequestSucceeded
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.RequestFailed;
+        public override CommandCode Code => CommandCode.RequestSucceeded;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)
@@ -15,11 +15,10 @@ namespace Sttp.WireProtocol.RequestFailed
 
         }
 
-        public void GetMetadataSchema(CommandCode failedCommand,bool terminateConnection, string reason, string details)
+        public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
         {
             BeginCommand();
-            Stream.Write(failedCommand);
-            Stream.Write(terminateConnection);
+            Stream.Write(commandSucceeded);
             Stream.Write(reason);
             Stream.Write(details);
             EndCommand();
