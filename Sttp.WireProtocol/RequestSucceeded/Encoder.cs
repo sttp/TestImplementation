@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.RequestSucceeded
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.RequestSucceeded;
+        protected override CommandCode Code => CommandCode.RequestSucceeded;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

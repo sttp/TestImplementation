@@ -24,7 +24,7 @@ namespace Sttp.WireProtocol.BulkTransport
         BeginSend,
 
         /// <summary>
-        /// Sends a fragment for the previously defined bulk transport. Maximum bytes sent per command is 1000 bytes
+        /// Sends a fragment for the previously defined bulk transport. 
         /// 
         /// Payload: 
         /// Guid ID,

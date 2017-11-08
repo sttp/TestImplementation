@@ -12,7 +12,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         Invalid = 0x00,
 
         /// <summary>
-        /// Specified version is not compatible. Recompile query with the latest schema.
+        /// Specified schema or revision is not compatible. Recompile query with the latest schema.
         /// </summary>
         VersionNotCompatible,
 

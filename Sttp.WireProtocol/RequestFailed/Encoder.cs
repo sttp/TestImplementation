@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.RequestFailed
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.RequestFailed;
+        protected override CommandCode Code => CommandCode.RequestFailed;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

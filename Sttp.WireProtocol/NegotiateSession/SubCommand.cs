@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol.NegotiateSession
         Invalid = 0x00,
 
         /// <summary>
-        /// When negotiating options, the protocol defaults to the listener acting as the 'Server' who get to make all of the decisions.
+        /// When negotiating options, the protocol defaults to the listener acting as the 'Server' who gets to make all of the decisions.
         /// In a scenario where outbound connections are made for security purposes, the client can request to behave as the 'Server'. 
         /// This command will either be rejected or accepted by the current 'server'. After this, the role swaps or the connection is terminated.
         /// 

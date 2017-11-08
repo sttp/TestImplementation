@@ -1,5 +1,4 @@
 ﻿using System;
-using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp.WireProtocol
 {
@@ -16,20 +15,21 @@ namespace Sttp.WireProtocol
 
         //private DataPointEncoder m_dataPoint;
 
-        private Subscribe.Encoder m_subscription;
-
-        private NegotiateSession.Encoder m_negotiateSession;
-
-        private BulkTransport.Encoder m_bulkEncoder;
-
         private CommandCode m_lastCode;
 
         private SessionDetails m_sessionDetails;
 
-        private GetMetadataSchema.Encoder m_getMetadataSchema;
-        private GetMetadataSchemaResponse.Encoder m_getMetadataSchemaResponse;
-        private GetMetadata.Encoder m_getMetadata;
-        private GetMetadataResponse.Encoder m_getMetadataResponse;
+        public GetMetadataSchema.Encoder GetMetadataSchema;
+        public GetMetadataSchemaResponse.Encoder GetMetadataSchemaResponse;
+        public GetMetadata.Encoder GetMetadata;
+        public GetMetadataResponse.Encoder GetMetadataResponse;
+        public Subscribe.Encoder Subscribe;
+        public SendDataPoints.Encoder SendDataPoints;
+        public NegotiateSession.Encoder NegotiateSession;
+        public NegotiateSessionResponse.Encoder NegotiateSessionResponse;
+        public RequestFailed.Encoder RequestFailed;
+        public RequestSucceeded.Encoder RequestSucceeded;
+        public BulkTransport.Encoder BulkTransport;
 
 
         /// <summary>
@@ -39,15 +39,18 @@ namespace Sttp.WireProtocol
         {
             m_sessionDetails = new SessionDetails();
             m_lastCode = CommandCode.Invalid;
-            m_getMetadataSchema = new GetMetadataSchema.Encoder(SendNewPacket, m_sessionDetails);
-            m_getMetadataSchemaResponse = new GetMetadataSchemaResponse.Encoder(SendNewPacket, m_sessionDetails);
-            m_getMetadata = new GetMetadata.Encoder(SendNewPacket, m_sessionDetails);
-            m_getMetadataResponse = new GetMetadataResponse.Encoder(SendNewPacket, m_sessionDetails);
 
-            //m_subscription = new SubscriptionEncoder(SendPacket);
-            //m_dataPoint = new DataPointEncoder(SendPacket);
-            //m_negotiateSession = new NegotiateSessionEncoder(SendPacket);
-            m_bulkEncoder = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadataSchema = new GetMetadataSchema.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadataSchemaResponse = new GetMetadataSchemaResponse.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadata = new GetMetadata.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadataResponse = new GetMetadataResponse.Encoder(SendNewPacket, m_sessionDetails);
+            Subscribe = new Subscribe.Encoder(SendNewPacket, m_sessionDetails);
+            SendDataPoints = new SendDataPoints.Encoder(SendNewPacket, m_sessionDetails);
+            NegotiateSession = new NegotiateSession.Encoder(SendNewPacket, m_sessionDetails);
+            NegotiateSessionResponse = new NegotiateSessionResponse.Encoder(SendNewPacket, m_sessionDetails);
+            RequestFailed = new RequestFailed.Encoder(SendNewPacket, m_sessionDetails);
+            RequestSucceeded = new RequestSucceeded.Encoder(SendNewPacket, m_sessionDetails);
+            BulkTransport = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
@@ -55,28 +58,7 @@ namespace Sttp.WireProtocol
             NewPacket?.Invoke(buffer, position, length);
         }
 
-        public BulkTransport.Encoder BeginBulkTransferPacket()
-        {
-            return m_bulkEncoder;
-        }
-
-        public GetMetadataSchema.Encoder GetMetadataSchema()
-        {
-            return m_getMetadataSchema;
-        }
-        public GetMetadataSchemaResponse.Encoder GetMetadataSchemaResponse()
-        {
-            return m_getMetadataSchemaResponse;
-        }
-        public GetMetadata.Encoder GetMetadata()
-        {
-            return m_getMetadata;
-        }
-        public GetMetadataResponse.Encoder GetMetadataResponse()
-        {
-            return m_getMetadataResponse;
-        }
-
+       
         public void Flush()
         {
         }

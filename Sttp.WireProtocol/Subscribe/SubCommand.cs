@@ -41,7 +41,7 @@ namespace Sttp.WireProtocol.Subscribe
         ByQuery,
 
         /// <summary>
-        /// Requests an 
+        /// Specifies all of the PointIDs to subscribe to.
         /// 
         /// Payload: 
         /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }

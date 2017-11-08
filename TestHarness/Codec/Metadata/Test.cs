@@ -50,7 +50,7 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            var cmd1 = send.GetMetadataSchema();
+            var cmd1 = send.GetMetadataSchema;
             cmd1.GetMetadataSchema(false);
 
             CommandDecoder nextCommand;

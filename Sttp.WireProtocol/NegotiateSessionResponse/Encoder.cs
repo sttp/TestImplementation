@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.NegotiateSessionResponse
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.NegotiateSession;
+        protected override CommandCode Code => CommandCode.NegotiateSession;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

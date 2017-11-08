@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.BulkTransport
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.BulkTransport;
+        protected override CommandCode Code => CommandCode.BulkTransport;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

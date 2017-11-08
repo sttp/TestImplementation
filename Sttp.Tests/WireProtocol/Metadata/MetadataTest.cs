@@ -35,7 +35,7 @@ namespace Sttp.Tests
 
             for (short x = 0; x < testSet.Tables.Count; x++)
             {
-                testSourceSet.RequestTableData(encoder.GetMetadataResponse(), x);
+                testSourceSet.RequestTableData(encoder.GetMetadataResponse, x);
             }
             encoder.Flush();
 

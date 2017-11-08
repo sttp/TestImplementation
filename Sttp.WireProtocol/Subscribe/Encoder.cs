@@ -4,7 +4,7 @@ namespace Sttp.WireProtocol.Subscribe
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.Subscribe;
+        protected override CommandCode Code => CommandCode.Subscribe;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 {
     public class Encoder : BaseEncoder
     {
-        public override CommandCode Code => CommandCode.GetMetadata;
+        protected override CommandCode Code => CommandCode.GetMetadataResponse;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)
