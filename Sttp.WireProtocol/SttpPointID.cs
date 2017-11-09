@@ -43,9 +43,8 @@ namespace Sttp.WireProtocol
 
         private Guid m_valueGuid;
         private object m_valueObject;
-        private int m_valueRuntimeID;
         private SttpPointIDTypeCode m_valueTypeCode;
-        private bool m_hasRuntimeID;
+        public int RuntimeID { get; set; } = -1;
 
         #endregion
 
@@ -60,24 +59,6 @@ namespace Sttp.WireProtocol
 
         #region [ Properties ]
 
-        public bool HasRuntimeID => m_hasRuntimeID;
-
-        public int AsRuntimeID
-        {
-            get
-            {
-                if (m_hasRuntimeID)
-                {
-                    return m_valueRuntimeID;
-                }
-                throw new InvalidCastException("RuntimeID is not specified for this data point.");
-            }
-            set
-            {
-                m_hasRuntimeID = true;
-                m_valueRuntimeID = value;
-            }
-        }
 
         /// <summary>
         /// The type code of the raw value.
