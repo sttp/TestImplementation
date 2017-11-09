@@ -19,19 +19,33 @@ namespace Prototype.Codec.Metadata
                 {
                     case CommandCode.Invalid:
                         break;
-                    case CommandCode.BulkTransport:
-                        break;
                     case CommandCode.BeginFragment:
                         break;
                     case CommandCode.NextFragment:
                         break;
-                    case CommandCode.NegotiateSession:
+                    case CommandCode.GetMetadataSchema:
+                        break;
+                    case CommandCode.GetMetadataSchemaResponse:
+                        break;
+                    case CommandCode.GetMetadata:
+                        break;
+                    case CommandCode.GetMetadataResponse:
                         break;
                     case CommandCode.Subscribe:
                         break;
+                    case CommandCode.SendDataPoints:
+                        break;
                     case CommandCode.RegisterDataPointRuntimeIdentifier:
                         break;
-                    case CommandCode.SendDataPoints:
+                    case CommandCode.NegotiateSession:
+                        break;
+                    case CommandCode.NegotiateSessionResponse:
+                        break;
+                    case CommandCode.RequestFailed:
+                        break;
+                    case CommandCode.RequestSucceeded:
+                        break;
+                    case CommandCode.BulkTransport:
                         break;
                     case CommandCode.NoOp:
                         break;
@@ -50,16 +64,8 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            var cmd1 = send.GetMetadataSchema;
-            cmd1.GetMetadataSchema(false);
-
-            CommandDecoder nextCommand;
-            while ((nextCommand = receive.NextCommand()) != null)
-            {
-                if (nextCommand.CommandCode == CommandCode.GetMetadataSchemaResponse)
-                {
-                }
-            }
+            send.GetMetadataSchema.GetMetadataSchema(false);
+            CommandDecoder command = receive.NextCommand();
 
         }
 
