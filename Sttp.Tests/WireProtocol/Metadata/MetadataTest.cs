@@ -54,7 +54,7 @@ namespace Sttp.Tests
                 {
                     case CommandCode.NegotiateSession:
                     case CommandCode.Subscribe:
-                    case CommandCode.RegisterDataPointRuntimeIdentifier:
+                    case CommandCode.RuntimeIDMapping:
                     case CommandCode.SendDataPoints:
                     case CommandCode.NoOp:
                     case CommandCode.Invalid:

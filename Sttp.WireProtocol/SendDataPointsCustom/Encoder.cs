@@ -15,7 +15,7 @@ namespace Sttp.WireProtocol.SendDataPointsCustom
 
         }
 
-        public void SendDataPointsCustom(byte encodingMethod,byte[] buffer)
+        public void SendDataPointsCustom(byte encodingMethod, byte[] buffer)
         {
             BeginCommand();
             Stream.Write(encodingMethod);

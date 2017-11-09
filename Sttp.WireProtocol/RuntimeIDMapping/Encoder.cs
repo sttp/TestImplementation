@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.RegisterDataPointRuntimeIdentifier
+namespace Sttp.WireProtocol.RuntimeIDMapping
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.RegisterDataPointRuntimeIdentifier;
+        protected override CommandCode Code => CommandCode.RuntimeIDMapping;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)
@@ -15,7 +15,7 @@ namespace Sttp.WireProtocol.RegisterDataPointRuntimeIdentifier
 
         }
 
-        public void RegisterDataPointRuntimeIdentifier(List<SttpPointID> points)
+        public void RuntimeIDMapping(List<SttpPointID> points)
         {
             BeginCommand();
             Stream.Write(points.Count);

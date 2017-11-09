@@ -18,7 +18,7 @@ namespace Sttp.WireProtocol
         private GetMetadataResponse.Decoder m_getMetadataResponse;
         private Subscribe.Decoder m_subscribe;
         private SendDataPoints.Decoder m_sendDataPoints;
-        private RegisterDataPointRuntimeIdentifier.Decoder m_registerDataPointRuntimeIdentifier;
+        private RuntimeIDMapping.Decoder m_registerDataPointRuntimeIdentifier;
         private NegotiateSession.Decoder m_negotiateSession;
         private NegotiateSessionResponse.Decoder m_negotiateSessionResponse;
         private RequestFailed.Decoder m_requestFailed;
@@ -37,7 +37,7 @@ namespace Sttp.WireProtocol
             m_getMetadataResponse = new GetMetadataResponse.Decoder();
             m_subscribe = new Subscribe.Decoder();
             m_sendDataPoints = new SendDataPoints.Decoder();
-            m_registerDataPointRuntimeIdentifier = new RegisterDataPointRuntimeIdentifier.Decoder();
+            m_registerDataPointRuntimeIdentifier = new RuntimeIDMapping.Decoder();
             m_negotiateSession = new NegotiateSession.Decoder();
             m_negotiateSessionResponse = new NegotiateSessionResponse.Decoder();
             m_requestFailed = new RequestFailed.Decoder();
@@ -78,7 +78,7 @@ namespace Sttp.WireProtocol
                 case CommandCode.Subscribe:
                     m_subscribe.Fill(reader);
                     return new CommandDecoder(reader.Command, m_subscribe);
-                case CommandCode.RegisterDataPointRuntimeIdentifier:
+                case CommandCode.RuntimeIDMapping:
                     break;
                     //m_dataPointDecoder.Fill(reader);
                     //return new CommandDecoder(reader.Command, m_dataPointDecoder);

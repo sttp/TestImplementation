@@ -35,7 +35,7 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.SendDataPoints:
                         break;
-                    case CommandCode.RegisterDataPointRuntimeIdentifier:
+                    case CommandCode.RuntimeIDMapping:
                         break;
                     case CommandCode.NegotiateSession:
                         break;

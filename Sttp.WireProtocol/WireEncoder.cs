@@ -30,7 +30,7 @@ namespace Sttp.WireProtocol
         public RequestFailed.Encoder RequestFailed;
         public RequestSucceeded.Encoder RequestSucceeded;
         public BulkTransport.Encoder BulkTransport;
-        public RegisterDataPointRuntimeIdentifier.Encoder RegisterDataPointRuntimeIdentifier;
+        public RuntimeIDMapping.Encoder RegisterDataPointRuntimeIdentifier;
 
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Sttp.WireProtocol
             RequestFailed = new RequestFailed.Encoder(SendNewPacket, m_sessionDetails);
             RequestSucceeded = new RequestSucceeded.Encoder(SendNewPacket, m_sessionDetails);
             BulkTransport = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);
-            RegisterDataPointRuntimeIdentifier = new RegisterDataPointRuntimeIdentifier.Encoder(SendNewPacket, m_sessionDetails);
+            RegisterDataPointRuntimeIdentifier = new RuntimeIDMapping.Encoder(SendNewPacket, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)

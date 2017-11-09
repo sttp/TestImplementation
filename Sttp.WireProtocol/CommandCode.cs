@@ -106,7 +106,7 @@ namespace Sttp.WireProtocol
         /// 
         /// Payload:
         /// byte encodingMethod 
-        /// byte[] Data;
+        /// List<SttpDataPoint> Data;
         /// 
         /// </summary>
         SendDataPoints,
@@ -132,7 +132,7 @@ namespace Sttp.WireProtocol
         /// List<SttpPointID> Points;
         /// 
         /// </summary>
-        RegisterDataPointRuntimeIdentifier,
+        RuntimeIDMapping,
 
         /// <summary>
         /// Negotiates session variables and roles.

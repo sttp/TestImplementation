@@ -62,7 +62,7 @@ namespace Sttp.WireProtocol.DataPointEncoding
         {
             if (m_pointIDsToRegister.Count > 0)
             {
-                m_stream.BeginCommand(CommandCode.RegisterDataPointRuntimeIdentifier);
+                m_stream.BeginCommand(CommandCode.RuntimeIDMapping);
                 m_stream.Write(m_pointIDsToRegister.Count);
                 foreach (var key in m_pointIDsToRegister)
                 {

@@ -50,5 +50,5 @@ namespace Sttp.WireProtocol.Subscribe
         DataPointByID,
     }
 
-   
+
 }
