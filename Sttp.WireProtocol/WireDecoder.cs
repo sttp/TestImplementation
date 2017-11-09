@@ -18,12 +18,12 @@ namespace Sttp.WireProtocol
         private GetMetadataResponse.Decoder m_getMetadataResponse;
         private Subscribe.Decoder m_subscribe;
         private SendDataPoints.Decoder m_sendDataPoints;
-        //private RegisterDataPointRuntimeIdentifier.Decoder m_RegisterDataPointRuntimeIdentifier;
+        private RegisterDataPointRuntimeIdentifier.Decoder m_registerDataPointRuntimeIdentifier;
         private NegotiateSession.Decoder m_negotiateSession;
         private NegotiateSessionResponse.Decoder m_negotiateSessionResponse;
         private RequestFailed.Decoder m_requestFailed;
         private RequestSucceeded.Decoder m_requestSucceeded;
-        private BulkTransport.Decoder m_bulkDecoder;
+        private BulkTransport.Decoder m_bulkTransport;
 
         public WireDecoder()
         {
@@ -37,11 +37,12 @@ namespace Sttp.WireProtocol
             m_getMetadataResponse = new GetMetadataResponse.Decoder();
             m_subscribe = new Subscribe.Decoder();
             m_sendDataPoints = new SendDataPoints.Decoder();
+            m_registerDataPointRuntimeIdentifier = new RegisterDataPointRuntimeIdentifier.Decoder();
             m_negotiateSession = new NegotiateSession.Decoder();
             m_negotiateSessionResponse = new NegotiateSessionResponse.Decoder();
             m_requestFailed = new RequestFailed.Decoder();
             m_requestSucceeded = new RequestSucceeded.Decoder();
-            m_bulkDecoder = new BulkTransport.Decoder();
+            m_bulkTransport = new BulkTransport.Decoder();
         }
 
         /// <summary>
@@ -72,8 +73,8 @@ namespace Sttp.WireProtocol
                     m_negotiateSession.Fill(reader);
                     return new CommandDecoder(reader.Command, m_negotiateSession);
                 case CommandCode.BulkTransport:
-                    m_bulkDecoder.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_bulkDecoder);
+                    m_bulkTransport.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_bulkTransport);
                 case CommandCode.Subscribe:
                     m_subscribe.Fill(reader);
                     return new CommandDecoder(reader.Command, m_subscribe);

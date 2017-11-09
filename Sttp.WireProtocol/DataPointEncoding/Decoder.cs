@@ -1,4 +1,6 @@
-﻿namespace Sttp.WireProtocol.SendDataPoints
+﻿using System.Collections.Generic;
+
+namespace Sttp.WireProtocol.DataPointEncoding
 {
     public class Decoder
     {
@@ -8,5 +10,6 @@
         {
             throw new System.NotImplementedException();
         }
+
     }
 }

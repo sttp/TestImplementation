@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Sttp.WireProtocol.DataPoint.TSSC;
 
-namespace Sttp.WireProtocol.SendDataPoints
+namespace Sttp.WireProtocol.DataPointEncoding
 {
     public class Encoder
     {

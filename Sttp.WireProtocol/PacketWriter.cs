@@ -353,11 +353,23 @@ namespace Sttp.WireProtocol
 
         public void WriteInt7Bit(int value)
         {
-            uint u = *(uint*)&value;
-            WriteUInt7Bit(u);
+            WriteUInt7Bit((uint)value);
+        }
+
+        public void WriteInt7Bit(long value)
+        {
+            WriteUInt7Bit((ulong)value);
         }
 
         public void WriteUInt7Bit(uint value)
+        {
+            int size = Encoding7Bit.GetSize(value);
+            Grow(size);
+
+            // position is incremented within method.
+            Encoding7Bit.Write(m_buffer, ref m_position, value);
+        }
+        public void WriteUInt7Bit(ulong value)
         {
             int size = Encoding7Bit.GetSize(value);
             Grow(size);
@@ -440,7 +452,7 @@ namespace Sttp.WireProtocol
             }
             if (t == typeof(SttpValue))
             {
-                ((SttpValue)(object)value).Save(this);
+                ((SttpValue)(object)value).Save(this, true);
             }
             switch (Type.GetTypeCode(t))
             {
@@ -500,6 +512,8 @@ namespace Sttp.WireProtocol
         #endregion Generics
 
         #endregion
+
+
     }
 }
 

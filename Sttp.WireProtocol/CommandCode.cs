@@ -101,10 +101,26 @@ namespace Sttp.WireProtocol
 
         /// <summary>
         /// Sends a series of DataPoints as a single packet. 
-        /// The encoding of this packet can be rather complex depending on the 
-        /// advance encoding algorithm that is specified.
+        /// The encoding of this packet can be rather complex therefore the wire protocol 
+        /// will only deal with a buffer
+        /// 
+        /// Payload:
+        /// byte encodingMethod 
+        /// byte[] Data;
+        /// 
         /// </summary>
         SendDataPoints,
+        /// <summary>
+        /// Sends a series of DataPoints as a single packet. 
+        /// The encoding of this packet can be rather complex therefore the wire protocol 
+        /// will only deal with a buffer
+        /// 
+        /// Payload:
+        /// byte encodingMethod 
+        /// byte[] Data;
+        /// 
+        /// </summary>
+        SendDataPointsCustom,
 
         /// <summary>
         /// Registers a new data point identifier. 
@@ -113,8 +129,7 @@ namespace Sttp.WireProtocol
         /// runtime IDs that can be mapped, therefore all identifiers do not have to be mapped.
         /// 
         /// Payload:
-        /// int32 RuntimeID
-        /// SttpPointID ID;
+        /// List<SttpPointID> Points;
         /// 
         /// </summary>
         RegisterDataPointRuntimeIdentifier,

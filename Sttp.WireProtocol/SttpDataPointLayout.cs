@@ -21,5 +21,48 @@ namespace Sttp.WireProtocol
         /// 
         /// </summary>
         public byte RawValue;
+
+        public SttpPointIDTypeCode PointIDType
+        {
+            get
+            {
+                return (SttpPointIDTypeCode)(RawValue >> 5);
+            }
+            set
+            {
+                RawValue = (byte)(RawValue & ~((1 << 5) - 1) | (((byte)value) << 5));
+            }
+        }
+
+        public SttpValueTypeCode ValueType
+        {
+            get
+            {
+                return (SttpValueTypeCode)(RawValue & 31);
+            }
+            set
+            {
+                RawValue = (byte)(RawValue & ~31 | (((byte)value) & 31));
+            }
+        }
+
+        public bool ExtraFields
+        {
+            get
+            {
+                return (RawValue & 32) != 0;
+            }
+            set
+            {
+                if (value)
+                {
+                    RawValue = (byte)(RawValue | 32);
+                }
+                else
+                {
+                    RawValue = (byte)(RawValue & ~32);
+                }
+            }
+        }
     }
 }

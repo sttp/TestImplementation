@@ -1681,7 +1681,7 @@ namespace Sttp.WireProtocol
             throw new NotImplementedException();
         }
 
-        public void Save(PacketWriter packetWriter)
+        public void Save(PacketWriter packetWriter, bool includeTypeCode)
         {
             throw new NotImplementedException();
         }
