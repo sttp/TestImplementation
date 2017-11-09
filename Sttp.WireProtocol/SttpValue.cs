@@ -1674,8 +1674,6 @@ namespace Sttp.WireProtocol
             throw new NotImplementedException();
         }
 
-        
-
         public object ToNativeType(SttpValueTypeCode typeCode)
         {
             throw new NotImplementedException();

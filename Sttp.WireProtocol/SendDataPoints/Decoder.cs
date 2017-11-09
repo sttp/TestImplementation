@@ -11,13 +11,11 @@ namespace Sttp.WireProtocol.SendDataPoints
 
         public CommandCode CommandCode => CommandCode.SendDataPoints;
 
-        public byte EncodingMethod;
-        public byte[] Data;
+        public List<SttpDataPoint> DataPoints;
 
         public void Fill(PacketReader reader)
         {
-            EncodingMethod = reader.ReadByte();
-            Data = reader.ReadBytes();
+
         }
     }
 }
