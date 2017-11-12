@@ -64,7 +64,7 @@ namespace Sttp.WireProtocol
             writer.Write(Revision);
             foreach (var table in Tables)
             {
-                if (table.LastDeletedRevision > oldRevision || table.LastModifiedRevision > oldRevision)
+                if (table.LastModifiedRevision > oldRevision)
                 {
                     writer.Write(true);
                     table.SaveChanges(writer);
@@ -78,7 +78,6 @@ namespace Sttp.WireProtocol
     {
         public string TableName;
         public long LastModifiedRevision;
-        public long LastDeletedRevision;
         public TableFlags TableFlags;
         public List<Tuple<string, SttpValueTypeCode>> Columns;
 
@@ -86,7 +85,6 @@ namespace Sttp.WireProtocol
         {
             TableName = reader.ReadString();
             LastModifiedRevision = reader.ReadInt64();
-            LastDeletedRevision = reader.ReadInt64();
             if (!isUpdateResponse)
             {
                 TableFlags = reader.Read<TableFlags>();
@@ -98,7 +96,6 @@ namespace Sttp.WireProtocol
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);
-            writer.Write(LastDeletedRevision);
             writer.Write(TableFlags);
             writer.Write(Columns);
         }
@@ -107,7 +104,6 @@ namespace Sttp.WireProtocol
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);
-            writer.Write(LastDeletedRevision);
         }
     }
 

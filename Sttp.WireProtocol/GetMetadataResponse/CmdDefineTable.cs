@@ -7,6 +7,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
     {
         public SubCommand SubCommand => SubCommand.DefineTable;
 
+        public bool IsUpdateQuery;
         public Guid SchemaVersion;
         public long Revision;
         public string TableName;
@@ -14,6 +15,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void Load(PacketReader reader)
         {
+            IsUpdateQuery = reader.ReadBoolean();
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             TableName = reader.ReadString();
