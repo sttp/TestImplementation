@@ -22,5 +22,7 @@
         public RequestFailed.Decoder RequestFailed => m_decoder as RequestFailed.Decoder;
         public RequestSucceeded.Decoder RequestSucceeded => m_decoder as RequestSucceeded.Decoder;
         public BulkTransport.Decoder BulkTransport => m_decoder as BulkTransport.Decoder;
+        public CompletedSendingDataPoints.Decoder CompletedSendingDataPoints => m_decoder as CompletedSendingDataPoints.Decoder;
+
     }
 }

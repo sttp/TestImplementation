@@ -24,6 +24,7 @@ namespace Sttp.WireProtocol
         private RequestFailed.Decoder m_requestFailed;
         private RequestSucceeded.Decoder m_requestSucceeded;
         private BulkTransport.Decoder m_bulkTransport;
+        private CompletedSendingDataPoints.Decoder m_completedSendingDataPoints;
 
         public WireDecoder()
         {
@@ -43,6 +44,7 @@ namespace Sttp.WireProtocol
             m_requestFailed = new RequestFailed.Decoder();
             m_requestSucceeded = new RequestSucceeded.Decoder();
             m_bulkTransport = new BulkTransport.Decoder();
+            m_completedSendingDataPoints = new CompletedSendingDataPoints.Decoder();
         }
 
         /// <summary>

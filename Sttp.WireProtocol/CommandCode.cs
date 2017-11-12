@@ -110,6 +110,7 @@ namespace Sttp.WireProtocol
         /// 
         /// </summary>
         SendDataPoints,
+
         /// <summary>
         /// Sends a series of DataPoints as a single packet. 
         /// The encoding of this packet can be rather complex therefore the wire protocol 
@@ -121,6 +122,13 @@ namespace Sttp.WireProtocol
         /// 
         /// </summary>
         SendDataPointsCustom,
+
+
+        /// <summary>
+        /// Indicates that the Data Point Stream has completed. This occurs for historical queries to indicate that 
+        /// the last point has been serialized.
+        /// </summary>
+        CompletedSendingDataPoints,
 
         /// <summary>
         /// Registers a new data point identifier. 

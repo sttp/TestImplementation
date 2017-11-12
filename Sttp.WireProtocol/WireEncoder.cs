@@ -31,7 +31,7 @@ namespace Sttp.WireProtocol
         public RequestSucceeded.Encoder RequestSucceeded;
         public BulkTransport.Encoder BulkTransport;
         public RuntimeIDMapping.Encoder RegisterDataPointRuntimeIdentifier;
-
+        public CompletedSendingDataPoints.Encoder CompletedSendingDataPoints;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -53,6 +53,7 @@ namespace Sttp.WireProtocol
             RequestSucceeded = new RequestSucceeded.Encoder(SendNewPacket, m_sessionDetails);
             BulkTransport = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);
             RegisterDataPointRuntimeIdentifier = new RuntimeIDMapping.Encoder(SendNewPacket, m_sessionDetails);
+            CompletedSendingDataPoints = new CompletedSendingDataPoints.Encoder(SendNewPacket, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
