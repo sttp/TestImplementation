@@ -5,10 +5,9 @@ namespace Sttp.WireProtocol
 {
     public class MetadataSchema
     {
+        public bool IsUpdateResponse;
         public Guid SchemaVersion;
         public long Revision;
-        public bool IncludesSchema;
-
         public List<MetadataTables> Tables;
         public List<MetadataTableRelationships> TableRelationships;
 
@@ -16,68 +15,99 @@ namespace Sttp.WireProtocol
         {
             Tables = new List<MetadataTables>();
             TableRelationships = new List<MetadataTableRelationships>();
+            IsUpdateResponse = reader.ReadBoolean();
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
-            IncludesSchema = reader.ReadBoolean();
-            if (IncludesSchema)
+            while (reader.ReadBoolean())
             {
-                int cnt = reader.ReadInt32();
-                while (cnt > 0)
+                Tables.Add(new MetadataTables(reader, IsUpdateResponse));
+            }
+            if (!IsUpdateResponse)
+            {
+                while (reader.ReadBoolean())
                 {
-                    cnt--;
-                    Tables.Add(new MetadataTables(reader));
-                }
-
-                cnt = reader.ReadInt32();
-                while (cnt > 0)
-                {
-                    cnt--;
                     TableRelationships.Add(new MetadataTableRelationships(reader));
                 }
             }
         }
 
-        public void Save(PacketWriter writer, bool includeSchema)
+        public void Save(PacketWriter writer)
         {
+            writer.Write(false);
             writer.Write(SchemaVersion);
             writer.Write(Revision);
-            writer.Write(includeSchema);
-            if (includeSchema)
+            foreach (var table in Tables)
             {
-                writer.Write(Tables.Count);
-                foreach (var table in Tables)
-                {
-                    table.Save(writer);
-                }
-                writer.Write(TableRelationships.Count);
-                foreach (var relationship in TableRelationships)
-                {
-                    relationship.Save(writer);
-                }
+                writer.Write(true);
+                table.Save(writer);
             }
+            writer.Write(false);
+            writer.Write(TableRelationships.Count);
+            foreach (var relationship in TableRelationships)
+            {
+                writer.Write(true);
+                relationship.Save(writer);
+            }
+            writer.Write(true);
         }
 
-    }
+        public void SaveChanges(PacketWriter writer, Guid oldVersion, long oldRevision)
+        {
+            if (SchemaVersion != oldVersion)
+            {
+                Save(writer);
+                return;
+            }
 
+            writer.Write(true);
+            writer.Write(SchemaVersion);
+            writer.Write(Revision);
+            foreach (var table in Tables)
+            {
+                if (table.LastDeletedRevision > oldRevision || table.LastModifiedRevision > oldRevision)
+                {
+                    writer.Write(true);
+                    table.SaveChanges(writer);
+                }
+            }
+            writer.Write(false);
+        }
+    }
 
     public class MetadataTables
     {
         public string TableName;
+        public long LastModifiedRevision;
+        public long LastDeletedRevision;
         public TableFlags TableFlags;
         public List<Tuple<string, SttpValueTypeCode>> Columns;
 
-        public MetadataTables(PacketReader reader)
+        public MetadataTables(PacketReader reader, bool isUpdateResponse)
         {
             TableName = reader.ReadString();
-            TableFlags = reader.Read<TableFlags>();
-            Columns = reader.ReadList<string, SttpValueTypeCode>();
+            LastModifiedRevision = reader.ReadInt64();
+            LastDeletedRevision = reader.ReadInt64();
+            if (!isUpdateResponse)
+            {
+                TableFlags = reader.Read<TableFlags>();
+                Columns = reader.ReadList<string, SttpValueTypeCode>();
+            }
         }
 
         public void Save(PacketWriter writer)
         {
             writer.Write(TableName);
+            writer.Write(LastModifiedRevision);
+            writer.Write(LastDeletedRevision);
             writer.Write(TableFlags);
             writer.Write(Columns);
+        }
+
+        public void SaveChanges(PacketWriter writer)
+        {
+            writer.Write(TableName);
+            writer.Write(LastModifiedRevision);
+            writer.Write(LastDeletedRevision);
         }
     }
 
@@ -92,7 +122,6 @@ namespace Sttp.WireProtocol
         /// The name of the column with the foreign key.
         /// </summary>
         public string ColumnName;
-
         /// <summary>
         /// The foreign table that has the key. 
         /// It could be itself of course.

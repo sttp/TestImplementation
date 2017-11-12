@@ -49,10 +49,11 @@ namespace Sttp.WireProtocol
         NextFragment,
 
         /// <summary>
-        /// Requests the version of the current database, along with the schema. 
+        /// Request the metadata schema if it has changed since the specified version.
         /// 
         /// Payload:
-        /// bool includeSchema     - Indicates if only the current version of the database will be returned. Not the schema.
+        /// Guid schemaVersion,                 - If a schema mismatch occurs, The entire schema is serialized. Specify Guid.Empty to get a full schema.
+        /// long revision,                      - The revision that is cached on the client.
         /// 
         /// Response:
         /// MetadataSchema schema
@@ -105,7 +106,6 @@ namespace Sttp.WireProtocol
         /// will only deal with a buffer
         /// 
         /// Payload:
-        /// byte encodingMethod 
         /// List<SttpDataPoint> Data;
         /// 
         /// </summary>
