@@ -30,7 +30,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// Array columns{string columnName, SttpValueTypeCode columnType}
         /// 
         /// </summary>
-        DefineTable,
+        DefineResponse,
 
         /// <summary>
         /// Defines a row to an existing table. This will either be a new row, or replacing an exiting one.

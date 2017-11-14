@@ -76,7 +76,7 @@ namespace Sttp.WireProtocol
         /// 
         /// OR
         /// 
-        /// DefineTable                         - Defines the response Table
+        /// DefineResponseSchema                - Defines the response Table
         /// DefineRow                           - Defines a row of the data
         /// UndefineRow                         - For update queries, indicates this row should be removed if it exists.
         /// Finished                            - Indicates that the streaming of the table has completed.

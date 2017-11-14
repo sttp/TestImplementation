@@ -20,9 +20,9 @@ namespace Sttp.WireProtocol.GetMetadataResponse
             Stream.Write(SubCommand.VersionNotCompatible);
         }
 
-        public void DefineTable(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
+        public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
         {
-            Stream.Write(SubCommand.DefineTable);
+            Stream.Write(SubCommand.DefineResponse);
             Stream.Write(isUpdateQuery);
             Stream.Write(updatedFromRevision);
             Stream.Write(schemaVersion);

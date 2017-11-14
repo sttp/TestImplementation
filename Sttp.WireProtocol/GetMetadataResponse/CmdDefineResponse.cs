@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Sttp.WireProtocol.GetMetadataResponse
 {
-    public class CmdDefineTable : ICmd
+    public class CmdDefineResponse : ICmd
     {
-        public SubCommand SubCommand => SubCommand.DefineTable;
+        public SubCommand SubCommand => SubCommand.DefineResponse;
 
         public bool IsUpdateQuery;
         public Guid SchemaVersion;
@@ -16,8 +16,6 @@ namespace Sttp.WireProtocol.GetMetadataResponse
 
         public void Load(PacketReader reader)
         {
-            /// long updatedFromRevision            - If IsUpdateQuery, this is the Revision that was supplied in the GetMetadata command.
-
             IsUpdateQuery = reader.ReadBoolean();
             UpdatedFromRevision = reader.ReadInt64();
             SchemaVersion = reader.ReadGuid();
