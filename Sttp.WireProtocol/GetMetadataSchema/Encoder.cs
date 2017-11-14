@@ -15,10 +15,11 @@ namespace Sttp.WireProtocol.GetMetadataSchema
 
         }
 
-        public void GetMetadataSchema(bool includeSchema)
+        public void GetMetadataSchema(Guid schemaVersion, long revision)
         {
             BeginCommand();
-            Stream.Write(includeSchema);
+            Stream.Write(schemaVersion);
+            Stream.Write(revision);
             EndCommand();
         }
 

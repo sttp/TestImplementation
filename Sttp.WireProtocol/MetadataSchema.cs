@@ -6,6 +6,7 @@ namespace Sttp.WireProtocol
     public class MetadataSchema
     {
         public bool IsUpdateResponse;
+        public long UpdatedFromRevision;
         public Guid SchemaVersion;
         public long Revision;
         public List<MetadataTables> Tables;
@@ -16,6 +17,7 @@ namespace Sttp.WireProtocol
             Tables = new List<MetadataTables>();
             TableRelationships = new List<MetadataTableRelationships>();
             IsUpdateResponse = reader.ReadBoolean();
+            UpdatedFromRevision = reader.ReadInt64();
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             while (reader.ReadBoolean())
@@ -34,6 +36,7 @@ namespace Sttp.WireProtocol
         public void Save(PacketWriter writer)
         {
             writer.Write(false);
+            writer.Write(0L);
             writer.Write(SchemaVersion);
             writer.Write(Revision);
             foreach (var table in Tables)
@@ -60,6 +63,7 @@ namespace Sttp.WireProtocol
             }
 
             writer.Write(true);
+            writer.Write(oldRevision);
             writer.Write(SchemaVersion);
             writer.Write(Revision);
             foreach (var table in Tables)

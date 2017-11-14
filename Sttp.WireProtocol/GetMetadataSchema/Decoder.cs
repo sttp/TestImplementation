@@ -7,13 +7,15 @@ namespace Sttp.WireProtocol.GetMetadataSchema
 {
     public class Decoder
     {
-        public bool IncludeSchema;
+        public Guid SchemaVersion;
+        public long Revision;
 
         public CommandCode CommandCode => CommandCode.GetMetadataSchema;
 
         public void Fill(PacketReader reader)
         {
-            IncludeSchema = reader.ReadBoolean();
+            SchemaVersion = reader.ReadGuid();
+            Revision = reader.ReadInt64();
         }
     }
 }
