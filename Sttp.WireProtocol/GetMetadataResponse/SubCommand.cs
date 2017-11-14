@@ -22,6 +22,7 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// Payload:
         /// bool isUpdateQuery, - Indicates if the results are a complete set or an update set. 
         ///                       Note: if the SchemaVersion matches, but the data cannot be patched for some reason, a full set of data is serialized regardless of the client's request.
+        /// long updatedFromRevision - If isUpdatedQuery, this is the revision number that was supplied in the GetMetadata request.
         /// Guid schemaVersion, 
         /// long revision, 
         /// string tableName,
