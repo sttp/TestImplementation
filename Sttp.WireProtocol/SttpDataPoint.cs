@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol
     {
         /// <summary>
         /// A token was defined by the API layer when the runtime ID was defined at the protocol level.
-        /// This is only present when <see cref="PointID"/> is a RuntimeID type. This field is only 
+        /// This is only present when <see cref="DataPointID"/> is a RuntimeID type. This field is only 
         /// used on the receiving end. The source of the data point does not need to assign this field.
         /// 
         /// Suggestions for this token include the properly mapped point identifier and possibly routing information.
@@ -24,7 +24,7 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// The unique identifier for this PointID. Can be int32, GUID, string, SttpNamedSet.
         /// </summary>
-        public SttpPointID PointID;
+        public SttpDataPointID DataPointID;
 
         /// <summary>
         /// A 64-bit timestamp

@@ -66,10 +66,10 @@ namespace Sttp.WireProtocol.SendDataPoints
                 //Write the prefix that indicates the type of the PointID, the number of extra fields, and the type of the value
                 SttpDataPointLayout layout = default(SttpDataPointLayout);
 
-                bool canUseRuntimeID = point.PointID.RuntimeID >= 0 && point.PointID.RuntimeID < m_sessionDetails.MaxRuntimeIDCache;
+                bool canUseRuntimeID = point.DataPointID.RuntimeID >= 0 && point.DataPointID.RuntimeID < m_sessionDetails.MaxRuntimeIDCache;
                 if (!canUseRuntimeID)
                 {
-                    layout.PointIDType = point.PointID.ValueTypeCode;
+                    layout.DataPointIDType = point.DataPointID.ValueTypeCode;
                 }
 
                 layout.ValueType = point.Value.ValueTypeCode;
@@ -103,7 +103,7 @@ namespace Sttp.WireProtocol.SendDataPoints
 
                 if (canUseRuntimeID)
                 {
-                    int pointIDDelta = point.PointID.RuntimeID ^ lastPointID;
+                    int pointIDDelta = point.DataPointID.RuntimeID ^ lastPointID;
                     encodingHeader |= (byte)(pointIDDelta & 15);
                     pointIDDelta >>= 4;
                     if (pointIDDelta > 0)
@@ -113,23 +113,23 @@ namespace Sttp.WireProtocol.SendDataPoints
                     Stream.Write(encodingHeader);
                     Stream.WriteInt7Bit(pointIDDelta);
 
-                    lastPointID = point.PointID.RuntimeID;
+                    lastPointID = point.DataPointID.RuntimeID;
                 }
                 else
                 {
                     Stream.Write(encodingHeader);
-                    switch (point.PointID.ValueTypeCode)
+                    switch (point.DataPointID.ValueTypeCode)
                     {
-                        case SttpPointIDTypeCode.Null:
+                        case SttpDataPointIDTypeCode.Null:
                             break;
-                        case SttpPointIDTypeCode.Guid:
-                            Stream.Write(point.PointID.AsGuid);
+                        case SttpDataPointIDTypeCode.Guid:
+                            Stream.Write(point.DataPointID.AsGuid);
                             break;
-                        case SttpPointIDTypeCode.String:
-                            Stream.Write(point.PointID.AsString);
+                        case SttpDataPointIDTypeCode.String:
+                            Stream.Write(point.DataPointID.AsString);
                             break;
-                        case SttpPointIDTypeCode.NamedSet:
-                            Stream.Write(point.PointID.AsNamedSet);
+                        case SttpDataPointIDTypeCode.NamedSet:
+                            Stream.Write(point.DataPointID.AsNamedSet);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();

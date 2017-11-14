@@ -22,11 +22,11 @@ namespace Sttp.WireProtocol
         /// </summary>
         public byte RawValue;
 
-        public SttpPointIDTypeCode PointIDType
+        public SttpDataPointIDTypeCode DataPointIDType
         {
             get
             {
-                return (SttpPointIDTypeCode)(RawValue >> 5);
+                return (SttpDataPointIDTypeCode)(RawValue >> 5);
             }
             set
             {

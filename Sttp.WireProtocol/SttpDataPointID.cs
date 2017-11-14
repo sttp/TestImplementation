@@ -6,7 +6,7 @@ using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp.WireProtocol
 {
-    public enum SttpPointIDTypeCode
+    public enum SttpDataPointIDTypeCode
     {
         /// <summary>
         /// The pointID is null
@@ -37,22 +37,22 @@ namespace Sttp.WireProtocol
     /// Like financial institutions with billion of identifiers, but very low transactional count per identifier.
     /// 
     /// </summary>
-    public class SttpPointID
+    public class SttpDataPointID
     {
         #region [ Members ]
 
         private Guid m_valueGuid;
         private object m_valueObject;
-        private SttpPointIDTypeCode m_valueTypeCode;
+        private SttpDataPointIDTypeCode m_valueTypeCode;
         public int RuntimeID { get; set; } = -1;
 
         #endregion
 
         #region [ Constructors ]
 
-        public SttpPointID()
+        public SttpDataPointID()
         {
-            m_valueTypeCode = SttpPointIDTypeCode.Null;
+            m_valueTypeCode = SttpDataPointIDTypeCode.Null;
         }
 
         #endregion
@@ -63,7 +63,7 @@ namespace Sttp.WireProtocol
         /// <summary>
         /// The type code of the raw value.
         /// </summary>
-        public SttpPointIDTypeCode ValueTypeCode
+        public SttpDataPointIDTypeCode ValueTypeCode
         {
             get
             {
@@ -75,7 +75,7 @@ namespace Sttp.WireProtocol
         {
             get
             {
-                if (m_valueTypeCode == SttpPointIDTypeCode.Guid)
+                if (m_valueTypeCode == SttpDataPointIDTypeCode.Guid)
                 {
                     return m_valueGuid;
                 }
@@ -83,7 +83,7 @@ namespace Sttp.WireProtocol
             }
             set
             {
-                m_valueTypeCode = SttpPointIDTypeCode.Guid;
+                m_valueTypeCode = SttpDataPointIDTypeCode.Guid;
                 m_valueGuid = value;
             }
         }
@@ -92,7 +92,7 @@ namespace Sttp.WireProtocol
         {
             get
             {
-                if (m_valueTypeCode == SttpPointIDTypeCode.String)
+                if (m_valueTypeCode == SttpDataPointIDTypeCode.String)
                 {
                     return m_valueObject as string;
                 }
@@ -102,11 +102,11 @@ namespace Sttp.WireProtocol
             {
                 if (value == null)
                 {
-                    m_valueTypeCode = SttpPointIDTypeCode.Null;
+                    m_valueTypeCode = SttpDataPointIDTypeCode.Null;
                     m_valueObject = null;
                     return;
                 }
-                m_valueTypeCode = SttpPointIDTypeCode.String;
+                m_valueTypeCode = SttpDataPointIDTypeCode.String;
                 m_valueObject = value;
             }
         }
@@ -115,7 +115,7 @@ namespace Sttp.WireProtocol
         {
             get
             {
-                if (m_valueTypeCode == SttpPointIDTypeCode.NamedSet)
+                if (m_valueTypeCode == SttpDataPointIDTypeCode.NamedSet)
                 {
                     return m_valueObject as SttpNamedSet;
                 }
@@ -125,11 +125,11 @@ namespace Sttp.WireProtocol
             {
                 if (value == null)
                 {
-                    m_valueTypeCode = SttpPointIDTypeCode.Null;
+                    m_valueTypeCode = SttpDataPointIDTypeCode.Null;
                     m_valueObject = null;
                     return;
                 }
-                m_valueTypeCode = SttpPointIDTypeCode.NamedSet;
+                m_valueTypeCode = SttpDataPointIDTypeCode.NamedSet;
                 m_valueObject = value;
             }
         }
@@ -142,14 +142,14 @@ namespace Sttp.WireProtocol
         {
             get
             {
-                return m_valueTypeCode == SttpPointIDTypeCode.Null;
+                return m_valueTypeCode == SttpDataPointIDTypeCode.Null;
             }
             set
             {
                 if (!value)
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
                 m_valueObject = null;
-                m_valueTypeCode = SttpPointIDTypeCode.Null;
+                m_valueTypeCode = SttpDataPointIDTypeCode.Null;
             }
         }
 

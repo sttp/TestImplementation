@@ -31,11 +31,11 @@ namespace Sttp.WireProtocol.Subscribe
             Stream.Write(query);
         }
 
-        public void DataPointByID(SubscriptionAppendMode mode, SttpPointID[] points)
+        public void DataPointByID(SubscriptionAppendMode mode, SttpDataPointID[] dataPoints)
         {
             Stream.Write(SubCommand.DataPointByID);
             Stream.Write(mode);
-            Stream.Write(points);
+            Stream.Write(dataPoints);
         }
 
     }

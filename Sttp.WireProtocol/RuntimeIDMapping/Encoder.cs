@@ -15,7 +15,7 @@ namespace Sttp.WireProtocol.RuntimeIDMapping
 
         }
 
-        public void RuntimeIDMapping(List<SttpPointID> points)
+        public void RuntimeIDMapping(List<SttpDataPointID> points)
         {
             BeginCommand();
             Stream.Write(points.Count);
@@ -25,15 +25,15 @@ namespace Sttp.WireProtocol.RuntimeIDMapping
                 Stream.Write(point.ValueTypeCode);
                 switch (point.ValueTypeCode)
                 {
-                    case SttpPointIDTypeCode.Null:
+                    case SttpDataPointIDTypeCode.Null:
                         throw new InvalidOperationException("A registered pointID cannot be null");
-                    case SttpPointIDTypeCode.Guid:
+                    case SttpDataPointIDTypeCode.Guid:
                         Stream.Write(point.AsGuid);
                         break;
-                    case SttpPointIDTypeCode.String:
+                    case SttpDataPointIDTypeCode.String:
                         Stream.Write(point.AsString);
                         break;
-                    case SttpPointIDTypeCode.NamedSet:
+                    case SttpDataPointIDTypeCode.NamedSet:
                         Stream.Write(point.AsNamedSet);
                         break;
                     default:

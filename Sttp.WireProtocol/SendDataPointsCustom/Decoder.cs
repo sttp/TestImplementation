@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.SendDataPointsCustom
 {
     public class Decoder
     {
-        public List<SttpPointID> Points;
+        public List<SttpDataPointID> Points;
 
         public CommandCode CommandCode => CommandCode.SendDataPointsCustom;
 

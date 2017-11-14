@@ -4,12 +4,12 @@
     {
         public SubCommand SubCommand => SubCommand.DataPointByID;
         public SubscriptionAppendMode Mode;
-        public SttpPointID[] Points;
+        public SttpDataPointID[] DataPoints;
 
         public void Load(PacketReader reader)
         {
             Mode = reader.Read<SubscriptionAppendMode>();
-            Points = reader.ReadArray<SttpPointID>();
+            DataPoints = reader.ReadArray<SttpDataPointID>();
         }
         
     }
