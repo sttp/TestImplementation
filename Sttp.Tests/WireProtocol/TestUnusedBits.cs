@@ -13,12 +13,13 @@ namespace Sttp.Tests.WireProtocol
         {
             float value = 28927496529742; //A random number to have bits set.
 
-            for (int x = 0; x < 256; x++)
+            for (int x = 0; x < 256; x+=16)
             {
                 ((byte*)&value)[3] = (byte)x;
                 Console.WriteLine(x.ToString() + '\t' + value.ToString());
             }
 
+            return;
             double value2 = 28927496529742; //A random number to have bits set.
 
             for (int x = 0; x < 256; x++)

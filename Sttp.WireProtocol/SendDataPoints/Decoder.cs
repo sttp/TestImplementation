@@ -15,7 +15,17 @@ namespace Sttp.WireProtocol.SendDataPoints
 
         public void Fill(PacketReader reader)
         {
+            int lastPointID = 0;
+            long lastTimestamp = 0;
+            byte lastTimeQuality = 0;
+            byte lastValueQuality = 0;
 
+            int count = reader.ReadInt7Bit();
+            DataPoints = new List<SttpDataPoint>(count);
+            while (count > 0)
+            {
+                count--;
+            }
         }
     }
 }

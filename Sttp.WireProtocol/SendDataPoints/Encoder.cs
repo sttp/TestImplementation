@@ -18,8 +18,20 @@ namespace Sttp.WireProtocol.SendDataPoints
 
         public void SendDataPoints(List<SttpDataPoint> dataPoint)
         {
+            //I think it's possible for the default encoding method to be 1 byte overhead. 
+            //Then GZIP might be able to shrink it some more, but we'll have to see.
+
+            //2-bits PointID Encoding. (Should be 0 for most use cases)
+            //1-bit HasExtraFields. (Rarely true)
+            //5-bits SttpValueTypeCode. (Probably just single and int16, but it depends on the protocol)
+            //1-bit TimestampQuality Changed. (Vare Rare)
+            //1-bit ValueQuality Changed. (Very Rare)
+            //1-bit Timestamp Changed. (Only likely to occur at the end of a frame, but not extremely likely)
+            //x-bits PointID Changed by X. (Can be Changed by 1 if properly sorted inside a frame)
+            //n-bits Value. (int16 or single usually, if compared to previous single, might be able to shave a nibble)
+
             BeginCommand();
-            Stream.Write(dataPoint.Count);
+            Stream.WriteInt7Bit(dataPoint.Count);
             int lastPointID = 0;
             long lastTimestamp = 0;
             byte lastTimeQuality = 0;
@@ -81,6 +93,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 }
                 else
                 {
+                    Stream.Write(encodingHeader);
                     switch (point.PointID.ValueTypeCode)
                     {
                         case SttpPointIDTypeCode.Null:

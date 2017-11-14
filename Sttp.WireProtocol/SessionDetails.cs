@@ -35,5 +35,10 @@ namespace Sttp.WireProtocol
         /// This variable is not negotiated.
         /// </summary>
         public int NextFragmentID = 0;
+
+        /// <summary>
+        /// For the default compression method, this identifies the most common first byte serialized.
+        /// </summary>
+        public byte MostCommonFirstByte = 9;
     }
 }
