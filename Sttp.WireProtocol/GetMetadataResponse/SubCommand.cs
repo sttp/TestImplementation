@@ -26,7 +26,6 @@ namespace Sttp.WireProtocol.GetMetadataResponse
         /// Guid schemaVersion, 
         /// long revision, 
         /// string tableName,
-        /// TableFlags flags
         /// Array columns{string columnName, SttpValueTypeCode columnType}
         /// 
         /// </summary>

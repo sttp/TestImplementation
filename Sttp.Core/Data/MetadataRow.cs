@@ -7,52 +7,20 @@ namespace Sttp.Data
 {
     public class MetadataRow
     {
-        public int RowIndex;
-        public List<MetadataField> Fields;
+        public SttpValue Key;
+        public SttpValueSet Fields;
+        public MetadataRow[] ForeignKeys;
 
-        public MetadataRow(int rowIndex)
+        public MetadataRow(SttpValue key, SttpValueSet fields)
         {
-            RowIndex = rowIndex;
-            Fields = new List<MetadataField>();
+            Key = key;
+            Fields = fields;
+            ForeignKeys = new MetadataRow[fields.Values.Count];
         }
 
-        internal void FillData(short tableIndex, MetadataChangeLog changeLog, MetadataColumn column, object value)
+        public void Update(SttpValueSet values)
         {
-            MetadataField field;
-
-            while (Fields.Count <= column.Index)
-            {
-                Fields.Add(null);
-            }
-            field = Fields[column.Index];
-
-            SttpValue encoding = column.Encode(value);
-            if (field == null)
-            {
-                field = new MetadataField();
-                Fields[column.Index] = field;
-                field.Value = encoding;
-                changeLog.AddValue(tableIndex, column.Index, RowIndex, encoding);
-            }
-            else if (field.Value != encoding)
-            {
-                changeLog.AddValue(tableIndex, column.Index, RowIndex, encoding);
-                field.Value = encoding;
-            }
-
+            Fields = values;
         }
-
-        //public void ProcessCommand(Sttp.WireProtocol.GetMetadataResponse.CmdDefineValue patch)
-        //{
-        //    while (Fields.Count <= patch.ColumnIndex)
-        //    {
-        //        Fields.Add(null);
-        //    }
-        //    if (Fields[patch.ColumnIndex] == null)
-        //    {
-        //        Fields[patch.ColumnIndex] = new MetadataField();
-        //    }
-        //    Fields[patch.ColumnIndex].Value = patch.Value;
-        //}
     }
 }

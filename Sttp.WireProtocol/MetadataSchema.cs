@@ -9,26 +9,32 @@ namespace Sttp.WireProtocol
         public long UpdatedFromRevision;
         public Guid SchemaVersion;
         public long Revision;
-        public List<MetadataTables> Tables;
-        public List<MetadataTableRelationships> TableRelationships;
+        public List<MetadataSchemaTables> Tables;
+        public List<MetadataSchemaTableRelationships> TableRelationships;
+
+        public MetadataSchema()
+        {
+            Tables = new List<MetadataSchemaTables>();
+            TableRelationships = new List<MetadataSchemaTableRelationships>();
+        }
 
         public MetadataSchema(PacketReader reader)
         {
-            Tables = new List<MetadataTables>();
-            TableRelationships = new List<MetadataTableRelationships>();
+            Tables = new List<MetadataSchemaTables>();
+            TableRelationships = new List<MetadataSchemaTableRelationships>();
             IsUpdateResponse = reader.ReadBoolean();
             UpdatedFromRevision = reader.ReadInt64();
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             while (reader.ReadBoolean())
             {
-                Tables.Add(new MetadataTables(reader, IsUpdateResponse));
+                Tables.Add(new MetadataSchemaTables(reader, IsUpdateResponse));
             }
             if (!IsUpdateResponse)
             {
                 while (reader.ReadBoolean())
                 {
-                    TableRelationships.Add(new MetadataTableRelationships(reader));
+                    TableRelationships.Add(new MetadataSchemaTableRelationships(reader));
                 }
             }
         }
@@ -78,14 +84,18 @@ namespace Sttp.WireProtocol
         }
     }
 
-    public class MetadataTables
+    public class MetadataSchemaTables
     {
         public string TableName;
         public long LastModifiedRevision;
         public TableFlags TableFlags;
         public List<Tuple<string, SttpValueTypeCode>> Columns;
 
-        public MetadataTables(PacketReader reader, bool isUpdateResponse)
+        public MetadataSchemaTables()
+        {
+            
+        }
+        public MetadataSchemaTables(PacketReader reader, bool isUpdateResponse)
         {
             TableName = reader.ReadString();
             LastModifiedRevision = reader.ReadInt64();
@@ -112,7 +122,7 @@ namespace Sttp.WireProtocol
     }
 
 
-    public class MetadataTableRelationships
+    public class MetadataSchemaTableRelationships
     {
         /// <summary>
         /// The table that has the column with the foreign key.
@@ -133,7 +143,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public string ForeignTableColumn;
 
-        public MetadataTableRelationships(PacketReader reader)
+        public MetadataSchemaTableRelationships(PacketReader reader)
         {
             TableName = reader.ReadString();
             ColumnName = reader.ReadString();

@@ -110,12 +110,12 @@ namespace Sttp.Publisher
             {
                 foreach (var item in key.Attributes.GetSchema())
                 {
-                    m_metadata[item.Item1].AddColumn(item.Item2, item.Item3);
+                    //m_metadata[item.Item1].AddColumn(item.Item2, item.Item3);
                 }
 
                 foreach (var item in key.Attributes.GetValues())
                 {
-                    m_metadata[item.Item1].AddOrUpdateValue(item.Item2, mapping.RuntimeID, item.Item3);
+                    //m_metadata[item.Item1].AddOrUpdateValue(item.Item2, mapping.RuntimeID, item.Item3);
                 }
             }
             return mapping.RuntimeID;

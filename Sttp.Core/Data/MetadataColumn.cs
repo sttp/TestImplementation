@@ -5,10 +5,6 @@ namespace Sttp.Data
     public class MetadataColumn
     {
         /// <summary>
-        /// The 0 based index of this column in the data table.
-        /// </summary>
-        public readonly short Index;
-        /// <summary>
         /// The name of the column
         /// </summary>
         public readonly string Name;
@@ -17,21 +13,10 @@ namespace Sttp.Data
         /// </summary>
         public readonly SttpValueTypeCode TypeCode;
 
-        public MetadataColumn(short index, string name, SttpValueTypeCode typeCode)
+        public MetadataColumn(string name, SttpValueTypeCode typeCode)
         {
-            Index = index;
             TypeCode = typeCode;
             Name = name;
-        }
-
-        public SttpValue Encode(object value)
-        {
-            return SttpValueTypeCodec.Encode(TypeCode, value);
-        }
-
-        public object Decode(SttpValue data)
-        {
-            return SttpValueTypeCodec.Decode(TypeCode, data);
         }
 
     }
