@@ -14,17 +14,15 @@ namespace Sttp.WireProtocol.Subscription
         Invalid = 0x00,
 
         /// <summary>
-        /// Specifies an option based connection string to configure the request. 
-        /// 
-        /// Payload:
-        /// SttpNamedSet options
+        /// Indicates that the subscription details should be cleared.
         /// 
         /// </summary>
-        ConfigureOptions,
+        UnsubscribeFromAll,
 
         /// <summary>
         /// Identifies all data points.
         /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
+        /// SttpNamedSet options
         /// </summary>
         AllDataPoints,
 
@@ -36,6 +34,7 @@ namespace Sttp.WireProtocol.Subscription
         /// Payload:
         /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
         /// SttpQueryExpression expression          - An sttp query expression.
+        /// SttpNamedSet options
         /// 
         /// </summary>
         ByQuery,
@@ -46,6 +45,8 @@ namespace Sttp.WireProtocol.Subscription
         /// Payload: 
         /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
         /// SttpPointID[] Points
+        /// SttpNamedSet options
+        /// 
         /// </summary>
         DataPointByID,
     }

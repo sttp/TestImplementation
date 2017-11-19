@@ -18,7 +18,7 @@
         }
 
         public SubCommand SubCommand => m_commandCode;
-        public CmdConfigureOptions ConfigureOptions => m_command as CmdConfigureOptions;
+        public CmdUnsubscribeFromAll UnsubscribeFromAll => m_command as CmdUnsubscribeFromAll;
         public CmdAllDataPoints AllDataPoints => m_command as CmdAllDataPoints;
         public CmdByQuery ByQuery => m_command as CmdByQuery;
         public CmdDataPointByID DataPointByID => m_command as CmdDataPointByID;

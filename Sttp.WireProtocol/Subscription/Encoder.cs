@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol.Subscription
 
         public void ConfigureOptions(SttpNamedSet options)
         {
-            Stream.Write(SubCommand.ConfigureOptions);
+            Stream.Write(SubCommand.UnsubscribeFromAll);
             Stream.Write(options);
         }
 
@@ -36,6 +36,11 @@ namespace Sttp.WireProtocol.Subscription
             Stream.Write(SubCommand.DataPointByID);
             Stream.Write(mode);
             Stream.Write(dataPoints);
+        }
+
+        public void UnsubscribeFromAll()
+        {
+            Stream.Write(SubCommand.UnsubscribeFromAll);
         }
 
     }

@@ -15,7 +15,7 @@ namespace Sttp.WireProtocol.Subscription
         {
             m_cmd = new Cmd();
             m_commands = new ICmd[10];
-            m_commands[(byte)SubCommand.ConfigureOptions] = new CmdConfigureOptions();
+            m_commands[(byte)SubCommand.UnsubscribeFromAll] = new CmdUnsubscribeFromAll();
             m_commands[(byte)SubCommand.AllDataPoints] = new CmdAllDataPoints();
             m_commands[(byte)SubCommand.ByQuery] = new CmdByQuery();
             m_commands[(byte)SubCommand.DataPointByID] = new CmdDataPointByID();
