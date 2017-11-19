@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.Subscribe
+namespace Sttp.WireProtocol.Subscription
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.Subscribe;
+        protected override CommandCode Code => CommandCode.Subscription;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

@@ -60,7 +60,7 @@ namespace Sttp.WireProtocol
         /// 
         /// </summary>
         GetMetadataSchema,
-        GetMetadataSchemaResponse,
+        MetadataSchema,
 
         /// <summary>
         /// Queries metadata from the server.
@@ -85,7 +85,7 @@ namespace Sttp.WireProtocol
         /// 
         /// </summary>
         GetMetadata,
-        GetMetadataResponse,
+        Metadata,
 
         /// <summary>
         /// Updates the subscription for new measurements. 
@@ -98,7 +98,7 @@ namespace Sttp.WireProtocol
         /// Success/Failed
         /// 
         /// </summary>
-        Subscribe,
+        Subscription,
 
         /// <summary>
         /// Sends a series of DataPoints as a single packet. 

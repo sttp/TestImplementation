@@ -13,10 +13,10 @@ namespace Sttp.WireProtocol
         private SessionDetails m_sessionDetails = new SessionDetails();
 
         private GetMetadataSchema.Decoder m_getMetadataSchema;
-        private GetMetadataSchemaResponse.Decoder m_getMetadataSchemaResponse;
+        private MetadataSchema.Decoder m_getMetadataSchemaResponse;
         private GetMetadata.Decoder m_getMetadata;
-        private GetMetadataResponse.Decoder m_getMetadataResponse;
-        private Subscribe.Decoder m_subscribe;
+        private Metadata.Decoder m_getMetadataResponse;
+        private Subscription.Decoder m_subscribe;
         private SendDataPoints.Decoder m_sendDataPoints;
         private RuntimeIDMapping.Decoder m_registerDataPointRuntimeIdentifier;
         private NegotiateSession.Decoder m_negotiateSession;
@@ -30,13 +30,12 @@ namespace Sttp.WireProtocol
         {
             // m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSession = new NegotiateSession.Decoder();
-            m_subscribe = new Subscribe.Decoder();
 
             m_getMetadataSchema = new GetMetadataSchema.Decoder();
-            m_getMetadataSchemaResponse = new GetMetadataSchemaResponse.Decoder();
+            m_getMetadataSchemaResponse = new MetadataSchema.Decoder();
             m_getMetadata = new GetMetadata.Decoder();
-            m_getMetadataResponse = new GetMetadataResponse.Decoder();
-            m_subscribe = new Subscribe.Decoder();
+            m_getMetadataResponse = new Metadata.Decoder();
+            m_subscribe = new Subscription.Decoder();
             m_sendDataPoints = new SendDataPoints.Decoder();
             m_registerDataPointRuntimeIdentifier = new RuntimeIDMapping.Decoder();
             m_negotiateSession = new NegotiateSession.Decoder();
@@ -77,7 +76,7 @@ namespace Sttp.WireProtocol
                 case CommandCode.BulkTransport:
                     m_bulkTransport.Fill(reader);
                     return new CommandDecoder(reader.Command, m_bulkTransport);
-                case CommandCode.Subscribe:
+                case CommandCode.Subscription:
                     m_subscribe.Fill(reader);
                     return new CommandDecoder(reader.Command, m_subscribe);
                 case CommandCode.RuntimeIDMapping:
@@ -99,13 +98,13 @@ namespace Sttp.WireProtocol
                 case CommandCode.GetMetadataSchema:
                     m_getMetadataSchema.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadataSchema);
-                case CommandCode.GetMetadataSchemaResponse:
+                case CommandCode.MetadataSchema:
                     m_getMetadataSchemaResponse.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadataSchemaResponse);
                 case CommandCode.GetMetadata:
                     m_getMetadata.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadata);
-                case CommandCode.GetMetadataResponse:
+                case CommandCode.Metadata:
                     m_getMetadataResponse.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadataResponse);
                 default:

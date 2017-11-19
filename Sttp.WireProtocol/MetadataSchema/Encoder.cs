@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.GetMetadataSchemaResponse
+namespace Sttp.WireProtocol.MetadataSchema
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.GetMetadataSchemaResponse;
+        protected override CommandCode Code => CommandCode.MetadataSchema;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)
@@ -15,7 +15,7 @@ namespace Sttp.WireProtocol.GetMetadataSchemaResponse
 
         }
 
-        public void GetMetadataSchemaResponse(MetadataSchema schema)
+        public void GetMetadataSchemaResponse(MetadataSchemaDefinition schema)
         {
             BeginCommand();
             Stream.Write(schema);

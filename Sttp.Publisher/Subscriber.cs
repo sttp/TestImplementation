@@ -295,7 +295,7 @@ namespace Sttp.Publisher
                     //    break;
                     case CommandCode.NegotiateSession:
                         break;
-                    case CommandCode.Subscribe:
+                    case CommandCode.Subscription:
                         break;
                     case CommandCode.RuntimeIDMapping:
                         break;

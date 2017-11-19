@@ -25,13 +25,13 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.GetMetadataSchema:
                         break;
-                    case CommandCode.GetMetadataSchemaResponse:
+                    case CommandCode.MetadataSchema:
                         break;
                     case CommandCode.GetMetadata:
                         break;
-                    case CommandCode.GetMetadataResponse:
+                    case CommandCode.Metadata:
                         break;
-                    case CommandCode.Subscribe:
+                    case CommandCode.Subscription:
                         break;
                     case CommandCode.SendDataPoints:
                         break;

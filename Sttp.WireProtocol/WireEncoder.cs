@@ -20,10 +20,10 @@ namespace Sttp.WireProtocol
         private SessionDetails m_sessionDetails;
 
         public GetMetadataSchema.Encoder GetMetadataSchema;
-        public GetMetadataSchemaResponse.Encoder GetMetadataSchemaResponse;
+        public MetadataSchema.Encoder GetMetadataSchemaResponse;
         public GetMetadata.Encoder GetMetadata;
-        public GetMetadataResponse.Encoder GetMetadataResponse;
-        public Subscribe.Encoder Subscribe;
+        public Metadata.Encoder GetMetadataResponse;
+        public Subscription.Encoder Subscribe;
         public SendDataPoints.Encoder SendDataPoints;
         public NegotiateSession.Encoder NegotiateSession;
         public NegotiateSessionResponse.Encoder NegotiateSessionResponse;
@@ -42,10 +42,10 @@ namespace Sttp.WireProtocol
             m_lastCode = CommandCode.Invalid;
 
             GetMetadataSchema = new GetMetadataSchema.Encoder(SendNewPacket, m_sessionDetails);
-            GetMetadataSchemaResponse = new GetMetadataSchemaResponse.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadataSchemaResponse = new MetadataSchema.Encoder(SendNewPacket, m_sessionDetails);
             GetMetadata = new GetMetadata.Encoder(SendNewPacket, m_sessionDetails);
-            GetMetadataResponse = new GetMetadataResponse.Encoder(SendNewPacket, m_sessionDetails);
-            Subscribe = new Subscribe.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadataResponse = new Metadata.Encoder(SendNewPacket, m_sessionDetails);
+            Subscribe = new Subscription.Encoder(SendNewPacket, m_sessionDetails);
             SendDataPoints = new SendDataPoints.Encoder(SendNewPacket, m_sessionDetails);
             NegotiateSession = new NegotiateSession.Encoder(SendNewPacket, m_sessionDetails);
             NegotiateSessionResponse = new NegotiateSessionResponse.Encoder(SendNewPacket, m_sessionDetails);

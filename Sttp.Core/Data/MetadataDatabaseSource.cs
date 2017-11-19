@@ -9,7 +9,7 @@ namespace Sttp.Data
     /// </summary>
     public class MetadataDatabaseSource
     {
-        private MetadataSchema m_metadataSchema = new MetadataSchema();
+        private MetadataSchemaDefinition m_metadataSchema = new MetadataSchemaDefinition();
 
         /// <summary>
         /// If logging is enabled, this is the ID for the transaction log.
@@ -57,7 +57,7 @@ namespace Sttp.Data
 
         public void RefreshSchema()
         {
-            m_metadataSchema = new MetadataSchema();
+            m_metadataSchema = new MetadataSchemaDefinition();
             foreach (var table in m_tables.Values)
             {
                 var t = new MetadataSchemaTables();

@@ -1,4 +1,4 @@
-﻿namespace Sttp.WireProtocol.GetMetadataResponse
+﻿namespace Sttp.WireProtocol.Metadata
 {
     public interface ICmd
     {

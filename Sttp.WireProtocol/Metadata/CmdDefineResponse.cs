@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol.GetMetadataResponse
+namespace Sttp.WireProtocol.Metadata
 {
     public class CmdDefineResponse : ICmd
     {

@@ -1,4 +1,4 @@
-﻿namespace Sttp.WireProtocol.Subscribe
+﻿namespace Sttp.WireProtocol.Subscription
 {
     public interface ICmd
     {

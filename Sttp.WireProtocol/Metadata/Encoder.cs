@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.GetMetadataResponse
+namespace Sttp.WireProtocol.Metadata
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.GetMetadataResponse;
+        protected override CommandCode Code => CommandCode.Metadata;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

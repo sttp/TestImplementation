@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Sttp.WireProtocol
 {
-    public class MetadataSchema
+    public class MetadataSchemaDefinition
     {
         public bool IsUpdateResponse;
         public long UpdatedFromRevision;
@@ -12,13 +12,13 @@ namespace Sttp.WireProtocol
         public List<MetadataSchemaTables> Tables;
         public List<MetadataSchemaTableRelationships> TableRelationships;
 
-        public MetadataSchema()
+        public MetadataSchemaDefinition()
         {
             Tables = new List<MetadataSchemaTables>();
             TableRelationships = new List<MetadataSchemaTableRelationships>();
         }
 
-        public MetadataSchema(PacketReader reader)
+        public MetadataSchemaDefinition(PacketReader reader)
         {
             Tables = new List<MetadataSchemaTables>();
             TableRelationships = new List<MetadataSchemaTableRelationships>();

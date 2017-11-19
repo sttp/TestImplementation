@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.GetMetadataResponse
+namespace Sttp.WireProtocol.Metadata
 {
     public class CmdVersionNotCompatible : ICmd
     {

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Sttp.IO;
 using Sttp.WireProtocol;
-using Sttp.WireProtocol.GetMetadataResponse;
+using Sttp.WireProtocol.Metadata;
 
 namespace Sttp.Data
 {
