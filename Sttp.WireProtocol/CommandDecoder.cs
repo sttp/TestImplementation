@@ -11,7 +11,6 @@
             CommandCode = code;
         }
 
-        public GetMetadataSchema.Decoder GetMetadataSchema => m_decoder as GetMetadataSchema.Decoder;
         public MetadataSchema.Decoder GetMetadataSchemaResponse => m_decoder as MetadataSchema.Decoder;
         public GetMetadata.Decoder GetMetadata => m_decoder as GetMetadata.Decoder;
         public Metadata.Decoder GetMetadataResponse => m_decoder as Metadata.Decoder;

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Sttp.WireProtocol.GetMetadataSchema
+namespace Sttp.WireProtocol.GetMetadata
 {
-    public class Decoder
+    public class CmdSchema : ICmd
     {
+        public SubCommand SubCommand => SubCommand.Schema;
+
         public Guid SchemaVersion;
         public long Revision;
 
-        public CommandCode CommandCode => CommandCode.GetMetadataSchema;
-
-        public void Fill(PacketReader reader)
+        public void Load(PacketReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();

@@ -64,7 +64,6 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            send.GetMetadataSchema.GetMetadataSchema(Guid.Empty, 0);
             CommandDecoder command = receive.NextCommand();
 
         }

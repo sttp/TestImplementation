@@ -12,7 +12,6 @@ namespace Sttp.WireProtocol
         private PacketDecoder m_packetDecoder = new PacketDecoder(new SessionDetails());
         private SessionDetails m_sessionDetails = new SessionDetails();
 
-        private GetMetadataSchema.Decoder m_getMetadataSchema;
         private MetadataSchema.Decoder m_getMetadataSchemaResponse;
         private GetMetadata.Decoder m_getMetadata;
         private Metadata.Decoder m_getMetadataResponse;
@@ -31,7 +30,6 @@ namespace Sttp.WireProtocol
             // m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSession = new NegotiateSession.Decoder();
 
-            m_getMetadataSchema = new GetMetadataSchema.Decoder();
             m_getMetadataSchemaResponse = new MetadataSchema.Decoder();
             m_getMetadata = new GetMetadata.Decoder();
             m_getMetadataResponse = new Metadata.Decoder();
@@ -95,9 +93,6 @@ namespace Sttp.WireProtocol
                     break;
                 case CommandCode.NextFragment:
                     break;
-                case CommandCode.GetMetadataSchema:
-                    m_getMetadataSchema.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_getMetadataSchema);
                 case CommandCode.MetadataSchema:
                     m_getMetadataSchemaResponse.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadataSchemaResponse);

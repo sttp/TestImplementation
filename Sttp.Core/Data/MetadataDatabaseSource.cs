@@ -74,14 +74,14 @@ namespace Sttp.Data
             m_metadataSchema.Revision = Revision;
         }
 
-        public void ProcessCommand(WireProtocol.GetMetadataSchema.Decoder command, WireProtocol.WireEncoder encoder)
-        {
-            encoder.GetMetadataSchemaResponse.GetMetadataSchemaResponse(m_metadataSchema);
-            if (command.SchemaVersion != SchemaVersion && command.SchemaVersion != Guid.Empty)
-            {
+        //public void ProcessCommand(WireProtocol.GetMetadataSchema.Decoder command, WireProtocol.WireEncoder encoder)
+        //{
+        //    encoder.GetMetadataSchemaResponse.GetMetadataSchemaResponse(m_metadataSchema);
+        //    if (command.SchemaVersion != SchemaVersion && command.SchemaVersion != Guid.Empty)
+        //    {
 
-            }
-        }
+        //    }
+        //}
         public void ProcessCommand(WireProtocol.GetMetadata.Decoder command, WireProtocol.WireEncoder encoder)
         {
 
