@@ -12,36 +12,34 @@ namespace Sttp.WireProtocol
         private PacketDecoder m_packetDecoder = new PacketDecoder(new SessionDetails());
         private SessionDetails m_sessionDetails = new SessionDetails();
 
-        private MetadataSchema.Decoder m_getMetadataSchemaResponse;
         private GetMetadata.Decoder m_getMetadata;
-        private Metadata.Decoder m_getMetadataResponse;
-        private Subscription.Decoder m_subscribe;
+        private Metadata.Decoder m_metadata;
+        private Subscription.Decoder m_subscription;
         private SendDataPoints.Decoder m_sendDataPoints;
-        private RuntimeIDMapping.Decoder m_registerDataPointRuntimeIdentifier;
+        private RuntimeIDMapping.Decoder m_runtimeIDMapping;
         private NegotiateSession.Decoder m_negotiateSession;
         private NegotiateSessionResponse.Decoder m_negotiateSessionResponse;
         private RequestFailed.Decoder m_requestFailed;
         private RequestSucceeded.Decoder m_requestSucceeded;
         private BulkTransport.Decoder m_bulkTransport;
-        private SendComplete.Decoder m_completedSendingDataPoints;
+        private SendComplete.Decoder m_sendComplete;
 
         public WireDecoder()
         {
             // m_dataPointDecoder = new DataPointDecoder();
             m_negotiateSession = new NegotiateSession.Decoder();
 
-            m_getMetadataSchemaResponse = new MetadataSchema.Decoder();
             m_getMetadata = new GetMetadata.Decoder();
-            m_getMetadataResponse = new Metadata.Decoder();
-            m_subscribe = new Subscription.Decoder();
+            m_metadata = new Metadata.Decoder();
+            m_subscription = new Subscription.Decoder();
             m_sendDataPoints = new SendDataPoints.Decoder();
-            m_registerDataPointRuntimeIdentifier = new RuntimeIDMapping.Decoder();
+            m_runtimeIDMapping = new RuntimeIDMapping.Decoder();
             m_negotiateSession = new NegotiateSession.Decoder();
             m_negotiateSessionResponse = new NegotiateSessionResponse.Decoder();
             m_requestFailed = new RequestFailed.Decoder();
             m_requestSucceeded = new RequestSucceeded.Decoder();
             m_bulkTransport = new BulkTransport.Decoder();
-            m_completedSendingDataPoints = new SendComplete.Decoder();
+            m_sendComplete = new SendComplete.Decoder();
         }
 
         /// <summary>
@@ -75,8 +73,8 @@ namespace Sttp.WireProtocol
                     m_bulkTransport.Fill(reader);
                     return new CommandDecoder(reader.Command, m_bulkTransport);
                 case CommandCode.Subscription:
-                    m_subscribe.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_subscribe);
+                    m_subscription.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_subscription);
                 case CommandCode.RuntimeIDMapping:
                     break;
                     //m_dataPointDecoder.Fill(reader);
@@ -93,15 +91,12 @@ namespace Sttp.WireProtocol
                     break;
                 case CommandCode.NextFragment:
                     break;
-                case CommandCode.MetadataSchema:
-                    m_getMetadataSchemaResponse.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_getMetadataSchemaResponse);
                 case CommandCode.GetMetadata:
                     m_getMetadata.Fill(reader);
                     return new CommandDecoder(reader.Command, m_getMetadata);
                 case CommandCode.Metadata:
-                    m_getMetadataResponse.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_getMetadataResponse);
+                    m_metadata.Fill(reader);
+                    return new CommandDecoder(reader.Command, m_metadata);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

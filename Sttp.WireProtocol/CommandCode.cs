@@ -48,11 +48,10 @@ namespace Sttp.WireProtocol
         /// </summary>
         NextFragment,
 
-       
-        GetMetadataSchema,
-        MetadataSchema,
 
-       
+        /// <summary>
+        /// Requests or provides metadata.              
+        /// </summary>
         GetMetadata,
         Metadata,
 

@@ -52,6 +52,11 @@ namespace Sttp.WireProtocol.Metadata
         UndefineRow,
 
         /// <summary>
+        /// Indicates that this is the schema only.
+        /// </summary>
+        Schema,
+
+        /// <summary>
         /// Indicates that the requested metadata has finished streaming.
         /// </summary>
         Finished,

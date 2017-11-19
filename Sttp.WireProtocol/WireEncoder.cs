@@ -19,7 +19,6 @@ namespace Sttp.WireProtocol
 
         private SessionDetails m_sessionDetails;
 
-        public MetadataSchema.Encoder GetMetadataSchemaResponse;
         public GetMetadata.Encoder GetMetadata;
         public Metadata.Encoder GetMetadataResponse;
         public Subscription.Encoder Subscribe;
@@ -40,7 +39,6 @@ namespace Sttp.WireProtocol
             m_sessionDetails = new SessionDetails();
             m_lastCode = CommandCode.Invalid;
 
-            GetMetadataSchemaResponse = new MetadataSchema.Encoder(SendNewPacket, m_sessionDetails);
             GetMetadata = new GetMetadata.Encoder(SendNewPacket, m_sessionDetails);
             GetMetadataResponse = new Metadata.Encoder(SendNewPacket, m_sessionDetails);
             Subscribe = new Subscription.Encoder(SendNewPacket, m_sessionDetails);

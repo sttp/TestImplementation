@@ -21,6 +21,8 @@ namespace Sttp.WireProtocol.Metadata
             m_commands[(byte)SubCommand.DefineResponse] = new CmdDefineResponse();
             m_commands[(byte)SubCommand.VersionNotCompatible] = new CmdVersionNotCompatible();
             m_commands[(byte)SubCommand.UndefineRow] = new CmdUndefineRow();
+            m_commands[(byte)SubCommand.Schema] = new CmdSchema();
+            
         }
 
         public CommandCode CommandCode => CommandCode.Metadata;

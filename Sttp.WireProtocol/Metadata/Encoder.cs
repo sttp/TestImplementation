@@ -49,5 +49,12 @@ namespace Sttp.WireProtocol.Metadata
             Stream.Write(SubCommand.Finished);
         }
 
+        public void Schema(MetadataSchemaDefinition schema)
+        {
+            BeginCommand();
+            Stream.Write(schema);
+            EndCommand();
+        }
+
     }
 }

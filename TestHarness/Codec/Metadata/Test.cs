@@ -23,10 +23,6 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.NextFragment:
                         break;
-                    case CommandCode.GetMetadataSchema:
-                        break;
-                    case CommandCode.MetadataSchema:
-                        break;
                     case CommandCode.GetMetadata:
                         break;
                     case CommandCode.Metadata:
