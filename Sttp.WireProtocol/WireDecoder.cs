@@ -18,7 +18,6 @@ namespace Sttp.WireProtocol
         private SendDataPoints.Decoder m_sendDataPoints;
         private RuntimeIDMapping.Decoder m_runtimeIDMapping;
         private NegotiateSession.Decoder m_negotiateSession;
-        private NegotiateSessionResponse.Decoder m_negotiateSessionResponse;
         private RequestFailed.Decoder m_requestFailed;
         private RequestSucceeded.Decoder m_requestSucceeded;
         private BulkTransport.Decoder m_bulkTransport;
@@ -35,7 +34,6 @@ namespace Sttp.WireProtocol
             m_sendDataPoints = new SendDataPoints.Decoder();
             m_runtimeIDMapping = new RuntimeIDMapping.Decoder();
             m_negotiateSession = new NegotiateSession.Decoder();
-            m_negotiateSessionResponse = new NegotiateSessionResponse.Decoder();
             m_requestFailed = new RequestFailed.Decoder();
             m_requestSucceeded = new RequestSucceeded.Decoder();
             m_bulkTransport = new BulkTransport.Decoder();

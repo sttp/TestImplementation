@@ -16,7 +16,6 @@
         public Subscription.Decoder Subscription => m_decoder as Subscription.Decoder;
         public SendDataPoints.Decoder SendDataPoints => m_decoder as SendDataPoints.Decoder;
         public NegotiateSession.Decoder NegotiateSession => m_decoder as NegotiateSession.Decoder;
-        public NegotiateSessionResponse.Decoder NegotiateSessionResponse => m_decoder as NegotiateSessionResponse.Decoder;
         public RequestFailed.Decoder RequestFailed => m_decoder as RequestFailed.Decoder;
         public RequestSucceeded.Decoder RequestSucceeded => m_decoder as RequestSucceeded.Decoder;
         public BulkTransport.Decoder BulkTransport => m_decoder as BulkTransport.Decoder;

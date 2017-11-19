@@ -24,7 +24,6 @@ namespace Sttp.WireProtocol
         public Subscription.Encoder Subscribe;
         public SendDataPoints.Encoder SendDataPoints;
         public NegotiateSession.Encoder NegotiateSession;
-        public NegotiateSessionResponse.Encoder NegotiateSessionResponse;
         public RequestFailed.Encoder RequestFailed;
         public RequestSucceeded.Encoder RequestSucceeded;
         public BulkTransport.Encoder BulkTransport;
@@ -44,7 +43,6 @@ namespace Sttp.WireProtocol
             Subscribe = new Subscription.Encoder(SendNewPacket, m_sessionDetails);
             SendDataPoints = new SendDataPoints.Encoder(SendNewPacket, m_sessionDetails);
             NegotiateSession = new NegotiateSession.Encoder(SendNewPacket, m_sessionDetails);
-            NegotiateSessionResponse = new NegotiateSessionResponse.Encoder(SendNewPacket, m_sessionDetails);
             RequestFailed = new RequestFailed.Encoder(SendNewPacket, m_sessionDetails);
             RequestSucceeded = new RequestSucceeded.Encoder(SendNewPacket, m_sessionDetails);
             BulkTransport = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);

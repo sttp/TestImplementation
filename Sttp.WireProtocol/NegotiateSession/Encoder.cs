@@ -15,33 +15,13 @@ namespace Sttp.WireProtocol.NegotiateSession
 
         }
 
-        public void InitiateReverseConnection()
+        public void Encode(SttpNamedSet connectionString)
         {
-            Stream.Write(SubCommand.InitiateReverseConnection);
+            BeginCommand();
+            Stream.Write(connectionString);
+            EndCommand();
         }
 
-        public void SupportedFunctionality(SttpNamedSet options)
-        {
-            Stream.Write(SubCommand.SupportedFunctionality);
-            Stream.Write(options);
-        }
-
-        public void ChangeInstance(string instanceName)
-        {
-            Stream.Write(SubCommand.ChangeInstance);
-            Stream.Write(instanceName);
-        }
-
-        public void GetAllInstances()
-        {
-            Stream.Write(SubCommand.GetAllInstances);
-        }
-
-        public void ChangeUdpCiper(byte[] nonce)
-        {
-            Stream.Write(SubCommand.ChangeUdpCiper);
-            Stream.Write(nonce);
-        }
 
     }
 }
