@@ -128,7 +128,7 @@ namespace Sttp.WireProtocol
         /// Indicates that the Data Point Stream has completed. This occurs for historical queries to indicate that 
         /// the last point has been serialized.
         /// </summary>
-        CompletedSendingDataPoints,
+        SendComplete,
 
         /// <summary>
         /// Registers a new data point identifier. 
