@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.SendComplete
+namespace Sttp.WireProtocol.SubscriptionStream
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.SendComplete;
+        protected override CommandCode Code => CommandCode.SubscriptionStream;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)
@@ -15,13 +15,14 @@ namespace Sttp.WireProtocol.SendComplete
 
         }
 
-        public void SendComplete()
+        public void SendDataPointsCustom(byte encodingMethod, byte[] buffer)
         {
             BeginCommand();
-          
+            Stream.Write(encodingMethod);
+            Stream.Write(buffer);
             EndCommand();
         }
-     
+
 
     }
 }

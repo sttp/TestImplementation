@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.RuntimeIDMapping
+namespace Sttp.WireProtocol.MapRuntimeIDs
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.RuntimeIDMapping;
+        protected override CommandCode Code => CommandCode.MapRuntimeIDs;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)

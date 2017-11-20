@@ -48,7 +48,6 @@ namespace Sttp.WireProtocol
         /// </summary>
         NextFragment,
 
-
         /// <summary>
         /// Requests or provides metadata.              
         /// </summary>
@@ -56,12 +55,13 @@ namespace Sttp.WireProtocol
         Metadata,
 
         /// <summary>
-        /// Updates the subscription for new measurements. 
+        /// Updates the real-time subscription for new measurements. 
         /// 
-        /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as priority; dead-banding; start/stop times; sample resolution.
+        /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as priority; dead-banding.
         /// Subcommand: AllDataPoints           - Subscribes to everything
         /// Subcommand: DataPointByID           - Specifies individual data points
         /// Subcommand: ByQuery                 - Specifies some kind of query to use to select the measurements.
+        /// Subcommand: UnsubscribeFromAll      - Clears the active subscription
         /// 
         /// Success/Failed
         /// 
@@ -74,10 +74,24 @@ namespace Sttp.WireProtocol
         /// will only deal with a buffer
         /// 
         /// Payload:
-        /// List<SttpDataPoint> Data;
+        /// byte encodingMethod 
+        /// byte[] Data;
         /// 
         /// </summary>
-        SendDataPoints,
+        SubscriptionStream,
+
+        /// <summary>
+        /// Initiates a request/reply for historical queries of data points.
+        /// 
+        /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as start/stop times; sample resolution.
+        /// Subcommand: AllDataPoints           - Subscribes to everything
+        /// Subcommand: DataPointByID           - Specifies individual data points
+        /// Subcommand: ByQuery                 - Specifies some kind of query to use to select the measurements.
+        /// 
+        /// Success/Failed
+        /// 
+        /// </summary>
+        DataPointRequest,
 
         /// <summary>
         /// Sends a series of DataPoints as a single packet. 
@@ -85,18 +99,13 @@ namespace Sttp.WireProtocol
         /// will only deal with a buffer
         /// 
         /// Payload:
+        /// Guid RequestID
+        /// bool IsEndOfResponse
         /// byte encodingMethod 
         /// byte[] Data;
         /// 
         /// </summary>
-        SendDataPointsCustom,
-
-
-        /// <summary>
-        /// Indicates that the Data Point Stream has completed. This occurs for historical queries to indicate that 
-        /// the last point has been serialized.
-        /// </summary>
-        SendComplete,
+        DataPointReply,
 
         /// <summary>
         /// Registers a new data point identifier. 
@@ -108,28 +117,12 @@ namespace Sttp.WireProtocol
         /// List<SttpPointID> Points;
         /// 
         /// </summary>
-        RuntimeIDMapping,
+        MapRuntimeIDs,
 
         /// <summary>
         /// Negotiates session variables and roles.
-        /// 
-        /// Subcommand: InitiateReverseConnection     - The connecting client desires to act as the server.
-        /// Subcommand: GetAllInstances               - Request all named instances on the server.
-        /// Subcommand: ChangeInstance                - Requests to change the instance connected to.
-        /// Subcommand: SupportedFuncationality       - Tell the server what functions/versions are supported by your client
-        /// Subcommand: ChangeUdpCipher               - Indicates that the UDP cipher needs to be changed.
-        /// 
-        /// 
-        /// Response: 
-        /// Subcommand: ChangeInstanceSuccess
-        /// Subcommand: ChangeUdpCipherResponse       - Returns data and agrees to change the UDP cipher.
-        /// Subcommand: DesiredOperation              - Reply to SupportedFunctionality, indicates the selected mode of operation.
-        /// Subcommand: InstanceList                  - The list of all instances this server has.
-        /// Subcommand: ReverseConnectionSuccess      - Transfers the role of server to the client.
-        /// 
         /// </summary>
         NegotiateSession,
-        NegotiateSessionResponse,
 
         /// <summary>
         /// The specified request failed. 
@@ -141,6 +134,7 @@ namespace Sttp.WireProtocol
         /// string Details              - A not so friendly message more helpful for troubleshooters.
         /// </summary>
         RequestFailed,
+
         /// <summary>
         /// The specified request Succeeded. 
         /// 

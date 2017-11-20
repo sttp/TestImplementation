@@ -15,13 +15,11 @@ namespace Sttp.WireProtocol
         private GetMetadata.Decoder m_getMetadata;
         private Metadata.Decoder m_metadata;
         private Subscription.Decoder m_subscription;
-        private SendDataPoints.Decoder m_sendDataPoints;
-        private RuntimeIDMapping.Decoder m_runtimeIDMapping;
+        private MapRuntimeIDs.Decoder m_runtimeIDMapping;
         private NegotiateSession.Decoder m_negotiateSession;
         private RequestFailed.Decoder m_requestFailed;
         private RequestSucceeded.Decoder m_requestSucceeded;
         private BulkTransport.Decoder m_bulkTransport;
-        private SendComplete.Decoder m_sendComplete;
 
         public WireDecoder()
         {
@@ -31,13 +29,11 @@ namespace Sttp.WireProtocol
             m_getMetadata = new GetMetadata.Decoder();
             m_metadata = new Metadata.Decoder();
             m_subscription = new Subscription.Decoder();
-            m_sendDataPoints = new SendDataPoints.Decoder();
-            m_runtimeIDMapping = new RuntimeIDMapping.Decoder();
+            m_runtimeIDMapping = new MapRuntimeIDs.Decoder();
             m_negotiateSession = new NegotiateSession.Decoder();
             m_requestFailed = new RequestFailed.Decoder();
             m_requestSucceeded = new RequestSucceeded.Decoder();
             m_bulkTransport = new BulkTransport.Decoder();
-            m_sendComplete = new SendComplete.Decoder();
         }
 
         /// <summary>
@@ -73,11 +69,7 @@ namespace Sttp.WireProtocol
                 case CommandCode.Subscription:
                     m_subscription.Fill(reader);
                     return new CommandDecoder(reader.Command, m_subscription);
-                case CommandCode.RuntimeIDMapping:
-                    break;
-                    //m_dataPointDecoder.Fill(reader);
-                    //return new CommandDecoder(reader.Command, m_dataPointDecoder);
-                case CommandCode.SendDataPoints:
+                case CommandCode.MapRuntimeIDs:
                     break;
                     //m_dataPointDecoder.Fill(reader);
                     //return new CommandDecoder(reader.Command, m_dataPointDecoder);

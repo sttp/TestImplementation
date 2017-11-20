@@ -297,9 +297,7 @@ namespace Sttp.Publisher
                         break;
                     case CommandCode.Subscription:
                         break;
-                    case CommandCode.RuntimeIDMapping:
-                        break;
-                    case CommandCode.SendDataPoints:
+                    case CommandCode.MapRuntimeIDs:
                         break;
                     case CommandCode.NoOp:
                         break;

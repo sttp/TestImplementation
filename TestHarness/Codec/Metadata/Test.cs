@@ -29,13 +29,9 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.Subscription:
                         break;
-                    case CommandCode.SendDataPoints:
-                        break;
-                    case CommandCode.RuntimeIDMapping:
+                    case CommandCode.MapRuntimeIDs:
                         break;
                     case CommandCode.NegotiateSession:
-                        break;
-                    case CommandCode.NegotiateSessionResponse:
                         break;
                     case CommandCode.RequestFailed:
                         break;

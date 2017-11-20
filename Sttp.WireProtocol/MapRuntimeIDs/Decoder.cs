@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.RuntimeIDMapping
+namespace Sttp.WireProtocol.MapRuntimeIDs
 {
     public class Decoder
     {
         public List<SttpDataPointID> Points;
 
-        public CommandCode CommandCode => CommandCode.RuntimeIDMapping;
+        public CommandCode CommandCode => CommandCode.MapRuntimeIDs;
 
         public void Fill(PacketReader reader)
         {
