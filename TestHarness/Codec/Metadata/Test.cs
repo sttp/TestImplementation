@@ -37,8 +37,6 @@ namespace Prototype.Codec.Metadata
                         break;
                     case CommandCode.RequestSucceeded:
                         break;
-                    case CommandCode.BulkTransport:
-                        break;
                     case CommandCode.NoOp:
                         break;
                     default:

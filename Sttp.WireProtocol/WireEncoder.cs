@@ -25,7 +25,9 @@ namespace Sttp.WireProtocol
         public NegotiateSession.Encoder NegotiateSession;
         public RequestFailed.Encoder RequestFailed;
         public RequestSucceeded.Encoder RequestSucceeded;
-        public BulkTransport.Encoder BulkTransport;
+        public BulkTransportBeginSend.Encoder BulkTransportBeginSend;
+        public BulkTransportCancelSend.Encoder BulkTransportCancelSend;
+        public BulkTransportSendFragment.Encoder BulkTransportSendFragment;
         public MapRuntimeIDs.Encoder RegisterDataPointRuntimeIdentifier;
 
         /// <summary>
@@ -42,7 +44,9 @@ namespace Sttp.WireProtocol
             NegotiateSession = new NegotiateSession.Encoder(SendNewPacket, m_sessionDetails);
             RequestFailed = new RequestFailed.Encoder(SendNewPacket, m_sessionDetails);
             RequestSucceeded = new RequestSucceeded.Encoder(SendNewPacket, m_sessionDetails);
-            BulkTransport = new BulkTransport.Encoder(SendNewPacket, m_sessionDetails);
+            BulkTransportBeginSend = new BulkTransportBeginSend.Encoder(SendNewPacket, m_sessionDetails);
+            BulkTransportCancelSend = new BulkTransportCancelSend.Encoder(SendNewPacket, m_sessionDetails);
+            BulkTransportSendFragment = new BulkTransportSendFragment.Encoder(SendNewPacket, m_sessionDetails);
             RegisterDataPointRuntimeIdentifier = new MapRuntimeIDs.Encoder(SendNewPacket, m_sessionDetails);
         }
 

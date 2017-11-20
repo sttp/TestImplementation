@@ -19,7 +19,9 @@ namespace Sttp.WireProtocol
         private NegotiateSession.Decoder m_negotiateSession;
         private RequestFailed.Decoder m_requestFailed;
         private RequestSucceeded.Decoder m_requestSucceeded;
-        private BulkTransport.Decoder m_bulkTransport;
+        private BulkTransportBeginSend.Decoder m_bulkTransportBeginSend;
+        private BulkTransportCancelSend.Decoder m_bulkTransportCancelSend;
+        private BulkTransportSendFragment.Decoder m_bulkTransportSendFragment;
 
         public WireDecoder()
         {
@@ -33,7 +35,9 @@ namespace Sttp.WireProtocol
             m_negotiateSession = new NegotiateSession.Decoder();
             m_requestFailed = new RequestFailed.Decoder();
             m_requestSucceeded = new RequestSucceeded.Decoder();
-            m_bulkTransport = new BulkTransport.Decoder();
+            m_bulkTransportBeginSend = new BulkTransportBeginSend.Decoder();
+            m_bulkTransportCancelSend = new BulkTransportCancelSend.Decoder();
+            m_bulkTransportSendFragment = new BulkTransportSendFragment.Decoder();
         }
 
         /// <summary>
@@ -63,9 +67,6 @@ namespace Sttp.WireProtocol
                 case CommandCode.NegotiateSession:
                     m_negotiateSession.Fill(reader);
                     return new CommandDecoder(reader.Command, m_negotiateSession);
-                case CommandCode.BulkTransport:
-                    m_bulkTransport.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_bulkTransport);
                 case CommandCode.Subscription:
                     m_subscription.Fill(reader);
                     return new CommandDecoder(reader.Command, m_subscription);

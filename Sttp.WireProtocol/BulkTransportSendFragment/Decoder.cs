@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol.BulkTransport
+namespace Sttp.WireProtocol.BulkTransportSendFragment
 {
-    public class CmdSendFragment : ICmd
+    public class Decoder
     {
-        public SubCommand SubCommand => SubCommand.SendFragment;
+        public CommandCode CommandCode => CommandCode.BulkTransportSendFragment;
 
         public Guid Id;
         public long BytesRemaining;

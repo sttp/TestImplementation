@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.BulkTransport
+namespace Sttp.WireProtocol.BulkTransportCancelSend
 {
-    public class CmdCancelSend : ICmd
+    public class Decoder
     {
-        public SubCommand SubCommand => SubCommand.CancelSend;
+        public CommandCode CommandCode => CommandCode.BulkTransportCancelSend;
         public Guid Id;
 
         public void Load(PacketReader reader)

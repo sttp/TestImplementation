@@ -147,15 +147,33 @@ namespace Sttp.WireProtocol
         RequestSucceeded,
 
         /// <summary>
-        /// Capable of sending large blocks of data over STTP.
+        /// Notifies that a new bulk transport packet is pending to be sent over the wire.
         /// 
         /// Payload:
-        /// Subcommand: BeginSend       - Indicates a new large block of data is on its way.
-        /// Subcommand: SendFragment    - Indicates that a new fragment of data is being sent.
-        /// Subcommand: CancelSend      - Indicates that a send operation is being canceled.
-        /// 
+        /// Guid ID,
+        /// BulkTransportMode mode,
+        /// BulkTransportCompression compression,
+        /// ulong OrigionalSize,
+        /// byte[] Data
         /// </summary>
-        BulkTransport,
+        BulkTransportBeginSend,
+        /// <summary>
+        /// Sends a fragment for the previously defined bulk transport. 
+        /// 
+        /// Payload: 
+        /// Guid ID,
+        /// ulong bytesRemaining 
+        /// byte[] Data
+        /// </summary>
+        BulkTransportSendFragment,
+
+        /// <summary>
+        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
+        /// 
+        /// Payload: 
+        /// Guid ID,
+        /// </summary>
+        BulkTransportCancelSend,
 
         /// <summary>
         /// A keep-alive packet.

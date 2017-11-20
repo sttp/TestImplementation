@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.BulkTransport
+namespace Sttp.WireProtocol.BulkTransportBeginSend
 {
     public class Encoder : BaseEncoder
     {
-        protected override CommandCode Code => CommandCode.BulkTransport;
+        protected override CommandCode Code => CommandCode.BulkTransportBeginSend;
 
         public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
             : base(sendPacket, sessionDetails)
@@ -18,30 +18,12 @@ namespace Sttp.WireProtocol.BulkTransport
         public void BeginSend(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, long position, int length)
         {
             BeginCommand();
-            Stream.Write(SubCommand.BeginSend);
+            Stream.Write(CommandCode.BulkTransportBeginSend);
             Stream.Write(id);
             Stream.Write(mode);
             Stream.Write(compression);
             Stream.Write(originalSize);
             Stream.Write(source, position, length);
-            EndCommand();
-        }
-
-        public void SendFragment(Guid id, long bytesRemaining, byte[] content, long position, int length)
-        {
-            BeginCommand();
-            Stream.Write(SubCommand.SendFragment);
-            Stream.Write(id);
-            Stream.Write(bytesRemaining);
-            Stream.Write(content, position, length);
-            EndCommand();
-        }
-
-        public void CancelSend(Guid id)
-        {
-            BeginCommand();
-            Stream.Write(SubCommand.CancelSend);
-            Stream.Write(id);
             EndCommand();
         }
 

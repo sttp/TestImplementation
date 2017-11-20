@@ -17,7 +17,9 @@
         public NegotiateSession.Decoder NegotiateSession => m_decoder as NegotiateSession.Decoder;
         public RequestFailed.Decoder RequestFailed => m_decoder as RequestFailed.Decoder;
         public RequestSucceeded.Decoder RequestSucceeded => m_decoder as RequestSucceeded.Decoder;
-        public BulkTransport.Decoder BulkTransport => m_decoder as BulkTransport.Decoder;
+        public BulkTransportBeginSend.Decoder BulkTransportBeginSend => m_decoder as BulkTransportBeginSend.Decoder;
+        public BulkTransportCancelSend.Decoder BulkTransportCancelSend => m_decoder as BulkTransportCancelSend.Decoder;
+        public BulkTransportSendFragment.Decoder BulkTransportSendFragment => m_decoder as BulkTransportSendFragment.Decoder;
 
     }
 }
