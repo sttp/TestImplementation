@@ -9,35 +9,36 @@ namespace Sttp.WireProtocol
     public class WireDecoder
     {
         //private DataPointDecoder m_dataPointDecoder;
-        private CommandDecoder m_packetDecoder = new CommandDecoder(new SessionDetails());
-        private SessionDetails m_sessionDetails = new SessionDetails();
+        private CommandDecoder m_packetDecoder;
+        private SessionDetails m_sessionDetails;
 
         private GetMetadata.Decoder m_getMetadata;
         private Metadata.Decoder m_metadata;
-        private Subscription.Decoder m_subscription;
-        private MapRuntimeIDs.Decoder m_runtimeIDMapping;
-        private NegotiateSession.Decoder m_negotiateSession;
-        private RequestFailed.Decoder m_requestFailed;
-        private RequestSucceeded.Decoder m_requestSucceeded;
-        private BulkTransportBeginSend.Decoder m_bulkTransportBeginSend;
-        private BulkTransportCancelSend.Decoder m_bulkTransportCancelSend;
-        private BulkTransportSendFragment.Decoder m_bulkTransportSendFragment;
+        private CommandSubscription m_subscription;
+        private CommandMapRuntimeIDs m_runtimeIDMapping;
+        private CommandNegotiateSession m_negotiateSession;
+        private CommandRequestFailed m_requestFailed;
+        private CommandRequestSucceeded m_requestSucceeded;
+        private CommandBulkTransportBeginSend m_bulkTransportBeginSend;
+        private CommandBulkTransportCancelSend m_bulkTransportCancelSend;
+        private CommandBulkTransportSendFragment m_bulkTransportSendFragment;
 
         public WireDecoder()
         {
             // m_dataPointDecoder = new DataPointDecoder();
-            m_negotiateSession = new NegotiateSession.Decoder();
-
+            m_negotiateSession = new CommandNegotiateSession();
+            m_sessionDetails = new SessionDetails();
+            m_packetDecoder = new CommandDecoder(m_sessionDetails);
             m_getMetadata = new GetMetadata.Decoder();
             m_metadata = new Metadata.Decoder();
-            m_subscription = new Subscription.Decoder();
-            m_runtimeIDMapping = new MapRuntimeIDs.Decoder();
-            m_negotiateSession = new NegotiateSession.Decoder();
-            m_requestFailed = new RequestFailed.Decoder();
-            m_requestSucceeded = new RequestSucceeded.Decoder();
-            m_bulkTransportBeginSend = new BulkTransportBeginSend.Decoder();
-            m_bulkTransportCancelSend = new BulkTransportCancelSend.Decoder();
-            m_bulkTransportSendFragment = new BulkTransportSendFragment.Decoder();
+            m_subscription = new CommandSubscription();
+            m_runtimeIDMapping = new CommandMapRuntimeIDs();
+            m_negotiateSession = new CommandNegotiateSession();
+            m_requestFailed = new CommandRequestFailed();
+            m_requestSucceeded = new CommandRequestSucceeded();
+            m_bulkTransportBeginSend = new CommandBulkTransportBeginSend();
+            m_bulkTransportCancelSend = new CommandBulkTransportCancelSend();
+            m_bulkTransportSendFragment = new CommandBulkTransportSendFragment();
         }
 
         /// <summary>
@@ -72,8 +73,8 @@ namespace Sttp.WireProtocol
                     return new DecoderObjects(reader.Command, m_subscription);
                 case CommandCode.MapRuntimeIDs:
                     break;
-                    //m_dataPointDecoder.Fill(reader);
-                    //return new CommandDecoder(reader.Command, m_dataPointDecoder);
+                //m_dataPointDecoder.Fill(reader);
+                //return new CommandDecoder(reader.Command, m_dataPointDecoder);
                 case CommandCode.NoOp:
                     break;
                 case CommandCode.Invalid:
@@ -94,7 +95,7 @@ namespace Sttp.WireProtocol
             return null;
         }
 
-       
+
 
     }
 }

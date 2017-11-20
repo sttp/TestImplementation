@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.SubscriptionStream
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandSubscriptionStream
     {
-        public List<SttpDataPointID> Points;
-
         public CommandCode CommandCode => CommandCode.SubscriptionStream;
 
         public byte EncodingMethod;

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.DataPointRequest
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandDataPointRequest
     {
         public CommandCode CommandCode => CommandCode.DataPointRequest;
 

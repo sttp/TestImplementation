@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace Sttp.WireProtocol.BulkTransportBeginSend
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandDataPointReply
     {
-        public CommandCode CommandCode => CommandCode.BulkTransportBeginSend;
+        public CommandCode CommandCode => CommandCode.DataPointReply;
 
         public byte EncodingMethod;
         public bool IsEndOfResponse;
@@ -18,6 +21,5 @@ namespace Sttp.WireProtocol.BulkTransportBeginSend
             EncodingMethod = reader.ReadByte();
             Data = reader.ReadBytes();
         }
-
     }
 }

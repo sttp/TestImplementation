@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.BulkTransportCancelSend
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandBulkTransportCancelSend
     {
         public CommandCode CommandCode => CommandCode.BulkTransportCancelSend;
         public Guid Id;

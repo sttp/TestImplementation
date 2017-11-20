@@ -13,13 +13,13 @@
 
         public GetMetadata.Decoder GetMetadata => m_decoder as GetMetadata.Decoder;
         public Metadata.Decoder Metadata => m_decoder as Metadata.Decoder;
-        public Subscription.Decoder Subscription => m_decoder as Subscription.Decoder;
-        public NegotiateSession.Decoder NegotiateSession => m_decoder as NegotiateSession.Decoder;
-        public RequestFailed.Decoder RequestFailed => m_decoder as RequestFailed.Decoder;
-        public RequestSucceeded.Decoder RequestSucceeded => m_decoder as RequestSucceeded.Decoder;
-        public BulkTransportBeginSend.Decoder BulkTransportBeginSend => m_decoder as BulkTransportBeginSend.Decoder;
-        public BulkTransportCancelSend.Decoder BulkTransportCancelSend => m_decoder as BulkTransportCancelSend.Decoder;
-        public BulkTransportSendFragment.Decoder BulkTransportSendFragment => m_decoder as BulkTransportSendFragment.Decoder;
+        public CommandSubscription Subscription => m_decoder as CommandSubscription;
+        public CommandNegotiateSession NegotiateSession => m_decoder as CommandNegotiateSession;
+        public CommandRequestFailed RequestFailed => m_decoder as CommandRequestFailed;
+        public CommandRequestSucceeded RequestSucceeded => m_decoder as CommandRequestSucceeded;
+        public CommandBulkTransportBeginSend BulkTransportBeginSend => m_decoder as CommandBulkTransportBeginSend;
+        public CommandBulkTransportCancelSend BulkTransportCancelSend => m_decoder as CommandBulkTransportCancelSend;
+        public CommandBulkTransportSendFragment BulkTransportSendFragment => m_decoder as CommandBulkTransportSendFragment;
 
     }
 }

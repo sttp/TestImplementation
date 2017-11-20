@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.NegotiateSession
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandNegotiateSession
     {
         private SttpNamedSet ConnectionString;
 

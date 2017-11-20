@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.RequestSucceeded
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandRequestSucceeded
     {
         public CommandCode CommandSucceeded;
         public string Reason;

@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.Subscription
+namespace Sttp.WireProtocol
 {
     /// <summary>
     /// Responsible for encoding each command into bytes
     /// </summary>
-    public class Decoder 
+    public class CommandSubscription 
     {
-        public CommandCode CommandCode => CommandCode.DataPointRequest;
+        public CommandCode CommandCode => CommandCode.Subscription;
 
         public SttpNamedSet Options;
         public SubscriptionAppendMode Mode;

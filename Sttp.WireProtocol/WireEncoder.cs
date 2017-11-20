@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sttp.WireProtocol
 {
@@ -21,15 +22,8 @@ namespace Sttp.WireProtocol
 
         public GetMetadata.Encoder GetMetadata;
         public Metadata.Encoder GetMetadataResponse;
-        public Subscription.Encoder Subscribe;
-        public NegotiateSession.Encoder NegotiateSession;
-        public RequestFailed.Encoder RequestFailed;
-        public RequestSucceeded.Encoder RequestSucceeded;
-        public BulkTransportBeginSend.Encoder BulkTransportBeginSend;
-        public BulkTransportCancelSend.Encoder BulkTransportCancelSend;
-        public BulkTransportSendFragment.Encoder BulkTransportSendFragment;
-        public MapRuntimeIDs.Encoder RegisterDataPointRuntimeIdentifier;
         private CommandEncoder m_encoder;
+        private PayloadWriter m_stream;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -39,17 +33,10 @@ namespace Sttp.WireProtocol
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder(m_sessionDetails, SendNewPacket);
             m_lastCode = CommandCode.Invalid;
+            m_stream = new PayloadWriter(m_sessionDetails, m_encoder);
 
             GetMetadata = new GetMetadata.Encoder(m_encoder, m_sessionDetails);
             GetMetadataResponse = new Metadata.Encoder(m_encoder, m_sessionDetails);
-            Subscribe = new Subscription.Encoder(m_encoder, m_sessionDetails);
-            NegotiateSession = new NegotiateSession.Encoder(m_encoder, m_sessionDetails);
-            RequestFailed = new RequestFailed.Encoder(m_encoder, m_sessionDetails);
-            RequestSucceeded = new RequestSucceeded.Encoder(m_encoder, m_sessionDetails);
-            BulkTransportBeginSend = new BulkTransportBeginSend.Encoder(m_encoder, m_sessionDetails);
-            BulkTransportCancelSend = new BulkTransportCancelSend.Encoder(m_encoder, m_sessionDetails);
-            BulkTransportSendFragment = new BulkTransportSendFragment.Encoder(m_encoder, m_sessionDetails);
-            RegisterDataPointRuntimeIdentifier = new MapRuntimeIDs.Encoder(m_encoder, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
@@ -57,10 +44,116 @@ namespace Sttp.WireProtocol
             NewPacket?.Invoke(buffer, position, length);
         }
 
+        public void BulkTransportBeginSend(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, long position, int length)
+        {
+            m_stream.Clear();
+            m_stream.Write(id);
+            m_stream.Write(mode);
+            m_stream.Write(compression);
+            m_stream.Write(originalSize);
+            m_stream.Write(source, position, length);
+            m_stream.Send(CommandCode.BulkTransportBeginSend);
+        }
+
+        public void BulkTransportCancelSend(Guid id)
+        {
+            m_stream.Clear();
+            m_stream.Write(id);
+            m_stream.Send(CommandCode.BulkTransportCancelSend);
+        }
+
+        public void BulkTransportSendFragment(Guid id, long bytesRemaining, byte[] content, long position, int length)
+        {
+            m_stream.Clear();
+            m_stream.Write(id);
+            m_stream.Write(bytesRemaining);
+            m_stream.Write(content, position, length);
+            m_stream.Send(CommandCode.BulkTransportSendFragment);
+        }
+
+        public void DataPointReply(Guid requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
+        {
+            m_stream.Clear();
+            m_stream.Write(requestID);
+            m_stream.Write(isEndOfResponse);
+            m_stream.Write(encodingMethod);
+            m_stream.Write(buffer);
+            m_stream.Send(CommandCode.DataPointReply);
+        }
+
+        public void DataPointRequest(SttpNamedSet options, SttpDataPointID[] dataPoints)
+        {
+            m_stream.Clear();
+            m_stream.Write(options);
+            m_stream.Write(dataPoints);
+            m_stream.Send(CommandCode.DataPointRequest);
+        }
+
+        public void MapRuntimeIDs(List<SttpDataPointID> points)
+        {
+            m_stream.Clear();
+            m_stream.Write(points.Count);
+            foreach (var point in points)
+            {
+                m_stream.Write(point.RuntimeID);
+                m_stream.Write(point.ValueTypeCode);
+                switch (point.ValueTypeCode)
+                {
+                    case SttpDataPointIDTypeCode.Null:
+                        throw new InvalidOperationException("A registered pointID cannot be null");
+                    case SttpDataPointIDTypeCode.Guid:
+                        m_stream.Write(point.AsGuid);
+                        break;
+                    case SttpDataPointIDTypeCode.String:
+                        m_stream.Write(point.AsString);
+                        break;
+                    case SttpDataPointIDTypeCode.NamedSet:
+                        m_stream.Write(point.AsNamedSet);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            m_stream.Send(CommandCode.MapRuntimeIDs);
+        }
+
+        public void NegotiateSession(SttpNamedSet connectionString)
+        {
+            m_stream.Clear();
+            m_stream.Write(connectionString);
+            m_stream.Send(CommandCode.NegotiateSession);
+        }
+
+        public void RequestFailed(CommandCode failedCommand, bool terminateConnection, string reason, string details)
+        {
+            m_stream.Clear();
+            m_stream.Write(failedCommand);
+            m_stream.Write(terminateConnection);
+            m_stream.Write(reason);
+            m_stream.Write(details);
+            m_stream.Send(CommandCode.RequestFailed);
+        }
+
+        public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
+        {
+            m_stream.Clear();
+            m_stream.Write(commandSucceeded);
+            m_stream.Write(reason);
+            m_stream.Write(details);
+            m_stream.Send(CommandCode.RequestSucceeded);
+        }
+
+        public void Subscription(SubscriptionAppendMode mode, SttpNamedSet options, SttpDataPointID[] dataPoints)
+        {
+            m_stream.Clear();
+            m_stream.Write(mode);
+            m_stream.Write(options);
+            m_stream.Write(dataPoints);
+            m_stream.Send(CommandCode.DataPointRequest);
+        }
+
         public void Flush()
         {
         }
-
-
     }
 }

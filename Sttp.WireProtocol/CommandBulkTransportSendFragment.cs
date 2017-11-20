@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol.BulkTransportSendFragment
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandBulkTransportSendFragment
     {
         public CommandCode CommandCode => CommandCode.BulkTransportSendFragment;
 

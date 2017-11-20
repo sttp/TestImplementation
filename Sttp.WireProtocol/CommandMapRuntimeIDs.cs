@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.WireProtocol.MapRuntimeIDs
+namespace Sttp.WireProtocol
 {
-    public class Decoder
+    public class CommandMapRuntimeIDs
     {
         public List<SttpDataPointID> Points;
 
