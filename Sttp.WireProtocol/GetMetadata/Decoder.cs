@@ -10,7 +10,7 @@ namespace Sttp.WireProtocol.GetMetadata
         private ICmd[] m_commands;
         private Cmd m_cmd;
 
-        private PacketReader m_packet = new PacketReader(new SessionDetails());
+        private PayloadReader m_payload = new PayloadReader(new SessionDetails());
 
         public Decoder()
         {
@@ -22,18 +22,18 @@ namespace Sttp.WireProtocol.GetMetadata
 
         public CommandCode CommandCode => CommandCode.GetMetadata;
 
-        public void Fill(PacketReader buffer)
+        public void Fill(PayloadReader buffer)
         {
-            m_packet = buffer;
+            m_payload = buffer;
         }
 
         public Cmd NextCommand()
         {
-            if (m_packet.Position == m_packet.Length)
+            if (m_payload.Position == m_payload.Length)
                 return null;
 
-            SubCommand subCommand = m_packet.Read<SubCommand>();
-            m_commands[(byte)subCommand].Load(m_packet);
+            SubCommand subCommand = m_payload.Read<SubCommand>();
+            m_commands[(byte)subCommand].Load(m_payload);
             m_cmd.Load(m_commands[(byte)subCommand]);
             return m_cmd;
         }

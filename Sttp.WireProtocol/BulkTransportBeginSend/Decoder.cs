@@ -11,7 +11,7 @@ namespace Sttp.WireProtocol.BulkTransportBeginSend
         public byte[] Data;
         public Guid RequestID;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             RequestID = reader.ReadGuid();
             IsEndOfResponse = reader.ReadBoolean();

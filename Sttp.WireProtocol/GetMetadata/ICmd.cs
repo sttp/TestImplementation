@@ -3,7 +3,7 @@
     public interface ICmd
     {
         SubCommand SubCommand { get; }
-        void Load(PacketReader reader);
+        void Load(PayloadReader reader);
     }
 
     public class Cmd

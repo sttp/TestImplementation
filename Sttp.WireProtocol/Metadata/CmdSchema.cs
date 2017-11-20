@@ -9,7 +9,7 @@ namespace Sttp.WireProtocol.Metadata
 
         public MetadataSchemaDefinition Schema;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             Schema = new MetadataSchemaDefinition(reader);
         }

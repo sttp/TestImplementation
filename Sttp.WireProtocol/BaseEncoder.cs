@@ -6,14 +6,12 @@ namespace Sttp.WireProtocol
     {
         protected abstract CommandCode Code { get; }
 
-        protected PacketWriter Stream;
+        protected PayloadWriter Stream;
 
-        protected Action<byte[], int, int> SendPacket;
-
-        protected BaseEncoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
+        protected BaseEncoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
         {
-            Stream = new PacketWriter(sessionDetails);
-            SendPacket = sendPacket;
+            Stream = new PayloadWriter(sessionDetails, commandEncoder);
+            Stream.Clear();
         }
 
         /// <summary>
@@ -21,7 +19,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public void BeginCommand()
         {
-            Stream.BeginCommand(Code);
+            Stream.Clear();
         }
 
         /// <summary>
@@ -30,7 +28,7 @@ namespace Sttp.WireProtocol
         /// <returns></returns>
         public void EndCommand()
         {
-            Stream.EndCommand(SendPacket);
+            Stream.Send(Code);
         }
     }
 }

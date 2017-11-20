@@ -56,7 +56,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public SttpValue[] ExtraFields;
         
-        public void Write(PacketWriter stream)
+        public void Write(PayloadWriter stream)
         {
             SttpDataPointLayout layout;
         }

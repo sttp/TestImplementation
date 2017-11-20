@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class PacketReader
+    public unsafe class PayloadReader
     {
         private static readonly byte[] Empty = new byte[0];
 
@@ -18,7 +18,7 @@ namespace Sttp.WireProtocol
         public CommandCode Command { get; private set; }
         public int Length { get; private set; }
 
-        public PacketReader(SessionDetails sessionDetails)
+        public PayloadReader(SessionDetails sessionDetails)
         {
             m_sessionDetails = sessionDetails;
             m_buffer = new byte[512];

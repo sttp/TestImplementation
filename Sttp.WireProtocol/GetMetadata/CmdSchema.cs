@@ -10,7 +10,7 @@ namespace Sttp.WireProtocol.GetMetadata
         public Guid SchemaVersion;
         public long Revision;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();

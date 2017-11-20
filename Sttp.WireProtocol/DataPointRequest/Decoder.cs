@@ -12,7 +12,7 @@ namespace Sttp.WireProtocol.DataPointRequest
         public SttpNamedSet Options;
         public SttpDataPointID[] DataPoints;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             Options = reader.Read<SttpNamedSet>();
             DataPoints = reader.ReadArray<SttpDataPointID>();

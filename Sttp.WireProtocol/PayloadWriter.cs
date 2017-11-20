@@ -7,17 +7,18 @@ using Sttp.IO;
 
 namespace Sttp.WireProtocol
 {
-    public unsafe class PacketWriter
+    public unsafe class PayloadWriter
     {
-        private const int UserDataPosition = 30;
+        private const int UserDataPosition = 15;
         private static readonly byte[] Empty = new byte[0];
         private byte[] m_buffer;
         private int m_position;
-        private CommandCode m_command;
         private SessionDetails m_sessionDetails;
+        private CommandEncoder m_encoder;
 
-        public PacketWriter(SessionDetails sessionDetails)
+        public PayloadWriter(SessionDetails sessionDetails, CommandEncoder encoder)
         {
+            m_encoder = encoder;
             m_sessionDetails = sessionDetails;
             m_buffer = new byte[512];
         }
@@ -39,118 +40,18 @@ namespace Sttp.WireProtocol
             m_buffer = newBuffer;
         }
 
-        public byte[] ToArray()
-        {
-            byte[] rv = new byte[m_position];
-            Array.Copy(m_buffer, 0, rv, 0, m_position);
-            return rv;
-        }
-
-        public void BeginCommand(CommandCode command)
-        {
-            Clear();
-            m_command = command;
-            m_position = UserDataPosition;
-        }
-
-        public void EndCommand(Action<byte[], int, int> sendPacket)
+        public void Send(CommandCode command)
         {
             int length = UserData;
             int offset = UserDataPosition;
-            if (length == 0)
-                return;
 
-            m_position = offset;
-            Write(m_command);
-            Write(length);
-
-            if (length > m_sessionDetails.Limits.MetadataResponseSizeLimit)
-            {
-                //ToDo: Properly enforce limits based on packet sizes.
-                throw new Exception("Exceeded a limit");
-            }
-
-            if (m_sessionDetails.SupportsDeflate)
-            {
-                SendCompressed(sendPacket, offset, length);
-                return;
-            }
-
-            if (length + 3 < m_sessionDetails.MaximumSegmentSize)
-            {
-                offset -= 3;
-                length += 3;
-                m_position = offset;
-                Write(m_command);
-                Write((short)length);
-                sendPacket(m_buffer, offset, length);
-            }
-            else
-            {
-                SendFragmentedPacket(sendPacket, length, length, 0, offset, length);
-            }
-        }
-
-        private void SendCompressed(Action<byte[], int, int> sendPacket, int offset, int length)
-        {
-            //ToDo: Determine if and what kind of compression should occur
-
-            int compressedSize;
-            using (var ms = new MemoryStream())
-            {
-                using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
-                {
-                    deflate.Write(m_buffer, offset, length);
-                }
-                ms.Position = 0;
-                compressedSize = (int)ms.Length;
-                while (m_buffer.Length < ms.Length + UserDataPosition)
-                {
-                    Grow();
-                }
-                ms.ReadAll(m_buffer, UserDataPosition, compressedSize);
-            }
-
-            SendFragmentedPacket(sendPacket, compressedSize, length, 1, UserDataPosition, compressedSize);
-        }
-
-        private void SendFragmentedPacket(Action<byte[], int, int> sendPacket, int totalFragmentedSize, int totalRawSize, byte compressionMode, int offset, int length)
-        {
-            const int Overhead = 1 + 2 + 4 + 4 + 1 + 1; //13 bytes.
-            const int Overhead2 = 1 + 2; //3 bytes.
-
-            int sentLength = Math.Min(m_sessionDetails.MaximumSegmentSize - Overhead, length);
-
-            m_position = offset - Overhead;
-            Write(CommandCode.BeginFragment);
-            Write((short)(sentLength + Overhead));
-            Write(totalFragmentedSize);
-            Write(totalRawSize);
-            Write(m_command);
-            Write(compressionMode);
-            sendPacket(m_buffer, offset - Overhead, sentLength + Overhead);
-
-            offset += sentLength;
-            while (sentLength < length)
-            {
-                int nextLength = Math.Min(m_sessionDetails.MaximumSegmentSize - Overhead2, length - sentLength);
-
-                m_position = offset - Overhead2;
-                Write(CommandCode.NextFragment);
-                Write((short)(nextLength + Overhead2));
-                Write(nextLength);
-
-                sendPacket(m_buffer, offset - Overhead2, nextLength + Overhead2);
-
-                sentLength += nextLength;
-                offset += nextLength;
-            }
-
+            m_encoder.EncodeAndSend(command, m_buffer, offset, length);
+            Clear();
         }
 
         public void Clear()
         {
-            m_position = 0;
+            m_position = UserDataPosition;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }

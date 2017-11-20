@@ -29,6 +29,7 @@ namespace Sttp.WireProtocol
         public BulkTransportCancelSend.Encoder BulkTransportCancelSend;
         public BulkTransportSendFragment.Encoder BulkTransportSendFragment;
         public MapRuntimeIDs.Encoder RegisterDataPointRuntimeIdentifier;
+        private CommandEncoder m_encoder;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -36,18 +37,19 @@ namespace Sttp.WireProtocol
         public WireEncoder()
         {
             m_sessionDetails = new SessionDetails();
+            m_encoder = new CommandEncoder(m_sessionDetails, SendNewPacket);
             m_lastCode = CommandCode.Invalid;
 
-            GetMetadata = new GetMetadata.Encoder(SendNewPacket, m_sessionDetails);
-            GetMetadataResponse = new Metadata.Encoder(SendNewPacket, m_sessionDetails);
-            Subscribe = new Subscription.Encoder(SendNewPacket, m_sessionDetails);
-            NegotiateSession = new NegotiateSession.Encoder(SendNewPacket, m_sessionDetails);
-            RequestFailed = new RequestFailed.Encoder(SendNewPacket, m_sessionDetails);
-            RequestSucceeded = new RequestSucceeded.Encoder(SendNewPacket, m_sessionDetails);
-            BulkTransportBeginSend = new BulkTransportBeginSend.Encoder(SendNewPacket, m_sessionDetails);
-            BulkTransportCancelSend = new BulkTransportCancelSend.Encoder(SendNewPacket, m_sessionDetails);
-            BulkTransportSendFragment = new BulkTransportSendFragment.Encoder(SendNewPacket, m_sessionDetails);
-            RegisterDataPointRuntimeIdentifier = new MapRuntimeIDs.Encoder(SendNewPacket, m_sessionDetails);
+            GetMetadata = new GetMetadata.Encoder(m_encoder, m_sessionDetails);
+            GetMetadataResponse = new Metadata.Encoder(m_encoder, m_sessionDetails);
+            Subscribe = new Subscription.Encoder(m_encoder, m_sessionDetails);
+            NegotiateSession = new NegotiateSession.Encoder(m_encoder, m_sessionDetails);
+            RequestFailed = new RequestFailed.Encoder(m_encoder, m_sessionDetails);
+            RequestSucceeded = new RequestSucceeded.Encoder(m_encoder, m_sessionDetails);
+            BulkTransportBeginSend = new BulkTransportBeginSend.Encoder(m_encoder, m_sessionDetails);
+            BulkTransportCancelSend = new BulkTransportCancelSend.Encoder(m_encoder, m_sessionDetails);
+            BulkTransportSendFragment = new BulkTransportSendFragment.Encoder(m_encoder, m_sessionDetails);
+            RegisterDataPointRuntimeIdentifier = new MapRuntimeIDs.Encoder(m_encoder, m_sessionDetails);
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
@@ -55,7 +57,6 @@ namespace Sttp.WireProtocol
             NewPacket?.Invoke(buffer, position, length);
         }
 
-       
         public void Flush()
         {
         }

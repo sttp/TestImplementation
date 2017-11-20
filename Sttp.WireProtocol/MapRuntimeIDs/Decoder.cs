@@ -11,7 +11,7 @@ namespace Sttp.WireProtocol.MapRuntimeIDs
 
         public CommandCode CommandCode => CommandCode.MapRuntimeIDs;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             int count = reader.ReadInt32();
             Points = new List<SttpDataPointID>(count);

@@ -9,8 +9,8 @@ namespace Sttp.WireProtocol.SubscriptionStream
     {
         protected override CommandCode Code => CommandCode.SubscriptionStream;
 
-        public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
-            : base(sendPacket, sessionDetails)
+        public Encoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
+            : base(commandEncoder, sessionDetails)
         {
 
         }

@@ -4,7 +4,7 @@
     {
         public SubCommand SubCommand => SubCommand.Finished;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
         }
 

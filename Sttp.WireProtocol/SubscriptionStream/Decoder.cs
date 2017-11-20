@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol.SubscriptionStream
         public byte EncodingMethod;
         public byte[] Data;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             EncodingMethod = reader.ReadByte();
             Data = reader.ReadBytes();

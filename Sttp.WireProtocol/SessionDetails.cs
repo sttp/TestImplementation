@@ -19,6 +19,11 @@ namespace Sttp.WireProtocol
         public bool SupportsDeflate = false;
 
         /// <summary>
+        /// The number of bytes before deflate kicks in.
+        /// </summary>
+        public int DeflateThreshold = 1000;
+
+        /// <summary>
         /// The maximum size of every packet. After this threshold, the packet will be fragmented.
         /// </summary>
         public int MaximumSegmentSize = 1500;

@@ -11,7 +11,7 @@ namespace Sttp.WireProtocol.BulkTransportSendFragment
         public long BytesRemaining;
         public byte[] Content;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             Id = reader.ReadGuid();
             BytesRemaining = reader.ReadInt64();

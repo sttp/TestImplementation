@@ -13,7 +13,7 @@ namespace Sttp.WireProtocol.RequestFailed
 
         public CommandCode CommandCode => CommandCode.RequestFailed;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             FailedCommand = reader.Read<CommandCode>();
             Reason = reader.ReadString();

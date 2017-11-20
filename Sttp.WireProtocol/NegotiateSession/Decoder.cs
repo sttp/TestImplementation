@@ -11,7 +11,7 @@ namespace Sttp.WireProtocol.NegotiateSession
 
         public CommandCode CommandCode => CommandCode.NegotiateSession;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             ConnectionString = reader.Read<SttpNamedSet>();
         }

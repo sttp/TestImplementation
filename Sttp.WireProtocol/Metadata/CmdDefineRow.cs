@@ -6,7 +6,7 @@
         public SttpValue PrimaryKey;
         public SttpValueSet Values;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             PrimaryKey = reader.Read<SttpValue>();
             Values = reader.Read<SttpValueSet>();

@@ -9,8 +9,8 @@ namespace Sttp.WireProtocol.BulkTransportBeginSend
     {
         protected override CommandCode Code => CommandCode.BulkTransportBeginSend;
 
-        public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
-            : base(sendPacket, sessionDetails)
+        public Encoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
+            : base(commandEncoder, sessionDetails)
         {
 
         }

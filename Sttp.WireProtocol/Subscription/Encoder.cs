@@ -6,8 +6,8 @@ namespace Sttp.WireProtocol.Subscription
     {
         protected override CommandCode Code => CommandCode.Subscription;
 
-        public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
-            : base(sendPacket, sessionDetails)
+        public Encoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
+            : base(commandEncoder, sessionDetails)
         {
 
         }

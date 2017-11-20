@@ -1669,7 +1669,7 @@ namespace Sttp.WireProtocol
         
         #endregion
 
-        public void Load(PacketReader packetReader)
+        public void Load(PayloadReader payloadReader)
         {
             throw new NotImplementedException();
         }
@@ -1679,7 +1679,7 @@ namespace Sttp.WireProtocol
             throw new NotImplementedException();
         }
 
-        public void Save(PacketWriter packetWriter, bool includeTypeCode)
+        public void Save(PayloadWriter payloadWriter, bool includeTypeCode)
         {
             throw new NotImplementedException();
         }

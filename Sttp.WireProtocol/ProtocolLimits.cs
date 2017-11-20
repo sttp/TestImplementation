@@ -11,58 +11,55 @@ namespace Sttp.WireProtocol
     /// </summary>
     public class ProtocolLimits
     {
-        private int m_metadataRequestSizeLimit = 100_000;
-        private int m_metadataResponseSizeLimit = 10_000_000;
-        private int m_metadataSchemaSizeLimit = 100_000;
+        private int m_maxPacketSize = 10_000_000;
+        private int m_maxDataPointSize = 10_000;
+        private int m_maxMetadataRecordValue = 1_000_000;
 
         /// <summary>
-        /// The maximum size of a GetTable,GetQuery,SyncDatabase or SyncTableOrQuery command.
-        /// This limit is before compression.
+        /// The maximum size of a single packet of any type.
         /// </summary>
-        public int MetadataRequestSizeLimit
+        public int MaxPacketSize
         {
             get
             {
-                return m_metadataRequestSizeLimit;
-            }
-            set
-            {
-                ValidateLimit(0, 10_000_000, value);
-                m_metadataRequestSizeLimit = value;
-            }
-        }
-
-        /// <summary>
-        /// Responses to metadata commands cannot exceed this threshold.
-        /// This limit is before compression.
-        /// </summary>
-        public int MetadataResponseSizeLimit
-        {
-            get
-            {
-                return m_metadataResponseSizeLimit;
+                return m_maxPacketSize;
             }
             set
             {
                 ValidateLimit(0, 100_000_000, value);
-                m_metadataResponseSizeLimit = value;
+                m_maxPacketSize = value;
             }
         }
 
         /// <summary>
-        /// Responses to metadata commands cannot exceed this threshold.
-        /// This limit is before compression.
+        /// The maximum size of a SttpDataPoint value that can be sent.
         /// </summary>
-        public int MetadataSchemaSizeLimit
+        public int MaxDataPointSize
         {
             get
             {
-                return m_metadataSchemaSizeLimit;
+                return m_maxDataPointSize;
             }
             set
             {
                 ValidateLimit(0, 1_000_000, value);
-                m_metadataSchemaSizeLimit = value;
+                m_maxDataPointSize = value;
+            }
+        }
+
+        /// <summary>
+        /// The maximum size of a single field of the metadata.
+        /// </summary>
+        public int MaxMetadataRecordValue
+        {
+            get
+            {
+                return m_maxMetadataRecordValue;
+            }
+            set
+            {
+                ValidateLimit(0, 10_000_000, value);
+                m_maxMetadataRecordValue = value;
             }
         }
 

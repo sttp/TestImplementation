@@ -6,7 +6,7 @@ namespace Sttp.WireProtocol.Metadata
     {
         public SubCommand SubCommand => SubCommand.VersionNotCompatible;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
         }
     }

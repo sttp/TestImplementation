@@ -11,7 +11,7 @@ namespace Sttp.WireProtocol.GetMetadata
         public bool IsUpdateQuery;
         public SttpQueryExpression Expression;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();

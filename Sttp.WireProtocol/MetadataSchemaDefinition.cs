@@ -18,7 +18,7 @@ namespace Sttp.WireProtocol
             TableRelationships = new List<MetadataSchemaTableRelationships>();
         }
 
-        public MetadataSchemaDefinition(PacketReader reader)
+        public MetadataSchemaDefinition(PayloadReader reader)
         {
             Tables = new List<MetadataSchemaTables>();
             TableRelationships = new List<MetadataSchemaTableRelationships>();
@@ -39,7 +39,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public void Save(PacketWriter writer)
+        public void Save(PayloadWriter writer)
         {
             writer.Write(false);
             writer.Write(0L);
@@ -60,7 +60,7 @@ namespace Sttp.WireProtocol
             writer.Write(true);
         }
 
-        public void SaveChanges(PacketWriter writer, Guid oldVersion, long oldRevision)
+        public void SaveChanges(PayloadWriter writer, Guid oldVersion, long oldRevision)
         {
             if (SchemaVersion != oldVersion)
             {
@@ -95,7 +95,7 @@ namespace Sttp.WireProtocol
         {
             
         }
-        public MetadataSchemaTables(PacketReader reader, bool isUpdateResponse)
+        public MetadataSchemaTables(PayloadReader reader, bool isUpdateResponse)
         {
             TableName = reader.ReadString();
             LastModifiedRevision = reader.ReadInt64();
@@ -106,7 +106,7 @@ namespace Sttp.WireProtocol
             }
         }
 
-        public void Save(PacketWriter writer)
+        public void Save(PayloadWriter writer)
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);
@@ -114,7 +114,7 @@ namespace Sttp.WireProtocol
             writer.Write(Columns);
         }
 
-        public void SaveChanges(PacketWriter writer)
+        public void SaveChanges(PayloadWriter writer)
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);
@@ -143,7 +143,7 @@ namespace Sttp.WireProtocol
         /// </summary>
         public string ForeignTableColumn;
 
-        public MetadataSchemaTableRelationships(PacketReader reader)
+        public MetadataSchemaTableRelationships(PayloadReader reader)
         {
             TableName = reader.ReadString();
             ColumnName = reader.ReadString();
@@ -151,7 +151,7 @@ namespace Sttp.WireProtocol
             ForeignTableColumn = reader.ReadString();
         }
 
-        public void Save(PacketWriter writer)
+        public void Save(PayloadWriter writer)
         {
             writer.Write(TableName);
             writer.Write(ColumnName);

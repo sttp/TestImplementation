@@ -13,7 +13,7 @@ namespace Sttp.WireProtocol.RequestSucceeded
 
         public CommandCode CommandCode => CommandCode.RequestSucceeded;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             CommandSucceeded = reader.Read<CommandCode>();
             Reason = reader.ReadString();

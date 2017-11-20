@@ -13,7 +13,7 @@ namespace Sttp.WireProtocol.Subscription
         public SubscriptionAppendMode Mode;
         public SttpDataPointID[] DataPoints;
 
-        public void Fill(PacketReader reader)
+        public void Fill(PayloadReader reader)
         {
             Options = reader.Read<SttpNamedSet>();
             Mode = reader.Read<SubscriptionAppendMode>();

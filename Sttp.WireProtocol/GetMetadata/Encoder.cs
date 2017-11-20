@@ -9,8 +9,8 @@ namespace Sttp.WireProtocol.GetMetadata
     {
         protected override CommandCode Code => CommandCode.GetMetadata;
 
-        public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
-            : base(sendPacket, sessionDetails)
+        public Encoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
+            : base(commandEncoder, sessionDetails)
         {
 
         }

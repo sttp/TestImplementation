@@ -9,7 +9,7 @@ namespace Sttp.WireProtocol
     public class WireDecoder
     {
         //private DataPointDecoder m_dataPointDecoder;
-        private PacketDecoder m_packetDecoder = new PacketDecoder(new SessionDetails());
+        private CommandDecoder m_packetDecoder = new CommandDecoder(new SessionDetails());
         private SessionDetails m_sessionDetails = new SessionDetails();
 
         private GetMetadata.Decoder m_getMetadata;
@@ -56,9 +56,9 @@ namespace Sttp.WireProtocol
         /// messages before the next block of data is added to the decoder via <see cref="WriteData"/>
         /// </summary>
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
-        public CommandDecoder NextCommand()
+        public DecoderObjects NextCommand()
         {
-            PacketReader reader = m_packetDecoder.NextPacket();
+            PayloadReader reader = m_packetDecoder.NextPacket();
             if (reader == null)
                 return null;
 
@@ -66,10 +66,10 @@ namespace Sttp.WireProtocol
             {
                 case CommandCode.NegotiateSession:
                     m_negotiateSession.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_negotiateSession);
+                    return new DecoderObjects(reader.Command, m_negotiateSession);
                 case CommandCode.Subscription:
                     m_subscription.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_subscription);
+                    return new DecoderObjects(reader.Command, m_subscription);
                 case CommandCode.MapRuntimeIDs:
                     break;
                     //m_dataPointDecoder.Fill(reader);
@@ -84,10 +84,10 @@ namespace Sttp.WireProtocol
                     break;
                 case CommandCode.GetMetadata:
                     m_getMetadata.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_getMetadata);
+                    return new DecoderObjects(reader.Command, m_getMetadata);
                 case CommandCode.Metadata:
                     m_metadata.Fill(reader);
-                    return new CommandDecoder(reader.Command, m_metadata);
+                    return new DecoderObjects(reader.Command, m_metadata);
                 default:
                     throw new ArgumentOutOfRangeException();
             }

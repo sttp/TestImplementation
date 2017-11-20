@@ -14,7 +14,7 @@ namespace Sttp.WireProtocol.Metadata
         public string TableName;
         public List<Tuple<string, SttpValueTypeCode>> Columns;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             IsUpdateQuery = reader.ReadBoolean();
             UpdatedFromRevision = reader.ReadInt64();

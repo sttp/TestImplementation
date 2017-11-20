@@ -7,7 +7,7 @@ namespace Sttp.WireProtocol.BulkTransportCancelSend
         public CommandCode CommandCode => CommandCode.BulkTransportCancelSend;
         public Guid Id;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             Id = reader.ReadGuid();
         }

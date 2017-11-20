@@ -5,7 +5,7 @@
         public SubCommand SubCommand => SubCommand.UndefineRow;
         public SttpValue PrimaryKey;
 
-        public void Load(PacketReader reader)
+        public void Load(PayloadReader reader)
         {
             PrimaryKey = reader.Read<SttpValue>();
         }
