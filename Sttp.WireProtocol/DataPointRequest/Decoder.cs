@@ -7,8 +7,6 @@ namespace Sttp.WireProtocol.DataPointRequest
 {
     public class Decoder
     {
-        public List<SttpDataPointID> Points;
-
         public CommandCode CommandCode => CommandCode.DataPointRequest;
 
         public SttpNamedSet Options;

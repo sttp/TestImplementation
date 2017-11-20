@@ -58,10 +58,11 @@ namespace Sttp.WireProtocol
         /// Updates the real-time subscription for new measurements. 
         /// 
         /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as priority; dead-banding.
-        /// Subcommand: AllDataPoints           - Subscribes to everything
-        /// Subcommand: DataPointByID           - Specifies individual data points
-        /// Subcommand: ByQuery                 - Specifies some kind of query to use to select the measurements.
-        /// Subcommand: UnsubscribeFromAll      - Clears the active subscription
+      
+        /// Payload: 
+        /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
+        /// SttpPointID[] Points
+        /// SttpNamedSet options
         /// 
         /// Success/Failed
         /// 

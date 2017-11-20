@@ -12,36 +12,14 @@ namespace Sttp.WireProtocol.Subscription
 
         }
 
-        public void ConfigureOptions(SttpNamedSet options)
+        public void Subscription(SubscriptionAppendMode mode, SttpNamedSet options, SttpDataPointID[] dataPoints)
         {
-            Stream.Write(SubCommand.UnsubscribeFromAll);
+            Stream.Write(CommandCode.DataPointRequest);
+            Stream.Write(mode);
             Stream.Write(options);
-        }
-
-        public void AllDataPoints(SubscriptionAppendMode mode)
-        {
-            Stream.Write(SubCommand.AllDataPoints);
-            Stream.Write(mode);
-        }
-
-        public void ByQuery(SubscriptionAppendMode mode, SttpQueryExpression query)
-        {
-            Stream.Write(SubCommand.ByQuery);
-            Stream.Write(mode);
-            Stream.Write(query);
-        }
-
-        public void DataPointByID(SubscriptionAppendMode mode, SttpDataPointID[] dataPoints)
-        {
-            Stream.Write(SubCommand.DataPointByID);
-            Stream.Write(mode);
             Stream.Write(dataPoints);
         }
 
-        public void UnsubscribeFromAll()
-        {
-            Stream.Write(SubCommand.UnsubscribeFromAll);
-        }
 
     }
 
