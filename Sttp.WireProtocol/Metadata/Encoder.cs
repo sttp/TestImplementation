@@ -5,46 +5,61 @@ using System.Text;
 
 namespace Sttp.WireProtocol.Metadata
 {
-    public class Encoder : BaseEncoder
+    public class Encoder 
     {
-        protected override CommandCode Code => CommandCode.Metadata;
+        private PayloadWriter m_stream;
 
         public Encoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
-            : base(commandEncoder, sessionDetails)
         {
+            m_stream = new PayloadWriter(sessionDetails, commandEncoder);
+            m_stream.Clear();
+        }
 
+        /// <summary>
+        /// Begins a new metadata packet
+        /// </summary>
+        public void BeginCommand()
+        {
+            m_stream.Clear();
+        }
+
+        /// <summary>
+        /// Ends a metadata packet and requests the buffer block that was allocated.
+        /// </summary>
+        /// <returns></returns>
+        public void EndCommand()
+        {
+            m_stream.Send(CommandCode.Metadata);
         }
 
         public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
         {
-            Stream.Write(SubCommand.DefineResponse);
-            Stream.Write(isUpdateQuery);
-            Stream.Write(updatedFromRevision);
-            Stream.Write(schemaVersion);
-            Stream.Write(revision);
-            Stream.Write(tableName);
-            Stream.Write(columns);
+            m_stream.Write(SubCommand.DefineResponse);
+            m_stream.Write(isUpdateQuery);
+            m_stream.Write(updatedFromRevision);
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Write(tableName);
+            m_stream.Write(columns);
         }
 
         public void DefineRow(SttpValue primaryKey, SttpValueSet fields)
         {
-            Stream.Write(SubCommand.DefineRow);
-            Stream.Write(primaryKey);
-            Stream.Write(fields);
+            m_stream.Write(SubCommand.DefineRow);
+            m_stream.Write(primaryKey);
+            m_stream.Write(fields);
         }
 
         public void UndefineRow(SttpValue primaryKey)
         {
-            Stream.Write(SubCommand.UndefineRow);
-            Stream.Write(primaryKey);
+            m_stream.Write(SubCommand.UndefineRow);
+            m_stream.Write(primaryKey);
         }
 
         public void Finished()
         {
-            Stream.Write(SubCommand.Finished);
+            m_stream.Write(SubCommand.Finished);
         }
-
-        
 
     }
 }

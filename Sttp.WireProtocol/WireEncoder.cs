@@ -15,12 +15,8 @@ namespace Sttp.WireProtocol
         public event Action<byte[], int, int> NewPacket;
 
         //private DataPointEncoder m_dataPoint;
-
-        private CommandCode m_lastCode;
-
         private SessionDetails m_sessionDetails;
-
-        public Metadata.Encoder GetMetadataResponse;
+        private Metadata.Encoder m_metadata;
         private CommandEncoder m_encoder;
         private PayloadWriter m_stream;
 
@@ -31,10 +27,18 @@ namespace Sttp.WireProtocol
         {
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder(m_sessionDetails, SendNewPacket);
-            m_lastCode = CommandCode.Invalid;
             m_stream = new PayloadWriter(m_sessionDetails, m_encoder);
+            m_metadata = new Metadata.Encoder(m_encoder, m_sessionDetails);
+        }
 
-            GetMetadataResponse = new Metadata.Encoder(m_encoder, m_sessionDetails);
+        /// <summary>
+        /// Builds a metadata response message. Be sure to call the SendCommand periodically.
+        /// </summary>
+        /// <returns></returns>
+        public Metadata.Encoder MetadataCommandBuilder()
+        {
+            m_metadata.BeginCommand();
+            return m_metadata;
         }
 
         private void SendNewPacket(byte[] buffer, int position, int length)
@@ -172,15 +176,11 @@ namespace Sttp.WireProtocol
             m_stream.Send(CommandCode.MetadataSchema);
         }
 
-
         public void MetadataVersionNotCompatible()
         {
             m_stream.Clear();
             m_stream.Send(CommandCode.MetadataVersionNotCompatible);
         }
 
-        public void Flush()
-        {
-        }
     }
 }
