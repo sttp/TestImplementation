@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sttp.WireProtocol.Metadata;
+using Sttp.Codec.Metadata;
 
 namespace Sttp.Tests.WireProtocol
 {

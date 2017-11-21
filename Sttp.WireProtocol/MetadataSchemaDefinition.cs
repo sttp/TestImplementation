@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sttp.Codec;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     public class MetadataSchemaDefinition
     {

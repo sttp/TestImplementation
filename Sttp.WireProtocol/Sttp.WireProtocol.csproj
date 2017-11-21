@@ -3,6 +3,7 @@
     <TargetFrameworks>net40;net45;net46;netstandard2.0</TargetFrameworks>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<RootNamespace>Sttp</RootNamespace>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
     <Reference Include="System" />

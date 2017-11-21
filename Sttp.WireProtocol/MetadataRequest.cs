@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sttp.Codec;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     public class MetadataRequest
     {

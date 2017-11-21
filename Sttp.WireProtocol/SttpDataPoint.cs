@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Sttp.WireProtocol.SendDataPoints;
+using Sttp.Codec;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     /// <summary>
     /// This class contains the fundamental unit of transmission for STTP.

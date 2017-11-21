@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using Sttp.Codec.Metadata;
 using Sttp.IO;
-using Sttp.WireProtocol;
-using Sttp.WireProtocol.Metadata;
 
 namespace Sttp.Data
 {

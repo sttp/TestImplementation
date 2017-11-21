@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sttp.WireProtocol.SendDataPoints
+namespace Sttp
 {
     /// <summary>
     /// The default timestamp field for STTP.

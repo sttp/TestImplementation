@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Sttp.WireProtocol.SendDataPoints;
+using Sttp.Codec;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     /// <summary>
     /// This class contains the fundamental value for STTP.

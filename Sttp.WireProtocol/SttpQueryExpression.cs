@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Sttp.WireProtocol
+namespace Sttp
 {
     public class SttpQueryTable
     {

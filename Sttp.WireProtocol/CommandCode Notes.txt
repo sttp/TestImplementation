@@ -1,9 +1,0 @@
-﻿It's highly desired that all commands exist as distinct codes in the CommandCode. The only exceptions 
-to that rule as of this writing is GetMetaData and Metadata. This is because each command is sent by itself 
-and processed one at a time. 
-
-When requesting metadata, It's necessary to put all requests in the same packet if synchronizing a large database, 
-otherwise, the response could be from different versions of the database, which would make management more difficult.
-
-When responding metadata, it's possible the response could be hundreds of MBs or more, Therefore, it's unreasonable
-to assume that the metadata can be placed in a single packet. Therefore fragmenting the metadata response is permitted.

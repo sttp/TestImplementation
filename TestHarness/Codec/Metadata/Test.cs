@@ -1,4 +1,5 @@
 ﻿using System;
+using Sttp.Codec;
 using Sttp.WireProtocol;
 
 namespace Prototype.Codec.Metadata

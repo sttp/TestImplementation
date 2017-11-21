@@ -1,0 +1,6 @@
+﻿It's highly desired that all commands exist as distinct codes in the CommandCode. The only exceptions 
+to that rule as of this writing is Metadata. This is because each command is sent by itself 
+and processed one at a time. 
+
+When responding metadata, it's possible the response could be hundreds of MBs or more, Therefore, it's unreasonable
+to assume that the metadata can be placed in a single packet. Therefore fragmenting the metadata response is permitted.

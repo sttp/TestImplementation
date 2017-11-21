@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp
 {

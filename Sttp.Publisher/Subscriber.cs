@@ -5,9 +5,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using Sttp.Codec;
 using Sttp.Data;
-using Sttp.WireProtocol;
-using Sttp.WireProtocol.SendDataPoints;
 
 namespace Sttp.Publisher
 {
