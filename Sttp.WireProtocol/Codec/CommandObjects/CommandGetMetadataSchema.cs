@@ -5,10 +5,10 @@ namespace Sttp.Codec
 {
     public class CommandGetMetadataSchema
     {
-        public Guid SchemaVersion;
-        public long Revision;
+        public readonly Guid SchemaVersion;
+        public readonly long Revision;
 
-        public void Load(PayloadReader reader)
+        public CommandGetMetadataSchema(PayloadReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();

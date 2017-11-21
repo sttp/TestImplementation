@@ -1,8 +1,8 @@
 ﻿namespace Sttp.Codec.Metadata
 {
-    public class CmdDefineRow : ICmd
+    public class CmdDefineRow 
     {
-        public SubCommand SubCommand => SubCommand.DefineRow;
+        public MetadataSubCommand SubCommand => MetadataSubCommand.DefineRow;
         public SttpValue PrimaryKey;
         public SttpValueSet Values;
 

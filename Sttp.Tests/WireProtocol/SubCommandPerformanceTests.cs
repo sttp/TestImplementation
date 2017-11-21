@@ -10,7 +10,6 @@ namespace Sttp.Tests.WireProtocol
     public class SubCommandPerformanceTests
     {
         private const int NumIterations = 50000000;
-        static List<ICmd> commands = new List<ICmd>();
         private static TestContext _context;
 
         //[ClassInitialize]

@@ -1,8 +1,8 @@
 ﻿namespace Sttp.Codec.Metadata
 {
-    public class CmdUndefineRow : ICmd
+    public class CmdUndefineRow 
     {
-        public SubCommand SubCommand => SubCommand.UndefineRow;
+        public MetadataSubCommand SubCommand => MetadataSubCommand.UndefineRow;
         public SttpValue PrimaryKey;
 
         public void Load(PayloadReader reader)

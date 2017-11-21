@@ -1,0 +1,1 @@
+﻿This folder contains all of the command objects that can be decoded from the wire protocol.

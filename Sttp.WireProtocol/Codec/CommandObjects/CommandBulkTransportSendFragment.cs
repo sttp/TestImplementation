@@ -7,11 +7,11 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.BulkTransportSendFragment;
 
-        public Guid Id;
-        public long BytesRemaining;
-        public byte[] Content;
+        public readonly Guid Id;
+        public readonly long BytesRemaining;
+        public readonly byte[] Content;
 
-        public void Load(PayloadReader reader)
+        public CommandBulkTransportSendFragment(PayloadReader reader)
         {
             Id = reader.ReadGuid();
             BytesRemaining = reader.ReadInt64();

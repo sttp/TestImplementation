@@ -7,13 +7,13 @@ namespace Sttp.Codec
 {
     public class CommandRequestSucceeded
     {
-        public CommandCode CommandSucceeded;
-        public string Reason;
-        public string Details;
+        public readonly CommandCode CommandSucceeded;
+        public readonly string Reason;
+        public readonly string Details;
 
         public CommandCode CommandCode => CommandCode.RequestSucceeded;
 
-        public void Fill(PayloadReader reader)
+        public CommandRequestSucceeded(PayloadReader reader)
         {
             CommandSucceeded = reader.Read<CommandCode>();
             Reason = reader.ReadString();

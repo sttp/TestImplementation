@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Sttp.Codec.Metadata
 {
-    public class Encoder 
+    public class MetadataCommandBuilder 
     {
         private PayloadWriter m_stream;
 
-        public Encoder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
+        public MetadataCommandBuilder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
         {
             m_stream = new PayloadWriter(sessionDetails, commandEncoder);
             m_stream.Clear();
@@ -34,7 +34,7 @@ namespace Sttp.Codec.Metadata
 
         public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
         {
-            m_stream.Write(SubCommand.DefineResponse);
+            m_stream.Write(MetadataSubCommand.DefineResponse);
             m_stream.Write(isUpdateQuery);
             m_stream.Write(updatedFromRevision);
             m_stream.Write(schemaVersion);
@@ -45,20 +45,20 @@ namespace Sttp.Codec.Metadata
 
         public void DefineRow(SttpValue primaryKey, SttpValueSet fields)
         {
-            m_stream.Write(SubCommand.DefineRow);
+            m_stream.Write(MetadataSubCommand.DefineRow);
             m_stream.Write(primaryKey);
             m_stream.Write(fields);
         }
 
         public void UndefineRow(SttpValue primaryKey)
         {
-            m_stream.Write(SubCommand.UndefineRow);
+            m_stream.Write(MetadataSubCommand.UndefineRow);
             m_stream.Write(primaryKey);
         }
 
         public void Finished()
         {
-            m_stream.Write(SubCommand.Finished);
+            m_stream.Write(MetadataSubCommand.Finished);
         }
 
     }

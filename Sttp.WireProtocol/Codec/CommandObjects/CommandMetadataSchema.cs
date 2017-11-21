@@ -5,9 +5,9 @@ namespace Sttp.Codec
 {
     public class CommandMetadataSchema
     {
-        public MetadataSchemaDefinition Schema;
+        public readonly MetadataSchemaDefinition Schema;
 
-        public void Load(PayloadReader reader)
+        public CommandMetadataSchema(PayloadReader reader)
         {
             Schema = new MetadataSchemaDefinition(reader);
         }

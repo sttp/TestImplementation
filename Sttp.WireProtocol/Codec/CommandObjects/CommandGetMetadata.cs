@@ -5,9 +5,9 @@ namespace Sttp.Codec
 {
     public class CommandGetMetadata
     {
-        public List<MetadataRequest> Requests;
+        public readonly List<MetadataRequest> Requests;
 
-        public void Load(PayloadReader reader)
+        public CommandGetMetadata(PayloadReader reader)
         {
             Requests = reader.ReadList<MetadataRequest>();
         }

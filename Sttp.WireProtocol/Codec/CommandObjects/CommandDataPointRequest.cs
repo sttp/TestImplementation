@@ -9,10 +9,10 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.DataPointRequest;
 
-        public SttpNamedSet Options;
-        public SttpDataPointID[] DataPoints;
+        public readonly SttpNamedSet Options;
+        public readonly SttpDataPointID[] DataPoints;
 
-        public void Fill(PayloadReader reader)
+        public CommandDataPointRequest(PayloadReader reader)
         {
             Options = reader.Read<SttpNamedSet>();
             DataPoints = reader.ReadArray<SttpDataPointID>();

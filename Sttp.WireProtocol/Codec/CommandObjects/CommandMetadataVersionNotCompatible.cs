@@ -4,7 +4,7 @@ namespace Sttp.Codec
 {
     public class CommandMetadataVersionNotCompatible
     {
-        public void Load(PayloadReader reader)
+        public CommandMetadataVersionNotCompatible(PayloadReader reader)
         {
 
         }

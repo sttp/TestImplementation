@@ -7,11 +7,10 @@ namespace Sttp.Codec
 {
     public class CommandMapRuntimeIDs
     {
-        public List<SttpDataPointID> Points;
-
         public CommandCode CommandCode => CommandCode.MapRuntimeIDs;
+        public readonly List<SttpDataPointID> Points;
 
-        public void Fill(PayloadReader reader)
+        public CommandMapRuntimeIDs(PayloadReader reader)
         {
             int count = reader.ReadInt32();
             Points = new List<SttpDataPointID>(count);

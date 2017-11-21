@@ -9,11 +9,11 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.Subscription;
 
-        public SttpNamedSet Options;
-        public SubscriptionAppendMode Mode;
-        public SttpDataPointID[] DataPoints;
+        public readonly SttpNamedSet Options;
+        public readonly SubscriptionAppendMode Mode;
+        public readonly SttpDataPointID[] DataPoints;
 
-        public void Fill(PayloadReader reader)
+        public CommandSubscription(PayloadReader reader)
         {
             Options = reader.Read<SttpNamedSet>();
             Mode = reader.Read<SubscriptionAppendMode>();

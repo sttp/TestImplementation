@@ -9,10 +9,10 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.SubscriptionStream;
 
-        public byte EncodingMethod;
-        public byte[] Data;
+        public readonly byte EncodingMethod;
+        public readonly byte[] Data;
 
-        public void Fill(PayloadReader reader)
+        public CommandSubscriptionStream(PayloadReader reader)
         {
             EncodingMethod = reader.ReadByte();
             Data = reader.ReadBytes();

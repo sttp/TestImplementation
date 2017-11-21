@@ -1,8 +1,8 @@
 ﻿namespace Sttp.Codec.Metadata
 {
-    public class CmdFinished : ICmd
+    public class CmdFinished 
     {
-        public SubCommand SubCommand => SubCommand.Finished;
+        public MetadataSubCommand SubCommand => MetadataSubCommand.Finished;
 
         public void Load(PayloadReader reader)
         {

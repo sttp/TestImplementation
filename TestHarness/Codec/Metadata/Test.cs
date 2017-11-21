@@ -13,7 +13,7 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            DecoderObjects nextCommand;
+            CommandObjects nextCommand;
             while ((nextCommand = receive.NextCommand()) != null)
             {
                 switch (nextCommand.CommandCode)
@@ -55,7 +55,7 @@ namespace Prototype.Codec.Metadata
             var send = new WireEncoder();
             var receive = new WireDecoder();
 
-            DecoderObjects command = receive.NextCommand();
+            CommandObjects command = receive.NextCommand();
 
         }
 

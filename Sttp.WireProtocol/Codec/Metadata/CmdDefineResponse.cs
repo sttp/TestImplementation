@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Sttp.Codec.Metadata
 {
-    public class CmdDefineResponse : ICmd
+    public class CmdDefineResponse
     {
-        public SubCommand SubCommand => SubCommand.DefineResponse;
+        public MetadataSubCommand SubCommand => MetadataSubCommand.DefineResponse;
 
         public bool IsUpdateQuery;
         public Guid SchemaVersion;

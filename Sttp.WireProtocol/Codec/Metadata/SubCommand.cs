@@ -3,7 +3,7 @@ namespace Sttp.Codec.Metadata
     /// <summary>
     /// All of the permitted commands for metadata.
     /// </summary>
-    public enum SubCommand : byte
+    public enum MetadataSubCommand : byte
     {
         /// <summary>
         /// An invalid command to indicate that nothing is assigned.

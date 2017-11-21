@@ -16,7 +16,7 @@ namespace Sttp.Codec
 
         //private DataPointEncoder m_dataPoint;
         private SessionDetails m_sessionDetails;
-        private Metadata.Encoder m_metadata;
+        private Metadata.MetadataCommandBuilder m_metadata;
         private CommandEncoder m_encoder;
         private PayloadWriter m_stream;
 
@@ -28,14 +28,14 @@ namespace Sttp.Codec
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder(m_sessionDetails, SendNewPacket);
             m_stream = new PayloadWriter(m_sessionDetails, m_encoder);
-            m_metadata = new Metadata.Encoder(m_encoder, m_sessionDetails);
+            m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
         }
 
         /// <summary>
         /// Builds a metadata response message. Be sure to call the SendCommand periodically.
         /// </summary>
         /// <returns></returns>
-        public Metadata.Encoder MetadataCommandBuilder()
+        public Metadata.MetadataCommandBuilder MetadataCommandBuilder()
         {
             m_metadata.BeginCommand();
             return m_metadata;
@@ -180,6 +180,13 @@ namespace Sttp.Codec
         {
             m_stream.Clear();
             m_stream.Send(CommandCode.MetadataVersionNotCompatible);
+        }
+
+        public void NoOp(bool shouldEcho)
+        {
+            m_stream.Clear();
+            m_stream.Write(shouldEcho);
+            m_stream.Send(CommandCode.NoOp);
         }
 
     }

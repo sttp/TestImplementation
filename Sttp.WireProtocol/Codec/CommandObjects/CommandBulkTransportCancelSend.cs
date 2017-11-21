@@ -5,9 +5,9 @@ namespace Sttp.Codec
     public class CommandBulkTransportCancelSend
     {
         public CommandCode CommandCode => CommandCode.BulkTransportCancelSend;
-        public Guid Id;
+        public readonly Guid Id;
 
-        public void Load(PayloadReader reader)
+        public CommandBulkTransportCancelSend(PayloadReader reader)
         {
             Id = reader.ReadGuid();
         }
