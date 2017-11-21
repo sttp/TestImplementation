@@ -22,8 +22,6 @@
         public CmdFinished Finished => m_command as CmdFinished;
         public CmdDefineRow DefineRow => m_command as CmdDefineRow;
         public CmdDefineResponse DefineResponse => m_command as CmdDefineResponse;
-        public CmdVersionNotCompatible VersionNotCompatible => m_command as CmdVersionNotCompatible;
         public CmdUndefineRow UndefineRow => m_command as CmdUndefineRow;
-        public CmdSchema Schema => m_command as CmdSchema;
     }
 }

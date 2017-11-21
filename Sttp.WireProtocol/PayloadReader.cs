@@ -296,6 +296,20 @@ namespace Sttp.WireProtocol
 
         #region [ Generics ]
 
+        public List<T> ReadList<T>()
+        {
+            int length = (int)ReadUInt16();
+            var collection = new List<T>();
+
+            for (int i = 0; i < length; i++)
+            {
+                T item1 = Read<T>();
+
+                collection.Add(item1);
+            }
+
+            return collection;
+        }
         public List<Tuple<T1, T2>> ReadList<T1, T2>()
         {
             int length = (int)ReadUInt16();

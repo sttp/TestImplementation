@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol.GetMetadata
+namespace Sttp.WireProtocol
 {
-    public class CmdSchema : ICmd
+    public class CommandGetMetadataSchema
     {
-        public SubCommand SubCommand => SubCommand.Schema;
-
         public Guid SchemaVersion;
         public long Revision;
 

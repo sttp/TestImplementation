@@ -82,10 +82,10 @@ namespace Sttp.Data
 
         //    }
         //}
-        public void ProcessCommand(WireProtocol.GetMetadata.Decoder command, WireProtocol.WireEncoder encoder)
-        {
+        //public void ProcessCommand(WireProtocol.GetMetadata.Decoder command, WireProtocol.WireEncoder encoder)
+        //{
 
-        }
+        //}
 
 
     }

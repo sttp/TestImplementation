@@ -19,9 +19,7 @@ namespace Sttp.WireProtocol.Metadata
             m_commands[(byte)SubCommand.Finished] = new CmdFinished();
             m_commands[(byte)SubCommand.DefineRow] = new CmdDefineRow();
             m_commands[(byte)SubCommand.DefineResponse] = new CmdDefineResponse();
-            m_commands[(byte)SubCommand.VersionNotCompatible] = new CmdVersionNotCompatible();
             m_commands[(byte)SubCommand.UndefineRow] = new CmdUndefineRow();
-            m_commands[(byte)SubCommand.Schema] = new CmdSchema();
             
         }
 

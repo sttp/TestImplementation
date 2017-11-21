@@ -12,11 +12,6 @@ namespace Sttp.WireProtocol.Metadata
         Invalid = 0x00,
 
         /// <summary>
-        /// Specified schema or revision is not compatible. Recompile query with the latest schema.
-        /// </summary>
-        VersionNotCompatible,
-
-        /// <summary>
         /// Defines the table structure of the requested table
         /// 
         /// Payload:
@@ -50,11 +45,6 @@ namespace Sttp.WireProtocol.Metadata
         /// 
         /// </summary>
         UndefineRow,
-
-        /// <summary>
-        /// Indicates that this is the schema only.
-        /// </summary>
-        Schema,
 
         /// <summary>
         /// Indicates that the requested metadata has finished streaming.

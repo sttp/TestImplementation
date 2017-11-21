@@ -20,7 +20,6 @@ namespace Sttp.WireProtocol
 
         private SessionDetails m_sessionDetails;
 
-        public GetMetadata.Encoder GetMetadata;
         public Metadata.Encoder GetMetadataResponse;
         private CommandEncoder m_encoder;
         private PayloadWriter m_stream;
@@ -35,7 +34,6 @@ namespace Sttp.WireProtocol
             m_lastCode = CommandCode.Invalid;
             m_stream = new PayloadWriter(m_sessionDetails, m_encoder);
 
-            GetMetadata = new GetMetadata.Encoder(m_encoder, m_sessionDetails);
             GetMetadataResponse = new Metadata.Encoder(m_encoder, m_sessionDetails);
         }
 
@@ -150,6 +148,35 @@ namespace Sttp.WireProtocol
             m_stream.Write(options);
             m_stream.Write(dataPoints);
             m_stream.Send(CommandCode.DataPointRequest);
+        }
+
+        public void GetMetadata(List<MetadataRequest> requests)
+        {
+            m_stream.Clear();
+            m_stream.Write(requests);
+            m_stream.Send(CommandCode.GetMetadata);
+        }
+
+        public void GetMetadataSchema(Guid schemaVersion, long revision)
+        {
+            m_stream.Clear();
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Send(CommandCode.GetMetadataSchema);
+        }
+
+        public void MetadataSchema(MetadataSchemaDefinition schema)
+        {
+            m_stream.Clear();
+            m_stream.Write(schema);
+            m_stream.Send(CommandCode.MetadataSchema);
+        }
+
+
+        public void MetadataVersionNotCompatible()
+        {
+            m_stream.Clear();
+            m_stream.Send(CommandCode.MetadataVersionNotCompatible);
         }
 
         public void Flush()

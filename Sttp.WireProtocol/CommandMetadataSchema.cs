@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sttp.WireProtocol.Metadata
+namespace Sttp.WireProtocol
 {
-    public class CmdSchema : ICmd
+    public class CommandMetadataSchema
     {
-        public SubCommand SubCommand => SubCommand.Schema;
-
         public MetadataSchemaDefinition Schema;
 
         public void Load(PayloadReader reader)

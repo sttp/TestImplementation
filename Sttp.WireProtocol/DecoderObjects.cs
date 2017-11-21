@@ -11,7 +11,6 @@
             CommandCode = code;
         }
 
-        public GetMetadata.Decoder GetMetadata => m_decoder as GetMetadata.Decoder;
         public Metadata.Decoder Metadata => m_decoder as Metadata.Decoder;
         public CommandSubscription Subscription => m_decoder as CommandSubscription;
         public CommandNegotiateSession NegotiateSession => m_decoder as CommandNegotiateSession;

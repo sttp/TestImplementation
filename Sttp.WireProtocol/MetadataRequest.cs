@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace Sttp.WireProtocol.GetMetadata
+namespace Sttp.WireProtocol
 {
-    public class CmdQuery : ICmd
+    public class MetadataRequest
     {
-        public SubCommand SubCommand => SubCommand.Query;
-
         public Guid SchemaVersion;
         public long Revision;
         public bool IsUpdateQuery;
@@ -19,6 +20,12 @@ namespace Sttp.WireProtocol.GetMetadata
             Expression = reader.Read<SttpQueryExpression>();
         }
 
-
+        public void Save(PayloadWriter writer)
+        {
+            writer.Write(SchemaVersion);
+            writer.Write(Revision);
+            writer.Write(IsUpdateQuery);
+            writer.Write(Expression);
+        }
     }
 }

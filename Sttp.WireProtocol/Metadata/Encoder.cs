@@ -15,11 +15,6 @@ namespace Sttp.WireProtocol.Metadata
 
         }
 
-        public void VersionNotCompatible()
-        {
-            Stream.Write(SubCommand.VersionNotCompatible);
-        }
-
         public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
         {
             Stream.Write(SubCommand.DefineResponse);
@@ -49,12 +44,7 @@ namespace Sttp.WireProtocol.Metadata
             Stream.Write(SubCommand.Finished);
         }
 
-        public void Schema(MetadataSchemaDefinition schema)
-        {
-            BeginCommand();
-            Stream.Write(schema);
-            EndCommand();
-        }
+        
 
     }
 }

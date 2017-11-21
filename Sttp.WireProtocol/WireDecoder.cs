@@ -12,7 +12,6 @@ namespace Sttp.WireProtocol
         private CommandDecoder m_packetDecoder;
         private SessionDetails m_sessionDetails;
 
-        private GetMetadata.Decoder m_getMetadata;
         private Metadata.Decoder m_metadata;
         private CommandSubscription m_subscription;
         private CommandMapRuntimeIDs m_runtimeIDMapping;
@@ -29,7 +28,6 @@ namespace Sttp.WireProtocol
             m_negotiateSession = new CommandNegotiateSession();
             m_sessionDetails = new SessionDetails();
             m_packetDecoder = new CommandDecoder(m_sessionDetails);
-            m_getMetadata = new GetMetadata.Decoder();
             m_metadata = new Metadata.Decoder();
             m_subscription = new CommandSubscription();
             m_runtimeIDMapping = new CommandMapRuntimeIDs();
@@ -83,9 +81,6 @@ namespace Sttp.WireProtocol
                     break;
                 case CommandCode.NextFragment:
                     break;
-                case CommandCode.GetMetadata:
-                    m_getMetadata.Fill(reader);
-                    return new DecoderObjects(reader.Command, m_getMetadata);
                 case CommandCode.Metadata:
                     m_metadata.Fill(reader);
                     return new DecoderObjects(reader.Command, m_metadata);
