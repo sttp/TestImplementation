@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Sttp.WireProtocol;
+using System.Xml.Serialization;
 
 namespace Sttp.Data
 {
@@ -25,14 +24,14 @@ namespace Sttp.Data
         public List<MetadataColumn> Columns;
 
         /// <summary>
-        /// lookup columns by their name
-        /// </summary>
-        private Dictionary<string, int> m_columnLookup;
-
-        /// <summary>
         /// All possible rows.
         /// </summary>
         public Dictionary<SttpValue, MetadataRow> Rows;
+
+        /// <summary>
+        /// Contains pending changes to the table schema if the changes included adding or deleting rows.
+        /// </summary>
+        private Dictionary<SttpValue, MetadataRow> m_pendingChanges;
 
         public long LastModifiedRevision;
 
@@ -40,34 +39,75 @@ namespace Sttp.Data
         {
             TableName = tableName;
             TableFlags = tableFlags;
-            m_columnLookup = new Dictionary<string, int>();
             Columns = new List<MetadataColumn>();
             Rows = new Dictionary<SttpValue, MetadataRow>();
             for (var index = 0; index < columns.Count; index++)
             {
                 var item = columns[index];
-                m_columnLookup.Add(item.Item1, index);
                 Columns.Add(new MetadataColumn(item.Item1, item.Item2));
             }
         }
 
         public void AddOrUpdateRow(SttpValue key, SttpValueSet fields)
         {
-            if (!Rows.ContainsKey(key))
+            //Check the existing value, only if the row has changed do we update the changes in the database.
+            if (m_pendingChanges == null)
             {
-                Rows[key] = new MetadataRow(key, fields);
+                if (Rows.TryGetValue(key, out MetadataRow existing))
+                {
+                    existing.UpdateRow(fields);
+                    return;
+                }
+                m_pendingChanges = new Dictionary<SttpValue, MetadataRow>(Rows);
             }
             else
             {
-                Rows[key].Update(fields); 
+                if (m_pendingChanges.TryGetValue(key, out MetadataRow existing))
+                {
+                    existing.UpdateRow(fields);
+                    return;
+                }
             }
+            m_pendingChanges.Add(key, new MetadataRow(key, fields));
         }
 
         public void DeleteRow(SttpValue primaryKey)
         {
-            Rows.Remove(primaryKey);
+            if (m_pendingChanges == null)
+            {
+                m_pendingChanges = new Dictionary<SttpValue, MetadataRow>(Rows);
+            }
+            m_pendingChanges.Remove(primaryKey);
         }
 
-      
+        public void RollbackChanges()
+        {
+            m_pendingChanges = null;
+            foreach (var metadataRow in Rows.Values)
+            {
+                metadataRow.RollbackChanges();
+            }
+        }
+
+        public bool CommitChanges(long revision, bool schemaRefresh)
+        {
+            bool hasChanged = schemaRefresh;
+
+            if (m_pendingChanges != null)
+            {
+                hasChanged = true;
+                Rows = m_pendingChanges;
+                m_pendingChanges = null;
+            }
+            foreach (var metadataRow in Rows.Values)
+            {
+                hasChanged |= metadataRow.CommitChanges(revision, schemaRefresh);
+            }
+            if (hasChanged)
+            {
+                LastModifiedRevision = revision;
+            }
+            return hasChanged;
+        }
     }
 }

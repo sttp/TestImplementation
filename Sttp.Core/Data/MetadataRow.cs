@@ -9,7 +9,9 @@ namespace Sttp.Data
     {
         public SttpValue Key;
         public SttpValueSet Fields;
+        private SttpValueSet m_changes;
         public MetadataRow[] ForeignKeys;
+        public long Revision;
 
         public MetadataRow(SttpValue key, SttpValueSet fields)
         {
@@ -18,9 +20,42 @@ namespace Sttp.Data
             ForeignKeys = new MetadataRow[fields.Values.Count];
         }
 
-        public void Update(SttpValueSet values)
+        public void UpdateRow(SttpValueSet fields)
         {
-            Fields = values;
+            if (m_changes == null)
+            {
+                if (Fields != fields)
+                {
+                    m_changes = fields;
+                }
+            }
+            else
+            {
+                m_changes = fields;
+            }
         }
+
+        public void RollbackChanges()
+        {
+            m_changes = null;
+        }
+
+        public bool CommitChanges(long revision, bool refreshSchema)
+        {
+            if (refreshSchema)
+            {
+                Revision = revision;
+            }
+            if (m_changes != null)
+            {
+                Fields = m_changes;
+                Revision = revision;
+                m_changes = null;
+                return true;
+            }
+            return false;
+
+        }
+
     }
 }

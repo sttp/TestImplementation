@@ -14,14 +14,16 @@ namespace Sttp.Data
         /// <summary>
         /// If logging is enabled, this is the ID for the transaction log.
         /// </summary>
-        public Guid SchemaVersion { get; }
+        public Guid SchemaVersion { get; private set; }
 
         /// <summary>
         /// This identifies the transaction number of the supplied log. 
         /// </summary>
-        public long Revision { get; }
+        public long Revision { get; private set; }
 
         private Dictionary<string, MetadataTable> m_tables;
+
+        private Dictionary<string, MetadataTable> m_pendingChanges;
 
         public MetadataDatabaseSource()
         {
@@ -36,26 +38,72 @@ namespace Sttp.Data
             }
         }
 
-        public void DefineTable(string tableName, TableFlags flags, List<Tuple<string,SttpValueTypeCode>> columns)
+        public void AddOrReplaceTable(string tableName, TableFlags flags, List<Tuple<string, SttpValueTypeCode>> columns)
         {
-            if (!m_tables.ContainsKey(tableName))
-            {
-                var tbl = new MetadataTable(tableName, flags, columns);
-                m_tables.Add(tableName, tbl);
-            }
+            if (m_pendingChanges == null)
+                m_pendingChanges = new Dictionary<string, MetadataTable>(m_tables);
+            m_pendingChanges[tableName] = new MetadataTable(tableName, flags, columns);
         }
 
-        public void AddOrUpdateRow(string tableName, SttpValue key, SttpValueSet fields )
+        public void AddOrReplaceRow(string tableName, SttpValue key, SttpValueSet fields)
         {
-            m_tables[tableName].AddOrUpdateRow(key, fields);
+            if (m_pendingChanges != null)
+            {
+                m_pendingChanges[tableName].AddOrUpdateRow(key, fields);
+            }
+            else
+            {
+                m_tables[tableName].AddOrUpdateRow(key, fields);
+            }
         }
 
         public void DeleteRow(string tableName, SttpValue key)
         {
-            m_tables[tableName].DeleteRow(key);
+            if (m_pendingChanges != null)
+            {
+                m_pendingChanges[tableName].DeleteRow(key);
+            }
+            else
+            {
+                m_tables[tableName].DeleteRow(key);
+            }
         }
 
-        public void RefreshSchema()
+        public void RollbackChanges()
+        {
+            m_pendingChanges = null;
+            foreach (var tables in m_tables.Values)
+            {
+                tables.RollbackChanges();
+            }
+        }
+
+        public void CommitChanges()
+        {
+            if (m_pendingChanges != null)
+            {
+                SchemaVersion = Guid.NewGuid();
+                Revision = 0;
+
+                foreach (var tables in m_pendingChanges.Values)
+                {
+                    tables.CommitChanges(Revision, true);
+                }
+                m_tables = m_pendingChanges;
+                m_pendingChanges = null;
+            }
+            else
+            {
+                foreach (var tables in m_tables.Values)
+                {
+
+                    tables.CommitChanges(Revision, false);
+                }
+            }
+            RefreshSchema();
+        }
+
+        private void RefreshSchema()
         {
             m_metadataSchema = new MetadataSchemaDefinition();
             foreach (var table in m_tables.Values)
