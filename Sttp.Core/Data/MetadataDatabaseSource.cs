@@ -153,18 +153,18 @@ namespace Sttp.Data
 
         private void ProcessQuery(CommandGetMetadata command, WireEncoder encoder, SttpQueryExpression query)
         {
-            if (query.Tables.Count != 1)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Cannot parse a query unless it has exactly 1 table.");
-            if (query.Joins.Count != 1)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Joins aren't supported yet");
+            if (query.IndirectColumnInputs.Count > 0)
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect columns are not supported by this engine");
             if (query.Procedures.Count != 1)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures aren't supported yet");
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
+            if (query.WhereBooleanVariableIndex.HasValue)
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
 
-            var table = m_tables[TableLookup(query.Tables[0].TableName)];
+            var table = m_tables[TableLookup(query.BaseTable)];
             Dictionary<int, SttpValue> variables = new Dictionary<int, SttpValue>();
 
             List<Tuple<int, int>> columnIndexes = new List<Tuple<int, int>>();
-            foreach (var column in query.ColumnInputs)
+            foreach (var column in query.DirectColumnInputs)
             {
                 columnIndexes.Add(Tuple.Create(column.VariableIndex, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
             }
