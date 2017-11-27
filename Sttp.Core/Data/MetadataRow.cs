@@ -7,54 +7,25 @@ namespace Sttp.Data
 {
     public class MetadataRow
     {
-        public SttpValue Key;
-        public SttpValueSet Fields;
-        private SttpValueSet m_changes;
-        public MetadataRow[] ForeignKeys;
-        public long Revision;
+        public readonly SttpValue Key;
+        public readonly SttpValueSet Fields;
+        /// <summary>
+        /// The index position in he table that has this foreign key. 
+        /// -1 means the row does not exist.
+        /// </summary>
+        public readonly int[] ForeignKeys;
+        public readonly long Revision;
 
-        public MetadataRow(SttpValue key, SttpValueSet fields)
+        public MetadataRow(SttpValue key, SttpValueSet fields, int foreignKeyCount, long revision)
         {
+            Revision = revision;
             Key = key;
             Fields = fields;
-            ForeignKeys = new MetadataRow[fields.Values.Count];
-        }
-
-        public void UpdateRow(SttpValueSet fields)
-        {
-            if (m_changes == null)
+            ForeignKeys = new int[foreignKeyCount];
+            for (int x = 0; x < foreignKeyCount; x++)
             {
-                if (Fields != fields)
-                {
-                    m_changes = fields;
-                }
+                ForeignKeys[x] = -1;
             }
-            else
-            {
-                m_changes = fields;
-            }
-        }
-
-        public void RollbackChanges()
-        {
-            m_changes = null;
-        }
-
-        public bool CommitChanges(long revision, bool refreshSchema)
-        {
-            if (refreshSchema)
-            {
-                Revision = revision;
-            }
-            if (m_changes != null)
-            {
-                Fields = m_changes;
-                Revision = revision;
-                m_changes = null;
-                return true;
-            }
-            return false;
-
         }
 
     }

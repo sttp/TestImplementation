@@ -88,9 +88,10 @@ namespace Sttp.Codec
         Metadata,
 
         /// <summary>
-        /// The current metadata schema.
+        /// The current metadata schema, or an update if updates were requested.
         /// </summary>
         MetadataSchema,
+        MetadataSchemaUpdate,
 
         MetadataVersionNotCompatible,
 

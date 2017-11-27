@@ -26,7 +26,8 @@ namespace Sttp.Data
         /// <summary>
         /// All possible rows.
         /// </summary>
-        public Dictionary<SttpValue, MetadataRow> Rows;
+        public Dictionary<SttpValue, SttpValueSet> Rows;
+
         public Guid SchemaVersion;
         public long Revision;
 
@@ -71,21 +72,14 @@ namespace Sttp.Data
                 Revision = command.Revision;
                 TableName = command.TableName;
                 Columns = new List<MetadataColumn>(command.Columns.Select(x => new MetadataColumn(x.Item1, x.Item2)));
-                Rows = new Dictionary<SttpValue, MetadataRow>();
+                Rows = new Dictionary<SttpValue, SttpValueSet>();
             }
 
         }
 
         public void ProcessCommand(CmdDefineRow command)
         {
-            if (!Rows.ContainsKey(command.PrimaryKey))
-            {
-                Rows[command.PrimaryKey] = new MetadataRow(command.PrimaryKey, command.Values);
-            }
-            else
-            {
-                Rows[command.PrimaryKey].Fields = command.Values;
-            }
+            Rows[command.PrimaryKey] = command.Values;
         }
 
         public void ProcessCommand(CmdUndefineRow command)

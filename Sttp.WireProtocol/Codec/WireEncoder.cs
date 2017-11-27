@@ -154,10 +154,13 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointRequest);
         }
 
-        public void GetMetadata(List<MetadataRequest> requests)
+        public void GetMetadata(Guid schemaVersion, long revision, long areUpdateQueries, List<SttpQueryExpression> queries)
         {
             m_stream.Clear();
-            m_stream.Write(requests);
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Write(areUpdateQueries);
+            m_stream.Write(queries);
             m_stream.Send(CommandCode.GetMetadata);
         }
 
@@ -169,11 +172,23 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.GetMetadataSchema);
         }
 
-        public void MetadataSchema(MetadataSchemaDefinition schema)
+        public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
         {
             m_stream.Clear();
-            m_stream.Write(schema);
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Write(tables);
             m_stream.Send(CommandCode.MetadataSchema);
+        }
+
+        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<Tuple<string, long>> tableRevisions)
+        {
+            m_stream.Clear();
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Write(updatedFromRevision);
+            m_stream.Write(tableRevisions);
+            m_stream.Send(CommandCode.MetadataSchemaUpdate);
         }
 
         public void MetadataVersionNotCompatible()

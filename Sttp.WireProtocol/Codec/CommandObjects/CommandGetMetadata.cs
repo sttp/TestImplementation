@@ -5,13 +5,17 @@ namespace Sttp.Codec
 {
     public class CommandGetMetadata
     {
-        public readonly List<MetadataRequest> Requests;
+        public readonly Guid SchemaVersion;
+        public readonly long Revision;
+        public readonly bool AreUpdateQueries;
+        public readonly List<SttpQueryExpression> Queries;
 
         public CommandGetMetadata(PayloadReader reader)
         {
-            Requests = reader.ReadList<MetadataRequest>();
+            SchemaVersion = reader.ReadGuid();
+            Revision = reader.ReadInt64();
+            AreUpdateQueries = reader.ReadBoolean();
+            Queries = reader.ReadList<SttpQueryExpression>();
         }
-
-
     }
 }

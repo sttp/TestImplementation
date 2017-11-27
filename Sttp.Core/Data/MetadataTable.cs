@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Xml.Serialization;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Sttp.Data
 {
@@ -9,105 +11,188 @@ namespace Sttp.Data
         /// <summary>
         /// The name of the table
         /// </summary>
-        public string TableName;
+        public readonly string TableName;
 
         /// <summary>
         /// Indicates that this table has 1 record for each measurement and can be used
         /// in filtering. False means this is a ancillary table that won't be understood by the
         /// API, but is used for the application layer.
         /// </summary>
-        public TableFlags TableFlags;
+        public readonly TableFlags TableFlags;
 
         /// <summary>
         /// All possible columns that are defined for the table.
         /// </summary>
-        public List<MetadataColumn> Columns;
+        public readonly List<MetadataColumn> Columns;
+
+        public readonly List<MetadataForeignKey> ForeignKeys;
+
+        public readonly long LastModifiedRevision;
+
+        private bool m_isReadOnly;
 
         /// <summary>
-        /// All possible rows.
+        /// This is concurrent since it will be shared with all modified instances. To check 
+        /// if the value actually exists, make sure that the index returned is not outside the bounds of 
+        /// m_rows.
         /// </summary>
-        public Dictionary<SttpValue, MetadataRow> Rows;
+        private readonly ConcurrentDictionary<SttpValue, int> m_rowLookup;
 
-        /// <summary>
-        /// Contains pending changes to the table schema if the changes included adding or deleting rows.
-        /// </summary>
-        private Dictionary<SttpValue, MetadataRow> m_pendingChanges;
+        public IEnumerable<MetadataRow> Rows => m_rows;
 
-        public long LastModifiedRevision;
+        private readonly List<MetadataRow> m_rows;
 
-        public MetadataTable(string tableName, TableFlags tableFlags, List<Tuple<string, SttpValueTypeCode>> columns)
+        public MetadataTable(string tableName, TableFlags tableFlags, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)
         {
             TableName = tableName;
             TableFlags = tableFlags;
-            Columns = new List<MetadataColumn>();
-            Rows = new Dictionary<SttpValue, MetadataRow>();
-            for (var index = 0; index < columns.Count; index++)
+            Columns = columns.ToList();
+            ForeignKeys = tableRelationships.ToList();
+
+            foreach (var fk in ForeignKeys)
             {
-                var item = columns[index];
-                Columns.Add(new MetadataColumn(item.Item1, item.Item2));
+                fk.LocalColumnIndex = Columns.FindIndex(y => y.Name == fk.ColumnName);
+            }
+            LastModifiedRevision = 0;
+            m_rowLookup = new ConcurrentDictionary<SttpValue, int>();
+            m_rows = new List<MetadataRow>();
+            m_isReadOnly = false;
+        }
+
+        public MetadataTable(MetadataTable other)
+        {
+            m_rowLookup = other.m_rowLookup;
+            m_rows = other.m_rows.ToList();
+            ForeignKeys = other.ForeignKeys;
+            Columns = other.Columns;
+            TableFlags = other.TableFlags;
+            TableName = other.TableName;
+            LastModifiedRevision = other.LastModifiedRevision;
+            m_isReadOnly = false;
+        }
+
+        /// <summary>
+        /// Gets/Sets the readonly nature of this class.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get
+            {
+                return m_isReadOnly;
             }
         }
 
-        public void AddOrUpdateRow(SttpValue key, SttpValueSet fields)
+        public void SetIsReadOnly(long revision, Func<string, int> tableLookup, Func<int, SttpValue, int> lookupForeignKey)
         {
-            //Check the existing value, only if the row has changed do we update the changes in the database.
-            if (m_pendingChanges == null)
+            if (IsReadOnly)
+                throw new Exception("This class is immutable");
+            int x = 0;
+            if (revision == 0)
             {
-                if (Rows.TryGetValue(key, out MetadataRow existing))
+                for (x = 0; x < m_rows.Count; x++)
                 {
-                    existing.UpdateRow(fields);
-                    return;
+                    if (m_rows[x].Revision != 0)
+                    {
+                        m_rows[x] = new MetadataRow(m_rows[x].Key, m_rows[x].Fields, ForeignKeys.Count, 0);
+                    }
                 }
-                m_pendingChanges = new Dictionary<SttpValue, MetadataRow>(Rows);
+                //For a schema change, all foreign keys must be reassigned
+                for (x = 0; x < ForeignKeys.Count; x++)
+                {
+                    if (ForeignKeys[x].TableIndex < 0)
+                    {
+                        ForeignKeys[x].TableIndex = tableLookup(TableName);
+                    }
+                    if (ForeignKeys[x].TableIndex >= 0 && ForeignKeys[x].LocalColumnIndex >= 0)
+                    {
+                        int tableIndex = ForeignKeys[x].TableIndex;
+                        int columnIndex = ForeignKeys[x].LocalColumnIndex;
+
+                        foreach (var row in m_rows)
+                        {
+                            if (row.Fields != null)
+                            {
+                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields.Values[columnIndex]);
+                            }
+                        }
+                    }
+                }
+
             }
             else
             {
-                if (m_pendingChanges.TryGetValue(key, out MetadataRow existing))
+                //All the foreign key tree must be searched 
+                //even if there is not a schema update to check if a foreign table has been updated.
+                for (x = 0; x < ForeignKeys.Count; x++)
                 {
-                    existing.UpdateRow(fields);
-                    return;
+                    if (ForeignKeys[x].TableIndex < 0)
+                    {
+                        ForeignKeys[x].TableIndex = tableLookup(TableName);
+                    }
+                    if (ForeignKeys[x].TableIndex >= 0 && ForeignKeys[x].LocalColumnIndex >= 0)
+                    {
+                        int tableIndex = ForeignKeys[x].TableIndex;
+                        int columnIndex = ForeignKeys[x].LocalColumnIndex;
+
+                        foreach (var row in m_rows)
+                        {
+                            if (row.Fields != null && row.ForeignKeys[x] < 0)
+                            {
+                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields.Values[columnIndex]);
+                            }
+                        }
+                    }
                 }
             }
-            m_pendingChanges.Add(key, new MetadataRow(key, fields));
+            m_isReadOnly = true;
         }
 
-        public void DeleteRow(SttpValue primaryKey)
+        public void AddOrUpdateRow(SttpValue key, SttpValueSet fields, long revision)
         {
-            if (m_pendingChanges == null)
+            if (IsReadOnly)
+                throw new Exception("This class is immutable");
+
+            if (m_rowLookup.TryGetValue(key, out int rowIndex))
             {
-                m_pendingChanges = new Dictionary<SttpValue, MetadataRow>(Rows);
+                if (m_rows[rowIndex].Fields != fields)
+                {
+                    m_rows[rowIndex] = new MetadataRow(key, fields, ForeignKeys.Count, revision);
+                }
             }
-            m_pendingChanges.Remove(primaryKey);
+            else
+            {
+                m_rowLookup.TryAdd(key, m_rows.Count);
+                m_rows.Add(new MetadataRow(key, fields, ForeignKeys.Count, revision));
+            }
         }
 
-        public void RollbackChanges()
+        public MetadataTable CloneEditable()
         {
-            m_pendingChanges = null;
-            foreach (var metadataRow in Rows.Values)
+            return new MetadataTable(this);
+        }
+
+        public void DeleteRow(SttpValue key, long revision)
+        {
+            if (IsReadOnly)
+                throw new Exception("This class is immutable");
+
+            if (m_rowLookup.TryGetValue(key, out int rowIndex))
             {
-                metadataRow.RollbackChanges();
+                m_rows[rowIndex] = new MetadataRow(key, null, 0, revision);
             }
         }
 
-        public bool CommitChanges(long revision, bool schemaRefresh)
+        public int LookupRowIndex(SttpValue sttpValue)
         {
-            bool hasChanged = schemaRefresh;
-
-            if (m_pendingChanges != null)
+            if (m_rowLookup.TryGetValue(sttpValue, out int index))
             {
-                hasChanged = true;
-                Rows = m_pendingChanges;
-                m_pendingChanges = null;
+                if (index < m_rows.Count)
+                {
+                    return index;
+                }
+                return -1;
             }
-            foreach (var metadataRow in Rows.Values)
-            {
-                hasChanged |= metadataRow.CommitChanges(revision, schemaRefresh);
-            }
-            if (hasChanged)
-            {
-                LastModifiedRevision = revision;
-            }
-            return hasChanged;
+            return -1;
         }
     }
 }

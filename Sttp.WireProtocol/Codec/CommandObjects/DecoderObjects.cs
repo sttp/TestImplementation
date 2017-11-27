@@ -31,6 +31,9 @@ namespace Sttp.Codec
                 case CommandCode.MetadataSchema:
                     m_decoder = new CommandMetadataSchema(reader);
                     break;
+                case CommandCode.MetadataSchemaUpdate:
+                    m_decoder = new CommandMetadataSchemaUpdate(reader);
+                    break;
                 case CommandCode.MetadataVersionNotCompatible:
                     m_decoder = new CommandMetadataVersionNotCompatible(reader);
                     break;
@@ -86,6 +89,7 @@ namespace Sttp.Codec
         public CommandMapRuntimeIDs MapRuntimeIDs => m_decoder as CommandMapRuntimeIDs;
         public CommandMetadata Metadata => m_decoder as CommandMetadata;
         public CommandMetadataSchema MetadataSchema => m_decoder as CommandMetadataSchema;
+        public CommandMetadataSchemaUpdate MetadataSchemaUpdate => m_decoder as CommandMetadataSchemaUpdate;
         public CommandMetadataVersionNotCompatible MetadataVersionNotCompatible => m_decoder as CommandMetadataVersionNotCompatible;
         public CommandNegotiateSession NegotiateSession => m_decoder as CommandNegotiateSession;
         public CommandNoOp NoOp => m_decoder as CommandNoOp;

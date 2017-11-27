@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sttp.WireProtocol;
 
 namespace Sttp.Data

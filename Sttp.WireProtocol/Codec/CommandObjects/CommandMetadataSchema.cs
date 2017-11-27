@@ -5,11 +5,15 @@ namespace Sttp.Codec
 {
     public class CommandMetadataSchema
     {
-        public readonly MetadataSchemaDefinition Schema;
+        public readonly Guid SchemaVersion;
+        public readonly long Revision;
+        public readonly List<MetadataSchemaTables> Tables;
 
         public CommandMetadataSchema(PayloadReader reader)
         {
-            Schema = new MetadataSchemaDefinition(reader);
+            SchemaVersion = reader.ReadGuid();
+            Revision = reader.ReadInt64();
+            Tables = reader.ReadList<MetadataSchemaTables>();
         }
     }
 }

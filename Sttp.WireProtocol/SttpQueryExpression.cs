@@ -5,36 +5,49 @@ namespace Sttp
     public class SttpQueryTable
     {
         public string TableName;
-        public int AliasName;
+        public int TableIndex;
     }
 
-    public class SttpQueryColumns
+    public class SttpQueryColumnInputs
     {
-        public int TableAlias;
+        public int TableIndex;
         public string ColumnName;
-        public int ColumnAlias;
-        public int OutputAsColumnIndex;
-        public string OutputAsColumnName;
+        public int VariableIndex;
+    }
+
+    public class SttpQueryValueInputs
+    {
+        public SttpValue Value;
+        public int VariableIndex;
+    }
+
+    public class SttpOutputVariables
+    {
+        public int VariableIndex;
+        public string ColumnName;
+        public SttpValueTypeCode ColumnType;
     }
 
     public class SttpQueryJoinedTables
     {
-        public int ColumnIndexLeft;
-        public int ColumnIndexRight;
-        public bool IsLeftJoin;
+        public int ColumnVariableIndexLeft;
+        public int ColumnVariableIndexRight;
+        public JoinType JoinType; 
     }
 
-    public class SttpQueryValues
+    public enum JoinType
     {
-        public int VariableName;
-        public SttpValue Value;
+        Left,
+        Right,
+        Inner,
+        Outer,
     }
 
     public class SttpProcedure
     {
         public string Function;
-        public int[] Parameters;
-        public int Results;
+        public int[] ParameterAliasInputs;
+        public int VariableIndex;
     }
 
     /// <summary>
@@ -43,33 +56,39 @@ namespace Sttp
     public class SttpQueryExpression
     {
         public List<SttpQueryTable> Tables = new List<SttpQueryTable>();
-        public List<SttpQueryColumns> Columns = new List<SttpQueryColumns>();
+        public List<SttpQueryColumnInputs> ColumnInputs = new List<SttpQueryColumnInputs>();
+        public List<SttpQueryValueInputs> ValueInputs = new List<SttpQueryValueInputs>();
         public List<SttpQueryJoinedTables> Joins = new List<SttpQueryJoinedTables>();
-        public List<SttpQueryValues> Values = new List<SttpQueryValues>();
         public List<SttpProcedure> Procedures = new List<SttpProcedure>();
+        public List<SttpOutputVariables> Outputs = new List<SttpOutputVariables>();
 
-        public void DefineTable(string tableName, int aliasName)
+        public void DefineTable(string tableName, int tableIndex)
         {
-            Tables.Add(new SttpQueryTable() { TableName = tableName, AliasName = aliasName });
+            Tables.Add(new SttpQueryTable() { TableName = tableName, TableIndex = tableIndex });
         }
-        public void DefineColumns(int tableAlias, string columnName, int columnAlias, int outputAsColumnIndex, string outputAsColumnName)
+        public void DefineColumnInputs(int tableIndex, string columnName, int variableIndex)
         {
-            Columns.Add(new SttpQueryColumns() { TableAlias = tableAlias, ColumnName = columnName, ColumnAlias = columnAlias, OutputAsColumnIndex = outputAsColumnIndex, OutputAsColumnName = outputAsColumnName });
-        }
-
-        public void DefineJoins(int columnIndexLeft, int columnIndexRight, bool isLeftJoin)
-        {
-            Joins.Add(new SttpQueryJoinedTables() { ColumnIndexLeft = columnIndexLeft, ColumnIndexRight = columnIndexRight, IsLeftJoin = isLeftJoin });
+            ColumnInputs.Add(new SttpQueryColumnInputs() { TableIndex = tableIndex, ColumnName = columnName, VariableIndex = variableIndex});
         }
 
-        public void DefineValues(int variableName, SttpValue value)
+        public void DefineJoins(int columnVariableIndexLeft, int columnVariableIndexRight, JoinType joinType)
         {
-            Values.Add(new SttpQueryValues() { VariableName = variableName, Value = value });
+            Joins.Add(new SttpQueryJoinedTables() { ColumnVariableIndexLeft = columnVariableIndexLeft, ColumnVariableIndexRight = columnVariableIndexRight, JoinType = joinType });
         }
 
-        public void DefineProcedures(string function, int[] parameters, int results)
+        public void DefineValueInputs(int variableIndex, SttpValue value)
         {
-            Procedures.Add(new SttpProcedure() { Function = function, Parameters = parameters, Results = results });
+            ValueInputs.Add(new SttpQueryValueInputs() { VariableIndex = variableIndex, Value = value });
+        }
+
+        public void DefineProcedures(string function, int[] parameters, int variableIndex)
+        {
+            Procedures.Add(new SttpProcedure() { Function = function, ParameterAliasInputs = parameters, VariableIndex = variableIndex });
+        }
+
+        public void DefineOutputs(int variableIndex, string columnName, SttpValueTypeCode columnType)
+        {
+            Outputs.Add(new SttpOutputVariables() { VariableIndex = variableIndex, ColumnName = columnName, ColumnType = columnType });
         }
 
 
