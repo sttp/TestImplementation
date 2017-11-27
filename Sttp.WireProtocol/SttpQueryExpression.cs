@@ -13,7 +13,7 @@ namespace Sttp
 
     public class SttpQueryInputIndirectColumn
     {
-        public List<SttpQueryJoinPath> JoinPath;
+        public SttpQueryJoinPath[] JoinPath;
         public string ColumnName;
         public string Variable;
     }
@@ -23,6 +23,11 @@ namespace Sttp
         public string JoinedColumn;
         public string JoinedTable;
         public JoinType JoinType;
+
+        public static SttpQueryJoinPath Create(string column, string table, JoinType type = JoinType.Inner)
+        {
+            return new SttpQueryJoinPath() { JoinedColumn = column, JoinedTable = table, JoinType = type };
+        }
     }
 
     public enum JoinType
@@ -64,11 +69,11 @@ namespace Sttp
         public List<SttpOutputVariables> Outputs = new List<SttpOutputVariables>();
         public string WhereBooleanVariable;
 
-        public void DefineDirectColumn(string columnName, string variable)
+        public void DefineDirectColumn(string variable, string columnName)
         {
             DirectColumnInputs.Add(new SttpQueryInputDirectColumn() { ColumnName = columnName, Variable = variable });
         }
-        public void DefineIndirectColumn(List<SttpQueryJoinPath> joinPath, string columnName, string variable)
+        public void DefineIndirectColumn(string variable, string columnName, params SttpQueryJoinPath[] joinPath)
         {
             IndirectColumnInputs.Add(new SttpQueryInputIndirectColumn() { JoinPath = joinPath, ColumnName = columnName, Variable = variable });
         }
@@ -92,14 +97,14 @@ namespace Sttp
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine($"TABLE: {BaseTable}");
+            sb.AppendLine($"TABLE {BaseTable}");
             foreach (var column in DirectColumnInputs)
             {
-                sb.AppendLine($"COLUMN: [{column.Variable}] = [{column.ColumnName}]");
+                sb.AppendLine($"COLUMN {column.Variable}: [{column.ColumnName}]");
             }
             foreach (var column in IndirectColumnInputs)
             {
-                sb.Append($"COLUMN: [{column.Variable}] = ");
+                sb.Append($"COLUMN {column.Variable}: ");
                 foreach (var link in column.JoinPath)
                 {
                     if (link.JoinType == JoinType.Inner)
@@ -120,17 +125,17 @@ namespace Sttp
             }
             foreach (var input in ValueInputs)
             {
-                sb.AppendLine($"VALUE: [{input.Variable}] = [{input.Value}]");
+                sb.AppendLine($"VALUE {input.Variable}: {input.Value.AsTypeString}");
             }
             foreach (var step in Procedures)
             {
-                sb.AppendLine($"PROCEDURE: ([{String.Join("],[", step.OutputVariables)}]) = {step.Function}([{String.Join("],[", step.InputVariables)}])");
+                sb.AppendLine($"PROCEDURE ([{String.Join("],[", step.OutputVariables)}]): {step.Function}([{String.Join("],[", step.InputVariables)}])");
             }
             foreach (var output in Outputs)
             {
-                sb.AppendLine($"OUTPUT: ({output.ColumnType})[{output.Variable}] AS [{output.ColumnName}]");
+                sb.AppendLine($"OUTPUT ({output.ColumnType})[{output.Variable}] AS [{output.ColumnName}]");
             }
-            sb.AppendLine($"WHERE: {WhereBooleanVariable}");
+            sb.AppendLine($"WHERE {WhereBooleanVariable}");
 
             return sb.ToString();
         }
@@ -159,7 +164,7 @@ namespace Sttp
             rv.BaseTable = fromStatement;
             for (var index = 0; index < columns.Length; index++)
             {
-                rv.DefineDirectColumn(columns[index].Trim(), index.ToString());
+                rv.DefineDirectColumn(index.ToString(), columns[index].Trim());
                 rv.DefineOutputs(index.ToString(), columns[index].Trim(), SttpValueTypeCode.Null);
             }
             return rv;
@@ -169,6 +174,11 @@ namespace Sttp
         {
             //This is the expression filter that GPA uses right now.
             return null;
+        }
+
+        internal void DefineDirectColumn(string v, SttpValue sttpValue)
+        {
+            throw new NotImplementedException();
         }
     }
 }

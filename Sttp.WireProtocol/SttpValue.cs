@@ -37,6 +37,9 @@ namespace Sttp
         private ulong m_valueUInt64;
         [FieldOffset(0)]
         private double m_valueDouble;
+
+
+
         [FieldOffset(0)]
         private float m_valueSingle;
         [FieldOffset(0)]
@@ -1213,6 +1216,14 @@ namespace Sttp
             }
         }
 
+        public string AsTypeString
+        {
+            get
+            {
+                return $"({m_valueTypeCode}){AsString}";
+            }
+        }
+
         public byte[] AsBuffer
         {
             get
@@ -1657,7 +1668,7 @@ namespace Sttp
                 return false;
             switch (a.m_valueTypeCode)
             {
-               //ToDo: Finish.
+                //ToDo: Finish.
             }
             return true;
         }
@@ -1666,7 +1677,7 @@ namespace Sttp
         {
             return !(a == b);
         }
-        
+
         #endregion
 
         public void Load(PayloadReader payloadReader)
@@ -1682,6 +1693,20 @@ namespace Sttp
         public void Save(PayloadWriter payloadWriter, bool includeTypeCode)
         {
             throw new NotImplementedException();
+        }
+
+
+        public static explicit operator SttpValue(double v)
+        {
+            var rv = new SttpValue();
+            rv.AsDouble = v;
+            return rv;
+        }
+        public static explicit operator SttpValue(string v)
+        {
+            var rv = new SttpValue();
+            rv.AsString = v;
+            return rv;
         }
     }
 }
