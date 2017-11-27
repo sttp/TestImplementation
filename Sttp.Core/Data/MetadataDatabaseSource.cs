@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sttp.Codec;
-using Sttp.WireProtocol;
 
 namespace Sttp.Data
 {
@@ -157,16 +156,16 @@ namespace Sttp.Data
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect columns are not supported by this engine");
             if (query.Procedures.Count != 1)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
-            if (query.WhereBooleanVariableIndex.HasValue)
+            if (query.WhereBooleanVariable != null)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
 
             var table = m_tables[TableLookup(query.BaseTable)];
-            Dictionary<int, SttpValue> variables = new Dictionary<int, SttpValue>();
+            Dictionary<string, SttpValue> variables = new Dictionary<string, SttpValue>();
 
-            List<Tuple<int, int>> columnIndexes = new List<Tuple<int, int>>();
+            List<Tuple<string, int>> columnIndexes = new List<Tuple<string, int>>();
             foreach (var column in query.DirectColumnInputs)
             {
-                columnIndexes.Add(Tuple.Create(column.VariableIndex, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
+                columnIndexes.Add(Tuple.Create(column.Variable, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
             }
 
             var send = encoder.MetadataCommandBuilder();
@@ -177,7 +176,7 @@ namespace Sttp.Data
             {
                 foreach (var input in query.ValueInputs)
                 {
-                    variables[input.VariableIndex] = input.Value;
+                    variables[input.Variable] = input.Value;
                 }
                 foreach (var input in columnIndexes)
                 {
@@ -187,7 +186,7 @@ namespace Sttp.Data
                 SttpValueSet values = new SttpValueSet();
                 foreach (var item in query.Outputs)
                 {
-                    values.Values.Add(variables[item.VariableIndex]);
+                    values.Values.Add(variables[item.Variable]);
                 }
                 send.DefineRow(row.Key, values);
             }

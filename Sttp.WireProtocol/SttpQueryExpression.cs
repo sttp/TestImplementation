@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Sttp
 {
     public class SttpQueryInputDirectColumn
     {
         public string ColumnName;
-        public int VariableIndex;
+        public string Variable;
     }
 
     public class SttpQueryInputIndirectColumn
     {
         public List<SttpQueryJoinPath> JoinPath;
         public string ColumnName;
-        public int VariableIndex;
+        public string Variable;
     }
 
     public class SttpQueryJoinPath
@@ -32,19 +34,19 @@ namespace Sttp
     public class SttpQueryInputValue
     {
         public SttpValue Value;
-        public int VariableIndex;
+        public string Variable;
     }
 
     public class SttpProcedure
     {
         public string Function;
-        public int[] VariableIndexInputs;
-        public int OutputVariableIndex;
+        public string[] InputVariables;
+        public string[] OutputVariables;
     }
 
     public class SttpOutputVariables
     {
-        public int VariableIndex;
+        public string Variable;
         public string ColumnName;
         public SttpValueTypeCode ColumnType;
     }
@@ -60,32 +62,78 @@ namespace Sttp
         public List<SttpQueryInputValue> ValueInputs = new List<SttpQueryInputValue>();
         public List<SttpProcedure> Procedures = new List<SttpProcedure>();
         public List<SttpOutputVariables> Outputs = new List<SttpOutputVariables>();
-        public int? WhereBooleanVariableIndex;
+        public string WhereBooleanVariable;
 
-        public void DefineDirectColumn(string columnName, int variableIndex)
+        public void DefineDirectColumn(string columnName, string variable)
         {
-            DirectColumnInputs.Add(new SttpQueryInputDirectColumn() { ColumnName = columnName, VariableIndex = variableIndex });
+            DirectColumnInputs.Add(new SttpQueryInputDirectColumn() { ColumnName = columnName, Variable = variable });
         }
-        public void DefineIndirectColumn(List<SttpQueryJoinPath> joinPath, string columnName, int variableIndex)
+        public void DefineIndirectColumn(List<SttpQueryJoinPath> joinPath, string columnName, string variable)
         {
-            IndirectColumnInputs.Add(new SttpQueryInputIndirectColumn() { JoinPath = joinPath, ColumnName = columnName, VariableIndex = variableIndex });
-        }
-
-        public void DefineValue(int variableIndex, SttpValue value)
-        {
-            ValueInputs.Add(new SttpQueryInputValue() { VariableIndex = variableIndex, Value = value });
+            IndirectColumnInputs.Add(new SttpQueryInputIndirectColumn() { JoinPath = joinPath, ColumnName = columnName, Variable = variable });
         }
 
-        public void DefineProcedures(string function, int[] variableIndexInputs, int outputVariableIndex)
+        public void DefineValue(string variable, SttpValue value)
         {
-            Procedures.Add(new SttpProcedure() { Function = function, VariableIndexInputs = variableIndexInputs, OutputVariableIndex = outputVariableIndex });
+            ValueInputs.Add(new SttpQueryInputValue() { Variable = variable, Value = value });
         }
 
-        public void DefineOutputs(int variableIndex, string columnName, SttpValueTypeCode columnType)
+        public void DefineProcedures(string function, string[] inputVariables, string[] outputVariables)
         {
-            Outputs.Add(new SttpOutputVariables() { VariableIndex = variableIndex, ColumnName = columnName, ColumnType = columnType });
+            Procedures.Add(new SttpProcedure() { Function = function, InputVariables = inputVariables, OutputVariables = outputVariables });
         }
 
+        public void DefineOutputs(string variable, string columnName, SttpValueTypeCode columnType)
+        {
+            Outputs.Add(new SttpOutputVariables() { Variable = variable, ColumnName = columnName, ColumnType = columnType });
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"TABLE: {BaseTable}");
+            foreach (var column in DirectColumnInputs)
+            {
+                sb.AppendLine($"COLUMN: [{column.Variable}] = [{column.ColumnName}]");
+            }
+            foreach (var column in IndirectColumnInputs)
+            {
+                sb.Append($"COLUMN: [{column.Variable}] = ");
+                foreach (var link in column.JoinPath)
+                {
+                    if (link.JoinType == JoinType.Inner)
+                    {
+                        sb.Append($"[{link.JoinedColumn}].[{link.JoinedTable}].");
+
+                    }
+                    else if (link.JoinType == JoinType.Left)
+                    {
+                        sb.Append($"[{link.JoinedColumn}]?.[{link.JoinedTable}].");
+                    }
+                    else
+                    {
+                        throw new Exception("Join type invalid");
+                    }
+                }
+                sb.AppendLine($"[{column.ColumnName}]");
+            }
+            foreach (var input in ValueInputs)
+            {
+                sb.AppendLine($"VALUE: [{input.Variable}] = [{input.Value}]");
+            }
+            foreach (var step in Procedures)
+            {
+                sb.AppendLine($"PROCEDURE: ([{String.Join("],[", step.OutputVariables)}]) = {step.Function}([{String.Join("],[", step.InputVariables)}])");
+            }
+            foreach (var output in Outputs)
+            {
+                sb.AppendLine($"OUTPUT: ({output.ColumnType})[{output.Variable}] AS [{output.ColumnName}]");
+            }
+            sb.AppendLine($"WHERE: {WhereBooleanVariable}");
+
+            return sb.ToString();
+        }
 
         public static SttpQueryExpression ParseSql(string sql)
         {
@@ -111,8 +159,8 @@ namespace Sttp
             rv.BaseTable = fromStatement;
             for (var index = 0; index < columns.Length; index++)
             {
-                rv.DefineDirectColumn(columns[index].Trim(), index);
-                rv.DefineOutputs(index, columns[index].Trim(), SttpValueTypeCode.Null);
+                rv.DefineDirectColumn(columns[index].Trim(), index.ToString());
+                rv.DefineOutputs(index.ToString(), columns[index].Trim(), SttpValueTypeCode.Null);
             }
             return rv;
         }
