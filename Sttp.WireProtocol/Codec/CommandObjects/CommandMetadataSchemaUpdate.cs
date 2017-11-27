@@ -15,7 +15,7 @@ namespace Sttp.Codec
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             UpdatedFromVersion = reader.ReadInt64();
-            TableRevisions = reader.ReadList<Tuple<string, long>>();
+            TableRevisions = reader.ReadList<Tuple<string,long>>();
         }
     }
 }

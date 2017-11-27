@@ -89,8 +89,32 @@ namespace Sttp
 
         public static SttpQueryExpression ParseSql(string sql)
         {
-            //Return Something
-            return null;
+            int indexSelect = sql.IndexOf("SELECT ", StringComparison.CurrentCultureIgnoreCase);
+            int indexfrom = sql.IndexOf(" FROM ", StringComparison.CurrentCultureIgnoreCase);
+            int indexwhere = sql.IndexOf(" WHERE ", StringComparison.CurrentCultureIgnoreCase);
+
+            if (indexwhere >= 0)
+                throw new Exception("Cannot parse a WHERE statement yet");
+
+            if (indexfrom < 0)
+                throw new Exception("must have a FROM statement");
+
+            if (indexSelect < 0)
+                throw new Exception("must have a SELECT statement");
+
+
+            string selectStatement = sql.Substring(indexSelect + 7, indexfrom - (indexSelect + 7)).Trim();
+            string fromStatement = sql.Substring(indexfrom + 6).Trim();
+            string[] columns = selectStatement.Split(',');
+
+            var rv = new SttpQueryExpression();
+            rv.BaseTable = fromStatement;
+            for (var index = 0; index < columns.Length; index++)
+            {
+                rv.DefineDirectColumn(columns[index].Trim(), index);
+                rv.DefineOutputs(index, columns[index].Trim(), SttpValueTypeCode.Null);
+            }
+            return rv;
         }
 
         public static SttpQueryExpression ParseFilterExpression(string text)
