@@ -152,44 +152,44 @@ namespace Sttp.Data
 
         private void ProcessQuery(CommandGetMetadata command, WireEncoder encoder, SttpQueryExpression query)
         {
-            if (query.IndirectColumnInputs.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect columns are not supported by this engine");
-            if (query.Procedures.Count != 1)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
-            if (query.WhereBooleanVariable != null)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
+            //if (query.IndirectColumnInputs.Count > 0)
+            //    encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect columns are not supported by this engine");
+            //if (query.Procedures.Count != 1)
+            //    encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
+            //if (query.WhereBooleanVariable != null)
+            //    encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
 
-            var table = m_tables[TableLookup(query.BaseTable)];
-            Dictionary<string, SttpValue> variables = new Dictionary<string, SttpValue>();
+            //var table = m_tables[TableLookup(query.FromTable)];
+            //Dictionary<string, SttpValue> variables = new Dictionary<string, SttpValue>();
 
-            List<Tuple<string, int>> columnIndexes = new List<Tuple<string, int>>();
-            foreach (var column in query.DirectColumnInputs)
-            {
-                columnIndexes.Add(Tuple.Create(column.Variable, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
-            }
+            //List<Tuple<string, int>> columnIndexes = new List<Tuple<string, int>>();
+            //foreach (var column in query.DirectColumnInputs)
+            //{
+            //    columnIndexes.Add(Tuple.Create(column.Variable, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
+            //}
 
-            var send = encoder.MetadataCommandBuilder();
+            //var send = encoder.MetadataCommandBuilder();
 
-            send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, query.Outputs.Select(x => Tuple.Create(x.ColumnName, x.ColumnType)).ToList());
+            //send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, query.Outputs.Select(x => Tuple.Create(x.ColumnName, x.ColumnType)).ToList());
 
-            foreach (var row in table.Rows)
-            {
-                foreach (var input in query.ValueInputs)
-                {
-                    variables[input.Variable] = input.Value;
-                }
-                foreach (var input in columnIndexes)
-                {
-                    variables[input.Item1] = row.Fields.Values[input.Item2];
-                }
+            //foreach (var row in table.Rows)
+            //{
+            //    foreach (var input in query.Parameters)
+            //    {
+            //        variables[input.Variable] = input.Value;
+            //    }
+            //    foreach (var input in columnIndexes)
+            //    {
+            //        variables[input.Item1] = row.Fields.Values[input.Item2];
+            //    }
 
-                SttpValueSet values = new SttpValueSet();
-                foreach (var item in query.Outputs)
-                {
-                    values.Values.Add(variables[item.Variable]);
-                }
-                send.DefineRow(row.Key, values);
-            }
+            //    SttpValueSet values = new SttpValueSet();
+            //    foreach (var item in query.Outputs)
+            //    {
+            //        values.Values.Add(variables[item.Variable]);
+            //    }
+            //    send.DefineRow(row.Key, values);
+            //}
 
         }
 
