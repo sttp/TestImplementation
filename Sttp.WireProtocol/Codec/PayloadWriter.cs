@@ -439,10 +439,7 @@ namespace Sttp.Codec
             }
         }
 
-        public void Write(SttpConnectionString options)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         public void Write(List<SttpDataPointID> list)
         {
@@ -464,15 +461,6 @@ namespace Sttp.Codec
         }
 
 
-        internal void Write(SttpValueSet value)
-        {
-            value.Write(this);
-        }
-
-        internal void Write(SttpValue value)
-        {
-            value.Write(this);
-        }
 
         public void Write(List<SttpQueryStatement> list)
         {
@@ -528,6 +516,24 @@ namespace Sttp.Codec
             {
                 list[x].Save(this);
             }
+        }
+
+
+
+
+        public void Write(SttpValueSet value)
+        {
+            value.Write(this);
+        }
+
+        public void Write(SttpValue value)
+        {
+            value.Write(this);
+        }
+
+        public void Write(SttpConnectionString value)
+        {
+            value.Write(this);
         }
     }
 }

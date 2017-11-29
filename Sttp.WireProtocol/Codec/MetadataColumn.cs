@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 
 namespace Sttp.Codec
 {
@@ -34,6 +35,13 @@ namespace Sttp.Codec
         public override string ToString()
         {
             return $"{Name} ({TypeCode})";
+        }
+
+        public void GetFullOutputString(string linePrefix, StringBuilder builder)
+        {
+            builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataColumn) + ")");
+            builder.Append(linePrefix); builder.AppendLine($"Name: {Name} ");
+            builder.Append(linePrefix); builder.AppendLine($"TypeCode: {TypeCode} ");
         }
 
     }

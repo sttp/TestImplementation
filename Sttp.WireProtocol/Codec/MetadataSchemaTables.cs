@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Sttp.Codec;
 
 namespace Sttp
@@ -30,6 +31,23 @@ namespace Sttp
             writer.Write(LastModifiedRevision);
             writer.Write(Columns);
             writer.Write(ForeignKeys);
+        }
+
+        public void GetFullOutputString(string linePrefix, StringBuilder builder)
+        {
+            builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataSchemaTables) + ")");
+            builder.Append(linePrefix); builder.AppendLine($"TableName: {TableName} ");
+            builder.Append(linePrefix); builder.AppendLine($"LastModifiedRevision: {LastModifiedRevision} ");
+            builder.Append(linePrefix); builder.AppendLine($"Columns Count {Columns.Count} ");
+            foreach (var value in Columns)
+            {
+                value.GetFullOutputString(linePrefix + " ", builder);
+            }
+            builder.Append(linePrefix); builder.AppendLine($"ForeignKeys Count {ForeignKeys.Count} ");
+            foreach (var value in ForeignKeys)
+            {
+                value.GetFullOutputString(linePrefix + " ", builder);
+            }
         }
     }
 }

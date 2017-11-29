@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 using Sttp.Data;
@@ -51,10 +52,13 @@ namespace Sttp.Tests
                 var data = packets.Dequeue();
                 reader.WriteData(data, 0, data.Length);
             }
+
             cmd = reader.NextCommand();
+            Assert.AreEqual(cmd.CommandCode, CommandCode.MetadataSchema);
 
-
-
+            StringBuilder sb = new StringBuilder();
+            cmd.MetadataSchema.GetFullOutputString("", sb);
+            Console.WriteLine(sb);
         }
 
 

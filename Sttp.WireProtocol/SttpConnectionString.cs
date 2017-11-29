@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sttp.Codec;
 
 namespace Sttp
 {
@@ -26,6 +27,11 @@ namespace Sttp
     public class SttpConnectionString
     {
         public List<Tuple<string, SttpConnectionStringCompatiblity, SttpValue>> Values;
+
+        public void Write(PayloadWriter payloadWriter)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

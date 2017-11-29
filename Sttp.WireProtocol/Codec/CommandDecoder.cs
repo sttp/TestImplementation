@@ -14,7 +14,7 @@ namespace Sttp.Codec
         private PayloadReader m_reader;
         private byte[] m_buffer;
         private int m_position;
-        private int m_length;
+        private int m_remainingBytes;
         private SessionDetails m_sessionDetails;
 
         private bool m_isProcessingFragments;
@@ -37,12 +37,12 @@ namespace Sttp.Codec
         {
             TryAgain:
 
-            if (m_length < 3)
+            if (m_remainingBytes < 3)
                 return null;
 
             CommandCode code = (CommandCode)m_buffer[m_position];
             int payloadLength = BigEndian.ToInt16(m_buffer, m_position + 1);
-            if (m_length < payloadLength + 3)
+            if (m_remainingBytes < payloadLength + 3)
             {
                 return null;
             }
@@ -65,8 +65,8 @@ namespace Sttp.Codec
 
                 Array.Copy(m_buffer, m_position + 13, m_pendingData, 0, payloadLength - 10);
                 m_fragmentBytesReceived = payloadLength - 10;
-                m_position += payloadLength;
-                m_length -= payloadLength;
+                m_position += payloadLength + 3;
+                m_remainingBytes -= payloadLength + 3;
 
                 if (m_fragmentBytesReceived == m_fragmentTotalSize)
                 {
@@ -82,7 +82,7 @@ namespace Sttp.Codec
                 Array.Copy(m_buffer, m_position + 3, m_pendingData, m_fragmentBytesReceived, payloadLength);
                 m_fragmentBytesReceived += payloadLength;
                 m_position += payloadLength + 3;
-                m_length -= payloadLength + 3;
+                m_remainingBytes -= payloadLength + 3;
 
                 if (m_fragmentBytesReceived == m_fragmentTotalSize)
                 {
@@ -96,13 +96,19 @@ namespace Sttp.Codec
                     throw new Exception("Expecting the next fragment");
                 m_reader.SetBuffer(code, m_buffer, m_position + 3, payloadLength);
                 m_position += payloadLength + 3;
-                m_length -= payloadLength + 3;
+                m_remainingBytes -= payloadLength + 3;
                 return m_reader;
             }
         }
 
         private PayloadReader SendFragmentedPacket()
         {
+            if (m_fragmentCompressionMode == 0)
+            {
+                m_reader.SetBuffer(m_fragmentCommandCode, m_pendingData, 0, m_fragmentTotalRawSize);
+                return m_reader;
+
+            }
             if (m_pendingData2.Length < m_fragmentTotalRawSize)
             {
                 m_pendingData2 = new byte[m_fragmentTotalRawSize];
@@ -119,22 +125,21 @@ namespace Sttp.Codec
         public void WriteData(byte[] data, int position, int length)
         {
             Compact();
-            while (length + m_length >= m_buffer.Length)
+            while (length + m_remainingBytes >= m_buffer.Length)
             {
                 Grow();
             }
-            Array.Copy(data, position, m_buffer, m_length, length);
-            m_length += length;
+            Array.Copy(data, position, m_buffer, m_remainingBytes, length);
+            m_remainingBytes += length;
         }
 
         public void Compact()
         {
-            if (m_position > 0 && m_position != m_length)
+            if (m_position > 0 && m_remainingBytes != 0)
             {
                 // Compact - trims all data before current position if position is in middle of stream
-                Array.Copy(m_buffer, m_position, m_buffer, 0, m_length - m_position);
+                Array.Copy(m_buffer, m_position, m_buffer, 0, m_remainingBytes);
             }
-            m_length = m_length - m_position;
             m_position = 0;
         }
 

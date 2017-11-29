@@ -107,9 +107,9 @@ namespace Sttp.Codec
             {
                 fragmentLength = Math.Min(m_sessionDetails.MaximumSegmentSize - 3, length);
 
-                data[offset - Overhead - 3] = (byte)CommandCode.NextFragment;
-                data[offset - Overhead - 2] = (byte)(fragmentLength >> 8);
-                data[offset - Overhead - 1] = (byte)(fragmentLength);
+                data[offset - 3] = (byte)CommandCode.NextFragment;
+                data[offset - 2] = (byte)(fragmentLength >> 8);
+                data[offset - 1] = (byte)(fragmentLength);
 
                 m_sendPacket(data, offset - 3, fragmentLength + 3);
                 offset += fragmentLength;
