@@ -9,6 +9,7 @@ namespace Sttp.Codec
         public readonly long Revision;
         public readonly bool AreUpdateQueries;
         public readonly List<SttpQueryStatement> Queries;
+        public readonly List<SttpQueryRaw> QueriesRaw;
 
         public CommandGetMetadata(PayloadReader reader)
         {
@@ -16,6 +17,7 @@ namespace Sttp.Codec
             Revision = reader.ReadInt64();
             AreUpdateQueries = reader.ReadBoolean();
             Queries = reader.ReadList<SttpQueryStatement>();
+            QueriesRaw = reader.ReadList<SttpQueryRaw>();
         }
     }
 }
