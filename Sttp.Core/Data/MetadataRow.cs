@@ -27,5 +27,9 @@ namespace Sttp.Data
             }
         }
 
+        public override string ToString()
+        {
+            return Key.ToString();
+        }
     }
 }

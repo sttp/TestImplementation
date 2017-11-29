@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Sttp.Codec;
 
@@ -71,6 +72,84 @@ namespace Sttp.Data
             m_tables = new List<MetadataTable>();
         }
 
+        public MetadataDatabaseSource(DataSet dataSet)
+        {
+            m_tablesLookup = new Dictionary<string, int>();
+            m_tables = new List<MetadataTable>();
+
+            //-------------------------------------
+            //--   Fill the schema
+            //-------------------------------------
+            Dictionary<string, string[]> primaryKeys = new Dictionary<string, string[]>();
+            Dictionary<string, List<MetadataForeignKey>> foreignKeys = new Dictionary<string, List<MetadataForeignKey>>();
+
+            foreach (DataTable table in dataSet.Tables)
+            {
+                if ((table.PrimaryKey?.Length ?? 0) == 0)
+                    throw new Exception("All tables must have primary keys defined");
+
+                primaryKeys.Add(table.TableName, table.PrimaryKey.Select(x => x.ColumnName).ToArray());
+                foreignKeys.Add(table.TableName, new List<MetadataForeignKey>());
+            }
+
+            foreach (DataRelation relation in dataSet.Relations)
+            {
+                if (relation.ChildColumns.Length == 1 && relation.ParentColumns.Length == 1)
+                {
+                    //Foreign keys are only permitted with a single column primary key. This is an implementation issue, not a protocol issue.
+
+                    string table = relation.ChildTable.TableName;
+                    string column = relation.ChildColumns[0].ColumnName;
+                    string foreignTable = relation.ParentTable.TableName;
+                    string foreignColumn = relation.ParentColumns[0].ColumnName;
+
+                    if (primaryKeys[foreignTable].Length == 1 && primaryKeys[foreignTable][0] == foreignColumn)
+                    {
+                        foreignKeys[table].Add(new MetadataForeignKey(column, foreignTable));
+                    }
+                }
+            }
+
+            foreach (DataTable table in dataSet.Tables)
+            {
+                var columns = new List<MetadataColumn>();
+                foreach (DataColumn c in table.Columns)
+                {
+                    columns.Add(new MetadataColumn(c.ColumnName, SttpValueTypeCodec.FromType(c.DataType)));
+                }
+
+                AddOrReplaceTable(table.TableName, columns, foreignKeys[table.TableName]);
+            }
+
+            //-------------------------------------
+            //--   Fill the data
+            //-------------------------------------
+
+            foreach (DataTable table in dataSet.Tables)
+            {
+                int index = m_tablesLookup[table.TableName];
+                string[] pkey = primaryKeys[table.TableName];
+
+                foreach (DataRow row in table.Rows)
+                {
+                    SttpValue key = new SttpValue();
+                    SttpValueSet values = new SttpValueSet();
+                    values.Values.AddRange(row.ItemArray.Select(x => new SttpValue(x)));
+                    if (pkey.Length == 1)
+                    {
+                        key.SetValue(row[pkey[0]]);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                    m_tables[index].AddOrUpdateRow(key, values, Revision);
+                }
+            }
+
+            IsReadOnly = true;
+        }
+
         private MetadataDatabaseSource(MetadataDatabaseSource other)
         {
             m_tablesLookup = new Dictionary<string, int>(other.m_tablesLookup);
@@ -87,14 +166,23 @@ namespace Sttp.Data
             }
         }
 
-        public void AddOrReplaceTable(string tableName, TableFlags tableFlags, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)
+        public void AddOrReplaceTable(string tableName, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)
         {
             if (IsReadOnly)
                 throw new Exception("This class is immutable");
             SchemaVersion = Guid.NewGuid();
             Revision = 0;
-            int index = m_tablesLookup[tableName];
-            m_tables[index] = new MetadataTable(tableName, tableFlags, columns, tableRelationships);
+            if (!m_tablesLookup.ContainsKey(tableName))
+            {
+                m_tables.Add(new MetadataTable(tableName, columns, tableRelationships));
+                m_tablesLookup[tableName] = m_tables.Count - 1;
+            }
+            else
+            {
+                int index = m_tablesLookup[tableName];
+                m_tables[index] = new MetadataTable(tableName, columns, tableRelationships);
+            }
+          
         }
 
         public void AddOrReplaceRow(string tableName, SttpValue key, SttpValueSet fields)
@@ -130,7 +218,6 @@ namespace Sttp.Data
                 {
                     t.Columns.Add(Tuple.Create(col.Name, col.TypeCode));
                 }
-                t.TableFlags = table.TableFlags;
                 m_metadataSchema.Add(t);
             }
         }

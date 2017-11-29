@@ -84,6 +84,11 @@ namespace Sttp
             m_valueTypeCode = value.m_valueTypeCode;
         }
 
+        public SttpValue(object x)
+        {
+            SetValue(x);
+        }
+
         #endregion
 
         #region [ Properties ]

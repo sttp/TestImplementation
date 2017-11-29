@@ -14,13 +14,6 @@ namespace Sttp.Data
         public readonly string TableName;
 
         /// <summary>
-        /// Indicates that this table has 1 record for each measurement and can be used
-        /// in filtering. False means this is a ancillary table that won't be understood by the
-        /// API, but is used for the application layer.
-        /// </summary>
-        public readonly TableFlags TableFlags;
-
-        /// <summary>
         /// All possible columns that are defined for the table.
         /// </summary>
         public readonly List<MetadataColumn> Columns;
@@ -42,10 +35,9 @@ namespace Sttp.Data
 
         private readonly List<MetadataRow> m_rows;
 
-        public MetadataTable(string tableName, TableFlags tableFlags, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)
+        public MetadataTable(string tableName, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)
         {
             TableName = tableName;
-            TableFlags = tableFlags;
             Columns = columns.ToList();
             ForeignKeys = tableRelationships.ToList();
 
@@ -65,7 +57,6 @@ namespace Sttp.Data
             m_rows = other.m_rows.ToList();
             ForeignKeys = other.ForeignKeys;
             Columns = other.Columns;
-            TableFlags = other.TableFlags;
             TableName = other.TableName;
             LastModifiedRevision = other.LastModifiedRevision;
             m_isReadOnly = false;
@@ -193,6 +184,11 @@ namespace Sttp.Data
                 return -1;
             }
             return -1;
+        }
+
+        public override string ToString()
+        {
+            return $"{TableName} Columns: {Columns.Count} Rows: {m_rows.Count} ForeignKeys: {ForeignKeys.Count}";
         }
     }
 }

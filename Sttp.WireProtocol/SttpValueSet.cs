@@ -7,6 +7,6 @@ namespace Sttp
 {
     public class SttpValueSet
     {
-        public List<SttpValue> Values;
+        public List<SttpValue> Values = new List<SttpValue>();
     }
 }

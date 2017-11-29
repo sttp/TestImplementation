@@ -19,5 +19,11 @@ namespace Sttp.Data
             Name = name;
         }
 
+
+        public override string ToString()
+        {
+            return $"{Name} ({TypeCode})";
+        }
+
     }
 }

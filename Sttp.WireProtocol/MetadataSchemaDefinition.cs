@@ -72,9 +72,8 @@ namespace Sttp
     {
         public string TableName;
         public long LastModifiedRevision;
-        public TableFlags TableFlags;
-        public List<Tuple<string, SttpValueTypeCode>> Columns;
-        public List<Tuple<string, string>> Relationships;
+        public List<Tuple<string, SttpValueTypeCode>> Columns = new List<Tuple<string, SttpValueTypeCode>>();
+        public List<Tuple<string, string>> Relationships = new List<Tuple<string, string>>();
 
         public MetadataSchemaTables()
         {
@@ -86,7 +85,6 @@ namespace Sttp
             LastModifiedRevision = reader.ReadInt64();
             if (!isUpdateResponse)
             {
-                TableFlags = reader.Read<TableFlags>();
                 Columns = reader.ReadList<string, SttpValueTypeCode>();
                 Relationships = reader.ReadList<string, string>();
             }
@@ -96,7 +94,6 @@ namespace Sttp
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);
-            writer.Write(TableFlags);
             writer.Write(Columns);
         }
 
