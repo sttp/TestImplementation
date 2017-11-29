@@ -21,7 +21,7 @@ namespace Sttp.Codec
         {
             builder.Append(linePrefix); builder.AppendLine("(" + nameof(CommandMetadataSchema) + ")");
             builder.Append(linePrefix); builder.AppendLine($"SchemaVersion: {SchemaVersion} ");
-            builder.Append(linePrefix); builder.AppendLine($"Revision: {SchemaVersion} ");
+            builder.Append(linePrefix); builder.AppendLine($"Revision: {Revision} ");
             builder.Append(linePrefix); builder.AppendLine($"Tables Count {Tables.Count} ");
             foreach (var table in Tables)
             {

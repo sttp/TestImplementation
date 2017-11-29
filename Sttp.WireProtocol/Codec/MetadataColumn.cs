@@ -39,9 +39,9 @@ namespace Sttp.Codec
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
-            builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataColumn) + ")");
-            builder.Append(linePrefix); builder.AppendLine($"Name: {Name} ");
-            builder.Append(linePrefix); builder.AppendLine($"TypeCode: {TypeCode} ");
+            builder.Append(linePrefix);
+            builder.Append($"({nameof(MetadataColumn)}) Name: { Name} ({TypeCode})");
+            builder.AppendLine();
         }
 
     }

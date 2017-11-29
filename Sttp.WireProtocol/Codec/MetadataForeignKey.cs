@@ -27,12 +27,10 @@ namespace Sttp.Codec
             writer.Write(ForeignTableName);
         }
 
-
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
-            builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataForeignKey) + ")");
-            builder.Append(linePrefix); builder.AppendLine($"ColumnName: {ColumnName} ");
-            builder.Append(linePrefix); builder.AppendLine($"ForeignTableName: {ForeignTableName} ");
+            builder.Append(linePrefix);
+            builder.AppendLine($"({nameof(MetadataForeignKey)} {ColumnName} -> {ForeignTableName}");
         }
     }
 }

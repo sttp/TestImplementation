@@ -482,7 +482,6 @@ namespace Sttp.Codec
         public SttpConnectionString ReadSttpConnectionString()
         {
             return new SttpConnectionString(this);
-
         }
 
         public List<MetadataColumn> ReadListMetadataColumn()

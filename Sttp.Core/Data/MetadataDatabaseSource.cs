@@ -218,6 +218,10 @@ namespace Sttp.Data
                 {
                     t.Columns.Add(col);
                 }
+                foreach (var col in table.ForeignKeys)
+                {
+                    t.ForeignKeys.Add(new MetadataForeignKey(col.ColumnName, col.ForeignTableName));
+                }
                 m_metadataSchema.Add(t);
             }
         }

@@ -1,3 +1,4 @@
+using System.Text;
 using Sttp.Codec;
 
 namespace Sttp
@@ -23,6 +24,13 @@ namespace Sttp
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);
+        }
+
+        public void GetFullOutputString(string linePrefix, StringBuilder builder)
+        {
+            builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataSchemaTables) + ")");
+            builder.Append(linePrefix); builder.AppendLine($"TableName: {TableName} ");
+            builder.Append(linePrefix); builder.AppendLine($"LastModifiedRevision: {LastModifiedRevision} ");
         }
     }
 }
