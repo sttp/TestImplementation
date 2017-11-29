@@ -102,6 +102,11 @@ namespace Sttp
 
         public int Limit = -1;
 
+        public SttpQueryStatement(PayloadReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Save(PayloadWriter payloadWriter)
         {
             throw new NotImplementedException();

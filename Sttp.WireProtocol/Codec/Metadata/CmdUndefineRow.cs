@@ -7,7 +7,7 @@
 
         public void Load(PayloadReader reader)
         {
-            PrimaryKey = reader.Read<SttpValue>();
+            PrimaryKey = reader.ReadSttpValue();
         }
 
     }

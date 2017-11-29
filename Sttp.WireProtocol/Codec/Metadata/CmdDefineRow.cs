@@ -8,8 +8,8 @@
 
         public void Load(PayloadReader reader)
         {
-            PrimaryKey = reader.Read<SttpValue>();
-            Values = reader.Read<SttpValueSet>();
+            PrimaryKey = reader.ReadSttpValue();
+            Values = reader.ReadSttpValueSet();
         }
 
 

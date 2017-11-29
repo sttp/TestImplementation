@@ -57,7 +57,7 @@ namespace Sttp
 
         public SttpDataPointID(PayloadReader reader)
         {
-            switch (reader.Read<SttpDataPointIDTypeCode>())
+            switch ((SttpDataPointIDTypeCode)reader.ReadByte())
             {
                 case SttpDataPointIDTypeCode.Null:
                     IsNull = true;
@@ -69,7 +69,7 @@ namespace Sttp
                     AsString = reader.ReadString();
                     break;
                 case SttpDataPointIDTypeCode.NamedSet:
-                    AsNamedSet = reader.Read<SttpNamedSet>();
+                    AsNamedSet = reader.ReadSttpNamedSet();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

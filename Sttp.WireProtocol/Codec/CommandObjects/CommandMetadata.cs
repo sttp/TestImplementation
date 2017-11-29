@@ -34,7 +34,7 @@ namespace Sttp.Codec
             if (m_payload.Position == m_payload.Length)
                 return null;
 
-            switch (m_payload.Read<MetadataSubCommand>())
+            switch ((MetadataSubCommand)m_payload.ReadByte())
             {
                 case MetadataSubCommand.Invalid:
                     throw new ArgumentOutOfRangeException("Invalid is not permitted");

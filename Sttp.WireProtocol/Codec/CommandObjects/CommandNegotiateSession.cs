@@ -7,13 +7,13 @@ namespace Sttp.Codec
 {
     public class CommandNegotiateSession
     {
-        public readonly SttpNamedSet ConnectionString;
+        public readonly SttpConnectionString ConnectionString;
 
         public CommandCode CommandCode => CommandCode.NegotiateSession;
 
         public CommandNegotiateSession(PayloadReader reader)
         {
-            ConnectionString = reader.Read<SttpNamedSet>();
+            ConnectionString = reader.ReadSttpConnectionString();
         }
     }
 }

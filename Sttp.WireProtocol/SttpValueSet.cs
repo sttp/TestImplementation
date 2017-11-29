@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Sttp.Codec;
 
 namespace Sttp
@@ -9,6 +7,15 @@ namespace Sttp
     public class SttpValueSet
     {
         public List<SttpValue> Values = new List<SttpValue>();
+
+        public SttpValueSet()
+        {
+            
+        }
+        public SttpValueSet(PayloadReader payloadReader)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Write(PayloadWriter payloadWriter)
         {

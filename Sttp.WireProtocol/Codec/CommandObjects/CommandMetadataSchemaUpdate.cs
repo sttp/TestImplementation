@@ -8,14 +8,14 @@ namespace Sttp.Codec
         public readonly Guid SchemaVersion;
         public readonly long Revision;
         public readonly long UpdatedFromVersion;
-        public readonly List<Tuple<string,long>> TableRevisions;
+        public readonly List<MetadataSchemaTableUpdate> Tables;
 
         public CommandMetadataSchemaUpdate(PayloadReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             UpdatedFromVersion = reader.ReadInt64();
-            TableRevisions = reader.ReadList<Tuple<string,long>>();
+            Tables = reader.ReadListMetadataSchemaTableUpdate();
         }
     }
 }

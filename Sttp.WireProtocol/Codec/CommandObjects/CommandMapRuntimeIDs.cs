@@ -21,7 +21,7 @@ namespace Sttp.Codec
                 var point = new SttpDataPointID();
                 point.RuntimeID = id;
 
-                switch (reader.Read<SttpDataPointIDTypeCode>())
+                switch ((SttpDataPointIDTypeCode)reader.ReadByte())
                 {
                     case SttpDataPointIDTypeCode.Null:
                         throw new InvalidOperationException("A registered pointID cannot be null");
@@ -32,7 +32,7 @@ namespace Sttp.Codec
                         point.AsString = reader.ReadString();
                         break;
                     case SttpDataPointIDTypeCode.NamedSet:
-                        point.AsNamedSet = reader.Read<SttpNamedSet>();
+                        point.AsNamedSet = reader.ReadSttpNamedSet();
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

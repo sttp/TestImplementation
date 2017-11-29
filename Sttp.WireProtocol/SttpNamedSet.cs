@@ -10,6 +10,11 @@ namespace Sttp
     {
         public List<Tuple<string, SttpValue>> Values;
 
+        public SttpNamedSet(PayloadReader payloadReader)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Write(PayloadWriter payloadWriter)
         {
             throw new NotImplementedException();

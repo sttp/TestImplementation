@@ -28,6 +28,11 @@ namespace Sttp
     {
         public List<Tuple<string, SttpConnectionStringCompatiblity, SttpValue>> Values;
 
+        public SttpConnectionString(PayloadReader payloadReader)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Write(PayloadWriter payloadWriter)
         {
             throw new NotImplementedException();

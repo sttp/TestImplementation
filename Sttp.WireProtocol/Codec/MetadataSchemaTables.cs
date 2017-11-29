@@ -21,8 +21,8 @@ namespace Sttp
         {
             TableName = reader.ReadString();
             LastModifiedRevision = reader.ReadInt64();
-            Columns = reader.ReadList<MetadataColumn>();
-            ForeignKeys = reader.ReadList<MetadataForeignKey>();
+            Columns = reader.ReadListMetadataColumn();
+            ForeignKeys = reader.ReadListMetadataForeignKey();
         }
 
         public void Save(PayloadWriter writer)

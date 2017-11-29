@@ -16,8 +16,8 @@ namespace Sttp.Codec
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             AreUpdateQueries = reader.ReadBoolean();
-            Queries = reader.ReadList<SttpQueryStatement>();
-            QueriesRaw = reader.ReadList<SttpQueryRaw>();
+            Queries = reader.ReadListSttpQueryStatement();
+            QueriesRaw = reader.ReadListSttpQueryRaw();
         }
     }
 }

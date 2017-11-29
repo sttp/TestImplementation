@@ -12,7 +12,7 @@ namespace Sttp.Codec.Metadata
         public long Revision;
         public long UpdatedFromRevision;
         public string TableName;
-        public List<Tuple<string, SttpValueTypeCode>> Columns;
+        public List<MetadataColumn> Columns;
 
         public void Load(PayloadReader reader)
         {
@@ -21,7 +21,7 @@ namespace Sttp.Codec.Metadata
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             TableName = reader.ReadString();
-            Columns = reader.ReadList<string, SttpValueTypeCode>();
+            Columns = reader.ReadListMetadataColumn();
         }
     }
 }

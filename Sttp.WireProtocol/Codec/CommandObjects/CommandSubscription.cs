@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sttp.Codec
 {
@@ -11,13 +12,13 @@ namespace Sttp.Codec
 
         public readonly SttpNamedSet Options;
         public readonly SubscriptionAppendMode Mode;
-        public readonly SttpDataPointID[] DataPoints;
+        public readonly List<SttpDataPointID> DataPoints;
 
         public CommandSubscription(PayloadReader reader)
         {
-            Options = reader.Read<SttpNamedSet>();
-            Mode = reader.Read<SubscriptionAppendMode>();
-            DataPoints = reader.ReadArray<SttpDataPointID>();
+            Options = reader.ReadSttpNamedSet();
+            Mode = (SubscriptionAppendMode) reader.ReadByte();
+            DataPoints = reader.ReadListSttpDataPointID();
         }
     }
 }

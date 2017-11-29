@@ -23,7 +23,7 @@ namespace Sttp.Codec
         public MetadataColumn(PayloadReader reader)
         {
             Name = reader.ReadString();
-            TypeCode = reader.Read<SttpValueTypeCode>();
+            TypeCode = (SttpValueTypeCode)reader.ReadByte();
         }
 
         public void Save(PayloadWriter writer)

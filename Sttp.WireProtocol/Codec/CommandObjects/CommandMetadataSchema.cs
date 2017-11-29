@@ -14,7 +14,7 @@ namespace Sttp.Codec
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
-            Tables = reader.ReadList<MetadataSchemaTables>();
+            Tables = reader.ReadListMetadataSchemaTables();
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)

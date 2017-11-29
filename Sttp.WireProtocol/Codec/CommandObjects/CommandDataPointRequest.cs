@@ -10,12 +10,12 @@ namespace Sttp.Codec
         public CommandCode CommandCode => CommandCode.DataPointRequest;
 
         public readonly SttpNamedSet Options;
-        public readonly SttpDataPointID[] DataPoints;
+        public readonly List<SttpDataPointID> DataPoints;
 
         public CommandDataPointRequest(PayloadReader reader)
         {
-            Options = reader.Read<SttpNamedSet>();
-            DataPoints = reader.ReadArray<SttpDataPointID>();
+            Options = reader.ReadSttpNamedSet();
+            DataPoints = reader.ReadListSttpDataPointID();
         }
     }
 }

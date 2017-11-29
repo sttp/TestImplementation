@@ -58,10 +58,10 @@ namespace Sttp.Data
 
                 for (int x = 0; x < Columns.Count; x++)
                 {
-                    if (Columns[x].Name != command.Columns[x].Item1)
+                    if (Columns[x].Name != command.Columns[x].Name)
                         throw new Exception("There was a schema change");
 
-                    if (Columns[x].TypeCode != command.Columns[x].Item2)
+                    if (Columns[x].TypeCode != command.Columns[x].TypeCode)
                         throw new Exception("There was a schema change");
                 }
 
@@ -72,7 +72,7 @@ namespace Sttp.Data
                 SchemaVersion = command.SchemaVersion;
                 Revision = command.Revision;
                 TableName = command.TableName;
-                Columns = new List<MetadataColumn>(command.Columns.Select(x => new MetadataColumn(x.Item1, x.Item2)));
+                Columns = new List<MetadataColumn>(command.Columns);
                 Rows = new Dictionary<SttpValue, SttpValueSet>();
             }
 

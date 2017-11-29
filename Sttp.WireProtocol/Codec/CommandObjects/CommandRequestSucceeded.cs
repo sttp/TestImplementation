@@ -15,7 +15,7 @@ namespace Sttp.Codec
 
         public CommandRequestSucceeded(PayloadReader reader)
         {
-            CommandSucceeded = reader.Read<CommandCode>();
+            CommandSucceeded = (CommandCode)reader.ReadByte();
             Reason = reader.ReadString();
             Details = reader.ReadString();
         }
