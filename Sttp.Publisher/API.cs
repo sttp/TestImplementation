@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Sttp.Data;
-using Sttp.WireProtocol;
 
 namespace Sttp.Publisher
 {
