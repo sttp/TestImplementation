@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Sttp.Codec;
 
 namespace Sttp
 {
@@ -52,6 +53,27 @@ namespace Sttp
         public SttpDataPointID()
         {
             m_valueTypeCode = SttpDataPointIDTypeCode.Null;
+        }
+
+        public SttpDataPointID(PayloadReader reader)
+        {
+            switch (reader.Read<SttpDataPointIDTypeCode>())
+            {
+                case SttpDataPointIDTypeCode.Null:
+                    IsNull = true;
+                    break;
+                case SttpDataPointIDTypeCode.Guid:
+                    AsGuid = reader.ReadGuid();
+                    break;
+                case SttpDataPointIDTypeCode.String:
+                    AsString = reader.ReadString();
+                    break;
+                case SttpDataPointIDTypeCode.NamedSet:
+                    AsNamedSet = reader.Read<SttpNamedSet>();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         #endregion
@@ -149,6 +171,27 @@ namespace Sttp
                     throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
                 m_valueObject = null;
                 m_valueTypeCode = SttpDataPointIDTypeCode.Null;
+            }
+        }
+
+        public void Save(PayloadWriter writer)
+        {
+            writer.Write((byte)m_valueTypeCode);
+            switch (m_valueTypeCode)
+            {
+                case SttpDataPointIDTypeCode.Null:
+                    break;
+                case SttpDataPointIDTypeCode.Guid:
+                    writer.Write(AsGuid);
+                    break;
+                case SttpDataPointIDTypeCode.String:
+                    writer.Write(AsString);
+                    break;
+                case SttpDataPointIDTypeCode.NamedSet:
+                    writer.Write(AsNamedSet);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

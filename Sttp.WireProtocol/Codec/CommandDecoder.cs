@@ -41,8 +41,8 @@ namespace Sttp.Codec
                 return null;
 
             CommandCode code = (CommandCode)m_buffer[m_position];
-            int packetLegth = BigEndian.ToInt16(m_buffer, m_position + 1);
-            if (m_length < packetLegth)
+            int payloadLength = BigEndian.ToInt16(m_buffer, m_position + 1);
+            if (m_length < payloadLength + 3)
             {
                 return null;
             }
@@ -63,10 +63,10 @@ namespace Sttp.Codec
                     m_pendingData = new byte[m_fragmentTotalSize];
                 }
 
-                Array.Copy(m_buffer, m_position + 13, m_pendingData, 0, packetLegth - 13);
-                m_fragmentBytesReceived = packetLegth - 13;
-                m_position += packetLegth;
-                m_length -= packetLegth;
+                Array.Copy(m_buffer, m_position + 13, m_pendingData, 0, payloadLength - 10);
+                m_fragmentBytesReceived = payloadLength - 10;
+                m_position += payloadLength;
+                m_length -= payloadLength;
 
                 if (m_fragmentBytesReceived == m_fragmentTotalSize)
                 {
@@ -79,10 +79,10 @@ namespace Sttp.Codec
                 if (!m_isProcessingFragments)
                     throw new Exception("A fragment has not been defined.");
 
-                Array.Copy(m_buffer, m_position + 3, m_pendingData, m_fragmentBytesReceived, packetLegth - 3);
-                m_fragmentBytesReceived += packetLegth - 3;
-                m_position += packetLegth;
-                m_length -= packetLegth;
+                Array.Copy(m_buffer, m_position + 3, m_pendingData, m_fragmentBytesReceived, payloadLength);
+                m_fragmentBytesReceived += payloadLength;
+                m_position += payloadLength + 3;
+                m_length -= payloadLength + 3;
 
                 if (m_fragmentBytesReceived == m_fragmentTotalSize)
                 {
@@ -94,9 +94,9 @@ namespace Sttp.Codec
             {
                 if (m_isProcessingFragments)
                     throw new Exception("Expecting the next fragment");
-                m_reader.SetBuffer(code, m_buffer, m_position, packetLegth);
-                m_position += packetLegth;
-                m_length -= packetLegth;
+                m_reader.SetBuffer(code, m_buffer, m_position + 3, payloadLength);
+                m_position += payloadLength + 3;
+                m_length -= payloadLength + 3;
                 return m_reader;
             }
         }

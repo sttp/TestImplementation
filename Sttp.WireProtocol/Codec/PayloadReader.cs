@@ -350,7 +350,6 @@ namespace Sttp.Codec
             return result;
         }
 
-
         /// <summary>
         /// Generic interface for reading data.
         /// </summary>

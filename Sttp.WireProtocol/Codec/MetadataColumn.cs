@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Sttp.Data
+namespace Sttp.Codec
 {
     public class MetadataColumn
     {
@@ -19,6 +19,17 @@ namespace Sttp.Data
             Name = name;
         }
 
+        public MetadataColumn(PayloadReader reader)
+        {
+            Name = reader.ReadString();
+            TypeCode = reader.Read<SttpValueTypeCode>();
+        }
+
+        public void Save(PayloadWriter writer)
+        {
+            writer.Write(Name);
+            writer.Write((byte)TypeCode);
+        }
 
         public override string ToString()
         {

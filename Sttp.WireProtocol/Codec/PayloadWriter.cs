@@ -56,6 +56,8 @@ namespace Sttp.Codec
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
 
+      
+
 
         #region [ Write Methods ]
 
@@ -275,140 +277,258 @@ namespace Sttp.Codec
 
         #endregion
 
-        #region Generics
+        //#region Generics
 
-        private bool WriteCollectionHeader<T>(IList<T> collection)
-        {
-            if (collection == null)
-            {
-                Write((ushort)0);
-                return false;
-            }
+        //private bool WriteCollectionHeader<T>(IList<T> collection)
+        //{
+        //    if (collection == null)
+        //    {
+        //        Write((ushort)0);
+        //        return false;
+        //    }
 
-            if (collection.Count > short.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(collection), "Length must be between 0 and 32767");
+        //    if (collection.Count > short.MaxValue)
+        //        throw new ArgumentOutOfRangeException(nameof(collection), "Length must be between 0 and 32767");
 
-            Write((ushort)collection.Count);
-            return true;
-        }
+        //    Write((ushort)collection.Count);
+        //    return true;
+        //}
 
-        /// <summary>
-        /// Writes a collection to the buffer.
-        /// </summary>
-        /// <typeparam name="T">Data type.</typeparam>
-        /// <param name="collection"></param>
-        public void WriteArray<T>(T[] collection)
-        {
-            if (!WriteCollectionHeader(collection)) return;
+        ///// <summary>
+        ///// Writes a collection to the buffer.
+        ///// </summary>
+        ///// <typeparam name="T">Data type.</typeparam>
+        ///// <param name="collection"></param>
+        //public void WriteArray<T>(T[] collection)
+        //{
+        //    if (!WriteCollectionHeader(collection)) return;
 
-            for (int i = 0; i < collection.Length; i++)
-            {
-                Write(collection[i]);
-            }
-        }
+        //    for (int i = 0; i < collection.Length; i++)
+        //    {
+        //        Write(collection[i]);
+        //    }
+        //}
 
-        public void WriteList<T1, T2>(IList<Tuple<T1, T2>> collection)
-        {
-            if (!WriteCollectionHeader(collection)) return;
+        //public void WriteList<T1, T2>(IList<Tuple<T1, T2>> collection)
+        //{
+        //    if (!WriteCollectionHeader(collection)) return;
 
-            for (var i = 0; i < collection.Count; i++)
-            {
-                Write(collection[i].Item1);
-                Write(collection[i].Item2);
-            }
-        }
+        //    for (var i = 0; i < collection.Count; i++)
+        //    {
+        //        Write(collection[i].Item1);
+        //        Write(collection[i].Item2);
+        //    }
+        //}
 
-        public void WriteList<T1, T2, T3>(List<Tuple<T1, T2, T3>> collection)
-        {
-            if (!WriteCollectionHeader(collection)) return;
+        //public void WriteList<T1, T2, T3>(List<Tuple<T1, T2, T3>> collection)
+        //{
+        //    if (!WriteCollectionHeader(collection)) return;
 
-            for (var i = 0; i < collection.Count; i++)
-            {
-                Write(collection[i].Item1);
-                Write(collection[i].Item2);
-                Write(collection[i].Item3);
-            }
-        }
+        //    for (var i = 0; i < collection.Count; i++)
+        //    {
+        //        Write(collection[i].Item1);
+        //        Write(collection[i].Item2);
+        //        Write(collection[i].Item3);
+        //    }
+        //}
 
-        /// <summary>
-        /// Generic interface for writing a value.
-        /// </summary>
-        /// <typeparam name="T">Type of value.</typeparam>
-        /// <param name="value">Value to write.</param>
-        public void Write<T>(T value)
-        {
-            var t = typeof(T);
 
-            // special guid handling
-            if (t == typeof(Guid))
-            {
-                Write((Guid)(object)value);
-                return;
-            }
-            if (t == typeof(SttpValue))
-            {
-                ((SttpValue)(object)value).Save(this, true);
-            }
-            switch (Type.GetTypeCode(t))
-            {
-                case TypeCode.Boolean:
-                    Write(Convert.ToBoolean(value));
-                    break;
-                case TypeCode.Byte:
-                    Write(Convert.ToByte(value));
-                    break;
-                case TypeCode.Char:
-                    Write(Convert.ToChar(value));
-                    break;
-                case TypeCode.DateTime:
-                    Write(Convert.ToDateTime(value));
-                    break;
-                case TypeCode.Decimal:
-                    Write(Convert.ToDecimal(value));
-                    break;
-                case TypeCode.Double:
-                    Write(Convert.ToDouble(value));
-                    break;
-                case TypeCode.Int16:
-                    Write(Convert.ToInt16(value));
-                    break;
-                case TypeCode.Int32:
-                    Write(Convert.ToInt32(value));
-                    break;
-                case TypeCode.Int64:
-                    Write(Convert.ToInt64(value));
-                    break;
-                case TypeCode.SByte:
-                    Write(Convert.ToSByte(value));
-                    break;
-                case TypeCode.Single:
-                    Write(Convert.ToSingle(value));
-                    break;
-                case TypeCode.String:
-                    Write(Convert.ToString(value));
-                    break;
-                case TypeCode.UInt16:
-                    Write(Convert.ToUInt16(value));
-                    break;
-                case TypeCode.UInt32:
-                    Write(Convert.ToUInt32(value));
-                    break;
-                case TypeCode.UInt64:
-                    Write(Convert.ToUInt64(value));
-                    break;
-                case TypeCode.Object:
-                case TypeCode.DBNull:
-                case TypeCode.Empty:
-                default:
-                    throw new ArgumentException(nameof(value), $"Invalid type: {t.FullName}");
-            }
-        }
+        ///// <summary>
+        ///// Generic interface for writing a value.
+        ///// </summary>
+        ///// <typeparam name="T">Type of value.</typeparam>
+        ///// <param name="value">Value to write.</param>
+        //public void Write<T>(T value)
+        //{
+        //    var t = typeof(T);
 
-        #endregion Generics
+        //    // special guid handling
+        //    if (t == typeof(Guid))
+        //    {
+        //        Write((Guid)(object)value);
+        //        return;
+        //    }
+        //    if (t == typeof(SttpValue))
+        //    {
+        //        ((SttpValue)(object)value).Save(this, true);
+        //    }
+        //    switch (Type.GetTypeCode(t))
+        //    {
+        //        case TypeCode.Boolean:
+        //            Write(Convert.ToBoolean(value));
+        //            break;
+        //        case TypeCode.Byte:
+        //            Write(Convert.ToByte(value));
+        //            break;
+        //        case TypeCode.Char:
+        //            Write(Convert.ToChar(value));
+        //            break;
+        //        case TypeCode.DateTime:
+        //            Write(Convert.ToDateTime(value));
+        //            break;
+        //        case TypeCode.Decimal:
+        //            Write(Convert.ToDecimal(value));
+        //            break;
+        //        case TypeCode.Double:
+        //            Write(Convert.ToDouble(value));
+        //            break;
+        //        case TypeCode.Int16:
+        //            Write(Convert.ToInt16(value));
+        //            break;
+        //        case TypeCode.Int32:
+        //            Write(Convert.ToInt32(value));
+        //            break;
+        //        case TypeCode.Int64:
+        //            Write(Convert.ToInt64(value));
+        //            break;
+        //        case TypeCode.SByte:
+        //            Write(Convert.ToSByte(value));
+        //            break;
+        //        case TypeCode.Single:
+        //            Write(Convert.ToSingle(value));
+        //            break;
+        //        case TypeCode.String:
+        //            Write(Convert.ToString(value));
+        //            break;
+        //        case TypeCode.UInt16:
+        //            Write(Convert.ToUInt16(value));
+        //            break;
+        //        case TypeCode.UInt32:
+        //            Write(Convert.ToUInt32(value));
+        //            break;
+        //        case TypeCode.UInt64:
+        //            Write(Convert.ToUInt64(value));
+        //            break;
+        //        case TypeCode.Object:
+        //        case TypeCode.DBNull:
+        //        case TypeCode.Empty:
+        //        default:
+        //            throw new ArgumentException(nameof(value), $"Invalid type: {t.FullName}");
+        //    }
+        //}
+
+        //#endregion Generics
 
         #endregion
 
+        public void Write(List<MetadataColumn> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
 
+        public void Write(List<MetadataForeignKey> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(SttpConnectionString options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Write(List<SttpDataPointID> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(SttpNamedSet value)
+        {
+            value.Write(this);
+        }
+
+
+        internal void Write(SttpValueSet value)
+        {
+            value.Write(this);
+        }
+
+        internal void Write(SttpValue value)
+        {
+            value.Write(this);
+        }
+
+        public void Write(List<SttpQueryStatement> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<SttpQueryRaw> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<MetadataSchemaTables> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<MetadataSchemaTableUpdate> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
     }
 }
 

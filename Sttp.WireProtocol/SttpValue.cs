@@ -1713,5 +1713,10 @@ namespace Sttp
             rv.AsString = v;
             return rv;
         }
+
+        public void Write(PayloadWriter payloadWriter)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

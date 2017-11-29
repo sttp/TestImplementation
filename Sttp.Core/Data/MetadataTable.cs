@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Sttp.Codec;
 
 namespace Sttp.Data
 {
@@ -18,7 +19,7 @@ namespace Sttp.Data
         /// </summary>
         public readonly List<MetadataColumn> Columns;
 
-        public readonly List<MetadataForeignKey> ForeignKeys;
+        public readonly List<MetadataForeignKey2> ForeignKeys;
 
         public readonly long LastModifiedRevision;
 
@@ -39,7 +40,7 @@ namespace Sttp.Data
         {
             TableName = tableName;
             Columns = columns.ToList();
-            ForeignKeys = tableRelationships.ToList();
+            ForeignKeys = tableRelationships.Select(x => new MetadataForeignKey2(x)).ToList();
 
             foreach (var fk in ForeignKeys)
             {

@@ -50,8 +50,8 @@ namespace Sttp.Codec
         {
             m_stream.Clear();
             m_stream.Write(id);
-            m_stream.Write(mode);
-            m_stream.Write(compression);
+            m_stream.Write((byte)mode);
+            m_stream.Write((byte)compression);
             m_stream.Write(originalSize);
             m_stream.Write(source, position, length);
             m_stream.Send(CommandCode.BulkTransportBeginSend);
@@ -83,7 +83,7 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointReply);
         }
 
-        public void DataPointRequest(SttpNamedSet options, SttpDataPointID[] dataPoints)
+        public void DataPointRequest(SttpConnectionString options, List<SttpDataPointID> dataPoints)
         {
             m_stream.Clear();
             m_stream.Write(options);
@@ -98,7 +98,7 @@ namespace Sttp.Codec
             foreach (var point in points)
             {
                 m_stream.Write(point.RuntimeID);
-                m_stream.Write(point.ValueTypeCode);
+                m_stream.Write((byte)point.ValueTypeCode);
                 switch (point.ValueTypeCode)
                 {
                     case SttpDataPointIDTypeCode.Null:
@@ -129,7 +129,7 @@ namespace Sttp.Codec
         public void RequestFailed(CommandCode failedCommand, bool terminateConnection, string reason, string details)
         {
             m_stream.Clear();
-            m_stream.Write(failedCommand);
+            m_stream.Write((byte)failedCommand);
             m_stream.Write(terminateConnection);
             m_stream.Write(reason);
             m_stream.Write(details);
@@ -139,16 +139,16 @@ namespace Sttp.Codec
         public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
         {
             m_stream.Clear();
-            m_stream.Write(commandSucceeded);
+            m_stream.Write((byte)commandSucceeded);
             m_stream.Write(reason);
             m_stream.Write(details);
             m_stream.Send(CommandCode.RequestSucceeded);
         }
 
-        public void Subscription(SubscriptionAppendMode mode, SttpNamedSet options, SttpDataPointID[] dataPoints)
+        public void Subscription(SubscriptionAppendMode mode, SttpNamedSet options, List<SttpDataPointID> dataPoints)
         {
             m_stream.Clear();
-            m_stream.Write(mode);
+            m_stream.Write((byte)mode);
             m_stream.Write(options);
             m_stream.Write(dataPoints);
             m_stream.Send(CommandCode.DataPointRequest);
@@ -182,13 +182,13 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.MetadataSchema);
         }
 
-        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<Tuple<string, long>> tableRevisions)
+        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<MetadataSchemaTableUpdate> tables)
         {
             m_stream.Clear();
             m_stream.Write(schemaVersion);
             m_stream.Write(revision);
             m_stream.Write(updatedFromRevision);
-            m_stream.Write(tableRevisions);
+            m_stream.Write(tables);
             m_stream.Send(CommandCode.MetadataSchemaUpdate);
         }
 

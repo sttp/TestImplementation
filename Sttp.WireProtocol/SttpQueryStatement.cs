@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sttp.Codec;
 
 namespace Sttp
 {
@@ -101,5 +102,9 @@ namespace Sttp
 
         public int Limit = -1;
 
+        public void Save(PayloadWriter payloadWriter)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

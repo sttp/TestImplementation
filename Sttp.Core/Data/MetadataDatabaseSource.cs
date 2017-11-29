@@ -182,7 +182,7 @@ namespace Sttp.Data
                 int index = m_tablesLookup[tableName];
                 m_tables[index] = new MetadataTable(tableName, columns, tableRelationships);
             }
-          
+
         }
 
         public void AddOrReplaceRow(string tableName, SttpValue key, SttpValueSet fields)
@@ -216,7 +216,7 @@ namespace Sttp.Data
                 t.LastModifiedRevision = table.LastModifiedRevision;
                 foreach (var col in table.Columns)
                 {
-                    t.Columns.Add(Tuple.Create(col.Name, col.TypeCode));
+                    t.Columns.Add(col);
                 }
                 m_metadataSchema.Add(t);
             }
@@ -257,7 +257,7 @@ namespace Sttp.Data
 
             var send = encoder.MetadataCommandBuilder();
 
-            send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, query.Outputs.Select(x => Tuple.Create(x.ColumnName, SttpValueTypeCode.Null)).ToList()); //ToDo: Actually determine the column type somehow
+            send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, query.Outputs.Select(x => new MetadataColumn(x.ColumnName, SttpValueTypeCode.Null)).ToList()); //ToDo: Actually determine the column type somehow
 
             foreach (var row in table.Rows)
             {
@@ -287,12 +287,12 @@ namespace Sttp.Data
             }
             else
             {
-                List<Tuple<string, long>> tableRevisions = new List<Tuple<string, long>>();
+                List<MetadataSchemaTableUpdate> tableRevisions = new List<MetadataSchemaTableUpdate>();
                 foreach (var tables in m_metadataSchema)
                 {
                     if (tables.LastModifiedRevision > command.Revision)
                     {
-                        tableRevisions.Add(Tuple.Create(tables.TableName, tables.LastModifiedRevision));
+                        tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedRevision));
                     }
                 }
                 encoder.MetadataSchemaUpdate(SchemaVersion, Revision, command.Revision, tableRevisions);

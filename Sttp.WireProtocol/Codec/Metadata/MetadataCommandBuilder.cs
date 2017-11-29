@@ -32,9 +32,9 @@ namespace Sttp.Codec.Metadata
             m_stream.Send(CommandCode.Metadata);
         }
 
-        public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<Tuple<string, SttpValueTypeCode>> columns)
+        public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<MetadataColumn> columns)
         {
-            m_stream.Write(MetadataSubCommand.DefineResponse);
+            m_stream.Write((byte)MetadataSubCommand.DefineResponse);
             m_stream.Write(isUpdateQuery);
             m_stream.Write(updatedFromRevision);
             m_stream.Write(schemaVersion);
@@ -45,20 +45,20 @@ namespace Sttp.Codec.Metadata
 
         public void DefineRow(SttpValue primaryKey, SttpValueSet fields)
         {
-            m_stream.Write(MetadataSubCommand.DefineRow);
+            m_stream.Write((byte)MetadataSubCommand.DefineRow);
             m_stream.Write(primaryKey);
             m_stream.Write(fields);
         }
 
         public void UndefineRow(SttpValue primaryKey)
         {
-            m_stream.Write(MetadataSubCommand.UndefineRow);
+            m_stream.Write((byte)MetadataSubCommand.UndefineRow);
             m_stream.Write(primaryKey);
         }
 
         public void Finished()
         {
-            m_stream.Write(MetadataSubCommand.Finished);
+            m_stream.Write((byte)MetadataSubCommand.Finished);
         }
 
     }
