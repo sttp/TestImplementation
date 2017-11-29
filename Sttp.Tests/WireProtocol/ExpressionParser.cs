@@ -11,7 +11,7 @@ namespace Sttp.Tests.WireProtocol
         [TestMethod]
         public unsafe void Test()
         {
-            var cmd = new SttpQueryExpression(@"
+            var cmd = new SttpQueryLanguage(@"
 PARAM(#1000(int)# >> 1000, #345000# >> 345, #C37.118(string)# >> C37)
 WITH(ProducerTableID->PMU.Rated MVA)
 SELECT(PointID

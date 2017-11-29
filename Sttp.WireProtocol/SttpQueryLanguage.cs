@@ -59,12 +59,12 @@ namespace Sttp
     /// <summary>
     /// The STTP based query expression object
     /// </summary>
-    public class SttpQueryExpression
+    public class SttpQueryLanguage
     {
         public Dictionary<string, List<string>> Sections;
         public Dictionary<string, SttpValue> Literals;
 
-        public SttpQueryExpression(string expression, Dictionary<string, SttpValue> literals = null)
+        public SttpQueryLanguage(string expression, Dictionary<string, SttpValue> literals = null)
         {
             if (literals != null)
             {

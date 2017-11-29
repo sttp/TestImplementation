@@ -251,10 +251,10 @@ namespace Sttp
         public Dictionary<string, SttpValue> Literals = new Dictionary<string, SttpValue>();
         public HashSet<string> Variables = new HashSet<string>();
 
-        public SttpCompiledQueryExpression(SttpQueryExpression queryExpression)
+        public SttpCompiledQueryExpression(SttpQueryLanguage queryLanguage)
         {
-            var expr = new Dictionary<string, List<string>>(queryExpression.Sections);
-            Literals = new Dictionary<string, SttpValue>(queryExpression.Literals);
+            var expr = new Dictionary<string, List<string>>(queryLanguage.Sections);
+            Literals = new Dictionary<string, SttpValue>(queryLanguage.Literals);
 
             var withSection = new List<CompiledLine>();
             var whereSection = new List<CompiledLine>();
@@ -288,7 +288,7 @@ namespace Sttp
 
             //Define all outputs.
 
-            foreach (var item in queryExpression.Sections)
+            foreach (var item in queryLanguage.Sections)
             {
                 switch (item.Key)
                 {
