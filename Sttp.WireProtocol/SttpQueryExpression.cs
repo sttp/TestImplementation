@@ -2,60 +2,59 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Sttp
 {
-    public class SttpQueryInputDirectColumn
-    {
-        public string ColumnName;
-        public string Variable;
-    }
+    //public class SttpQueryInputDirectColumn
+    //{
+    //    public string ColumnName;
+    //    public string Variable;
+    //}
 
-    public class SttpQueryInputIndirectColumn
-    {
-        public SttpQueryJoinPath[] JoinPath;
-        public string ColumnName;
-        public string Variable;
-    }
+    //public class SttpQueryInputIndirectColumn
+    //{
+    //    public SttpQueryJoinPath[] JoinPath;
+    //    public string ColumnName;
+    //    public string Variable;
+    //}
 
-    public class SttpQueryJoinPath
-    {
-        public string JoinedColumn;
-        public string JoinedTable;
-        public JoinType JoinType;
+    //public class SttpQueryJoinPath
+    //{
+    //    public string JoinedColumn;
+    //    public string JoinedTable;
+    //    public JoinType JoinType;
 
-        public static SttpQueryJoinPath Create(string column, string table, JoinType type = JoinType.Inner)
-        {
-            return new SttpQueryJoinPath() { JoinedColumn = column, JoinedTable = table, JoinType = type };
-        }
-    }
+    //    public static SttpQueryJoinPath Create(string column, string table, JoinType type = JoinType.Inner)
+    //    {
+    //        return new SttpQueryJoinPath() { JoinedColumn = column, JoinedTable = table, JoinType = type };
+    //    }
+    //}
 
-    public enum JoinType
-    {
-        Left,
-        Inner,
-    }
+    //public enum JoinType
+    //{
+    //    Left,
+    //    Inner,
+    //}
 
-    public class SttpQueryParameter
-    {
-        public SttpValue Value;
-        public string Variable;
-    }
+    //public class SttpQueryParameter
+    //{
+    //    public SttpValue Value;
+    //    public string Variable;
+    //}
 
-    public class SttpProcedure
-    {
-        public string Function;
-        public string[] InputVariables;
-        public string OutputVariables;
-    }
+    //public class SttpProcedure
+    //{
+    //    public string Function;
+    //    public string[] InputVariables;
+    //    public string OutputVariables;
+    //}
 
-    public class SttpOutputVariables
-    {
-        public string Variable;
-        public string ColumnName;
-        public SttpValueTypeCode ColumnType;
-    }
+    //public class SttpOutputVariables
+    //{
+    //    public string Variable;
+    //    public string ColumnName;
+    //    public SttpValueTypeCode ColumnType;
+    //}
 
     /// <summary>
     /// The STTP based query expression object
@@ -67,7 +66,6 @@ namespace Sttp
 
         public SttpQueryExpression(string expression, Dictionary<string, SttpValue> literals = null)
         {
-            int param = 1;
             if (literals != null)
             {
                 Literals = new Dictionary<string, SttpValue>(literals);
@@ -78,46 +76,51 @@ namespace Sttp
             }
             Sections = new Dictionary<string, List<string>>();
 
+            expression = ExtractLiterals(expression);
+
+            ExtractSections(expression);
+
+        }
+
+        /// <summary>
+        /// This method will extract all literals and assign them a new variable name.
+        /// </summary>
+        private string ExtractLiterals(string expression)
+        {
+            int param = 1;
+
             StringBuilder sb = new StringBuilder();
             StringBuilder sbLiteral = new StringBuilder();
-            List<string> args = new List<string>();
 
-            string functionName = null;
-            int pCount = 0;
-            bool isQuoted = false;
             bool isLiteral = false;
-
-            foreach (var c in expression)
+            for (var x = 0; x < expression.Length; x++)
             {
-                if (c == '\'')
-                {
-                    isQuoted = !isQuoted;
-                    if (isLiteral)
-                        sbLiteral.Append(c);
-                    else
-                        sb.Append(c);
+                char c = expression[x];
+                char peek = ' ';
+                if (x + 1 < expression.Length)
+                    peek = expression[x + 1];
 
-                }
-                else if (isQuoted)
-                {
-                    if (isLiteral)
-                        sbLiteral.Append(c);
-                    else
-                        sb.Append(c);
-                }
-                else if (c == '#')
+                if (c == '#')
                 {
                     isLiteral = !isLiteral;
                     if (!isLiteral)
                     {
-                        SttpValue value = ParseLiteral(ToTrimString(sbLiteral));
-                        while (Literals.ContainsKey($"{{{param}}}"))
+                        //Only on closing, if the next char is a # is this an escape character. 
+                        if (peek == '#')
                         {
-                            param++;
+                            sbLiteral.Append('#');
                         }
-                        Literals.Add($"{{{param}}}", value);
-                        sbLiteral.Clear();
-                        sb.Append($"{{{param}}}");
+                        else
+                        {
+                            SttpValue value = ParseLiteral(ToTrimString(sbLiteral));
+                            while (Literals.ContainsKey($"{{{param}}}"))
+                            {
+                                param++;
+                            }
+                            Literals.Add($"{{{param}}}", value);
+                            sbLiteral.Clear();
+                            sb.Append($"{{{param}}}");
+                        }
                     }
                 }
                 else if (isLiteral)
@@ -128,55 +131,128 @@ namespace Sttp
                 {
                     switch (c)
                     {
-                        case '(':
-                            if (pCount == 0)
-                            {
-                                functionName = ToTrimString(sb);
-                                sb.Clear();
-                            }
-                            else
-                            {
-                                sb.Append('(');
-                            }
-                            pCount++;
+                        default:
+                            sb.Append(c);
                             break;
-                        case ',':
-                            if (pCount == 1)
-                            {
-                                args.Add(ToTrimString(sb));
-                                sb.Clear();
-                            }
-                            else
-                            {
-                                sb.Append(',');
-                            }
-                            break;
-                        case ')':
-                            if (pCount == 1)
-                            {
-                                args.Add(ToTrimString(sb));
-                                sb.Clear();
+                    }
+                }
+            }
+            if (isLiteral)
+                throw new Exception("Literal Mismatch");
+            if (sb.Length == 0)
+                return string.Empty;
+            return sb.ToString();
+        }
 
-                                if (Sections.ContainsKey(functionName))
-                                {
-                                    Sections[functionName].AddRange(args);
-                                }
-                                else
-                                {
-                                    Sections[functionName] = args;
-                                }
-                                args = new List<string>();
-                                functionName = null;
+
+        /// <summary>
+        /// This method will extract all sections and occurs after extracting literals.
+        /// </summary>
+        /// <param name="expression"></param>
+        private void ExtractSections(string expression)
+        {
+            StringBuilder sb = new StringBuilder();
+            List<string> args = new List<string>();
+
+            string functionName = null;
+            int pCount = 0;
+            foreach (var c in expression)
+            {
+                switch (c)
+                {
+                    case '(':
+                        if (pCount == 0)
+                        {
+                            functionName = ToTrimString(sb);
+                            sb.Clear();
+                        }
+                        else
+                        {
+                            sb.Append('(');
+                        }
+                        pCount++;
+                        break;
+                    case ',':
+                        if (pCount == 1)
+                        {
+                            args.Add(ToTrimString(sb));
+                            sb.Clear();
+                        }
+                        else
+                        {
+                            sb.Append(',');
+                        }
+                        break;
+                    case ')':
+                        if (pCount == 1)
+                        {
+                            args.Add(ToTrimString(sb));
+                            sb.Clear();
+
+                            if (Sections.ContainsKey(functionName))
+                            {
+                                Sections[functionName].AddRange(args);
                             }
                             else
                             {
-                                sb.Append(')');
+                                Sections[functionName] = args;
                             }
-                            pCount--;
-                            if (pCount < 0)
-                                throw new Exception("Too many close Parentheses");
+                            args = new List<string>();
+                            functionName = null;
+                        }
+                        else
+                        {
+                            sb.Append(')');
+                        }
+                        pCount--;
+                        if (pCount < 0)
+                            throw new Exception("Too many close Parentheses");
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
+
+                }
+            }
+
+            if (pCount != 0)
+                throw new Exception("Parentheses don't line up.");
+            if (ToTrimString(sb).Length > 0)
+                throw new Exception("Unknown characters after all functions");
+        }
+
+        private string TrimArgument(string arg)
+        {
+            StringBuilder sb = new StringBuilder();
+            bool isQuoted = false;
+            bool hasSpace = false;
+            foreach (var c in arg)
+            {
+                if (c == '\'')
+                {
+                    isQuoted = !isQuoted;
+                    sb.Append(c);
+                }
+                else if (isQuoted)
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    switch (c)
+                    {
+                        case '\r':
+                        case '\n':
+                        case '\t':
+                        case ' ':
+                            if (!hasSpace)
+                            {
+                                sb.Append(' ');
+                                hasSpace = true;
+                            }
                             break;
                         default:
+                            hasSpace = false;
                             sb.Append(c);
                             break;
 
@@ -184,12 +260,9 @@ namespace Sttp
                 }
             }
 
-            if (isQuoted)
-                throw new Exception("Missing exit quote");
-            if (pCount != 0)
-                throw new Exception("Parentheses don't line up.");
-            if (ToTrimString(sb).Length > 0)
-                throw new Exception("Unknown characters after all functions");
+            if (sb.Length == 0)
+                return string.Empty;
+            return sb.ToString().Trim();
         }
 
         private SttpValue ParseLiteral(string literal)
@@ -204,10 +277,26 @@ namespace Sttp
         {
             if (sb.Length == 0)
                 return string.Empty;
-            return sb.ToString().Trim(TrimChars);
+            return TrimArgument(sb.ToString().Trim(TrimChars));
         }
 
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
 
+            if (Literals.Count > 0)
+            {
+                sb.AppendLine($"LITERALS ( {string.Join("\n,", Literals.Select(x => $"#{x.Value.AsTypeString}# >> {x.Key}"))} )");
+            }
+
+            foreach (var item in Sections)
+            {
+                sb.AppendLine($"{item.Key}({string.Join("\n,", item.Value)})");
+            }
+            if (sb.Length == 0)
+                return string.Empty;
+            return sb.ToString();
+        }
 
         //public List<SttpQueryInputDirectColumn> DirectColumnInputs = new List<SttpQueryInputDirectColumn>();
         //public List<SttpQueryInputIndirectColumn> IndirectColumnInputs = new List<SttpQueryInputIndirectColumn>();

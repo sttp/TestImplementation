@@ -11,7 +11,22 @@ namespace Sttp.Tests.WireProtocol
         [TestMethod]
         public unsafe void Test()
         {
-            //var cmd = new SttpQueryExpression();
+            var cmd = new SttpQueryExpression(@"
+PARAM(#1000(int)# >> 1000, #345000# >> 345, #C37.118(string)# >> C37)
+WITH(ProducerTableID->PMU.Rated MVA)
+SELECT(PointID
+,PointTag
+,Phase Designation >> Phase
+,ProducerTableID->PMU.Nominal Voltage
+,ProducerTableID->PMU.SubstationTableID?>Substation.Name >> SubName
+,MUL(Rated MVA, 1000) >> Rated KVA
+,EQL(ProducerTableID->PMU.Protocol,C37) >> IsC37)
+FROM(DataPoint)
+WHERE(LTEQ(Nominal Voltage,345)) 
+LIMIT(1000)
+");
+            Console.Write(cmd.ToString());
+
             //cmd.FromTable = "DataPoint";
             //cmd.DefineDirectColumn("PointID", "PointID");
             //cmd.DefineDirectColumn("PointTag", "PointTag");
@@ -35,7 +50,6 @@ namespace Sttp.Tests.WireProtocol
             //cmd.DefineOutputs("SubName", "SubName", SttpValueTypeCode.String);
             //cmd.WhereBooleanVariable = "Condition1";
 
-            //Console.Write(cmd.ToString());
         }
     }
 }
