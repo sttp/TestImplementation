@@ -517,5 +517,89 @@ namespace Sttp.Codec
             }
             return rv;
         }
+
+        public List<SttpQueryJoinedTable> ReadListSttpQueryJoinedTable()
+        {
+            var rv = new List<SttpQueryJoinedTable>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpQueryJoinedTable(this));
+                len--;
+            }
+            return rv;
+        }
+
+        public List<SttpQueryLiterals> ReadListSttpQueryLiterals()
+        {
+            var rv = new List<SttpQueryLiterals>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpQueryLiterals(this));
+                len--;
+            }
+            return rv;
+        }
+
+        public List<SttpQueryColumn> ReadListSttpQueryColumn()
+        {
+            var rv = new List<SttpQueryColumn>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpQueryColumn(this));
+                len--;
+            }
+            return rv;
+        }
+
+        public List<SttpProcedureStep> ReadListSttpSttpProcedureStep()
+        {
+            var rv = new List<SttpProcedureStep>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpProcedureStep(this));
+                len--;
+            }
+            return rv;
+        }
+
+        public List<SttpOutputColumns> ReadListSttpOutputColumns()
+        {
+            var rv = new List<SttpOutputColumns>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpOutputColumns(this));
+                len--;
+            }
+            return rv;
+        }
+
+        public List<int> ReadListInt()
+        {
+            var rv = new List<int>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(ReadInt32());
+                len--;
+            }
+            return rv;
+        }
+
+        public List<SttpValue> ReadListSttpValue()
+        {
+            var rv = new List<SttpValue>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpValue(this));
+                len--;
+            }
+            return rv;
+        }
     }
 }

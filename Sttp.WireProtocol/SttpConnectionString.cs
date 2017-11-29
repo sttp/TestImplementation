@@ -33,7 +33,7 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
-        public void Write(PayloadWriter payloadWriter)
+        public void Save(PayloadWriter payloadWriter)
         {
             throw new NotImplementedException();
         }

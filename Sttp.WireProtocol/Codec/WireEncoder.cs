@@ -154,7 +154,7 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointRequest);
         }
 
-        public void GetMetadata(Guid schemaVersion, long revision, long areUpdateQueries, List<SttpQueryStatement> queries, List<SttpQueryRaw> queriesRaw)
+        public void GetMetadata(Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryStatement> queries, List<SttpQueryRaw> queriesRaw)
         {
             m_stream.Clear();
             m_stream.Write(schemaVersion);

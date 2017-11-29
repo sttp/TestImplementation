@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
+using Sttp.Codec.Metadata;
 using Sttp.Data;
 
 namespace Sttp.Tests
@@ -21,7 +22,7 @@ namespace Sttp.Tests
 
 
         [TestMethod]
-        public void TestQuery()
+        public void TestGetMetadataSchema()
         {
             var db = Load();
 
@@ -59,6 +60,80 @@ namespace Sttp.Tests
             StringBuilder sb = new StringBuilder();
             cmd.MetadataSchema.GetFullOutputString("", sb);
             Console.WriteLine(sb);
+        }
+
+        [TestMethod]
+        public void TestGetMetadata()
+        {
+            var db = Load();
+
+            Queue<byte[]> packets = new Queue<byte[]>();
+
+            var writer = new WireEncoder();
+            var reader = new WireDecoder();
+
+            writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
+
+            var statements = new List<SttpQueryStatement>();
+
+            var s = new SttpQueryStatement();
+            s.DirectTable = "Vendor";
+            s.ColumnInputs.Add(new SttpQueryColumn(-1, "ID", 1));
+            s.ColumnInputs.Add(new SttpQueryColumn(-1, "Acronym", 2));
+            s.ColumnInputs.Add(new SttpQueryColumn(-1, "Name", 3));
+
+            s.Outputs.Add(new SttpOutputColumns(1, "ID"));
+            s.Outputs.Add(new SttpOutputColumns(2, "Acronym"));
+            s.Outputs.Add(new SttpOutputColumns(3, "Name"));
+
+            statements.Add(s);
+            var raw = new List<SttpQueryRaw>();
+            writer.GetMetadata(Guid.Empty, 0, false, statements, raw);
+
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.WriteData(data, 0, data.Length);
+            }
+
+            CommandObjects cmd = reader.NextCommand();
+
+            StringBuilder sb = new StringBuilder();
+            cmd.GetMetadata.GetFullOutputString("", sb);
+            Console.WriteLine(sb);
+
+            Assert.AreEqual(cmd.CommandCode, CommandCode.GetMetadata);
+
+            db.ProcessCommand(cmd.GetMetadata, writer);
+
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.WriteData(data, 0, data.Length);
+            }
+
+            cmd = reader.NextCommand();
+            Assert.AreEqual(cmd.CommandCode, CommandCode.Metadata);
+
+            MetadataSubCommandObjects subCmd;
+            while ((subCmd = cmd.Metadata.NextCommand())!= null)
+            {
+                switch (subCmd.SubCommand)
+                {
+                    case MetadataSubCommand.Invalid:
+                        break;
+                    case MetadataSubCommand.DefineResponse:
+                        break;
+                    case MetadataSubCommand.DefineRow:
+                        break;
+                    case MetadataSubCommand.UndefineRow:
+                        break;
+                    case MetadataSubCommand.Finished:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
 

@@ -84,6 +84,103 @@ namespace Sttp
             m_valueTypeCode = value.m_valueTypeCode;
         }
 
+        public SttpValue(PayloadReader rd)
+        {
+            switch ((SttpValueTypeCode)rd.ReadByte())
+            {
+                case SttpValueTypeCode.Null:
+                    IsNull = true;
+                    break;
+                case SttpValueTypeCode.SByte:
+                    AsSByte = rd.ReadSByte();
+                    break;
+                case SttpValueTypeCode.Int16:
+                    AsInt16 = rd.ReadInt16();
+                    break;
+                case SttpValueTypeCode.Int32:
+                    AsInt32 = rd.ReadInt32();
+                    break;
+                case SttpValueTypeCode.Int64:
+                    AsInt64 = rd.ReadInt64();
+                    break;
+                case SttpValueTypeCode.Byte:
+                    AsByte = rd.ReadByte();
+                    break;
+                case SttpValueTypeCode.UInt16:
+                    AsUInt16 = rd.ReadUInt16();
+                    break;
+                case SttpValueTypeCode.UInt32:
+                    AsUInt32 = rd.ReadUInt32();
+                    break;
+                case SttpValueTypeCode.UInt64:
+                    AsUInt64 = rd.ReadUInt64();
+                    break;
+                case SttpValueTypeCode.Single:
+                    AsSingle = rd.ReadSingle();
+                    break;
+                case SttpValueTypeCode.Double:
+                    AsDouble = rd.ReadDouble();
+                    break;
+                case SttpValueTypeCode.Decimal:
+                    AsDecimal = rd.ReadDecimal();
+                    break;
+                case SttpValueTypeCode.DateTime:
+                    throw new NotImplementedException();
+                    //AsDateTime = rd.ReadDateTime();
+                    break;
+                case SttpValueTypeCode.DateTimeOffset:
+                    throw new NotImplementedException();
+                    //AsDateTimeOffset = rd.ReadDateTimeOffset();
+                    break;
+                case SttpValueTypeCode.SttpTime:
+                    throw new NotImplementedException();
+                   // AsSttpTime = rd.ReadSttpTime();
+                    break;
+                case SttpValueTypeCode.SttpTimeOffset:
+                    throw new NotImplementedException();
+                    //AsSttpTimeOffset = rd.ReadSttpTimeOffset();
+                    break;
+                case SttpValueTypeCode.TimeSpan:
+                    throw new NotImplementedException();
+                    //AsTimeSpan = rd.ReadTimeSpan();
+                    break;
+                case SttpValueTypeCode.Bool:
+                    AsBool = rd.ReadBoolean();
+                    break;
+                case SttpValueTypeCode.Char:
+                    AsChar = rd.ReadChar();
+                    break;
+                case SttpValueTypeCode.Guid:
+                    AsGuid = rd.ReadGuid();
+                    break;
+                case SttpValueTypeCode.String:
+                    AsString = rd.ReadString();
+                    break;
+                case SttpValueTypeCode.Buffer:
+                    throw new NotImplementedException();
+                    //AsBuffer = rd.ReadBuffer();
+                    break;
+                case SttpValueTypeCode.ValueSet:
+                    throw new NotImplementedException();
+                    //AsValueSet = rd.ReadValueSet();
+                    break;
+                case SttpValueTypeCode.NamedSet:
+                    throw new NotImplementedException();
+                    //AsNamedSet = rd.ReadNamedSet();
+                    break;
+                case SttpValueTypeCode.ConnectionString:
+                    throw new NotImplementedException();
+                    //AsConnectionString = rd.ReadConnectionString();
+                    break;
+                case SttpValueTypeCode.BulkTransportGuid:
+                    throw new NotImplementedException();
+                    //AsBulkTransportGuid = rd.ReadBulkTransportGuid();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         public SttpValue(object x)
         {
             SetValue(x);
@@ -1714,9 +1811,97 @@ namespace Sttp
             return rv;
         }
 
-        public void Write(PayloadWriter payloadWriter)
+        public void Save(PayloadWriter wr)
         {
-            throw new NotImplementedException();
+            wr.Write((byte)ValueTypeCode);
+            switch (ValueTypeCode)
+            {
+                case SttpValueTypeCode.Null:
+                    break;
+                case SttpValueTypeCode.SByte:
+                    wr.Write(AsSByte);
+                    break;
+                case SttpValueTypeCode.Int16:
+                    wr.Write(AsInt16);
+                    break;
+                case SttpValueTypeCode.Int32:
+                    wr.Write(AsInt32);
+                    break;
+                case SttpValueTypeCode.Int64:
+                    wr.Write(AsInt64);
+                    break;
+                case SttpValueTypeCode.Byte:
+                    wr.Write(AsByte);
+                    break;
+                case SttpValueTypeCode.UInt16:
+                    wr.Write(AsUInt16);
+                    break;
+                case SttpValueTypeCode.UInt32:
+                    wr.Write(AsUInt32);
+                    break;
+                case SttpValueTypeCode.UInt64:
+                    wr.Write(AsUInt64);
+                    break;
+                case SttpValueTypeCode.Single:
+                    wr.Write(AsSingle);
+                    break;
+                case SttpValueTypeCode.Double:
+                    wr.Write(AsDouble);
+                    break;
+                case SttpValueTypeCode.Decimal:
+                    wr.Write(AsDecimal);
+                    break;
+                case SttpValueTypeCode.DateTime:
+                    throw new NotImplementedException();
+                    //wr.Write(AsDateTime);
+                    break;
+                case SttpValueTypeCode.DateTimeOffset:
+                    throw new NotImplementedException();
+                    //wr.Write(AsDateTimeOffset);
+                    break;
+                case SttpValueTypeCode.SttpTime:
+                    throw new NotImplementedException();
+                    //wr.Write(AsSttpTime);
+                    break;
+                case SttpValueTypeCode.SttpTimeOffset:
+                    throw new NotImplementedException();
+                    //wr.Write(AsSttpTimeOffset);
+                    break;
+                case SttpValueTypeCode.TimeSpan:
+                    wr.Write(AsTimeSpan.Ticks);
+                    break;
+                case SttpValueTypeCode.Bool:
+                    wr.Write(AsBool);
+                    break;
+                case SttpValueTypeCode.Char:
+                    wr.Write(AsChar);
+                    break;
+                case SttpValueTypeCode.Guid:
+                    wr.Write(AsGuid);
+                    break;
+                case SttpValueTypeCode.String:
+                    wr.Write(AsString);
+                    break;
+                case SttpValueTypeCode.Buffer:
+                    wr.Write(AsBuffer);
+                    break;
+                case SttpValueTypeCode.ValueSet:
+                    wr.Write(AsValueSet);
+                    break;
+                case SttpValueTypeCode.NamedSet:
+                    wr.Write(AsNamedSet);
+                    break;
+                case SttpValueTypeCode.ConnectionString:
+                    throw new NotImplementedException();
+                    //wr.Write(AsConnectionString);
+                    break;
+                case SttpValueTypeCode.BulkTransportGuid:
+                    throw new NotImplementedException();
+                    //wr.Write(AsBulkTransportGuid);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

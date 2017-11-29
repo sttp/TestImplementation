@@ -56,7 +56,7 @@ namespace Sttp.Codec
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
 
-      
+
 
 
         #region [ Write Methods ]
@@ -439,7 +439,7 @@ namespace Sttp.Codec
             }
         }
 
-       
+
 
         public void Write(List<SttpDataPointID> list)
         {
@@ -457,7 +457,7 @@ namespace Sttp.Codec
 
         public void Write(SttpNamedSet value)
         {
-            value.Write(this);
+            value.Save(this);
         }
 
 
@@ -518,22 +518,131 @@ namespace Sttp.Codec
             }
         }
 
-
-
-
         public void Write(SttpValueSet value)
         {
-            value.Write(this);
+            value.Save(this);
         }
 
         public void Write(SttpValue value)
         {
-            value.Write(this);
+            value.Save(this);
         }
 
         public void Write(SttpConnectionString value)
         {
-            value.Write(this);
+            value.Save(this);
+        }
+
+        public void Write(List<SttpQueryJoinedTable> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<SttpQueryLiterals> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<SttpQueryColumn> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<SttpProcedureStep> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<SttpOutputColumns> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<int> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                Write(list[x]);
+            }
+        }
+
+        public void Write(List<SttpQueryJoinPath> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
+        }
+
+        public void Write(List<SttpValue> list)
+        {
+            if (list == null)
+            {
+                Write((byte)0);
+                return;
+            }
+            WriteInt7Bit(list.Count);
+            for (var x = 0; x < list.Count; x++)
+            {
+                list[x].Save(this);
+            }
         }
     }
 }

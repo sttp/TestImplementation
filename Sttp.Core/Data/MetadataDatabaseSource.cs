@@ -245,9 +245,9 @@ namespace Sttp.Data
         {
             if (query.JoinedTables.Count > 0)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect table are not supported by this engine");
-            if (query.Procedure.Count != 1)
+            if (query.Procedure.Count > 0)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
-            if (query.WhereBooleanVariable != null)
+            if (query.WhereBooleanVariable >= 0)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
 
             var table = m_tables[TableLookup(query.DirectTable)];
@@ -281,6 +281,8 @@ namespace Sttp.Data
                 }
                 send.DefineRow(row.Key, values);
             }
+            send.Finished();
+            send.EndCommand();
         }
 
         public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)

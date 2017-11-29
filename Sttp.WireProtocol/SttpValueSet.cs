@@ -12,14 +12,14 @@ namespace Sttp
         {
             
         }
-        public SttpValueSet(PayloadReader payloadReader)
+        public SttpValueSet(PayloadReader rd)
         {
-            throw new NotImplementedException();
+            Values = rd.ReadListSttpValue();
         }
 
-        public void Write(PayloadWriter payloadWriter)
+        public void Save(PayloadWriter wr)
         {
-            throw new NotImplementedException();
+            wr.Write(Values);
         }
     }
 }
