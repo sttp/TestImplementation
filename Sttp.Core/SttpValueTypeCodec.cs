@@ -42,7 +42,7 @@ namespace Sttp
             if (columnDataType == typeof(Single))
                 return SttpValueTypeCode.Single;
             if (columnDataType == typeof(DateTime))
-                return SttpValueTypeCode.SttpTime;
+                return SttpValueTypeCode.DateTime;
             if (columnDataType == typeof(bool))
                 return SttpValueTypeCode.Bool;
             if (columnDataType == typeof(Guid))
@@ -53,6 +53,67 @@ namespace Sttp
                 return SttpValueTypeCode.Buffer;
 
             return SttpValueTypeCode.Null;
+        }
+
+        public static Type ToType(SttpValueTypeCode columnTypeCode)
+        {
+            switch (columnTypeCode)
+            {
+                case SttpValueTypeCode.Null:
+                    return typeof(DBNull);
+                case SttpValueTypeCode.SByte:
+                    return typeof(SByte);
+                case SttpValueTypeCode.Int16:
+                    return typeof(Int16);
+                case SttpValueTypeCode.Int32:
+                    return typeof(Int32);
+                case SttpValueTypeCode.Int64:
+                    return typeof(Int64);
+                case SttpValueTypeCode.Byte:
+                    return typeof(Byte);
+                case SttpValueTypeCode.UInt16:
+                    return typeof(UInt16);
+                case SttpValueTypeCode.UInt32:
+                    return typeof(UInt32);
+                case SttpValueTypeCode.UInt64:
+                    return typeof(UInt64);
+                case SttpValueTypeCode.Single:
+                    return typeof(Single);
+                case SttpValueTypeCode.Double:
+                    return typeof(Double);
+                case SttpValueTypeCode.Decimal:
+                    return typeof(Decimal);
+                case SttpValueTypeCode.DateTime:
+                    return typeof(DateTime);
+                case SttpValueTypeCode.DateTimeOffset:
+                    return typeof(DateTimeOffset);
+                case SttpValueTypeCode.SttpTime:
+                    return typeof(SttpTimestamp);
+                case SttpValueTypeCode.SttpTimeOffset:
+                    return typeof(SttpTimestampOffset);
+                case SttpValueTypeCode.TimeSpan:
+                    return typeof(TimeSpan);
+                case SttpValueTypeCode.Bool:
+                    return typeof(Boolean);
+                case SttpValueTypeCode.Char:
+                    return typeof(Char);
+                case SttpValueTypeCode.Guid:
+                    return typeof(Guid);
+                case SttpValueTypeCode.String:
+                    return typeof(String);
+                case SttpValueTypeCode.Buffer:
+                    return typeof(byte[]);
+                case SttpValueTypeCode.ValueSet:
+                    return typeof(SttpValueSet);
+                case SttpValueTypeCode.NamedSet:
+                    return typeof(SttpNamedSet);
+                case SttpValueTypeCode.ConnectionString:
+                    return typeof(SttpConnectionString);
+                case SttpValueTypeCode.BulkTransportGuid:
+                    return typeof(Guid);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(columnTypeCode), columnTypeCode, null);
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Sttp.Codec
         /// <summary>
         /// Indicate that the protocol supports deflate.
         /// </summary>
-        public bool SupportsDeflate = false;
+        public bool SupportsDeflate = true;
 
         /// <summary>
         /// The number of bytes before deflate kicks in.

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Xml.Schema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 using Sttp.Codec.Metadata;
@@ -76,17 +78,10 @@ namespace Sttp.Tests
 
             var statements = new List<SttpQueryStatement>();
 
-            var s = new SttpQueryStatement();
-            s.DirectTable = "Vendor";
-            s.ColumnInputs.Add(new SttpQueryColumn(-1, "ID", 1));
-            s.ColumnInputs.Add(new SttpQueryColumn(-1, "Acronym", 2));
-            s.ColumnInputs.Add(new SttpQueryColumn(-1, "Name", 3));
+            //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
-            s.Outputs.Add(new SttpOutputColumns(1, "ID"));
-            s.Outputs.Add(new SttpOutputColumns(2, "Acronym"));
-            s.Outputs.Add(new SttpOutputColumns(3, "Name"));
+            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()));
 
-            statements.Add(s);
             var raw = new List<SttpQueryRaw>();
             writer.GetMetadata(Guid.Empty, 0, false, statements, raw);
 
@@ -115,18 +110,20 @@ namespace Sttp.Tests
             cmd = reader.NextCommand();
             Assert.AreEqual(cmd.CommandCode, CommandCode.Metadata);
 
+            MetadataQueryTable tbl = null;
             MetadataSubCommandObjects subCmd;
-            while ((subCmd = cmd.Metadata.NextCommand())!= null)
+            while ((subCmd = cmd.Metadata.NextCommand()) != null)
             {
                 switch (subCmd.SubCommand)
                 {
-                    case MetadataSubCommand.Invalid:
-                        break;
                     case MetadataSubCommand.DefineResponse:
+                        tbl = new MetadataQueryTable(subCmd.DefineResponse);
                         break;
                     case MetadataSubCommand.DefineRow:
+                        tbl.ProcessCommand(subCmd.DefineRow);
                         break;
                     case MetadataSubCommand.UndefineRow:
+                        tbl.ProcessCommand(subCmd.UndefineRow);
                         break;
                     case MetadataSubCommand.Finished:
                         break;
@@ -134,6 +131,39 @@ namespace Sttp.Tests
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
+            var t = tbl.ToTable();
+            MakeCSV(t);
+        }
+
+        private static SttpQueryStatement BuildRequest(string tableName, params string[] columns)
+        {
+            var s = new SttpQueryStatement();
+            s.DirectTable = tableName;
+
+            for (int x = 0; x < columns.Length; x++)
+            {
+                s.ColumnInputs.Add(new SttpQueryColumn(-1, columns[x], x));
+                s.Outputs.Add(new SttpOutputColumns(x, columns[x]));
+            }
+            return s;
+        }
+
+        private static void MakeCSV(DataTable dt)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
+                                                 Select(column => column.ColumnName);
+            sb.AppendLine(string.Join(",", columnNames));
+
+            foreach (DataRow row in dt.Rows)
+            {
+                IEnumerable<string> fields = row.ItemArray.Select(field => string.Concat("\"", field.ToString().Replace("\"", "\"\""), "\""));
+                sb.AppendLine(string.Join(",", fields));
+            }
+
+            File.WriteAllText("c:\\temp\\openPDC-sttp.csv", sb.ToString());
         }
 
 

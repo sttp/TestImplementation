@@ -40,6 +40,25 @@ namespace Sttp.Data
             ProcessCommand(command);
         }
 
+        public DataTable ToTable()
+        {
+            DataTable tbl = new DataTable();
+            foreach (var column in Columns)
+            {
+                tbl.Columns.Add(column.Name, SttpValueTypeCodec.ToType(column.TypeCode));
+            }
+            object[] list = new object[Columns.Count];
+            foreach (var row in Rows)
+            {
+                for (int x = 0; x < list.Length; x++)
+                {
+                    list[x] = row.Value.Values[x].AsNativeType;
+                }
+                tbl.Rows.Add(list);
+            }
+            return tbl;
+        }
+
         public void ProcessCommand(CmdDefineResponse command)
         {
             if (command.IsUpdateQuery)

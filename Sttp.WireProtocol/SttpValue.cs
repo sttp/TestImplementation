@@ -53,6 +53,10 @@ namespace Sttp
         [FieldOffset(0)]
         private SttpTimestampOffset m_valueSttpTimestampOffset;
         [FieldOffset(0)]
+        private DateTime m_valueDateTime;
+        [FieldOffset(0)]
+        private DateTimeOffset m_valueDateTimeOffset;
+        [FieldOffset(0)]
         private decimal m_valueDecimal;
         [FieldOffset(0)]
         private Guid m_valueGuid;
@@ -125,8 +129,7 @@ namespace Sttp
                     AsDecimal = rd.ReadDecimal();
                     break;
                 case SttpValueTypeCode.DateTime:
-                    throw new NotImplementedException();
-                    //AsDateTime = rd.ReadDateTime();
+                    AsDateTime = rd.ReadDateTime();
                     break;
                 case SttpValueTypeCode.DateTimeOffset:
                     throw new NotImplementedException();
@@ -134,15 +137,14 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.SttpTime:
                     throw new NotImplementedException();
-                   // AsSttpTime = rd.ReadSttpTime();
+                    // AsSttpTime = rd.ReadSttpTime();
                     break;
                 case SttpValueTypeCode.SttpTimeOffset:
                     throw new NotImplementedException();
                     //AsSttpTimeOffset = rd.ReadSttpTimeOffset();
                     break;
                 case SttpValueTypeCode.TimeSpan:
-                    throw new NotImplementedException();
-                    //AsTimeSpan = rd.ReadTimeSpan();
+                    AsTimeSpan = new TimeSpan(rd.ReadInt64());
                     break;
                 case SttpValueTypeCode.Bool:
                     AsBool = rd.ReadBoolean();
@@ -871,6 +873,144 @@ namespace Sttp
             {
                 m_valueTypeCode = SttpValueTypeCode.Single;
                 m_valueSingle = value;
+            }
+        }
+
+        public DateTime AsDateTime
+        {
+            get
+            {
+                checked
+                {
+                    switch (m_valueTypeCode)
+                    {
+                        case SttpValueTypeCode.Null:
+                            throw new InvalidCastException("Cannot cast from Null");
+                        case SttpValueTypeCode.SByte:
+                            throw new InvalidCastException("Cannot cast from SByte");
+                        case SttpValueTypeCode.Int16:
+                            throw new InvalidCastException("Cannot cast from Int16");
+                        case SttpValueTypeCode.Int32:
+                            throw new InvalidCastException("Cannot cast from Int32");
+                        case SttpValueTypeCode.Int64:
+                            throw new InvalidCastException("Cannot cast from Int64");
+                        case SttpValueTypeCode.Byte:
+                            throw new InvalidCastException("Cannot cast from Byte");
+                        case SttpValueTypeCode.UInt16:
+                            throw new InvalidCastException("Cannot cast from UInt16");
+                        case SttpValueTypeCode.UInt32:
+                            throw new InvalidCastException("Cannot cast from UInt32");
+                        case SttpValueTypeCode.UInt64:
+                            throw new InvalidCastException("Cannot cast from UInt64");
+                        case SttpValueTypeCode.Decimal:
+                            throw new InvalidCastException("Cannot cast from Decimal");
+                        case SttpValueTypeCode.Double:
+                            throw new InvalidCastException("Cannot cast from Double");
+                        case SttpValueTypeCode.Single:
+                            throw new InvalidCastException("Cannot cast from Single");
+                        case SttpValueTypeCode.SttpTime:
+                            return m_valueSttpTimestamp.Ticks;
+                        case SttpValueTypeCode.SttpTimeOffset:
+                            return m_valueSttpTimestampOffset.Ticks;
+                        case SttpValueTypeCode.TimeSpan:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Char:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Bool:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Guid:
+                            throw new InvalidCastException("Cannot cast from Guid");
+                        case SttpValueTypeCode.String:
+                            return DateTime.Parse((string)m_valueObject);
+                        case SttpValueTypeCode.Buffer:
+                            throw new InvalidCastException("Cannot cast from Buffer");
+                        case SttpValueTypeCode.ValueSet:
+                            throw new InvalidCastException("Cannot cast from Set");
+                        case SttpValueTypeCode.DateTime:
+                            return m_valueDateTime;
+                        case SttpValueTypeCode.DateTimeOffset:
+                            return m_valueDateTimeOffset.UtcDateTime;
+                        case SttpValueTypeCode.NamedSet:
+                        case SttpValueTypeCode.ConnectionString:
+                        case SttpValueTypeCode.BulkTransportGuid:
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+            set
+            {
+                m_valueTypeCode = SttpValueTypeCode.DateTime;
+                m_valueDateTime = value;
+            }
+        }
+
+        public DateTimeOffset AsDateTimeOffset
+        {
+            get
+            {
+                checked
+                {
+                    switch (m_valueTypeCode)
+                    {
+                        case SttpValueTypeCode.Null:
+                            throw new InvalidCastException("Cannot cast from Null");
+                        case SttpValueTypeCode.SByte:
+                            throw new InvalidCastException("Cannot cast from SByte");
+                        case SttpValueTypeCode.Int16:
+                            throw new InvalidCastException("Cannot cast from Int16");
+                        case SttpValueTypeCode.Int32:
+                            throw new InvalidCastException("Cannot cast from Int32");
+                        case SttpValueTypeCode.Int64:
+                            throw new InvalidCastException("Cannot cast from Int64");
+                        case SttpValueTypeCode.Byte:
+                            throw new InvalidCastException("Cannot cast from Byte");
+                        case SttpValueTypeCode.UInt16:
+                            throw new InvalidCastException("Cannot cast from UInt16");
+                        case SttpValueTypeCode.UInt32:
+                            throw new InvalidCastException("Cannot cast from UInt32");
+                        case SttpValueTypeCode.UInt64:
+                            throw new InvalidCastException("Cannot cast from UInt64");
+                        case SttpValueTypeCode.Decimal:
+                            throw new InvalidCastException("Cannot cast from Decimal");
+                        case SttpValueTypeCode.Double:
+                            throw new InvalidCastException("Cannot cast from Double");
+                        case SttpValueTypeCode.Single:
+                            throw new InvalidCastException("Cannot cast from Single");
+                        case SttpValueTypeCode.SttpTime:
+                            throw new NotImplementedException();
+                        case SttpValueTypeCode.SttpTimeOffset:
+                            throw new NotImplementedException();
+                        case SttpValueTypeCode.TimeSpan:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Char:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Bool:
+                            throw new InvalidCastException("Cannot cast from TimeSpan");
+                        case SttpValueTypeCode.Guid:
+                            throw new InvalidCastException("Cannot cast from Guid");
+                        case SttpValueTypeCode.String:
+                            return DateTimeOffset.Parse((string)m_valueObject);
+                        case SttpValueTypeCode.Buffer:
+                            throw new InvalidCastException("Cannot cast from Buffer");
+                        case SttpValueTypeCode.ValueSet:
+                            throw new InvalidCastException("Cannot cast from Set");
+                        case SttpValueTypeCode.DateTime:
+                            return new DateTimeOffset(m_valueDateTime);
+                        case SttpValueTypeCode.DateTimeOffset:
+                            return m_valueDateTimeOffset.UtcDateTime;
+                        case SttpValueTypeCode.NamedSet:
+                        case SttpValueTypeCode.ConnectionString:
+                        case SttpValueTypeCode.BulkTransportGuid:
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+            set
+            {
+                m_valueTypeCode = SttpValueTypeCode.DateTimeOffset;
+                m_valueDateTimeOffset = value;
             }
         }
 
@@ -1719,11 +1859,11 @@ namespace Sttp
         }
         public void SetValue(DateTime value)
         {
-            AsSttpTimestamp = new SttpTimestamp(value);
+            AsDateTime = value;
         }
         public void SetValue(DateTimeOffset value)
         {
-            AsSttpTimestampOffset = new SttpTimestampOffset(value);
+            AsDateTimeOffset = value;
         }
         public void SetValue(TimeSpan value)
         {
@@ -1811,6 +1951,72 @@ namespace Sttp
             return rv;
         }
 
+        public object AsNativeType
+        {
+            get
+            {
+                switch (ValueTypeCode)
+                {
+                    case SttpValueTypeCode.Null:
+                        return null;
+                    case SttpValueTypeCode.SByte:
+                        return AsSByte;
+                    case SttpValueTypeCode.Int16:
+                        return AsInt16;
+                    case SttpValueTypeCode.Int32:
+                        return AsInt32;
+                    case SttpValueTypeCode.Int64:
+                        return AsInt64;
+                    case SttpValueTypeCode.Byte:
+                        return AsByte;
+                    case SttpValueTypeCode.UInt16:
+                        return AsUInt16;
+                    case SttpValueTypeCode.UInt32:
+                        return AsUInt32;
+                    case SttpValueTypeCode.UInt64:
+                        return AsUInt64;
+                    case SttpValueTypeCode.Single:
+                        return AsSingle;
+                    case SttpValueTypeCode.Double:
+                        return AsDouble;
+                    case SttpValueTypeCode.Decimal:
+                        return AsDecimal;
+                    case SttpValueTypeCode.DateTime:
+                        return AsDateTime;
+                    case SttpValueTypeCode.DateTimeOffset:
+                        return AsDateTimeOffset;
+                    case SttpValueTypeCode.SttpTime:
+                        return AsSttpTimestamp;
+                    case SttpValueTypeCode.SttpTimeOffset:
+                        return AsSttpTimestampOffset;
+                    case SttpValueTypeCode.TimeSpan:
+                        return AsTimeSpan.Ticks;
+                    case SttpValueTypeCode.Bool:
+                        return AsBool;
+                    case SttpValueTypeCode.Char:
+                        return AsChar;
+                    case SttpValueTypeCode.Guid:
+                        return AsGuid;
+                    case SttpValueTypeCode.String:
+                        return AsString;
+                    case SttpValueTypeCode.Buffer:
+                        return AsBuffer;
+                    case SttpValueTypeCode.ValueSet:
+                        return AsValueSet;
+                    case SttpValueTypeCode.NamedSet:
+                        return AsNamedSet;
+                    case SttpValueTypeCode.ConnectionString:
+                        throw new NotImplementedException();
+                    //return AsConnectionString);
+                    case SttpValueTypeCode.BulkTransportGuid:
+                        throw new NotImplementedException();
+                    //return AsBulkTransportGuid);
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
         public void Save(PayloadWriter wr)
         {
             wr.Write((byte)ValueTypeCode);
@@ -1852,8 +2058,7 @@ namespace Sttp
                     wr.Write(AsDecimal);
                     break;
                 case SttpValueTypeCode.DateTime:
-                    throw new NotImplementedException();
-                    //wr.Write(AsDateTime);
+                    wr.Write(AsDateTime);
                     break;
                 case SttpValueTypeCode.DateTimeOffset:
                     throw new NotImplementedException();

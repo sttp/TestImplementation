@@ -259,9 +259,25 @@ namespace Sttp.Data
                 columnIndexes.Add(Tuple.Create(column.Variable, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
             }
 
-            var send = encoder.MetadataCommandBuilder();
+            Dictionary<int, SttpValueTypeCode> typeCodes = new Dictionary<int, SttpValueTypeCode>();
 
-            send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, query.Outputs.Select(x => new MetadataColumn(x.ColumnName, SttpValueTypeCode.Null)).ToList()); //ToDo: Actually determine the column type somehow
+            foreach (var input in query.Literals)
+            {
+                typeCodes[input.Variable] = input.Value.ValueTypeCode;
+            }
+            foreach (var input in columnIndexes)
+            {
+                typeCodes[input.Item1] = table.Columns[input.Item2].TypeCode;
+            }
+
+            List<MetadataColumn> columns = new List<MetadataColumn>();
+            foreach (var item in query.Outputs)
+            {
+                columns.Add(new MetadataColumn(item.ColumnName, typeCodes[item.Variable]));
+            }
+
+            var send = encoder.MetadataCommandBuilder();
+            send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, columns);
 
             foreach (var row in table.Rows)
             {

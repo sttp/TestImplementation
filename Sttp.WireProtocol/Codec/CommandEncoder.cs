@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
+using Ionic.Zlib;
+using OGE.Core.Aced;
 using Sttp.IO;
+using CompressionMode = System.IO.Compression.CompressionMode;
+using DeflateStream = System.IO.Compression.DeflateStream;
 
 namespace Sttp.Codec
 {
@@ -71,7 +74,10 @@ namespace Sttp.Codec
                 {
                     deflate.Write(data, offset, length);
                 }
-
+                //byte[] raw = new byte[length];
+                //Array.Copy(data, offset, raw, 0, length);
+                //File.WriteAllBytes("C:\\temp\\openPDC-sttp.raw", raw);
+                //byte[] aced = AcedDeflator.Instance.Compress(data, offset, length, AcedCompressionLevel.Maximum, 0, 0);
                 data = ms.ToArray();
                 SendFragmentedPacket(command, length, 1, data, 15, data.Length - 15);
             }
