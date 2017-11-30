@@ -7,90 +7,310 @@ namespace Sttp.Core.Data
 {
     public abstract class MetadataFunctions
     {
-        public abstract string FunctionName { get; }
-        public abstract void Execute(SttpValue[] values);
-        public abstract void PropagateType(SttpValueTypeCode[] codes);
+        private readonly int[] m_inputs;
+        private readonly int m_output;
+        private readonly SttpValue[] m_values;
+
+        protected MetadataFunctions(int[] inputs, int output, SttpValue[] values)
+        {
+            m_inputs = inputs;
+            m_output = output;
+            m_values = values;
+        }
+
+        protected int InputCount => m_inputs.Length;
+
+        protected SttpValue Inputs(int index)
+        {
+            return m_values[m_inputs[0]];
+        }
+
+        protected SttpValue Output
+        {
+            set
+            {
+                m_values[m_output] = value;
+            }
+        }
+
+        protected void ValidInputsEquals(int inputCount)
+        {
+            if (InputCount != inputCount)
+                throw new Exception("Input mismatch");
+        }
+
+        protected void ValidInputsAtLeast(int fewestInputCount)
+        {
+            if (InputCount < fewestInputCount)
+                throw new Exception("Input mismatch");
+        }
+
+        protected bool IfAnyNullAssignNull()
+        {
+            for (int x = 0; x < InputCount; x++)
+            {
+                if (Inputs(x).IsNull)
+                {
+                    Output = new SttpValue();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public abstract void Execute();
+
+        public void PropagateType(SttpValueTypeCode[] codes)
+        {
+            SttpValueTypeCode[] myCodes = new SttpValueTypeCode[InputCount];
+            for (int x = 0; x < InputCount; x++)
+            {
+                myCodes[x] = codes[m_inputs[x]];
+            }
+            codes[m_output] = GetReturnType(myCodes);
+        }
+
+        protected abstract SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes);
     }
 
     public class FuncMultiply : MetadataFunctions
     {
-        public override string FunctionName => "MUL";
-
-        private int[] m_inputs;
-        private int m_output;
-
-        public FuncMultiply(int[] inputs, int output)
+        public FuncMultiply(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
         {
-            m_inputs = inputs;
-            m_output = output;
+            ValidInputsAtLeast(2);
         }
 
-        public override void Execute(SttpValue[] values)
+        public override void Execute()
         {
-            if (values[0].IsNull)
-            {
-                values[m_output] = new SttpValue();
+            if (IfAnyNullAssignNull())
                 return;
-            }
-            double firstValue = values[m_inputs[0]].AsDouble;
-            for (int x = 1; x < m_inputs.Length; x++)
+
+            double firstValue = Inputs(0).AsDouble;
+            for (int x = 1; x < InputCount; x++)
             {
-                if (values[m_inputs[x]].IsNull)
-                {
-                    values[m_output] = new SttpValue();
-                    return;
-                }
-                firstValue *= values[m_inputs[x]].AsDouble;
+                firstValue *= Inputs(x).AsDouble;
             }
-            values[m_output] = new SttpValue(firstValue);
+            Output = new SttpValue(firstValue);
         }
 
-        public override void PropagateType(SttpValueTypeCode[] codes)
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            codes[m_output] = SttpValueTypeCode.Double;
+            return SttpValueTypeCode.Double;
         }
     }
 
     public class FuncEquals : MetadataFunctions
     {
-        public override string FunctionName => "EQU";
-
-        private int[] m_inputs;
-        private int m_output;
-
-        public FuncEquals(int[] inputs, int output)
+        public FuncEquals(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
         {
-            m_inputs = inputs;
-            m_output = output;
+            ValidInputsEquals(2);
         }
 
-        public override void Execute(SttpValue[] values)
+        public override void Execute()
         {
-            if (values[0].IsNull)
-            {
-                values[m_output] = new SttpValue();
+            if (IfAnyNullAssignNull())
                 return;
-            }
-            SttpValue firstValue = values[m_inputs[0]];
-            for (int x = 1; x < m_inputs.Length; x++)
-            {
-                if (values[m_inputs[x]].IsNull)
-                {
-                    values[m_output] = new SttpValue();
-                    return;
-                }
-                if (!firstValue.Equals(values[m_inputs[x]]))
-                {
-                    values[m_output] = new SttpValue(false);
-                    return;
-                }
-            }
-            values[m_output] = new SttpValue(true);
+
+            Output = new SttpValue(Inputs(0).Equals(Inputs(1)));
         }
 
-        public override void PropagateType(SttpValueTypeCode[] codes)
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            codes[m_output] = SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Bool;
+        }
+    }
+
+    public class FuncNotEquals : MetadataFunctions
+    {
+        public FuncNotEquals(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsEquals(2);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(!Inputs(0).Equals(Inputs(1)));
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+    }
+
+    public class FuncNot : MetadataFunctions
+    {
+        public FuncNot(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsEquals(1);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(!Inputs(0).AsBool);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+    }
+
+    public class FuncOr : MetadataFunctions
+    {
+        public FuncOr(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsAtLeast(2);
+        }
+
+        public override void Execute()
+        {
+            for (int x = 0; x < InputCount; x++)
+            {
+                if (!Inputs(x).IsNull && Inputs(x).AsBool)
+                {
+                    Output = new SttpValue(true);
+                    return;
+                }
+            }
+
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(false);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+    }
+
+    public class FuncAnd : MetadataFunctions
+    {
+        public FuncAnd(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsAtLeast(2);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+            for (int x = 0; x < InputCount; x++)
+            {
+                if (!Inputs(x).AsBool)
+                {
+                    Output = new SttpValue(false);
+                    return;
+                }
+            }
+
+            Output = new SttpValue(true);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+
+       
+    }
+
+    public class FuncLessThan : MetadataFunctions
+    {
+        public FuncLessThan(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsEquals(2);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(Inputs(0).AsDouble < Inputs(1).AsDouble);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+    }
+    public class FuncLessThanOrEqual : MetadataFunctions
+    {
+        public FuncLessThanOrEqual(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsEquals(2);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(Inputs(0).AsDouble <= Inputs(1).AsDouble);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+    }
+    public class FuncGreaterThan : MetadataFunctions
+    {
+        public FuncGreaterThan(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsEquals(2);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(Inputs(0).AsDouble > Inputs(1).AsDouble);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
+        }
+    }
+    public class FuncGreaterThanOrEqual : MetadataFunctions
+    {
+        public FuncGreaterThanOrEqual(int[] inputs, int output, SttpValue[] values)
+            : base(inputs, output, values)
+        {
+            ValidInputsEquals(2);
+        }
+
+        public override void Execute()
+        {
+            if (IfAnyNullAssignNull())
+                return;
+
+            Output = new SttpValue(Inputs(0).AsDouble >= Inputs(1).AsDouble);
+        }
+
+        protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
+        {
+            return SttpValueTypeCode.Bool;
         }
     }
 }

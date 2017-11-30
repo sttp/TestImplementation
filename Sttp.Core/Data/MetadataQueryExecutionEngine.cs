@@ -34,15 +34,39 @@ namespace Sttp.Core.Data
         {
             public MetadataFunctions Function;
 
-            public Procedure(SttpQueryProcedureStep step)
+            public Procedure(SttpQueryProcedureStep step, SttpValue[] variables)
             {
                 switch (step.Function)
                 {
                     case "MUL":
-                        Function = new FuncMultiply(step.InputVariables.ToArray(), step.OutputVariable);
+                        Function = new FuncMultiply(step.InputVariables.ToArray(), step.OutputVariable, variables);
                         break;
                     case "EQU":
-                        Function = new FuncEquals(step.InputVariables.ToArray(), step.OutputVariable);
+                        Function = new FuncEquals(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "NEQ":
+                        Function = new FuncNotEquals(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "OR":
+                        Function = new FuncOr(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "AND":
+                        Function = new FuncAnd(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "NOT":
+                        Function = new FuncNot(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "LT":
+                        Function = new FuncLessThan(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "LTE":
+                        Function = new FuncLessThanOrEqual(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "GT":
+                        Function = new FuncGreaterThan(step.InputVariables.ToArray(), step.OutputVariable, variables);
+                        break;
+                    case "GTE":
+                        Function = new FuncGreaterThanOrEqual(step.InputVariables.ToArray(), step.OutputVariable, variables);
                         break;
                     default:
                         throw new Exception("Function does not exist");
@@ -65,7 +89,7 @@ namespace Sttp.Core.Data
             var variables = new SttpValue[variableIndexCount];
             var tables = FindAllTables(db, query, tableIndexCount);
             var inputColumns = MapInputColumns(query, tables);
-            var procedures = CompileProcedures(query);
+            var procedures = CompileProcedures(query, variables);
             var outputColumns = MapOutputColumns(query, variableIndexCount, inputColumns, tables, procedures);
             var joinPath = MapAllJoins(db, query);
             var send = encoder.MetadataCommandBuilder();
@@ -95,10 +119,10 @@ namespace Sttp.Core.Data
 
                 foreach (var procedure in procedures)
                 {
-                    procedure.Function.Execute(variables);
+                    procedure.Function.Execute();
                 }
 
-                if (!query.WhereBooleanVariable.HasValue 
+                if (!query.WhereBooleanVariable.HasValue
                     || (!variables[query.WhereBooleanVariable.Value].IsNull && variables[query.WhereBooleanVariable.Value].AsBool))
                 {
                     SttpValueSet values = new SttpValueSet();
@@ -109,7 +133,7 @@ namespace Sttp.Core.Data
                     send.DefineRow(row.Key, values);
                 }
 
-                
+
             }
             send.Finished();
             send.EndCommand();
@@ -219,12 +243,12 @@ namespace Sttp.Core.Data
             return rv;
         }
 
-        private static Procedure[] CompileProcedures(SttpQueryStatement query)
+        private static Procedure[] CompileProcedures(SttpQueryStatement query, SttpValue[] variables)
         {
             var rv = new Procedure[query.Procedure.Count];
             for (var x = 0; x < query.Procedure.Count; x++)
             {
-                rv[x] = new Procedure(query.Procedure[x]);
+                rv[x] = new Procedure(query.Procedure[x], variables);
             }
             return rv;
         }
