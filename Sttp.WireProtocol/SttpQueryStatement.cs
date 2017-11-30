@@ -43,76 +43,40 @@ namespace Sttp
 
     public class SttpQueryJoinedTable
     {
-        public int TableIndex;
-        public List<SttpQueryJoinPath> JoinPath;
+        public int ExistingTableIndex;
+        public string ExistingForeignKeyColumn;
+        public string ForeignTable;
+        public int ForeignTableIndex;
 
-        public SttpQueryJoinedTable(int tableIndex, List<SttpQueryJoinPath> joinPath)
+        public SttpQueryJoinedTable(int existingTableIndex, string existingForeignKeyColumn, string foreignTable, int foreignTableIndex)
         {
-            TableIndex = tableIndex;
-            JoinPath = joinPath;
+            ExistingTableIndex = existingTableIndex;
+            ExistingForeignKeyColumn = existingForeignKeyColumn;
+            ForeignTable = foreignTable;
+            ForeignTableIndex = foreignTableIndex;
         }
 
         public SttpQueryJoinedTable(PayloadReader rd)
         {
-            throw new NotImplementedException();
-        }
-
-
-        public void Save(PayloadWriter wr)
-        {
-            wr.Write(TableIndex);
-            wr.Write(JoinPath);
-        }
-
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix); builder.AppendLine("(" + nameof(SttpQueryJoinedTable) + ")");
-            builder.Append(linePrefix); builder.AppendLine($"TableIndex: {TableIndex} ");
-
-            builder.Append(linePrefix); builder.AppendLine($"JoinPath Count {JoinPath.Count} ");
-            foreach (var table in JoinPath)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-
-        }
-    }
-
-    public class SttpQueryJoinPath
-    {
-        public string JoinedColumn;
-        public string JoinedTable;
-        public JoinType JoinType;
-
-        public SttpQueryJoinPath(string column, string table, JoinType type = JoinType.Inner)
-        {
-            JoinedColumn = column;
-            JoinedTable = table;
-            JoinType = type;
-        }
-
-        public SttpQueryJoinPath(PayloadReader rd)
-        {
+            ExistingTableIndex = rd.ReadInt32();
+            ExistingForeignKeyColumn = rd.ReadString();
+            ForeignTable = rd.ReadString();
+            ForeignTableIndex = rd.ReadInt32();
             throw new NotImplementedException();
         }
 
         public void Save(PayloadWriter wr)
         {
-            wr.Write(JoinedColumn);
-            wr.Write(JoinedTable);
-            wr.Write((byte)JoinType);
+            wr.Write(ExistingTableIndex);
+            wr.Write(ExistingForeignKeyColumn);
+            wr.Write(ForeignTable);
+            wr.Write(ForeignTableIndex);
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryJoinPath)}) {JoinedColumn} {JoinType} {JoinedTable} ");
+            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryJoinedTable)}) ({ExistingTableIndex}) LEFT JOIN {ForeignTable} AS ({ForeignTableIndex}) ON ({ExistingTableIndex}).{ExistingForeignKeyColumn} = ({ForeignTableIndex}).[PrimaryKey]");
         }
-    }
-
-    public enum JoinType
-    {
-        Left,
-        Inner,
     }
 
     public class SttpQueryLiterals
@@ -238,7 +202,11 @@ namespace Sttp
             tableIndexMap.Add(0, 0); //The direct table gets this mapping.
             foreach (var table in JoinedTables)
             {
-                tableIndexMap.Add(table.TableIndex, tableIndexMap.Count);
+                if (!tableIndexMap.ContainsKey(table.ExistingTableIndex))
+                {
+                    throw new Exception("Column Index Invalid");
+                }
+                tableIndexMap.Add(table.ForeignTableIndex, tableIndexMap.Count);
             }
 
             //Fill the variable indexes
@@ -281,7 +249,7 @@ namespace Sttp
             //Now: Remap since the mapping is complete.
             foreach (var table in JoinedTables)
             {
-                table.TableIndex = tableIndexMap[table.TableIndex];
+                table.ForeignTableIndex = tableIndexMap[table.ForeignTableIndex];
             }
 
             //Fill the variable indexes

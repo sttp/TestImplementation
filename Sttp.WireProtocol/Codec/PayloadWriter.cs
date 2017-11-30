@@ -617,20 +617,6 @@ namespace Sttp.Codec
             }
         }
 
-        public void Write(List<SttpQueryJoinPath> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
         public void Write(List<SttpValue> list)
         {
             if (list == null)

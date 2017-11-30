@@ -12,8 +12,8 @@ namespace Sttp.Core.Data
         private class JoinedTablePath
         {
             public int TableIndex;
-            public List<int> JoinIndex = new List<int>();
-            public List<bool> IsLeftJoin = new List<bool>();
+            public int JoinIndex;
+            public int NewTableIndex;
         }
 
         private class ColumnsLookedUp
@@ -54,7 +54,7 @@ namespace Sttp.Core.Data
             MetadataRow[] tableRows = new MetadataRow[tableIndexCount];
             foreach (var row in table.Rows)
             {
-                TraverseAllJoinsForRows(db, tableRows, row, table, joinPath);
+                TraverseAllJoinsForRows(db, tableRows, row, joinPath);
 
                 foreach (var input in query.Literals)
                 {
@@ -76,24 +76,21 @@ namespace Sttp.Core.Data
             send.EndCommand();
         }
 
-        private void TraverseAllJoinsForRows(MetadataDatabaseSource db, MetadataRow[] tableRows, MetadataRow row, MetadataTable table, JoinedTablePath[] joinPath)
+        private void TraverseAllJoinsForRows(MetadataDatabaseSource db, MetadataRow[] tableRows, MetadataRow row, JoinedTablePath[] joinPath)
         {
             tableRows[0] = row;
             foreach (var item in joinPath)
             {
-                MetadataRow joinedRow = row;
-                MetadataTable joinedTable = table;
+                MetadataRow joinedRow = tableRows[item.TableIndex];
+                MetadataTable joinedTable = db.LookupTable(item.TableIndex);
 
-                for (int x = 0; x < item.JoinIndex.Count; x++)
-                {
-                    int nextTableIndex = joinedTable.ForeignKeys[item.JoinIndex[x]].TableIndex;
-                    int nextRowIndex = joinedRow.ForeignKeys[item.JoinIndex[x]];
+                int nextTableIndex = joinedTable.ForeignKeys[item.JoinIndex].TableIndex;
+                int nextRowIndex = joinedRow.ForeignKeys[item.JoinIndex];
 
-                    joinedTable = db.LookupTable(nextTableIndex);
-                    joinedRow = joinedTable.LookupRow(nextRowIndex);
-                }
+                joinedTable = db.LookupTable(nextTableIndex);
+                joinedRow = joinedTable.LookupRow(nextRowIndex);
 
-                tableRows[item.TableIndex] = joinedRow;
+                tableRows[item.NewTableIndex] = joinedRow;
             }
         }
 
@@ -110,15 +107,9 @@ namespace Sttp.Core.Data
             {
                 var path = new JoinedTablePath();
                 var qry = query.JoinedTables[x];
-                path.TableIndex = qry.TableIndex;
-
-                for (int i = 0; i < qry.JoinPath.Count; i++)
-                {
-                    var qPath = qry.JoinPath[x];
-                    path.IsLeftJoin.Add(qPath.JoinType == JoinType.Left);
-                    path.JoinIndex.Add(previousTable.ForeignKeys.FindIndex(y => y.ColumnName == qPath.JoinedColumn && y.ForeignTableName == qPath.JoinedTable));
-                    previousTable = db[qPath.JoinedTable];
-                }
+                path.TableIndex = qry.ForeignTableIndex;
+                path.JoinIndex = previousTable.ForeignKeys.FindIndex(y => y.ColumnName == qry.ExistingForeignKeyColumn && y.ForeignTableName == qry.ForeignTable);
+                path.NewTableIndex = qry.ForeignTableIndex;
                 rv[x] = path;
             }
 
@@ -155,7 +146,7 @@ namespace Sttp.Core.Data
             rv[0] = db[query.DirectTable];
             foreach (var item in query.JoinedTables)
             {
-                rv[item.TableIndex] = db[item.JoinPath.Last().JoinedTable];
+                rv[item.ForeignTableIndex] = db[item.ForeignTable];
             }
             return rv;
         }
