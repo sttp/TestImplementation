@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Sttp.Codec;
+using Sttp.Core.Data;
 
 namespace Sttp.Data
 {
@@ -64,6 +65,11 @@ namespace Sttp.Data
         private int LookupForeignKey(int i, SttpValue sttpValue)
         {
             return m_tables[i].LookupRowIndex(sttpValue);
+        }
+
+        public MetadataTable LookupTable(int index)
+        {
+            return m_tables[index];
         }
 
         public MetadataDatabaseSource()
@@ -237,68 +243,8 @@ namespace Sttp.Data
 
             foreach (var query in command.Queries)
             {
-                ProcessQuery(command, encoder, query);
+                var engine = new MetadataQueryExecutionEngine(this, command, encoder, query);
             }
-        }
-
-        private void ProcessQuery(CommandGetMetadata command, WireEncoder encoder, SttpQueryStatement query)
-        {
-            if (query.JoinedTables.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect table are not supported by this engine");
-            if (query.Procedure.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
-            if (query.WhereBooleanVariable >= 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
-
-            var table = m_tables[TableLookup(query.DirectTable)];
-            Dictionary<int, SttpValue> variables = new Dictionary<int, SttpValue>();
-
-            List<Tuple<int, int>> columnIndexes = new List<Tuple<int, int>>();
-            foreach (var column in query.ColumnInputs)
-            {
-                columnIndexes.Add(Tuple.Create(column.Variable, table.Columns.FindIndex(x => x.Name == column.ColumnName)));
-            }
-
-            Dictionary<int, SttpValueTypeCode> typeCodes = new Dictionary<int, SttpValueTypeCode>();
-
-            foreach (var input in query.Literals)
-            {
-                typeCodes[input.Variable] = input.Value.ValueTypeCode;
-            }
-            foreach (var input in columnIndexes)
-            {
-                typeCodes[input.Item1] = table.Columns[input.Item2].TypeCode;
-            }
-
-            List<MetadataColumn> columns = new List<MetadataColumn>();
-            foreach (var item in query.Outputs)
-            {
-                columns.Add(new MetadataColumn(item.ColumnName, typeCodes[item.Variable]));
-            }
-
-            var send = encoder.MetadataCommandBuilder();
-            send.DefineResponse(false, 0, SchemaVersion, Revision, table.TableName, columns);
-
-            foreach (var row in table.Rows)
-            {
-                foreach (var input in query.Literals)
-                {
-                    variables[input.Variable] = input.Value;
-                }
-                foreach (var input in columnIndexes)
-                {
-                    variables[input.Item1] = row.Fields.Values[input.Item2];
-                }
-
-                SttpValueSet values = new SttpValueSet();
-                foreach (var item in query.Outputs)
-                {
-                    values.Values.Add(variables[item.Variable]);
-                }
-                send.DefineRow(row.Key, values);
-            }
-            send.Finished();
-            send.EndCommand();
         }
 
         public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)

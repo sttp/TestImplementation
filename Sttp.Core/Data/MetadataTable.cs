@@ -191,5 +191,10 @@ namespace Sttp.Data
         {
             return $"{TableName} Columns: {Columns.Count} Rows: {m_rows.Count} ForeignKeys: {ForeignKeys.Count}";
         }
+
+        public MetadataRow LookupRow(int nextRowIndex)
+        {
+            return m_rows[nextRowIndex];
+        }
     }
 }

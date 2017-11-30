@@ -222,6 +222,95 @@ namespace Sttp
 
         public SttpQueryStatement()
         {
+
+        }
+
+        /// <summary>
+        /// This will remap all table and variable indexes to a sequential range starting with 0.
+        /// As a nature of the remap, this will also validate the query's indexing.
+        /// </summary>
+        public void ValidateAndRemapAllIndexes(out int variableIndexCount, out int tableIndexCount)
+        {
+            Dictionary<int, int> tableIndexMap = new Dictionary<int, int>();
+            Dictionary<int, int> variableIndexMap = new Dictionary<int, int>();
+
+            //Fill the table indexes
+            tableIndexMap.Add(0, 0); //The direct table gets this mapping.
+            foreach (var table in JoinedTables)
+            {
+                tableIndexMap.Add(table.TableIndex, tableIndexMap.Count);
+            }
+
+            //Fill the variable indexes
+            foreach (var v in Literals)
+            {
+                variableIndexMap.Add(v.Variable, variableIndexMap.Count);
+            }
+            foreach (var v in ColumnInputs)
+            {
+                if (!tableIndexMap.ContainsKey(v.TableIndex))
+                {
+                    throw new Exception("Column Index Invalid");
+                }
+                variableIndexMap.Add(v.Variable, variableIndexMap.Count);
+            }
+
+            foreach (var v in Procedure)
+            {
+                foreach (var vIn in v.InputVariables)
+                {
+                    if (!variableIndexMap.ContainsKey(vIn))
+                        throw new Exception("Function with undefined input variable");
+                }
+                if (!variableIndexMap.ContainsKey(v.OutputVariable))
+                {
+                    variableIndexMap.Add(v.OutputVariable, variableIndexMap.Count);
+                }
+            }
+
+            foreach (var v in Outputs)
+            {
+                if (!variableIndexMap.ContainsKey(v.Variable))
+                {
+                    throw new Exception("Output Column with undefined variable");
+                }
+            }
+
+            //ToDo: Still need Having, Where, Group By defined.
+
+            //Now: Remap since the mapping is complete.
+            foreach (var table in JoinedTables)
+            {
+                table.TableIndex = tableIndexMap[table.TableIndex];
+            }
+
+            //Fill the variable indexes
+            foreach (var v in Literals)
+            {
+                v.Variable = variableIndexMap[v.Variable];
+            }
+
+            foreach (var v in ColumnInputs)
+            {
+                v.TableIndex = tableIndexMap[v.TableIndex];
+                v.Variable = variableIndexMap[v.Variable];
+            }
+
+            foreach (var v in Procedure)
+            {
+                for (var x = 0; x < v.InputVariables.Count; x++)
+                {
+                    v.InputVariables[x] = variableIndexMap[v.InputVariables[x]];
+                }
+                v.OutputVariable = variableIndexMap[v.OutputVariable];
+            }
+
+            foreach (var v in Outputs)
+            {
+                v.Variable = variableIndexMap[v.Variable];
+            }
+            tableIndexCount = tableIndexMap.Count;
+            variableIndexCount = variableIndexMap.Count;
         }
 
         public SttpQueryStatement(PayloadReader rd)
@@ -288,7 +377,6 @@ namespace Sttp
             wr.Write((byte)10); wr.Write(HavingBooleanVariable);
             wr.Write((byte)11); wr.Write(Limit);
             wr.Write((byte)0);
-
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
