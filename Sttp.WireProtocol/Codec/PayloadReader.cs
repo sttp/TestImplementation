@@ -554,25 +554,25 @@ namespace Sttp.Codec
             return rv;
         }
 
-        public List<SttpProcedureStep> ReadListSttpSttpProcedureStep()
+        public List<SttpQueryProcedureStep> ReadListSttpSttpProcedureStep()
         {
-            var rv = new List<SttpProcedureStep>();
+            var rv = new List<SttpQueryProcedureStep>();
             int len = ReadInt7Bit();
             while (len > 0)
             {
-                rv.Add(new SttpProcedureStep(this));
+                rv.Add(new SttpQueryProcedureStep(this));
                 len--;
             }
             return rv;
         }
 
-        public List<SttpOutputColumns> ReadListSttpOutputColumns()
+        public List<SttpQueryOutputColumns> ReadListSttpOutputColumns()
         {
-            var rv = new List<SttpOutputColumns>();
+            var rv = new List<SttpQueryOutputColumns>();
             int len = ReadInt7Bit();
             while (len > 0)
             {
-                rv.Add(new SttpOutputColumns(this));
+                rv.Add(new SttpQueryOutputColumns(this));
                 len--;
             }
             return rv;

@@ -79,6 +79,7 @@ namespace Sttp.Data
             if (IsReadOnly)
                 throw new Exception("This class is immutable");
             int x = 0;
+
             if (revision == 0)
             {
                 for (x = 0; x < m_rows.Count; x++)
@@ -93,7 +94,7 @@ namespace Sttp.Data
                 {
                     if (ForeignKeys[x].TableIndex < 0)
                     {
-                        ForeignKeys[x].TableIndex = tableLookup(TableName);
+                        ForeignKeys[x].TableIndex = tableLookup(ForeignKeys[x].ForeignTableName);
                     }
                     if (ForeignKeys[x].TableIndex >= 0 && ForeignKeys[x].LocalColumnIndex >= 0)
                     {

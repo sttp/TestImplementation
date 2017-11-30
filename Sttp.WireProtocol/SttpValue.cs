@@ -10,7 +10,7 @@ namespace Sttp
     /// This class contains the fundamental value for STTP.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public class SttpValue
+    public class SttpValue : IEquatable<SttpValue>
     {
         #region [ Members ]
 
@@ -2106,6 +2106,43 @@ namespace Sttp
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public override string ToString()
+        {
+            return AsTypeString;
+        }
+
+        public bool Equals(SttpValue other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return m_rawBytes0_7 == other.m_rawBytes0_7 && m_rawBytes8_15 == other.m_rawBytes8_15 && Equals(m_valueObject, other.m_valueObject) && m_valueTypeCode == other.m_valueTypeCode;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != this.GetType())
+                return false;
+            return Equals((SttpValue)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = m_rawBytes0_7.GetHashCode();
+                hashCode = (hashCode * 397) ^ m_rawBytes8_15.GetHashCode();
+                hashCode = (hashCode * 397) ^ (m_valueObject != null ? m_valueObject.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (int)m_valueTypeCode;
+                return hashCode;
             }
         }
     }

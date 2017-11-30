@@ -28,50 +28,6 @@ namespace Sttp.Data
         private bool m_isReadOnly;
         private List<MetadataSchemaTables> m_metadataSchema;
 
-        /// <summary>
-        /// Gets/Sets the readonly nature of this class.
-        /// </summary>
-        public bool IsReadOnly
-        {
-            get
-            {
-                return m_isReadOnly;
-            }
-            set
-            {
-                if (m_isReadOnly && !value) //True, changing to false
-                    throw new Exception("This class is immutable");
-                if (!m_isReadOnly && value) //False changing to true
-                {
-                    foreach (var metadataTable in m_tables)
-                    {
-                        metadataTable.SetIsReadOnly(Revision, TableLookup, LookupForeignKey);
-                    }
-                    RefreshSchema();
-                    m_isReadOnly = true;
-                }
-            }
-        }
-
-        private int TableLookup(string arg)
-        {
-            if (m_tablesLookup.TryGetValue(arg, out int index))
-            {
-                return index;
-            }
-            return -1;
-        }
-
-        private int LookupForeignKey(int i, SttpValue sttpValue)
-        {
-            return m_tables[i].LookupRowIndex(sttpValue);
-        }
-
-        public MetadataTable LookupTable(int index)
-        {
-            return m_tables[index];
-        }
-
         public MetadataDatabaseSource()
         {
             m_tablesLookup = new Dictionary<string, int>();
@@ -170,6 +126,50 @@ namespace Sttp.Data
             {
                 return m_tables[m_tablesLookup[tableName]];
             }
+        }
+
+        /// <summary>
+        /// Gets/Sets the readonly nature of this class.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get
+            {
+                return m_isReadOnly;
+            }
+            set
+            {
+                if (m_isReadOnly && !value) //True, changing to false
+                    throw new Exception("This class is immutable");
+                if (!m_isReadOnly && value) //False changing to true
+                {
+                    foreach (var metadataTable in m_tables)
+                    {
+                        metadataTable.SetIsReadOnly(Revision, TableLookup, LookupForeignKey);
+                    }
+                    RefreshSchema();
+                    m_isReadOnly = true;
+                }
+            }
+        }
+
+        private int TableLookup(string arg)
+        {
+            if (m_tablesLookup.TryGetValue(arg, out int index))
+            {
+                return index;
+            }
+            return -1;
+        }
+
+        private int LookupForeignKey(int i, SttpValue sttpValue)
+        {
+            return m_tables[i].LookupRowIndex(sttpValue);
+        }
+
+        public MetadataTable LookupTable(int index)
+        {
+            return m_tables[index];
         }
 
         public void AddOrReplaceTable(string tableName, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)

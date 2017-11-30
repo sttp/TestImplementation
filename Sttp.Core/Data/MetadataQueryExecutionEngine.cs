@@ -32,29 +32,32 @@ namespace Sttp.Core.Data
 
         public MetadataQueryExecutionEngine(MetadataDatabaseSource db, CommandGetMetadata command, WireEncoder encoder, SttpQueryStatement query)
         {
-            if (query.JoinedTables.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Indirect table are not supported by this engine");
             if (query.Procedure.Count > 0)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
             if (query.WhereBooleanVariable >= 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean where clauses are not supported by this engine");
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean WHERE clauses are not supported by this engine");
+            if (query.HavingProcedure.Count > 0)
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "HAVING clauses are not supported by this engine");
+            if (query.HavingBooleanVariable >= 0)
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "HAVING clauses are not supported by this engine");
+            if (query.GroupByVariables.Count > 0)
+                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "GROUP BY clauses are not supported by this engine");
 
-            query.ValidateAndRemapAllIndexes(out int tableIndexCount, out int variableIndexCount);
+            query.ValidateAndRemapAllIndexes(out int variableIndexCount, out int tableIndexCount);
+
             var variables = new SttpValue[variableIndexCount];
-            var table = db[query.DirectTable];
             var tables = FindAllTables(db, query, tableIndexCount);
-            var inputColumns = FindInputColumns(query, tables);
-            var outputColumns = CreateOutputColumns(query, variableIndexCount, inputColumns, tables);
-
-            var joinPath = CreateJoinedTablePath(db, query);
+            var inputColumns = MapInputColumns(query, tables);
+            var outputColumns = MapOutputColumns(query, variableIndexCount, inputColumns, tables);
+            var joinPath = MapAllJoins(db, query);
 
             var send = encoder.MetadataCommandBuilder();
-            send.DefineResponse(false, 0, db.SchemaVersion, db.Revision, table.TableName, outputColumns.ToList());
+            send.DefineResponse(false, 0, db.SchemaVersion, db.Revision, tables[0].TableName, outputColumns.ToList());
 
             MetadataRow[] tableRows = new MetadataRow[tableIndexCount];
-            foreach (var row in table.Rows)
+            foreach (var row in tables[0].Rows)
             {
-                TraverseAllJoinsForRows(db, tableRows, row, joinPath);
+                TraverseAllJoinsForRows(db, tableRows, row, joinPath, tables);
 
                 foreach (var input in query.Literals)
                 {
@@ -62,9 +65,16 @@ namespace Sttp.Core.Data
                 }
                 foreach (var input in inputColumns)
                 {
-                    variables[input.VariableNumber] = tableRows[input.TableIndex].Fields.Values[input.ColumnIndex];
+                    var r = tableRows[input.TableIndex];
+                    if (r == null)
+                    {
+                        variables[input.VariableNumber] = new SttpValue();
+                    }
+                    else
+                    {
+                        variables[input.VariableNumber] = r.Fields.Values[input.ColumnIndex];
+                    }
                 }
-
                 SttpValueSet values = new SttpValueSet();
                 foreach (var item in query.Outputs)
                 {
@@ -76,26 +86,39 @@ namespace Sttp.Core.Data
             send.EndCommand();
         }
 
-        private void TraverseAllJoinsForRows(MetadataDatabaseSource db, MetadataRow[] tableRows, MetadataRow row, JoinedTablePath[] joinPath)
+        private void TraverseAllJoinsForRows(MetadataDatabaseSource db, MetadataRow[] tableRows, MetadataRow row, JoinedTablePath[] joinPath, MetadataTable[] tables)
         {
             tableRows[0] = row;
             foreach (var item in joinPath)
             {
                 MetadataRow joinedRow = tableRows[item.TableIndex];
-                MetadataTable joinedTable = db.LookupTable(item.TableIndex);
+                if (joinedRow != null)
+                {
+                    MetadataTable joinedTable = tables[item.TableIndex];
 
-                int nextTableIndex = joinedTable.ForeignKeys[item.JoinIndex].TableIndex;
-                int nextRowIndex = joinedRow.ForeignKeys[item.JoinIndex];
+                    int nextTableIndex = joinedTable.ForeignKeys[item.JoinIndex].TableIndex;
+                    int nextRowIndex = joinedRow.ForeignKeys[item.JoinIndex];
+                    joinedTable = db.LookupTable(nextTableIndex);
 
-                joinedTable = db.LookupTable(nextTableIndex);
-                joinedRow = joinedTable.LookupRow(nextRowIndex);
-
-                tableRows[item.NewTableIndex] = joinedRow;
+                    if (nextRowIndex >= 0)
+                    {
+                        joinedRow = joinedTable.LookupRow(nextRowIndex);
+                        tableRows[item.NewTableIndex] = joinedRow;
+                    }
+                    else
+                    {
+                        tableRows[item.NewTableIndex] = null;
+                    }
+                }
+                else
+                {
+                    tableRows[item.NewTableIndex] = null;
+                }
             }
         }
 
 
-        private static JoinedTablePath[] CreateJoinedTablePath(MetadataDatabaseSource db, SttpQueryStatement query)
+        private static JoinedTablePath[] MapAllJoins(MetadataDatabaseSource db, SttpQueryStatement query)
         {
             //Export:
             //JoinIndex. This is the Column->Table join index that exists in the table.
@@ -107,7 +130,7 @@ namespace Sttp.Core.Data
             {
                 var path = new JoinedTablePath();
                 var qry = query.JoinedTables[x];
-                path.TableIndex = qry.ForeignTableIndex;
+                path.TableIndex = qry.ExistingTableIndex;
                 path.JoinIndex = previousTable.ForeignKeys.FindIndex(y => y.ColumnName == qry.ExistingForeignKeyColumn && y.ForeignTableName == qry.ForeignTable);
                 path.NewTableIndex = qry.ForeignTableIndex;
                 rv[x] = path;
@@ -117,7 +140,7 @@ namespace Sttp.Core.Data
 
         }
 
-        private static MetadataColumn[] CreateOutputColumns(SttpQueryStatement query, int variableIndexCount, ColumnsLookedUp[] inputColumns, MetadataTable[] tables)
+        private static MetadataColumn[] MapOutputColumns(SttpQueryStatement query, int variableIndexCount, ColumnsLookedUp[] inputColumns, MetadataTable[] tables)
         {
             var typeCodes = new SttpValueTypeCode[variableIndexCount];
             foreach (var input in query.Literals)
@@ -151,7 +174,7 @@ namespace Sttp.Core.Data
             return rv;
         }
 
-        private static ColumnsLookedUp[] FindInputColumns(SttpQueryStatement query, MetadataTable[] tables)
+        private static ColumnsLookedUp[] MapInputColumns(SttpQueryStatement query, MetadataTable[] tables)
         {
             var rv = new ColumnsLookedUp[query.ColumnInputs.Count];
             for (var x = 0; x < query.ColumnInputs.Count; x++)

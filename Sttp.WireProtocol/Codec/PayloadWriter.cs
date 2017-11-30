@@ -575,7 +575,7 @@ namespace Sttp.Codec
             }
         }
 
-        public void Write(List<SttpProcedureStep> list)
+        public void Write(List<SttpQueryProcedureStep> list)
         {
             if (list == null)
             {
@@ -589,7 +589,7 @@ namespace Sttp.Codec
             }
         }
 
-        public void Write(List<SttpOutputColumns> list)
+        public void Write(List<SttpQueryOutputColumns> list)
         {
             if (list == null)
             {

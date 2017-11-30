@@ -136,6 +136,82 @@ namespace Sttp.Tests
             MakeCSV(t);
         }
 
+
+        [TestMethod]
+        public void TestGetMetadataJoin()
+        {
+            var db = Load();
+
+            Queue<byte[]> packets = new Queue<byte[]>();
+
+            var writer = new WireEncoder();
+            var reader = new WireDecoder();
+
+            writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
+
+            var statements = new List<SttpQueryStatement>();
+
+            //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
+
+            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()));
+            statements[0].JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", 1));
+            statements[0].ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
+            statements[0].Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
+
+            var raw = new List<SttpQueryRaw>();
+            writer.GetMetadata(Guid.Empty, 0, false, statements, raw);
+
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.WriteData(data, 0, data.Length);
+            }
+
+            CommandObjects cmd = reader.NextCommand();
+
+            StringBuilder sb = new StringBuilder();
+            cmd.GetMetadata.GetFullOutputString("", sb);
+            Console.WriteLine(sb);
+
+            Assert.AreEqual(cmd.CommandCode, CommandCode.GetMetadata);
+
+            db.ProcessCommand(cmd.GetMetadata, writer);
+
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.WriteData(data, 0, data.Length);
+            }
+
+            cmd = reader.NextCommand();
+            Assert.AreEqual(cmd.CommandCode, CommandCode.Metadata);
+
+            MetadataQueryTable tbl = null;
+            MetadataSubCommandObjects subCmd;
+            while ((subCmd = cmd.Metadata.NextCommand()) != null)
+            {
+                switch (subCmd.SubCommand)
+                {
+                    case MetadataSubCommand.DefineResponse:
+                        tbl = new MetadataQueryTable(subCmd.DefineResponse);
+                        break;
+                    case MetadataSubCommand.DefineRow:
+                        tbl.ProcessCommand(subCmd.DefineRow);
+                        break;
+                    case MetadataSubCommand.UndefineRow:
+                        tbl.ProcessCommand(subCmd.UndefineRow);
+                        break;
+                    case MetadataSubCommand.Finished:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            var t = tbl.ToTable();
+            MakeCSV(t);
+        }
+
         private static SttpQueryStatement BuildRequest(string tableName, params string[] columns)
         {
             var s = new SttpQueryStatement();
@@ -143,8 +219,8 @@ namespace Sttp.Tests
 
             for (int x = 0; x < columns.Length; x++)
             {
-                s.ColumnInputs.Add(new SttpQueryColumn(-1, columns[x], x));
-                s.Outputs.Add(new SttpOutputColumns(x, columns[x]));
+                s.ColumnInputs.Add(new SttpQueryColumn(0, columns[x], x));
+                s.Outputs.Add(new SttpQueryOutputColumns(x, columns[x]));
             }
             return s;
         }

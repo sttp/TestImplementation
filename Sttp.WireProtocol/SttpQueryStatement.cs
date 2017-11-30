@@ -62,7 +62,6 @@ namespace Sttp
             ExistingForeignKeyColumn = rd.ReadString();
             ForeignTable = rd.ReadString();
             ForeignTableIndex = rd.ReadInt32();
-            throw new NotImplementedException();
         }
 
         public void Save(PayloadWriter wr)
@@ -105,20 +104,20 @@ namespace Sttp
         }
     }
 
-    public class SttpProcedureStep
+    public class SttpQueryProcedureStep
     {
         public string Function;
         public List<int> InputVariables;
         public int OutputVariable;
 
-        public SttpProcedureStep(string function, List<int> inputVariables, int outputVariable)
+        public SttpQueryProcedureStep(string function, List<int> inputVariables, int outputVariable)
         {
             Function = function;
             InputVariables = inputVariables;
             OutputVariable = outputVariable;
         }
 
-        public SttpProcedureStep(PayloadReader rd)
+        public SttpQueryProcedureStep(PayloadReader rd)
         {
             throw new NotImplementedException();
         }
@@ -131,22 +130,22 @@ namespace Sttp
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpProcedureStep)}) {OutputVariable} = {Function}({string.Join(",", InputVariables)}) ");
+            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryProcedureStep)}) {OutputVariable} = {Function}({string.Join(",", InputVariables)}) ");
         }
     }
 
-    public class SttpOutputColumns
+    public class SttpQueryOutputColumns
     {
         public int Variable;
         public string ColumnName;
 
-        public SttpOutputColumns(int variable, string columnName)
+        public SttpQueryOutputColumns(int variable, string columnName)
         {
             Variable = variable;
             ColumnName = columnName;
         }
 
-        public SttpOutputColumns(PayloadReader rd)
+        public SttpQueryOutputColumns(PayloadReader rd)
         {
             Variable = rd.ReadInt32();
             ColumnName = rd.ReadString();
@@ -160,7 +159,7 @@ namespace Sttp
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpOutputColumns)}) {Variable} = {ColumnName} ");
+            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryOutputColumns)}) {Variable} = {ColumnName} ");
         }
 
 
@@ -175,11 +174,11 @@ namespace Sttp
         public List<SttpQueryJoinedTable> JoinedTables = new List<SttpQueryJoinedTable>();
         public List<SttpQueryLiterals> Literals = new List<SttpQueryLiterals>();
         public List<SttpQueryColumn> ColumnInputs = new List<SttpQueryColumn>();
-        public List<SttpProcedureStep> Procedure = new List<SttpProcedureStep>();
-        public List<SttpOutputColumns> Outputs = new List<SttpOutputColumns>();
+        public List<SttpQueryProcedureStep> Procedure = new List<SttpQueryProcedureStep>();
+        public List<SttpQueryOutputColumns> Outputs = new List<SttpQueryOutputColumns>();
         public List<int> GroupByVariables = new List<int>();
         public int WhereBooleanVariable = -1;
-        public List<SttpProcedureStep> HavingProcedure = new List<SttpProcedureStep>();
+        public List<SttpQueryProcedureStep> HavingProcedure = new List<SttpQueryProcedureStep>();
         public int HavingBooleanVariable = -1;
 
         public int Limit = -1;
@@ -250,6 +249,7 @@ namespace Sttp
             foreach (var table in JoinedTables)
             {
                 table.ForeignTableIndex = tableIndexMap[table.ForeignTableIndex];
+                table.ExistingTableIndex = tableIndexMap[table.ExistingTableIndex];
             }
 
             //Fill the variable indexes
