@@ -90,7 +90,8 @@ namespace Sttp
         }
         public SttpQueryLiterals(PayloadReader rd)
         {
-            throw new NotImplementedException();
+            Variable = rd.ReadInt32();
+            Value = rd.ReadSttpValue();
         }
         public void Save(PayloadWriter wr)
         {
@@ -119,7 +120,9 @@ namespace Sttp
 
         public SttpQueryProcedureStep(PayloadReader rd)
         {
-            throw new NotImplementedException();
+            Function = rd.ReadString();
+            InputVariables = rd.ReadListInt();
+            OutputVariable = rd.ReadInt32();
         }
         public void Save(PayloadWriter wr)
         {
@@ -177,11 +180,10 @@ namespace Sttp
         public List<SttpQueryProcedureStep> Procedure = new List<SttpQueryProcedureStep>();
         public List<SttpQueryOutputColumns> Outputs = new List<SttpQueryOutputColumns>();
         public List<int> GroupByVariables = new List<int>();
-        public int WhereBooleanVariable = -1;
+        public int? WhereBooleanVariable;
         public List<SttpQueryProcedureStep> HavingProcedure = new List<SttpQueryProcedureStep>();
-        public int HavingBooleanVariable = -1;
-
-        public int Limit = -1;
+        public int? HavingBooleanVariable;
+        public int? Limit;
 
         public SttpQueryStatement()
         {
@@ -243,7 +245,12 @@ namespace Sttp
                 }
             }
 
-            //ToDo: Still need Having, Where, Group By defined.
+            if (WhereBooleanVariable.HasValue && !variableIndexMap.ContainsKey(WhereBooleanVariable.Value))
+            {
+                throw new Exception("WhereBooleanVariable with undefined variable");
+            }
+
+            //ToDo: Still need Having, Group By defined.
 
             //Now: Remap since the mapping is complete.
             foreach (var table in JoinedTables)
@@ -277,6 +284,12 @@ namespace Sttp
             {
                 v.Variable = variableIndexMap[v.Variable];
             }
+
+            if (WhereBooleanVariable.HasValue)
+            {
+                WhereBooleanVariable = variableIndexMap[WhereBooleanVariable.Value];
+            }
+
             tableIndexCount = tableIndexMap.Count;
             variableIndexCount = variableIndexMap.Count;
         }
@@ -313,16 +326,16 @@ namespace Sttp
                         GroupByVariables = rd.ReadListInt();
                         break;
                     case 8:
-                        WhereBooleanVariable = rd.ReadInt32();
+                        WhereBooleanVariable = rd.ReadNullInt32();
                         break;
                     case 9:
                         HavingProcedure = rd.ReadListSttpSttpProcedureStep();
                         break;
                     case 10:
-                        HavingBooleanVariable = rd.ReadInt32();
+                        HavingBooleanVariable = rd.ReadNullInt32();
                         break;
                     case 11:
-                        Limit = rd.ReadInt32();
+                        Limit = rd.ReadNullInt32();
                         break;
                     default:
                         throw new VersionNotFoundException();

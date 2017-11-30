@@ -630,6 +630,16 @@ namespace Sttp.Codec
                 list[x].Save(this);
             }
         }
+
+        public void Write(int? value)
+        {
+            Write(value.HasValue);
+            if (value.HasValue)
+            {
+                Write(value.Value);
+            }
+
+        }
     }
 }
 

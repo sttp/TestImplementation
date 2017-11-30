@@ -601,5 +601,12 @@ namespace Sttp.Codec
             }
             return rv;
         }
+
+        public int? ReadNullInt32()
+        {
+            if (ReadBoolean())
+                return ReadInt32();
+            return null;
+        }
     }
 }

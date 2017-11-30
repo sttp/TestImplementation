@@ -30,12 +30,29 @@ namespace Sttp.Core.Data
             }
         }
 
+        private class Procedure
+        {
+            public MetadataFunctions Function;
+
+            public Procedure(SttpQueryProcedureStep step)
+            {
+                switch (step.Function)
+                {
+                    case "MUL":
+                        Function = new FuncMultiply(step.InputVariables.ToArray(), step.OutputVariable);
+                        break;
+                    case "EQU":
+                        Function = new FuncEquals(step.InputVariables.ToArray(), step.OutputVariable);
+                        break;
+                    default:
+                        throw new Exception("Function does not exist");
+                }
+            }
+        }
+
+
         public MetadataQueryExecutionEngine(MetadataDatabaseSource db, CommandGetMetadata command, WireEncoder encoder, SttpQueryStatement query)
         {
-            if (query.Procedure.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Procedures are not supported by this engine");
-            if (query.WhereBooleanVariable >= 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "Boolean WHERE clauses are not supported by this engine");
             if (query.HavingProcedure.Count > 0)
                 encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "HAVING clauses are not supported by this engine");
             if (query.HavingBooleanVariable >= 0)
@@ -48,9 +65,9 @@ namespace Sttp.Core.Data
             var variables = new SttpValue[variableIndexCount];
             var tables = FindAllTables(db, query, tableIndexCount);
             var inputColumns = MapInputColumns(query, tables);
-            var outputColumns = MapOutputColumns(query, variableIndexCount, inputColumns, tables);
+            var procedures = CompileProcedures(query);
+            var outputColumns = MapOutputColumns(query, variableIndexCount, inputColumns, tables, procedures);
             var joinPath = MapAllJoins(db, query);
-
             var send = encoder.MetadataCommandBuilder();
             send.DefineResponse(false, 0, db.SchemaVersion, db.Revision, tables[0].TableName, outputColumns.ToList());
 
@@ -75,12 +92,24 @@ namespace Sttp.Core.Data
                         variables[input.VariableNumber] = r.Fields.Values[input.ColumnIndex];
                     }
                 }
-                SttpValueSet values = new SttpValueSet();
-                foreach (var item in query.Outputs)
+
+                foreach (var procedure in procedures)
                 {
-                    values.Values.Add(variables[item.Variable]);
+                    procedure.Function.Execute(variables);
                 }
-                send.DefineRow(row.Key, values);
+
+                if (!query.WhereBooleanVariable.HasValue 
+                    || (!variables[query.WhereBooleanVariable.Value].IsNull && variables[query.WhereBooleanVariable.Value].AsBool))
+                {
+                    SttpValueSet values = new SttpValueSet();
+                    foreach (var item in query.Outputs)
+                    {
+                        values.Values.Add(variables[item.Variable]);
+                    }
+                    send.DefineRow(row.Key, values);
+                }
+
+                
             }
             send.Finished();
             send.EndCommand();
@@ -140,7 +169,7 @@ namespace Sttp.Core.Data
 
         }
 
-        private static MetadataColumn[] MapOutputColumns(SttpQueryStatement query, int variableIndexCount, ColumnsLookedUp[] inputColumns, MetadataTable[] tables)
+        private static MetadataColumn[] MapOutputColumns(SttpQueryStatement query, int variableIndexCount, ColumnsLookedUp[] inputColumns, MetadataTable[] tables, Procedure[] procedures)
         {
             var typeCodes = new SttpValueTypeCode[variableIndexCount];
             foreach (var input in query.Literals)
@@ -151,6 +180,11 @@ namespace Sttp.Core.Data
             foreach (var input in inputColumns)
             {
                 typeCodes[input.VariableNumber] = tables[input.TableIndex].Columns[input.ColumnIndex].TypeCode;
+            }
+
+            foreach (var procedure in procedures)
+            {
+                procedure.Function.PropagateType(typeCodes);
             }
 
             var rv = new MetadataColumn[query.Outputs.Count];
@@ -184,5 +218,16 @@ namespace Sttp.Core.Data
             }
             return rv;
         }
+
+        private static Procedure[] CompileProcedures(SttpQueryStatement query)
+        {
+            var rv = new Procedure[query.Procedure.Count];
+            for (var x = 0; x < query.Procedure.Count; x++)
+            {
+                rv[x] = new Procedure(query.Procedure[x]);
+            }
+            return rv;
+        }
+
     }
 }
