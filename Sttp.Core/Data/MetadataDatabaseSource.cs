@@ -243,7 +243,11 @@ namespace Sttp.Data
 
             foreach (var query in command.Queries)
             {
-                var engine = new MetadataQueryExecutionEngine(this, command, encoder, query);
+                if (query.HasValue("Syntax", "SttpQueryStatement"))
+                {
+                    var statement = new SttpQueryStatement(query);
+                    var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
+                }
             }
         }
 

@@ -296,51 +296,54 @@ namespace Sttp
 
         public SttpQueryStatement(PayloadReader rd)
         {
-            bool quit = false;
-            while (!quit)
+
+        }
+
+        public SttpQueryStatement(SttpConnectionString query)
+        {
+            if (query.TryGetValue("Syntax", out SttpValue value))
             {
-                switch (rd.ReadByte())
+                if (value.AsString != "SttpQueryStatement")
                 {
-                    case 0:
-                        quit = true;
+                    throw new Exception("This query is not a STTP Statement query");
+                }
+            }
+
+            foreach (var element in query.Values)
+            {
+                switch (element.RecordName)
+                {
+                    case "DirectTable":
+                        DirectTable = element.Value.AsString;
                         break;
-                    case 1:
-                        DirectTable = rd.ReadString();
+                    case "JoinedTables":
+
+                    case "Literals":
+
+                    case "ColumnInputs":
+
+                    case "Procedure":
+
+                    case "Outputs":
+
+                    case "GroupByVariables":
+
+                    case "WhereBooleanVariable":
+                        WhereBooleanVariable = element.Value.AsInt32;
                         break;
-                    case 2:
-                        JoinedTables = rd.ReadListSttpQueryJoinedTable();
+                    case "HavingProcedure":
+
+                    case "HavingBooleanVariable":
+                        HavingBooleanVariable = element.Value.AsInt32;
                         break;
-                    case 3:
-                        Literals = rd.ReadListSttpQueryLiterals();
-                        break;
-                    case 4:
-                        ColumnInputs = rd.ReadListSttpQueryColumn();
-                        break;
-                    case 5:
-                        Procedure = rd.ReadListSttpSttpProcedureStep();
-                        break;
-                    case 6:
-                        Outputs = rd.ReadListSttpOutputColumns();
-                        break;
-                    case 7:
-                        GroupByVariables = rd.ReadListInt();
-                        break;
-                    case 8:
-                        WhereBooleanVariable = rd.ReadNullInt32();
-                        break;
-                    case 9:
-                        HavingProcedure = rd.ReadListSttpSttpProcedureStep();
-                        break;
-                    case 10:
-                        HavingBooleanVariable = rd.ReadNullInt32();
-                        break;
-                    case 11:
-                        Limit = rd.ReadNullInt32();
+                    case "Limit":
+                        Limit = element.Value.AsInt32;
                         break;
                     default:
-                        throw new VersionNotFoundException();
+                        if (element.Requirement != SttpConnectionStringCompatiblity.Optional)
+                            throw new Exception("An unknown query command was presented and not marked as optional.");
+                        break;
                 }
-
             }
         }
 
@@ -400,6 +403,11 @@ namespace Sttp
             {
                 table.GetFullOutputString(linePrefix + " ", builder);
             }
+        }
+
+        public SttpConnectionString ToConnectionString()
+        {
+            throw new NotImplementedException();
         }
     }
 }

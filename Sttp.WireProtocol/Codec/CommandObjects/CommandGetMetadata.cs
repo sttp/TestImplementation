@@ -9,16 +9,14 @@ namespace Sttp.Codec
         public readonly Guid SchemaVersion;
         public readonly long Revision;
         public readonly bool AreUpdateQueries;
-        public readonly List<SttpQueryStatement> Queries;
-        public readonly List<SttpQueryRaw> QueriesRaw;
+        public readonly List<SttpConnectionString> Queries;
 
         public CommandGetMetadata(PayloadReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             AreUpdateQueries = reader.ReadBoolean();
-            Queries = reader.ReadListSttpQueryStatement();
-            QueriesRaw = reader.ReadListSttpQueryRaw();
+            Queries = reader.ReadListSttpConnectionString();
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
@@ -28,15 +26,15 @@ namespace Sttp.Codec
             builder.Append(linePrefix); builder.AppendLine($"Revision: {Revision} ");
             builder.Append(linePrefix); builder.AppendLine($"AreUpdateQueries {AreUpdateQueries} ");
             builder.Append(linePrefix); builder.AppendLine($"Queries Count {Queries.Count} ");
-            foreach (var table in Queries)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-            builder.Append(linePrefix); builder.AppendLine($"QueriesRaw Count {QueriesRaw.Count} ");
-            foreach (var table in QueriesRaw)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
+            //foreach (var table in Queries)
+            //{
+            //    table.GetFullOutputString(linePrefix + " ", builder);
+            //}
+            //builder.Append(linePrefix); builder.AppendLine($"QueriesRaw Count {QueriesRaw.Count} ");
+            //foreach (var table in QueriesRaw)
+            //{
+            //    table.GetFullOutputString(linePrefix + " ", builder);
+            //}
         }
     }
 }

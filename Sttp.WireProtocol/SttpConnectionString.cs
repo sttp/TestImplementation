@@ -26,17 +26,73 @@ namespace Sttp
 
     public class SttpConnectionString
     {
-        public List<Tuple<string, SttpConnectionStringCompatiblity, SttpValue>> Values;
+        public List<SttpConnectionStringElement> Values;
 
-        public SttpConnectionString(PayloadReader payloadReader)
+        public SttpConnectionString(PayloadReader rd)
         {
-            throw new NotImplementedException();
+            Values = rd.ReadSttpConnectionStringElement();
         }
 
-        public void Save(PayloadWriter payloadWriter)
+        public void Save(PayloadWriter wr)
         {
-            throw new NotImplementedException();
+            wr.Write(Values);
         }
+
+        public bool TryGetValue(string recordName, out SttpValue value)
+        {
+            foreach (var item in Values)
+            {
+                if (item.RecordName == recordName)
+                {
+                    value = item.Value;
+                    return true;
+                }
+            }
+            value = null;
+            return false;
+        }
+
+        public bool HasValue(string syntax, string sttpquerystatement)
+        {
+            foreach (var item in Values)
+            {
+                if (item.RecordName == syntax)
+                {
+                    if (sttpquerystatement == item.Value.AsString)
+                        return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public class SttpConnectionStringElement
+    {
+        public string RecordName;
+        public SttpConnectionStringCompatiblity Requirement;
+        public SttpValue Value;
+
+        public SttpConnectionStringElement(string recordName, SttpConnectionStringCompatiblity requirement, SttpValue value)
+        {
+            RecordName = recordName;
+            Requirement = requirement;
+            Value = value;
+        }
+
+        public SttpConnectionStringElement(PayloadReader rd)
+        {
+            RecordName = rd.ReadString();
+            Requirement = (SttpConnectionStringCompatiblity)rd.ReadByte();
+            Value = rd.ReadSttpValue();
+        }
+
+        public void Save(PayloadWriter wr)
+        {
+            wr.Write(RecordName);
+            wr.Write((byte)Requirement);
+            wr.Write(Value);
+        }
+
     }
 
 }

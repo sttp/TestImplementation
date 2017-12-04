@@ -608,5 +608,29 @@ namespace Sttp.Codec
                 return ReadInt32();
             return null;
         }
+
+        public List<SttpConnectionString> ReadListSttpConnectionString()
+        {
+            var rv = new List<SttpConnectionString>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpConnectionString(this));
+                len--;
+            }
+            return rv;
+        }
+
+        public List<SttpConnectionStringElement> ReadSttpConnectionStringElement()
+        {
+            var rv = new List<SttpConnectionStringElement>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpConnectionStringElement(this));
+                len--;
+            }
+            return rv;
+        }
     }
 }

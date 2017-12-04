@@ -76,14 +76,13 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var statements = new List<SttpQueryStatement>();
+            var statements = new List<SttpConnectionString>();
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
-            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()));
+            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToConnectionString());
 
-            var raw = new List<SttpQueryRaw>();
-            writer.GetMetadata(Guid.Empty, 0, false, statements, raw);
+            writer.GetMetadata(Guid.Empty, 0, false, statements);
 
             while (packets.Count > 0)
             {
@@ -149,21 +148,20 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var statements = new List<SttpQueryStatement>();
+            var statements = new List<SttpConnectionString>();
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
-            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()));
-            statements[0].JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", 1));
-            statements[0].ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
-            statements[0].Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
-            statements[0].Literals.Add(new SttpQueryLiterals(new SttpValue(327), -2));
-            statements[0].Procedure.Add(new SttpQueryProcedureStep("EQU",new int[]{3,-2}.ToList(), -3));
-            statements[0].WhereBooleanVariable = -3;
+            var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
+            s.JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", 1));
+            s.ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
+            s.Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
+            s.Literals.Add(new SttpQueryLiterals(new SttpValue(327), -2));
+            s.Procedure.Add(new SttpQueryProcedureStep("EQU",new int[]{3,-2}.ToList(), -3));
+            s.WhereBooleanVariable = -3;
+            statements.Add(s.ToConnectionString());
 
-
-            var raw = new List<SttpQueryRaw>();
-            writer.GetMetadata(Guid.Empty, 0, false, statements, raw);
+            writer.GetMetadata(Guid.Empty, 0, false, statements);
 
             while (packets.Count > 0)
             {
