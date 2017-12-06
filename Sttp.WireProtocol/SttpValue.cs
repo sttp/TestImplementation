@@ -184,6 +184,11 @@ namespace Sttp
             }
         }
 
+        internal void Load(Stream stream)
+        {
+            throw new NotImplementedException();
+        }
+
         public SttpValue(object x)
         {
             SetValue(x);
