@@ -48,7 +48,7 @@ namespace Sttp
             if (columnDataType == typeof(String))
                 return SttpValueTypeCode.String;
             if (columnDataType == typeof(byte[]))
-                return SttpValueTypeCode.Buffer;
+                return SttpValueTypeCode.SttpBuffer;
 
             return SttpValueTypeCode.Null;
         }
@@ -99,11 +99,11 @@ namespace Sttp
                     return typeof(Guid);
                 case SttpValueTypeCode.String:
                     return typeof(String);
-                case SttpValueTypeCode.Buffer:
+                case SttpValueTypeCode.SttpBuffer:
                     return typeof(byte[]);
-                case SttpValueTypeCode.ValueSet:
+                case SttpValueTypeCode.SttpValueSet:
                     return typeof(SttpValueSet);
-                case SttpValueTypeCode.NamedSet:
+                case SttpValueTypeCode.SttpNamedSet:
                     return typeof(SttpNamedSet);
                 case SttpValueTypeCode.SttpMarkup:
                     return typeof(byte[]);

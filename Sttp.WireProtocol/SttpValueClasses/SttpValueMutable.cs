@@ -157,15 +157,15 @@ namespace Sttp
                 case SttpValueTypeCode.String:
                     SetValue(rd.ReadString());
                     break;
-                case SttpValueTypeCode.Buffer:
+                case SttpValueTypeCode.SttpBuffer:
                     throw new NotImplementedException();
                     //AsBuffer = rd.ReadBuffer();
                     break;
-                case SttpValueTypeCode.ValueSet:
+                case SttpValueTypeCode.SttpValueSet:
                     throw new NotImplementedException();
                     //AsValueSet = rd.ReadValueSet();
                     break;
-                case SttpValueTypeCode.NamedSet:
+                case SttpValueTypeCode.SttpNamedSet:
                     throw new NotImplementedException();
                     //AsNamedSet = rd.ReadNamedSet();
                     break;
@@ -242,9 +242,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return sbyte.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -299,9 +299,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return short.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -357,9 +357,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return int.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -415,9 +415,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return long.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -473,9 +473,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return byte.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -531,9 +531,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return ushort.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -589,9 +589,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return uint.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -647,9 +647,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return ulong.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -705,9 +705,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return decimal.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -763,9 +763,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return double.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -821,9 +821,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return float.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -879,15 +879,15 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return DateTime.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         case SttpValueTypeCode.DateTime:
                             return m_valueDateTime;
                         case SttpValueTypeCode.DateTimeOffset:
                             return m_valueDateTimeOffset.UtcDateTime;
-                        case SttpValueTypeCode.NamedSet:
+                        case SttpValueTypeCode.SttpNamedSet:
                         case SttpValueTypeCode.SttpMarkup:
                         case SttpValueTypeCode.BulkTransportGuid:
                         default:
@@ -944,15 +944,15 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return DateTimeOffset.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         case SttpValueTypeCode.DateTime:
                             return new DateTimeOffset(m_valueDateTime);
                         case SttpValueTypeCode.DateTimeOffset:
                             return m_valueDateTimeOffset.UtcDateTime;
-                        case SttpValueTypeCode.NamedSet:
+                        case SttpValueTypeCode.SttpNamedSet:
                         case SttpValueTypeCode.SttpMarkup:
                         case SttpValueTypeCode.BulkTransportGuid:
                         default:
@@ -1009,9 +1009,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return SttpTime.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1067,9 +1067,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return SttpTimeOffset.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1125,9 +1125,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return TimeSpan.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1183,9 +1183,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return char.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1250,9 +1250,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             return bool.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1307,9 +1307,9 @@ namespace Sttp
                             return m_valueGuid;
                         case SttpValueTypeCode.String:
                             return Guid.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1365,10 +1365,10 @@ namespace Sttp
                             return m_valueGuid.ToString();
                         case SttpValueTypeCode.String:
                             return (string)m_valueObject;
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             //ToDo: Return a byte string 0x292A78B402;
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1386,7 +1386,7 @@ namespace Sttp
             }
         }
 
-        public override byte[] AsBuffer
+        public override SttpBuffer AsBuffer
         {
             get
             {
@@ -1432,9 +1432,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             throw new InvalidCastException("Cannot cast from String");
-                        case SttpValueTypeCode.Buffer:
-                            return (byte[])m_valueObject;
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpBuffer:
+                            return (SttpBuffer)m_valueObject;
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1444,7 +1444,7 @@ namespace Sttp
 
         }
 
-        public override SttpValueSet AsValueSet
+        public override SttpValueSet AsSttpValueSet
         {
             get
             {
@@ -1490,9 +1490,9 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             throw new InvalidCastException("Cannot cast from String");
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             return (SttpValueSet)m_valueObject;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1502,7 +1502,7 @@ namespace Sttp
 
         }
 
-        public override SttpNamedSet AsNamedSet
+        public override SttpNamedSet AsSttpNamedSet
         {
             get
             {
@@ -1548,11 +1548,11 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
                             throw new InvalidCastException("Cannot cast from String");
-                        case SttpValueTypeCode.Buffer:
+                        case SttpValueTypeCode.SttpBuffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.ValueSet:
+                        case SttpValueTypeCode.SttpValueSet:
                             throw new InvalidCastException("Cannot cast from Set");
-                        case SttpValueTypeCode.NamedSet:
+                        case SttpValueTypeCode.SttpNamedSet:
                             return (SttpNamedSet)m_valueObject;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1562,19 +1562,9 @@ namespace Sttp
 
         }
 
-        /// <summary>
-        /// Gets if this class has a value. Clear this by setting a value.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">When setting this value to true. Set a value by calling one of the <see cref="SetValue"/> methods.</exception>
-        public override bool IsNull
-        {
-            get
-            {
-                return m_valueTypeCode == SttpValueTypeCode.Null;
-            }
+        public override SttpMarkup AsSttpMarkup { get; }
 
-        }
-
+        public override Guid AsBulkTransportGuid { get; }
 
         /// <summary>
         /// The type code of the raw value.
@@ -1591,13 +1581,9 @@ namespace Sttp
 
         #region [ Methods ] 
 
-        /// <summary>
-        /// Clones the value
-        /// </summary>
-        /// <returns></returns>
-        public override SttpValue Clone()
+        public SttpValue CloneAsImmutable()
         {
-            return new SttpValueMutable(this);
+            throw new NotImplementedException();
         }
 
         public void SetValue(object value)
@@ -1809,17 +1795,17 @@ namespace Sttp
         }
         public void SetValue(byte[] value)
         {
-            m_valueTypeCode = SttpValueTypeCode.Buffer;
+            m_valueTypeCode = SttpValueTypeCode.SttpBuffer;
             m_valueObject = value;
         }
         public void SetValue(SttpValueSet value)
         {
-            m_valueTypeCode = SttpValueTypeCode.ValueSet;
+            m_valueTypeCode = SttpValueTypeCode.SttpValueSet;
             m_valueObject = value;
         }
         public void SetValue(SttpNamedSet value)
         {
-            m_valueTypeCode = SttpValueTypeCode.NamedSet;
+            m_valueTypeCode = SttpValueTypeCode.SttpNamedSet;
             m_valueObject = value;
         }
 
@@ -1919,12 +1905,12 @@ namespace Sttp
                         return AsGuid;
                     case SttpValueTypeCode.String:
                         return AsString;
-                    case SttpValueTypeCode.Buffer:
+                    case SttpValueTypeCode.SttpBuffer:
                         return AsBuffer;
-                    case SttpValueTypeCode.ValueSet:
-                        return AsValueSet;
-                    case SttpValueTypeCode.NamedSet:
-                        return AsNamedSet;
+                    case SttpValueTypeCode.SttpValueSet:
+                        return AsSttpValueSet;
+                    case SttpValueTypeCode.SttpNamedSet:
+                        return AsSttpNamedSet;
                     case SttpValueTypeCode.SttpMarkup:
                         throw new NotImplementedException();
                     //return AsConnectionString);
@@ -1935,140 +1921,6 @@ namespace Sttp
                         throw new ArgumentOutOfRangeException();
                 }
             }
-        }
-
-        public override void Save(PayloadWriter wr)
-        {
-            wr.Write((byte)ValueTypeCode);
-            switch (ValueTypeCode)
-            {
-                case SttpValueTypeCode.Null:
-                    break;
-                case SttpValueTypeCode.SByte:
-                    wr.Write(AsSByte);
-                    break;
-                case SttpValueTypeCode.Int16:
-                    wr.Write(AsInt16);
-                    break;
-                case SttpValueTypeCode.Int32:
-                    wr.Write(AsInt32);
-                    break;
-                case SttpValueTypeCode.Int64:
-                    wr.Write(AsInt64);
-                    break;
-                case SttpValueTypeCode.Byte:
-                    wr.Write(AsByte);
-                    break;
-                case SttpValueTypeCode.UInt16:
-                    wr.Write(AsUInt16);
-                    break;
-                case SttpValueTypeCode.UInt32:
-                    wr.Write(AsUInt32);
-                    break;
-                case SttpValueTypeCode.UInt64:
-                    wr.Write(AsUInt64);
-                    break;
-                case SttpValueTypeCode.Single:
-                    wr.Write(AsSingle);
-                    break;
-                case SttpValueTypeCode.Double:
-                    wr.Write(AsDouble);
-                    break;
-                case SttpValueTypeCode.Decimal:
-                    wr.Write(AsDecimal);
-                    break;
-                case SttpValueTypeCode.DateTime:
-                    wr.Write(AsDateTime);
-                    break;
-                case SttpValueTypeCode.DateTimeOffset:
-                    throw new NotImplementedException();
-                    //wr.Write(AsDateTimeOffset);
-                    break;
-                case SttpValueTypeCode.SttpTime:
-                    throw new NotImplementedException();
-                    //wr.Write(AsSttpTime);
-                    break;
-                case SttpValueTypeCode.SttpTimeOffset:
-                    throw new NotImplementedException();
-                    //wr.Write(AsSttpTimeOffset);
-                    break;
-                case SttpValueTypeCode.TimeSpan:
-                    wr.Write(AsTimeSpan.Ticks);
-                    break;
-                case SttpValueTypeCode.Bool:
-                    wr.Write(AsBool);
-                    break;
-                case SttpValueTypeCode.Char:
-                    wr.Write(AsChar);
-                    break;
-                case SttpValueTypeCode.Guid:
-                    wr.Write(AsGuid);
-                    break;
-                case SttpValueTypeCode.String:
-                    wr.Write(AsString);
-                    break;
-                case SttpValueTypeCode.Buffer:
-                    wr.Write(AsBuffer);
-                    break;
-                case SttpValueTypeCode.ValueSet:
-                    wr.Write(AsValueSet);
-                    break;
-                case SttpValueTypeCode.NamedSet:
-                    wr.Write(AsNamedSet);
-                    break;
-                case SttpValueTypeCode.SttpMarkup:
-                    throw new NotImplementedException();
-                    //wr.Write(AsConnectionString);
-                    break;
-                case SttpValueTypeCode.BulkTransportGuid:
-                    throw new NotImplementedException();
-                    //wr.Write(AsBulkTransportGuid);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        public override string ToString()
-        {
-            return ToTypeString;
-        }
-
-        public bool Equals(SttpValueMutable other)
-        {
-            if (ReferenceEquals(null, other))
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-            return m_rawBytes0_7 == other.m_rawBytes0_7 && m_rawBytes8_15 == other.m_rawBytes8_15 && Equals(m_valueObject, other.m_valueObject) && m_valueTypeCode == other.m_valueTypeCode;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-                return false;
-            if (ReferenceEquals(this, obj))
-                return true;
-            if (obj.GetType() != this.GetType())
-                return false;
-            return Equals((SttpValue)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = m_rawBytes0_7.GetHashCode();
-                hashCode = (hashCode * 397) ^ m_rawBytes8_15.GetHashCode();
-                hashCode = (hashCode * 397) ^ (m_valueObject != null ? m_valueObject.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (int)m_valueTypeCode;
-                return hashCode;
-            }
-        }
-
-        public override void Save(Stream value)
-        {
-            throw new NotImplementedException();
         }
 
         public void SetNull()

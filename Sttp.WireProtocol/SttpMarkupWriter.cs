@@ -133,14 +133,14 @@ namespace Sttp
                 m_stream.Write7BitInt(nameIndex);
             }
             m_prevNameAsInt = nameIndex;
-            value.Save(m_stream);
+            //value.Save(m_stream);
         }
 
         private void Encode(string name, SttpMarkupCompatiblity compatiblity, SttpValue value, int nameIndex)
         {
             m_stream.Write((byte)((int)SttpMarkupNodeType.Value | ((int)compatiblity << 2) | (1 << 4) | (0 << 5)));
             m_stream.Write(name);
-            value.Save(m_stream);
+            //value.Save(m_stream);
             m_prevNameAsInt = nameIndex;
         }
 

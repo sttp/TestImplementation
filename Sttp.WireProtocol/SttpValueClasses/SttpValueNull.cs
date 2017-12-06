@@ -9,6 +9,10 @@ namespace Sttp.SttpValueClasses
 {
     public class SttpValueNull : SttpValue
     {
+        public override SttpValueTypeCode ValueTypeCode => SttpValueTypeCode.Null;
+        public override string ToTypeString => "(Null)";
+        public override object ToNativeType => null;
+
         public override sbyte AsSByte => throw new InvalidCastException();
         public override short AsInt16 => throw new InvalidCastException();
         public override int AsInt32 => throw new InvalidCastException();
@@ -29,32 +33,27 @@ namespace Sttp.SttpValueClasses
         public override bool AsBool => throw new InvalidCastException();
         public override Guid AsGuid => throw new InvalidCastException();
         public override string AsString => throw new InvalidCastException();
-        public override string ToTypeString => "(Null)";
-        public override byte[] AsBuffer => throw new InvalidCastException();
-        public override SttpValueSet AsValueSet => throw new InvalidCastException();
-        public override SttpNamedSet AsNamedSet => throw new InvalidCastException();
-        public override object ToNativeType => null;
-        public override bool IsNull => true;
+        public override SttpBuffer AsBuffer => throw new InvalidCastException();
+        public override SttpValueSet AsSttpValueSet => throw new InvalidCastException();
+        public override SttpNamedSet AsSttpNamedSet => throw new InvalidCastException();
+        public override SttpMarkup AsSttpMarkup => throw new InvalidCastException();
+        public override Guid AsBulkTransportGuid => throw new InvalidCastException();
+    }
 
-        public override SttpValueTypeCode ValueTypeCode { get; }
-        public override SttpValue Clone()
+
+    internal static class SttpValueNullMethods
+    {
+        public static SttpValueTypeCode ValueTypeCode => SttpValueTypeCode.Null;
+
+        public static string ToTypeString(int value)
         {
-            return this;
+            return $"(Null)";
         }
 
-        public override void Save(PayloadWriter wr)
+        public static object ToNativeType(int value)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
-        public override int GetHashCode()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Save(Stream value)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
