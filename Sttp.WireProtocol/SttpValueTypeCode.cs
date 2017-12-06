@@ -28,7 +28,6 @@
         NamedSet = 23,          // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
         SttpMarkup = 24,        // Yet another markup language
         BulkTransportGuid = 25, // A special type of GUID that indicates it is transmitted out of band.
-        Missing = 26,           // Indicates that the value is missing. This is different from NULL because NULL means the value is present, but it's null. Missing means nothing is actively stated about the value.
     }
 
     // sizeof(uint8), 1-byte

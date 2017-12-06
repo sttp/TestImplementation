@@ -5,26 +5,26 @@ namespace Sttp
     /// <summary>
     /// The default timestamp field for STTP.
     /// </summary>
-    public struct SttpTimestampOffset
+    public struct SttpTimeOffset
     {
         private const long TicksMask = LeapsecondFlag - 1;
         private const long LeapsecondFlag = 1L << 62;
 
         public readonly long RawValue;           // Bits 0-62 Same as DateTime.Ticks  Bit 63 LeapSecondPending. Bit64 Sign for time BC.
 
-        public SttpTimestampOffset(DateTime time, bool leapSecondInProgress = false)
+        public SttpTimeOffset(DateTime time, bool leapSecondInProgress = false)
         {
             RawValue = time.Ticks;
             if (leapSecondInProgress)
                 RawValue |= LeapsecondFlag;
         }
 
-        public SttpTimestampOffset(long rawValue)
+        public SttpTimeOffset(long rawValue)
         {
             RawValue = rawValue;
         }
 
-        public SttpTimestampOffset(DateTimeOffset rawValue)
+        public SttpTimeOffset(DateTimeOffset rawValue)
         {
             throw new NotImplementedException();
         }
@@ -33,12 +33,12 @@ namespace Sttp
 
         public bool LeapsecondInProgress => (RawValue & LeapsecondFlag) > 0;
 
-        public static SttpTimestampOffset Parse(string isString)
+        public static SttpTimeOffset Parse(string isString)
         {
             throw new NotImplementedException();
         }
 
-        public SttpTimestamp ToSttpTimestamp()
+        public SttpTime ToSttpTimestamp()
         {
             throw new NotImplementedException();
         }

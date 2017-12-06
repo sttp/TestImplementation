@@ -22,18 +22,18 @@ namespace Sttp.SttpValueClasses
         public override float AsSingle => throw new InvalidCastException();
         public override DateTime AsDateTime => throw new InvalidCastException();
         public override DateTimeOffset AsDateTimeOffset => throw new InvalidCastException();
-        public override SttpTimestamp AsSttpTimestamp => throw new InvalidCastException();
-        public override SttpTimestampOffset AsSttpTimestampOffset => throw new InvalidCastException();
+        public override SttpTime AsSttpTime => throw new InvalidCastException();
+        public override SttpTimeOffset AsSttpTimeOffset => throw new InvalidCastException();
         public override TimeSpan AsTimeSpan => throw new InvalidCastException();
         public override char AsChar => throw new InvalidCastException();
         public override bool AsBool => throw new InvalidCastException();
         public override Guid AsGuid => throw new InvalidCastException();
         public override string AsString => throw new InvalidCastException();
-        public override string AsTypeString => throw new InvalidCastException();
+        public override string ToTypeString => "(Null)";
         public override byte[] AsBuffer => throw new InvalidCastException();
         public override SttpValueSet AsValueSet => throw new InvalidCastException();
         public override SttpNamedSet AsNamedSet => throw new InvalidCastException();
-        public override object AsNativeType => null;
+        public override object ToNativeType => null;
         public override bool IsNull => true;
 
         public override SttpValueTypeCode ValueTypeCode { get; }

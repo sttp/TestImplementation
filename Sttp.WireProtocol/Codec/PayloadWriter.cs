@@ -13,13 +13,11 @@ namespace Sttp.Codec
         private static readonly byte[] Empty = new byte[0];
         private byte[] m_buffer;
         private int m_position;
-        private SessionDetails m_sessionDetails;
         private CommandEncoder m_encoder;
 
-        public PayloadWriter(SessionDetails sessionDetails, CommandEncoder encoder)
+        public PayloadWriter(CommandEncoder encoder)
         {
             m_encoder = encoder;
-            m_sessionDetails = sessionDetails;
             m_buffer = new byte[512];
         }
 

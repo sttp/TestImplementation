@@ -48,9 +48,9 @@ namespace Sttp
         [FieldOffset(0)]
         private bool m_valueBool;
         [FieldOffset(0)]
-        private SttpTimestamp m_valueSttpTimestamp;
+        private SttpTime m_valueSttpTime;
         [FieldOffset(0)]
-        private SttpTimestampOffset m_valueSttpTimestampOffset;
+        private SttpTimeOffset m_valueSttpTimeOffset;
         [FieldOffset(0)]
         private DateTime m_valueDateTime;
         [FieldOffset(0)]
@@ -866,9 +866,9 @@ namespace Sttp
                         case SttpValueTypeCode.Single:
                             throw new InvalidCastException("Cannot cast from Single");
                         case SttpValueTypeCode.SttpTime:
-                            return m_valueSttpTimestamp.Ticks;
+                            return m_valueSttpTime.Ticks;
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return m_valueSttpTimestampOffset.Ticks;
+                            return m_valueSttpTimeOffset.Ticks;
                         case SttpValueTypeCode.TimeSpan:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
@@ -963,7 +963,7 @@ namespace Sttp
 
         }
 
-        public override SttpTimestamp AsSttpTimestamp
+        public override SttpTime AsSttpTime
         {
             get
             {
@@ -996,9 +996,9 @@ namespace Sttp
                         case SttpValueTypeCode.Single:
                             throw new InvalidCastException("Cannot cast from Single");
                         case SttpValueTypeCode.SttpTime:
-                            return m_valueSttpTimestamp;
+                            return m_valueSttpTime;
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return m_valueSttpTimestampOffset.ToSttpTimestamp();
+                            return m_valueSttpTimeOffset.ToSttpTimestamp();
                         case SttpValueTypeCode.TimeSpan:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
@@ -1008,7 +1008,7 @@ namespace Sttp
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return SttpTimestamp.Parse((string)m_valueObject);
+                            return SttpTime.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.ValueSet:
@@ -1021,7 +1021,7 @@ namespace Sttp
 
         }
 
-        public override SttpTimestampOffset AsSttpTimestampOffset
+        public override SttpTimeOffset AsSttpTimeOffset
         {
             get
             {
@@ -1054,9 +1054,9 @@ namespace Sttp
                         case SttpValueTypeCode.Single:
                             throw new InvalidCastException("Cannot cast from Single");
                         case SttpValueTypeCode.SttpTime:
-                            return m_valueSttpTimestamp.ToSttpTimestampOffset();
+                            return m_valueSttpTime.ToSttpTimestampOffset();
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return m_valueSttpTimestampOffset;
+                            return m_valueSttpTimeOffset;
                         case SttpValueTypeCode.TimeSpan:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
@@ -1066,7 +1066,7 @@ namespace Sttp
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
-                            return SttpTimestampOffset.Parse((string)m_valueObject);
+                            return SttpTimeOffset.Parse((string)m_valueObject);
                         case SttpValueTypeCode.Buffer:
                             throw new InvalidCastException("Cannot cast from Buffer");
                         case SttpValueTypeCode.ValueSet:
@@ -1352,9 +1352,9 @@ namespace Sttp
                         case SttpValueTypeCode.Single:
                             return m_valueSingle.ToString();
                         case SttpValueTypeCode.SttpTime:
-                            return m_valueSttpTimestamp.ToString();
+                            return m_valueSttpTime.ToString();
                         case SttpValueTypeCode.SttpTimeOffset:
-                            return m_valueSttpTimestampOffset.ToString();
+                            return m_valueSttpTimeOffset.ToString();
                         case SttpValueTypeCode.TimeSpan:
                             return m_valueTimeSpan.ToString();
                         case SttpValueTypeCode.Char:
@@ -1378,7 +1378,7 @@ namespace Sttp
 
         }
 
-        public override string AsTypeString
+        public override string ToTypeString
         {
             get
             {
@@ -1653,13 +1653,13 @@ namespace Sttp
             {
                 SetValue((decimal)value);
             }
-            else if (type == typeof(SttpTimestamp))
+            else if (type == typeof(SttpTime))
             {
-                SetValue((SttpTimestamp)value);
+                SetValue((SttpTime)value);
             }
-            else if (type == typeof(SttpTimestampOffset))
+            else if (type == typeof(SttpTimeOffset))
             {
-                SetValue((SttpTimestampOffset)value);
+                SetValue((SttpTimeOffset)value);
             }
             else if (type == typeof(DateTime))
             {
@@ -1762,15 +1762,15 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.Decimal;
             m_valueDecimal = value;
         }
-        public void SetValue(SttpTimestamp value)
+        public void SetValue(SttpTime value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpTime;
-            m_valueSttpTimestamp = value;
+            m_valueSttpTime = value;
         }
-        public void SetValue(SttpTimestampOffset value)
+        public void SetValue(SttpTimeOffset value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
-            m_valueSttpTimestampOffset = value;
+            m_valueSttpTimeOffset = value;
         }
         public void SetValue(DateTime value)
         {
@@ -1852,11 +1852,6 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
-        public object ToNativeType(SttpValueTypeCode typeCode)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Save(PayloadWriter payloadWriter, bool includeTypeCode)
         {
             throw new NotImplementedException();
@@ -1876,7 +1871,7 @@ namespace Sttp
             return rv;
         }
 
-        public override object AsNativeType
+        public override object ToNativeType
         {
             get
             {
@@ -1911,9 +1906,9 @@ namespace Sttp
                     case SttpValueTypeCode.DateTimeOffset:
                         return AsDateTimeOffset;
                     case SttpValueTypeCode.SttpTime:
-                        return AsSttpTimestamp;
+                        return AsSttpTime;
                     case SttpValueTypeCode.SttpTimeOffset:
-                        return AsSttpTimestampOffset;
+                        return AsSttpTimeOffset;
                     case SttpValueTypeCode.TimeSpan:
                         return AsTimeSpan.Ticks;
                     case SttpValueTypeCode.Bool:
@@ -2036,7 +2031,7 @@ namespace Sttp
 
         public override string ToString()
         {
-            return AsTypeString;
+            return ToTypeString;
         }
 
         public bool Equals(SttpValueMutable other)

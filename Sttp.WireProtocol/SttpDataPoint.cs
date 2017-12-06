@@ -29,7 +29,7 @@ namespace Sttp
         /// <summary>
         /// A 64-bit timestamp
         /// </summary>
-        public SttpTimestamp Timestamp;
+        public SttpTime Time;
 
         /// <summary>
         /// The value for the data point.

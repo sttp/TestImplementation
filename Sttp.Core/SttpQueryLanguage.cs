@@ -286,7 +286,7 @@ namespace Sttp
 
             if (Literals.Count > 0)
             {
-                sb.AppendLine($"LITERALS ( {string.Join("\n,", Literals.Select(x => $"#{x.Value.AsTypeString}# >> {x.Key}"))} )");
+                sb.AppendLine($"LITERALS ( {string.Join("\n,", Literals.Select(x => $"#{x.Value.ToTypeString}# >> {x.Key}"))} )");
             }
 
             foreach (var item in Sections)

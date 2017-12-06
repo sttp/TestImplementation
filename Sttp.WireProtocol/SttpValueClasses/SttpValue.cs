@@ -35,18 +35,18 @@ namespace Sttp
         public abstract float AsSingle { get; }
         public abstract DateTime AsDateTime { get; }
         public abstract DateTimeOffset AsDateTimeOffset { get; }
-        public abstract SttpTimestamp AsSttpTimestamp { get; }
-        public abstract SttpTimestampOffset AsSttpTimestampOffset { get; }
+        public abstract SttpTime AsSttpTime { get; }
+        public abstract SttpTimeOffset AsSttpTimeOffset { get; }
         public abstract TimeSpan AsTimeSpan { get; }
         public abstract char AsChar { get; }
         public abstract bool AsBool { get; }
         public abstract Guid AsGuid { get; }
         public abstract string AsString { get; }
-        public abstract string AsTypeString { get; }
+        public abstract string ToTypeString { get; }
         public abstract byte[] AsBuffer { get; }
         public abstract SttpValueSet AsValueSet { get; }
         public abstract SttpNamedSet AsNamedSet { get; }
-        public abstract object AsNativeType { get; }
+        public abstract object ToNativeType { get; }
 
         /// <summary>
         /// Gets if this class has a value. Clear this by setting a value.
@@ -84,10 +84,10 @@ namespace Sttp
             return !(a == b);
         }
 
-        public object ToNativeType(SttpValueTypeCode typeCode)
-        {
-            throw new NotImplementedException();
-        }
+        //public object ToNativeType(SttpValueTypeCode typeCode)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public static explicit operator SttpValue(bool v)
         {
@@ -118,7 +118,7 @@ namespace Sttp
 
         public override string ToString()
         {
-            return AsTypeString;
+            return ToTypeString;
         }
 
         public bool Equals(SttpValue other)

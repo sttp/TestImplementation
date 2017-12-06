@@ -5,15 +5,15 @@ namespace Sttp
 {
     public static class SttpValueTypeCodec
     {
-        public static SttpValue Encode(SttpValueTypeCode typeCode, object value)
-        {
-            return (SttpValue)value;
-        }
+        //public static SttpValue Encode(SttpValueTypeCode typeCode, object value)
+        //{
+        //    return (SttpValue)value;
+        //}
 
-        public static object Decode(SttpValueTypeCode typeCode, SttpValue data)
-        {
-            return data.ToNativeType(typeCode);
-        }
+        //public static object Decode(SttpValueTypeCode typeCode, SttpValue data)
+        //{
+        //    return data.ToNativeType(typeCode);
+        //}
 
         public static SttpValueTypeCode FromType(Type columnDataType)
         {
@@ -86,9 +86,9 @@ namespace Sttp
                 case SttpValueTypeCode.DateTimeOffset:
                     return typeof(DateTimeOffset);
                 case SttpValueTypeCode.SttpTime:
-                    return typeof(SttpTimestamp);
+                    return typeof(SttpTime);
                 case SttpValueTypeCode.SttpTimeOffset:
-                    return typeof(SttpTimestampOffset);
+                    return typeof(SttpTimeOffset);
                 case SttpValueTypeCode.TimeSpan:
                     return typeof(TimeSpan);
                 case SttpValueTypeCode.Bool:

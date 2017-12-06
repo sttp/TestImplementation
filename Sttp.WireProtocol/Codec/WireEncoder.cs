@@ -27,7 +27,7 @@ namespace Sttp.Codec
         {
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder(m_sessionDetails, SendNewPacket);
-            m_stream = new PayloadWriter(m_sessionDetails, m_encoder);
+            m_stream = new PayloadWriter(m_encoder);
             m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
         }
 

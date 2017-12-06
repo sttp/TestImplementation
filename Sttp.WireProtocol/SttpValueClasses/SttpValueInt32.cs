@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,250 +16,59 @@ namespace Sttp.SttpValueClasses
             Value = value;
         }
 
-        public override sbyte AsSByte
-        {
-            get
-            {
-                checked
-                {
-                    return (sbyte)Value;
-                }
-            }
-        }
-        public override short AsInt16
-        {
-            get
-            {
-                checked
-                {
-                    return (short)Value;
-                }
-            }
-        }
+        public override sbyte AsSByte => SttpValueInt32Methods.AsSByte(Value);
 
-        public override int AsInt32
-        {
-            get
-            {
-                checked
-                {
-                    return (int)Value;
-                }
-            }
-        }
+        public override short AsInt16 => SttpValueInt32Methods.AsInt16(Value);
 
-        public override long AsInt64
-        {
-            get
-            {
-                checked
-                {
-                    return (long)Value;
-                }
-            }
-        }
+        public override int AsInt32 => SttpValueInt32Methods.AsInt32(Value);
 
-        public override byte AsByte
-        {
-            get
-            {
-                checked
-                {
-                    return (byte)Value;
-                }
-            }
-        }
+        public override long AsInt64 => SttpValueInt32Methods.AsInt64(Value);
 
-        public override ushort AsUInt16
-        {
-            get
-            {
-                checked
-                {
-                    return (ushort)Value;
-                }
-            }
-        }
+        public override byte AsByte => SttpValueInt32Methods.AsByte(Value);
 
-        public override uint AsUInt32
-        {
-            get
-            {
-                checked
-                {
-                    return (uint)Value;
-                }
-            }
-        }
+        public override ushort AsUInt16 => SttpValueInt32Methods.AsUInt16(Value);
 
-        public override ulong AsUInt64
-        {
-            get
-            {
-                checked
-                {
-                    return (ulong)Value;
-                }
-            }
-        }
+        public override uint AsUInt32 => SttpValueInt32Methods.AsUInt32(Value);
 
-        public override decimal AsDecimal
-        {
-            get
-            {
-                checked
-                {
-                    return (decimal)Value;
-                }
-            }
-        }
+        public override ulong AsUInt64 => SttpValueInt32Methods.AsUInt64(Value);
 
-        public override double AsDouble
-        {
-            get
-            {
-                checked
-                {
-                    return (double)Value;
-                }
-            }
-        }
+        public override decimal AsDecimal => SttpValueInt32Methods.AsDecimal(Value);
 
-        public override float AsSingle
-        {
-            get
-            {
-                checked
-                {
-                    return (float)Value;
-                }
-            }
-        }
+        public override double AsDouble => SttpValueInt32Methods.AsDouble(Value);
 
-        public override DateTime AsDateTime
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override float AsSingle => SttpValueInt32Methods.AsSingle(Value);
 
-        public override DateTimeOffset AsDateTimeOffset
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override DateTime AsDateTime => SttpValueInt32Methods.AsDateTime(Value);
 
-        public override SttpTimestamp AsSttpTimestamp
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override DateTimeOffset AsDateTimeOffset => SttpValueInt32Methods.AsDateTimeOffset(Value);
 
-        public override SttpTimestampOffset AsSttpTimestampOffset
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override SttpTime AsSttpTime => SttpValueInt32Methods.AsSttpTime(Value);
 
-        public override TimeSpan AsTimeSpan
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override SttpTimeOffset AsSttpTimeOffset => SttpValueInt32Methods.AsSttpTimeOffset(Value);
 
-        public override char AsChar
-        {
-            get
-            {
-                checked
-                {
-                    return (char)Value;
-                }
-            }
-        }
+        public override TimeSpan AsTimeSpan => SttpValueInt32Methods.AsTimeSpan(Value);
 
-        public override bool AsBool
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override char AsChar => SttpValueInt32Methods.AsChar(Value);
 
-        public override Guid AsGuid
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override bool AsBool => SttpValueInt32Methods.AsBool(Value);
 
-        public override string AsString
-        {
-            get
-            {
-                return Value.ToString();
-            }
-        }
+        public override Guid AsGuid => SttpValueInt32Methods.AsGuid(Value);
 
-        public override string AsTypeString
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override string AsString => SttpValueInt32Methods.AsString(Value);
 
-        public override byte[] AsBuffer
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override string ToTypeString => SttpValueInt32Methods.ToTypeString(Value);
 
-        public override SttpValueSet AsValueSet
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override byte[] AsBuffer => SttpValueInt32Methods.AsBuffer(Value);
 
-        public override SttpNamedSet AsNamedSet
-        {
-            get
-            {
-                throw new InvalidCastException();
-            }
-        }
+        public override SttpValueSet AsValueSet => SttpValueInt32Methods.AsValueSet(Value);
 
-        public override object AsNativeType
-        {
-            get
-            {
-                return Value;
-            }
-        }
+        public override SttpNamedSet AsNamedSet => SttpValueInt32Methods.AsNamedSet(Value);
 
-        public override bool IsNull
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public override object ToNativeType => SttpValueInt32Methods.ToNativeType(Value);
 
-        public override SttpValueTypeCode ValueTypeCode => SttpValueTypeCode.Int32;
+        public override bool IsNull => SttpValueInt32Methods.IsNull(Value);
+
+        public override SttpValueTypeCode ValueTypeCode => SttpValueInt32Methods.ValueTypeCode;
 
         public override SttpValue Clone()
         {
@@ -273,7 +82,7 @@ namespace Sttp.SttpValueClasses
 
         public override int GetHashCode()
         {
-            return SttpValueTypeCode.Int32.GetHashCode() ^ Value.GetHashCode();
+            return SttpValueInt32Methods.GetHashCode(Value);
         }
 
         public override void Save(Stream value)

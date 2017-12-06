@@ -11,7 +11,7 @@ namespace Sttp.Codec.Metadata
 
         public MetadataCommandBuilder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
         {
-            m_stream = new PayloadWriter(sessionDetails, commandEncoder);
+            m_stream = new PayloadWriter(commandEncoder);
             m_stream.Clear();
         }
 

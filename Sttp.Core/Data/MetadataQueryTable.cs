@@ -52,7 +52,7 @@ namespace Sttp.Data
             {
                 for (int x = 0; x < list.Length; x++)
                 {
-                    list[x] = row.Value.Values[x].AsNativeType;
+                    list[x] = row.Value.Values[x].ToNativeType;
                 }
                 tbl.Rows.Add(list);
             }
