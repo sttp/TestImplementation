@@ -24,7 +24,7 @@ namespace Sttp
         private Stack<string> m_elementStack = new Stack<string>();
         private MemoryStream m_stream = new MemoryStream();
         private ElementEndElementHelper m_endElementHelper;
-        private SttpValue m_tmpValue = new SttpValue();
+        private SttpValueMutable m_tmpValue = new SttpValueMutable();
         private int m_prevNameAsInt = 0;
 
         public SttpMarkupWriter()

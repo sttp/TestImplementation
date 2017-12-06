@@ -96,9 +96,9 @@ namespace Sttp.Data
 
                 foreach (DataRow row in table.Rows)
                 {
-                    SttpValue key = new SttpValue();
+                    SttpValueMutable key = new SttpValueMutable();
                     SttpValueSet values = new SttpValueSet();
-                    values.Values.AddRange(row.ItemArray.Select(x => new SttpValue(x)));
+                    values.Values.AddRange(row.ItemArray.Select(x => (SttpValue)x));
                     if (pkey.Length == 1)
                     {
                         key.SetValue(row[pkey[0]]);

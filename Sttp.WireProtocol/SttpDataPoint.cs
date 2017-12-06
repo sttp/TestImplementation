@@ -34,7 +34,7 @@ namespace Sttp
         /// <summary>
         /// The value for the data point.
         /// </summary>
-        public SttpValue Value = new SttpValue();
+        public SttpValue Value = new SttpValueMutable();
 
         /// <summary>
         /// 16-bits for identifying the quality of the time.

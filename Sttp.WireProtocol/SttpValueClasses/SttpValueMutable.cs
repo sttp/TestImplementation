@@ -11,7 +11,7 @@ namespace Sttp
     /// This class contains the fundamental value for STTP.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public class SttpValue : IEquatable<SttpValue>
+    public class SttpValueMutable : SttpValue
     {
         #region [ Members ]
 
@@ -38,8 +38,6 @@ namespace Sttp
         private ulong m_valueUInt64;
         [FieldOffset(0)]
         private double m_valueDouble;
-
-
 
         [FieldOffset(0)]
         private float m_valueSingle;
@@ -72,16 +70,16 @@ namespace Sttp
 
         #region [ Constructors ]
 
-        public SttpValue()
+        public SttpValueMutable()
         {
-            IsNull = true;
+            m_valueTypeCode = SttpValueTypeCode.Null;
         }
 
         /// <summary>
         /// Clones an <see cref="SttpValue"/>. 
         /// </summary>
         /// <param name="value">the value to clone</param>
-        public SttpValue(SttpValue value)
+        public SttpValueMutable(SttpValueMutable value)
         {
             m_rawBytes0_7 = value.m_rawBytes0_7;
             m_rawBytes8_15 = value.m_rawBytes8_15;
@@ -89,48 +87,48 @@ namespace Sttp
             m_valueTypeCode = value.m_valueTypeCode;
         }
 
-        public SttpValue(PayloadReader rd)
+        public SttpValueMutable(PayloadReader rd)
         {
             switch ((SttpValueTypeCode)rd.ReadByte())
             {
                 case SttpValueTypeCode.Null:
-                    IsNull = true;
+                    m_valueTypeCode = SttpValueTypeCode.Null;
                     break;
                 case SttpValueTypeCode.SByte:
-                    AsSByte = rd.ReadSByte();
+                    SetValue(rd.ReadSByte());
                     break;
                 case SttpValueTypeCode.Int16:
-                    AsInt16 = rd.ReadInt16();
+                    SetValue(rd.ReadInt16());
                     break;
                 case SttpValueTypeCode.Int32:
-                    AsInt32 = rd.ReadInt32();
+                    SetValue(rd.ReadInt32());
                     break;
                 case SttpValueTypeCode.Int64:
-                    AsInt64 = rd.ReadInt64();
+                    SetValue(rd.ReadInt64());
                     break;
                 case SttpValueTypeCode.Byte:
-                    AsByte = rd.ReadByte();
+                    SetValue(rd.ReadByte());
                     break;
                 case SttpValueTypeCode.UInt16:
-                    AsUInt16 = rd.ReadUInt16();
+                    SetValue(rd.ReadUInt16());
                     break;
                 case SttpValueTypeCode.UInt32:
-                    AsUInt32 = rd.ReadUInt32();
+                    SetValue(rd.ReadUInt32());
                     break;
                 case SttpValueTypeCode.UInt64:
-                    AsUInt64 = rd.ReadUInt64();
+                    SetValue(rd.ReadUInt64());
                     break;
                 case SttpValueTypeCode.Single:
-                    AsSingle = rd.ReadSingle();
+                    SetValue(rd.ReadSingle());
                     break;
                 case SttpValueTypeCode.Double:
-                    AsDouble = rd.ReadDouble();
+                    SetValue(rd.ReadDouble());
                     break;
                 case SttpValueTypeCode.Decimal:
-                    AsDecimal = rd.ReadDecimal();
+                    SetValue(rd.ReadDecimal());
                     break;
                 case SttpValueTypeCode.DateTime:
-                    AsDateTime = rd.ReadDateTime();
+                    SetValue(rd.ReadDateTime());
                     break;
                 case SttpValueTypeCode.DateTimeOffset:
                     throw new NotImplementedException();
@@ -145,19 +143,19 @@ namespace Sttp
                     //AsSttpTimeOffset = rd.ReadSttpTimeOffset();
                     break;
                 case SttpValueTypeCode.TimeSpan:
-                    AsTimeSpan = new TimeSpan(rd.ReadInt64());
+                    SetValue(new TimeSpan(rd.ReadInt64()));
                     break;
                 case SttpValueTypeCode.Bool:
-                    AsBool = rd.ReadBoolean();
+                    SetValue(rd.ReadBoolean());
                     break;
                 case SttpValueTypeCode.Char:
-                    AsChar = rd.ReadChar();
+                    SetValue(rd.ReadChar());
                     break;
                 case SttpValueTypeCode.Guid:
-                    AsGuid = rd.ReadGuid();
+                    SetValue(rd.ReadGuid());
                     break;
                 case SttpValueTypeCode.String:
-                    AsString = rd.ReadString();
+                    SetValue(rd.ReadString());
                     break;
                 case SttpValueTypeCode.Buffer:
                     throw new NotImplementedException();
@@ -189,7 +187,7 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
-        public SttpValue(object x)
+        public SttpValueMutable(object x)
         {
             SetValue(x);
         }
@@ -198,7 +196,7 @@ namespace Sttp
 
         #region [ Properties ]
 
-        public sbyte AsSByte
+        public override sbyte AsSByte
         {
             get
             {
@@ -253,14 +251,9 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.SByte;
-                m_valueSByte = value;
-            }
         }
 
-        public short AsInt16
+        public override short AsInt16
         {
             get
             {
@@ -315,15 +308,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Int16;
-                m_valueInt16 = value;
 
-            }
         }
 
-        public int AsInt32
+        public override int AsInt32
         {
             get
             {
@@ -378,15 +366,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Int32;
-                m_valueInt32 = value;
 
-            }
         }
 
-        public long AsInt64
+        public override long AsInt64
         {
             get
             {
@@ -441,14 +424,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Int64;
-                m_valueInt64 = value;
-            }
+
         }
 
-        public byte AsByte
+        public override byte AsByte
         {
             get
             {
@@ -503,14 +482,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Byte;
-                m_valueByte = value;
-            }
+
         }
 
-        public ushort AsUInt16
+        public override ushort AsUInt16
         {
             get
             {
@@ -565,14 +540,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.UInt16;
-                m_valueUInt16 = value;
-            }
+
         }
 
-        public uint AsUInt32
+        public override uint AsUInt32
         {
             get
             {
@@ -627,14 +598,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.UInt32;
-                m_valueUInt32 = value;
-            }
+
         }
 
-        public ulong AsUInt64
+        public override ulong AsUInt64
         {
             get
             {
@@ -689,14 +656,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.UInt64;
-                m_valueUInt64 = value;
-            }
+
         }
 
-        public decimal AsDecimal
+        public override decimal AsDecimal
         {
             get
             {
@@ -751,14 +714,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Decimal;
-                m_valueDecimal = value;
-            }
+
         }
 
-        public double AsDouble
+        public override double AsDouble
         {
             get
             {
@@ -813,14 +772,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Double;
-                m_valueDouble = value;
-            }
+
         }
 
-        public float AsSingle
+        public override float AsSingle
         {
             get
             {
@@ -875,14 +830,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Single;
-                m_valueSingle = value;
-            }
+
         }
 
-        public DateTime AsDateTime
+        public override DateTime AsDateTime
         {
             get
             {
@@ -944,14 +895,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.DateTime;
-                m_valueDateTime = value;
-            }
+
         }
 
-        public DateTimeOffset AsDateTimeOffset
+        public override DateTimeOffset AsDateTimeOffset
         {
             get
             {
@@ -1013,14 +960,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.DateTimeOffset;
-                m_valueDateTimeOffset = value;
-            }
+
         }
 
-        public SttpTimestamp AsSttpTimestamp
+        public override SttpTimestamp AsSttpTimestamp
         {
             get
             {
@@ -1075,14 +1018,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.SttpTime;
-                m_valueSttpTimestamp = value;
-            }
+
         }
 
-        public SttpTimestampOffset AsSttpTimestampOffset
+        public override SttpTimestampOffset AsSttpTimestampOffset
         {
             get
             {
@@ -1137,14 +1076,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
-                m_valueSttpTimestampOffset = value;
-            }
+
         }
 
-        public TimeSpan AsTimeSpan
+        public override TimeSpan AsTimeSpan
         {
             get
             {
@@ -1199,14 +1134,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.TimeSpan;
-                m_valueTimeSpan = value;
-            }
+
         }
 
-        public char AsChar
+        public override char AsChar
         {
             get
             {
@@ -1261,14 +1192,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Char;
-                m_valueChar = value;
-            }
+
         }
 
-        public bool AsBool
+        public override bool AsBool
         {
             get
             {
@@ -1332,14 +1259,9 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Bool;
-                m_valueBool = value;
-            }
         }
 
-        public Guid AsGuid
+        public override Guid AsGuid
         {
             get
             {
@@ -1394,14 +1316,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Guid;
-                m_valueGuid = value;
-            }
+
         }
 
-        public string AsString
+        public override string AsString
         {
             get
             {
@@ -1457,14 +1375,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.String;
-                m_valueObject = value;
-            }
+
         }
 
-        public string AsTypeString
+        public override string AsTypeString
         {
             get
             {
@@ -1472,7 +1386,7 @@ namespace Sttp
             }
         }
 
-        public byte[] AsBuffer
+        public override byte[] AsBuffer
         {
             get
             {
@@ -1527,14 +1441,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.Buffer;
-                m_valueObject = value;
-            }
+
         }
 
-        public SttpValueSet AsValueSet
+        public override SttpValueSet AsValueSet
         {
             get
             {
@@ -1589,14 +1499,10 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.ValueSet;
-                m_valueObject = value;
-            }
+
         }
 
-        public SttpNamedSet AsNamedSet
+        public override SttpNamedSet AsNamedSet
         {
             get
             {
@@ -1653,37 +1559,27 @@ namespace Sttp
                     }
                 }
             }
-            set
-            {
-                m_valueTypeCode = SttpValueTypeCode.NamedSet;
-                m_valueObject = value;
-            }
+
         }
 
         /// <summary>
         /// Gets if this class has a value. Clear this by setting a value.
         /// </summary>
         /// <exception cref="InvalidOperationException">When setting this value to true. Set a value by calling one of the <see cref="SetValue"/> methods.</exception>
-        public bool IsNull
+        public override bool IsNull
         {
             get
             {
                 return m_valueTypeCode == SttpValueTypeCode.Null;
             }
-            set
-            {
-                if (!value)
-                    throw new InvalidOperationException("Can only set a value to null with this property, to set not null, use one of the other properties to set the value.");
-                m_valueObject = null;
-                m_valueTypeCode = SttpValueTypeCode.Null;
-            }
+
         }
 
 
         /// <summary>
         /// The type code of the raw value.
         /// </summary>
-        public SttpValueTypeCode ValueTypeCode
+        public override SttpValueTypeCode ValueTypeCode
         {
             get
             {
@@ -1699,16 +1595,16 @@ namespace Sttp
         /// Clones the value
         /// </summary>
         /// <returns></returns>
-        public SttpValue Clone()
+        public override SttpValue Clone()
         {
-            return new SttpValue(this);
+            return new SttpValueMutable(this);
         }
 
         public void SetValue(object value)
         {
             if (value == null || value == DBNull.Value)
             {
-                IsNull = true;
+                m_valueTypeCode = SttpValueTypeCode.Null;
                 return;
             }
 
@@ -1813,98 +1709,121 @@ namespace Sttp
 
         public void SetValue(sbyte value)
         {
-            AsSByte = value;
+            m_valueTypeCode = SttpValueTypeCode.SByte;
+            m_valueSByte = value;
         }
         public void SetValue(short value)
         {
-            AsInt16 = value;
+            m_valueTypeCode = SttpValueTypeCode.Int16;
+            m_valueInt16 = value;
         }
         public void SetValue(int value)
         {
-            AsInt32 = value;
+            m_valueTypeCode = SttpValueTypeCode.Int32;
+            m_valueInt32 = value;
         }
         public void SetValue(long value)
         {
-            AsInt64 = value;
+            m_valueTypeCode = SttpValueTypeCode.Int64;
+            m_valueInt64 = value;
         }
         public void SetValue(byte value)
         {
-            AsByte = value;
+            m_valueTypeCode = SttpValueTypeCode.Byte;
+            m_valueByte = value;
         }
         public void SetValue(ushort value)
         {
-            AsUInt16 = value;
+            m_valueTypeCode = SttpValueTypeCode.UInt16;
+            m_valueUInt16 = value;
         }
         public void SetValue(uint value)
         {
-            AsUInt32 = value;
+            m_valueTypeCode = SttpValueTypeCode.UInt32;
+            m_valueUInt32 = value;
         }
         public void SetValue(ulong value)
         {
-            AsUInt64 = value;
+            m_valueTypeCode = SttpValueTypeCode.UInt64;
+            m_valueUInt64 = value;
         }
         public void SetValue(float value)
         {
-            AsSingle = value;
+            m_valueTypeCode = SttpValueTypeCode.Single;
+            m_valueSingle = value;
         }
         public void SetValue(double value)
         {
-            AsDouble = value;
+            m_valueTypeCode = SttpValueTypeCode.Double;
+            m_valueDouble = value;
         }
         public void SetValue(decimal value)
         {
-            AsDecimal = value;
+            m_valueTypeCode = SttpValueTypeCode.Decimal;
+            m_valueDecimal = value;
         }
         public void SetValue(SttpTimestamp value)
         {
-            AsSttpTimestamp = value;
+            m_valueTypeCode = SttpValueTypeCode.SttpTime;
+            m_valueSttpTimestamp = value;
         }
         public void SetValue(SttpTimestampOffset value)
         {
-            AsSttpTimestampOffset = value;
+            m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
+            m_valueSttpTimestampOffset = value;
         }
         public void SetValue(DateTime value)
         {
-            AsDateTime = value;
+            m_valueTypeCode = SttpValueTypeCode.DateTime;
+            m_valueDateTime = value;
         }
         public void SetValue(DateTimeOffset value)
         {
-            AsDateTimeOffset = value;
+            m_valueTypeCode = SttpValueTypeCode.DateTimeOffset;
+            m_valueDateTimeOffset = value;
         }
         public void SetValue(TimeSpan value)
         {
-            AsTimeSpan = value;
+            m_valueTypeCode = SttpValueTypeCode.TimeSpan;
+            m_valueTimeSpan = value;
         }
         public void SetValue(bool value)
         {
-            AsBool = value;
+            m_valueTypeCode = SttpValueTypeCode.Bool;
+            m_valueBool = value;
         }
         public void SetValue(char value)
         {
-            AsChar = value;
+            m_valueTypeCode = SttpValueTypeCode.Char;
+            m_valueChar = value;
         }
         public void SetValue(Guid value)
         {
-            AsGuid = value;
+            m_valueTypeCode = SttpValueTypeCode.Guid;
+            m_valueGuid = value;
         }
         public void SetValue(string value)
         {
-            AsString = value;
+            m_valueTypeCode = SttpValueTypeCode.String;
+            m_valueObject = value;
         }
         public void SetValue(byte[] value)
         {
-            AsBuffer = value;
+            m_valueTypeCode = SttpValueTypeCode.Buffer;
+            m_valueObject = value;
         }
         public void SetValue(SttpValueSet value)
         {
-            AsValueSet = value;
+            m_valueTypeCode = SttpValueTypeCode.ValueSet;
+            m_valueObject = value;
         }
         public void SetValue(SttpNamedSet value)
         {
-            AsNamedSet = value;
+            m_valueTypeCode = SttpValueTypeCode.NamedSet;
+            m_valueObject = value;
         }
 
-        public static bool operator ==(SttpValue a, SttpValue b)
+        public static bool operator ==(SttpValueMutable a, SttpValueMutable b)
         {
             if (ReferenceEquals(a, b))
                 return true;
@@ -1921,7 +1840,7 @@ namespace Sttp
             return true;
         }
 
-        public static bool operator !=(SttpValue a, SttpValue b)
+        public static bool operator !=(SttpValueMutable a, SttpValueMutable b)
         {
             return !(a == b);
         }
@@ -1944,20 +1863,20 @@ namespace Sttp
         }
 
 
-        public static explicit operator SttpValue(double v)
+        public static explicit operator SttpValueMutable(double v)
         {
-            var rv = new SttpValue();
-            rv.AsDouble = v;
+            var rv = new SttpValueMutable();
+            rv.SetValue(v);
             return rv;
         }
-        public static explicit operator SttpValue(string v)
+        public static explicit operator SttpValueMutable(string v)
         {
-            var rv = new SttpValue();
-            rv.AsString = v;
+            var rv = new SttpValueMutable();
+            rv.SetValue(v);
             return rv;
         }
 
-        public object AsNativeType
+        public override object AsNativeType
         {
             get
             {
@@ -2023,7 +1942,7 @@ namespace Sttp
             }
         }
 
-        public void Save(PayloadWriter wr)
+        public override void Save(PayloadWriter wr)
         {
             wr.Write((byte)ValueTypeCode);
             switch (ValueTypeCode)
@@ -2120,7 +2039,7 @@ namespace Sttp
             return AsTypeString;
         }
 
-        public bool Equals(SttpValue other)
+        public bool Equals(SttpValueMutable other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -2152,9 +2071,14 @@ namespace Sttp
             }
         }
 
-        public void Save(MemoryStream payloadWriter)
+        public override void Save(Stream value)
         {
             throw new NotImplementedException();
+        }
+
+        public void SetNull()
+        {
+            m_valueTypeCode = SttpValueTypeCode.Null;
         }
     }
 }

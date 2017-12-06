@@ -156,7 +156,7 @@ namespace Sttp.Tests
             s.JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", 1));
             s.ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
             s.Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
-            s.Literals.Add(new SttpQueryLiterals(new SttpValue(327), -2));
+            s.Literals.Add(new SttpQueryLiterals((SttpValue)327, -2));
             s.Procedure.Add(new SttpQueryProcedureStep("EQU", new int[] { 3, -2 }.ToList(), -3));
             s.WhereBooleanVariable = -3;
             statements.Add(s.ToSttpMarkup());

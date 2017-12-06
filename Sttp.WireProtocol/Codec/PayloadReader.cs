@@ -469,7 +469,7 @@ namespace Sttp.Codec
 
         public SttpValue ReadSttpValue()
         {
-            return new SttpValue(this);
+            return SttpValue.Load(this);
         }
 
         public SttpValueSet ReadSttpValueSet()
@@ -495,7 +495,7 @@ namespace Sttp.Codec
             int len = ReadInt7Bit();
             while (len > 0)
             {
-                rv.Add(new SttpValue(this));
+                rv.Add(SttpValue.Load(this));
                 len--;
             }
             return rv;

@@ -51,7 +51,7 @@ namespace Sttp.Core.Data
             {
                 if (Inputs(x).IsNull)
                 {
-                    Output = new SttpValue();
+                    Output = SttpValue.Null;
                     return true;
                 }
             }
@@ -91,7 +91,7 @@ namespace Sttp.Core.Data
             {
                 firstValue *= Inputs(x).AsDouble;
             }
-            Output = new SttpValue(firstValue);
+            Output = (SttpValue)firstValue;
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -113,7 +113,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(Inputs(0).Equals(Inputs(1)));
+            Output = (SttpValue)Inputs(0).Equals(Inputs(1));
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -135,7 +135,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(!Inputs(0).Equals(Inputs(1)));
+            Output = (SttpValue)(!Inputs(0).Equals(Inputs(1)));
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -157,7 +157,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(!Inputs(0).AsBool);
+            Output = (SttpValue)(!Inputs(0).AsBool);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -180,7 +180,7 @@ namespace Sttp.Core.Data
             {
                 if (!Inputs(x).IsNull && Inputs(x).AsBool)
                 {
-                    Output = new SttpValue(true);
+                    Output = (SttpValue)(true);
                     return;
                 }
             }
@@ -188,7 +188,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(false);
+            Output = (SttpValue)(false);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -213,12 +213,12 @@ namespace Sttp.Core.Data
             {
                 if (!Inputs(x).AsBool)
                 {
-                    Output = new SttpValue(false);
+                    Output = (SttpValue)(false);
                     return;
                 }
             }
 
-            Output = new SttpValue(true);
+            Output = (SttpValue)(true);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -242,7 +242,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(Inputs(0).AsDouble < Inputs(1).AsDouble);
+            Output = (SttpValue)(Inputs(0).AsDouble < Inputs(1).AsDouble);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -263,7 +263,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(Inputs(0).AsDouble <= Inputs(1).AsDouble);
+            Output = (SttpValue)(Inputs(0).AsDouble <= Inputs(1).AsDouble);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -284,7 +284,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(Inputs(0).AsDouble > Inputs(1).AsDouble);
+            Output = (SttpValue)(Inputs(0).AsDouble > Inputs(1).AsDouble);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
@@ -305,7 +305,7 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = new SttpValue(Inputs(0).AsDouble >= Inputs(1).AsDouble);
+            Output = (SttpValue)(Inputs(0).AsDouble >= Inputs(1).AsDouble);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)

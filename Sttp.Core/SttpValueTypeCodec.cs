@@ -7,9 +7,7 @@ namespace Sttp
     {
         public static SttpValue Encode(SttpValueTypeCode typeCode, object value)
         {
-            var rv = new SttpValue();
-            rv.SetValue(value);
-            return rv;
+            return (SttpValue)value;
         }
 
         public static object Decode(SttpValueTypeCode typeCode, SttpValue data)

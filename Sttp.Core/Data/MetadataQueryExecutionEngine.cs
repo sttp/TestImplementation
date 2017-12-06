@@ -109,7 +109,7 @@ namespace Sttp.Core.Data
                     var r = tableRows[input.TableIndex];
                     if (r == null)
                     {
-                        variables[input.VariableNumber] = new SttpValue();
+                        variables[input.VariableNumber] = SttpValue.Null;
                     }
                     else
                     {

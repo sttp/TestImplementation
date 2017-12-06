@@ -59,7 +59,7 @@ namespace Sttp
         private List<string> m_elements = new List<string>();
         private Stack<string> m_elementStack = new Stack<string>();
         private Stack<SttpMarkupCompatiblity> m_elementStackCompatibility = new Stack<SttpMarkupCompatiblity>();
-        private SttpValue m_value = new SttpValue();
+        private SttpValueMutable m_value = new SttpValueMutable();
         private int m_prevNameAsInt = 0;
 
         internal SttpMarkupReader(byte[] data)
@@ -71,7 +71,7 @@ namespace Sttp
         public string Element { get; private set; }
         public SttpMarkupCompatiblity ElementCompatibility { get; private set; }
         public string ValueName { get; private set; }
-        public SttpValue Value { get; private set; }
+        public SttpValueMutable Value { get; private set; }
         public SttpMarkupCompatiblity ValueCompatibility { get; private set; }
 
         public SttpMarkupNodeType CurrentNodeType { get; private set; }
@@ -95,7 +95,7 @@ namespace Sttp
             switch (CurrentNodeType)
             {
                 case SttpMarkupNodeType.Element:
-                    Value.IsNull = true;
+                    Value.SetNull();
                     ValueCompatibility = SttpMarkupCompatiblity.Unknown;
                     ElementCompatibility = (SttpMarkupCompatiblity)((code >> 2) & 3);
 
