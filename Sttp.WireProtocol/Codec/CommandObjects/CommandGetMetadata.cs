@@ -9,14 +9,14 @@ namespace Sttp.Codec
         public readonly Guid SchemaVersion;
         public readonly long Revision;
         public readonly bool AreUpdateQueries;
-        public readonly List<SttpConnectionString> Queries;
+        public readonly List<string> Queries;
 
         public CommandGetMetadata(PayloadReader reader)
         {
             SchemaVersion = reader.ReadGuid();
             Revision = reader.ReadInt64();
             AreUpdateQueries = reader.ReadBoolean();
-            Queries = reader.ReadListSttpConnectionString();
+            Queries = reader.ReadListString();
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)

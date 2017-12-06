@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Xml;
 using Sttp.Codec;
 using Sttp.Core.Data;
 
@@ -243,10 +245,19 @@ namespace Sttp.Data
 
             foreach (var query in command.Queries)
             {
-                if (query.HasValue("Syntax", "SttpQueryStatement"))
+                var reader = new XmlTextReader(query);
+                while (reader.Read())
                 {
-                    var statement = new SttpQueryStatement(query);
-                    var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            if (reader.Name == "SttpQuery")
+                            {
+                                var statement = new SttpQueryStatement(reader);
+                                var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
+                            }
+                            break;
+                    }
                 }
             }
         }

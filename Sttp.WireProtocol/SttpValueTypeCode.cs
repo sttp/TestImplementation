@@ -26,8 +26,9 @@
         Buffer = 21,            // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
         ValueSet = 22,          // An array of SttpValue. Up to 255 elements.
         NamedSet = 23,          // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
-        ConnectionString = 24,  // An array of [string,Restriction,SttpValue]. Up to 255 elements. Like a connection string.
+        SttpMarkup = 24,        // Yet another markup language
         BulkTransportGuid = 25, // A special type of GUID that indicates it is transmitted out of band.
+        Missing = 26,           // Indicates that the value is missing. This is different from NULL because NULL means the value is present, but it's null. Missing means nothing is actively stated about the value.
     }
 
     // sizeof(uint8), 1-byte

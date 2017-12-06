@@ -83,7 +83,7 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointReply);
         }
 
-        public void DataPointRequest(SttpConnectionString options, List<SttpDataPointID> dataPoints)
+        public void DataPointRequest(SttpMarkup options, List<SttpDataPointID> dataPoints)
         {
             m_stream.Clear();
             m_stream.Write(options);
@@ -154,7 +154,7 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointRequest);
         }
 
-        public void GetMetadata(Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpConnectionString> queries)
+        public void GetMetadata(Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpMarkup> queries)
         {
             m_stream.Clear();
             m_stream.Write(schemaVersion);

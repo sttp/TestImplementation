@@ -107,8 +107,8 @@ namespace Sttp
                     return typeof(SttpValueSet);
                 case SttpValueTypeCode.NamedSet:
                     return typeof(SttpNamedSet);
-                case SttpValueTypeCode.ConnectionString:
-                    return typeof(SttpConnectionString);
+                case SttpValueTypeCode.SttpMarkup:
+                    return typeof(byte[]);
                 case SttpValueTypeCode.BulkTransportGuid:
                     return typeof(Guid);
                 default:

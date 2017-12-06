@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -170,7 +171,7 @@ namespace Sttp
                     throw new NotImplementedException();
                     //AsNamedSet = rd.ReadNamedSet();
                     break;
-                case SttpValueTypeCode.ConnectionString:
+                case SttpValueTypeCode.SttpMarkup:
                     throw new NotImplementedException();
                     //AsConnectionString = rd.ReadConnectionString();
                     break;
@@ -931,7 +932,7 @@ namespace Sttp
                         case SttpValueTypeCode.DateTimeOffset:
                             return m_valueDateTimeOffset.UtcDateTime;
                         case SttpValueTypeCode.NamedSet:
-                        case SttpValueTypeCode.ConnectionString:
+                        case SttpValueTypeCode.SttpMarkup:
                         case SttpValueTypeCode.BulkTransportGuid:
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -1000,7 +1001,7 @@ namespace Sttp
                         case SttpValueTypeCode.DateTimeOffset:
                             return m_valueDateTimeOffset.UtcDateTime;
                         case SttpValueTypeCode.NamedSet:
-                        case SttpValueTypeCode.ConnectionString:
+                        case SttpValueTypeCode.SttpMarkup:
                         case SttpValueTypeCode.BulkTransportGuid:
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -2005,7 +2006,7 @@ namespace Sttp
                         return AsValueSet;
                     case SttpValueTypeCode.NamedSet:
                         return AsNamedSet;
-                    case SttpValueTypeCode.ConnectionString:
+                    case SttpValueTypeCode.SttpMarkup:
                         throw new NotImplementedException();
                     //return AsConnectionString);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -2096,7 +2097,7 @@ namespace Sttp
                 case SttpValueTypeCode.NamedSet:
                     wr.Write(AsNamedSet);
                     break;
-                case SttpValueTypeCode.ConnectionString:
+                case SttpValueTypeCode.SttpMarkup:
                     throw new NotImplementedException();
                     //wr.Write(AsConnectionString);
                     break;
@@ -2144,6 +2145,11 @@ namespace Sttp
                 hashCode = (hashCode * 397) ^ (int)m_valueTypeCode;
                 return hashCode;
             }
+        }
+
+        public void Save(MemoryStream payloadWriter)
+        {
+            throw new NotImplementedException();
         }
     }
 }

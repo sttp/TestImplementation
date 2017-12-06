@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Xml.Schema;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
@@ -76,11 +77,10 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var statements = new List<SttpConnectionString>();
+            var statements = new List<SttpMarkup>();
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
-
-            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToConnectionString());
+            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup());
 
             writer.GetMetadata(Guid.Empty, 0, false, statements);
 
@@ -148,7 +148,7 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var statements = new List<SttpConnectionString>();
+            var statements = new List<SttpMarkup>();
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
@@ -157,9 +157,9 @@ namespace Sttp.Tests
             s.ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
             s.Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
             s.Literals.Add(new SttpQueryLiterals(new SttpValue(327), -2));
-            s.Procedure.Add(new SttpQueryProcedureStep("EQU",new int[]{3,-2}.ToList(), -3));
+            s.Procedure.Add(new SttpQueryProcedureStep("EQU", new int[] { 3, -2 }.ToList(), -3));
             s.WhereBooleanVariable = -3;
-            statements.Add(s.ToConnectionString());
+            statements.Add(s.ToSttpMarkup());
 
             writer.GetMetadata(Guid.Empty, 0, false, statements);
 

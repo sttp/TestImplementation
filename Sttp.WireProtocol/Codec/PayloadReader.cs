@@ -431,30 +431,6 @@ namespace Sttp.Codec
             return rv;
         }
 
-        public List<SttpQueryStatement> ReadListSttpQueryStatement()
-        {
-            var rv = new List<SttpQueryStatement>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryStatement(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpQueryRaw> ReadListSttpQueryRaw()
-        {
-            var rv = new List<SttpQueryRaw>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryRaw(this));
-                len--;
-            }
-            return rv;
-        }
-
         public List<MetadataSchemaTables> ReadListMetadataSchemaTables()
         {
             var rv = new List<MetadataSchemaTables>();
@@ -479,11 +455,6 @@ namespace Sttp.Codec
             return rv;
         }
 
-        public SttpConnectionString ReadSttpConnectionString()
-        {
-            return new SttpConnectionString(this);
-        }
-
         public List<MetadataColumn> ReadListMetadataColumn()
         {
             var rv = new List<MetadataColumn>();
@@ -504,78 +475,6 @@ namespace Sttp.Codec
         public SttpValueSet ReadSttpValueSet()
         {
             return new SttpValueSet(this);
-        }
-
-        public List<MetadataForeignKey> ReadListMetadataForeignKey()
-        {
-            var rv = new List<MetadataForeignKey>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new MetadataForeignKey(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpQueryJoinedTable> ReadListSttpQueryJoinedTable()
-        {
-            var rv = new List<SttpQueryJoinedTable>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryJoinedTable(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpQueryLiterals> ReadListSttpQueryLiterals()
-        {
-            var rv = new List<SttpQueryLiterals>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryLiterals(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpQueryColumn> ReadListSttpQueryColumn()
-        {
-            var rv = new List<SttpQueryColumn>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryColumn(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpQueryProcedureStep> ReadListSttpSttpProcedureStep()
-        {
-            var rv = new List<SttpQueryProcedureStep>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryProcedureStep(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpQueryOutputColumns> ReadListSttpOutputColumns()
-        {
-            var rv = new List<SttpQueryOutputColumns>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpQueryOutputColumns(this));
-                len--;
-            }
-            return rv;
         }
 
         public List<int> ReadListInt()
@@ -609,25 +508,30 @@ namespace Sttp.Codec
             return null;
         }
 
-        public List<SttpConnectionString> ReadListSttpConnectionString()
+        public List<string> ReadListString()
         {
-            var rv = new List<SttpConnectionString>();
+            var rv = new List<string>();
             int len = ReadInt7Bit();
             while (len > 0)
             {
-                rv.Add(new SttpConnectionString(this));
+                rv.Add(ReadString());
                 len--;
             }
             return rv;
         }
 
-        public List<SttpConnectionStringElement> ReadSttpConnectionStringElement()
+        public SttpMarkup ReadSttpMarkup()
         {
-            var rv = new List<SttpConnectionStringElement>();
+            return new SttpMarkup(this);
+        }
+
+        public List<MetadataForeignKey> ReadListMetadataForeignKey()
+        {
+            var rv = new List<MetadataForeignKey>();
             int len = ReadInt7Bit();
             while (len > 0)
             {
-                rv.Add(new SttpConnectionStringElement(this));
+                rv.Add(new MetadataForeignKey(this));
                 len--;
             }
             return rv;

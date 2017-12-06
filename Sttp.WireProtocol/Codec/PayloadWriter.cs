@@ -258,6 +258,8 @@ namespace Sttp.Codec
             WriteUInt7Bit((ulong)value);
         }
 
+       
+
         public void WriteUInt7Bit(uint value)
         {
             int size = Encoding7Bit.GetSize(value);
@@ -460,36 +462,6 @@ namespace Sttp.Codec
             value.Save(this);
         }
 
-
-
-        public void Write(List<SttpQueryStatement> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<SttpQueryRaw> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
         public void Write(List<MetadataSchemaTables> list)
         {
             if (list == null)
@@ -528,68 +500,8 @@ namespace Sttp.Codec
             value.Save(this);
         }
 
-        public void Write(SttpConnectionString value)
-        {
-            value.Save(this);
-        }
 
         public void Write(List<SttpQueryJoinedTable> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<SttpQueryLiterals> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<SttpQueryColumn> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<SttpQueryProcedureStep> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<SttpQueryOutputColumns> list)
         {
             if (list == null)
             {
@@ -641,7 +553,7 @@ namespace Sttp.Codec
 
         }
 
-        public void Write(List<SttpConnectionString> list)
+        public void Write(List<string> list)
         {
             if (list == null)
             {
@@ -651,11 +563,16 @@ namespace Sttp.Codec
             WriteInt7Bit(list.Count);
             for (var x = 0; x < list.Count; x++)
             {
-                list[x].Save(this);
+                Write(list[x]);
             }
         }
 
-        public void Write(List<SttpConnectionStringElement> list)
+        public void Write(SttpMarkup value)
+        {
+            value.Write(this);
+        }
+
+        public void Write(List<SttpMarkup> list)
         {
             if (list == null)
             {
@@ -665,7 +582,7 @@ namespace Sttp.Codec
             WriteInt7Bit(list.Count);
             for (var x = 0; x < list.Count; x++)
             {
-                list[x].Save(this);
+                Write(list[x]);
             }
         }
     }

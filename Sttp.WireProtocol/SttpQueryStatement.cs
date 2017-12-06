@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using Sttp.Codec;
 
 namespace Sttp
@@ -20,25 +21,20 @@ namespace Sttp
             Variable = variable;
         }
 
-        public SttpQueryColumn(PayloadReader rd)
-        {
-            TableIndex = rd.ReadInt32();
-            ColumnName = rd.ReadString();
-            Variable = rd.ReadInt32();
-        }
-
-        public void Save(PayloadWriter wr)
-        {
-            wr.Write(TableIndex);
-            wr.Write(ColumnName);
-            wr.Write(Variable);
-        }
-
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
             builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryColumn)}) {Variable} = {TableIndex}.{ColumnName} ");
         }
 
+        public void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement("Column"))
+            {
+                writer.WriteValue("TableIndex", TableIndex);
+                writer.WriteValue("ColumnName", ColumnName);
+                writer.WriteValue("Variable", Variable);
+            }
+        }
     }
 
     public class SttpQueryJoinedTable
@@ -76,6 +72,17 @@ namespace Sttp
         {
             builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryJoinedTable)}) ({ExistingTableIndex}) LEFT JOIN {ForeignTable} AS ({ForeignTableIndex}) ON ({ExistingTableIndex}).{ExistingForeignKeyColumn} = ({ForeignTableIndex}).[PrimaryKey]");
         }
+
+        public void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement("JoinedTable"))
+            {
+                writer.WriteValue("ExistingTableIndex", ExistingTableIndex);
+                writer.WriteValue("ExistingForeignKeyColumn", ExistingForeignKeyColumn);
+                writer.WriteValue("ForeignTable", ForeignTable);
+                writer.WriteValue("ForeignTableIndex", ForeignTableIndex);
+            }
+        }
     }
 
     public class SttpQueryLiterals
@@ -103,6 +110,16 @@ namespace Sttp
         {
             builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryLiterals)}) {Variable} = {Value.AsString} ");
         }
+
+        public void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement("Literal"))
+            {
+                writer.WriteValue("Value", Value);
+                writer.WriteValue("Variable", Variable);
+            }
+        }
+        
     }
 
     public class SttpQueryProcedureStep
@@ -135,6 +152,24 @@ namespace Sttp
         {
             builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryProcedureStep)}) {OutputVariable} = {Function}({string.Join(",", InputVariables)}) ");
         }
+
+        public void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement("Procedure"))
+            {
+                writer.WriteValue("Function", Function);
+                writer.WriteValue("OutputVariable", OutputVariable);
+
+                using (writer.StartElement("InputVariables"))
+                {
+                    foreach (var x in InputVariables)
+                    {
+                        writer.WriteValue("Item", x);
+                    }
+                }
+            }
+        }
+        
     }
 
     public class SttpQueryOutputColumns
@@ -165,6 +200,14 @@ namespace Sttp
             builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryOutputColumns)}) {Variable} = {ColumnName} ");
         }
 
+        public void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement("Output"))
+            {
+                writer.WriteValue("Variable", Variable);
+                writer.WriteValue("ColumnName", ColumnName);
+            }
+        }
 
     }
 
@@ -187,6 +230,41 @@ namespace Sttp
 
         public SttpQueryStatement()
         {
+
+        }
+
+        public SttpQueryStatement(XmlReader reader)
+        {
+            if (reader.NodeType != XmlNodeType.Element)
+                throw new Exception("Must seek to the SttpQuery element.");
+            if (reader.Name != "SttpQuery")
+                throw new Exception("Must seek to the SttpQuery element.");
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case XmlNodeType.None:
+                    case XmlNodeType.Element:
+                    case XmlNodeType.Attribute:
+                    case XmlNodeType.Text:
+                    case XmlNodeType.CDATA:
+                    case XmlNodeType.EntityReference:
+                    case XmlNodeType.Entity:
+                    case XmlNodeType.ProcessingInstruction:
+                    case XmlNodeType.Comment:
+                    case XmlNodeType.Document:
+                    case XmlNodeType.DocumentType:
+                    case XmlNodeType.DocumentFragment:
+                    case XmlNodeType.Notation:
+                    case XmlNodeType.Whitespace:
+                    case XmlNodeType.SignificantWhitespace:
+                    case XmlNodeType.EndElement:
+                    case XmlNodeType.EndEntity:
+                    case XmlNodeType.XmlDeclaration:
+                        break;
+                }
+            }
 
         }
 
@@ -294,73 +372,9 @@ namespace Sttp
             variableIndexCount = variableIndexMap.Count;
         }
 
-        public SttpQueryStatement(PayloadReader rd)
+        public void Save(XmlWriter writer)
         {
 
-        }
-
-        public SttpQueryStatement(SttpConnectionString query)
-        {
-            if (query.TryGetValue("Syntax", out SttpValue value))
-            {
-                if (value.AsString != "SttpQueryStatement")
-                {
-                    throw new Exception("This query is not a STTP Statement query");
-                }
-            }
-
-            foreach (var element in query.Values)
-            {
-                switch (element.RecordName)
-                {
-                    case "DirectTable":
-                        DirectTable = element.Value.AsString;
-                        break;
-                    case "JoinedTables":
-
-                    case "Literals":
-
-                    case "ColumnInputs":
-
-                    case "Procedure":
-
-                    case "Outputs":
-
-                    case "GroupByVariables":
-
-                    case "WhereBooleanVariable":
-                        WhereBooleanVariable = element.Value.AsInt32;
-                        break;
-                    case "HavingProcedure":
-
-                    case "HavingBooleanVariable":
-                        HavingBooleanVariable = element.Value.AsInt32;
-                        break;
-                    case "Limit":
-                        Limit = element.Value.AsInt32;
-                        break;
-                    default:
-                        if (element.Requirement != SttpConnectionStringCompatiblity.Optional)
-                            throw new Exception("An unknown query command was presented and not marked as optional.");
-                        break;
-                }
-            }
-        }
-
-        public void Save(PayloadWriter wr)
-        {
-            wr.Write((byte)1); wr.Write(DirectTable);
-            wr.Write((byte)2); wr.Write(JoinedTables);
-            wr.Write((byte)3); wr.Write(Literals);
-            wr.Write((byte)4); wr.Write(ColumnInputs);
-            wr.Write((byte)5); wr.Write(Procedure);
-            wr.Write((byte)6); wr.Write(Outputs);
-            wr.Write((byte)7); wr.Write(GroupByVariables);
-            wr.Write((byte)8); wr.Write(WhereBooleanVariable);
-            wr.Write((byte)9); wr.Write(HavingProcedure);
-            wr.Write((byte)10); wr.Write(HavingBooleanVariable);
-            wr.Write((byte)11); wr.Write(Limit);
-            wr.Write((byte)0);
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
@@ -405,9 +419,74 @@ namespace Sttp
             }
         }
 
-        public SttpConnectionString ToConnectionString()
+        public SttpMarkup ToSttpMarkup()
         {
-            throw new NotImplementedException();
+            var writer = new SttpMarkupWriter();
+            using (writer.StartElement("SttpQuery"))
+            {
+                writer.WriteValue("DirectTable", DirectTable);
+                writer.WriteValue("WhereBoolVariable", WhereBooleanVariable.ToString());
+                writer.WriteValue("Limit", Limit.ToString());
+                writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable.ToString());
+
+                using (writer.StartElement("JoinedTables"))
+                {
+                    foreach (var item in JoinedTables)
+                    {
+                        item.Save(writer);
+                    }
+                }
+
+                using (writer.StartElement("Literals"))
+                {
+                    foreach (var item in Literals)
+                    {
+                        item.Save(writer);
+                    }
+                }
+
+
+                using (writer.StartElement("ColumnInputs"))
+                {
+                    foreach (var item in ColumnInputs)
+                    {
+                        item.Save(writer);
+                    }
+                }
+
+                using (writer.StartElement("Procedure"))
+                {
+                    foreach (var item in Procedure)
+                    {
+                        item.Save(writer);
+                    }
+                }
+
+                using (writer.StartElement("Outputs"))
+                {
+                    foreach (var item in Outputs)
+                    {
+                        item.Save(writer);
+                    }
+                }
+
+                using (writer.StartElement("GroupByVariables"))
+                {
+                    foreach (var item in GroupByVariables)
+                    {
+                        writer.WriteValue("Item", item);
+                    }
+                }
+
+                using (writer.StartElement("HavingProcedure"))
+                {
+                    foreach (var item in HavingProcedure)
+                    {
+                        item.Save(writer);
+                    }
+                }
+            }
+            return writer.ToSttpMarkup();
         }
     }
 }

@@ -667,6 +667,19 @@ namespace Sttp.IO
         }
 
         /// <summary>
+        /// Writes the supplied <paramref name="value"/> to 
+        /// <paramref name="stream"/> along with prefixing the length 
+        /// so it can be properly read as a unit.
+        /// </summary>
+        /// <param name="stream">the stream to write to</param>
+        /// <param name="value">the value to write</param>
+        public static void Write7BitInt(this Stream stream, int value)
+        {
+            Encoding7Bit.Write(stream.WriteByte, (uint)value);
+        }
+
+
+        /// <summary>
         /// Reads a byte array from a <see cref="Stream"/>. 
         /// The number of bytes should be prefixed in the stream.
         /// </summary>
@@ -812,6 +825,16 @@ namespace Sttp.IO
         public static uint Read7BitUInt32(this Stream stream)
         {
             return Encoding7Bit.ReadUInt32(stream);
+        }
+
+        /// <summary>
+        /// Reads the 7-bit encoded value from the stream.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public static int Read7BitInt(this Stream stream)
+        {
+            return (int)Encoding7Bit.ReadUInt32(stream);
         }
 
         /// <summary>
