@@ -18,113 +18,6 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.Null;
         }
 
-        public void SetValue(object value)
-        {
-            if (value == null || value == DBNull.Value)
-            {
-                m_valueTypeCode = SttpValueTypeCode.Null;
-                return;
-            }
-
-            var type = value.GetType();
-            if (type == typeof(sbyte))
-            {
-                SetValue((sbyte)value);
-            }
-            else if (type == typeof(short))
-            {
-                SetValue((short)value);
-            }
-            else if (type == typeof(int))
-            {
-                SetValue((int)value);
-            }
-            else if (type == typeof(long))
-            {
-                SetValue((long)value);
-            }
-            else if (type == typeof(byte))
-            {
-                SetValue((byte)value);
-            }
-            else if (type == typeof(ushort))
-            {
-                SetValue((ushort)value);
-            }
-            else if (type == typeof(uint))
-            {
-                SetValue((uint)value);
-            }
-            else if (type == typeof(ulong))
-            {
-                SetValue((ulong)value);
-            }
-            else if (type == typeof(float))
-            {
-                SetValue((float)value);
-            }
-            else if (type == typeof(double))
-            {
-                SetValue((double)value);
-            }
-            else if (type == typeof(decimal))
-            {
-                SetValue((decimal)value);
-            }
-            else if (type == typeof(SttpTime))
-            {
-                SetValue((SttpTime)value);
-            }
-            else if (type == typeof(SttpTimeOffset))
-            {
-                SetValue((SttpTimeOffset)value);
-            }
-            else if (type == typeof(DateTime))
-            {
-                SetValue((DateTime)value);
-            }
-            else if (type == typeof(DateTimeOffset))
-            {
-                SetValue((DateTimeOffset)value);
-            }
-            else if (type == typeof(TimeSpan))
-            {
-                SetValue((TimeSpan)value);
-            }
-            else if (type == typeof(bool))
-            {
-                SetValue((bool)value);
-            }
-            else if (type == typeof(char))
-            {
-                SetValue((char)value);
-            }
-            else if (type == typeof(Guid))
-            {
-                SetValue((Guid)value);
-            }
-            else if (type == typeof(string))
-            {
-                SetValue((string)value);
-            }
-            else if (type == typeof(byte[]))
-            {
-                SetValue((byte[])value);
-            }
-            else if (type == typeof(SttpValueSet))
-            {
-                SetValue((SttpValueSet)value);
-            }
-            else if (type == typeof(SttpNamedSet))
-            {
-                SetValue((SttpNamedSet)value);
-            }
-            else
-            {
-                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
-            }
-        }
-
         public void SetValue(sbyte value)
         {
             m_valueTypeCode = SttpValueTypeCode.SByte;
@@ -180,16 +73,6 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.Decimal;
             m_valueDecimal = value;
         }
-        public void SetValue(SttpTime value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.SttpTime;
-            m_valueSttpTime = value;
-        }
-        public void SetValue(SttpTimeOffset value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
-            m_valueSttpTimeOffset = value;
-        }
         public void SetValue(DateTime value)
         {
             m_valueTypeCode = SttpValueTypeCode.DateTime;
@@ -199,6 +82,16 @@ namespace Sttp
         {
             m_valueTypeCode = SttpValueTypeCode.DateTimeOffset;
             m_valueDateTimeOffset = value;
+        }
+        public void SetValue(SttpTime value)
+        {
+            m_valueTypeCode = SttpValueTypeCode.SttpTime;
+            m_valueSttpTime = value;
+        }
+        public void SetValue(SttpTimeOffset value)
+        {
+            m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
+            m_valueSttpTimeOffset = value;
         }
         public void SetValue(TimeSpan value)
         {
@@ -225,7 +118,7 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.String;
             m_valueObject = value;
         }
-        public void SetValue(byte[] value)
+        public void SetValue(SttpBuffer value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpBuffer;
             m_valueObject = value;
@@ -240,7 +133,139 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.SttpNamedSet;
             m_valueObject = value;
         }
+        public void SetValue(SttpMarkup value)
+        {
+            m_valueTypeCode = SttpValueTypeCode.SttpMarkup;
+            m_valueObject = value;
+        }
+        public void SetValueBulkTransportGuid(Guid value)
+        {
+            m_valueTypeCode = SttpValueTypeCode.BulkTransportGuid;
+            m_valueGuid = value;
+        }
 
-        
+        public void SetValue(byte[] data)
+        {
+            SetValue(new SttpBuffer(data));
+        }
+
+
+        public void SetValue(object value)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                m_valueTypeCode = SttpValueTypeCode.Null;
+                return;
+            }
+
+            var type = value.GetType();
+            if (type == typeof(sbyte))
+            {
+                SetValue((sbyte)value);
+            }
+            else if (type == typeof(short))
+            {
+                SetValue((short)value);
+            }
+            else if (type == typeof(int))
+            {
+                SetValue((int)value);
+            }
+            else if (type == typeof(long))
+            {
+                SetValue((long)value);
+            }
+            else if (type == typeof(byte))
+            {
+                SetValue((byte)value);
+            }
+            else if (type == typeof(ushort))
+            {
+                SetValue((ushort)value);
+            }
+            else if (type == typeof(uint))
+            {
+                SetValue((uint)value);
+            }
+            else if (type == typeof(ulong))
+            {
+                SetValue((ulong)value);
+            }
+            else if (type == typeof(float))
+            {
+                SetValue((float)value);
+            }
+            else if (type == typeof(double))
+            {
+                SetValue((double)value);
+            }
+            else if (type == typeof(decimal))
+            {
+                SetValue((decimal)value);
+            }
+            else if (type == typeof(DateTime))
+            {
+                SetValue((DateTime)value);
+            }
+            else if (type == typeof(DateTimeOffset))
+            {
+                SetValue((DateTimeOffset)value);
+            }
+            else if (type == typeof(SttpTime))
+            {
+                SetValue((SttpTime)value);
+            }
+            else if (type == typeof(SttpTimeOffset))
+            {
+                SetValue((SttpTimeOffset)value);
+            }
+            else if (type == typeof(TimeSpan))
+            {
+                SetValue((TimeSpan)value);
+            }
+            else if (type == typeof(bool))
+            {
+                SetValue((bool)value);
+            }
+            else if (type == typeof(char))
+            {
+                SetValue((char)value);
+            }
+            else if (type == typeof(Guid))
+            {
+                SetValue((Guid)value);
+            }
+            else if (type == typeof(string))
+            {
+                SetValue((string)value);
+            }
+            else if (type == typeof(byte[]))
+            {
+                SetValue((byte[])value);
+            }
+            else if (type == typeof(SttpValue))
+            {
+                SetValue((SttpValue)value);
+            }
+            else if (type == typeof(SttpValueSet))
+            {
+                SetValue((SttpValueSet)value);
+            }
+            else if (type == typeof(SttpNamedSet))
+            {
+                SetValue((SttpNamedSet)value);
+            }
+            else if (type == typeof(SttpMarkup))
+            {
+                SetValue((SttpMarkup)value);
+            }
+            else
+            {
+                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
+            }
+        }
+
+
+
     }
 }
