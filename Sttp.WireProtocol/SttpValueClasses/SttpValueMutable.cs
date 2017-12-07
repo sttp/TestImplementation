@@ -1454,9 +1454,9 @@ namespace Sttp
 
         }
 
-        public override SttpMarkup AsSttpMarkup { get; }
+        public override SttpMarkup AsSttpMarkup => null;
 
-        public override Guid AsBulkTransportGuid { get; }
+        public override Guid AsBulkTransportGuid => Guid.Empty;
 
         /// <summary>
         /// The type code of the raw value.
