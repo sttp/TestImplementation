@@ -15,7 +15,7 @@ namespace Sttp
             Data = (byte[])data.Clone();
         }
 
-        public SttpBuffer(PayloadReader data)
+        public SttpBuffer(ByteReader data)
         {
             throw new NotImplementedException();
         }

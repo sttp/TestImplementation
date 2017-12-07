@@ -55,7 +55,7 @@ namespace Sttp
             m_valueTypeCode = SttpDataPointIDTypeCode.Null;
         }
 
-        public SttpDataPointID(PayloadReader reader)
+        public SttpDataPointID(ByteReader reader)
         {
             switch ((SttpDataPointIDTypeCode)reader.ReadByte())
             {
@@ -174,7 +174,7 @@ namespace Sttp
             }
         }
 
-        public void Save(PayloadWriter writer)
+        public void Save(ByteWriter writer)
         {
             writer.Write((byte)m_valueTypeCode);
             switch (m_valueTypeCode)

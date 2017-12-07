@@ -60,7 +60,7 @@ namespace Sttp
             ForeignTableIndex = rd.ReadInt32();
         }
 
-        public void Save(PayloadWriter wr)
+        public void Save(ByteWriter wr)
         {
             wr.Write(ExistingTableIndex);
             wr.Write(ExistingForeignKeyColumn);

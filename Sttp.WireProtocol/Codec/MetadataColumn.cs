@@ -20,13 +20,13 @@ namespace Sttp.Codec
             Name = name;
         }
 
-        public MetadataColumn(PayloadReader reader)
+        public MetadataColumn(ByteReader reader)
         {
             Name = reader.ReadString();
             TypeCode = (SttpValueTypeCode)reader.ReadByte();
         }
 
-        public void Save(PayloadWriter writer)
+        public void Save(ByteWriter writer)
         {
             writer.Write(Name);
             writer.Write((byte)TypeCode);

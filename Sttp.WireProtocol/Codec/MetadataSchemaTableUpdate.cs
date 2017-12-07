@@ -14,13 +14,13 @@ namespace Sttp
             LastModifiedRevision = lastModifiedRevision;
         }
 
-        public MetadataSchemaTableUpdate(PayloadReader reader)
+        public MetadataSchemaTableUpdate(ByteReader reader)
         {
             TableName = reader.ReadString();
             LastModifiedRevision = reader.ReadInt64();
         }
 
-        public void Save(PayloadWriter writer)
+        public void Save(ByteWriter writer)
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);

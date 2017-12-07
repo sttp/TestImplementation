@@ -17,7 +17,7 @@ namespace Sttp
 
         }
 
-        public MetadataSchemaTables(PayloadReader reader)
+        public MetadataSchemaTables(ByteReader reader)
         {
             TableName = reader.ReadString();
             LastModifiedRevision = reader.ReadInt64();
@@ -25,7 +25,7 @@ namespace Sttp
             ForeignKeys = reader.ReadListMetadataForeignKey();
         }
 
-        public void Save(PayloadWriter writer)
+        public void Save(ByteWriter writer)
         {
             writer.Write(TableName);
             writer.Write(LastModifiedRevision);

@@ -27,7 +27,7 @@ namespace Sttp
     public class SttpMarkup
     {
         private byte[] m_data;
-        public SttpMarkup(PayloadReader rd)
+        public SttpMarkup(ByteReader rd)
         {
             m_data = rd.ReadBytes();
         }
@@ -35,7 +35,7 @@ namespace Sttp
         {
             m_data = data;
         }
-        public void Write(PayloadWriter wr)
+        public void Write(ByteWriter wr)
         {
             wr.Write(m_data);
         }

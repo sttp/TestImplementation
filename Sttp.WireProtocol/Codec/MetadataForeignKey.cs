@@ -15,13 +15,13 @@ namespace Sttp.Codec
             ForeignTableName = foreignTableName;
         }
 
-        public MetadataForeignKey(PayloadReader reader)
+        public MetadataForeignKey(ByteReader reader)
         {
             ColumnName = reader.ReadString();
             ForeignTableName = reader.ReadString();
         }
 
-        public void Save(PayloadWriter writer)
+        public void Save(ByteWriter writer)
         {
             writer.Write(ColumnName);
             writer.Write(ForeignTableName);

@@ -13,7 +13,7 @@ namespace Sttp
     /// </summary>
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
-        public void Save(PayloadWriter wr)
+        public void Save(ByteWriter wr)
         {
             var value = ValueTypeCode;
             wr.Write((byte)value);
@@ -101,7 +101,7 @@ namespace Sttp
             }
         }
 
-        public static SttpValue Load(PayloadReader rd)
+        public static SttpValue Load(ByteReader rd)
         {
             SttpValueTypeCode value = (SttpValueTypeCode)rd.ReadByte();
             switch (value)

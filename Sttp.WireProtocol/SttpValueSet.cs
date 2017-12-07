@@ -12,12 +12,12 @@ namespace Sttp
         {
             
         }
-        public SttpValueSet(PayloadReader rd)
+        public SttpValueSet(ByteReader rd)
         {
             Values = rd.ReadListSttpValue();
         }
 
-        public void Save(PayloadWriter wr)
+        public void Save(ByteWriter wr)
         {
             wr.Write(Values);
         }
