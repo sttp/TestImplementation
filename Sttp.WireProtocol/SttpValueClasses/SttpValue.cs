@@ -36,7 +36,7 @@ namespace Sttp
         public abstract SttpTime AsSttpTime { get; }
         public abstract SttpTimeOffset AsSttpTimeOffset { get; }
         public abstract TimeSpan AsTimeSpan { get; }
-        public abstract bool AsBool { get; }
+        public abstract bool AsBoolean { get; }
         public abstract char AsChar { get; }
         public abstract Guid AsGuid { get; }
         public abstract string AsString { get; }

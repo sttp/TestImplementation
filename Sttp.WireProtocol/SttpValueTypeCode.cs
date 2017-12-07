@@ -19,7 +19,7 @@
         SttpTime = 14,          // Local/Universal Time with Leap Seconds
         SttpTimeOffset = 15,    // Local/Universal Time with Leap Seconds and timezone offset.
         TimeSpan = 16,          // 8 bytes
-        Bool = 17,              // 1-byte
+        Boolean = 17,              // 1-byte
         Char = 18,              // 2-bytes
         Guid = 19,              // 16-bytes
         String = 20,            // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.

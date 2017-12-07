@@ -42,7 +42,7 @@ namespace Sttp
             if (columnDataType == typeof(DateTime))
                 return SttpValueTypeCode.DateTime;
             if (columnDataType == typeof(bool))
-                return SttpValueTypeCode.Bool;
+                return SttpValueTypeCode.Boolean;
             if (columnDataType == typeof(Guid))
                 return SttpValueTypeCode.Guid;
             if (columnDataType == typeof(String))
@@ -91,7 +91,7 @@ namespace Sttp
                     return typeof(SttpTimeOffset);
                 case SttpValueTypeCode.TimeSpan:
                     return typeof(TimeSpan);
-                case SttpValueTypeCode.Bool:
+                case SttpValueTypeCode.Boolean:
                     return typeof(Boolean);
                 case SttpValueTypeCode.Char:
                     return typeof(Char);

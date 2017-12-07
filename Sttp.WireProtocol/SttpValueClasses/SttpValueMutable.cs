@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Sttp.Codec;
+using Sttp.SttpValueClasses;
 
 namespace Sttp
 {
@@ -46,7 +47,7 @@ namespace Sttp
         [FieldOffset(0)]
         private char m_valueChar;
         [FieldOffset(0)]
-        private bool m_valueBool;
+        private bool m_valueBoolean;
         [FieldOffset(0)]
         private SttpTime m_valueSttpTime;
         [FieldOffset(0)]
@@ -72,125 +73,9 @@ namespace Sttp
 
         public SttpValueMutable()
         {
-            m_valueTypeCode = SttpValueTypeCode.Null;
+            SetNull();
         }
 
-        /// <summary>
-        /// Clones an <see cref="SttpValue"/>. 
-        /// </summary>
-        /// <param name="value">the value to clone</param>
-        public SttpValueMutable(SttpValueMutable value)
-        {
-            m_rawBytes0_7 = value.m_rawBytes0_7;
-            m_rawBytes8_15 = value.m_rawBytes8_15;
-            m_valueObject = value.m_valueObject;
-            m_valueTypeCode = value.m_valueTypeCode;
-        }
-
-        public SttpValueMutable(PayloadReader rd)
-        {
-            switch ((SttpValueTypeCode)rd.ReadByte())
-            {
-                case SttpValueTypeCode.Null:
-                    m_valueTypeCode = SttpValueTypeCode.Null;
-                    break;
-                case SttpValueTypeCode.SByte:
-                    SetValue(rd.ReadSByte());
-                    break;
-                case SttpValueTypeCode.Int16:
-                    SetValue(rd.ReadInt16());
-                    break;
-                case SttpValueTypeCode.Int32:
-                    SetValue(rd.ReadInt32());
-                    break;
-                case SttpValueTypeCode.Int64:
-                    SetValue(rd.ReadInt64());
-                    break;
-                case SttpValueTypeCode.Byte:
-                    SetValue(rd.ReadByte());
-                    break;
-                case SttpValueTypeCode.UInt16:
-                    SetValue(rd.ReadUInt16());
-                    break;
-                case SttpValueTypeCode.UInt32:
-                    SetValue(rd.ReadUInt32());
-                    break;
-                case SttpValueTypeCode.UInt64:
-                    SetValue(rd.ReadUInt64());
-                    break;
-                case SttpValueTypeCode.Single:
-                    SetValue(rd.ReadSingle());
-                    break;
-                case SttpValueTypeCode.Double:
-                    SetValue(rd.ReadDouble());
-                    break;
-                case SttpValueTypeCode.Decimal:
-                    SetValue(rd.ReadDecimal());
-                    break;
-                case SttpValueTypeCode.DateTime:
-                    SetValue(rd.ReadDateTime());
-                    break;
-                case SttpValueTypeCode.DateTimeOffset:
-                    throw new NotImplementedException();
-                    //AsDateTimeOffset = rd.ReadDateTimeOffset();
-                    break;
-                case SttpValueTypeCode.SttpTime:
-                    throw new NotImplementedException();
-                    // AsSttpTime = rd.ReadSttpTime();
-                    break;
-                case SttpValueTypeCode.SttpTimeOffset:
-                    throw new NotImplementedException();
-                    //AsSttpTimeOffset = rd.ReadSttpTimeOffset();
-                    break;
-                case SttpValueTypeCode.TimeSpan:
-                    SetValue(new TimeSpan(rd.ReadInt64()));
-                    break;
-                case SttpValueTypeCode.Bool:
-                    SetValue(rd.ReadBoolean());
-                    break;
-                case SttpValueTypeCode.Char:
-                    SetValue(rd.ReadChar());
-                    break;
-                case SttpValueTypeCode.Guid:
-                    SetValue(rd.ReadGuid());
-                    break;
-                case SttpValueTypeCode.String:
-                    SetValue(rd.ReadString());
-                    break;
-                case SttpValueTypeCode.SttpBuffer:
-                    throw new NotImplementedException();
-                    //AsBuffer = rd.ReadBuffer();
-                    break;
-                case SttpValueTypeCode.SttpValueSet:
-                    throw new NotImplementedException();
-                    //AsValueSet = rd.ReadValueSet();
-                    break;
-                case SttpValueTypeCode.SttpNamedSet:
-                    throw new NotImplementedException();
-                    //AsNamedSet = rd.ReadNamedSet();
-                    break;
-                case SttpValueTypeCode.SttpMarkup:
-                    throw new NotImplementedException();
-                    //AsConnectionString = rd.ReadConnectionString();
-                    break;
-                case SttpValueTypeCode.BulkTransportGuid:
-                    throw new NotImplementedException();
-                    //AsBulkTransportGuid = rd.ReadBulkTransportGuid();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        internal void Load(Stream stream)
-        {
-            throw new NotImplementedException();
-        }
-
-        public SttpValueMutable(object x)
-        {
-            SetValue(x);
-        }
 
         #endregion
 
@@ -200,55 +85,62 @@ namespace Sttp
         {
             get
             {
-                checked
+                switch (m_valueTypeCode)
                 {
-                    switch (m_valueTypeCode)
-                    {
-                        case SttpValueTypeCode.Null:
-                            throw new InvalidCastException("Cannot cast from Null");
-                        case SttpValueTypeCode.SByte:
-                            return m_valueSByte;
-                        case SttpValueTypeCode.Int16:
-                            return (sbyte)m_valueInt16;
-                        case SttpValueTypeCode.Int32:
-                            return (sbyte)m_valueInt32;
-                        case SttpValueTypeCode.Int64:
-                            return (sbyte)m_valueInt64;
-                        case SttpValueTypeCode.Byte:
-                            return (sbyte)m_valueByte;
-                        case SttpValueTypeCode.UInt16:
-                            return (sbyte)m_valueUInt16;
-                        case SttpValueTypeCode.UInt32:
-                            return (sbyte)m_valueUInt32;
-                        case SttpValueTypeCode.UInt64:
-                            return (sbyte)m_valueUInt64;
-                        case SttpValueTypeCode.Decimal:
-                            return (sbyte)m_valueDecimal;
-                        case SttpValueTypeCode.Double:
-                            return (sbyte)m_valueDouble;
-                        case SttpValueTypeCode.Single:
-                            return (sbyte)m_valueSingle;
-                        case SttpValueTypeCode.SttpTime:
-                            throw new InvalidCastException("Cannot cast from SttpTime");
-                        case SttpValueTypeCode.SttpTimeOffset:
-                            throw new InvalidCastException("Cannot cast from SttpTimeOffset");
-                        case SttpValueTypeCode.TimeSpan:
-                            throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Char:
-                            return (sbyte)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (sbyte)(m_valueBool ? 0 : 1);
-                        case SttpValueTypeCode.Guid:
-                            throw new InvalidCastException("Cannot cast from Guid");
-                        case SttpValueTypeCode.String:
-                            return sbyte.Parse((string)m_valueObject);
-                        case SttpValueTypeCode.SttpBuffer:
-                            throw new InvalidCastException("Cannot cast from Buffer");
-                        case SttpValueTypeCode.SttpValueSet:
-                            throw new InvalidCastException("Cannot cast from Set");
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    case SttpValueTypeCode.Null:
+                        throw new InvalidOperationException("Cannot cast from Null to SByte");
+                    case SttpValueTypeCode.SByte:
+                        return SttpValueSByteMethods.AsSByte(m_valueSByte);
+                    case SttpValueTypeCode.Int16:
+                        return SttpValueInt16Methods.AsSByte(m_valueInt16);
+                    case SttpValueTypeCode.Int32:
+                        return SttpValueInt32Methods.AsSByte(m_valueInt32);
+                    case SttpValueTypeCode.Int64:
+                        return SttpValueInt64Methods.AsSByte(m_valueInt64);
+                    case SttpValueTypeCode.Byte:
+                        return SttpValueByteMethods.AsSByte(m_valueByte);
+                    case SttpValueTypeCode.UInt16:
+                        return SttpValueUInt16Methods.AsSByte(m_valueUInt16);
+                    case SttpValueTypeCode.UInt32:
+                        return SttpValueUInt32Methods.AsSByte(m_valueUInt32);
+                    case SttpValueTypeCode.UInt64:
+                        return SttpValueUInt64Methods.AsSByte(m_valueUInt64);
+                    case SttpValueTypeCode.Single:
+                        return SttpValueSingleMethods.AsSByte(m_valueSingle);
+                    case SttpValueTypeCode.Double:
+                        return SttpValueDoubleMethods.AsSByte(m_valueDouble);
+                    case SttpValueTypeCode.Decimal:
+                        return SttpValueDecimalMethods.AsSByte(m_valueDecimal);
+                    case SttpValueTypeCode.DateTime:
+                        return SttpValueDateTimeMethods.AsSByte(m_valueDateTime);
+                    case SttpValueTypeCode.DateTimeOffset:
+                        return SttpValueDateTimeOffsetMethods.AsSByte(m_valueDateTimeOffset);
+                    case SttpValueTypeCode.SttpTime:
+                        return SttpValueSttpTimeMethods.AsSByte(m_valueSttpTime);
+                    case SttpValueTypeCode.SttpTimeOffset:
+                        return SttpValueSttpTimeOffsetMethods.AsSByte(m_valueSttpTimeOffset);
+                    case SttpValueTypeCode.TimeSpan:
+                        return SttpValueTimeSpanMethods.AsSByte(m_valueTimeSpan);
+                    case SttpValueTypeCode.Boolean:
+                        return SttpValueBooleanMethods.AsSByte(m_valueBoolean);
+                    case SttpValueTypeCode.Char:
+                        return SttpValueCharMethods.AsSByte(m_valueChar);
+                    case SttpValueTypeCode.Guid:
+                        return SttpValueGuidMethods.AsSByte(m_valueGuid);
+                    case SttpValueTypeCode.String:
+                        return SttpValueStringMethods.AsSByte(m_valueObject as string);
+                    case SttpValueTypeCode.SttpBuffer:
+                        return SttpValueSttpBufferMethods.AsSByte(m_valueObject as SttpBuffer);
+                    case SttpValueTypeCode.SttpValueSet:
+                        return SttpValueSttpValueSetMethods.AsSByte(m_valueObject as SttpValueSet);
+                    case SttpValueTypeCode.SttpNamedSet:
+                        return SttpValueSttpNamedSetMethods.AsSByte(m_valueObject as SttpNamedSet);
+                    case SttpValueTypeCode.SttpMarkup:
+                        return SttpValueSttpMarkupMethods.AsSByte(m_valueObject as SttpMarkup);
+                    case SttpValueTypeCode.BulkTransportGuid:
+                        return SttpValueBulkTransportGuidMethods.AsSByte(m_valueGuid);
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }
@@ -293,8 +185,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (short)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (short)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (short)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -351,8 +243,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (int)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (int)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (int)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -409,8 +301,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (long)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (long)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (long)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -467,8 +359,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (byte)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (byte)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (byte)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -525,8 +417,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (ushort)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (ushort)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (ushort)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -583,8 +475,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (uint)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (uint)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (uint)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -641,8 +533,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (ulong)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (ulong)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (ulong)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -699,8 +591,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (decimal)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (decimal)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (decimal)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -757,8 +649,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (double)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (double)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (double)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -815,8 +707,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (float)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (float)(m_valueBool ? 0 : 1);
+                        case SttpValueTypeCode.Boolean:
+                            return (float)(m_valueBoolean ? 0 : 1);
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -873,7 +765,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -938,7 +830,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1003,7 +895,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1061,7 +953,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1119,7 +1011,7 @@ namespace Sttp
                             return m_valueTimeSpan;
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1177,8 +1069,8 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             return (char)m_valueChar;
-                        case SttpValueTypeCode.Bool:
-                            return (char)(m_valueBool ? 'T' : 'F');
+                        case SttpValueTypeCode.Boolean:
+                            return (char)(m_valueBoolean ? 'T' : 'F');
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -1195,7 +1087,7 @@ namespace Sttp
 
         }
 
-        public override bool AsBool
+        public override bool AsBoolean
         {
             get
             {
@@ -1244,8 +1136,8 @@ namespace Sttp
                                     return false;
                             }
                             throw new InvalidCastException("Cannot cast from Char");
-                        case SttpValueTypeCode.Bool:
-                            return m_valueBool;
+                        case SttpValueTypeCode.Boolean:
+                            return m_valueBoolean;
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
                         case SttpValueTypeCode.String:
@@ -1301,7 +1193,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             return m_valueGuid;
@@ -1359,8 +1251,8 @@ namespace Sttp
                             return m_valueTimeSpan.ToString();
                         case SttpValueTypeCode.Char:
                             return m_valueChar.ToString();
-                        case SttpValueTypeCode.Bool:
-                            return m_valueBool.ToString();
+                        case SttpValueTypeCode.Boolean:
+                            return m_valueBoolean.ToString();
                         case SttpValueTypeCode.Guid:
                             return m_valueGuid.ToString();
                         case SttpValueTypeCode.String:
@@ -1426,7 +1318,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1484,7 +1376,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1542,7 +1434,7 @@ namespace Sttp
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Char:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
-                        case SttpValueTypeCode.Bool:
+                        case SttpValueTypeCode.Boolean:
                             throw new InvalidCastException("Cannot cast from TimeSpan");
                         case SttpValueTypeCode.Guid:
                             throw new InvalidCastException("Cannot cast from Guid");
@@ -1775,8 +1667,8 @@ namespace Sttp
         }
         public void SetValue(bool value)
         {
-            m_valueTypeCode = SttpValueTypeCode.Bool;
-            m_valueBool = value;
+            m_valueTypeCode = SttpValueTypeCode.Boolean;
+            m_valueBoolean = value;
         }
         public void SetValue(char value)
         {
@@ -1897,8 +1789,8 @@ namespace Sttp
                         return AsSttpTimeOffset;
                     case SttpValueTypeCode.TimeSpan:
                         return AsTimeSpan.Ticks;
-                    case SttpValueTypeCode.Bool:
-                        return AsBool;
+                    case SttpValueTypeCode.Boolean:
+                        return AsBoolean;
                     case SttpValueTypeCode.Char:
                         return AsChar;
                     case SttpValueTypeCode.Guid:

@@ -131,7 +131,7 @@ namespace Sttp
                             m_prevNameAsInt += nameDelta;
                         ValueName = m_elements[m_prevNameAsInt];
                     }
-                    m_value.Load(m_stream);
+                    //m_value.Load(m_stream);
 
                     break;
                 case SttpMarkupNodeType.EndElement:

@@ -123,7 +123,7 @@ namespace Sttp.Core.Data
                 }
 
                 if (!query.WhereBooleanVariable.HasValue
-                    || (!variables[query.WhereBooleanVariable.Value].IsNull && variables[query.WhereBooleanVariable.Value].AsBool))
+                    || (!variables[query.WhereBooleanVariable.Value].IsNull && variables[query.WhereBooleanVariable.Value].AsBoolean))
                 {
                     SttpValueSet values = new SttpValueSet();
                     foreach (var item in query.Outputs)

@@ -35,7 +35,7 @@ namespace Sttp.SttpValueClasses
         public override SttpTime AsSttpTime => SttpValueInt32Methods.AsSttpTime(Value);
         public override SttpTimeOffset AsSttpTimeOffset => SttpValueInt32Methods.AsSttpTimeOffset(Value);
         public override TimeSpan AsTimeSpan => SttpValueInt32Methods.AsTimeSpan(Value);
-        public override bool AsBool => SttpValueInt32Methods.AsBool(Value);
+        public override bool AsBoolean => SttpValueInt32Methods.AsBoolean(Value);
         public override char AsChar => SttpValueInt32Methods.AsChar(Value);
         public override Guid AsGuid => SttpValueInt32Methods.AsGuid(Value);
         public override string AsString => SttpValueInt32Methods.AsString(Value);
@@ -45,8 +45,6 @@ namespace Sttp.SttpValueClasses
         public override SttpMarkup AsSttpMarkup => SttpValueInt32Methods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueInt32Methods.AsBulkTransportGuid(Value);
     }
-
-
 
     internal static class SttpValueInt32Methods
     {
@@ -153,32 +151,32 @@ namespace Sttp.SttpValueClasses
 
         public static DateTime AsDateTime(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to DateTime");
         }
 
         public static DateTimeOffset AsDateTimeOffset(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to DateTimeOffset");
         }
 
         public static SttpTime AsSttpTime(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
         }
 
         public static SttpTimeOffset AsSttpTimeOffset(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTimeOffset");
         }
 
         public static TimeSpan AsTimeSpan(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to TimeSpan");
         }
 
-        public static bool AsBool(int value)
+        public static bool AsBoolean(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Boolean");
         }
 
         public static char AsChar(int value)
@@ -191,7 +189,7 @@ namespace Sttp.SttpValueClasses
 
         public static Guid AsGuid(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Guid");
         }
 
         public static string AsString(int value)
@@ -201,27 +199,27 @@ namespace Sttp.SttpValueClasses
 
         public static SttpBuffer AsBuffer(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
         public static SttpValueSet AsValueSet(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
         public static SttpNamedSet AsNamedSet(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }
 
         public static SttpMarkup AsSttpMarkup(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
         }
 
         public static Guid AsBulkTransportGuid(int value)
         {
-            throw new InvalidCastException();
+            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to BulkTransportGuid");
         }
 
         #endregion

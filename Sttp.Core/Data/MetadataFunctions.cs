@@ -118,7 +118,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
 
@@ -140,7 +140,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
 
@@ -157,12 +157,12 @@ namespace Sttp.Core.Data
             if (IfAnyNullAssignNull())
                 return;
 
-            Output = (SttpValue)(!Inputs(0).AsBool);
+            Output = (SttpValue)(!Inputs(0).AsBoolean);
         }
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
 
@@ -178,7 +178,7 @@ namespace Sttp.Core.Data
         {
             for (int x = 0; x < InputCount; x++)
             {
-                if (!Inputs(x).IsNull && Inputs(x).AsBool)
+                if (!Inputs(x).IsNull && Inputs(x).AsBoolean)
                 {
                     Output = (SttpValue)(true);
                     return;
@@ -193,7 +193,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
 
@@ -211,7 +211,7 @@ namespace Sttp.Core.Data
                 return;
             for (int x = 0; x < InputCount; x++)
             {
-                if (!Inputs(x).AsBool)
+                if (!Inputs(x).AsBoolean)
                 {
                     Output = (SttpValue)(false);
                     return;
@@ -223,7 +223,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
 
        
@@ -247,7 +247,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
     public class FuncLessThanOrEqual : MetadataFunctions
@@ -268,7 +268,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
     public class FuncGreaterThan : MetadataFunctions
@@ -289,7 +289,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
     public class FuncGreaterThanOrEqual : MetadataFunctions
@@ -310,7 +310,7 @@ namespace Sttp.Core.Data
 
         protected override SttpValueTypeCode GetReturnType(SttpValueTypeCode[] codes)
         {
-            return SttpValueTypeCode.Bool;
+            return SttpValueTypeCode.Boolean;
         }
     }
 }
