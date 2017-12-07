@@ -97,9 +97,65 @@ namespace Sttp
 
         public SttpValue CloneAsImmutable()
         {
-            throw new NotImplementedException();
+            switch (ValueTypeCode)
+            {
+                case SttpValueTypeCode.Null:
+                    return SttpValue.Null;
+                case SttpValueTypeCode.SByte:
+                    return (SttpValue)AsSByte;
+                case SttpValueTypeCode.Int16:
+                    return (SttpValue)AsInt16;
+                case SttpValueTypeCode.Int32:
+                    return (SttpValue)AsInt32;
+                case SttpValueTypeCode.Int64:
+                    return (SttpValue)AsInt64;
+                case SttpValueTypeCode.Byte:
+                    return (SttpValue)AsByte;
+                case SttpValueTypeCode.UInt16:
+                    return (SttpValue)AsUInt16;
+                case SttpValueTypeCode.UInt32:
+                    return (SttpValue)AsUInt32;
+                case SttpValueTypeCode.UInt64:
+                    return (SttpValue)AsUInt64;
+                case SttpValueTypeCode.Single:
+                    return (SttpValue)AsSingle;
+                case SttpValueTypeCode.Double:
+                    return (SttpValue)AsDouble;
+                case SttpValueTypeCode.Decimal:
+                    return (SttpValue)AsDecimal;
+                case SttpValueTypeCode.DateTime:
+                    return (SttpValue)AsDateTime;
+                case SttpValueTypeCode.DateTimeOffset:
+                    return (SttpValue)AsDateTimeOffset;
+                case SttpValueTypeCode.SttpTime:
+                    return (SttpValue)AsSttpTime;
+                case SttpValueTypeCode.SttpTimeOffset:
+                    return (SttpValue)AsSttpTimeOffset;
+                case SttpValueTypeCode.TimeSpan:
+                    return (SttpValue)AsTimeSpan;
+                case SttpValueTypeCode.Boolean:
+                    return (SttpValue)AsBoolean;
+                case SttpValueTypeCode.Char:
+                    return (SttpValue)AsChar;
+                case SttpValueTypeCode.Guid:
+                    return (SttpValue)AsGuid;
+                case SttpValueTypeCode.String:
+                    return (SttpValue)AsString;
+                case SttpValueTypeCode.SttpBuffer:
+                    return (SttpValue)AsSttpBuffer;
+                case SttpValueTypeCode.SttpValueSet:
+                    return (SttpValue)AsSttpValueSet;
+                case SttpValueTypeCode.SttpNamedSet:
+                    return (SttpValue)AsSttpNamedSet;
+                case SttpValueTypeCode.SttpMarkup:
+                    return (SttpValue)AsSttpMarkup;
+                case SttpValueTypeCode.BulkTransportGuid:
+                    return SttpValue.CreateBulkTransportGuid(AsBulkTransportGuid);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
-      
+
         public static bool operator ==(SttpValueMutable a, SttpValueMutable b)
         {
             if (ReferenceEquals(a, b))
@@ -146,6 +202,6 @@ namespace Sttp
             rv.SetValue(v);
             return rv;
         }
-        
+
     }
 }

@@ -149,6 +149,92 @@ namespace Sttp
             SetValue(new SttpBuffer(data));
         }
 
+        public void SetValue(SttpValue value)
+        {
+            switch (value.ValueTypeCode)
+            {
+                case SttpValueTypeCode.Null:
+                    SetNull();
+                    break;
+                case SttpValueTypeCode.SByte:
+                    SetValue(value.AsSByte);
+                    break;
+                case SttpValueTypeCode.Int16:
+                    SetValue(value.AsInt16);
+                    break;
+                case SttpValueTypeCode.Int32:
+                    SetValue(value.AsInt32);
+                    break;
+                case SttpValueTypeCode.Int64:
+                    SetValue(value.AsInt64);
+                    break;
+                case SttpValueTypeCode.Byte:
+                    SetValue(value.AsByte);
+                    break;
+                case SttpValueTypeCode.UInt16:
+                    SetValue(value.AsUInt16);
+                    break;
+                case SttpValueTypeCode.UInt32:
+                    SetValue(value.AsUInt32);
+                    break;
+                case SttpValueTypeCode.UInt64:
+                    SetValue(value.AsUInt64);
+                    break;
+                case SttpValueTypeCode.Single:
+                    SetValue(value.AsSingle);
+                    break;
+                case SttpValueTypeCode.Double:
+                    SetValue(value.AsDouble);
+                    break;
+                case SttpValueTypeCode.Decimal:
+                    SetValue(value.AsDecimal);
+                    break;
+                case SttpValueTypeCode.DateTime:
+                    SetValue(value.AsDateTime);
+                    break;
+                case SttpValueTypeCode.DateTimeOffset:
+                    SetValue(value.AsDateTimeOffset);
+                    break;
+                case SttpValueTypeCode.SttpTime:
+                    SetValue(value.AsSttpTime);
+                    break;
+                case SttpValueTypeCode.SttpTimeOffset:
+                    SetValue(value.AsSttpTimeOffset);
+                    break;
+                case SttpValueTypeCode.TimeSpan:
+                    SetValue(value.AsTimeSpan);
+                    break;
+                case SttpValueTypeCode.Boolean:
+                    SetValue(value.AsBoolean);
+                    break;
+                case SttpValueTypeCode.Char:
+                    SetValue(value.AsChar);
+                    break;
+                case SttpValueTypeCode.Guid:
+                    SetValue(value.AsGuid);
+                    break;
+                case SttpValueTypeCode.String:
+                    SetValue(value.AsString);
+                    break;
+                case SttpValueTypeCode.SttpBuffer:
+                    SetValue(value.AsSttpBuffer);
+                    break;
+                case SttpValueTypeCode.SttpValueSet:
+                    SetValue(value.AsSttpValueSet);
+                    break;
+                case SttpValueTypeCode.SttpNamedSet:
+                    SetValue(value.AsSttpNamedSet);
+                    break;
+                case SttpValueTypeCode.SttpMarkup:
+                    SetValue(value.AsSttpMarkup);
+                    break;
+                case SttpValueTypeCode.BulkTransportGuid:
+                    SetValueBulkTransportGuid(value.AsBulkTransportGuid);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         public void SetValue(object value)
         {

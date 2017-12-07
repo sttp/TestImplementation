@@ -11,8 +11,7 @@ namespace Sttp
     /// <summary>
     /// This class contains the fundamental value for STTP.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit)]
-    public abstract class SttpValue : IEquatable<SttpValue>
+    public abstract partial class SttpValue : IEquatable<SttpValue>
     {
         public static readonly SttpValue Null = new SttpValueNull();
 
@@ -95,25 +94,6 @@ namespace Sttp
         //    throw new NotImplementedException();
         //}
 
-        public static explicit operator SttpValue(bool v)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static explicit operator SttpValue(double v)
-        {
-            throw new NotImplementedException();
-            //var rv = new SttpValue();
-            //rv.AsDouble = v;
-            //return rv;
-        }
-        public static explicit operator SttpValue(string v)
-        {
-            throw new NotImplementedException();
-            //var rv = new SttpValue();
-            //rv.AsString = v;
-            //return rv;
-        }
 
 
         public override string ToString()
@@ -145,10 +125,6 @@ namespace Sttp
             return Equals((SttpValue)obj);
         }
 
-        public void Save(PayloadWriter wr)
-        {
-
-        }
 
         //public abstract override int GetHashCode();
 
@@ -157,9 +133,5 @@ namespace Sttp
         //    throw new NotImplementedException();
         //}
 
-        public static SttpValue Load(PayloadReader reader)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

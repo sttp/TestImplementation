@@ -536,5 +536,30 @@ namespace Sttp.Codec
             }
             return rv;
         }
+
+        public SttpBuffer ReadSttpBuffer()
+        {
+            return new SttpBuffer(this);
+        }
+
+        public DateTimeOffset ReadDateTimeOffset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public SttpTime ReadSttpTime()
+        {
+            throw new NotImplementedException();
+        }
+
+        public SttpTimeOffset ReadSttpTimeOffset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public TimeSpan ReadTimeSpan()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
