@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueDateTimeOffsetMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueDateTimeOffsetMethods.AsGuid(Value);
         public override string AsString => SttpValueDateTimeOffsetMethods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueDateTimeOffsetMethods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueDateTimeOffsetMethods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueDateTimeOffsetMethods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueDateTimeOffsetMethods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueDateTimeOffsetMethods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueDateTimeOffsetMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueDateTimeOffsetMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueDateTimeOffsetMethods.AsBulkTransportGuid(Value);
     }
@@ -161,17 +161,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(DateTimeOffset value)
+        public static SttpBuffer AsSttpBuffer(DateTimeOffset value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(DateTimeOffset value)
+        public static SttpValueSet AsSttpValueSet(DateTimeOffset value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(DateTimeOffset value)
+        public static SttpNamedSet AsSttpNamedSet(DateTimeOffset value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }

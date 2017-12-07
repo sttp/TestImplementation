@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueTimeSpanMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueTimeSpanMethods.AsGuid(Value);
         public override string AsString => SttpValueTimeSpanMethods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueTimeSpanMethods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueTimeSpanMethods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueTimeSpanMethods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueTimeSpanMethods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueTimeSpanMethods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueTimeSpanMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueTimeSpanMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueTimeSpanMethods.AsBulkTransportGuid(Value);
     }
@@ -161,17 +161,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(TimeSpan value)
+        public static SttpBuffer AsSttpBuffer(TimeSpan value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(TimeSpan value)
+        public static SttpValueSet AsSttpValueSet(TimeSpan value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(TimeSpan value)
+        public static SttpNamedSet AsSttpNamedSet(TimeSpan value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }

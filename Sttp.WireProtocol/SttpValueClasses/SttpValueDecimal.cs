@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueDecimalMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueDecimalMethods.AsGuid(Value);
         public override string AsString => SttpValueDecimalMethods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueDecimalMethods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueDecimalMethods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueDecimalMethods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueDecimalMethods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueDecimalMethods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueDecimalMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueDecimalMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueDecimalMethods.AsBulkTransportGuid(Value);
     }
@@ -197,17 +197,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(decimal value)
+        public static SttpBuffer AsSttpBuffer(decimal value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(decimal value)
+        public static SttpValueSet AsSttpValueSet(decimal value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(decimal value)
+        public static SttpNamedSet AsSttpNamedSet(decimal value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }

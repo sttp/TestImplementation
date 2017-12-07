@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueBooleanMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueBooleanMethods.AsGuid(Value);
         public override string AsString => SttpValueBooleanMethods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueBooleanMethods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueBooleanMethods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueBooleanMethods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueBooleanMethods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueBooleanMethods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueBooleanMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueBooleanMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueBooleanMethods.AsBulkTransportGuid(Value);
     }
@@ -161,17 +161,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(bool value)
+        public static SttpBuffer AsSttpBuffer(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(bool value)
+        public static SttpValueSet AsSttpValueSet(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(bool value)
+        public static SttpNamedSet AsSttpNamedSet(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }

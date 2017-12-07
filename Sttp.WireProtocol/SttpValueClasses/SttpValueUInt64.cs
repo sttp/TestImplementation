@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueUInt64Methods.AsChar(Value);
         public override Guid AsGuid => SttpValueUInt64Methods.AsGuid(Value);
         public override string AsString => SttpValueUInt64Methods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueUInt64Methods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueUInt64Methods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueUInt64Methods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueUInt64Methods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueUInt64Methods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueUInt64Methods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueUInt64Methods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueUInt64Methods.AsBulkTransportGuid(Value);
     }
@@ -197,17 +197,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(ulong value)
+        public static SttpBuffer AsSttpBuffer(ulong value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(ulong value)
+        public static SttpValueSet AsSttpValueSet(ulong value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(ulong value)
+        public static SttpNamedSet AsSttpNamedSet(ulong value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }

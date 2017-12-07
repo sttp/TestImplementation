@@ -76,12 +76,9 @@ namespace Sttp
             SetNull();
         }
 
-
         #endregion
 
         #region [ Properties ]
-
-      
 
         /// <summary>
         /// The type code of the raw value.
@@ -102,7 +99,6 @@ namespace Sttp
         {
             throw new NotImplementedException();
         }
-
       
         public static bool operator ==(SttpValueMutable a, SttpValueMutable b)
         {

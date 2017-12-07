@@ -40,7 +40,7 @@ namespace Sttp
         public abstract char AsChar { get; }
         public abstract Guid AsGuid { get; }
         public abstract string AsString { get; }
-        public abstract SttpBuffer AsBuffer { get; }
+        public abstract SttpBuffer AsSttpBuffer { get; }
         public abstract SttpValueSet AsSttpValueSet { get; }
         public abstract SttpNamedSet AsSttpNamedSet { get; }
         public abstract SttpMarkup AsSttpMarkup { get; }

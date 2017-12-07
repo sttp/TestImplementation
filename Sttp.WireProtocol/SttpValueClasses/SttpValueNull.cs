@@ -33,7 +33,7 @@ namespace Sttp.SttpValueClasses
         public override bool AsBoolean => throw new InvalidCastException();
         public override Guid AsGuid => throw new InvalidCastException();
         public override string AsString => throw new InvalidCastException();
-        public override SttpBuffer AsBuffer => throw new InvalidCastException();
+        public override SttpBuffer AsSttpBuffer => throw new InvalidCastException();
         public override SttpValueSet AsSttpValueSet => throw new InvalidCastException();
         public override SttpNamedSet AsSttpNamedSet => throw new InvalidCastException();
         public override SttpMarkup AsSttpMarkup => throw new InvalidCastException();
@@ -45,12 +45,12 @@ namespace Sttp.SttpValueClasses
     {
         public static SttpValueTypeCode ValueTypeCode => SttpValueTypeCode.Null;
 
-        public static string ToTypeString(int value)
+        public static string ToTypeString()
         {
             return $"(Null)";
         }
 
-        public static object ToNativeType(int value)
+        public static object ToNativeType()
         {
             return null;
         }

@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueDateTimeMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueDateTimeMethods.AsGuid(Value);
         public override string AsString => SttpValueDateTimeMethods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueDateTimeMethods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueDateTimeMethods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueDateTimeMethods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueDateTimeMethods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueDateTimeMethods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueDateTimeMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueDateTimeMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueDateTimeMethods.AsBulkTransportGuid(Value);
     }
@@ -161,17 +161,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(DateTime value)
+        public static SttpBuffer AsSttpBuffer(DateTime value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(DateTime value)
+        public static SttpValueSet AsSttpValueSet(DateTime value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(DateTime value)
+        public static SttpNamedSet AsSttpNamedSet(DateTime value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }

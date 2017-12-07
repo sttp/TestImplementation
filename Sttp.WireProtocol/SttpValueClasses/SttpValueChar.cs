@@ -39,9 +39,9 @@ namespace Sttp.SttpValueClasses
         public override char AsChar => SttpValueCharMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueCharMethods.AsGuid(Value);
         public override string AsString => SttpValueCharMethods.AsString(Value);
-        public override SttpBuffer AsBuffer => SttpValueCharMethods.AsBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueCharMethods.AsValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueCharMethods.AsNamedSet(Value);
+        public override SttpBuffer AsSttpBuffer => SttpValueCharMethods.AsSttpBuffer(Value);
+        public override SttpValueSet AsSttpValueSet => SttpValueCharMethods.AsSttpValueSet(Value);
+        public override SttpNamedSet AsSttpNamedSet => SttpValueCharMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueCharMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueCharMethods.AsBulkTransportGuid(Value);
     }
@@ -161,17 +161,17 @@ namespace Sttp.SttpValueClasses
             return value.ToString();
         }
 
-        public static SttpBuffer AsBuffer(char value)
+        public static SttpBuffer AsSttpBuffer(char value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static SttpValueSet AsValueSet(char value)
+        public static SttpValueSet AsSttpValueSet(char value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
         }
 
-        public static SttpNamedSet AsNamedSet(char value)
+        public static SttpNamedSet AsSttpNamedSet(char value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }
