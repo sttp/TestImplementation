@@ -44,28 +44,64 @@ namespace Sttp
         public string ForeignTable;
         public int ForeignTableIndex;
 
+        public SttpQueryJoinedTable(SttpMarkupReader reader)
+        {
+            if (reader.NodeType != SttpMarkupNodeType.Element)
+                throw new Exception("Must seek to the JoinedTable element.");
+            if (reader.ElementName != "JoinedTable")
+                throw new Exception("Must seek to the JoinedTable element.");
+            int nestedElements = 0;
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case SttpMarkupNodeType.Element:
+                        if (reader.ElementCompatibility != SttpMarkupCompatiblity.Unknown)
+                            throw new Exception("Unknown value");
+                        nestedElements++;
+                        break;
+                    case SttpMarkupNodeType.Value:
+                        if (nestedElements == 0)
+                        {
+                            switch (reader.ValueName)
+                            {
+                                case "ExistingTableIndex":
+                                    ExistingTableIndex = (int)reader.Value;
+                                    break;
+                                case "ExistingForeignKeyColumn":
+                                    ExistingForeignKeyColumn = (string)reader.Value;
+                                    break;
+                                case "ForeignTable":
+                                    ForeignTable = (string)reader.Value;
+                                    break;
+                                case "ForeignTableIndex":
+                                    ForeignTableIndex = (int)reader.Value;
+                                    break;
+                                default:
+                                    if (reader.ValueCompatibility != SttpMarkupCompatiblity.Unknown)
+                                        throw new Exception("Unknown value");
+                                    break;
+                            }
+                        }
+                        break;
+                    case SttpMarkupNodeType.EndElement:
+                        if (nestedElements == 0)
+                            return;
+                        nestedElements--;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
         public SttpQueryJoinedTable(int existingTableIndex, string existingForeignKeyColumn, string foreignTable, int foreignTableIndex)
         {
             ExistingTableIndex = existingTableIndex;
             ExistingForeignKeyColumn = existingForeignKeyColumn;
             ForeignTable = foreignTable;
             ForeignTableIndex = foreignTableIndex;
-        }
-
-        public SttpQueryJoinedTable(PayloadReader rd)
-        {
-            ExistingTableIndex = rd.ReadInt32();
-            ExistingForeignKeyColumn = rd.ReadString();
-            ForeignTable = rd.ReadString();
-            ForeignTableIndex = rd.ReadInt32();
-        }
-
-        public void Save(ByteWriter wr)
-        {
-            wr.Write(ExistingTableIndex);
-            wr.Write(ExistingForeignKeyColumn);
-            wr.Write(ForeignTable);
-            wr.Write(ForeignTableIndex);
         }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
@@ -119,7 +155,7 @@ namespace Sttp
                 writer.WriteValue("Variable", Variable);
             }
         }
-        
+
     }
 
     public class SttpQueryProcedureStep
@@ -169,7 +205,7 @@ namespace Sttp
                 }
             }
         }
-        
+
     }
 
     public class SttpQueryOutputColumns
@@ -233,36 +269,51 @@ namespace Sttp
 
         }
 
-        public SttpQueryStatement(XmlReader reader)
+        public SttpQueryStatement(SttpMarkupReader reader)
         {
-            if (reader.NodeType != XmlNodeType.Element)
+            if (reader.NodeType != SttpMarkupNodeType.Element)
                 throw new Exception("Must seek to the SttpQuery element.");
-            if (reader.Name != "SttpQuery")
+            if (reader.ElementName != "SttpQuery")
                 throw new Exception("Must seek to the SttpQuery element.");
 
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
-                    case XmlNodeType.None:
-                    case XmlNodeType.Element:
-                    case XmlNodeType.Attribute:
-                    case XmlNodeType.Text:
-                    case XmlNodeType.CDATA:
-                    case XmlNodeType.EntityReference:
-                    case XmlNodeType.Entity:
-                    case XmlNodeType.ProcessingInstruction:
-                    case XmlNodeType.Comment:
-                    case XmlNodeType.Document:
-                    case XmlNodeType.DocumentType:
-                    case XmlNodeType.DocumentFragment:
-                    case XmlNodeType.Notation:
-                    case XmlNodeType.Whitespace:
-                    case XmlNodeType.SignificantWhitespace:
-                    case XmlNodeType.EndElement:
-                    case XmlNodeType.EndEntity:
-                    case XmlNodeType.XmlDeclaration:
+                    case SttpMarkupNodeType.Element:
+                        switch (reader.ElementName)
+                        {
+                            case "JoinedTable":
+                                JoinedTables.Add(new SttpQueryJoinedTable(reader));
+                                break;
+                        }
                         break;
+                    case SttpMarkupNodeType.Value:
+                        switch (reader.ValueName)
+                        {
+                            case "DirectTable":
+                                DirectTable = (string)reader.Value;
+                                break;
+                            case "WhereBooleanVariable":
+                                WhereBooleanVariable = (int?)reader.Value;
+                                break;
+                            case "HavingBooleanVariable":
+                                HavingBooleanVariable = (int?)reader.Value;
+                                break;
+                            case "Limit":
+                                Limit = (int?)reader.Value;
+                                break;
+                            default:
+                                if (reader.ValueCompatibility != SttpMarkupCompatiblity.Unknown)
+                                    throw new Exception("Unknown value");
+                                break;
+                        }
+                        break;
+                    case SttpMarkupNodeType.EndElement:
+
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 
@@ -372,10 +423,6 @@ namespace Sttp
             variableIndexCount = variableIndexMap.Count;
         }
 
-        public void Save(XmlWriter writer)
-        {
-
-        }
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
@@ -425,65 +472,43 @@ namespace Sttp
             using (writer.StartElement("SttpQuery"))
             {
                 writer.WriteValue("DirectTable", DirectTable);
-                writer.WriteValue("WhereBoolVariable", WhereBooleanVariable.ToString());
+                writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
                 writer.WriteValue("Limit", Limit.ToString());
-                writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable.ToString());
+                writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable);
 
-                using (writer.StartElement("JoinedTables"))
+                foreach (var item in JoinedTables)
                 {
-                    foreach (var item in JoinedTables)
-                    {
-                        item.Save(writer);
-                    }
+                    item.Save(writer);
                 }
 
-                using (writer.StartElement("Literals"))
+                foreach (var item in Literals)
                 {
-                    foreach (var item in Literals)
-                    {
-                        item.Save(writer);
-                    }
+                    item.Save(writer);
                 }
 
-
-                using (writer.StartElement("ColumnInputs"))
+                foreach (var item in ColumnInputs)
                 {
-                    foreach (var item in ColumnInputs)
-                    {
-                        item.Save(writer);
-                    }
+                    item.Save(writer);
                 }
 
-                using (writer.StartElement("Procedure"))
+                foreach (var item in Procedure)
                 {
-                    foreach (var item in Procedure)
-                    {
-                        item.Save(writer);
-                    }
+                    item.Save(writer);
                 }
 
-                using (writer.StartElement("Outputs"))
+                foreach (var item in Outputs)
                 {
-                    foreach (var item in Outputs)
-                    {
-                        item.Save(writer);
-                    }
+                    item.Save(writer);
                 }
 
-                using (writer.StartElement("GroupByVariables"))
+                foreach (var item in GroupByVariables)
                 {
-                    foreach (var item in GroupByVariables)
-                    {
-                        writer.WriteValue("Item", item);
-                    }
+                    writer.WriteValue("Item", item);
                 }
 
-                using (writer.StartElement("HavingProcedure"))
+                foreach (var item in HavingProcedure)
                 {
-                    foreach (var item in HavingProcedure)
-                    {
-                        item.Save(writer);
-                    }
+                    item.Save(writer);
                 }
             }
             return writer.ToSttpMarkup();

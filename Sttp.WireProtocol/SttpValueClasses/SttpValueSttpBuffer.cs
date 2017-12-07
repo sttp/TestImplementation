@@ -16,6 +16,11 @@ namespace Sttp.SttpValueClasses
             Value = value;
         }
 
+        public SttpValueSttpBuffer(byte[] value)
+        {
+            Value = new SttpBuffer(value);
+        }
+
         public override SttpValueTypeCode ValueTypeCode => SttpValueSttpBufferMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueSttpBufferMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSttpBufferMethods.ToNativeType(Value);

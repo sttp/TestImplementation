@@ -355,21 +355,7 @@ namespace Sttp
         {
             value.Save(this);
         }
-
-
-        public void Write(List<SttpQueryJoinedTable> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
+       
 
         public void Write(List<int> list)
         {

@@ -21,5 +21,7 @@ namespace Sttp.Codec
             base.SetBuffer(data, position, length);
             Command = code;
         }
+
+       
     }
 }

@@ -11,6 +11,7 @@ namespace Sttp
     /// <summary>
     /// This class contains the fundamental value for STTP.
     /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
         public static readonly SttpValue Null = new SttpValueNull();

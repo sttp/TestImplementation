@@ -429,5 +429,17 @@ namespace Sttp
         {
             throw new NotImplementedException();
         }
+
+        public List<SttpMarkup> ReadListSttpMarkup()
+        {
+            var rv = new List<SttpMarkup>();
+            int len = ReadInt7Bit();
+            while (len > 0)
+            {
+                rv.Add(new SttpMarkup(this));
+                len--;
+            }
+            return rv;
+        }
     }
 }

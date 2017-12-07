@@ -8,7 +8,7 @@ namespace Sttp
 {
     public class SttpBuffer
     {
-        public byte[] Data;
+        private byte[] Data;
 
         public SttpBuffer(byte[] data)
         {
@@ -16,6 +16,11 @@ namespace Sttp
         }
 
         public SttpBuffer(ByteReader data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] ToBuffer()
         {
             throw new NotImplementedException();
         }

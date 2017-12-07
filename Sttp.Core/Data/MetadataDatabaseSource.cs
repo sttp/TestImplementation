@@ -98,7 +98,7 @@ namespace Sttp.Data
                 {
                     SttpValueMutable key = new SttpValueMutable();
                     SttpValueSet values = new SttpValueSet();
-                    values.Values.AddRange(row.ItemArray.Select(x => (SttpValue)x));
+                    values.Values.AddRange(row.ItemArray.Select(SttpValue.FromObject));
                     if (pkey.Length == 1)
                     {
                         key.SetValue(row[pkey[0]]);
@@ -245,18 +245,24 @@ namespace Sttp.Data
 
             foreach (var query in command.Queries)
             {
-                var reader = new XmlTextReader(query);
+                var reader = query.MakeReader();
                 while (reader.Read())
                 {
                     switch (reader.NodeType)
                     {
-                        case XmlNodeType.Element:
-                            if (reader.Name == "SttpQuery")
+                        case SttpMarkupNodeType.Element:
+                            if (reader.ElementName == "SttpQuery")
                             {
                                 var statement = new SttpQueryStatement(reader);
                                 var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
                             }
                             break;
+                        case SttpMarkupNodeType.Value:
+                            break;
+                        case SttpMarkupNodeType.EndElement:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
                 }
             }

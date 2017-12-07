@@ -46,7 +46,7 @@ namespace Sttp
         {
             if (name == null || name.Length == 0)
                 throw new ArgumentNullException(nameof(name));
-            if (compatiblity >= SttpMarkupCompatiblity.KnownAndEnforced && compatiblity <= SttpMarkupCompatiblity.Unknown)
+            if (compatiblity < SttpMarkupCompatiblity.KnownAndEnforced || compatiblity > SttpMarkupCompatiblity.Unknown)
                 throw new InvalidEnumArgumentException(nameof(compatiblity), (int)compatiblity, typeof(SttpMarkupCompatiblity));
 
             m_elementStack.Push(name);
@@ -76,7 +76,7 @@ namespace Sttp
         {
             if (name == null || name.Length == 0)
                 throw new ArgumentNullException(nameof(name));
-            if (compatiblity >= SttpMarkupCompatiblity.KnownAndEnforced && compatiblity <= SttpMarkupCompatiblity.Unknown)
+            if (compatiblity < SttpMarkupCompatiblity.KnownAndEnforced || compatiblity > SttpMarkupCompatiblity.Unknown)
                 throw new InvalidEnumArgumentException(nameof(compatiblity), (int)compatiblity, typeof(SttpMarkupCompatiblity));
             if ((object)value == null)
                 throw new ArgumentNullException(nameof(value));

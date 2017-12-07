@@ -102,6 +102,10 @@ namespace Sttp
         {
             return new SttpValueSttpBuffer(value);
         }
+        public static implicit operator SttpValue(byte[] value)
+        {
+            return new SttpValueSttpBuffer(value);
+        }
         public static implicit operator SttpValue(SttpValueSet value)
         {
             return new SttpValueSttpValueSet(value);
@@ -210,6 +214,129 @@ namespace Sttp
         public static explicit operator SttpMarkup(SttpValue value)
         {
             return value.AsSttpMarkup;
+        }
+
+        public static explicit operator byte[] (SttpValue value)
+        {
+            return value.AsSttpBuffer.ToBuffer();
+        }
+
+        public static SttpValue FromObject(object value)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                return SttpValue.Null;
+            }
+
+            var type = value.GetType();
+            if (type == typeof(sbyte))
+            {
+                return (sbyte)value;
+            }
+            else if (type == typeof(short))
+            {
+                return (short)value;
+            }
+            else if (type == typeof(int))
+            {
+                return (int)value;
+            }
+            else if (type == typeof(long))
+            {
+                return (long)value;
+            }
+            else if (type == typeof(byte))
+            {
+                return (byte)value;
+            }
+            else if (type == typeof(ushort))
+            {
+                return (ushort)value;
+            }
+            else if (type == typeof(uint))
+            {
+                return (uint)value;
+            }
+            else if (type == typeof(ulong))
+            {
+                return (ulong)value;
+            }
+            else if (type == typeof(float))
+            {
+                return (float)value;
+            }
+            else if (type == typeof(double))
+            {
+                return (double)value;
+            }
+            else if (type == typeof(decimal))
+            {
+                return (decimal)value;
+            }
+            else if (type == typeof(DateTime))
+            {
+                return (DateTime)value;
+            }
+            else if (type == typeof(DateTimeOffset))
+            {
+                return (DateTimeOffset)value;
+            }
+            else if (type == typeof(SttpTime))
+            {
+                return (SttpTime)value;
+            }
+            else if (type == typeof(SttpTimeOffset))
+            {
+                return (SttpTimeOffset)value;
+            }
+            else if (type == typeof(TimeSpan))
+            {
+                return (TimeSpan)value;
+            }
+            else if (type == typeof(bool))
+            {
+                return (bool)value;
+            }
+            else if (type == typeof(char))
+            {
+                return (char)value;
+            }
+            else if (type == typeof(Guid))
+            {
+                return (Guid)value;
+            }
+            else if (type == typeof(string))
+            {
+                return (string)value;
+            }
+            else if (type == typeof(SttpBuffer))
+            {
+                return (SttpBuffer)value;
+            }
+            else if (type == typeof(byte[]))
+            {
+                return (byte[])value;
+            }
+            else if (value is SttpValue)
+            {
+                return (SttpValue)value;
+            }
+            else if (type == typeof(SttpValueSet))
+            {
+                return (SttpValueSet)value;
+            }
+            else if (type == typeof(SttpNamedSet))
+            {
+                return (SttpNamedSet)value;
+            }
+            else if (type == typeof(SttpMarkup))
+            {
+                return (SttpMarkup)value;
+            }
+            else
+            {
+                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
+            }
         }
 
     }

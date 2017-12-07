@@ -325,11 +325,15 @@ namespace Sttp
             {
                 SetValue((string)value);
             }
+            else if (type == typeof(SttpBuffer))
+            {
+                SetValue((SttpBuffer)value);
+            }
             else if (type == typeof(byte[]))
             {
                 SetValue((byte[])value);
             }
-            else if (type == typeof(SttpValue))
+            else if (value is SttpValue)
             {
                 SetValue((SttpValue)value);
             }
