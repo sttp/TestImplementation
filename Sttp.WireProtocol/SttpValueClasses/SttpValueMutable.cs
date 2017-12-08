@@ -190,18 +190,7 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
-        public static explicit operator SttpValueMutable(double v)
-        {
-            var rv = new SttpValueMutable();
-            rv.SetValue(v);
-            return rv;
-        }
-        public static explicit operator SttpValueMutable(string v)
-        {
-            var rv = new SttpValueMutable();
-            rv.SetValue(v);
-            return rv;
-        }
+        
 
     }
 }

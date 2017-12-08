@@ -355,6 +355,94 @@ namespace Sttp
             }
         }
 
+        public new void Load(ByteReader rd)
+        {
+            SttpValueTypeCode value = (SttpValueTypeCode)rd.ReadByte();
+            switch (value)
+            {
+                case SttpValueTypeCode.Null:
+                    SetNull();
+                    break;
+                case SttpValueTypeCode.SByte:
+                    SetValue(rd.ReadSByte());
+                    break;
+                case SttpValueTypeCode.Int16:
+                    SetValue(rd.ReadInt16());
+                    break;
+                case SttpValueTypeCode.Int32:
+                    SetValue(rd.ReadInt32());
+                    break;
+                case SttpValueTypeCode.Int64:
+                    SetValue(rd.ReadInt64());
+                    break;
+                case SttpValueTypeCode.Byte:
+                    SetValue(rd.ReadByte());
+                    break;
+                case SttpValueTypeCode.UInt16:
+                    SetValue(rd.ReadUInt16());
+                    break;
+                case SttpValueTypeCode.UInt32:
+                    SetValue(rd.ReadUInt32());
+                    break;
+                case SttpValueTypeCode.UInt64:
+                    SetValue(rd.ReadUInt64());
+                    break;
+                case SttpValueTypeCode.Single:
+                    SetValue(rd.ReadSingle());
+                    break;
+                case SttpValueTypeCode.Double:
+                    SetValue(rd.ReadDouble());
+                    break;
+                case SttpValueTypeCode.Decimal:
+                    SetValue(rd.ReadDecimal());
+                    break;
+                case SttpValueTypeCode.DateTime:
+                    SetValue(rd.ReadDateTime());
+                    break;
+                case SttpValueTypeCode.DateTimeOffset:
+                    SetValue(rd.ReadDateTimeOffset());
+                    break;
+                case SttpValueTypeCode.SttpTime:
+                    SetValue(rd.ReadSttpTime());
+                    break;
+                case SttpValueTypeCode.SttpTimeOffset:
+                    SetValue(rd.ReadSttpTimeOffset());
+                    break;
+                case SttpValueTypeCode.TimeSpan:
+                    SetValue(rd.ReadTimeSpan());
+                    break;
+                case SttpValueTypeCode.Boolean:
+                    SetValue(rd.ReadBoolean());
+                    break;
+                case SttpValueTypeCode.Char:
+                    SetValue(rd.ReadChar());
+                    break;
+                case SttpValueTypeCode.Guid:
+                    SetValue(rd.ReadGuid());
+                    break;
+                case SttpValueTypeCode.String:
+                    SetValue(rd.ReadString());
+                    break;
+                case SttpValueTypeCode.SttpBuffer:
+                    SetValue(rd.ReadSttpBuffer());
+                    break;
+                case SttpValueTypeCode.SttpValueSet:
+                    SetValue(rd.ReadSttpValueSet());
+                    break;
+                case SttpValueTypeCode.SttpNamedSet:
+                    SetValue(rd.ReadSttpNamedSet());
+                    break;
+                case SttpValueTypeCode.SttpMarkup:
+                    SetValue(rd.ReadSttpMarkup());
+                    break;
+                case SttpValueTypeCode.BulkTransportGuid:
+                    SetValueBulkTransportGuid(rd.ReadGuid());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
 
 
     }

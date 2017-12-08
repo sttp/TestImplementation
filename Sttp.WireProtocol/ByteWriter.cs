@@ -15,13 +15,14 @@ namespace Sttp
         public ByteWriter()
         {
             m_buffer = new byte[512];
+            Clear();
         }
 
         public int UserData => m_position - UserDataPosition;
 
         private void Grow(int neededBytes)
         {
-            if (m_position + neededBytes >= m_buffer.Length)
+            while (m_position + neededBytes >= m_buffer.Length)
             {
                 Grow();
             }

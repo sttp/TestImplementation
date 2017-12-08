@@ -14,11 +14,17 @@ namespace Sttp
         private int m_currentPosition;
         private int m_startingPosition;
         private int m_lastPosition;
+
         public int Length { get; private set; }
 
         public ByteReader()
         {
             m_buffer = Empty;
+        }
+
+        public ByteReader(byte[] data)
+        {
+            SetBuffer(data,0,data.Length);
         }
 
         public int Position

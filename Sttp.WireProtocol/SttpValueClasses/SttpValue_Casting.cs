@@ -13,11 +13,6 @@ namespace Sttp
     /// </summary>
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
-        protected static SttpValue CreateBulkTransportGuid(Guid guid)
-        {
-            return new SttpValueBulkTransportGuid(guid);
-        }
-
         public static implicit operator SttpValue(sbyte value)
         {
             return new SttpValueSByte(value);
@@ -118,7 +113,7 @@ namespace Sttp
         {
             return new SttpValueSttpMarkup(value);
         }
-
+        
         public static explicit operator sbyte(SttpValue value)
         {
             return value.AsSByte;
@@ -339,5 +334,243 @@ namespace Sttp
             }
         }
 
+
+
+
+
+        #region [ Nullable Types ]
+
+        public static implicit operator SttpValue(sbyte? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueSByte(value.Value);
+        }
+        public static implicit operator SttpValue(short? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueInt16(value.Value);
+        }
+        public static implicit operator SttpValue(int? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueInt32(value.Value);
+        }
+        public static implicit operator SttpValue(long? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueInt64(value.Value);
+        }
+        public static implicit operator SttpValue(byte? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueByte(value.Value);
+        }
+        public static implicit operator SttpValue(ushort? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueUInt16(value.Value);
+        }
+        public static implicit operator SttpValue(uint? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueUInt32(value.Value);
+        }
+        public static implicit operator SttpValue(ulong? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueUInt64(value.Value);
+        }
+        public static implicit operator SttpValue(float? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueSingle(value.Value);
+        }
+        public static implicit operator SttpValue(double? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueDouble(value.Value);
+        }
+        public static implicit operator SttpValue(decimal? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueDecimal(value.Value);
+        }
+        public static implicit operator SttpValue(DateTime? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueDateTime(value.Value);
+        }
+        public static implicit operator SttpValue(DateTimeOffset? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueDateTimeOffset(value.Value);
+        }
+        public static implicit operator SttpValue(SttpTime? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueSttpTime(value.Value);
+        }
+        public static implicit operator SttpValue(SttpTimeOffset? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueSttpTimeOffset(value.Value);
+        }
+        public static implicit operator SttpValue(TimeSpan? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueTimeSpan(value.Value);
+        }
+        public static implicit operator SttpValue(bool? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueBoolean(value.Value);
+        }
+        public static implicit operator SttpValue(char? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueChar(value.Value);
+        }
+        public static implicit operator SttpValue(Guid? value)
+        {
+            if (!value.HasValue)
+                return SttpValue.Null;
+            return new SttpValueGuid(value.Value);
+        }
+       
+        public static explicit operator sbyte?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsSByte;
+        }
+        public static explicit operator short?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsInt16;
+        }
+        public static explicit operator int?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsInt32;
+        }
+        public static explicit operator long?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsInt64;
+        }
+        public static explicit operator byte?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsByte;
+        }
+        public static explicit operator ushort?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsUInt16;
+        }
+        public static explicit operator uint?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsUInt32;
+        }
+        public static explicit operator ulong?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsUInt64;
+        }
+        public static explicit operator float?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsSingle;
+        }
+        public static explicit operator double?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsDouble;
+        }
+        public static explicit operator decimal?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsDecimal;
+        }
+        public static explicit operator DateTime?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsDateTime;
+        }
+        public static explicit operator DateTimeOffset?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsDateTimeOffset;
+        }
+        public static explicit operator SttpTime?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsSttpTime;
+        }
+        public static explicit operator SttpTimeOffset?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsSttpTimeOffset;
+        }
+        public static explicit operator TimeSpan?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsTimeSpan;
+        }
+        public static explicit operator bool?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsBoolean;
+        }
+        public static explicit operator char?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsChar;
+        }
+        public static explicit operator Guid?(SttpValue value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsGuid;
+        }
+       
+        #endregion
+        
     }
 }

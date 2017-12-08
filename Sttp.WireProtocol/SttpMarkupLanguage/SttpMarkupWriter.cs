@@ -22,7 +22,7 @@ namespace Sttp
         }
         private Dictionary<string, int> m_nameCache = new Dictionary<string, int>();
         private Stack<string> m_elementStack = new Stack<string>();
-        private MemoryStream m_stream = new MemoryStream();
+        private ByteWriter m_stream = new ByteWriter();
         private ElementEndElementHelper m_endElementHelper;
         private SttpValueMutable m_tmpValue = new SttpValueMutable();
         private int m_prevNameAsInt = 0;
@@ -64,10 +64,7 @@ namespace Sttp
 
         public void EndElement()
         {
-            if (m_elementStack.Count == 0)
-            {
-                m_elementStack.Pop();
-            }
+            m_elementStack.Pop();
             m_stream.Write((byte)SttpMarkupNodeType.EndElement);
         }
 
@@ -108,7 +105,7 @@ namespace Sttp
             else
             {
                 m_stream.Write((byte)((int)SttpMarkupNodeType.Element | ((int)compatiblity << 2) | (0 << 4) | (7 << 5)));
-                m_stream.Write7BitInt(nameIndex);
+                m_stream.WriteInt7Bit(nameIndex);
             }
             m_prevNameAsInt = nameIndex;
         }
@@ -130,17 +127,17 @@ namespace Sttp
             else
             {
                 m_stream.Write((byte)((int)SttpMarkupNodeType.Value | ((int)compatiblity << 2) | (0 << 4) | (7 << 5)));
-                m_stream.Write7BitInt(nameIndex);
+                m_stream.WriteInt7Bit(nameIndex);
             }
             m_prevNameAsInt = nameIndex;
-            //value.Save(m_stream);
+            value.Save(m_stream);
         }
 
         private void Encode(string name, SttpMarkupCompatiblity compatiblity, SttpValue value, int nameIndex)
         {
             m_stream.Write((byte)((int)SttpMarkupNodeType.Value | ((int)compatiblity << 2) | (1 << 4) | (0 << 5)));
             m_stream.Write(name);
-            //value.Save(m_stream);
+            value.Save(m_stream);
             m_prevNameAsInt = nameIndex;
         }
 

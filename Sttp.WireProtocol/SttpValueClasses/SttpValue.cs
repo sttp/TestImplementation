@@ -134,5 +134,10 @@ namespace Sttp
         //    throw new NotImplementedException();
         //}
 
+        public static SttpValue CreateBulkTransportGuid(Guid guid)
+        {
+            return new SttpValueBulkTransportGuid(guid);
+        }
+
     }
 }

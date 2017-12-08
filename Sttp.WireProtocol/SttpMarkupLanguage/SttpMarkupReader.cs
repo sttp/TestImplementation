@@ -7,24 +7,24 @@ namespace Sttp
 {
     public class SttpMarkupReader
     {
-        private MemoryStream m_stream;
+        private ByteReader m_stream;
         private List<string> m_elements = new List<string>();
         private Stack<string> m_elementStack = new Stack<string>();
         private Stack<SttpMarkupCompatiblity> m_elementStackCompatibility = new Stack<SttpMarkupCompatiblity>();
-        private SttpValueMutable m_value = new SttpValueMutable();
         private int m_prevNameAsInt = 0;
 
         internal SttpMarkupReader(byte[] data)
         {
-            m_stream = new MemoryStream(data);
+            Value = new SttpValueMutable();
+            m_stream = new ByteReader(data);
         }
 
+        public int ElementDepth => m_elementStack.Count;
         public string ElementName { get; private set; }
         public SttpMarkupCompatiblity ElementCompatibility { get; private set; }
         public string ValueName { get; private set; }
         public SttpValueMutable Value { get; private set; }
         public SttpMarkupCompatiblity ValueCompatibility { get; private set; }
-
         public SttpMarkupNodeType NodeType { get; private set; }
 
         public bool Read()
@@ -38,7 +38,7 @@ namespace Sttp
                 ElementCompatibility = CurrentElementCompatiblity;
             }
 
-            byte code = m_stream.ReadNextByte();
+            byte code = m_stream.ReadByte();
             bool isNameAsString = ((code >> 4) & 1) == 1;
             int nameDelta = (code >> 5);
 
@@ -49,6 +49,8 @@ namespace Sttp
                     Value.SetNull();
                     ValueCompatibility = SttpMarkupCompatiblity.Unknown;
                     ElementCompatibility = (SttpMarkupCompatiblity)((code >> 2) & 3);
+                   
+
 
                     if (isNameAsString)
                     {
@@ -59,11 +61,14 @@ namespace Sttp
                     else
                     {
                         if (nameDelta == 7)
-                            m_prevNameAsInt = m_stream.Read7BitInt();
+                            m_prevNameAsInt = m_stream.ReadInt7Bit();
                         else
                             m_prevNameAsInt += nameDelta;
                         ElementName = m_elements[m_prevNameAsInt];
                     }
+
+                    m_elementStack.Push(ElementName);
+                    m_elementStackCompatibility.Push(ElementCompatibility);
 
                     break;
                 case SttpMarkupNodeType.Value:
@@ -77,12 +82,12 @@ namespace Sttp
                     else
                     {
                         if (nameDelta == 7)
-                            m_prevNameAsInt = m_stream.Read7BitInt();
+                            m_prevNameAsInt = m_stream.ReadInt7Bit();
                         else
                             m_prevNameAsInt += nameDelta;
                         ValueName = m_elements[m_prevNameAsInt];
                     }
-                    //m_value.Load(m_stream);
+                    Value.Load(m_stream);
 
                     break;
                 case SttpMarkupNodeType.EndElement:
@@ -95,6 +100,11 @@ namespace Sttp
                     throw new ArgumentOutOfRangeException();
             }
             return true;
+        }
+
+        public SttpMarkupElement ReadEntireElement()
+        {
+            return new SttpMarkupElement(this);
         }
 
         private string CurrentElement
