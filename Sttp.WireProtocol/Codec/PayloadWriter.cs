@@ -12,16 +12,16 @@ namespace Sttp.Codec
         private CommandEncoder m_encoder;
 
         public PayloadWriter(CommandEncoder encoder)
+            : base(15)
         {
             m_encoder = encoder;
         }
 
         public void Send(CommandCode command)
         {
-            int length = UserData;
-            int offset = UserDataPosition;
+            GetBounds(out byte[] data, out int offset, out int length);
 
-            m_encoder.EncodeAndSend(command, m_buffer, offset, length);
+            m_encoder.EncodeAndSend(command, data, offset, length);
             Clear();
         }
 

@@ -135,7 +135,7 @@ namespace Sttp
     public class SttpQueryProcedureStep
     {
         public string Function;
-        public List<int> InputVariables;
+        public List<int> InputVariables = new List<int>();
         public int OutputVariable;
 
         public SttpQueryProcedureStep(string function, List<int> inputVariables, int outputVariable)
@@ -251,7 +251,7 @@ namespace Sttp
             if (reader.ElementName != "SttpQuery")
                 throw new Exception("Must seek to the SttpQuery element.");
 
-            int startingDepth = reader.ElementDepth-1;
+            int startingDepth = reader.ElementDepth - 1;
 
             while (reader.Read())
             {

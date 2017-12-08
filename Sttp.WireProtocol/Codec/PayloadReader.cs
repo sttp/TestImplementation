@@ -9,7 +9,6 @@ namespace Sttp.Codec
     {
         private SessionDetails m_sessionDetails;
         public CommandCode Command { get; private set; }
-        public int Length { get; private set; }
 
         public PayloadReader(SessionDetails sessionDetails)
         {

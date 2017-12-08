@@ -8,37 +8,53 @@ namespace Sttp
 {
     public unsafe class ByteWriter
     {
-        protected const int UserDataPosition = 15;
-        protected byte[] m_buffer;
-        protected int m_position;
-
+        private int m_reservedPrfixBytes = 15;
+        private byte[] m_buffer;
+        private int m_position;
+        
         public ByteWriter()
         {
-            m_buffer = new byte[512];
+            m_buffer = new byte[64];
             Clear();
         }
 
-        public int UserData => m_position - UserDataPosition;
+        protected ByteWriter(int reservedPrefixBytes)
+        {
+            m_reservedPrfixBytes = reservedPrefixBytes;
+            m_buffer = new byte[64];
+            Clear();
+        }
 
-        private void Grow(int neededBytes)
+        
+        public int Length => m_position - m_reservedPrfixBytes;
+
+        protected void GetBounds(out byte[] data, out int offset, out int length)
+        {
+            data = m_buffer;
+            offset = m_reservedPrfixBytes;
+            length = Length;
+        }
+
+        private void EnsureCapacity(int neededBytes)
+        {
+            if (m_position + neededBytes >= m_buffer.Length)
+                Grow2(neededBytes);
+        }
+
+        private void Grow2(int neededBytes)
         {
             while (m_position + neededBytes >= m_buffer.Length)
             {
-                Grow();
+                byte[] newBuffer = new byte[m_buffer.Length * 2];
+                m_buffer.CopyTo(newBuffer, 0);
+                m_buffer = newBuffer;
             }
-        }
-
-        private void Grow()
-        {
-            byte[] newBuffer = new byte[m_buffer.Length * 2];
-            m_buffer.CopyTo(newBuffer, 0);
-            m_buffer = newBuffer;
         }
 
         public byte[] ToArray()
         {
-            int length = UserData;
-            int offset = UserDataPosition;
+            int length = Length;
+            int offset = m_reservedPrfixBytes;
 
             byte[] data = new byte[length];
             Array.Copy(m_buffer, offset, data, 0, length);
@@ -47,7 +63,7 @@ namespace Sttp
 
         public void Clear()
         {
-            m_position = UserDataPosition;
+            m_position = m_reservedPrfixBytes;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
@@ -56,7 +72,7 @@ namespace Sttp
 
         public void Write(byte value)
         {
-            Grow(1);
+            EnsureCapacity(1);
             m_buffer[m_position] = value;
             m_position++;
         }
@@ -80,7 +96,7 @@ namespace Sttp
 
         public void Write(short value)
         {
-            Grow(2);
+            EnsureCapacity(2);
             m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
@@ -100,7 +116,7 @@ namespace Sttp
 
         public void Write(int value)
         {
-            Grow(4);
+            EnsureCapacity(4);
             m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
@@ -120,7 +136,7 @@ namespace Sttp
 
         public void Write(long value)
         {
-            Grow(8);
+            EnsureCapacity(8);
             m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
@@ -145,13 +161,13 @@ namespace Sttp
 
         public void Write(decimal value)
         {
-            Grow(16);
+            EnsureCapacity(16);
             m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
         }
 
         public void Write(Guid value)
         {
-            Grow(16);
+            EnsureCapacity(16);
             Array.Copy(value.ToRfcBytes(), 0, m_buffer, m_position, 16);
             m_position += 16;
         }
@@ -166,7 +182,7 @@ namespace Sttp
                 throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
 
             // write null and empty
-            Grow(1);
+            EnsureCapacity(1);
 
             if (stream == null)
             {
@@ -179,7 +195,7 @@ namespace Sttp
                 return;
             }
 
-            Grow(Encoding7Bit.GetSize((uint)(length + 1)) + length);
+            EnsureCapacity(Encoding7Bit.GetSize((uint)(length + 1)) + length);
             WriteUInt7Bit((uint)(length + 1));
 
             stream.Read(m_buffer, m_position, length);
@@ -192,7 +208,7 @@ namespace Sttp
                 throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
 
             // write null and empty
-            Grow(1);
+            EnsureCapacity(1);
 
             if (value == null)
             {
@@ -205,7 +221,7 @@ namespace Sttp
                 return;
             }
 
-            Grow(Encoding7Bit.GetSize((uint)(length + 1)) + length);
+            EnsureCapacity(Encoding7Bit.GetSize((uint)(length + 1)) + length);
             WriteUInt7Bit((uint)(length + 1));
 
             Array.Copy(value, start, m_buffer, m_position, length); // write data
@@ -219,7 +235,7 @@ namespace Sttp
 
         public void Write(string value)
         {
-            Grow(1);
+            EnsureCapacity(1);
 
             if (value == null)
             {
@@ -254,7 +270,7 @@ namespace Sttp
         public void WriteUInt7Bit(uint value)
         {
             int size = Encoding7Bit.GetSize(value);
-            Grow(size);
+            EnsureCapacity(size);
 
             // position is incremented within method.
             Encoding7Bit.Write(m_buffer, ref m_position, value);
@@ -262,7 +278,7 @@ namespace Sttp
         public void WriteUInt7Bit(ulong value)
         {
             int size = Encoding7Bit.GetSize(value);
-            Grow(size);
+            EnsureCapacity(size);
 
             // position is incremented within method.
             Encoding7Bit.Write(m_buffer, ref m_position, value);
@@ -356,7 +372,7 @@ namespace Sttp
         {
             value.Save(this);
         }
-       
+
 
         public void Write(List<int> list)
         {

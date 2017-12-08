@@ -103,11 +103,11 @@ namespace Sttp.Codec
 
         private PayloadReader SendFragmentedPacket()
         {
+            m_isProcessingFragments = false;
             if (m_fragmentCompressionMode == 0)
             {
                 m_reader.SetBuffer(m_fragmentCommandCode, m_pendingData, 0, m_fragmentTotalRawSize);
                 return m_reader;
-
             }
             if (m_pendingData2.Length < m_fragmentTotalRawSize)
             {
