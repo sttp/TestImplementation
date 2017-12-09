@@ -82,6 +82,8 @@ namespace Sttp.Tests
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
             statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup());
 
+            Console.WriteLine(statements[0].ToXML());
+
             writer.GetMetadata(Guid.Empty, 0, false, statements);
 
             while (packets.Count > 0)
@@ -160,6 +162,7 @@ namespace Sttp.Tests
             s.Procedure.Add(new SttpQueryProcedureStep("EQU", new int[] { 3, -2 }.ToList(), -3));
             s.WhereBooleanVariable = -3;
             statements.Add(s.ToSttpMarkup());
+            Console.WriteLine(statements[0].ToXML());
 
             writer.GetMetadata(Guid.Empty, 0, false, statements);
 

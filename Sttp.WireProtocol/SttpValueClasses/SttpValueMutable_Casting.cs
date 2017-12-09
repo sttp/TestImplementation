@@ -1375,6 +1375,7 @@ namespace Sttp
                 switch (m_valueTypeCode)
                 {
                     case SttpValueTypeCode.Null:
+                        return null;
                         throw new InvalidOperationException("Cannot cast from Null to String");
                     case SttpValueTypeCode.SByte:
                         return SttpValueSByteMethods.AsString(m_valueSByte);
