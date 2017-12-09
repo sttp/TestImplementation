@@ -91,6 +91,25 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointRequest);
         }
 
+        public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, SttpMarkup queries)
+        {
+            m_stream.Clear();
+            m_stream.Write(requestID);
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Write(areUpdateQueries);
+            m_stream.Write(queries);
+            m_stream.Send(CommandCode.GetMetadata);
+        }
+
+        public void GetMetadataSchema(Guid schemaVersion, long revision)
+        {
+            m_stream.Clear();
+            m_stream.Write(schemaVersion);
+            m_stream.Write(revision);
+            m_stream.Send(CommandCode.GetMetadataSchema);
+        }
+
         public void MapRuntimeIDs(List<SttpDataPointID> points)
         {
             m_stream.Clear();
@@ -119,59 +138,6 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.MapRuntimeIDs);
         }
 
-        public void NegotiateSession(SttpNamedSet connectionString)
-        {
-            m_stream.Clear();
-            m_stream.Write(connectionString);
-            m_stream.Send(CommandCode.NegotiateSession);
-        }
-
-        public void RequestFailed(CommandCode failedCommand, bool terminateConnection, string reason, string details)
-        {
-            m_stream.Clear();
-            m_stream.Write((byte)failedCommand);
-            m_stream.Write(terminateConnection);
-            m_stream.Write(reason);
-            m_stream.Write(details);
-            m_stream.Send(CommandCode.RequestFailed);
-        }
-
-        public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
-        {
-            m_stream.Clear();
-            m_stream.Write((byte)commandSucceeded);
-            m_stream.Write(reason);
-            m_stream.Write(details);
-            m_stream.Send(CommandCode.RequestSucceeded);
-        }
-
-        public void Subscription(SubscriptionAppendMode mode, SttpNamedSet options, List<SttpDataPointID> dataPoints)
-        {
-            m_stream.Clear();
-            m_stream.Write((byte)mode);
-            m_stream.Write(options);
-            m_stream.Write(dataPoints);
-            m_stream.Send(CommandCode.DataPointRequest);
-        }
-
-        public void GetMetadata(Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpMarkup> queries)
-        {
-            m_stream.Clear();
-            m_stream.Write(schemaVersion);
-            m_stream.Write(revision);
-            m_stream.Write(areUpdateQueries);
-            m_stream.Write(queries);
-            m_stream.Send(CommandCode.GetMetadata);
-        }
-
-        public void GetMetadataSchema(Guid schemaVersion, long revision)
-        {
-            m_stream.Clear();
-            m_stream.Write(schemaVersion);
-            m_stream.Write(revision);
-            m_stream.Send(CommandCode.GetMetadataSchema);
-        }
-
         public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
         {
             m_stream.Clear();
@@ -197,12 +163,58 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.MetadataVersionNotCompatible);
         }
 
+        public void NegotiateSession(SttpMarkup config)
+        {
+            m_stream.Clear();
+            m_stream.Write(config);
+            m_stream.Send(CommandCode.NegotiateSession);
+        }
+
         public void NoOp(bool shouldEcho)
         {
             m_stream.Clear();
             m_stream.Write(shouldEcho);
             m_stream.Send(CommandCode.NoOp);
         }
+
+        public void RequestFailed(CommandCode failedCommand, bool terminateConnection, string reason, string details)
+        {
+            m_stream.Clear();
+            m_stream.Write((byte)failedCommand);
+            m_stream.Write(terminateConnection);
+            m_stream.Write(reason);
+            m_stream.Write(details);
+            m_stream.Send(CommandCode.RequestFailed);
+        }
+
+        public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
+        {
+            m_stream.Clear();
+            m_stream.Write((byte)commandSucceeded);
+            m_stream.Write(reason);
+            m_stream.Write(details);
+            m_stream.Send(CommandCode.RequestSucceeded);
+        }
+
+        public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
+        {
+            m_stream.Clear();
+            m_stream.Write((byte)mode);
+            m_stream.Write(options);
+            m_stream.Write(dataPoints);
+            m_stream.Send(CommandCode.DataPointRequest);
+        }
+
+        public void SubscriptionStream(byte encodingMethod, byte[] buffer)
+        {
+            m_stream.Clear();
+            m_stream.Write(encodingMethod);
+            m_stream.Write(buffer);
+            m_stream.Send(CommandCode.SubscriptionStream);
+        }
+
+       
+       
 
     }
 }

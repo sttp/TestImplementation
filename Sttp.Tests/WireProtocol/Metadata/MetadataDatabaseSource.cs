@@ -77,14 +77,12 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var statements = new List<SttpMarkup>();
-
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
-            statements.Add(BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup());
+            var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup();
 
-            Console.WriteLine(statements[0].ToXML());
+            Console.WriteLine(s.ToXML());
 
-            writer.GetMetadata(Guid.Empty, 0, false, statements);
+            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s);
 
             while (packets.Count > 0)
             {
@@ -150,8 +148,6 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var statements = new List<SttpMarkup>();
-
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
@@ -161,10 +157,10 @@ namespace Sttp.Tests
             s.Literals.Add(new SttpQueryLiteral((SttpValue)327, -2));
             s.Procedure.Add(new SttpQueryProcedureStep("EQU", new int[] { 3, -2 }.ToList(), -3));
             s.WhereBooleanVariable = -3;
-            statements.Add(s.ToSttpMarkup());
-            Console.WriteLine(statements[0].ToXML());
+            var s2 = s.ToSttpMarkup();
+            Console.WriteLine(s2.ToXML());
 
-            writer.GetMetadata(Guid.Empty, 0, false, statements);
+            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s2);
 
             while (packets.Count > 0)
             {

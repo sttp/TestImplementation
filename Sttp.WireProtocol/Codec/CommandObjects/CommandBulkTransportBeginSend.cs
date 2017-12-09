@@ -6,16 +6,18 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.BulkTransportBeginSend;
 
-        public readonly byte EncodingMethod;
-        public readonly bool IsEndOfResponse;
+        public readonly Guid ID;
+        public readonly BulkTransportMode Mode;
+        public readonly BulkTransportCompression Compression;
+        public readonly long OrigionalSize;
         public readonly byte[] Data;
-        public readonly Guid RequestID;
 
         public CommandBulkTransportBeginSend(PayloadReader reader)
         {
-            RequestID = reader.ReadGuid();
-            IsEndOfResponse = reader.ReadBoolean();
-            EncodingMethod = reader.ReadByte();
+            ID = reader.ReadGuid();
+            Mode = (BulkTransportMode)reader.ReadByte();
+            Compression = (BulkTransportCompression)reader.ReadByte();
+            OrigionalSize = reader.ReadInt64();
             Data = reader.ReadBytes();
         }
 

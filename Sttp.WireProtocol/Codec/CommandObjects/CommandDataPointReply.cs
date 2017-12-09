@@ -9,10 +9,10 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.DataPointReply;
 
-        public readonly byte EncodingMethod;
-        public readonly bool IsEndOfResponse;
-        public readonly byte[] Data;
         public readonly Guid RequestID;
+        public readonly bool IsEndOfResponse;
+        public readonly byte EncodingMethod;
+        public readonly byte[] Data;
 
         public CommandDataPointReply(PayloadReader reader)
         {

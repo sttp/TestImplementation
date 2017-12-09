@@ -243,27 +243,24 @@ namespace Sttp.Data
                 return;
             }
 
-            foreach (var query in command.Queries)
+            var reader = command.Queries.MakeReader();
+            while (reader.Read())
             {
-                var reader = query.MakeReader();
-                while (reader.Read())
+                switch (reader.NodeType)
                 {
-                    switch (reader.NodeType)
-                    {
-                        case SttpMarkupNodeType.Element:
-                            if (reader.ElementName == "SttpQuery")
-                            {
-                                var statement = new SttpQueryStatement(reader);
-                                var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
-                            }
-                            break;
-                        case SttpMarkupNodeType.Value:
-                            break;
-                        case SttpMarkupNodeType.EndElement:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    case SttpMarkupNodeType.Element:
+                        if (reader.ElementName == "SttpQuery")
+                        {
+                            var statement = new SttpQueryStatement(reader);
+                            var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
+                        }
+                        break;
+                    case SttpMarkupNodeType.Value:
+                        break;
+                    case SttpMarkupNodeType.EndElement:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }

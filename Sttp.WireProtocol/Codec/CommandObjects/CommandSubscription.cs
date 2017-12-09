@@ -10,14 +10,14 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.Subscription;
 
-        public readonly SttpNamedSet Options;
         public readonly SubscriptionAppendMode Mode;
+        public readonly SttpMarkup Options;
         public readonly List<SttpDataPointID> DataPoints;
 
         public CommandSubscription(PayloadReader reader)
         {
-            Options = reader.ReadSttpNamedSet();
             Mode = (SubscriptionAppendMode) reader.ReadByte();
+            Options = reader.ReadSttpMarkup();
             DataPoints = reader.ReadListSttpDataPointID();
         }
     }
