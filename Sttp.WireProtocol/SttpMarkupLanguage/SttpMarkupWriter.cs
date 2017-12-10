@@ -8,6 +8,20 @@ namespace Sttp
 {
     public class SttpMarkupWriter
     {
+        private class NameLookupCache
+        {
+            public string Name;
+            public int NextNameID;
+            public SttpValueMutable PrevValue;
+
+            public NameLookupCache(string name, int nextNameID)
+            {
+                Name = name;
+                NextNameID = nextNameID;
+                PrevValue = new SttpValueMutable();
+            }
+        }
+
         public class ElementEndElementHelper : IDisposable
         {
             private SttpMarkupWriter m_parent;
@@ -20,16 +34,20 @@ namespace Sttp
                 m_parent.EndElement();
             }
         }
+
         private Dictionary<string, int> m_nameCache = new Dictionary<string, int>();
+        private List<NameLookupCache> m_namesList = new List<NameLookupCache>();
         private Stack<string> m_elementStack = new Stack<string>();
         private ByteWriter m_stream = new ByteWriter();
+        private BitStreamWriter m_bitStream = new BitStreamWriter();
         private ElementEndElementHelper m_endElementHelper;
         private SttpValueMutable m_tmpValue = new SttpValueMutable();
-        private int m_prevNameAsInt = 0;
+        private NameLookupCache m_prevName;
 
         public SttpMarkupWriter()
         {
             m_endElementHelper = new ElementEndElementHelper(this);
+            m_prevName = new NameLookupCache(string.Empty, 0);
         }
 
         public string CurrentElement
@@ -42,21 +60,26 @@ namespace Sttp
             }
         }
 
+        //Encoding Scheme: 
+        //
+        // First, determine the Node Type.
+        // 2 bits, SttpMarkupType
+        // If EndElement, then exit.
+        //
+        // Second, Determine the next NameIndex
+        // 0: Next NameIndex is same as the last time it was encountered.
+        // 1: It's not, Next index is 8 bit encoded number.
+        // Third, If NodeType:Value, write the value.
+
         public ElementEndElementHelper StartElement(string name)
         {
             if (name == null || name.Length == 0)
                 throw new ArgumentNullException(nameof(name));
 
             m_elementStack.Push(name);
-            if (m_nameCache.TryGetValue(name, out int index))
-            {
-                Encode(index);
-            }
-            else
-            {
-                m_nameCache[name] = m_nameCache.Count;
-                Encode(name, m_nameCache.Count - 1);
-            }
+            m_bitStream.WriteBits2((uint)SttpMarkupNodeType.Element);
+            WriteName(name);
+
             return m_endElementHelper;
         }
 
@@ -66,7 +89,6 @@ namespace Sttp
             m_stream.Write((byte)SttpMarkupNodeType.EndElement);
         }
 
-
         public void WriteValue(string name, SttpValue value)
         {
             if (name == null || name.Length == 0)
@@ -74,69 +96,32 @@ namespace Sttp
             if ((object)value == null)
                 throw new ArgumentNullException(nameof(value));
 
-            if (m_nameCache.TryGetValue(name, out int index))
-            {
-                Encode(index, value);
-            }
-            else
+            m_bitStream.WriteBits2((uint)SttpMarkupNodeType.Value);
+            WriteName(name);
+            value.SaveDelta(m_bitStream, m_stream, m_prevName.PrevValue);
+            m_prevName.PrevValue.SetValue(value);
+        }
+
+        private void WriteName(string name)
+        {
+            if (!m_nameCache.TryGetValue(name, out int index))
             {
                 m_nameCache[name] = m_nameCache.Count;
-                Encode(name, value, m_nameCache.Count - 1);
+                m_namesList.Add(new NameLookupCache(name, m_nameCache.Count));
+                index = m_nameCache.Count - 1;
             }
-        }
-
-        //Encoding for the prefix character:
-        // Bits 0,1: SttpMarkupType
-        // Bits 2,3: Unused
-        // Bits 4: 1: Name as String, 0: Name as Int32
-        // Bits 5,6,7: 7: Name as int, 7bit int. 0-6. Previous int + value.
-
-        private void Encode(int nameIndex)
-        {
-            int delta = nameIndex - m_prevNameAsInt;
-            if (delta >= 0 && delta < 7)
+            if (m_prevName.NextNameID == index)
             {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Element |  (0 << 4) | (delta << 5)));
+                m_bitStream.WriteBits1(0);
             }
             else
             {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Element | (0 << 4) | (7 << 5)));
-                m_stream.WriteInt7Bit(nameIndex);
+                m_bitStream.WriteBits1(1);
+                m_bitStream.Write8BitSegments((uint)index);
             }
-            m_prevNameAsInt = nameIndex;
+            m_prevName.NextNameID = index;
+            m_prevName = m_namesList[index];
         }
-
-        private void Encode(string name, int nameIndex)
-        {
-            m_stream.Write((byte)((int)SttpMarkupNodeType.Element | (1 << 4) | (0 << 5)));
-            m_stream.Write(name);
-            m_prevNameAsInt = nameIndex;
-        }
-
-        private void Encode(int nameIndex, SttpValue value)
-        {
-            int delta = nameIndex - m_prevNameAsInt;
-            if (delta >= 0 && delta < 7)
-            {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Value | (0 << 4) | (delta << 5)));
-            }
-            else
-            {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Value | (0 << 4) | (7 << 5)));
-                m_stream.WriteInt7Bit(nameIndex);
-            }
-            m_prevNameAsInt = nameIndex;
-            value.Save(m_stream);
-        }
-
-        private void Encode(string name, SttpValue value, int nameIndex)
-        {
-            m_stream.Write((byte)((int)SttpMarkupNodeType.Value | (1 << 4) | (0 << 5)));
-            m_stream.Write(name);
-            value.Save(m_stream);
-            m_prevNameAsInt = nameIndex;
-        }
-
 
         public void WriteValue(string name, object value)
         {
@@ -146,7 +131,16 @@ namespace Sttp
 
         public SttpMarkup ToSttpMarkup()
         {
-            return new SttpMarkup(m_stream.ToArray());
+            var stream = new ByteWriter();
+            stream.WriteInt7Bit(m_namesList.Count);
+            foreach (var item in m_namesList)
+            {
+                stream.Write(item.Name);
+            }
+            m_bitStream.GetBuffer(out byte[] bits, out int len);
+            stream.Write(bits, 0, len);
+            stream.Write(m_stream.ToArray());
+            return new SttpMarkup(stream.ToArray());
         }
     }
 }

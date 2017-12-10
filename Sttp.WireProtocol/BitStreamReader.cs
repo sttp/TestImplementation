@@ -3,41 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.Codec.DataPointEncoding
+namespace Sttp
 {
-    public class BitStreamReaderBinaryStream
-       : BitStreamReader
-    {
-        private byte[] m_data;
-        private int m_position;
-
-        /// <summary>
-        /// Only valid for pointers
-        /// </summary>
-        public int PositionIndex => m_position;
-
-        public void SetStream(byte[] data)
-        {
-            m_data = data;
-            m_position = 0;
-        }
-
-        protected override void InternalRead(int bitsRequested)
-        {
-            while (m_bitCount < bitsRequested)
-            {
-                m_bitCount += 8;
-                m_cache = (m_cache << 8) | ReadByte();
-            }
-        }
-
-        protected override byte ReadByte()
-        {
-            return m_data[m_position++];
-        }
-    }
-
-    public abstract class BitStreamReader
+    public class BitStreamReader
     {
         /// <summary>
         /// The number of bits in m_bitStreamCache that are valid. 0 Means the bitstream is empty.
@@ -378,7 +346,10 @@ namespace Sttp.Codec.DataPointEncoding
             }
         }
 
-        protected abstract byte ReadByte();
+        private byte ReadByte()
+        {
+            return 0;
+        }
 
         public ulong Read8BitSegments()
         {

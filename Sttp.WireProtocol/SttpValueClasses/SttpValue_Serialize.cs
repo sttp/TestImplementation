@@ -13,6 +13,184 @@ namespace Sttp
     /// </summary>
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
+        public void SaveDelta(BitStreamWriter wrBits, ByteWriter wr, SttpValue other)
+        {
+            var value = ValueTypeCode;
+            if (other.ValueTypeCode == value)
+            {
+                wrBits.WriteBits1(0);
+                switch (value)
+                {
+                    case SttpValueTypeCode.Null:
+                        break;
+                    case SttpValueTypeCode.SByte:
+                        wrBits.Write8BitSegments((ulong)AsSByte ^ (ulong)other.AsSByte);
+                        break;
+                    case SttpValueTypeCode.Int16:
+                        wrBits.Write8BitSegments((ulong)AsInt16 ^ (ulong)other.AsInt16);
+                        break;
+                    case SttpValueTypeCode.Int32:
+                        wrBits.Write8BitSegments((ulong)AsInt32 ^ (ulong)other.AsInt32);
+                        break;
+                    case SttpValueTypeCode.Int64:
+                        wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
+                        break;
+                    case SttpValueTypeCode.Byte:
+                        wrBits.Write8BitSegments((ulong)AsByte ^ (ulong)other.AsByte);
+                        break;
+                    case SttpValueTypeCode.UInt16:
+                        wrBits.Write8BitSegments((ulong)AsUInt16 ^ (ulong)other.AsUInt16);
+                        break;
+                    case SttpValueTypeCode.UInt32:
+                        wrBits.Write8BitSegments((ulong)AsUInt32 ^ (ulong)other.AsUInt32);
+                        break;
+                    case SttpValueTypeCode.UInt64:
+                        wrBits.Write8BitSegments((ulong)AsUInt64 ^ (ulong)other.AsUInt64);
+                        break;
+                    case SttpValueTypeCode.Single:
+                        wr.Write(AsSingle);
+                        break;
+                    case SttpValueTypeCode.Double:
+                        wr.Write(AsDouble);
+                        break;
+                    case SttpValueTypeCode.Decimal:
+                        wr.Write(AsDecimal);
+                        break;
+                    case SttpValueTypeCode.DateTime:
+                        wr.Write(AsDateTime);
+                        break;
+                    case SttpValueTypeCode.DateTimeOffset:
+                        wr.Write(AsDateTimeOffset);
+                        break;
+                    case SttpValueTypeCode.SttpTime:
+                        wr.Write(AsSttpTime);
+                        break;
+                    case SttpValueTypeCode.SttpTimeOffset:
+                        wr.Write(AsSttpTimeOffset);
+                        break;
+                    case SttpValueTypeCode.TimeSpan:
+                        wr.Write(AsTimeSpan);
+                        break;
+                    case SttpValueTypeCode.Boolean:
+                        wr.Write(AsBoolean);
+                        break;
+                    case SttpValueTypeCode.Char:
+                        wr.Write(AsChar);
+                        break;
+                    case SttpValueTypeCode.Guid:
+                        wr.Write(AsGuid);
+                        break;
+                    case SttpValueTypeCode.String:
+                        wr.Write(AsString);
+                        break;
+                    case SttpValueTypeCode.SttpBuffer:
+                        wr.Write(AsSttpBuffer);
+                        break;
+                    case SttpValueTypeCode.SttpValueSet:
+                        wr.Write(AsSttpValueSet);
+                        break;
+                    case SttpValueTypeCode.SttpNamedSet:
+                        wr.Write(AsSttpNamedSet);
+                        break;
+                    case SttpValueTypeCode.SttpMarkup:
+                        wr.Write(AsSttpMarkup);
+                        break;
+                    case SttpValueTypeCode.BulkTransportGuid:
+                        wr.Write(AsBulkTransportGuid);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            else
+            {
+                wrBits.WriteBits1(1);
+                wrBits.WriteBits5((uint)value);
+                switch (value)
+                {
+                    case SttpValueTypeCode.Null:
+                        break;
+                    case SttpValueTypeCode.SByte:
+                        wr.Write(AsSByte);
+                        break;
+                    case SttpValueTypeCode.Int16:
+                        wr.Write(AsInt16);
+                        break;
+                    case SttpValueTypeCode.Int32:
+                        wr.Write(AsInt32);
+                        break;
+                    case SttpValueTypeCode.Int64:
+                        wr.Write(AsInt64);
+                        break;
+                    case SttpValueTypeCode.Byte:
+                        wr.Write(AsByte);
+                        break;
+                    case SttpValueTypeCode.UInt16:
+                        wr.Write(AsUInt16);
+                        break;
+                    case SttpValueTypeCode.UInt32:
+                        wr.Write(AsUInt32);
+                        break;
+                    case SttpValueTypeCode.UInt64:
+                        wr.Write(AsUInt64);
+                        break;
+                    case SttpValueTypeCode.Single:
+                        wr.Write(AsSingle);
+                        break;
+                    case SttpValueTypeCode.Double:
+                        wr.Write(AsDouble);
+                        break;
+                    case SttpValueTypeCode.Decimal:
+                        wr.Write(AsDecimal);
+                        break;
+                    case SttpValueTypeCode.DateTime:
+                        wr.Write(AsDateTime);
+                        break;
+                    case SttpValueTypeCode.DateTimeOffset:
+                        wr.Write(AsDateTimeOffset);
+                        break;
+                    case SttpValueTypeCode.SttpTime:
+                        wr.Write(AsSttpTime);
+                        break;
+                    case SttpValueTypeCode.SttpTimeOffset:
+                        wr.Write(AsSttpTimeOffset);
+                        break;
+                    case SttpValueTypeCode.TimeSpan:
+                        wr.Write(AsTimeSpan);
+                        break;
+                    case SttpValueTypeCode.Boolean:
+                        wr.Write(AsBoolean);
+                        break;
+                    case SttpValueTypeCode.Char:
+                        wr.Write(AsChar);
+                        break;
+                    case SttpValueTypeCode.Guid:
+                        wr.Write(AsGuid);
+                        break;
+                    case SttpValueTypeCode.String:
+                        wr.Write(AsString);
+                        break;
+                    case SttpValueTypeCode.SttpBuffer:
+                        wr.Write(AsSttpBuffer);
+                        break;
+                    case SttpValueTypeCode.SttpValueSet:
+                        wr.Write(AsSttpValueSet);
+                        break;
+                    case SttpValueTypeCode.SttpNamedSet:
+                        wr.Write(AsSttpNamedSet);
+                        break;
+                    case SttpValueTypeCode.SttpMarkup:
+                        wr.Write(AsSttpMarkup);
+                        break;
+                    case SttpValueTypeCode.BulkTransportGuid:
+                        wr.Write(AsBulkTransportGuid);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
         public void Save(ByteWriter wr)
         {
             var value = ValueTypeCode;

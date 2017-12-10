@@ -2,6 +2,7 @@
 using Sttp.Codec;
 using System.Text;
 using System.Xml;
+using OGE.Core.Aced;
 
 namespace Sttp
 {
@@ -18,6 +19,7 @@ namespace Sttp
         }
 
         public int EncodedSize => m_data.Length;
+        public int CompressedSize => AcedDeflator.Instance.Compress(m_data, 0, m_data.Length, AcedCompressionLevel.Maximum, 0, 0).Length;
 
         public void Write(ByteWriter wr)
         {
