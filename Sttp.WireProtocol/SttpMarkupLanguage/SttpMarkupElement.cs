@@ -8,7 +8,6 @@ namespace Sttp
     public class SttpMarkupElement
     {
         public readonly string ElementName;
-        public readonly SttpMarkupCompatiblity ElementCompatibility;
 
         public List<SttpMarkupElement> ChildElements = new List<SttpMarkupElement>();
         public List<SttpMarkupValue> ChildValues = new List<SttpMarkupValue>();
@@ -18,7 +17,6 @@ namespace Sttp
             if (reader.NodeType != SttpMarkupNodeType.Element)
                 throw new Exception("Expecting an Element type for the current node.");
             ElementName = reader.ElementName;
-            ElementCompatibility = reader.ElementCompatibility;
 
             while (reader.Read())
             {
@@ -83,13 +81,12 @@ namespace Sttp
         {
             foreach (var item in ChildElements)
             {
-                if (item.ElementCompatibility != SttpMarkupCompatiblity.Unknown)
-                    item.ErrorIfNotHandled();
+                item.ErrorIfNotHandled();
             }
 
             foreach (var item in ChildValues)
             {
-                if (item.ValueCompatibility != SttpMarkupCompatiblity.Unknown && !item.Handled)
+                if (!item.Handled)
                 {
                     throw new Exception("Unknown value not properly read.");
                 }

@@ -42,22 +42,20 @@ namespace Sttp
             }
         }
 
-        public ElementEndElementHelper StartElement(string name, SttpMarkupCompatiblity compatiblity = SttpMarkupCompatiblity.KnownAndEnforced)
+        public ElementEndElementHelper StartElement(string name)
         {
             if (name == null || name.Length == 0)
                 throw new ArgumentNullException(nameof(name));
-            if (compatiblity < SttpMarkupCompatiblity.KnownAndEnforced || compatiblity > SttpMarkupCompatiblity.Unknown)
-                throw new InvalidEnumArgumentException(nameof(compatiblity), (int)compatiblity, typeof(SttpMarkupCompatiblity));
 
             m_elementStack.Push(name);
             if (m_nameCache.TryGetValue(name, out int index))
             {
-                Encode(index, compatiblity);
+                Encode(index);
             }
             else
             {
                 m_nameCache[name] = m_nameCache.Count;
-                Encode(name, compatiblity, m_nameCache.Count - 1);
+                Encode(name, m_nameCache.Count - 1);
             }
             return m_endElementHelper;
         }
@@ -69,83 +67,81 @@ namespace Sttp
         }
 
 
-        public void WriteValue(string name, SttpValue value, SttpMarkupCompatiblity compatiblity = SttpMarkupCompatiblity.KnownAndEnforced)
+        public void WriteValue(string name, SttpValue value)
         {
             if (name == null || name.Length == 0)
                 throw new ArgumentNullException(nameof(name));
-            if (compatiblity < SttpMarkupCompatiblity.KnownAndEnforced || compatiblity > SttpMarkupCompatiblity.Unknown)
-                throw new InvalidEnumArgumentException(nameof(compatiblity), (int)compatiblity, typeof(SttpMarkupCompatiblity));
             if ((object)value == null)
                 throw new ArgumentNullException(nameof(value));
 
             if (m_nameCache.TryGetValue(name, out int index))
             {
-                Encode(index, compatiblity, value);
+                Encode(index, value);
             }
             else
             {
                 m_nameCache[name] = m_nameCache.Count;
-                Encode(name, compatiblity, value, m_nameCache.Count - 1);
+                Encode(name, value, m_nameCache.Count - 1);
             }
         }
 
         //Encoding for the prefix character:
         // Bits 0,1: SttpMarkupType
-        // Bits 2,3: SttpMarkupCompatiblity (0 if EndElement)
+        // Bits 2,3: Unused
         // Bits 4: 1: Name as String, 0: Name as Int32
         // Bits 5,6,7: 7: Name as int, 7bit int. 0-6. Previous int + value.
 
-        private void Encode(int nameIndex, SttpMarkupCompatiblity compatiblity)
+        private void Encode(int nameIndex)
         {
             int delta = nameIndex - m_prevNameAsInt;
             if (delta >= 0 && delta < 7)
             {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Element | ((int)compatiblity << 2) | (0 << 4) | (delta << 5)));
+                m_stream.Write((byte)((int)SttpMarkupNodeType.Element |  (0 << 4) | (delta << 5)));
             }
             else
             {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Element | ((int)compatiblity << 2) | (0 << 4) | (7 << 5)));
+                m_stream.Write((byte)((int)SttpMarkupNodeType.Element | (0 << 4) | (7 << 5)));
                 m_stream.WriteInt7Bit(nameIndex);
             }
             m_prevNameAsInt = nameIndex;
         }
 
-        private void Encode(string name, SttpMarkupCompatiblity compatiblity, int nameIndex)
+        private void Encode(string name, int nameIndex)
         {
-            m_stream.Write((byte)((int)SttpMarkupNodeType.Element | ((int)compatiblity << 2) | (1 << 4) | (0 << 5)));
+            m_stream.Write((byte)((int)SttpMarkupNodeType.Element | (1 << 4) | (0 << 5)));
             m_stream.Write(name);
             m_prevNameAsInt = nameIndex;
         }
 
-        private void Encode(int nameIndex, SttpMarkupCompatiblity compatiblity, SttpValue value)
+        private void Encode(int nameIndex, SttpValue value)
         {
             int delta = nameIndex - m_prevNameAsInt;
             if (delta >= 0 && delta < 7)
             {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Value | ((int)compatiblity << 2) | (0 << 4) | (delta << 5)));
+                m_stream.Write((byte)((int)SttpMarkupNodeType.Value | (0 << 4) | (delta << 5)));
             }
             else
             {
-                m_stream.Write((byte)((int)SttpMarkupNodeType.Value | ((int)compatiblity << 2) | (0 << 4) | (7 << 5)));
+                m_stream.Write((byte)((int)SttpMarkupNodeType.Value | (0 << 4) | (7 << 5)));
                 m_stream.WriteInt7Bit(nameIndex);
             }
             m_prevNameAsInt = nameIndex;
             value.Save(m_stream);
         }
 
-        private void Encode(string name, SttpMarkupCompatiblity compatiblity, SttpValue value, int nameIndex)
+        private void Encode(string name, SttpValue value, int nameIndex)
         {
-            m_stream.Write((byte)((int)SttpMarkupNodeType.Value | ((int)compatiblity << 2) | (1 << 4) | (0 << 5)));
+            m_stream.Write((byte)((int)SttpMarkupNodeType.Value | (1 << 4) | (0 << 5)));
             m_stream.Write(name);
             value.Save(m_stream);
             m_prevNameAsInt = nameIndex;
         }
 
 
-        public void WriteValue(string name, object value, SttpMarkupCompatiblity compatiblity = SttpMarkupCompatiblity.KnownAndEnforced)
+        public void WriteValue(string name, object value)
         {
             m_tmpValue.SetValue(value);
-            WriteValue(name, m_tmpValue, compatiblity);
+            WriteValue(name, m_tmpValue);
         }
 
         public SttpMarkup ToSttpMarkup()

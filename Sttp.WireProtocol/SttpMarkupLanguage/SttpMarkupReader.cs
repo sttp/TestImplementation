@@ -10,7 +10,6 @@ namespace Sttp
         private ByteReader m_stream;
         private List<string> m_elements = new List<string>();
         private Stack<string> m_elementStack = new Stack<string>();
-        private Stack<SttpMarkupCompatiblity> m_elementStackCompatibility = new Stack<SttpMarkupCompatiblity>();
         private int m_prevNameAsInt = 0;
 
         internal SttpMarkupReader(byte[] data)
@@ -21,10 +20,8 @@ namespace Sttp
 
         public int ElementDepth => m_elementStack.Count;
         public string ElementName { get; private set; }
-        public SttpMarkupCompatiblity ElementCompatibility { get; private set; }
         public string ValueName { get; private set; }
         public SttpValueMutable Value { get; private set; }
-        public SttpMarkupCompatiblity ValueCompatibility { get; private set; }
         public SttpMarkupNodeType NodeType { get; private set; }
 
         public bool Read()
@@ -35,7 +32,6 @@ namespace Sttp
             if (NodeType == SttpMarkupNodeType.EndElement)
             {
                 ElementName = CurrentElement;
-                ElementCompatibility = CurrentElementCompatiblity;
             }
 
             byte code = m_stream.ReadByte();
@@ -47,10 +43,6 @@ namespace Sttp
             {
                 case SttpMarkupNodeType.Element:
                     Value.SetNull();
-                    ValueCompatibility = SttpMarkupCompatiblity.Unknown;
-                    ElementCompatibility = (SttpMarkupCompatiblity)((code >> 2) & 3);
-                   
-
 
                     if (isNameAsString)
                     {
@@ -68,11 +60,9 @@ namespace Sttp
                     }
 
                     m_elementStack.Push(ElementName);
-                    m_elementStackCompatibility.Push(ElementCompatibility);
 
                     break;
                 case SttpMarkupNodeType.Value:
-                    ValueCompatibility = (SttpMarkupCompatiblity)((code >> 2) & 3);
                     if (isNameAsString)
                     {
                         ValueName = m_stream.ReadString();
@@ -92,9 +82,7 @@ namespace Sttp
                     break;
                 case SttpMarkupNodeType.EndElement:
                     ElementName = CurrentElement;
-                    ElementCompatibility = CurrentElementCompatiblity;
                     m_elementStack.Pop();
-                    m_elementStackCompatibility.Pop();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -116,16 +104,6 @@ namespace Sttp
                 return m_elementStack.Peek();
             }
         }
-        private SttpMarkupCompatiblity CurrentElementCompatiblity
-        {
-            get
-            {
-                if (m_elementStackCompatibility.Count == 0)
-                    return SttpMarkupCompatiblity.Unknown;
-                return m_elementStackCompatibility.Peek();
-            }
-        }
-
 
         public void Reset()
         {

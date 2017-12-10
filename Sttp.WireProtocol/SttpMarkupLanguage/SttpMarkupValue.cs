@@ -9,7 +9,6 @@ namespace Sttp
     {
         public readonly string ValueName;
         public readonly SttpValue Value;
-        public readonly SttpMarkupCompatiblity ValueCompatibility;
         public bool Handled;
 
         public SttpMarkupValue(SttpMarkupReader reader)
@@ -18,7 +17,6 @@ namespace Sttp
                 throw new Exception("Expecting a Value type for the current node.");
             ValueName = reader.ValueName;
             Value = reader.Value.CloneAsImmutable();
-            ValueCompatibility = reader.ValueCompatibility;
         }
     }
 }

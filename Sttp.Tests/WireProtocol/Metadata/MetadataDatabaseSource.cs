@@ -79,7 +79,7 @@ namespace Sttp.Tests
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup();
-
+            Console.WriteLine(s.EncodedSize);
             Console.WriteLine(s.ToXML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s);
@@ -158,6 +158,7 @@ namespace Sttp.Tests
             s.Procedure.Add(new SttpQueryProcedureStep("EQU", new int[] { 3, -2 }.ToList(), -3));
             s.WhereBooleanVariable = -3;
             var s2 = s.ToSttpMarkup();
+            Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.ToXML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s2);

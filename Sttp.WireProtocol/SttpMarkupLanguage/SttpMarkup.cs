@@ -16,6 +16,9 @@ namespace Sttp
         {
             m_data = data;
         }
+
+        public int EncodedSize => m_data.Length;
+
         public void Write(ByteWriter wr)
         {
             wr.Write(m_data);
@@ -41,11 +44,9 @@ namespace Sttp
                 {
                     case SttpMarkupNodeType.Element:
                         xml.WriteStartElement(reader.ElementName);
-                        xml.WriteAttributeString("Compatibility", reader.ElementCompatibility.ToString());
                         break;
                     case SttpMarkupNodeType.Value:
                         xml.WriteStartElement(reader.ValueName);
-                        xml.WriteAttributeString("Compatibility", reader.ValueCompatibility.ToString());
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
                         xml.WriteValue(reader.Value.AsString ?? string.Empty);
                         xml.WriteEndElement();

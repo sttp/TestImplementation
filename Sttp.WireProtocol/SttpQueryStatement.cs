@@ -287,10 +287,7 @@ namespace Sttp
                                 gb.ErrorIfNotHandled();
                                 break;
                             default:
-                                if (reader.ElementCompatibility != SttpMarkupCompatiblity.Unknown)
-                                    throw new Exception("Unknown value");
-                                reader.ReadEntireElement(); //Skip this item
-                                break;
+                                throw new Exception("Unknown value");
                         }
                         break;
                     case SttpMarkupNodeType.Value:
@@ -309,9 +306,7 @@ namespace Sttp
                                 Limit = (int?)reader.Value;
                                 break;
                             default:
-                                if (reader.ValueCompatibility != SttpMarkupCompatiblity.Unknown)
-                                    throw new Exception("Unknown value");
-                                break;
+                                throw new Exception("Unknown value");
                         }
                         break;
                     case SttpMarkupNodeType.EndElement:
