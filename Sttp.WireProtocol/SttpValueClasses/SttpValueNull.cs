@@ -19,7 +19,6 @@ namespace Sttp.SttpValueClasses
         public override double AsDouble => throw new InvalidCastException();
         public override float AsSingle => throw new InvalidCastException();
         public override SttpTime AsSttpTime => throw new InvalidCastException();
-        public override char AsChar => throw new InvalidCastException();
         public override bool AsBoolean => throw new InvalidCastException();
         public override Guid AsGuid => throw new InvalidCastException();
         public override string AsString => throw new InvalidCastException();

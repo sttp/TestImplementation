@@ -30,8 +30,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.ToTypeString(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.ToTypeString(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.ToTypeString(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.ToTypeString(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -69,8 +67,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.ToNativeType(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.ToNativeType(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.ToNativeType(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.ToNativeType(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -109,8 +105,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsInt64(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsInt64(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsInt64(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsInt64(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -151,8 +145,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsUInt64(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsUInt64(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsUInt64(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsUInt64(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -192,8 +184,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsSingle(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsSingle(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsSingle(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsSingle(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -233,8 +223,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsDouble(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsDouble(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsDouble(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsDouble(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -274,8 +262,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsDecimal(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsDecimal(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsDecimal(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsDecimal(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -315,8 +301,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsSttpTime(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsSttpTime(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsSttpTime(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsSttpTime(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -356,8 +340,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsBoolean(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsBoolean(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsBoolean(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsBoolean(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -372,47 +354,6 @@ namespace Sttp
                         throw new ArgumentOutOfRangeException();
                 }
             }
-        }
-
-        public override char AsChar
-        {
-            get
-            {
-                switch (m_valueTypeCode)
-                {
-                    case SttpValueTypeCode.Null:
-                        throw new InvalidOperationException("Cannot cast from Null to Char");
-                    case SttpValueTypeCode.Int64:
-                        return SttpValueInt64Methods.AsChar(m_valueInt64);
-                    case SttpValueTypeCode.UInt64:
-                        return SttpValueUInt64Methods.AsChar(m_valueUInt64);
-                    case SttpValueTypeCode.Single:
-                        return SttpValueSingleMethods.AsChar(m_valueSingle);
-                    case SttpValueTypeCode.Double:
-                        return SttpValueDoubleMethods.AsChar(m_valueDouble);
-                    case SttpValueTypeCode.Decimal:
-                        return SttpValueDecimalMethods.AsChar(m_valueDecimal);
-                    case SttpValueTypeCode.SttpTime:
-                        return SttpValueSttpTimeMethods.AsChar(m_valueSttpTime);
-                    case SttpValueTypeCode.Boolean:
-                        return SttpValueBooleanMethods.AsChar(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsChar(m_valueChar);
-                    case SttpValueTypeCode.Guid:
-                        return SttpValueGuidMethods.AsChar(m_valueGuid);
-                    case SttpValueTypeCode.String:
-                        return SttpValueStringMethods.AsChar(m_valueObject as string);
-                    case SttpValueTypeCode.SttpBuffer:
-                        return SttpValueSttpBufferMethods.AsChar(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpMarkup:
-                        return SttpValueSttpMarkupMethods.AsChar(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsChar(m_valueGuid);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
         }
 
         public override Guid AsGuid
@@ -437,8 +378,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsGuid(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsGuid(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsGuid(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsGuid(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -479,8 +418,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsString(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsString(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsString(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsString(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -520,8 +457,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsSttpBuffer(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsSttpBuffer(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsSttpBuffer(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsSttpBuffer(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -561,8 +496,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsSttpMarkup(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsSttpMarkup(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsSttpMarkup(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsSttpMarkup(m_valueGuid);
                     case SttpValueTypeCode.String:
@@ -601,8 +534,6 @@ namespace Sttp
                         return SttpValueSttpTimeMethods.AsBulkTransportGuid(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
                         return SttpValueBooleanMethods.AsBulkTransportGuid(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsBulkTransportGuid(m_valueChar);
                     case SttpValueTypeCode.Guid:
                         return SttpValueGuidMethods.AsBulkTransportGuid(m_valueGuid);
                     case SttpValueTypeCode.String:

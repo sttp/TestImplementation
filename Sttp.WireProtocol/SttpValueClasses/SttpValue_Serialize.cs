@@ -44,9 +44,6 @@ namespace Sttp
                     case SttpValueTypeCode.Boolean:
                         wr.Write(AsBoolean);
                         break;
-                    case SttpValueTypeCode.Char:
-                        wr.Write(AsChar);
-                        break;
                     case SttpValueTypeCode.Guid:
                         wr.Write(AsGuid);
                         break;
@@ -94,9 +91,6 @@ namespace Sttp
                         break;
                     case SttpValueTypeCode.Boolean:
                         wr.Write(AsBoolean);
-                        break;
-                    case SttpValueTypeCode.Char:
-                        wr.Write(AsChar);
                         break;
                     case SttpValueTypeCode.Guid:
                         wr.Write(AsGuid);
@@ -148,9 +142,6 @@ namespace Sttp
                 case SttpValueTypeCode.Boolean:
                     wr.Write(AsBoolean);
                     break;
-                case SttpValueTypeCode.Char:
-                    wr.Write(AsChar);
-                    break;
                 case SttpValueTypeCode.Guid:
                     wr.Write(AsGuid);
                     break;
@@ -192,8 +183,6 @@ namespace Sttp
                     return new SttpValueSttpTime(rd.ReadSttpTime());
                 case SttpValueTypeCode.Boolean:
                     return new SttpValueBoolean(rd.ReadBoolean());
-                case SttpValueTypeCode.Char:
-                    return new SttpValueChar(rd.ReadChar());
                 case SttpValueTypeCode.Guid:
                     return new SttpValueGuid(rd.ReadGuid());
                 case SttpValueTypeCode.String:

@@ -26,7 +26,6 @@ namespace Sttp.SttpValueClasses
         public override decimal AsDecimal => SttpValueSingleMethods.AsDecimal(Value);
         public override SttpTime AsSttpTime => SttpValueSingleMethods.AsSttpTime(Value);
         public override bool AsBoolean => SttpValueSingleMethods.AsBoolean(Value);
-        public override char AsChar => SttpValueSingleMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueSingleMethods.AsGuid(Value);
         public override string AsString => SttpValueSingleMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueSingleMethods.AsSttpBuffer(Value);

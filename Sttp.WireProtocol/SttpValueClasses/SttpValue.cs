@@ -27,7 +27,6 @@ namespace Sttp
         public abstract decimal AsDecimal { get; }
         public abstract SttpTime AsSttpTime { get; }
         public abstract bool AsBoolean { get; }
-        public abstract char AsChar { get; }
 
         public abstract Guid AsGuid { get; }
         public abstract Guid AsBulkTransportGuid { get; }

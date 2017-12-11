@@ -99,8 +99,6 @@ namespace Sttp
                     return (SttpValue)AsSttpTime;
                 case SttpValueTypeCode.Boolean:
                     return (SttpValue)AsBoolean;
-                case SttpValueTypeCode.Char:
-                    return (SttpValue)AsChar;
                 case SttpValueTypeCode.Guid:
                     return (SttpValue)AsGuid;
                 case SttpValueTypeCode.String:

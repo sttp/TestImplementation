@@ -73,8 +73,6 @@ namespace Sttp
                     return typeof(SttpTime);
                 case SttpValueTypeCode.Boolean:
                     return typeof(Boolean);
-                case SttpValueTypeCode.Char:
-                    return typeof(Char);
                 case SttpValueTypeCode.Guid:
                     return typeof(Guid);
                 case SttpValueTypeCode.String:

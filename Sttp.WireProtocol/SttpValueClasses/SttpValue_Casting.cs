@@ -73,10 +73,6 @@ namespace Sttp
         {
             return new SttpValueBoolean(value);
         }
-        public static implicit operator SttpValue(char value)
-        {
-            return new SttpValueChar(value);
-        }
         public static implicit operator SttpValue(Guid value)
         {
             return new SttpValueGuid(value);
@@ -157,10 +153,6 @@ namespace Sttp
         public static explicit operator bool(SttpValue value)
         {
             return value.AsBoolean;
-        }
-        public static explicit operator char(SttpValue value)
-        {
-            return value.AsChar;
         }
         public static explicit operator Guid(SttpValue value)
         {
@@ -251,10 +243,6 @@ namespace Sttp
             else if (type == typeof(bool))
             {
                 return (bool)value;
-            }
-            else if (type == typeof(char))
-            {
-                return (char)value;
             }
             else if (type == typeof(Guid))
             {
@@ -382,12 +370,7 @@ namespace Sttp
                 return SttpValue.Null;
             return new SttpValueBoolean(value.Value);
         }
-        public static implicit operator SttpValue(char? value)
-        {
-            if (!value.HasValue)
-                return SttpValue.Null;
-            return new SttpValueChar(value.Value);
-        }
+
         public static implicit operator SttpValue(Guid? value)
         {
             if (!value.HasValue)
@@ -484,12 +467,6 @@ namespace Sttp
             if (value.IsNull)
                 return null;
             return value.AsBoolean;
-        }
-        public static explicit operator char?(SttpValue value)
-        {
-            if (value.IsNull)
-                return null;
-            return value.AsChar;
         }
         public static explicit operator Guid?(SttpValue value)
         {

@@ -85,11 +85,6 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.Boolean;
             m_valueBoolean = value;
         }
-        public void SetValue(char value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.Char;
-            m_valueChar = value;
-        }
         public void SetValue(Guid value)
         {
             m_valueTypeCode = SttpValueTypeCode.Guid;
@@ -148,9 +143,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.Boolean:
                     SetValue(value.AsBoolean);
-                    break;
-                case SttpValueTypeCode.Char:
-                    SetValue(value.AsChar);
                     break;
                 case SttpValueTypeCode.Guid:
                     SetValue(value.AsGuid);
@@ -307,9 +299,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.Boolean:
                     SetValue(rd.ReadBoolean());
-                    break;
-                case SttpValueTypeCode.Char:
-                    SetValue(rd.ReadChar());
                     break;
                 case SttpValueTypeCode.Guid:
                     SetValue(rd.ReadGuid());
