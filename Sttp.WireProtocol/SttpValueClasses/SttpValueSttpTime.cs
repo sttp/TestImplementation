@@ -19,22 +19,14 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueSttpTimeMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueSttpTimeMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSttpTimeMethods.ToNativeType(Value);
-        public override sbyte AsSByte => SttpValueSttpTimeMethods.AsSByte(Value);
-        public override short AsInt16 => SttpValueSttpTimeMethods.AsInt16(Value);
         public override int AsInt32 => SttpValueSttpTimeMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueSttpTimeMethods.AsInt64(Value);
-        public override byte AsByte => SttpValueSttpTimeMethods.AsByte(Value);
-        public override ushort AsUInt16 => SttpValueSttpTimeMethods.AsUInt16(Value);
         public override uint AsUInt32 => SttpValueSttpTimeMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueSttpTimeMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueSttpTimeMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSttpTimeMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueSttpTimeMethods.AsDecimal(Value);
-        public override DateTime AsDateTime => SttpValueSttpTimeMethods.AsDateTime(Value);
-        public override DateTimeOffset AsDateTimeOffset => SttpValueSttpTimeMethods.AsDateTimeOffset(Value);
         public override SttpTime AsSttpTime => SttpValueSttpTimeMethods.AsSttpTime(Value);
-        public override SttpTimeOffset AsSttpTimeOffset => SttpValueSttpTimeMethods.AsSttpTimeOffset(Value);
-        public override TimeSpan AsTimeSpan => SttpValueSttpTimeMethods.AsTimeSpan(Value);
         public override bool AsBoolean => SttpValueSttpTimeMethods.AsBoolean(Value);
         public override char AsChar => SttpValueSttpTimeMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueSttpTimeMethods.AsGuid(Value);
@@ -129,11 +121,6 @@ namespace Sttp.SttpValueClasses
         public static SttpTime AsSttpTime(SttpTime value)
         {
             return value;
-        }
-
-        public static SttpTimeOffset AsSttpTimeOffset(SttpTime value)
-        {
-            return value.ToSttpTimestampOffset();
         }
 
         public static TimeSpan AsTimeSpan(SttpTime value)

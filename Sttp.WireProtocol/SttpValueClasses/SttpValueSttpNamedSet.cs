@@ -19,22 +19,14 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueSttpNamedSetMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueSttpNamedSetMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSttpNamedSetMethods.ToNativeType(Value);
-        public override sbyte AsSByte => SttpValueSttpNamedSetMethods.AsSByte(Value);
-        public override short AsInt16 => SttpValueSttpNamedSetMethods.AsInt16(Value);
         public override int AsInt32 => SttpValueSttpNamedSetMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueSttpNamedSetMethods.AsInt64(Value);
-        public override byte AsByte => SttpValueSttpNamedSetMethods.AsByte(Value);
-        public override ushort AsUInt16 => SttpValueSttpNamedSetMethods.AsUInt16(Value);
         public override uint AsUInt32 => SttpValueSttpNamedSetMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueSttpNamedSetMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueSttpNamedSetMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSttpNamedSetMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueSttpNamedSetMethods.AsDecimal(Value);
-        public override DateTime AsDateTime => SttpValueSttpNamedSetMethods.AsDateTime(Value);
-        public override DateTimeOffset AsDateTimeOffset => SttpValueSttpNamedSetMethods.AsDateTimeOffset(Value);
         public override SttpTime AsSttpTime => SttpValueSttpNamedSetMethods.AsSttpTime(Value);
-        public override SttpTimeOffset AsSttpTimeOffset => SttpValueSttpNamedSetMethods.AsSttpTimeOffset(Value);
-        public override TimeSpan AsTimeSpan => SttpValueSttpNamedSetMethods.AsTimeSpan(Value);
         public override bool AsBoolean => SttpValueSttpNamedSetMethods.AsBoolean(Value);
         public override char AsChar => SttpValueSttpNamedSetMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueSttpNamedSetMethods.AsGuid(Value);
@@ -129,11 +121,6 @@ namespace Sttp.SttpValueClasses
         public static SttpTime AsSttpTime(SttpNamedSet value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
-        }
-
-        public static SttpTimeOffset AsSttpTimeOffset(SttpNamedSet value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTimeOffset");
         }
 
         public static TimeSpan AsTimeSpan(SttpNamedSet value)

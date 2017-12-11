@@ -8,12 +8,13 @@ namespace Sttp
 {
     public unsafe class ByteWriter
     {
-        private int m_reservedPrfixBytes = 15;
+        private int m_reservedPrfixBytes;
         private byte[] m_buffer;
         private int m_position;
-        
+
         public ByteWriter()
         {
+            m_reservedPrfixBytes = 0;
             m_buffer = new byte[64];
             Clear();
         }
@@ -25,7 +26,7 @@ namespace Sttp
             Clear();
         }
 
-        
+
         public int Length => m_position - m_reservedPrfixBytes;
 
         protected void GetBounds(out byte[] data, out int offset, out int length)
@@ -199,6 +200,14 @@ namespace Sttp
             WriteUInt7Bit((uint)(length + 1));
 
             stream.Read(m_buffer, m_position, length);
+            m_position += length;
+        }
+
+        public void WriteWithoutLength(byte[] value, int start, int length)
+        {
+            value.ValidateParameters(start, length);
+            EnsureCapacity(length);
+            Array.Copy(value, start, m_buffer, m_position, length); // write data
             m_position += length;
         }
 

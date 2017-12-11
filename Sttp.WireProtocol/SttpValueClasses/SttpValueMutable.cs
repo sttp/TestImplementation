@@ -22,17 +22,9 @@ namespace Sttp
         private long m_rawBytes8_15;
 
         [FieldOffset(0)]
-        private sbyte m_valueSByte;
-        [FieldOffset(0)]
-        private byte m_valueByte;
-        [FieldOffset(0)]
-        private short m_valueInt16;
-        [FieldOffset(0)]
         private int m_valueInt32;
         [FieldOffset(0)]
         private long m_valueInt64;
-        [FieldOffset(0)]
-        private ushort m_valueUInt16;
         [FieldOffset(0)]
         private uint m_valueUInt32;
         [FieldOffset(0)]
@@ -43,19 +35,11 @@ namespace Sttp
         [FieldOffset(0)]
         private float m_valueSingle;
         [FieldOffset(0)]
-        private TimeSpan m_valueTimeSpan;
-        [FieldOffset(0)]
         private char m_valueChar;
         [FieldOffset(0)]
         private bool m_valueBoolean;
         [FieldOffset(0)]
         private SttpTime m_valueSttpTime;
-        [FieldOffset(0)]
-        private SttpTimeOffset m_valueSttpTimeOffset;
-        [FieldOffset(0)]
-        private DateTime m_valueDateTime;
-        [FieldOffset(0)]
-        private DateTimeOffset m_valueDateTimeOffset;
         [FieldOffset(0)]
         private decimal m_valueDecimal;
         [FieldOffset(0)]
@@ -101,18 +85,10 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     return SttpValue.Null;
-                case SttpValueTypeCode.SByte:
-                    return (SttpValue)AsSByte;
-                case SttpValueTypeCode.Int16:
-                    return (SttpValue)AsInt16;
                 case SttpValueTypeCode.Int32:
                     return (SttpValue)AsInt32;
                 case SttpValueTypeCode.Int64:
                     return (SttpValue)AsInt64;
-                case SttpValueTypeCode.Byte:
-                    return (SttpValue)AsByte;
-                case SttpValueTypeCode.UInt16:
-                    return (SttpValue)AsUInt16;
                 case SttpValueTypeCode.UInt32:
                     return (SttpValue)AsUInt32;
                 case SttpValueTypeCode.UInt64:
@@ -123,16 +99,8 @@ namespace Sttp
                     return (SttpValue)AsDouble;
                 case SttpValueTypeCode.Decimal:
                     return (SttpValue)AsDecimal;
-                case SttpValueTypeCode.DateTime:
-                    return (SttpValue)AsDateTime;
-                case SttpValueTypeCode.DateTimeOffset:
-                    return (SttpValue)AsDateTimeOffset;
                 case SttpValueTypeCode.SttpTime:
                     return (SttpValue)AsSttpTime;
-                case SttpValueTypeCode.SttpTimeOffset:
-                    return (SttpValue)AsSttpTimeOffset;
-                case SttpValueTypeCode.TimeSpan:
-                    return (SttpValue)AsTimeSpan;
                 case SttpValueTypeCode.Boolean:
                     return (SttpValue)AsBoolean;
                 case SttpValueTypeCode.Char:

@@ -426,11 +426,6 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
-        public SttpTimeOffset ReadSttpTimeOffset()
-        {
-            throw new NotImplementedException();
-        }
-
         public TimeSpan ReadTimeSpan()
         {
             throw new NotImplementedException();

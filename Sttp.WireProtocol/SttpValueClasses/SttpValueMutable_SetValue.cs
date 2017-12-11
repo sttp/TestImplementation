@@ -20,13 +20,11 @@ namespace Sttp
 
         public void SetValue(sbyte value)
         {
-            m_valueTypeCode = SttpValueTypeCode.SByte;
-            m_valueSByte = value;
+            SetValue((int)value);
         }
         public void SetValue(short value)
         {
-            m_valueTypeCode = SttpValueTypeCode.Int16;
-            m_valueInt16 = value;
+            SetValue((int)value);
         }
         public void SetValue(int value)
         {
@@ -40,13 +38,11 @@ namespace Sttp
         }
         public void SetValue(byte value)
         {
-            m_valueTypeCode = SttpValueTypeCode.Byte;
-            m_valueByte = value;
+            SetValue((uint)value);
         }
         public void SetValue(ushort value)
         {
-            m_valueTypeCode = SttpValueTypeCode.UInt16;
-            m_valueUInt16 = value;
+            SetValue((uint)value);
         }
         public void SetValue(uint value)
         {
@@ -75,28 +71,20 @@ namespace Sttp
         }
         public void SetValue(DateTime value)
         {
-            m_valueTypeCode = SttpValueTypeCode.DateTime;
-            m_valueDateTime = value;
+            SetValue(new SttpTime(value));
         }
         public void SetValue(DateTimeOffset value)
         {
-            m_valueTypeCode = SttpValueTypeCode.DateTimeOffset;
-            m_valueDateTimeOffset = value;
+            SetValue(new SttpTime(value));
         }
         public void SetValue(SttpTime value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpTime;
             m_valueSttpTime = value;
         }
-        public void SetValue(SttpTimeOffset value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.SttpTimeOffset;
-            m_valueSttpTimeOffset = value;
-        }
         public void SetValue(TimeSpan value)
         {
-            m_valueTypeCode = SttpValueTypeCode.TimeSpan;
-            m_valueTimeSpan = value;
+            SetValue(new SttpTime(value));
         }
         public void SetValue(bool value)
         {
@@ -156,23 +144,11 @@ namespace Sttp
                 case SttpValueTypeCode.Null:
                     SetNull();
                     break;
-                case SttpValueTypeCode.SByte:
-                    SetValue(value.AsSByte);
-                    break;
-                case SttpValueTypeCode.Int16:
-                    SetValue(value.AsInt16);
-                    break;
                 case SttpValueTypeCode.Int32:
                     SetValue(value.AsInt32);
                     break;
                 case SttpValueTypeCode.Int64:
                     SetValue(value.AsInt64);
-                    break;
-                case SttpValueTypeCode.Byte:
-                    SetValue(value.AsByte);
-                    break;
-                case SttpValueTypeCode.UInt16:
-                    SetValue(value.AsUInt16);
                     break;
                 case SttpValueTypeCode.UInt32:
                     SetValue(value.AsUInt32);
@@ -189,20 +165,8 @@ namespace Sttp
                 case SttpValueTypeCode.Decimal:
                     SetValue(value.AsDecimal);
                     break;
-                case SttpValueTypeCode.DateTime:
-                    SetValue(value.AsDateTime);
-                    break;
-                case SttpValueTypeCode.DateTimeOffset:
-                    SetValue(value.AsDateTimeOffset);
-                    break;
                 case SttpValueTypeCode.SttpTime:
                     SetValue(value.AsSttpTime);
-                    break;
-                case SttpValueTypeCode.SttpTimeOffset:
-                    SetValue(value.AsSttpTimeOffset);
-                    break;
-                case SttpValueTypeCode.TimeSpan:
-                    SetValue(value.AsTimeSpan);
                     break;
                 case SttpValueTypeCode.Boolean:
                     SetValue(value.AsBoolean);
@@ -301,10 +265,6 @@ namespace Sttp
             {
                 SetValue((SttpTime)value);
             }
-            else if (type == typeof(SttpTimeOffset))
-            {
-                SetValue((SttpTimeOffset)value);
-            }
             else if (type == typeof(TimeSpan))
             {
                 SetValue((TimeSpan)value);
@@ -363,23 +323,11 @@ namespace Sttp
                 case SttpValueTypeCode.Null:
                     SetNull();
                     break;
-                case SttpValueTypeCode.SByte:
-                    SetValue(rd.ReadSByte());
-                    break;
-                case SttpValueTypeCode.Int16:
-                    SetValue(rd.ReadInt16());
-                    break;
                 case SttpValueTypeCode.Int32:
                     SetValue(rd.ReadInt32());
                     break;
                 case SttpValueTypeCode.Int64:
                     SetValue(rd.ReadInt64());
-                    break;
-                case SttpValueTypeCode.Byte:
-                    SetValue(rd.ReadByte());
-                    break;
-                case SttpValueTypeCode.UInt16:
-                    SetValue(rd.ReadUInt16());
                     break;
                 case SttpValueTypeCode.UInt32:
                     SetValue(rd.ReadUInt32());
@@ -396,20 +344,8 @@ namespace Sttp
                 case SttpValueTypeCode.Decimal:
                     SetValue(rd.ReadDecimal());
                     break;
-                case SttpValueTypeCode.DateTime:
-                    SetValue(rd.ReadDateTime());
-                    break;
-                case SttpValueTypeCode.DateTimeOffset:
-                    SetValue(rd.ReadDateTimeOffset());
-                    break;
                 case SttpValueTypeCode.SttpTime:
                     SetValue(rd.ReadSttpTime());
-                    break;
-                case SttpValueTypeCode.SttpTimeOffset:
-                    SetValue(rd.ReadSttpTimeOffset());
-                    break;
-                case SttpValueTypeCode.TimeSpan:
-                    SetValue(rd.ReadTimeSpan());
                     break;
                 case SttpValueTypeCode.Boolean:
                     SetValue(rd.ReadBoolean());

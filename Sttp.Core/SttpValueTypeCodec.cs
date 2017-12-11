@@ -18,17 +18,17 @@ namespace Sttp
         public static SttpValueTypeCode FromType(Type columnDataType)
         {
             if (columnDataType == typeof(sbyte))
-                return SttpValueTypeCode.SByte;
+                return SttpValueTypeCode.Int32;
             if (columnDataType == typeof(Int16))
-                return SttpValueTypeCode.Int16;
+                return SttpValueTypeCode.Int32;
             if (columnDataType == typeof(Int32))
                 return SttpValueTypeCode.Int32;
             if (columnDataType == typeof(Int64))
                 return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Byte))
-                return SttpValueTypeCode.Byte;
+                return SttpValueTypeCode.Int32;
             if (columnDataType == typeof(UInt16))
-                return SttpValueTypeCode.UInt16;
+                return SttpValueTypeCode.Int32;
             if (columnDataType == typeof(UInt32))
                 return SttpValueTypeCode.UInt32;
             if (columnDataType == typeof(UInt64))
@@ -40,7 +40,7 @@ namespace Sttp
             if (columnDataType == typeof(Single))
                 return SttpValueTypeCode.Single;
             if (columnDataType == typeof(DateTime))
-                return SttpValueTypeCode.DateTime;
+                return SttpValueTypeCode.SttpTime;
             if (columnDataType == typeof(bool))
                 return SttpValueTypeCode.Boolean;
             if (columnDataType == typeof(Guid))
@@ -59,18 +59,10 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     return typeof(DBNull);
-                case SttpValueTypeCode.SByte:
-                    return typeof(SByte);
-                case SttpValueTypeCode.Int16:
-                    return typeof(Int16);
                 case SttpValueTypeCode.Int32:
                     return typeof(Int32);
                 case SttpValueTypeCode.Int64:
                     return typeof(Int64);
-                case SttpValueTypeCode.Byte:
-                    return typeof(Byte);
-                case SttpValueTypeCode.UInt16:
-                    return typeof(UInt16);
                 case SttpValueTypeCode.UInt32:
                     return typeof(UInt32);
                 case SttpValueTypeCode.UInt64:
@@ -81,16 +73,8 @@ namespace Sttp
                     return typeof(Double);
                 case SttpValueTypeCode.Decimal:
                     return typeof(Decimal);
-                case SttpValueTypeCode.DateTime:
-                    return typeof(DateTime);
-                case SttpValueTypeCode.DateTimeOffset:
-                    return typeof(DateTimeOffset);
                 case SttpValueTypeCode.SttpTime:
                     return typeof(SttpTime);
-                case SttpValueTypeCode.SttpTimeOffset:
-                    return typeof(SttpTimeOffset);
-                case SttpValueTypeCode.TimeSpan:
-                    return typeof(TimeSpan);
                 case SttpValueTypeCode.Boolean:
                     return typeof(Boolean);
                 case SttpValueTypeCode.Char:

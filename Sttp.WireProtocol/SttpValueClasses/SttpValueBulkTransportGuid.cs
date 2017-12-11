@@ -19,22 +19,14 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueBulkTransportGuidMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueBulkTransportGuidMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueBulkTransportGuidMethods.ToNativeType(Value);
-        public override sbyte AsSByte => SttpValueBulkTransportGuidMethods.AsSByte(Value);
-        public override short AsInt16 => SttpValueBulkTransportGuidMethods.AsInt16(Value);
         public override int AsInt32 => SttpValueBulkTransportGuidMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueBulkTransportGuidMethods.AsInt64(Value);
-        public override byte AsByte => SttpValueBulkTransportGuidMethods.AsByte(Value);
-        public override ushort AsUInt16 => SttpValueBulkTransportGuidMethods.AsUInt16(Value);
         public override uint AsUInt32 => SttpValueBulkTransportGuidMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueBulkTransportGuidMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueBulkTransportGuidMethods.AsSingle(Value);
         public override double AsDouble => SttpValueBulkTransportGuidMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueBulkTransportGuidMethods.AsDecimal(Value);
-        public override DateTime AsDateTime => SttpValueBulkTransportGuidMethods.AsDateTime(Value);
-        public override DateTimeOffset AsDateTimeOffset => SttpValueBulkTransportGuidMethods.AsDateTimeOffset(Value);
         public override SttpTime AsSttpTime => SttpValueBulkTransportGuidMethods.AsSttpTime(Value);
-        public override SttpTimeOffset AsSttpTimeOffset => SttpValueBulkTransportGuidMethods.AsSttpTimeOffset(Value);
-        public override TimeSpan AsTimeSpan => SttpValueBulkTransportGuidMethods.AsTimeSpan(Value);
         public override bool AsBoolean => SttpValueBulkTransportGuidMethods.AsBoolean(Value);
         public override char AsChar => SttpValueBulkTransportGuidMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueBulkTransportGuidMethods.AsGuid(Value);
@@ -129,11 +121,6 @@ namespace Sttp.SttpValueClasses
         public static SttpTime AsSttpTime(Guid value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
-        }
-
-        public static SttpTimeOffset AsSttpTimeOffset(Guid value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTimeOffset");
         }
 
         public static TimeSpan AsTimeSpan(Guid value)

@@ -19,22 +19,14 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueStringMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueStringMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueStringMethods.ToNativeType(Value);
-        public override sbyte AsSByte => SttpValueStringMethods.AsSByte(Value);
-        public override short AsInt16 => SttpValueStringMethods.AsInt16(Value);
         public override int AsInt32 => SttpValueStringMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueStringMethods.AsInt64(Value);
-        public override byte AsByte => SttpValueStringMethods.AsByte(Value);
-        public override ushort AsUInt16 => SttpValueStringMethods.AsUInt16(Value);
         public override uint AsUInt32 => SttpValueStringMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueStringMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueStringMethods.AsSingle(Value);
         public override double AsDouble => SttpValueStringMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueStringMethods.AsDecimal(Value);
-        public override DateTime AsDateTime => SttpValueStringMethods.AsDateTime(Value);
-        public override DateTimeOffset AsDateTimeOffset => SttpValueStringMethods.AsDateTimeOffset(Value);
         public override SttpTime AsSttpTime => SttpValueStringMethods.AsSttpTime(Value);
-        public override SttpTimeOffset AsSttpTimeOffset => SttpValueStringMethods.AsSttpTimeOffset(Value);
-        public override TimeSpan AsTimeSpan => SttpValueStringMethods.AsTimeSpan(Value);
         public override bool AsBoolean => SttpValueStringMethods.AsBoolean(Value);
         public override char AsChar => SttpValueStringMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueStringMethods.AsGuid(Value);
@@ -129,11 +121,6 @@ namespace Sttp.SttpValueClasses
         public static SttpTime AsSttpTime(string value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
-        }
-
-        public static SttpTimeOffset AsSttpTimeOffset(string value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTimeOffset");
         }
 
         public static TimeSpan AsTimeSpan(string value)

@@ -23,23 +23,11 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         break;
-                    case SttpValueTypeCode.SByte:
-                        wrBits.Write8BitSegments((ulong)AsSByte ^ (ulong)other.AsSByte);
-                        break;
-                    case SttpValueTypeCode.Int16:
-                        wrBits.Write8BitSegments((ulong)AsInt16 ^ (ulong)other.AsInt16);
-                        break;
                     case SttpValueTypeCode.Int32:
                         wrBits.Write8BitSegments((ulong)AsInt32 ^ (ulong)other.AsInt32);
                         break;
                     case SttpValueTypeCode.Int64:
                         wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
-                        break;
-                    case SttpValueTypeCode.Byte:
-                        wrBits.Write8BitSegments((ulong)AsByte ^ (ulong)other.AsByte);
-                        break;
-                    case SttpValueTypeCode.UInt16:
-                        wrBits.Write8BitSegments((ulong)AsUInt16 ^ (ulong)other.AsUInt16);
                         break;
                     case SttpValueTypeCode.UInt32:
                         wrBits.Write8BitSegments((ulong)AsUInt32 ^ (ulong)other.AsUInt32);
@@ -56,20 +44,8 @@ namespace Sttp
                     case SttpValueTypeCode.Decimal:
                         wr.Write(AsDecimal);
                         break;
-                    case SttpValueTypeCode.DateTime:
-                        wr.Write(AsDateTime);
-                        break;
-                    case SttpValueTypeCode.DateTimeOffset:
-                        wr.Write(AsDateTimeOffset);
-                        break;
                     case SttpValueTypeCode.SttpTime:
                         wr.Write(AsSttpTime);
-                        break;
-                    case SttpValueTypeCode.SttpTimeOffset:
-                        wr.Write(AsSttpTimeOffset);
-                        break;
-                    case SttpValueTypeCode.TimeSpan:
-                        wr.Write(AsTimeSpan);
                         break;
                     case SttpValueTypeCode.Boolean:
                         wr.Write(AsBoolean);
@@ -110,23 +86,11 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         break;
-                    case SttpValueTypeCode.SByte:
-                        wr.Write(AsSByte);
-                        break;
-                    case SttpValueTypeCode.Int16:
-                        wr.Write(AsInt16);
-                        break;
                     case SttpValueTypeCode.Int32:
                         wr.Write(AsInt32);
                         break;
                     case SttpValueTypeCode.Int64:
                         wr.Write(AsInt64);
-                        break;
-                    case SttpValueTypeCode.Byte:
-                        wr.Write(AsByte);
-                        break;
-                    case SttpValueTypeCode.UInt16:
-                        wr.Write(AsUInt16);
                         break;
                     case SttpValueTypeCode.UInt32:
                         wr.Write(AsUInt32);
@@ -143,20 +107,8 @@ namespace Sttp
                     case SttpValueTypeCode.Decimal:
                         wr.Write(AsDecimal);
                         break;
-                    case SttpValueTypeCode.DateTime:
-                        wr.Write(AsDateTime);
-                        break;
-                    case SttpValueTypeCode.DateTimeOffset:
-                        wr.Write(AsDateTimeOffset);
-                        break;
                     case SttpValueTypeCode.SttpTime:
                         wr.Write(AsSttpTime);
-                        break;
-                    case SttpValueTypeCode.SttpTimeOffset:
-                        wr.Write(AsSttpTimeOffset);
-                        break;
-                    case SttpValueTypeCode.TimeSpan:
-                        wr.Write(AsTimeSpan);
                         break;
                     case SttpValueTypeCode.Boolean:
                         wr.Write(AsBoolean);
@@ -199,23 +151,11 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     break;
-                case SttpValueTypeCode.SByte:
-                    wr.Write(AsSByte);
-                    break;
-                case SttpValueTypeCode.Int16:
-                    wr.Write(AsInt16);
-                    break;
                 case SttpValueTypeCode.Int32:
                     wr.Write(AsInt32);
                     break;
                 case SttpValueTypeCode.Int64:
                     wr.Write(AsInt64);
-                    break;
-                case SttpValueTypeCode.Byte:
-                    wr.Write(AsByte);
-                    break;
-                case SttpValueTypeCode.UInt16:
-                    wr.Write(AsUInt16);
                     break;
                 case SttpValueTypeCode.UInt32:
                     wr.Write(AsUInt32);
@@ -232,20 +172,8 @@ namespace Sttp
                 case SttpValueTypeCode.Decimal:
                     wr.Write(AsDecimal);
                     break;
-                case SttpValueTypeCode.DateTime:
-                    wr.Write(AsDateTime);
-                    break;
-                case SttpValueTypeCode.DateTimeOffset:
-                    wr.Write(AsDateTimeOffset);
-                    break;
                 case SttpValueTypeCode.SttpTime:
                     wr.Write(AsSttpTime);
-                    break;
-                case SttpValueTypeCode.SttpTimeOffset:
-                    wr.Write(AsSttpTimeOffset);
-                    break;
-                case SttpValueTypeCode.TimeSpan:
-                    wr.Write(AsTimeSpan);
                     break;
                 case SttpValueTypeCode.Boolean:
                     wr.Write(AsBoolean);
@@ -286,18 +214,10 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     return SttpValue.Null;
-                case SttpValueTypeCode.SByte:
-                    return new SttpValueSByte(rd.ReadSByte());
-                case SttpValueTypeCode.Int16:
-                    return new SttpValueInt16(rd.ReadInt16());
                 case SttpValueTypeCode.Int32:
                     return new SttpValueInt32(rd.ReadInt32());
                 case SttpValueTypeCode.Int64:
                     return new SttpValueInt64(rd.ReadInt64());
-                case SttpValueTypeCode.Byte:
-                    return new SttpValueByte(rd.ReadByte());
-                case SttpValueTypeCode.UInt16:
-                    return new SttpValueUInt16(rd.ReadUInt16());
                 case SttpValueTypeCode.UInt32:
                     return new SttpValueUInt32(rd.ReadUInt32());
                 case SttpValueTypeCode.UInt64:
@@ -308,16 +228,8 @@ namespace Sttp
                     return new SttpValueDouble(rd.ReadDouble());
                 case SttpValueTypeCode.Decimal:
                     return new SttpValueDecimal(rd.ReadDecimal());
-                case SttpValueTypeCode.DateTime:
-                    return new SttpValueDateTime(rd.ReadDateTime());
-                case SttpValueTypeCode.DateTimeOffset:
-                    return new SttpValueDateTimeOffset(rd.ReadDateTimeOffset());
                 case SttpValueTypeCode.SttpTime:
                     return new SttpValueSttpTime(rd.ReadSttpTime());
-                case SttpValueTypeCode.SttpTimeOffset:
-                    return new SttpValueSttpTimeOffset(rd.ReadSttpTimeOffset());
-                case SttpValueTypeCode.TimeSpan:
-                    return new SttpValueTimeSpan(rd.ReadTimeSpan());
                 case SttpValueTypeCode.Boolean:
                     return new SttpValueBoolean(rd.ReadBoolean());
                 case SttpValueTypeCode.Char:

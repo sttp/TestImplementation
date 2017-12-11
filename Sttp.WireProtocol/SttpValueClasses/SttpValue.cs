@@ -20,34 +20,77 @@ namespace Sttp
         {
         }
 
-        public abstract sbyte AsSByte { get; }
-        public abstract short AsInt16 { get; }
+
         public abstract int AsInt32 { get; }
         public abstract long AsInt64 { get; }
-        public abstract byte AsByte { get; }
-        public abstract ushort AsUInt16 { get; }
         public abstract uint AsUInt32 { get; }
         public abstract ulong AsUInt64 { get; }
         public abstract float AsSingle { get; }
         public abstract double AsDouble { get; }
         public abstract decimal AsDecimal { get; }
-        public abstract DateTime AsDateTime { get; }
-        public abstract DateTimeOffset AsDateTimeOffset { get; }
         public abstract SttpTime AsSttpTime { get; }
-        public abstract SttpTimeOffset AsSttpTimeOffset { get; }
-        public abstract TimeSpan AsTimeSpan { get; }
         public abstract bool AsBoolean { get; }
         public abstract char AsChar { get; }
+
         public abstract Guid AsGuid { get; }
+        public abstract Guid AsBulkTransportGuid { get; }
+
         public abstract string AsString { get; }
         public abstract SttpBuffer AsSttpBuffer { get; }
         public abstract SttpValueSet AsSttpValueSet { get; }
         public abstract SttpNamedSet AsSttpNamedSet { get; }
         public abstract SttpMarkup AsSttpMarkup { get; }
-        public abstract Guid AsBulkTransportGuid { get; }
 
         public abstract object ToNativeType { get; }
         public abstract string ToTypeString { get; }
+
+        public sbyte AsSByte
+        {
+            get
+            {
+                checked
+                {
+                    return (sbyte)AsInt32; 
+                }
+            }
+        }
+
+        public short AsInt16
+        {
+            get
+            {
+                checked
+                {
+                    return (short)AsInt32;
+                }
+            }
+        }
+
+        public byte AsByte
+        {
+            get
+            {
+                checked
+                {
+                    return (byte)AsInt32;
+                }
+            }
+        }
+
+        public ushort AsUInt16
+        {
+            get
+            {
+                checked
+                {
+                    return (ushort)AsInt32;
+                }
+            }
+        }
+
+        public TimeSpan AsTimeSpan => AsSttpTime.AsTimeSpan;
+        public DateTime AsDateTime => AsSttpTime.AsDateTime;
+        public DateTimeOffset AsDateTimeOffset => AsSttpTime.AsDateTimeOffset;
 
         /// <summary>
         /// Gets if this class has a value. Clear this by setting a value.

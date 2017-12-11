@@ -19,22 +19,14 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueBooleanMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueBooleanMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueBooleanMethods.ToNativeType(Value);
-        public override sbyte AsSByte => SttpValueBooleanMethods.AsSByte(Value);
-        public override short AsInt16 => SttpValueBooleanMethods.AsInt16(Value);
         public override int AsInt32 => SttpValueBooleanMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueBooleanMethods.AsInt64(Value);
-        public override byte AsByte => SttpValueBooleanMethods.AsByte(Value);
-        public override ushort AsUInt16 => SttpValueBooleanMethods.AsUInt16(Value);
         public override uint AsUInt32 => SttpValueBooleanMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueBooleanMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueBooleanMethods.AsSingle(Value);
         public override double AsDouble => SttpValueBooleanMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueBooleanMethods.AsDecimal(Value);
-        public override DateTime AsDateTime => SttpValueBooleanMethods.AsDateTime(Value);
-        public override DateTimeOffset AsDateTimeOffset => SttpValueBooleanMethods.AsDateTimeOffset(Value);
         public override SttpTime AsSttpTime => SttpValueBooleanMethods.AsSttpTime(Value);
-        public override SttpTimeOffset AsSttpTimeOffset => SttpValueBooleanMethods.AsSttpTimeOffset(Value);
-        public override TimeSpan AsTimeSpan => SttpValueBooleanMethods.AsTimeSpan(Value);
         public override bool AsBoolean => SttpValueBooleanMethods.AsBoolean(Value);
         public override char AsChar => SttpValueBooleanMethods.AsChar(Value);
         public override Guid AsGuid => SttpValueBooleanMethods.AsGuid(Value);
@@ -129,11 +121,6 @@ namespace Sttp.SttpValueClasses
         public static SttpTime AsSttpTime(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
-        }
-
-        public static SttpTimeOffset AsSttpTimeOffset(bool value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTimeOffset");
         }
 
         public static TimeSpan AsTimeSpan(bool value)

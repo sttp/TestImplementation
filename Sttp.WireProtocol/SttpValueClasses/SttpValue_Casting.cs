@@ -15,11 +15,11 @@ namespace Sttp
     {
         public static implicit operator SttpValue(sbyte value)
         {
-            return new SttpValueSByte(value);
+            return (SttpValue)(int)value;
         }
         public static implicit operator SttpValue(short value)
         {
-            return new SttpValueInt16(value);
+            return (SttpValue)(int)value;
         }
         public static implicit operator SttpValue(int value)
         {
@@ -31,11 +31,11 @@ namespace Sttp
         }
         public static implicit operator SttpValue(byte value)
         {
-            return new SttpValueByte(value);
+            return (SttpValue)(uint)value;
         }
         public static implicit operator SttpValue(ushort value)
         {
-            return new SttpValueUInt16(value);
+            return (SttpValue)(uint)value;
         }
         public static implicit operator SttpValue(uint value)
         {
@@ -59,23 +59,19 @@ namespace Sttp
         }
         public static implicit operator SttpValue(DateTime value)
         {
-            return new SttpValueDateTime(value);
+            return new SttpTime(value);
         }
         public static implicit operator SttpValue(DateTimeOffset value)
         {
-            return new SttpValueDateTimeOffset(value);
+            return new SttpTime(value);
         }
         public static implicit operator SttpValue(SttpTime value)
         {
             return new SttpValueSttpTime(value);
         }
-        public static implicit operator SttpValue(SttpTimeOffset value)
-        {
-            return new SttpValueSttpTimeOffset(value);
-        }
         public static implicit operator SttpValue(TimeSpan value)
         {
-            return new SttpValueTimeSpan(value);
+            return new SttpTime(value);
         }
         public static implicit operator SttpValue(bool value)
         {
@@ -169,10 +165,6 @@ namespace Sttp
         public static explicit operator SttpTime(SttpValue value)
         {
             return value.AsSttpTime;
-        }
-        public static explicit operator SttpTimeOffset(SttpValue value)
-        {
-            return value.AsSttpTimeOffset;
         }
         public static explicit operator TimeSpan(SttpValue value)
         {
@@ -280,10 +272,6 @@ namespace Sttp
             {
                 return (SttpTime)value;
             }
-            else if (type == typeof(SttpTimeOffset))
-            {
-                return (SttpTimeOffset)value;
-            }
             else if (type == typeof(TimeSpan))
             {
                 return (TimeSpan)value;
@@ -344,13 +332,13 @@ namespace Sttp
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueSByte(value.Value);
+            return (int)(value.Value);
         }
         public static implicit operator SttpValue(short? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueInt16(value.Value);
+            return (int)(value.Value);
         }
         public static implicit operator SttpValue(int? value)
         {
@@ -368,13 +356,13 @@ namespace Sttp
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueByte(value.Value);
+            return (uint)(value.Value);
         }
         public static implicit operator SttpValue(ushort? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueUInt16(value.Value);
+            return (uint)(value.Value);
         }
         public static implicit operator SttpValue(uint? value)
         {
@@ -410,13 +398,13 @@ namespace Sttp
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueDateTime(value.Value);
+            return new SttpTime(value.Value);
         }
         public static implicit operator SttpValue(DateTimeOffset? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueDateTimeOffset(value.Value);
+            return new SttpTime(value.Value);
         }
         public static implicit operator SttpValue(SttpTime? value)
         {
@@ -424,17 +412,11 @@ namespace Sttp
                 return SttpValue.Null;
             return new SttpValueSttpTime(value.Value);
         }
-        public static implicit operator SttpValue(SttpTimeOffset? value)
-        {
-            if (!value.HasValue)
-                return SttpValue.Null;
-            return new SttpValueSttpTimeOffset(value.Value);
-        }
         public static implicit operator SttpValue(TimeSpan? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueTimeSpan(value.Value);
+            return new SttpTime(value.Value);
         }
         public static implicit operator SttpValue(bool? value)
         {
@@ -538,12 +520,6 @@ namespace Sttp
             if (value.IsNull)
                 return null;
             return value.AsSttpTime;
-        }
-        public static explicit operator SttpTimeOffset?(SttpValue value)
-        {
-            if (value.IsNull)
-                return null;
-            return value.AsSttpTimeOffset;
         }
         public static explicit operator TimeSpan?(SttpValue value)
         {
