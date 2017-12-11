@@ -1,15 +1,17 @@
-﻿namespace Sttp.Codec.Metadata
+﻿using System.Collections.Generic;
+
+namespace Sttp.Codec.Metadata
 {
     public class CmdDefineRow 
     {
         public MetadataSubCommand SubCommand => MetadataSubCommand.DefineRow;
         public SttpValue PrimaryKey;
-        public SttpValueSet Values;
+        public List<SttpValue> Values;
 
         public void Load(PayloadReader reader)
         {
             PrimaryKey = reader.ReadSttpValue();
-            Values = reader.ReadSttpValueSet();
+            Values = reader.ReadListSttpValue();
         }
 
 

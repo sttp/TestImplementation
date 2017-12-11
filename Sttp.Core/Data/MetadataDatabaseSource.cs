@@ -97,8 +97,8 @@ namespace Sttp.Data
                 foreach (DataRow row in table.Rows)
                 {
                     SttpValueMutable key = new SttpValueMutable();
-                    SttpValueSet values = new SttpValueSet();
-                    values.Values.AddRange(row.ItemArray.Select(SttpValue.FromObject));
+                    List<SttpValue> values = new List<SttpValue>();
+                    values.AddRange(row.ItemArray.Select(SttpValue.FromObject));
                     if (pkey.Length == 1)
                     {
                         key.SetValue(row[pkey[0]]);
@@ -193,7 +193,7 @@ namespace Sttp.Data
 
         }
 
-        public void AddOrReplaceRow(string tableName, SttpValue key, SttpValueSet fields)
+        public void AddOrReplaceRow(string tableName, SttpValue key, List<SttpValue> fields)
         {
             if (IsReadOnly)
                 throw new Exception("This class is immutable");

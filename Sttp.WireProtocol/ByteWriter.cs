@@ -339,11 +339,6 @@ namespace Sttp
             }
         }
 
-        public void Write(SttpNamedSet value)
-        {
-            value.Save(this);
-        }
-
         public void Write(List<MetadataSchemaTables> list)
         {
             if (list == null)
@@ -370,11 +365,6 @@ namespace Sttp
             {
                 list[x].Save(this);
             }
-        }
-
-        public void Write(SttpValueSet value)
-        {
-            value.Save(this);
         }
 
         public void Write(SttpValue value)

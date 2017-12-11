@@ -38,10 +38,6 @@ namespace Sttp
                         return SttpValueStringMethods.ToTypeString(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.ToTypeString(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.ToTypeString(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.ToTypeString(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.ToTypeString(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -81,10 +77,6 @@ namespace Sttp
                         return SttpValueStringMethods.ToNativeType(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.ToNativeType(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.ToNativeType(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.ToNativeType(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.ToNativeType(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -125,10 +117,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsInt64(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsInt64(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsInt64(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsInt64(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsInt64(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -171,10 +159,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsUInt64(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsUInt64(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsUInt64(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsUInt64(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsUInt64(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -216,10 +200,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsSingle(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsSingle(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsSingle(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsSingle(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSingle(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -261,10 +241,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsDouble(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsDouble(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsDouble(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsDouble(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsDouble(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -306,10 +282,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsDecimal(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsDecimal(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsDecimal(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsDecimal(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsDecimal(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -351,10 +323,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsSttpTime(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsSttpTime(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsSttpTime(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsSttpTime(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSttpTime(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -396,10 +364,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsBoolean(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsBoolean(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsBoolean(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsBoolean(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsBoolean(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -440,10 +404,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsChar(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsChar(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsChar(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsChar(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsChar(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -485,10 +445,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsGuid(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsGuid(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsGuid(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsGuid(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsGuid(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -531,10 +487,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsString(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsString(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsString(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsString(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsString(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -576,10 +528,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsSttpBuffer(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsSttpBuffer(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsSttpBuffer(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsSttpBuffer(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSttpBuffer(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -589,95 +537,6 @@ namespace Sttp
                 }
             }
 
-        }
-
-        public override SttpValueSet AsSttpValueSet
-        {
-            get
-            {
-                switch (m_valueTypeCode)
-                {
-                    case SttpValueTypeCode.Null:
-                        throw new InvalidOperationException("Cannot cast from Null to SttpValueSet");
-                    case SttpValueTypeCode.Int64:
-                        return SttpValueInt64Methods.AsSttpValueSet(m_valueInt64);
-                    case SttpValueTypeCode.UInt64:
-                        return SttpValueUInt64Methods.AsSttpValueSet(m_valueUInt64);
-                    case SttpValueTypeCode.Single:
-                        return SttpValueSingleMethods.AsSttpValueSet(m_valueSingle);
-                    case SttpValueTypeCode.Double:
-                        return SttpValueDoubleMethods.AsSttpValueSet(m_valueDouble);
-                    case SttpValueTypeCode.Decimal:
-                        return SttpValueDecimalMethods.AsSttpValueSet(m_valueDecimal);
-                    case SttpValueTypeCode.SttpTime:
-                        return SttpValueSttpTimeMethods.AsSttpValueSet(m_valueSttpTime);
-                    case SttpValueTypeCode.Boolean:
-                        return SttpValueBooleanMethods.AsSttpValueSet(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsSttpValueSet(m_valueChar);
-                    case SttpValueTypeCode.Guid:
-                        return SttpValueGuidMethods.AsSttpValueSet(m_valueGuid);
-                    case SttpValueTypeCode.String:
-                        return SttpValueStringMethods.AsSttpValueSet(m_valueObject as string);
-                    case SttpValueTypeCode.SttpBuffer:
-                        return SttpValueSttpBufferMethods.AsSttpValueSet(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsSttpValueSet(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsSttpValueSet(m_valueObject as SttpNamedSet);
-                    case SttpValueTypeCode.SttpMarkup:
-                        return SttpValueSttpMarkupMethods.AsSttpValueSet(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsSttpValueSet(m_valueGuid);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-        }
-
-        public override SttpNamedSet AsSttpNamedSet
-        {
-            get
-            {
-                switch (m_valueTypeCode)
-                {
-                    case SttpValueTypeCode.Null:
-                        throw new InvalidOperationException("Cannot cast from Null to SttpNamedSet");
-                    case SttpValueTypeCode.Int64:
-                        return SttpValueInt64Methods.AsSttpNamedSet(m_valueInt64);
-                    case SttpValueTypeCode.UInt64:
-                        return SttpValueUInt64Methods.AsSttpNamedSet(m_valueUInt64);
-                    case SttpValueTypeCode.Single:
-                        return SttpValueSingleMethods.AsSttpNamedSet(m_valueSingle);
-                    case SttpValueTypeCode.Double:
-                        return SttpValueDoubleMethods.AsSttpNamedSet(m_valueDouble);
-                    case SttpValueTypeCode.Decimal:
-                        return SttpValueDecimalMethods.AsSttpNamedSet(m_valueDecimal);
-                    case SttpValueTypeCode.SttpTime:
-                        return SttpValueSttpTimeMethods.AsSttpNamedSet(m_valueSttpTime);
-                    case SttpValueTypeCode.Boolean:
-                        return SttpValueBooleanMethods.AsSttpNamedSet(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsSttpNamedSet(m_valueChar);
-                    case SttpValueTypeCode.Guid:
-                        return SttpValueGuidMethods.AsSttpNamedSet(m_valueGuid);
-                    case SttpValueTypeCode.String:
-                        return SttpValueStringMethods.AsSttpNamedSet(m_valueObject as string);
-                    case SttpValueTypeCode.SttpBuffer:
-                        return SttpValueSttpBufferMethods.AsSttpNamedSet(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsSttpNamedSet(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsSttpNamedSet(m_valueObject as SttpNamedSet);
-                    case SttpValueTypeCode.SttpMarkup:
-                        return SttpValueSttpMarkupMethods.AsSttpNamedSet(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsSttpNamedSet(m_valueGuid);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
         }
 
         public override SttpMarkup AsSttpMarkup
@@ -710,10 +569,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsSttpMarkup(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsSttpMarkup(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsSttpMarkup(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsSttpMarkup(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSttpMarkup(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:
@@ -754,10 +609,6 @@ namespace Sttp
                         return SttpValueStringMethods.AsBulkTransportGuid(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
                         return SttpValueSttpBufferMethods.AsBulkTransportGuid(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsBulkTransportGuid(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsBulkTransportGuid(m_valueObject as SttpNamedSet);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsBulkTransportGuid(m_valueObject as SttpMarkup);
                     case SttpValueTypeCode.BulkTransportGuid:

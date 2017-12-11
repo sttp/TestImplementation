@@ -30,8 +30,6 @@ namespace Sttp.SttpValueClasses
         public override Guid AsGuid => SttpValueSttpTimeMethods.AsGuid(Value);
         public override string AsString => SttpValueSttpTimeMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueSttpTimeMethods.AsSttpBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueSttpTimeMethods.AsSttpValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueSttpTimeMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueSttpTimeMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueSttpTimeMethods.AsBulkTransportGuid(Value);
     }
@@ -149,16 +147,6 @@ namespace Sttp.SttpValueClasses
         public static SttpBuffer AsSttpBuffer(SttpTime value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
-        }
-
-        public static SttpValueSet AsSttpValueSet(SttpTime value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
-        }
-
-        public static SttpNamedSet AsSttpNamedSet(SttpTime value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }
 
         public static SttpMarkup AsSttpMarkup(SttpTime value)

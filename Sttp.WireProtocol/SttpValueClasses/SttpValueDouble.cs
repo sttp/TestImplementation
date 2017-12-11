@@ -30,8 +30,6 @@ namespace Sttp.SttpValueClasses
         public override Guid AsGuid => SttpValueDoubleMethods.AsGuid(Value);
         public override string AsString => SttpValueDoubleMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueDoubleMethods.AsSttpBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueDoubleMethods.AsSttpValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueDoubleMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueDoubleMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueDoubleMethods.AsBulkTransportGuid(Value);
     }
@@ -185,16 +183,6 @@ namespace Sttp.SttpValueClasses
         public static SttpBuffer AsSttpBuffer(double value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
-        }
-
-        public static SttpValueSet AsSttpValueSet(double value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
-        }
-
-        public static SttpNamedSet AsSttpNamedSet(double value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }
 
         public static SttpMarkup AsSttpMarkup(double value)

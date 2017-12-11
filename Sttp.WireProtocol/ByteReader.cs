@@ -288,11 +288,6 @@ namespace Sttp
 
         #endregion
 
-        public SttpNamedSet ReadSttpNamedSet()
-        {
-            return new SttpNamedSet(this);
-        }
-
         public List<SttpDataPointID> ReadListSttpDataPointID()
         {
             var rv = new List<SttpDataPointID>();
@@ -344,11 +339,6 @@ namespace Sttp
         public SttpValue ReadSttpValue()
         {
             return SttpValue.Load(this);
-        }
-
-        public SttpValueSet ReadSttpValueSet()
-        {
-            return new SttpValueSet(this);
         }
 
         public List<int> ReadListInt()

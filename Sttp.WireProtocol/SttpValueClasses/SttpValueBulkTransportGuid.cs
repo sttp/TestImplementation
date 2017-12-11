@@ -30,8 +30,6 @@ namespace Sttp.SttpValueClasses
         public override Guid AsGuid => SttpValueBulkTransportGuidMethods.AsGuid(Value);
         public override string AsString => SttpValueBulkTransportGuidMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueBulkTransportGuidMethods.AsSttpBuffer(Value);
-        public override SttpValueSet AsSttpValueSet => SttpValueBulkTransportGuidMethods.AsSttpValueSet(Value);
-        public override SttpNamedSet AsSttpNamedSet => SttpValueBulkTransportGuidMethods.AsSttpNamedSet(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueBulkTransportGuidMethods.AsSttpMarkup(Value);
         public override Guid AsBulkTransportGuid => SttpValueBulkTransportGuidMethods.AsBulkTransportGuid(Value);
     }
@@ -149,16 +147,6 @@ namespace Sttp.SttpValueClasses
         public static SttpBuffer AsSttpBuffer(Guid value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
-        }
-
-        public static SttpValueSet AsSttpValueSet(Guid value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpValueSet");
-        }
-
-        public static SttpNamedSet AsSttpNamedSet(Guid value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpNamedSet");
         }
 
         public static SttpMarkup AsSttpMarkup(Guid value)

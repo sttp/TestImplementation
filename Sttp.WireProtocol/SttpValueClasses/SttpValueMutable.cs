@@ -107,10 +107,6 @@ namespace Sttp
                     return (SttpValue)AsString;
                 case SttpValueTypeCode.SttpBuffer:
                     return (SttpValue)AsSttpBuffer;
-                case SttpValueTypeCode.SttpValueSet:
-                    return (SttpValue)AsSttpValueSet;
-                case SttpValueTypeCode.SttpNamedSet:
-                    return (SttpValue)AsSttpNamedSet;
                 case SttpValueTypeCode.SttpMarkup:
                     return (SttpValue)AsSttpMarkup;
                 case SttpValueTypeCode.BulkTransportGuid:

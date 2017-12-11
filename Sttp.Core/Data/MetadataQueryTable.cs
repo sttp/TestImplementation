@@ -27,7 +27,7 @@ namespace Sttp.Data
         /// <summary>
         /// All possible rows.
         /// </summary>
-        public Dictionary<SttpValue, SttpValueSet> Rows;
+        public Dictionary<SttpValue, List<SttpValue>> Rows;
 
         public Guid SchemaVersion;
         public long Revision;
@@ -52,7 +52,7 @@ namespace Sttp.Data
             {
                 for (int x = 0; x < list.Length; x++)
                 {
-                    list[x] = row.Value.Values[x].ToNativeType;
+                    list[x] = row.Value[x].ToNativeType;
                 }
                 tbl.Rows.Add(list);
             }
@@ -92,7 +92,7 @@ namespace Sttp.Data
                 Revision = command.Revision;
                 TableName = command.TableName;
                 Columns = new List<MetadataColumn>(command.Columns);
-                Rows = new Dictionary<SttpValue, SttpValueSet>();
+                Rows = new Dictionary<SttpValue, List<SttpValue>>();
             }
 
         }

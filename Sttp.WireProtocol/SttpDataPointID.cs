@@ -23,7 +23,7 @@ namespace Sttp
         /// <summary>
         /// ID is a named set, Example: PMU-ID: 29384, Station: Shelby, PointName: PM1, Type: Analog, Position: 4
         /// </summary>
-        NamedSet = 3,
+        SttpMarkup = 3,
     }
 
     /// <summary>
@@ -68,8 +68,8 @@ namespace Sttp
                 case SttpDataPointIDTypeCode.String:
                     AsString = reader.ReadString();
                     break;
-                case SttpDataPointIDTypeCode.NamedSet:
-                    AsNamedSet = reader.ReadSttpNamedSet();
+                case SttpDataPointIDTypeCode.SttpMarkup:
+                    AsSttpMarkup = reader.ReadSttpMarkup();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -132,13 +132,13 @@ namespace Sttp
             }
         }
 
-        public SttpNamedSet AsNamedSet
+        public SttpMarkup AsSttpMarkup
         {
             get
             {
-                if (m_valueTypeCode == SttpDataPointIDTypeCode.NamedSet)
+                if (m_valueTypeCode == SttpDataPointIDTypeCode.SttpMarkup)
                 {
-                    return m_valueObject as SttpNamedSet;
+                    return m_valueObject as SttpMarkup;
                 }
                 throw new InvalidCastException("Value is not a Named Set");
             }
@@ -150,7 +150,7 @@ namespace Sttp
                     m_valueObject = null;
                     return;
                 }
-                m_valueTypeCode = SttpDataPointIDTypeCode.NamedSet;
+                m_valueTypeCode = SttpDataPointIDTypeCode.SttpMarkup;
                 m_valueObject = value;
             }
         }
@@ -187,8 +187,8 @@ namespace Sttp
                 case SttpDataPointIDTypeCode.String:
                     writer.Write(AsString);
                     break;
-                case SttpDataPointIDTypeCode.NamedSet:
-                    writer.Write(AsNamedSet);
+                case SttpDataPointIDTypeCode.SttpMarkup:
+                    writer.Write(AsSttpMarkup);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

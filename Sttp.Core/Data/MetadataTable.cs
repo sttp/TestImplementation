@@ -105,7 +105,7 @@ namespace Sttp.Data
                         {
                             if (row.Fields != null)
                             {
-                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields.Values[columnIndex]);
+                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields[columnIndex]);
                             }
                         }
                     }
@@ -131,7 +131,7 @@ namespace Sttp.Data
                         {
                             if (row.Fields != null && row.ForeignKeys[x] < 0)
                             {
-                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields.Values[columnIndex]);
+                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields[columnIndex]);
                             }
                         }
                     }
@@ -140,7 +140,7 @@ namespace Sttp.Data
             m_isReadOnly = true;
         }
 
-        public void AddOrUpdateRow(SttpValue key, SttpValueSet fields, long revision)
+        public void AddOrUpdateRow(SttpValue key, List<SttpValue> fields, long revision)
         {
             if (IsReadOnly)
                 throw new Exception("This class is immutable");

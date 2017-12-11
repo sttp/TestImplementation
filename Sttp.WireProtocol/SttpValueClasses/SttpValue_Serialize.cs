@@ -56,12 +56,6 @@ namespace Sttp
                     case SttpValueTypeCode.SttpBuffer:
                         wr.Write(AsSttpBuffer);
                         break;
-                    case SttpValueTypeCode.SttpValueSet:
-                        wr.Write(AsSttpValueSet);
-                        break;
-                    case SttpValueTypeCode.SttpNamedSet:
-                        wr.Write(AsSttpNamedSet);
-                        break;
                     case SttpValueTypeCode.SttpMarkup:
                         wr.Write(AsSttpMarkup);
                         break;
@@ -112,12 +106,6 @@ namespace Sttp
                         break;
                     case SttpValueTypeCode.SttpBuffer:
                         wr.Write(AsSttpBuffer);
-                        break;
-                    case SttpValueTypeCode.SttpValueSet:
-                        wr.Write(AsSttpValueSet);
-                        break;
-                    case SttpValueTypeCode.SttpNamedSet:
-                        wr.Write(AsSttpNamedSet);
                         break;
                     case SttpValueTypeCode.SttpMarkup:
                         wr.Write(AsSttpMarkup);
@@ -172,12 +160,6 @@ namespace Sttp
                 case SttpValueTypeCode.SttpBuffer:
                     wr.Write(AsSttpBuffer);
                     break;
-                case SttpValueTypeCode.SttpValueSet:
-                    wr.Write(AsSttpValueSet);
-                    break;
-                case SttpValueTypeCode.SttpNamedSet:
-                    wr.Write(AsSttpNamedSet);
-                    break;
                 case SttpValueTypeCode.SttpMarkup:
                     wr.Write(AsSttpMarkup);
                     break;
@@ -218,10 +200,6 @@ namespace Sttp
                     return new SttpValueString(rd.ReadString());
                 case SttpValueTypeCode.SttpBuffer:
                     return new SttpValueSttpBuffer(rd.ReadSttpBuffer());
-                case SttpValueTypeCode.SttpValueSet:
-                    return new SttpValueSttpValueSet(rd.ReadSttpValueSet());
-                case SttpValueTypeCode.SttpNamedSet:
-                    return new SttpValueSttpNamedSet(rd.ReadSttpNamedSet());
                 case SttpValueTypeCode.SttpMarkup:
                     return new SttpValueSttpMarkup(rd.ReadSttpMarkup());
                 case SttpValueTypeCode.BulkTransportGuid:

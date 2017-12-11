@@ -93,14 +93,6 @@ namespace Sttp
         {
             return new SttpValueSttpBuffer(value);
         }
-        public static implicit operator SttpValue(SttpValueSet value)
-        {
-            return new SttpValueSttpValueSet(value);
-        }
-        public static implicit operator SttpValue(SttpNamedSet value)
-        {
-            return new SttpValueSttpNamedSet(value);
-        }
         public static implicit operator SttpValue(SttpMarkup value)
         {
             return new SttpValueSttpMarkup(value);
@@ -181,14 +173,6 @@ namespace Sttp
         public static explicit operator SttpBuffer(SttpValue value)
         {
             return value.AsSttpBuffer;
-        }
-        public static explicit operator SttpValueSet(SttpValue value)
-        {
-            return value.AsSttpValueSet;
-        }
-        public static explicit operator SttpNamedSet(SttpValue value)
-        {
-            return value.AsSttpNamedSet;
         }
         public static explicit operator SttpMarkup(SttpValue value)
         {
@@ -291,14 +275,6 @@ namespace Sttp
             else if (value is SttpValue)
             {
                 return (SttpValue)value;
-            }
-            else if (type == typeof(SttpValueSet))
-            {
-                return (SttpValueSet)value;
-            }
-            else if (type == typeof(SttpNamedSet))
-            {
-                return (SttpNamedSet)value;
             }
             else if (type == typeof(SttpMarkup))
             {

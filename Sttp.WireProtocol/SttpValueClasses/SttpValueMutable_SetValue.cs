@@ -105,16 +105,6 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.SttpBuffer;
             m_valueObject = value;
         }
-        public void SetValue(SttpValueSet value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.SttpValueSet;
-            m_valueObject = value;
-        }
-        public void SetValue(SttpNamedSet value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.SttpNamedSet;
-            m_valueObject = value;
-        }
         public void SetValue(SttpMarkup value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpMarkup;
@@ -170,12 +160,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.SttpBuffer:
                     SetValue(value.AsSttpBuffer);
-                    break;
-                case SttpValueTypeCode.SttpValueSet:
-                    SetValue(value.AsSttpValueSet);
-                    break;
-                case SttpValueTypeCode.SttpNamedSet:
-                    SetValue(value.AsSttpNamedSet);
                     break;
                 case SttpValueTypeCode.SttpMarkup:
                     SetValue(value.AsSttpMarkup);
@@ -285,14 +269,6 @@ namespace Sttp
             {
                 SetValue((SttpValue)value);
             }
-            else if (type == typeof(SttpValueSet))
-            {
-                SetValue((SttpValueSet)value);
-            }
-            else if (type == typeof(SttpNamedSet))
-            {
-                SetValue((SttpNamedSet)value);
-            }
             else if (type == typeof(SttpMarkup))
             {
                 SetValue((SttpMarkup)value);
@@ -343,12 +319,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.SttpBuffer:
                     SetValue(rd.ReadSttpBuffer());
-                    break;
-                case SttpValueTypeCode.SttpValueSet:
-                    SetValue(rd.ReadSttpValueSet());
-                    break;
-                case SttpValueTypeCode.SttpNamedSet:
-                    SetValue(rd.ReadSttpNamedSet());
                     break;
                 case SttpValueTypeCode.SttpMarkup:
                     SetValue(rd.ReadSttpMarkup());

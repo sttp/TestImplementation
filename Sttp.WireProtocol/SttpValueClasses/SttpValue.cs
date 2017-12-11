@@ -34,8 +34,6 @@ namespace Sttp
 
         public abstract string AsString { get; }
         public abstract SttpBuffer AsSttpBuffer { get; }
-        public abstract SttpValueSet AsSttpValueSet { get; }
-        public abstract SttpNamedSet AsSttpNamedSet { get; }
         public abstract SttpMarkup AsSttpMarkup { get; }
 
         public abstract object ToNativeType { get; }

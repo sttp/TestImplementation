@@ -31,8 +31,8 @@ namespace Sttp.Codec
                     case SttpDataPointIDTypeCode.String:
                         point.AsString = reader.ReadString();
                         break;
-                    case SttpDataPointIDTypeCode.NamedSet:
-                        point.AsNamedSet = reader.ReadSttpNamedSet();
+                    case SttpDataPointIDTypeCode.SttpMarkup:
+                        point.AsSttpMarkup = reader.ReadSttpMarkup();
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

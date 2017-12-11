@@ -128,8 +128,8 @@ namespace Sttp.Codec
                     case SttpDataPointIDTypeCode.String:
                         m_stream.Write(point.AsString);
                         break;
-                    case SttpDataPointIDTypeCode.NamedSet:
-                        m_stream.Write(point.AsNamedSet);
+                    case SttpDataPointIDTypeCode.SttpMarkup:
+                        m_stream.Write(point.AsSttpMarkup);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

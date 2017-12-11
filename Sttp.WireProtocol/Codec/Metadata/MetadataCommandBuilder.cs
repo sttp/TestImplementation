@@ -43,7 +43,7 @@ namespace Sttp.Codec.Metadata
             m_stream.Write(columns);
         }
 
-        public void DefineRow(SttpValue primaryKey, SttpValueSet fields)
+        public void DefineRow(SttpValue primaryKey, List<SttpValue> fields)
         {
             m_stream.Write((byte)MetadataSubCommand.DefineRow);
             m_stream.Write(primaryKey);

@@ -7,7 +7,7 @@ namespace Sttp.Data
     public class MetadataRow
     {
         public readonly SttpValue Key;
-        public readonly SttpValueSet Fields;
+        public readonly List<SttpValue> Fields;
         /// <summary>
         /// The index position in he table that has this foreign key. 
         /// -1 means the row does not exist.
@@ -15,7 +15,7 @@ namespace Sttp.Data
         public readonly int[] ForeignKeys;
         public readonly long Revision;
 
-        public MetadataRow(SttpValue key, SttpValueSet fields, int foreignKeyCount, long revision)
+        public MetadataRow(SttpValue key, List<SttpValue> fields, int foreignKeyCount, long revision)
         {
             Revision = revision;
             Key = key;

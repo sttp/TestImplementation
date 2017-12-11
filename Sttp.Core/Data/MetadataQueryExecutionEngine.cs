@@ -113,7 +113,7 @@ namespace Sttp.Core.Data
                     }
                     else
                     {
-                        variables[input.VariableNumber] = r.Fields.Values[input.ColumnIndex];
+                        variables[input.VariableNumber] = r.Fields[input.ColumnIndex];
                     }
                 }
 
@@ -125,10 +125,10 @@ namespace Sttp.Core.Data
                 if (!query.WhereBooleanVariable.HasValue
                     || (!variables[query.WhereBooleanVariable.Value].IsNull && variables[query.WhereBooleanVariable.Value].AsBoolean))
                 {
-                    SttpValueSet values = new SttpValueSet();
+                    List<SttpValue> values = new List<SttpValue>();
                     foreach (var item in query.Outputs)
                     {
-                        values.Values.Add(variables[item.Variable]);
+                        values.Add(variables[item.Variable]);
                     }
                     send.DefineRow(row.Key, values);
                 }

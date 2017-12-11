@@ -81,10 +81,6 @@ namespace Sttp
                     return typeof(String);
                 case SttpValueTypeCode.SttpBuffer:
                     return typeof(byte[]);
-                case SttpValueTypeCode.SttpValueSet:
-                    return typeof(SttpValueSet);
-                case SttpValueTypeCode.SttpNamedSet:
-                    return typeof(SttpNamedSet);
                 case SttpValueTypeCode.SttpMarkup:
                     return typeof(byte[]);
                 case SttpValueTypeCode.BulkTransportGuid:
