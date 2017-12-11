@@ -18,19 +18,19 @@ namespace Sttp
         public static SttpValueTypeCode FromType(Type columnDataType)
         {
             if (columnDataType == typeof(sbyte))
-                return SttpValueTypeCode.Int32;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Int16))
-                return SttpValueTypeCode.Int32;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Int32))
-                return SttpValueTypeCode.Int32;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Int64))
                 return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Byte))
-                return SttpValueTypeCode.Int32;
+                return SttpValueTypeCode.UInt64;
             if (columnDataType == typeof(UInt16))
-                return SttpValueTypeCode.Int32;
+                return SttpValueTypeCode.UInt64;
             if (columnDataType == typeof(UInt32))
-                return SttpValueTypeCode.UInt32;
+                return SttpValueTypeCode.UInt64;
             if (columnDataType == typeof(UInt64))
                 return SttpValueTypeCode.UInt64;
             if (columnDataType == typeof(Decimal))
@@ -59,12 +59,8 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     return typeof(DBNull);
-                case SttpValueTypeCode.Int32:
-                    return typeof(Int32);
                 case SttpValueTypeCode.Int64:
                     return typeof(Int64);
-                case SttpValueTypeCode.UInt32:
-                    return typeof(UInt32);
                 case SttpValueTypeCode.UInt64:
                     return typeof(UInt64);
                 case SttpValueTypeCode.Single:

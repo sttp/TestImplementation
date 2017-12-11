@@ -19,9 +19,7 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueDecimalMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueDecimalMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueDecimalMethods.ToNativeType(Value);
-        public override int AsInt32 => SttpValueDecimalMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueDecimalMethods.AsInt64(Value);
-        public override uint AsUInt32 => SttpValueDecimalMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueDecimalMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueDecimalMethods.AsSingle(Value);
         public override double AsDouble => SttpValueDecimalMethods.AsDouble(Value);

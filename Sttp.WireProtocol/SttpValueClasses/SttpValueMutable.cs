@@ -85,12 +85,8 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     return SttpValue.Null;
-                case SttpValueTypeCode.Int32:
-                    return (SttpValue)AsInt32;
                 case SttpValueTypeCode.Int64:
                     return (SttpValue)AsInt64;
-                case SttpValueTypeCode.UInt32:
-                    return (SttpValue)AsUInt32;
                 case SttpValueTypeCode.UInt64:
                     return (SttpValue)AsUInt64;
                 case SttpValueTypeCode.Single:

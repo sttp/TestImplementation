@@ -13,9 +13,7 @@ namespace Sttp.SttpValueClasses
         public override string ToTypeString => "(Null)";
         public override object ToNativeType => null;
 
-        public override int AsInt32 => throw new InvalidCastException();
         public override long AsInt64 => throw new InvalidCastException();
-        public override uint AsUInt32 => throw new InvalidCastException();
         public override ulong AsUInt64 => throw new InvalidCastException();
         public override decimal AsDecimal => throw new InvalidCastException();
         public override double AsDouble => throw new InvalidCastException();

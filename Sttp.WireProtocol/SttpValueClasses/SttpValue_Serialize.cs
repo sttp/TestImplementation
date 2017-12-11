@@ -23,14 +23,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         break;
-                    case SttpValueTypeCode.Int32:
-                        wrBits.Write8BitSegments((ulong)AsInt32 ^ (ulong)other.AsInt32);
-                        break;
                     case SttpValueTypeCode.Int64:
                         wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
-                        break;
-                    case SttpValueTypeCode.UInt32:
-                        wrBits.Write8BitSegments((ulong)AsUInt32 ^ (ulong)other.AsUInt32);
                         break;
                     case SttpValueTypeCode.UInt64:
                         wrBits.Write8BitSegments((ulong)AsUInt64 ^ (ulong)other.AsUInt64);
@@ -86,14 +80,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         break;
-                    case SttpValueTypeCode.Int32:
-                        wr.Write(AsInt32);
-                        break;
                     case SttpValueTypeCode.Int64:
                         wr.Write(AsInt64);
-                        break;
-                    case SttpValueTypeCode.UInt32:
-                        wr.Write(AsUInt32);
                         break;
                     case SttpValueTypeCode.UInt64:
                         wr.Write(AsUInt64);
@@ -151,14 +139,8 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     break;
-                case SttpValueTypeCode.Int32:
-                    wr.Write(AsInt32);
-                    break;
                 case SttpValueTypeCode.Int64:
                     wr.Write(AsInt64);
-                    break;
-                case SttpValueTypeCode.UInt32:
-                    wr.Write(AsUInt32);
                     break;
                 case SttpValueTypeCode.UInt64:
                     wr.Write(AsUInt64);
@@ -214,12 +196,8 @@ namespace Sttp
             {
                 case SttpValueTypeCode.Null:
                     return SttpValue.Null;
-                case SttpValueTypeCode.Int32:
-                    return new SttpValueInt32(rd.ReadInt32());
                 case SttpValueTypeCode.Int64:
                     return new SttpValueInt64(rd.ReadInt64());
-                case SttpValueTypeCode.UInt32:
-                    return new SttpValueUInt32(rd.ReadUInt32());
                 case SttpValueTypeCode.UInt64:
                     return new SttpValueUInt64(rd.ReadUInt64());
                 case SttpValueTypeCode.Single:

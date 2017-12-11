@@ -30,11 +30,6 @@ namespace Sttp
         /// Indicates that the kind of the datetime is not specified.
         /// </summary>
         IsDateTimeUnspecified,
-
-        /// <summary>
-        /// Gets if the tick value held is a timespan.
-        /// </summary>
-        IsTimeSpan,
     }
     /// <summary>
     /// The default timestamp field for STTP.
@@ -57,11 +52,6 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
-        public SttpTime(TimeSpan dateTimeOffset)
-        {
-            throw new NotImplementedException();
-        }
-
         //public SttpTime2(DateTime time, bool leapSecondInProgress = false)
         //{
 
@@ -76,8 +66,8 @@ namespace Sttp
 
         public bool LeapsecondInProgress => (0) > 0;
 
-        public TimeSpan AsTimeSpan { get; set; }
         public DateTime AsDateTime { get; set; }
+
         public DateTimeOffset AsDateTimeOffset { get; set; }
 
         public static SttpTime Parse(string isString)

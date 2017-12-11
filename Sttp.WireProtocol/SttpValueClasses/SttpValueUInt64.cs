@@ -19,9 +19,7 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueUInt64Methods.ValueTypeCode;
         public override string ToTypeString => SttpValueUInt64Methods.ToTypeString(Value);
         public override object ToNativeType => SttpValueUInt64Methods.ToNativeType(Value);
-        public override int AsInt32 => SttpValueUInt64Methods.AsInt32(Value);
         public override long AsInt64 => SttpValueUInt64Methods.AsInt64(Value);
-        public override uint AsUInt32 => SttpValueUInt64Methods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueUInt64Methods.AsUInt64(Value);
         public override float AsSingle => SttpValueUInt64Methods.AsSingle(Value);
         public override double AsDouble => SttpValueUInt64Methods.AsDouble(Value);
@@ -154,11 +152,6 @@ namespace Sttp.SttpValueClasses
         public static SttpTime AsSttpTime(ulong value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
-        }
-
-        public static TimeSpan AsTimeSpan(ulong value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to TimeSpan");
         }
 
         public static bool AsBoolean(ulong value)

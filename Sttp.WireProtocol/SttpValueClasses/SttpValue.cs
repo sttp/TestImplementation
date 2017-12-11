@@ -20,10 +20,7 @@ namespace Sttp
         {
         }
 
-
-        public abstract int AsInt32 { get; }
         public abstract long AsInt64 { get; }
-        public abstract uint AsUInt32 { get; }
         public abstract ulong AsUInt64 { get; }
         public abstract float AsSingle { get; }
         public abstract double AsDouble { get; }
@@ -51,6 +48,17 @@ namespace Sttp
                 checked
                 {
                     return (sbyte)AsInt32; 
+                }
+            }
+        }
+
+        public int AsInt32
+        {
+            get
+            {
+                checked
+                {
+                    return (int)AsInt64;
                 }
             }
         }
@@ -88,8 +96,19 @@ namespace Sttp
             }
         }
 
-        public TimeSpan AsTimeSpan => AsSttpTime.AsTimeSpan;
+        public uint AsUInt32
+        {
+            get
+            {
+                checked
+                {
+                    return (uint)AsInt64;
+                }
+            }
+        }
+
         public DateTime AsDateTime => AsSttpTime.AsDateTime;
+
         public DateTimeOffset AsDateTimeOffset => AsSttpTime.AsDateTimeOffset;
 
         /// <summary>

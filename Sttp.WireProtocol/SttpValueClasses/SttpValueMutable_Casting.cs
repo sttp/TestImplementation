@@ -16,12 +16,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         return SttpValueNullMethods.ToTypeString();
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.ToTypeString(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.ToTypeString(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.ToTypeString(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.ToTypeString(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -63,12 +59,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         return SttpValueNullMethods.ToNativeType();
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.ToNativeType(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.ToNativeType(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.ToNativeType(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.ToNativeType(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -103,55 +95,6 @@ namespace Sttp
             }
         }
 
-        public override int AsInt32
-        {
-            get
-            {
-                switch (m_valueTypeCode)
-                {
-                    case SttpValueTypeCode.Null:
-                        throw new InvalidOperationException("Cannot cast from Null to Int32");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsInt32(m_valueInt32);
-                    case SttpValueTypeCode.Int64:
-                        return SttpValueInt64Methods.AsInt32(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsInt32(m_valueUInt32);
-                    case SttpValueTypeCode.UInt64:
-                        return SttpValueUInt64Methods.AsInt32(m_valueUInt64);
-                    case SttpValueTypeCode.Single:
-                        return SttpValueSingleMethods.AsInt32(m_valueSingle);
-                    case SttpValueTypeCode.Double:
-                        return SttpValueDoubleMethods.AsInt32(m_valueDouble);
-                    case SttpValueTypeCode.Decimal:
-                        return SttpValueDecimalMethods.AsInt32(m_valueDecimal);
-                    case SttpValueTypeCode.SttpTime:
-                        return SttpValueSttpTimeMethods.AsInt32(m_valueSttpTime);
-                    case SttpValueTypeCode.Boolean:
-                        return SttpValueBooleanMethods.AsInt32(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsInt32(m_valueChar);
-                    case SttpValueTypeCode.Guid:
-                        return SttpValueGuidMethods.AsInt32(m_valueGuid);
-                    case SttpValueTypeCode.String:
-                        return SttpValueStringMethods.AsInt32(m_valueObject as string);
-                    case SttpValueTypeCode.SttpBuffer:
-                        return SttpValueSttpBufferMethods.AsInt32(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsInt32(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsInt32(m_valueObject as SttpNamedSet);
-                    case SttpValueTypeCode.SttpMarkup:
-                        return SttpValueSttpMarkupMethods.AsInt32(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsInt32(m_valueGuid);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-        }
-
         public override long AsInt64
         {
             get
@@ -160,12 +103,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Int64");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsInt64(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsInt64(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsInt64(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsInt64(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -201,54 +140,6 @@ namespace Sttp
 
         }
 
-        public override uint AsUInt32
-        {
-            get
-            {
-                switch (m_valueTypeCode)
-                {
-                    case SttpValueTypeCode.Null:
-                        throw new InvalidOperationException("Cannot cast from Null to UInt32");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsUInt32(m_valueInt32);
-                    case SttpValueTypeCode.Int64:
-                        return SttpValueInt64Methods.AsUInt32(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsUInt32(m_valueUInt32);
-                    case SttpValueTypeCode.UInt64:
-                        return SttpValueUInt64Methods.AsUInt32(m_valueUInt64);
-                    case SttpValueTypeCode.Single:
-                        return SttpValueSingleMethods.AsUInt32(m_valueSingle);
-                    case SttpValueTypeCode.Double:
-                        return SttpValueDoubleMethods.AsUInt32(m_valueDouble);
-                    case SttpValueTypeCode.Decimal:
-                        return SttpValueDecimalMethods.AsUInt32(m_valueDecimal);
-                    case SttpValueTypeCode.SttpTime:
-                        return SttpValueSttpTimeMethods.AsUInt32(m_valueSttpTime);
-                    case SttpValueTypeCode.Boolean:
-                        return SttpValueBooleanMethods.AsUInt32(m_valueBoolean);
-                    case SttpValueTypeCode.Char:
-                        return SttpValueCharMethods.AsUInt32(m_valueChar);
-                    case SttpValueTypeCode.Guid:
-                        return SttpValueGuidMethods.AsUInt32(m_valueGuid);
-                    case SttpValueTypeCode.String:
-                        return SttpValueStringMethods.AsUInt32(m_valueObject as string);
-                    case SttpValueTypeCode.SttpBuffer:
-                        return SttpValueSttpBufferMethods.AsUInt32(m_valueObject as SttpBuffer);
-                    case SttpValueTypeCode.SttpValueSet:
-                        return SttpValueSttpValueSetMethods.AsUInt32(m_valueObject as SttpValueSet);
-                    case SttpValueTypeCode.SttpNamedSet:
-                        return SttpValueSttpNamedSetMethods.AsUInt32(m_valueObject as SttpNamedSet);
-                    case SttpValueTypeCode.SttpMarkup:
-                        return SttpValueSttpMarkupMethods.AsUInt32(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsUInt32(m_valueGuid);
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-        }
 
         public override ulong AsUInt64
         {
@@ -258,12 +149,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to UInt64");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsUInt64(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsUInt64(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsUInt64(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsUInt64(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -307,12 +194,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Single");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsSingle(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsSingle(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsSingle(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsSingle(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -356,12 +239,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Double");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsDouble(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsDouble(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsDouble(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsDouble(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -405,12 +284,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Decimal");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsDecimal(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsDecimal(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsDecimal(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsDecimal(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -454,12 +329,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to SttpTime");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsSttpTime(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsSttpTime(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsSttpTime(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsSttpTime(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -503,12 +374,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Boolean");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsBoolean(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsBoolean(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsBoolean(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsBoolean(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -551,12 +418,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Char");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsChar(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsChar(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsChar(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsChar(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -600,12 +463,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to Guid");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsGuid(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsGuid(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsGuid(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsGuid(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -650,12 +509,8 @@ namespace Sttp
                     case SttpValueTypeCode.Null:
                         return null;
                         throw new InvalidOperationException("Cannot cast from Null to String");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsString(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsString(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsString(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsString(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -699,12 +554,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to SttpBuffer");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsSttpBuffer(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsSttpBuffer(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsSttpBuffer(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsSttpBuffer(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -748,12 +599,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to SttpValueSet");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsSttpValueSet(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsSttpValueSet(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsSttpValueSet(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsSttpValueSet(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -797,12 +644,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to SttpNamedSet");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsSttpNamedSet(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsSttpNamedSet(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsSttpNamedSet(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsSttpNamedSet(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -845,12 +688,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to SttpMarkup");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsSttpMarkup(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsSttpMarkup(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsSttpMarkup(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsSttpMarkup(m_valueUInt64);
                     case SttpValueTypeCode.Single:
@@ -893,12 +732,8 @@ namespace Sttp
                 {
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to BulkTransportGuid");
-                    case SttpValueTypeCode.Int32:
-                        return SttpValueInt32Methods.AsBulkTransportGuid(m_valueInt32);
                     case SttpValueTypeCode.Int64:
                         return SttpValueInt64Methods.AsBulkTransportGuid(m_valueInt64);
-                    case SttpValueTypeCode.UInt32:
-                        return SttpValueUInt32Methods.AsBulkTransportGuid(m_valueUInt32);
                     case SttpValueTypeCode.UInt64:
                         return SttpValueUInt64Methods.AsBulkTransportGuid(m_valueUInt64);
                     case SttpValueTypeCode.Single:

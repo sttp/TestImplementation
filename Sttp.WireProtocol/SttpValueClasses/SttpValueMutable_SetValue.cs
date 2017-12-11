@@ -20,16 +20,15 @@ namespace Sttp
 
         public void SetValue(sbyte value)
         {
-            SetValue((int)value);
+            SetValue((long)value);
         }
         public void SetValue(short value)
         {
-            SetValue((int)value);
+            SetValue((long)value);
         }
         public void SetValue(int value)
         {
-            m_valueTypeCode = SttpValueTypeCode.Int32;
-            m_valueInt32 = value;
+            SetValue((long)value);
         }
         public void SetValue(long value)
         {
@@ -38,16 +37,15 @@ namespace Sttp
         }
         public void SetValue(byte value)
         {
-            SetValue((uint)value);
+            SetValue((ulong)value);
         }
         public void SetValue(ushort value)
         {
-            SetValue((uint)value);
+            SetValue((ulong)value);
         }
         public void SetValue(uint value)
         {
-            m_valueTypeCode = SttpValueTypeCode.UInt32;
-            m_valueUInt32 = value;
+            SetValue((ulong)value);
         }
         public void SetValue(ulong value)
         {
@@ -81,10 +79,6 @@ namespace Sttp
         {
             m_valueTypeCode = SttpValueTypeCode.SttpTime;
             m_valueSttpTime = value;
-        }
-        public void SetValue(TimeSpan value)
-        {
-            SetValue(new SttpTime(value));
         }
         public void SetValue(bool value)
         {
@@ -144,14 +138,8 @@ namespace Sttp
                 case SttpValueTypeCode.Null:
                     SetNull();
                     break;
-                case SttpValueTypeCode.Int32:
-                    SetValue(value.AsInt32);
-                    break;
                 case SttpValueTypeCode.Int64:
                     SetValue(value.AsInt64);
-                    break;
-                case SttpValueTypeCode.UInt32:
-                    SetValue(value.AsUInt32);
                     break;
                 case SttpValueTypeCode.UInt64:
                     SetValue(value.AsUInt64);
@@ -323,14 +311,8 @@ namespace Sttp
                 case SttpValueTypeCode.Null:
                     SetNull();
                     break;
-                case SttpValueTypeCode.Int32:
-                    SetValue(rd.ReadInt32());
-                    break;
                 case SttpValueTypeCode.Int64:
                     SetValue(rd.ReadInt64());
-                    break;
-                case SttpValueTypeCode.UInt32:
-                    SetValue(rd.ReadUInt32());
                     break;
                 case SttpValueTypeCode.UInt64:
                     SetValue(rd.ReadUInt64());

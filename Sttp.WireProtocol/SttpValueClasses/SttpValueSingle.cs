@@ -19,9 +19,7 @@ namespace Sttp.SttpValueClasses
         public override SttpValueTypeCode ValueTypeCode => SttpValueSingleMethods.ValueTypeCode;
         public override string ToTypeString => SttpValueSingleMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSingleMethods.ToNativeType(Value);
-        public override int AsInt32 => SttpValueSingleMethods.AsInt32(Value);
         public override long AsInt64 => SttpValueSingleMethods.AsInt64(Value);
-        public override uint AsUInt32 => SttpValueSingleMethods.AsUInt32(Value);
         public override ulong AsUInt64 => SttpValueSingleMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueSingleMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSingleMethods.AsDouble(Value);
