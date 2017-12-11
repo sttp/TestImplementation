@@ -17,25 +17,12 @@ namespace Sttp
         #region [ Members ]
 
         [FieldOffset(0)]
-        private long m_rawBytes0_7;
-        [FieldOffset(8)]
-        private long m_rawBytes8_15;
-
-        [FieldOffset(0)]
-        private int m_valueInt32;
-        [FieldOffset(0)]
         private long m_valueInt64;
-        [FieldOffset(0)]
-        private uint m_valueUInt32;
-        [FieldOffset(0)]
-        private ulong m_valueUInt64;
         [FieldOffset(0)]
         private double m_valueDouble;
 
         [FieldOffset(0)]
         private float m_valueSingle;
-        [FieldOffset(0)]
-        private char m_valueChar;
         [FieldOffset(0)]
         private bool m_valueBoolean;
         [FieldOffset(0)]
@@ -87,7 +74,6 @@ namespace Sttp
                     return SttpValue.Null;
                 case SttpValueTypeCode.Int64:
                     return (SttpValue)AsInt64;
-                case SttpValueTypeCode.UInt64:
                     return (SttpValue)AsUInt64;
                 case SttpValueTypeCode.Single:
                     return (SttpValue)AsSingle;

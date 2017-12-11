@@ -20,7 +20,6 @@ namespace Sttp.SttpValueClasses
         public override string ToTypeString => SttpValueSingleMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSingleMethods.ToNativeType(Value);
         public override long AsInt64 => SttpValueSingleMethods.AsInt64(Value);
-        public override ulong AsUInt64 => SttpValueSingleMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueSingleMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSingleMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueSingleMethods.AsDecimal(Value);

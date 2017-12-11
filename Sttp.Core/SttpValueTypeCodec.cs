@@ -26,13 +26,13 @@ namespace Sttp
             if (columnDataType == typeof(Int64))
                 return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Byte))
-                return SttpValueTypeCode.UInt64;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(UInt16))
-                return SttpValueTypeCode.UInt64;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(UInt32))
-                return SttpValueTypeCode.UInt64;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(UInt64))
-                return SttpValueTypeCode.UInt64;
+                return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(Decimal))
                 return SttpValueTypeCode.Decimal;
             if (columnDataType == typeof(Double))
@@ -61,8 +61,6 @@ namespace Sttp
                     return typeof(DBNull);
                 case SttpValueTypeCode.Int64:
                     return typeof(Int64);
-                case SttpValueTypeCode.UInt64:
-                    return typeof(UInt64);
                 case SttpValueTypeCode.Single:
                     return typeof(Single);
                 case SttpValueTypeCode.Double:

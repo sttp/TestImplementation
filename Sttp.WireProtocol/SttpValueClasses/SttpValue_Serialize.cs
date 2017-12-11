@@ -26,9 +26,6 @@ namespace Sttp
                     case SttpValueTypeCode.Int64:
                         wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
                         break;
-                    case SttpValueTypeCode.UInt64:
-                        wrBits.Write8BitSegments((ulong)AsUInt64 ^ (ulong)other.AsUInt64);
-                        break;
                     case SttpValueTypeCode.Single:
                         wr.Write(AsSingle);
                         break;
@@ -73,9 +70,6 @@ namespace Sttp
                         break;
                     case SttpValueTypeCode.Int64:
                         wr.Write(AsInt64);
-                        break;
-                    case SttpValueTypeCode.UInt64:
-                        wr.Write(AsUInt64);
                         break;
                     case SttpValueTypeCode.Single:
                         wr.Write(AsSingle);
@@ -124,9 +118,6 @@ namespace Sttp
                 case SttpValueTypeCode.Int64:
                     wr.Write(AsInt64);
                     break;
-                case SttpValueTypeCode.UInt64:
-                    wr.Write(AsUInt64);
-                    break;
                 case SttpValueTypeCode.Single:
                     wr.Write(AsSingle);
                     break;
@@ -171,8 +162,6 @@ namespace Sttp
                     return SttpValue.Null;
                 case SttpValueTypeCode.Int64:
                     return new SttpValueInt64(rd.ReadInt64());
-                case SttpValueTypeCode.UInt64:
-                    return new SttpValueUInt64(rd.ReadUInt64());
                 case SttpValueTypeCode.Single:
                     return new SttpValueSingle(rd.ReadSingle());
                 case SttpValueTypeCode.Double:

@@ -49,8 +49,14 @@ namespace Sttp
         }
         public void SetValue(ulong value)
         {
-            m_valueTypeCode = SttpValueTypeCode.UInt64;
-            m_valueUInt64 = value;
+            if (value > long.MaxValue)
+            {
+                SetValue((decimal)value);
+            }
+            else
+            {
+                SetValue((long)value);
+            }
         }
         public void SetValue(float value)
         {
@@ -125,9 +131,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.Int64:
                     SetValue(value.AsInt64);
-                    break;
-                case SttpValueTypeCode.UInt64:
-                    SetValue(value.AsUInt64);
                     break;
                 case SttpValueTypeCode.Single:
                     SetValue(value.AsSingle);
@@ -281,9 +284,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.Int64:
                     SetValue(rd.ReadInt64());
-                    break;
-                case SttpValueTypeCode.UInt64:
-                    SetValue(rd.ReadUInt64());
                     break;
                 case SttpValueTypeCode.Single:
                     SetValue(rd.ReadSingle());

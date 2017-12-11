@@ -25,7 +25,6 @@ namespace Sttp.SttpValueClasses
         public override string ToTypeString => SttpValueSttpBufferMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSttpBufferMethods.ToNativeType(Value);
         public override long AsInt64 => SttpValueSttpBufferMethods.AsInt64(Value);
-        public override ulong AsUInt64 => SttpValueSttpBufferMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueSttpBufferMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSttpBufferMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueSttpBufferMethods.AsDecimal(Value);

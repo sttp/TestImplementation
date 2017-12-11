@@ -21,7 +21,6 @@ namespace Sttp
         }
 
         public abstract long AsInt64 { get; }
-        public abstract ulong AsUInt64 { get; }
         public abstract float AsSingle { get; }
         public abstract double AsDouble { get; }
         public abstract decimal AsDecimal { get; }
@@ -44,7 +43,25 @@ namespace Sttp
             {
                 checked
                 {
-                    return (sbyte)AsInt32; 
+                    return (sbyte)AsInt32;
+                }
+            }
+        }
+
+        public ulong AsUInt64
+        {
+            get
+            {
+                checked
+                {
+                    if (ValueTypeCode == SttpValueTypeCode.Int64)
+                    {
+                        return (ulong)AsInt64;
+                    }
+                    else
+                    {
+                        return (ulong)AsDecimal;
+                    }
                 }
             }
         }

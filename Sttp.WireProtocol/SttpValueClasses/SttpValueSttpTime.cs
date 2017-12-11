@@ -20,7 +20,6 @@ namespace Sttp.SttpValueClasses
         public override string ToTypeString => SttpValueSttpTimeMethods.ToTypeString(Value);
         public override object ToNativeType => SttpValueSttpTimeMethods.ToNativeType(Value);
         public override long AsInt64 => SttpValueSttpTimeMethods.AsInt64(Value);
-        public override ulong AsUInt64 => SttpValueSttpTimeMethods.AsUInt64(Value);
         public override float AsSingle => SttpValueSttpTimeMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSttpTimeMethods.AsDouble(Value);
         public override decimal AsDecimal => SttpValueSttpTimeMethods.AsDecimal(Value);
