@@ -3,7 +3,7 @@
     public enum SttpValueTypeCode : byte
     {
         Null = 0,               // 0-bytes
-        Int64 = 1,              // 8-bytes Signed Value
+        Int64 = 1,              // 8-bytes Signed Value (An unsigned value exceeding Int64.MaxValue must be converted into a Decimal type)
         Single = 2,             // 4-bytes
         Double = 3,             // 8-bytes
         Decimal = 4,            // 16-bytes
