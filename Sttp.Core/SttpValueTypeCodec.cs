@@ -81,7 +81,7 @@ namespace Sttp
                     return typeof(byte[]);
                 case SttpValueTypeCode.SttpMarkup:
                     return typeof(byte[]);
-                case SttpValueTypeCode.BulkTransportGuid:
+                case SttpValueTypeCode.SttpBulkTransport:
                     return typeof(Guid);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(columnTypeCode), columnTypeCode, null);

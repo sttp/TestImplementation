@@ -107,8 +107,8 @@ namespace Sttp
                     return (SttpValue)AsSttpBuffer;
                 case SttpValueTypeCode.SttpMarkup:
                     return (SttpValue)AsSttpMarkup;
-                case SttpValueTypeCode.BulkTransportGuid:
-                    return SttpValue.CreateBulkTransportGuid(AsBulkTransportGuid);
+                case SttpValueTypeCode.SttpBulkTransport:
+                    return (SttpValue)AsSttpBulkTransport;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

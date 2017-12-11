@@ -443,6 +443,11 @@ namespace Sttp
                 Write(list[x]);
             }
         }
+
+        public void Write(SttpBulkTransport value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

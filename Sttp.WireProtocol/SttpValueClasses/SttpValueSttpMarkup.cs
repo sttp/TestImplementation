@@ -30,7 +30,7 @@ namespace Sttp.SttpValueClasses
         public override string AsString => SttpValueSttpMarkupMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueSttpMarkupMethods.AsSttpBuffer(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueSttpMarkupMethods.AsSttpMarkup(Value);
-        public override Guid AsBulkTransportGuid => SttpValueSttpMarkupMethods.AsBulkTransportGuid(Value);
+        public override SttpBulkTransport AsSttpBulkTransport => SttpValueSttpMarkupMethods.AsSttpBulkTransport(Value);
     }
 
     internal static class SttpValueSttpMarkupMethods
@@ -153,7 +153,7 @@ namespace Sttp.SttpValueClasses
             return value;
         }
 
-        public static Guid AsBulkTransportGuid(SttpMarkup value)
+        public static SttpBulkTransport AsSttpBulkTransport(SttpMarkup value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to BulkTransportGuid");
         }

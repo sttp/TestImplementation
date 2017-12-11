@@ -24,7 +24,7 @@ namespace Sttp.SttpValueClasses
         public override string AsString => throw new InvalidCastException();
         public override SttpBuffer AsSttpBuffer => throw new InvalidCastException();
         public override SttpMarkup AsSttpMarkup => throw new InvalidCastException();
-        public override Guid AsBulkTransportGuid => throw new InvalidCastException();
+        public override SttpBulkTransport AsSttpBulkTransport => throw new InvalidCastException();
     }
 
 

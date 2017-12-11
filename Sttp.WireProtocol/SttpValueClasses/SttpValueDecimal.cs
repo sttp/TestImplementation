@@ -30,7 +30,7 @@ namespace Sttp.SttpValueClasses
         public override string AsString => SttpValueDecimalMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueDecimalMethods.AsSttpBuffer(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueDecimalMethods.AsSttpMarkup(Value);
-        public override Guid AsBulkTransportGuid => SttpValueDecimalMethods.AsBulkTransportGuid(Value);
+        public override SttpBulkTransport AsSttpBulkTransport => SttpValueDecimalMethods.AsSttpBulkTransport(Value);
     }
 
     internal static class SttpValueDecimalMethods
@@ -189,7 +189,7 @@ namespace Sttp.SttpValueClasses
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
         }
 
-        public static Guid AsBulkTransportGuid(decimal value)
+        public static SttpBulkTransport AsSttpBulkTransport(decimal value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to BulkTransportGuid");
         }

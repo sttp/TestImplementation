@@ -14,7 +14,7 @@
         String = 10,            // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
         SttpBuffer = 11,        // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
         SttpMarkup = 12,        // Yet another markup language
-        BulkTransportGuid = 13, // A special type of GUID that indicates it is transmitted out of band.
+        SttpBulkTransport = 13, // A special type of value that indicates it is transmitted out of band. These are reserved for very large objects.
     }
 
     // sizeof(uint8), 1-byte

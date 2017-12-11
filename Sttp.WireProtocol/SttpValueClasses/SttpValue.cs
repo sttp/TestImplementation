@@ -29,11 +29,11 @@ namespace Sttp
         public abstract bool AsBoolean { get; }
 
         public abstract Guid AsGuid { get; }
-        public abstract Guid AsBulkTransportGuid { get; }
 
         public abstract string AsString { get; }
         public abstract SttpBuffer AsSttpBuffer { get; }
         public abstract SttpMarkup AsSttpMarkup { get; }
+        public abstract SttpBulkTransport AsSttpBulkTransport { get; }
 
         public abstract object ToNativeType { get; }
         public abstract string ToTypeString { get; }
@@ -193,10 +193,10 @@ namespace Sttp
         //    throw new NotImplementedException();
         //}
 
-        public static SttpValue CreateBulkTransportGuid(Guid guid)
-        {
-            return new SttpValueBulkTransportGuid(guid);
-        }
+        //public static SttpValue CreateBulkTransportGuid(Guid guid)
+        //{
+        //    return new SttpValueBulkTransportGuid(guid);
+        //}
 
     }
 }

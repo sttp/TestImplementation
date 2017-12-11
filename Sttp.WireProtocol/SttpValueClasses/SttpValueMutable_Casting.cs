@@ -38,8 +38,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.ToTypeString(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.ToTypeString(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.ToTypeString(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.ToTypeString(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -75,8 +75,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.ToNativeType(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.ToNativeType(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.ToNativeType(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.ToNativeType(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -113,8 +113,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsInt64(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsInt64(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsInt64(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsInt64(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -153,8 +153,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsUInt64(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsUInt64(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsUInt64(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsUInt64(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -192,8 +192,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsSingle(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSingle(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsSingle(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsSingle(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -231,8 +231,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsDouble(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsDouble(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsDouble(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsDouble(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -270,8 +270,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsDecimal(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsDecimal(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsDecimal(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsDecimal(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -309,8 +309,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsSttpTime(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSttpTime(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsSttpTime(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsSttpTime(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -348,8 +348,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsBoolean(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsBoolean(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsBoolean(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsBoolean(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -386,8 +386,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsGuid(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsGuid(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsGuid(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsGuid(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -426,8 +426,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsString(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsString(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsString(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsString(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -465,8 +465,8 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsSttpBuffer(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSttpBuffer(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsSttpBuffer(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsSttpBuffer(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -504,15 +504,15 @@ namespace Sttp
                         return SttpValueSttpBufferMethods.AsSttpMarkup(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
                         return SttpValueSttpMarkupMethods.AsSttpMarkup(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsSttpMarkup(m_valueGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsSttpMarkup(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
         }
 
-        public override Guid AsBulkTransportGuid
+        public override SttpBulkTransport AsSttpBulkTransport
         {
             get
             {
@@ -521,29 +521,29 @@ namespace Sttp
                     case SttpValueTypeCode.Null:
                         throw new InvalidOperationException("Cannot cast from Null to BulkTransportGuid");
                     case SttpValueTypeCode.Int64:
-                        return SttpValueInt64Methods.AsBulkTransportGuid(m_valueInt64);
+                        return SttpValueInt64Methods.AsSttpBulkTransport(m_valueInt64);
                     case SttpValueTypeCode.UInt64:
-                        return SttpValueUInt64Methods.AsBulkTransportGuid(m_valueUInt64);
+                        return SttpValueUInt64Methods.AsSttpBulkTransport(m_valueUInt64);
                     case SttpValueTypeCode.Single:
-                        return SttpValueSingleMethods.AsBulkTransportGuid(m_valueSingle);
+                        return SttpValueSingleMethods.AsSttpBulkTransport(m_valueSingle);
                     case SttpValueTypeCode.Double:
-                        return SttpValueDoubleMethods.AsBulkTransportGuid(m_valueDouble);
+                        return SttpValueDoubleMethods.AsSttpBulkTransport(m_valueDouble);
                     case SttpValueTypeCode.Decimal:
-                        return SttpValueDecimalMethods.AsBulkTransportGuid(m_valueDecimal);
+                        return SttpValueDecimalMethods.AsSttpBulkTransport(m_valueDecimal);
                     case SttpValueTypeCode.SttpTime:
-                        return SttpValueSttpTimeMethods.AsBulkTransportGuid(m_valueSttpTime);
+                        return SttpValueSttpTimeMethods.AsSttpBulkTransport(m_valueSttpTime);
                     case SttpValueTypeCode.Boolean:
-                        return SttpValueBooleanMethods.AsBulkTransportGuid(m_valueBoolean);
+                        return SttpValueBooleanMethods.AsSttpBulkTransport(m_valueBoolean);
                     case SttpValueTypeCode.Guid:
-                        return SttpValueGuidMethods.AsBulkTransportGuid(m_valueGuid);
+                        return SttpValueGuidMethods.AsSttpBulkTransport(m_valueGuid);
                     case SttpValueTypeCode.String:
-                        return SttpValueStringMethods.AsBulkTransportGuid(m_valueObject as string);
+                        return SttpValueStringMethods.AsSttpBulkTransport(m_valueObject as string);
                     case SttpValueTypeCode.SttpBuffer:
-                        return SttpValueSttpBufferMethods.AsBulkTransportGuid(m_valueObject as SttpBuffer);
+                        return SttpValueSttpBufferMethods.AsSttpBulkTransport(m_valueObject as SttpBuffer);
                     case SttpValueTypeCode.SttpMarkup:
-                        return SttpValueSttpMarkupMethods.AsBulkTransportGuid(m_valueObject as SttpMarkup);
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        return SttpValueBulkTransportGuidMethods.AsBulkTransportGuid(m_valueGuid);
+                        return SttpValueSttpMarkupMethods.AsSttpBulkTransport(m_valueObject as SttpMarkup);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return SttpValueSttpBulkTransportMethods.AsSttpBulkTransport(m_valueObject as SttpBulkTransport);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

@@ -107,7 +107,7 @@ namespace Sttp
         }
         public void SetValueBulkTransportGuid(Guid value)
         {
-            m_valueTypeCode = SttpValueTypeCode.BulkTransportGuid;
+            m_valueTypeCode = SttpValueTypeCode.SttpBulkTransport;
             m_valueGuid = value;
         }
 
@@ -156,8 +156,8 @@ namespace Sttp
                 case SttpValueTypeCode.SttpMarkup:
                     SetValue(value.AsSttpMarkup);
                     break;
-                case SttpValueTypeCode.BulkTransportGuid:
-                    SetValueBulkTransportGuid(value.AsBulkTransportGuid);
+                case SttpValueTypeCode.SttpBulkTransport:
+                    SetValue(value.AsSttpBulkTransport);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -312,7 +312,7 @@ namespace Sttp
                 case SttpValueTypeCode.SttpMarkup:
                     SetValue(rd.ReadSttpMarkup());
                     break;
-                case SttpValueTypeCode.BulkTransportGuid:
+                case SttpValueTypeCode.SttpBulkTransport:
                     SetValueBulkTransportGuid(rd.ReadGuid());
                     break;
                 default:

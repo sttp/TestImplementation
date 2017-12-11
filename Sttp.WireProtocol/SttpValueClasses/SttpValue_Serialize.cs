@@ -56,8 +56,8 @@ namespace Sttp
                     case SttpValueTypeCode.SttpMarkup:
                         wr.Write(AsSttpMarkup);
                         break;
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        wr.Write(AsBulkTransportGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        wr.Write(AsSttpBulkTransport);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -104,8 +104,8 @@ namespace Sttp
                     case SttpValueTypeCode.SttpMarkup:
                         wr.Write(AsSttpMarkup);
                         break;
-                    case SttpValueTypeCode.BulkTransportGuid:
-                        wr.Write(AsBulkTransportGuid);
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        wr.Write(AsSttpBulkTransport);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -154,8 +154,8 @@ namespace Sttp
                 case SttpValueTypeCode.SttpMarkup:
                     wr.Write(AsSttpMarkup);
                     break;
-                case SttpValueTypeCode.BulkTransportGuid:
-                    wr.Write(AsBulkTransportGuid);
+                case SttpValueTypeCode.SttpBulkTransport:
+                    wr.Write(AsSttpBulkTransport);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -191,8 +191,8 @@ namespace Sttp
                     return new SttpValueSttpBuffer(rd.ReadSttpBuffer());
                 case SttpValueTypeCode.SttpMarkup:
                     return new SttpValueSttpMarkup(rd.ReadSttpMarkup());
-                case SttpValueTypeCode.BulkTransportGuid:
-                    return new SttpValueBulkTransportGuid(rd.ReadGuid());
+                case SttpValueTypeCode.SttpBulkTransport:
+                    return new SttpValueSttpBulkTransport(rd.ReadSttpBulkTransport());
                 default:
                     throw new ArgumentOutOfRangeException();
             }

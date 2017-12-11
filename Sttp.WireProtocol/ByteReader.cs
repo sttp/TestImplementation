@@ -432,5 +432,10 @@ namespace Sttp
             }
             return rv;
         }
+
+        public SttpBulkTransport ReadSttpBulkTransport()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
