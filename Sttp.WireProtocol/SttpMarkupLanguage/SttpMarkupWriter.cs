@@ -118,7 +118,7 @@ namespace Sttp
             else
             {
                 m_bitStream.WriteBits1(1);
-                m_bitStream.Write8BitSegments((uint)index);
+                m_bitStream.Write8BitSegments((uint)index, m_stream);
             }
             m_prevName.NextNameID = index;
             m_prevName = m_namesList[index];

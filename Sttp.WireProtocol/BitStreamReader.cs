@@ -366,13 +366,13 @@ namespace Sttp
             }
         }
 
-        public ulong Read8BitSegments()
+        public ulong Read8BitSegments(ByteReader reader)
         {
             ulong value = 0;
             int bits = 0;
             while (ReadBits1() == 1)
             {
-                value = value | (((ulong)ReadBits8()) << bits);
+                value = value | (((ulong)reader.ReadByte()) << bits);
                 bits += 8;
             }
             return value;

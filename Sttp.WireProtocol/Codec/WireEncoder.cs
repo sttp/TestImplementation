@@ -92,11 +92,10 @@ namespace Sttp.Codec
             m_stream.Send(CommandCode.DataPointReply);
         }
 
-        public void DataPointRequest(SttpMarkup options, List<SttpDataPointID> dataPoints)
+        public void DataPointRequest(SttpMarkup request)
         {
             m_stream.Clear();
-            m_stream.Write(options);
-            m_stream.Write(dataPoints);
+            m_stream.Write(request);
             m_stream.Send(CommandCode.DataPointRequest);
         }
 

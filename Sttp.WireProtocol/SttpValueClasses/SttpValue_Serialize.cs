@@ -25,7 +25,7 @@ namespace Sttp
                         break;
                     case SttpValueTypeCode.Int64:
                         //wrBits.Write8BitSegments((ulong)AsInt64);
-                        wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
+                        wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64, wr);
                         break;
                     case SttpValueTypeCode.Single:
                         {
@@ -123,7 +123,7 @@ namespace Sttp
             }
         }
 
-        
+
 
 
         public void Save(ByteWriter wr)

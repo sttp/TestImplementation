@@ -3,14 +3,14 @@
 //using System.Collections;
 //using System.Collections.Generic;
 //using System.IO;
-//using Sttp.WireProtocol.DataPoint.TSSC;
+//using Sttp.Codec;
+//using Sttp.Codec.DataPoint.TSSC;
 
 //namespace Sttp.WireProtocol.DataPointEncoding
 //{
 //    public class Encoder
 //    {
-//        private Action<byte[], int, int> m_sendPacket;
-//        private PacketWriter m_stream;
+//        public Action<byte[], int, int> SendData;
 
 //        private List<SttpDataPointID> m_pointIDsToRegister;
 //        private List<SttpDataPoint> m_sttpCompatibleDataPoints;
@@ -18,13 +18,15 @@
 //        private BitArray m_hasRegistered;
 //        private SessionDetails m_sessionDetails;
 //        private TsscEncoder m_encoder = new TsscEncoder();
+//        private ByteWriter m_stream;
 
-//        public Encoder(Action<byte[], int, int> sendPacket, SessionDetails sessionDetails)
+
+//        public Encoder(Action<byte[], int, int> sendData, SessionDetails sessionDetails)
 //        {
-//            m_sendPacket = sendPacket;
+//            SendData = sendData;
+//            m_stream = new ByteWriter();
 //            m_pointIDsToRegister = new List<SttpDataPointID>();
 //            m_newPoints = new List<SttpDataPoint>();
-//            m_stream = new PacketWriter(sessionDetails);
 //            m_sessionDetails = sessionDetails;
 //            m_hasRegistered = new BitArray(m_sessionDetails.MaxRuntimeIDCache);
 //        }
@@ -73,7 +75,7 @@
 
 //            if (m_sttpCompatibleDataPoints.Count > 0)
 //            {
-//                m_stream.BeginCommand(CommandCode.SendDataPoints);
+//                m_stream.BeginCommand(CommandCode.MetadataVersionNotCompatible);
 //                m_stream.Write(m_sttpCompatibleDataPoints.Count);
 //                foreach (var point in m_sttpCompatibleDataPoints)
 //                {

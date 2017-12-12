@@ -9,13 +9,11 @@ namespace Sttp.Codec
     {
         public CommandCode CommandCode => CommandCode.DataPointRequest;
 
-        public readonly SttpMarkup Options;
-        public readonly List<SttpDataPointID> DataPoints;
+        public readonly SttpMarkup Request;
 
         public CommandDataPointRequest(PayloadReader reader)
         {
-            Options = reader.ReadSttpMarkup();
-            DataPoints = reader.ReadListSttpDataPointID();
+            Request = reader.ReadSttpMarkup();
         }
     }
 }

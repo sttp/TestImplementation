@@ -333,7 +333,7 @@ namespace Sttp
                         break;
                     case SttpValueTypeCode.Int64:
                         //wrBits.Write8BitSegments((ulong)AsInt64);
-                        SetValue((long)(rdBits.Read8BitSegments() ^ (ulong)other.AsInt64));
+                        SetValue((long)(rdBits.Read8BitSegments(rd) ^ (ulong)other.AsInt64));
                         break;
                     case SttpValueTypeCode.Single:
                         {

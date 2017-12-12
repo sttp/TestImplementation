@@ -105,7 +105,16 @@ namespace Sttp
             wr.Write(m_lowerTicks);
             wr.Write(m_offset);
             wr.Write((byte)m_flags);
+        }
 
+        public static bool operator ==(SttpTime a, SttpTime b)
+        {
+            return a.m_upperTicks == b.m_upperTicks && a.m_lowerTicks == b.m_lowerTicks && a.m_offset == b.m_offset && a.m_flags == b.m_flags;
+        }
+
+        public static bool operator !=(SttpTime a, SttpTime b)
+        {
+            return !(a == b);
         }
     } // 8-bytes
 }

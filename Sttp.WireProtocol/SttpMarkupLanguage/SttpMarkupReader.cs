@@ -93,7 +93,7 @@ namespace Sttp
         {
             if (m_bitStream.ReadBits1() != 0)
             {
-                int index = (int)m_bitStream.Read8BitSegments();
+                int index = (int)m_bitStream.Read8BitSegments(m_stream);
                 m_prevName.NextNameID = index;
             }
             m_prevName = m_elements[m_prevName.NextNameID];

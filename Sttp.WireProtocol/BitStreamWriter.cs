@@ -59,7 +59,7 @@ namespace Sttp
             m_writePointer[32] = WriteBits32;
         }
 
-        
+
 
 
         public void Clear()
@@ -81,13 +81,13 @@ namespace Sttp
         public int BitCount => (m_position * 8) + m_bitStreamCacheBitCount;
 
 
-      
+
 
         /// <summary>
         /// While (NotZero), WriteBits8
         /// </summary>
         /// <param name="value"></param>
-        public void Write8BitSegments(ulong value)
+        public void Write8BitSegments(ulong value, ByteWriter writer)
         {
             TryAgain:
             if (value <= 0)
@@ -97,7 +97,7 @@ namespace Sttp
             else
             {
                 WriteBits1(1);
-                WriteBits8((uint)value);
+                writer.Write((byte)value);
                 value >>= 8;
                 goto TryAgain;
             }
@@ -424,7 +424,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
         }
 
-#endregion
+        #endregion
 
         public void GetBuffer(out byte[] buffer, out int length)
         {
