@@ -61,14 +61,17 @@ namespace Sttp.Codec
                 case CommandCode.RequestSucceeded:
                     m_decoder = new CommandRequestSucceeded(reader);
                     break;
+                case CommandCode.BulkTransportCancelSend:
+                    m_decoder = new CommandBulkTransportCancelSend(reader);
+                    break;
                 case CommandCode.BulkTransportBeginSend:
                     m_decoder = new CommandBulkTransportBeginSend(reader);
                     break;
+                case CommandCode.BulkTransportRequest:
+                    m_decoder = new CommandBulkTransportRequest(reader);
+                    break;
                 case CommandCode.BulkTransportSendFragment:
                     m_decoder = new CommandBulkTransportSendFragment(reader);
-                    break;
-                case CommandCode.BulkTransportCancelSend:
-                    m_decoder = new CommandBulkTransportCancelSend(reader);
                     break;
                 case CommandCode.NoOp:
                     m_decoder = new CommandNoOp(reader);
@@ -81,6 +84,7 @@ namespace Sttp.Codec
 
         public CommandBulkTransportBeginSend BulkTransportBeginSend => m_decoder as CommandBulkTransportBeginSend;
         public CommandBulkTransportCancelSend BulkTransportCancelSend => m_decoder as CommandBulkTransportCancelSend;
+        public CommandBulkTransportRequest BulkTransportRequest => m_decoder as CommandBulkTransportRequest;
         public CommandBulkTransportSendFragment BulkTransportSendFragment => m_decoder as CommandBulkTransportSendFragment;
         public CommandDataPointReply DataPointReply => m_decoder as CommandDataPointReply;
         public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;

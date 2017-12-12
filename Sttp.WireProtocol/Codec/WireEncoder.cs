@@ -46,6 +46,15 @@ namespace Sttp.Codec
             NewPacket?.Invoke(buffer, position, length);
         }
 
+        public void BulkTransportRequest(Guid id,long startingPosition, long length)
+        {
+            m_stream.Clear();
+            m_stream.Write(id);
+            m_stream.Write(startingPosition);
+            m_stream.Write(length);
+            m_stream.Send(CommandCode.BulkTransportRequest);
+        }
+
         public void BulkTransportBeginSend(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, long position, int length)
         {
             m_stream.Clear();

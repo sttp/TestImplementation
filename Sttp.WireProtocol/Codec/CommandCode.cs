@@ -198,6 +198,26 @@ namespace Sttp.Codec
         /// byte[] Data
         /// </summary>
         BulkTransportBeginSend,
+      
+
+        /// <summary>
+        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
+        /// 
+        /// Payload: 
+        /// Guid ID,
+        /// </summary>
+        BulkTransportCancelSend,
+
+        /// <summary>
+        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
+        /// 
+        /// Payload: 
+        /// Guid ID,
+        /// long StartingPosition,
+        /// long Length
+        /// </summary>
+        BulkTransportRequest,
+
         /// <summary>
         /// Sends a fragment for the previously defined bulk transport. 
         /// 
@@ -207,14 +227,6 @@ namespace Sttp.Codec
         /// byte[] Data
         /// </summary>
         BulkTransportSendFragment,
-
-        /// <summary>
-        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
-        /// 
-        /// Payload: 
-        /// Guid ID,
-        /// </summary>
-        BulkTransportCancelSend,
 
         /// <summary>
         /// A keep-alive packet.
