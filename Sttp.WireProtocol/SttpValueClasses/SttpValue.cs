@@ -14,7 +14,7 @@ namespace Sttp
     [StructLayout(LayoutKind.Explicit)]
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
-        public static readonly SttpValue Null = new SttpValueNull();
+        public static readonly SttpValue Null = SttpValueNull.NullValue;
 
         protected SttpValue()
         {

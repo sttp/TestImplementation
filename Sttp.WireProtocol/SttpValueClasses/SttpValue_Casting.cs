@@ -75,7 +75,9 @@ namespace Sttp
         }
         public static implicit operator SttpValue(bool value)
         {
-            return new SttpValueBoolean(value);
+            if (value)
+                return SttpValueBoolean.ValueTrue;
+            return SttpValueBoolean.ValueFalse;
         }
         public static implicit operator SttpValue(Guid value)
         {
@@ -83,6 +85,10 @@ namespace Sttp
         }
         public static implicit operator SttpValue(string value)
         {
+            if (value == null)
+                return SttpValue.Null;
+            if (value.Length == 0)
+                return SttpValueString.EmptyString;
             return new SttpValueString(value);
         }
         public static implicit operator SttpValue(SttpBuffer value)
@@ -385,7 +391,7 @@ namespace Sttp
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpValueBoolean(value.Value);
+            return (SttpValue)(value.Value);
         }
 
         public static implicit operator SttpValue(Guid? value)

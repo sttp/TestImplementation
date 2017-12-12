@@ -190,11 +190,11 @@ namespace Sttp
                 case SttpValueTypeCode.SttpTime:
                     return new SttpValueSttpTime(rd.ReadSttpTime());
                 case SttpValueTypeCode.Boolean:
-                    return new SttpValueBoolean(rd.ReadBoolean());
+                    return (SttpValue)rd.ReadBoolean();
                 case SttpValueTypeCode.Guid:
                     return new SttpValueGuid(rd.ReadGuid());
                 case SttpValueTypeCode.String:
-                    return new SttpValueString(rd.ReadString());
+                    return (SttpValue)rd.ReadString();
                 case SttpValueTypeCode.SttpBuffer:
                     return new SttpValueSttpBuffer(rd.ReadSttpBuffer());
                 case SttpValueTypeCode.SttpMarkup:

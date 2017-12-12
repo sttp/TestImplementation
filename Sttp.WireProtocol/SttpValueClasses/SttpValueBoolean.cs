@@ -9,9 +9,12 @@ namespace Sttp.SttpValueClasses
 {
     public class SttpValueBoolean : SttpValue
     {
+        public static readonly SttpValue ValueTrue = new SttpValueBoolean(true);
+        public static readonly SttpValue ValueFalse = new SttpValueBoolean(false);
+
         public readonly bool Value;
 
-        public SttpValueBoolean(bool value)
+        private SttpValueBoolean(bool value)
         {
             Value = value;
         }
@@ -48,7 +51,7 @@ namespace Sttp.SttpValueClasses
 
         #region [ Type Casting ]
 
-      
+
         public static long AsInt64(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int64");

@@ -9,6 +9,12 @@ namespace Sttp.SttpValueClasses
 {
     public class SttpValueNull : SttpValue
     {
+        public static readonly SttpValue NullValue = new SttpValueNull();
+
+        private SttpValueNull()
+        {
+        }
+
         public override SttpValueTypeCode ValueTypeCode => SttpValueTypeCode.Null;
         public override string ToTypeString => "(Null)";
         public override object ToNativeType => null;
@@ -24,6 +30,8 @@ namespace Sttp.SttpValueClasses
         public override SttpBuffer AsSttpBuffer => throw new InvalidCastException();
         public override SttpMarkup AsSttpMarkup => throw new InvalidCastException();
         public override SttpBulkTransport AsSttpBulkTransport => throw new InvalidCastException();
+
+       
     }
 
 

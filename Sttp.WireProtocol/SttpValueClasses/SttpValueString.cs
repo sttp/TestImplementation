@@ -9,6 +9,8 @@ namespace Sttp.SttpValueClasses
 {
     public class SttpValueString : SttpValue
     {
+        public static readonly SttpValue EmptyString = new SttpValueString(string.Empty);
+
         public readonly string Value;
 
         public SttpValueString(string value)
