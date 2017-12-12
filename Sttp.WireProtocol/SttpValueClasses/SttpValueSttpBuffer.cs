@@ -53,43 +53,9 @@ namespace Sttp.SttpValueClasses
 
         #region [ Type Casting ]
 
-        public static sbyte AsSByte(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SByte");
-        }
-        public static short AsInt16(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int16");
-        }
-
-        public static int AsInt32(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int32");
-        }
-
         public static long AsInt64(SttpBuffer value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int64");
-        }
-
-        public static byte AsByte(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Byte");
-        }
-
-        public static ushort AsUInt16(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to UInt16");
-        }
-
-        public static uint AsUInt32(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to UInt32");
-        }
-
-        public static ulong AsUInt64(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to UInt64");
         }
 
         public static float AsSingle(SttpBuffer value)
@@ -107,34 +73,14 @@ namespace Sttp.SttpValueClasses
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Decimal");
         }
 
-        public static DateTime AsDateTime(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to DateTime");
-        }
-
-        public static DateTimeOffset AsDateTimeOffset(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to DateTimeOffset");
-        }
-
         public static SttpTime AsSttpTime(SttpBuffer value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
         }
 
-        public static TimeSpan AsTimeSpan(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to TimeSpan");
-        }
-
         public static bool AsBoolean(SttpBuffer value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Boolean");
-        }
-
-        public static char AsChar(SttpBuffer value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Char");
         }
 
         public static Guid AsGuid(SttpBuffer value)

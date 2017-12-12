@@ -24,7 +24,12 @@ namespace Sttp
 
         public ByteReader(byte[] data)
         {
-            SetBuffer(data,0,data.Length);
+            SetBuffer(data, 0, data.Length);
+        }
+
+        public ByteReader(byte[] data, int position, int length)
+        {
+            SetBuffer(data, position, length);
         }
 
         public int Position
@@ -413,7 +418,7 @@ namespace Sttp
 
         public SttpTime ReadSttpTime()
         {
-            throw new NotImplementedException();
+            return new SttpTime(this);
         }
 
         public TimeSpan ReadTimeSpan()

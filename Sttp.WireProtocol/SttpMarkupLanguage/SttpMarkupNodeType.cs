@@ -4,6 +4,7 @@
     {
         Element,
         Value,
-        EndElement
+        EndElement,
+        EndOfDocument,
     }
 }

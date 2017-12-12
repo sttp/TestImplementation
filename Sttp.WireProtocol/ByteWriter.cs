@@ -372,6 +372,10 @@ namespace Sttp
             value.Save(this);
         }
 
+        public void Write(SttpTime value)
+        {
+            value.Save(this);
+        }
 
         public void Write(List<int> list)
         {

@@ -76,6 +76,14 @@ namespace Sttp
             m_flags = SttpTimeFlags.IsOffsetValid;
         }
 
+        public SttpTime(ByteReader rd)
+        {
+            m_upperTicks = rd.ReadUInt32();
+            m_lowerTicks = rd.ReadUInt32();
+            m_offset = rd.ReadInt16();
+            m_flags = (SttpTimeFlags)rd.ReadByte();
+        }
+
         public DateTime UtcTicks => new DateTime(((long)m_upperTicks << 32) | m_lowerTicks, DateTimeKind.Utc);
         public DateTime Ticks => new DateTime((((long)m_upperTicks << 32) | m_lowerTicks) + TimeSpan.TicksPerMinute * m_offset, DateTimeKind.Unspecified);
         public TimeSpan Offset => new TimeSpan(TimeSpan.TicksPerMinute * m_offset);
@@ -89,6 +97,15 @@ namespace Sttp
         public static SttpTime Parse(string isString)
         {
             throw new NotImplementedException();
+        }
+
+        public void Save(ByteWriter wr)
+        {
+            wr.Write(m_upperTicks);
+            wr.Write(m_lowerTicks);
+            wr.Write(m_offset);
+            wr.Write((byte)m_flags);
+
         }
     } // 8-bytes
 }

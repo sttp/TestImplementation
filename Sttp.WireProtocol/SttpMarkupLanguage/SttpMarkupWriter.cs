@@ -43,6 +43,7 @@ namespace Sttp
         private ElementEndElementHelper m_endElementHelper;
         private SttpValueMutable m_tmpValue = new SttpValueMutable();
         private NameLookupCache m_prevName;
+        private bool m_disposed;
 
         public SttpMarkupWriter()
         {
@@ -86,7 +87,7 @@ namespace Sttp
         public void EndElement()
         {
             m_elementStack.Pop();
-            m_stream.Write((byte)SttpMarkupNodeType.EndElement);
+            m_bitStream.WriteBits2((uint)SttpMarkupNodeType.EndElement);
         }
 
         public void WriteValue(string name, SttpValue value)
@@ -131,15 +132,24 @@ namespace Sttp
 
         public SttpMarkup ToSttpMarkup()
         {
+            if (!m_disposed)
+            {
+                m_bitStream.WriteBits2((byte)SttpMarkupNodeType.EndOfDocument);
+                m_disposed = true;
+            }
+
+            byte[] byteStream = m_stream.ToArray();
+            m_bitStream.GetBuffer(out byte[] bitStream, out int bitStreamLength);
             var stream = new ByteWriter();
+            stream.Write(byteStream.Length);
+            stream.Write(bitStreamLength);
             stream.WriteInt7Bit(m_namesList.Count);
             foreach (var item in m_namesList)
             {
                 stream.Write(item.Name);
             }
-            m_bitStream.GetBuffer(out byte[] bits, out int len);
-            stream.Write(bits, 0, len);
-            stream.Write(m_stream.ToArray());
+            stream.WriteWithoutLength(byteStream, 0, byteStream.Length);
+            stream.WriteWithoutLength(bitStream, 0, bitStreamLength);
             return new SttpMarkup(stream.ToArray());
         }
     }

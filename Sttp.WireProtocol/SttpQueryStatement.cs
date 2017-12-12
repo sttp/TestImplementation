@@ -474,9 +474,12 @@ namespace Sttp
             using (writer.StartElement("SttpQuery"))
             {
                 writer.WriteValue("DirectTable", DirectTable);
-                writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
-                writer.WriteValue("Limit", Limit);
-                writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable);
+                if (WhereBooleanVariable.HasValue)
+                    writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
+                if (Limit.HasValue)
+                    writer.WriteValue("Limit", Limit);
+                if (HavingBooleanVariable.HasValue)
+                    writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable);
 
                 foreach (var item in JoinedTables)
                 {
@@ -503,11 +506,14 @@ namespace Sttp
                     item.Save(writer);
                 }
 
-                using (writer.StartElement("GroupBy"))
+                if (GroupByVariables.Count > 0)
                 {
-                    foreach (var item in GroupByVariables)
+                    using (writer.StartElement("GroupBy"))
                     {
-                        writer.WriteValue("Item", item);
+                        foreach (var item in GroupByVariables)
+                        {
+                            writer.WriteValue("Item", item);
+                        }
                     }
                 }
 

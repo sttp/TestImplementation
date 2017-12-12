@@ -16,46 +16,66 @@ namespace Sttp
         /// </summary>
         protected ulong m_cache;
 
-        public Func<uint>[] Read;
+        private byte[] m_buffer;
+        private int m_position;
+        private int m_length;
 
-        protected BitStreamReader()
+        private Func<uint>[] m_readBits;
+
+        public BitStreamReader(byte[] data, int position, int length)
         {
+            m_buffer = data;
+            m_position = position;
+            m_length = length;
             m_bitCount = 0;
             m_cache = 0;
-            Read = new Func<uint>[33];
-            Read[0] = ReadBits0;
-            Read[1] = ReadBits1;
-            Read[2] = ReadBits2;
-            Read[3] = ReadBits3;
-            Read[4] = ReadBits4;
-            Read[5] = ReadBits5;
-            Read[6] = ReadBits6;
-            Read[7] = ReadBits7;
-            Read[8] = ReadBits8;
-            Read[9] = ReadBits9;
-            Read[10] = ReadBits10;
-            Read[11] = ReadBits11;
-            Read[12] = ReadBits12;
-            Read[13] = ReadBits13;
-            Read[14] = ReadBits14;
-            Read[15] = ReadBits15;
-            Read[16] = ReadBits16;
-            Read[17] = ReadBits17;
-            Read[18] = ReadBits18;
-            Read[19] = ReadBits19;
-            Read[20] = ReadBits20;
-            Read[21] = ReadBits21;
-            Read[22] = ReadBits22;
-            Read[23] = ReadBits23;
-            Read[24] = ReadBits24;
-            Read[25] = ReadBits25;
-            Read[26] = ReadBits26;
-            Read[27] = ReadBits27;
-            Read[28] = ReadBits28;
-            Read[29] = ReadBits29;
-            Read[30] = ReadBits30;
-            Read[31] = ReadBits31;
-            Read[32] = ReadBits32;
+            m_readBits = new Func<uint>[33];
+            m_readBits[0] = ReadBits0;
+            m_readBits[1] = ReadBits1;
+            m_readBits[2] = ReadBits2;
+            m_readBits[3] = ReadBits3;
+            m_readBits[4] = ReadBits4;
+            m_readBits[5] = ReadBits5;
+            m_readBits[6] = ReadBits6;
+            m_readBits[7] = ReadBits7;
+            m_readBits[8] = ReadBits8;
+            m_readBits[9] = ReadBits9;
+            m_readBits[10] = ReadBits10;
+            m_readBits[11] = ReadBits11;
+            m_readBits[12] = ReadBits12;
+            m_readBits[13] = ReadBits13;
+            m_readBits[14] = ReadBits14;
+            m_readBits[15] = ReadBits15;
+            m_readBits[16] = ReadBits16;
+            m_readBits[17] = ReadBits17;
+            m_readBits[18] = ReadBits18;
+            m_readBits[19] = ReadBits19;
+            m_readBits[20] = ReadBits20;
+            m_readBits[21] = ReadBits21;
+            m_readBits[22] = ReadBits22;
+            m_readBits[23] = ReadBits23;
+            m_readBits[24] = ReadBits24;
+            m_readBits[25] = ReadBits25;
+            m_readBits[26] = ReadBits26;
+            m_readBits[27] = ReadBits27;
+            m_readBits[28] = ReadBits28;
+            m_readBits[29] = ReadBits29;
+            m_readBits[30] = ReadBits30;
+            m_readBits[31] = ReadBits31;
+            m_readBits[32] = ReadBits32;
+        }
+
+        private byte ReadByte()
+        {
+            if (m_length == 0)
+                throw new Exception("End of stream encoutered");
+            m_length--;
+            return m_buffer[m_position++];
+        }
+
+        public uint ReadBits(int bitCount)
+        {
+            return m_readBits[bitCount]();
         }
 
         public int RemainingBits => m_bitCount & 7;
@@ -337,18 +357,13 @@ namespace Sttp
             return (uint)(m_cache >> m_bitCount);
         }
 
-        protected virtual void InternalRead(int bitsRequested)
+        private void InternalRead(int bitsRequested)
         {
             while (m_bitCount < bitsRequested)
             {
                 m_bitCount += 8;
                 m_cache = (m_cache << 8) | ReadByte();
             }
-        }
-
-        private byte ReadByte()
-        {
-            return 0;
         }
 
         public ulong Read8BitSegments()

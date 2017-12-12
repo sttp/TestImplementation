@@ -74,7 +74,6 @@ namespace Sttp
                     return SttpValue.Null;
                 case SttpValueTypeCode.Int64:
                     return (SttpValue)AsInt64;
-                    return (SttpValue)AsUInt64;
                 case SttpValueTypeCode.Single:
                     return (SttpValue)AsSingle;
                 case SttpValueTypeCode.Double:
@@ -123,18 +122,6 @@ namespace Sttp
         }
 
         #endregion
-
-        public void Load(PayloadReader payloadReader)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Save(PayloadWriter payloadWriter, bool includeTypeCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        
 
     }
 }

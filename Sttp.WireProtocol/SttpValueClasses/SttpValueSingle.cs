@@ -48,66 +48,11 @@ namespace Sttp.SttpValueClasses
 
         #region [ Type Casting ]
 
-        public static sbyte AsSByte(float value)
-        {
-            checked
-            {
-                return (sbyte)value;
-            }
-        }
-        public static short AsInt16(float value)
-        {
-            checked
-            {
-                return (short)value;
-            }
-        }
-
-        public static int AsInt32(float value)
-        {
-            checked
-            {
-                return (int)value;
-            }
-        }
-
         public static long AsInt64(float value)
         {
             checked
             {
                 return (long)value;
-            }
-        }
-
-        public static byte AsByte(float value)
-        {
-            checked
-            {
-                return (byte)value;
-            }
-        }
-
-        public static ushort AsUInt16(float value)
-        {
-            checked
-            {
-                return (ushort)value;
-            }
-        }
-
-        public static uint AsUInt32(float value)
-        {
-            checked
-            {
-                return (uint)value;
-            }
-        }
-
-        public static ulong AsUInt64(float value)
-        {
-            checked
-            {
-                return (ulong)value;
             }
         }
 
@@ -135,37 +80,14 @@ namespace Sttp.SttpValueClasses
             }
         }
 
-        public static DateTime AsDateTime(float value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to DateTime");
-        }
-
-        public static DateTimeOffset AsDateTimeOffset(float value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to DateTimeOffset");
-        }
-
         public static SttpTime AsSttpTime(float value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
         }
 
-        public static TimeSpan AsTimeSpan(float value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to TimeSpan");
-        }
-
         public static bool AsBoolean(float value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Boolean");
-        }
-
-        public static char AsChar(float value)
-        {
-            checked
-            {
-                return (char)value;
-            }
         }
 
         public static Guid AsGuid(float value)

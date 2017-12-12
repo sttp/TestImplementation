@@ -7,15 +7,42 @@ namespace Sttp
 {
     public class SttpMarkupReader
     {
+        private class NameLookupCache
+        {
+            public string Name;
+            public int NextNameID;
+            public SttpValueMutable PrevValue;
+
+            public NameLookupCache(string name, int nextNameID)
+            {
+                Name = name;
+                NextNameID = nextNameID;
+                PrevValue = new SttpValueMutable();
+            }
+        }
+
         private ByteReader m_stream;
-        private List<string> m_elements = new List<string>();
-        private Stack<string> m_elementStack = new Stack<string>();
-        private int m_prevNameAsInt = 0;
+        private List<NameLookupCache> m_elements = new List<NameLookupCache>();
+        private Stack<NameLookupCache> m_elementStack = new Stack<NameLookupCache>();
+        private NameLookupCache m_prevName;
+        private BitStreamReader m_bitStream;
 
         internal SttpMarkupReader(byte[] data)
         {
             Value = new SttpValueMutable();
-            m_stream = new ByteReader(data);
+            int byteStreamLength = BigEndian.ToInt32(data, 0);
+            int bitStreamLength = BigEndian.ToInt32(data, 4);
+
+            m_stream = new ByteReader(data, 8, data.Length - bitStreamLength - 8);
+            int cnt = m_stream.ReadInt7Bit();
+            while (cnt > 0)
+            {
+                cnt--;
+                m_elements.Add(new NameLookupCache(m_stream.ReadString(), m_elements.Count + 1));
+            }
+
+            m_bitStream = new BitStreamReader(data, m_stream.Position + byteStreamLength + 8, bitStreamLength);
+            m_prevName = new NameLookupCache(string.Empty, 0);
         }
 
         public int ElementDepth => m_elementStack.Count;
@@ -26,7 +53,7 @@ namespace Sttp
 
         public bool Read()
         {
-            if (m_stream.Position == m_stream.Length)
+            if (NodeType == SttpMarkupNodeType.EndOfDocument)
                 return false;
 
             if (NodeType == SttpMarkupNodeType.EndElement)
@@ -34,61 +61,44 @@ namespace Sttp
                 ElementName = CurrentElement;
             }
 
-            byte code = m_stream.ReadByte();
-            bool isNameAsString = ((code >> 4) & 1) == 1;
-            int nameDelta = (code >> 5);
-
-            NodeType = (SttpMarkupNodeType)(code & 3);
+            NodeType = (SttpMarkupNodeType)m_bitStream.ReadBits2();
             switch (NodeType)
             {
                 case SttpMarkupNodeType.Element:
                     Value.SetNull();
-
-                    if (isNameAsString)
-                    {
-                        ElementName = m_stream.ReadString();
-                        m_prevNameAsInt = m_elements.Count;
-                        m_elements.Add(ElementName);
-                    }
-                    else
-                    {
-                        if (nameDelta == 7)
-                            m_prevNameAsInt = m_stream.ReadInt7Bit();
-                        else
-                            m_prevNameAsInt += nameDelta;
-                        ElementName = m_elements[m_prevNameAsInt];
-                    }
-
-                    m_elementStack.Push(ElementName);
-
+                    ReadName();
+                    m_elementStack.Push(m_prevName);
+                    ElementName = m_prevName.Name;
+                    
                     break;
                 case SttpMarkupNodeType.Value:
-                    if (isNameAsString)
-                    {
-                        ValueName = m_stream.ReadString();
-                        m_prevNameAsInt = m_elements.Count;
-                        m_elements.Add(ValueName);
-                    }
-                    else
-                    {
-                        if (nameDelta == 7)
-                            m_prevNameAsInt = m_stream.ReadInt7Bit();
-                        else
-                            m_prevNameAsInt += nameDelta;
-                        ValueName = m_elements[m_prevNameAsInt];
-                    }
-                    Value.Load(m_stream);
-
+                    ReadName();
+                    Value.LoadDelta(m_bitStream, m_stream, m_prevName.PrevValue);
+                    m_prevName.PrevValue.SetValue(Value);
+                    ValueName = m_prevName.Name;
                     break;
                 case SttpMarkupNodeType.EndElement:
                     ElementName = CurrentElement;
                     m_elementStack.Pop();
                     break;
+                case SttpMarkupNodeType.EndOfDocument:
+                    return false;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
             return true;
         }
+
+        private void ReadName()
+        {
+            if (m_bitStream.ReadBits1() != 0)
+            {
+                int index = (int)m_bitStream.Read8BitSegments();
+                m_prevName.NextNameID = index;
+            }
+            m_prevName = m_elements[m_prevName.NextNameID];
+        }
+
 
         public SttpMarkupElement ReadEntireElement()
         {
@@ -101,7 +111,7 @@ namespace Sttp
             {
                 if (m_elementStack.Count == 0)
                     return string.Empty;
-                return m_elementStack.Peek();
+                return m_elementStack.Peek().Name;
             }
         }
 

@@ -48,28 +48,9 @@ namespace Sttp.SttpValueClasses
 
         #region [ Type Casting ]
 
-        public static sbyte AsSByte(SttpBulkTransport value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SByte");
-        }
-        public static short AsInt16(SttpBulkTransport value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int16");
-        }
-
-        public static int AsInt32(SttpBulkTransport value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int32");
-        }
-
         public static long AsInt64(SttpBulkTransport value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int64");
-        }
-
-        public static ulong AsUInt64(SttpBulkTransport value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to UInt64");
         }
 
         public static float AsSingle(SttpBulkTransport value)
@@ -87,19 +68,15 @@ namespace Sttp.SttpValueClasses
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Decimal");
         }
 
-        
         public static SttpTime AsSttpTime(SttpBulkTransport value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
         }
 
-       
-
         public static bool AsBoolean(SttpBulkTransport value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Boolean");
         }
-
         
         public static Guid AsGuid(SttpBulkTransport value)
         {

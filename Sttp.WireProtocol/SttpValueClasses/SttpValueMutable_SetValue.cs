@@ -322,5 +322,107 @@ namespace Sttp
 
 
 
+        public unsafe void LoadDelta(BitStreamReader rdBits, ByteReader rd, SttpValue other)
+        {
+            if (rdBits.ReadBits1() == 0)
+            {
+                var value = other.ValueTypeCode;
+                switch (value)
+                {
+                    case SttpValueTypeCode.Null:
+                        break;
+                    case SttpValueTypeCode.Int64:
+                        //wrBits.Write8BitSegments((ulong)AsInt64);
+                        SetValue((long)(rdBits.Read8BitSegments() ^ (ulong)other.AsInt64));
+                        break;
+                    case SttpValueTypeCode.Single:
+                        {
+                            float value2 = other.AsSingle;
+                            uint result = rd.ReadUInt32() ^ *(uint*)&value2;
+                            SetValue(*(float*)&result);
+                            break;
+                        }
+                    case SttpValueTypeCode.Double:
+                        {
+                            double value2 = other.AsDouble;
+                            ulong result = rd.ReadUInt64() ^ *(uint*)&value2;
+                            SetValue(*(double*)&result);
+                            break;
+                        }
+                    case SttpValueTypeCode.Decimal:
+                        SetValue(rd.ReadDecimal());
+                        break;
+                    case SttpValueTypeCode.SttpTime:
+                        SetValue(rd.ReadSttpTime());
+                        break;
+                    case SttpValueTypeCode.Boolean:
+                        SetValue(rdBits.ReadBits1() == 1);
+                        break;
+                    case SttpValueTypeCode.Guid:
+                        SetValue(rd.ReadGuid());
+                        break;
+                    case SttpValueTypeCode.String:
+                        SetValue(rd.ReadString());
+                        break;
+                    case SttpValueTypeCode.SttpBuffer:
+                        SetValue(rd.ReadSttpBuffer());
+                        break;
+                    case SttpValueTypeCode.SttpMarkup:
+                        SetValue(rd.ReadSttpMarkup());
+                        break;
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        SetValue(rd.ReadSttpBulkTransport());
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            else
+            {
+                var value = (SttpValueTypeCode)rdBits.ReadBits4();
+                switch (value)
+                {
+                    case SttpValueTypeCode.Null:
+                        break;
+                    case SttpValueTypeCode.Int64:
+                        SetValue(rd.ReadInt64());
+                        break;
+                    case SttpValueTypeCode.Single:
+                        SetValue(rd.ReadSingle());
+                        break;
+                    case SttpValueTypeCode.Double:
+                        SetValue(rd.ReadDouble());
+                        break;
+                    case SttpValueTypeCode.Decimal:
+                        SetValue(rd.ReadDecimal());
+                        break;
+                    case SttpValueTypeCode.SttpTime:
+                        SetValue(rd.ReadSttpTime());
+                        break;
+                    case SttpValueTypeCode.Boolean:
+                        SetValue(rdBits.ReadBits1() == 1);
+                        break;
+                    case SttpValueTypeCode.Guid:
+                        SetValue(rd.ReadGuid());
+                        break;
+                    case SttpValueTypeCode.String:
+                        SetValue(rd.ReadString());
+                        break;
+                    case SttpValueTypeCode.SttpBuffer:
+                        SetValue(rd.ReadSttpBuffer());
+                        break;
+                    case SttpValueTypeCode.SttpMarkup:
+                        SetValue(rd.ReadSttpMarkup());
+                        break;
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        SetValue(rd.ReadSttpBulkTransport());
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+
     }
 }

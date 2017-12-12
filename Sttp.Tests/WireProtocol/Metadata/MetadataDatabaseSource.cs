@@ -81,6 +81,7 @@ namespace Sttp.Tests
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup();
             Console.WriteLine(s.EncodedSize);
             Console.WriteLine(s.CompressedSize);
+            Console.WriteLine(s.CompressedSize2);
             Console.WriteLine(s.ToXML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s);
@@ -162,6 +163,7 @@ namespace Sttp.Tests
             var s2 = s.ToSttpMarkup();
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
+            Console.WriteLine(s2.CompressedSize2);
             Console.WriteLine(s2.ToXML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s2);

@@ -13,7 +13,7 @@ namespace Sttp
     /// </summary>
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
-        public void SaveDelta(BitStreamWriter wrBits, ByteWriter wr, SttpValue other)
+        public unsafe void SaveDelta(BitStreamWriter wrBits, ByteWriter wr, SttpValue other)
         {
             var value = ValueTypeCode;
             if (other.ValueTypeCode == value)
@@ -24,14 +24,23 @@ namespace Sttp
                     case SttpValueTypeCode.Null:
                         break;
                     case SttpValueTypeCode.Int64:
+                        //wrBits.Write8BitSegments((ulong)AsInt64);
                         wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
                         break;
                     case SttpValueTypeCode.Single:
-                        wr.Write(AsSingle);
-                        break;
+                        {
+                            float value1 = AsSingle;
+                            float value2 = AsSingle;
+                            wr.Write(*(uint*)&value1 ^ *(uint*)&value2);
+                            break;
+                        }
                     case SttpValueTypeCode.Double:
-                        wr.Write(AsDouble);
-                        break;
+                        {
+                            double value1 = AsDouble;
+                            double value2 = AsDouble;
+                            wr.Write(*(ulong*)&value1 ^ *(ulong*)&value2);
+                            break;
+                        }
                     case SttpValueTypeCode.Decimal:
                         wr.Write(AsDecimal);
                         break;
@@ -39,7 +48,14 @@ namespace Sttp
                         wr.Write(AsSttpTime);
                         break;
                     case SttpValueTypeCode.Boolean:
-                        wr.Write(AsBoolean);
+                        if (AsBoolean)
+                        {
+                            wrBits.WriteBits1(1);
+                        }
+                        else
+                        {
+                            wrBits.WriteBits1(0);
+                        }
                         break;
                     case SttpValueTypeCode.Guid:
                         wr.Write(AsGuid);
@@ -63,7 +79,7 @@ namespace Sttp
             else
             {
                 wrBits.WriteBits1(1);
-                wrBits.WriteBits5((uint)value);
+                wrBits.WriteBits4((uint)value);
                 switch (value)
                 {
                     case SttpValueTypeCode.Null:
@@ -106,6 +122,9 @@ namespace Sttp
                 }
             }
         }
+
+        
+
 
         public void Save(ByteWriter wr)
         {
