@@ -24,6 +24,8 @@ namespace Sttp
             m_buffer = Empty;
         }
 
+
+
         public ByteReader(byte[] data)
         {
             SetBuffer(data, 0, data.Length);
@@ -48,6 +50,11 @@ namespace Sttp
                 }
                 m_currentPosition = value + m_startingPosition;
             }
+        }
+
+        public void SetBuffer(byte[] data)
+        {
+            SetBuffer(data, 0, data.Length);
         }
 
         public void SetBuffer(byte[] data, int position, int length)

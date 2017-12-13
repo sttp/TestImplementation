@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Sttp.Codec;
 
-namespace Sttp.SttpValueClasses
+namespace Sttp
 {
     public class SttpValueDecimal : SttpValue
     {

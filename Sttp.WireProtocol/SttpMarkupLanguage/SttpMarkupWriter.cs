@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using Sttp.IO;
-using Sttp.SttpValueClasses;
 
 namespace Sttp
 {

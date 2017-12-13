@@ -1,5 +1,4 @@
-﻿using Sttp.SttpValueClasses;
-
+﻿
 namespace Sttp.Codec.Metadata
 {
     public class CmdUndefineRow 

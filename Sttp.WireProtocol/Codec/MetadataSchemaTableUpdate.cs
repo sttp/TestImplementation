@@ -1,7 +1,7 @@
 using System.Text;
 using Sttp.Codec;
 
-namespace Sttp
+namespace Sttp.Codec
 {
     public class MetadataSchemaTableUpdate
     {

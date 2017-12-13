@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.SttpValueClasses
+namespace Sttp
 {
     public static class SttpValueEncodingWithoutType
     {

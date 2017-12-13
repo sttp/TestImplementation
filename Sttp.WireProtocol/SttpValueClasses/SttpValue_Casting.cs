@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Sttp.Codec;
-using Sttp.SttpValueClasses;
 
 namespace Sttp
 {

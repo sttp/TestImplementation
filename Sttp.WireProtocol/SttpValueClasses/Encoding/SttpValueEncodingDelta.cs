@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Sttp.SttpValueClasses
+namespace Sttp
 {
     public static unsafe class SttpValueEncodingDelta
     {
@@ -85,7 +85,7 @@ namespace Sttp.SttpValueClasses
                 case SttpValueTypeCode.Null:
                     return SttpValue.Null;
                 case SttpValueTypeCode.Int64:
-                    return (SttpValue)UnPackSign((long)(rd.Read8BitSegments() ^ (ulong)reference.AsInt64));
+                    return (SttpValue)((UnPackSign((long)rd.Read8BitSegments()) ^ reference.AsInt64));
                 case SttpValueTypeCode.Single:
                     {
                         float value2 = reference.AsSingle;
@@ -133,7 +133,7 @@ namespace Sttp.SttpValueClasses
                     output.SetNull();
                     break;
                 case SttpValueTypeCode.Int64:
-                    output.SetValue(UnPackSign((long)(rd.Read8BitSegments() ^ (ulong)reference.AsInt64)));
+                    output.SetValue((UnPackSign((long)rd.Read8BitSegments()) ^ reference.AsInt64));
                     break;
                 case SttpValueTypeCode.Single:
                     {

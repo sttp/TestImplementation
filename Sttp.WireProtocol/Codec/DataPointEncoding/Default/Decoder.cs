@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.SttpValueClasses;
 
-namespace Sttp.WireProtocol.SendDataPoints
+namespace Sttp.Codec.DataPoint
 {
     public class Decoder
     {

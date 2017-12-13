@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Sttp.SttpValueClasses;
 
 namespace Sttp.Codec.Metadata
 {

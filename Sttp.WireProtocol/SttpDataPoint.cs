@@ -56,9 +56,5 @@ namespace Sttp
         /// </summary>
         public SttpValue[] ExtraFields;
         
-        public void Write(PayloadWriter stream)
-        {
-            SttpDataPointLayout layout;
-        }
     }
 }

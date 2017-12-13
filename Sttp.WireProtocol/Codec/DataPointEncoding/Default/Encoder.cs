@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Sttp.Codec;
-using Sttp.SttpValueClasses;
 
-namespace Sttp.WireProtocol.SendDataPoints
+namespace Sttp.Codec.DataPoint
 {
     public class Encoder
     {
