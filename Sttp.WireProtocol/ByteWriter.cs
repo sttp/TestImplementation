@@ -69,6 +69,8 @@ namespace Sttp
             }
         }
 
+
+
         public byte[] ToArray()
         {
             GetBuffer(out byte[] origBuffer, out int offset, out int length);
@@ -518,6 +520,11 @@ namespace Sttp
         public void WriteBits0(uint value)
         {
 
+        }
+
+        public void WriteBits1(bool value)
+        {
+            WriteBits1(value ? 1u : 0u);
         }
 
         public void WriteBits1(uint value)

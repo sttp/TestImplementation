@@ -17,7 +17,7 @@ namespace Sttp.Codec
         /// 
         /// Bit 5:      Set = Has Extra Fields. See following byte for details.
         /// 
-        /// Bits 0-4:   Sttp Value Type Code. 32 values.
+        /// Bits 0-3:   Sttp Value Type Code. 32 values.
         /// 
         /// </summary>
         public byte RawValue;

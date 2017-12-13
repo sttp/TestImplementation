@@ -206,7 +206,82 @@ namespace Sttp
             }
         }
 
+        public static SttpValue LoadWithoutTypeCode(ByteReader rd, SttpValueTypeCode value)
+        {
+            switch (value)
+            {
+                case SttpValueTypeCode.Null:
+                    return SttpValue.Null;
+                case SttpValueTypeCode.Int64:
+                    return new SttpValueInt64(rd.ReadInt64());
+                case SttpValueTypeCode.Single:
+                    return new SttpValueSingle(rd.ReadSingle());
+                case SttpValueTypeCode.Double:
+                    return new SttpValueDouble(rd.ReadDouble());
+                case SttpValueTypeCode.Decimal:
+                    return new SttpValueDecimal(rd.ReadDecimal());
+                case SttpValueTypeCode.SttpTime:
+                    return new SttpValueSttpTime(rd.ReadSttpTime());
+                case SttpValueTypeCode.Boolean:
+                    return (SttpValue)rd.ReadBoolean();
+                case SttpValueTypeCode.Guid:
+                    return new SttpValueGuid(rd.ReadGuid());
+                case SttpValueTypeCode.String:
+                    return (SttpValue)rd.ReadString();
+                case SttpValueTypeCode.SttpBuffer:
+                    return new SttpValueSttpBuffer(rd.ReadSttpBuffer());
+                case SttpValueTypeCode.SttpMarkup:
+                    return new SttpValueSttpMarkup(rd.ReadSttpMarkup());
+                case SttpValueTypeCode.SttpBulkTransport:
+                    return new SttpValueSttpBulkTransport(rd.ReadSttpBulkTransport());
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
-
+        public void SaveWithoutTypeCode(ByteWriter wr)
+        {
+            var value = ValueTypeCode;
+            switch (value)
+            {
+                case SttpValueTypeCode.Null:
+                    break;
+                case SttpValueTypeCode.Int64:
+                    wr.Write(AsInt64);
+                    break;
+                case SttpValueTypeCode.Single:
+                    wr.Write(AsSingle);
+                    break;
+                case SttpValueTypeCode.Double:
+                    wr.Write(AsDouble);
+                    break;
+                case SttpValueTypeCode.Decimal:
+                    wr.Write(AsDecimal);
+                    break;
+                case SttpValueTypeCode.SttpTime:
+                    wr.Write(AsSttpTime);
+                    break;
+                case SttpValueTypeCode.Boolean:
+                    wr.Write(AsBoolean);
+                    break;
+                case SttpValueTypeCode.Guid:
+                    wr.Write(AsGuid);
+                    break;
+                case SttpValueTypeCode.String:
+                    wr.Write(AsString);
+                    break;
+                case SttpValueTypeCode.SttpBuffer:
+                    wr.Write(AsSttpBuffer);
+                    break;
+                case SttpValueTypeCode.SttpMarkup:
+                    wr.Write(AsSttpMarkup);
+                    break;
+                case SttpValueTypeCode.SttpBulkTransport:
+                    wr.Write(AsSttpBulkTransport);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }

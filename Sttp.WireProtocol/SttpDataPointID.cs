@@ -6,7 +6,7 @@ using Sttp.Codec;
 
 namespace Sttp
 {
-    public enum SttpDataPointIDTypeCode
+    public enum SttpDataPointIDTypeCode: byte
     {
         /// <summary>
         /// The pointID is null
