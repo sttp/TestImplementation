@@ -19,7 +19,7 @@ namespace Sttp.Codec
 
         public void Send(CommandCode command)
         {
-            GetBounds(out byte[] data, out int offset, out int length);
+            GetBuffer(out byte[] data, out int offset, out int length);
 
             m_encoder.EncodeAndSend(command, data, offset, length);
             Clear();

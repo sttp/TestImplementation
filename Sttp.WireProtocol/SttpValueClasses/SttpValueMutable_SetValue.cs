@@ -322,9 +322,9 @@ namespace Sttp
 
 
 
-        public unsafe void LoadDelta(BitStreamReader rdBits, ByteReader rd, SttpValue other)
+        public unsafe void LoadDelta(ByteReader rd, SttpValue other)
         {
-            if (rdBits.ReadBits1() == 0)
+            if (rd.ReadBits1() == 0)
             {
                 var value = other.ValueTypeCode;
                 switch (value)
@@ -333,7 +333,7 @@ namespace Sttp
                         break;
                     case SttpValueTypeCode.Int64:
                         //wrBits.Write8BitSegments((ulong)AsInt64);
-                        SetValue((long)(rdBits.Read8BitSegments(rd) ^ (ulong)other.AsInt64));
+                        SetValue((long)(rd.Read8BitSegments() ^ (ulong)other.AsInt64));
                         break;
                     case SttpValueTypeCode.Single:
                         {
@@ -356,7 +356,7 @@ namespace Sttp
                         SetValue(rd.ReadSttpTime());
                         break;
                     case SttpValueTypeCode.Boolean:
-                        SetValue(rdBits.ReadBits1() == 1);
+                        SetValue(rd.ReadBits1() == 1);
                         break;
                     case SttpValueTypeCode.Guid:
                         SetValue(rd.ReadGuid());
@@ -379,7 +379,7 @@ namespace Sttp
             }
             else
             {
-                var value = (SttpValueTypeCode)rdBits.ReadBits4();
+                var value = (SttpValueTypeCode)rd.ReadBits4();
                 switch (value)
                 {
                     case SttpValueTypeCode.Null:
@@ -400,7 +400,7 @@ namespace Sttp
                         SetValue(rd.ReadSttpTime());
                         break;
                     case SttpValueTypeCode.Boolean:
-                        SetValue(rdBits.ReadBits1() == 1);
+                        SetValue(rd.ReadBits1() == 1);
                         break;
                     case SttpValueTypeCode.Guid:
                         SetValue(rd.ReadGuid());

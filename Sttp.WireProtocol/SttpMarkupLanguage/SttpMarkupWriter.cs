@@ -39,7 +39,6 @@ namespace Sttp
         private List<NameLookupCache> m_namesList = new List<NameLookupCache>();
         private Stack<string> m_elementStack = new Stack<string>();
         private ByteWriter m_stream = new ByteWriter();
-        private BitStreamWriter m_bitStream = new BitStreamWriter();
         private ElementEndElementHelper m_endElementHelper;
         private SttpValueMutable m_tmpValue = new SttpValueMutable();
         private NameLookupCache m_prevName;
@@ -78,7 +77,7 @@ namespace Sttp
                 throw new ArgumentNullException(nameof(name));
 
             m_elementStack.Push(name);
-            m_bitStream.WriteBits2((uint)SttpMarkupNodeType.Element);
+            m_stream.WriteBits2((uint)SttpMarkupNodeType.Element);
             WriteName(name);
 
             return m_endElementHelper;
@@ -87,7 +86,7 @@ namespace Sttp
         public void EndElement()
         {
             m_elementStack.Pop();
-            m_bitStream.WriteBits2((uint)SttpMarkupNodeType.EndElement);
+            m_stream.WriteBits2((uint)SttpMarkupNodeType.EndElement);
         }
 
         public void WriteValue(string name, SttpValue value)
@@ -97,9 +96,9 @@ namespace Sttp
             if ((object)value == null)
                 throw new ArgumentNullException(nameof(value));
 
-            m_bitStream.WriteBits2((uint)SttpMarkupNodeType.Value);
+            m_stream.WriteBits2((uint)SttpMarkupNodeType.Value);
             WriteName(name);
-            value.SaveDelta(m_bitStream, m_stream, m_prevName.PrevValue);
+            value.SaveDelta(m_stream, m_prevName.PrevValue);
             m_prevName.PrevValue.SetValue(value);
         }
 
@@ -110,15 +109,19 @@ namespace Sttp
                 m_nameCache[name] = m_nameCache.Count;
                 m_namesList.Add(new NameLookupCache(name, m_nameCache.Count));
                 index = m_nameCache.Count - 1;
+                m_stream.WriteBits1(1);
+                m_stream.WriteBits1(1);
+                m_stream.Write(name);
             }
-            if (m_prevName.NextNameID == index)
+            else if (m_prevName.NextNameID == index)
             {
-                m_bitStream.WriteBits1(0);
+                m_stream.WriteBits1(0);
             }
             else
             {
-                m_bitStream.WriteBits1(1);
-                m_bitStream.Write8BitSegments((uint)index, m_stream);
+                m_stream.WriteBits1(1);
+                m_stream.WriteBits1(0);
+                m_stream.Write8BitSegments((uint)index);
             }
             m_prevName.NextNameID = index;
             m_prevName = m_namesList[index];
@@ -134,23 +137,10 @@ namespace Sttp
         {
             if (!m_disposed)
             {
-                m_bitStream.WriteBits2((byte)SttpMarkupNodeType.EndOfDocument);
+                m_stream.WriteBits2((byte)SttpMarkupNodeType.EndOfDocument);
                 m_disposed = true;
             }
-
-            byte[] byteStream = m_stream.ToArray();
-            m_bitStream.GetBuffer(out byte[] bitStream, out int bitStreamLength);
-            var stream = new ByteWriter();
-            stream.Write(byteStream.Length);
-            stream.Write(bitStreamLength);
-            stream.WriteInt7Bit(m_namesList.Count);
-            foreach (var item in m_namesList)
-            {
-                stream.Write(item.Name);
-            }
-            stream.WriteWithoutLength(byteStream, 0, byteStream.Length);
-            stream.WriteWithoutLength(bitStream, 0, bitStreamLength);
-            return new SttpMarkup(stream.ToArray());
+            return new SttpMarkup(m_stream.ToArray());
         }
     }
 }

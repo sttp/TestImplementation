@@ -14,6 +14,8 @@ namespace Sttp
         private int m_currentPosition;
         private int m_startingPosition;
         private int m_lastPosition;
+        private int m_bitCount;
+        private uint m_cache;
 
         public int Length { get; private set; }
 
@@ -55,6 +57,8 @@ namespace Sttp
             m_currentPosition = position;
             m_lastPosition = length + position;
             Length = length;
+            m_bitCount = 0;
+            m_cache = 0;
         }
 
         private void ThrowEndOfStreamException()
@@ -442,5 +446,234 @@ namespace Sttp
         {
             throw new NotImplementedException();
         }
+
+
+
+        #region [ Read Bits ]
+
+        public uint ReadBits0()
+        {
+            return 0;
+        }
+
+        public uint ReadBits1()
+        {
+            const int bits = 1;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+        public uint ReadBits2()
+        {
+            const int bits = 2;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+
+        public uint ReadBits3()
+        {
+            const int bits = 3;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+        public uint ReadBits4()
+        {
+            const int bits = 4;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+        public uint ReadBits5()
+        {
+            const int bits = 5;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+        public uint ReadBits6()
+        {
+            const int bits = 6;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+        public uint ReadBits7()
+        {
+            const int bits = 7;
+            if (m_bitCount < bits)
+                ReadMoreBits();
+            m_bitCount -= bits;
+            return (uint)((m_cache >> m_bitCount) & ((1 << bits) - 1));
+        }
+        public uint ReadBits8()
+        {
+            if (m_currentPosition + 1 > m_lastPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            byte rv = m_buffer[m_currentPosition];
+            m_currentPosition++;
+            return rv;
+        }
+        public uint ReadBits9()
+        {
+            //Note, .NET evaluates Left to Right. If ported, be sure to correct this for the target language.
+            return ReadBits8() | (ReadBits1() << 8);
+        }
+        public uint ReadBits10()
+        {
+            return ReadBits8() | (ReadBits2() << 8);
+        }
+        public uint ReadBits11()
+        {
+            return ReadBits8() | (ReadBits3() << 8);
+        }
+        public uint ReadBits12()
+        {
+            return ReadBits8() | (ReadBits4() << 8);
+        }
+        public uint ReadBits13()
+        {
+            return ReadBits8() | (ReadBits5() << 8);
+        }
+        public uint ReadBits14()
+        {
+            return ReadBits8() | (ReadBits6() << 8);
+        }
+        public uint ReadBits15()
+        {
+            return ReadBits8() | (ReadBits7() << 8);
+        }
+        public uint ReadBits16()
+        {
+            if (m_currentPosition + 2 > m_lastPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            uint rv = (uint)m_buffer[m_currentPosition] << 8 
+                    | (uint)m_buffer[m_currentPosition + 1];
+            m_currentPosition += 2;
+            return rv;
+        }
+        public uint ReadBits17()
+        {
+            return ReadBits16() | (ReadBits1() << 16);
+
+        }
+        public uint ReadBits18()
+        {
+            return ReadBits16() | (ReadBits2() << 16);
+
+        }
+        public uint ReadBits19()
+        {
+            return ReadBits16() | (ReadBits3() << 16);
+
+        }
+
+        public uint ReadBits20()
+        {
+            return ReadBits16() | (ReadBits4() << 16);
+
+        }
+        public uint ReadBits21()
+        {
+            return ReadBits16() | (ReadBits5() << 16);
+
+        }
+        public uint ReadBits22()
+        {
+            return ReadBits16() | (ReadBits6() << 16);
+        }
+
+        public uint ReadBits23()
+        {
+            return ReadBits16() | (ReadBits7() << 16);
+
+        }
+        public uint ReadBits24()
+        {
+            if (m_currentPosition + 3 > m_lastPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            uint rv = (uint)m_buffer[m_currentPosition] << 16
+                      | (uint)m_buffer[m_currentPosition + 1] << 8
+                      | (uint)m_buffer[m_currentPosition + 2];
+            m_currentPosition += 3;
+            return rv;
+        }
+        public uint ReadBits25()
+        {
+            return ReadBits24() | (ReadBits1() << 24);
+        }
+        public uint ReadBits26()
+        {
+            return ReadBits24() | (ReadBits2() << 24);
+        }
+        public uint ReadBits27()
+        {
+            return ReadBits24() | (ReadBits3() << 24);
+        }
+        public uint ReadBits28()
+        {
+            return ReadBits24() | (ReadBits4() << 24);
+        }
+        public uint ReadBits29()
+        {
+            return ReadBits24() | (ReadBits5() << 24);
+        }
+
+        public uint ReadBits30()
+        {
+            return ReadBits24() | (ReadBits6() << 24);
+        }
+
+        public uint ReadBits31()
+        {
+            return ReadBits24() | (ReadBits7() << 24);
+        }
+
+        public uint ReadBits32()
+        {
+            if (m_currentPosition + 4 > m_lastPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            uint rv = (uint)m_buffer[m_currentPosition] << 24
+                      | (uint)m_buffer[m_currentPosition + 1] << 16
+                      | (uint)m_buffer[m_currentPosition + 2] << 8
+                      | (uint)m_buffer[m_currentPosition + 3];
+            m_currentPosition += 4;
+            return rv;
+        }
+
+        private void ReadMoreBits()
+        {
+            m_bitCount += 8;
+            m_cache = (m_cache << 8) | ReadByte();
+        }
+
+        public ulong Read8BitSegments()
+        {
+            ulong value = 0;
+            int bits = 0;
+            while (ReadBits1() == 1)
+            {
+                value = value | ((ulong)ReadByte() << bits);
+                bits += 8;
+            }
+            return value;
+        }
+
+        #endregion
     }
 }

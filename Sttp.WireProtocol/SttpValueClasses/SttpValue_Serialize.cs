@@ -13,19 +13,19 @@ namespace Sttp
     /// </summary>
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
-        public unsafe void SaveDelta(BitStreamWriter wrBits, ByteWriter wr, SttpValue other)
+        public unsafe void SaveDelta(ByteWriter wr, SttpValue other)
         {
             var value = ValueTypeCode;
             if (other.ValueTypeCode == value)
             {
-                wrBits.WriteBits1(0);
+                wr.WriteBits1(0);
                 switch (value)
                 {
                     case SttpValueTypeCode.Null:
                         break;
                     case SttpValueTypeCode.Int64:
                         //wrBits.Write8BitSegments((ulong)AsInt64);
-                        wrBits.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64, wr);
+                        wr.Write8BitSegments((ulong)AsInt64 ^ (ulong)other.AsInt64);
                         break;
                     case SttpValueTypeCode.Single:
                         {
@@ -50,11 +50,11 @@ namespace Sttp
                     case SttpValueTypeCode.Boolean:
                         if (AsBoolean)
                         {
-                            wrBits.WriteBits1(1);
+                            wr.WriteBits1(1);
                         }
                         else
                         {
-                            wrBits.WriteBits1(0);
+                            wr.WriteBits1(0);
                         }
                         break;
                     case SttpValueTypeCode.Guid:
@@ -78,8 +78,8 @@ namespace Sttp
             }
             else
             {
-                wrBits.WriteBits1(1);
-                wrBits.WriteBits4((uint)value);
+                wr.WriteBits1(1);
+                wr.WriteBits4((uint)value);
                 switch (value)
                 {
                     case SttpValueTypeCode.Null:

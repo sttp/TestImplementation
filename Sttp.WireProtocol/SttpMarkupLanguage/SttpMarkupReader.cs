@@ -25,23 +25,11 @@ namespace Sttp
         private List<NameLookupCache> m_elements = new List<NameLookupCache>();
         private Stack<NameLookupCache> m_elementStack = new Stack<NameLookupCache>();
         private NameLookupCache m_prevName;
-        private BitStreamReader m_bitStream;
 
         internal SttpMarkupReader(byte[] data)
         {
+            m_stream = new ByteReader(data, 0, data.Length);
             Value = new SttpValueMutable();
-            int byteStreamLength = BigEndian.ToInt32(data, 0);
-            int bitStreamLength = BigEndian.ToInt32(data, 4);
-
-            m_stream = new ByteReader(data, 8, data.Length - bitStreamLength - 8);
-            int cnt = m_stream.ReadInt7Bit();
-            while (cnt > 0)
-            {
-                cnt--;
-                m_elements.Add(new NameLookupCache(m_stream.ReadString(), m_elements.Count + 1));
-            }
-
-            m_bitStream = new BitStreamReader(data, m_stream.Position + byteStreamLength + 8, bitStreamLength);
             m_prevName = new NameLookupCache(string.Empty, 0);
         }
 
@@ -61,7 +49,7 @@ namespace Sttp
                 ElementName = CurrentElement;
             }
 
-            NodeType = (SttpMarkupNodeType)m_bitStream.ReadBits2();
+            NodeType = (SttpMarkupNodeType)m_stream.ReadBits2();
             switch (NodeType)
             {
                 case SttpMarkupNodeType.Element:
@@ -69,11 +57,10 @@ namespace Sttp
                     ReadName();
                     m_elementStack.Push(m_prevName);
                     ElementName = m_prevName.Name;
-                    
                     break;
                 case SttpMarkupNodeType.Value:
                     ReadName();
-                    Value.LoadDelta(m_bitStream, m_stream, m_prevName.PrevValue);
+                    Value.LoadDelta(m_stream, m_prevName.PrevValue);
                     m_prevName.PrevValue.SetValue(Value);
                     ValueName = m_prevName.Name;
                     break;
@@ -91,10 +78,19 @@ namespace Sttp
 
         private void ReadName()
         {
-            if (m_bitStream.ReadBits1() != 0)
+            if (m_stream.ReadBits1() == 1)
             {
-                int index = (int)m_bitStream.Read8BitSegments(m_stream);
-                m_prevName.NextNameID = index;
+                if (m_stream.ReadBits1() == 1)
+                {
+                    m_elements.Add(new NameLookupCache(m_stream.ReadString(), m_elements.Count));
+                    m_prevName.NextNameID = m_elements.Count-1;
+                }
+                else
+                {
+                    int index = (int)m_stream.Read8BitSegments();
+                    m_prevName.NextNameID = index;
+                }
+
             }
             m_prevName = m_elements[m_prevName.NextNameID];
         }
