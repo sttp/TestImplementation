@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using Sttp.IO;
+using Sttp.SttpValueClasses;
 
 namespace Sttp
 {
@@ -98,7 +99,7 @@ namespace Sttp
 
             m_stream.WriteBits2((uint)SttpMarkupNodeType.Value);
             WriteName(name);
-            value.SaveDelta(m_stream, m_prevName.PrevValue);
+            SttpValueEncodingDelta.Save(m_stream, value, m_prevName.PrevValue);
             m_prevName.PrevValue.SetValue(value);
         }
 

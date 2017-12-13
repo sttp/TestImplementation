@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Sttp.Codec;
+using Sttp.SttpValueClasses;
 
 namespace Sttp.WireProtocol.SendDataPoints
 {
@@ -90,7 +91,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 m_stream.Write4BitSegments((uint)point.ExtraFields.Length);
                 foreach (var field in point.ExtraFields)
                 {
-                    m_stream.Write(field);
+                    SttpValueEncodingNative.Save(m_stream, field);
                 }
             }
 
@@ -118,7 +119,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 m_lastValueCode = point.Value.ValueTypeCode;
             }
 
-            point.Value.SaveWithoutTypeCode(m_stream);
+            SttpValueEncodingWithoutType.Save(m_stream, point.Value);
         }
     }
 }

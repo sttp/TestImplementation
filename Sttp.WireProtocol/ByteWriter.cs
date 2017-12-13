@@ -119,7 +119,9 @@ namespace Sttp
         public void Write(short value)
         {
             EnsureCapacity(2);
-            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
+            m_buffer[m_position] = (byte)(value >> 8);
+            m_buffer[m_position + 1] = (byte)value;
+            m_position += 2;
         }
 
         public void Write(ushort value)
@@ -139,7 +141,11 @@ namespace Sttp
         public void Write(int value)
         {
             EnsureCapacity(4);
-            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
+            m_buffer[m_position + 0] = (byte)(value >> 24);
+            m_buffer[m_position + 1] = (byte)(value >> 16);
+            m_buffer[m_position + 2] = (byte)(value >> 8);
+            m_buffer[m_position + 3] = (byte)value;
+            m_position += 4;
         }
 
         public void Write(uint value)
@@ -159,7 +165,15 @@ namespace Sttp
         public void Write(long value)
         {
             EnsureCapacity(8);
-            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
+            m_buffer[m_position + 0] = (byte)(value >> 56);
+            m_buffer[m_position + 1] = (byte)(value >> 48);
+            m_buffer[m_position + 2] = (byte)(value >> 40);
+            m_buffer[m_position + 3] = (byte)(value >> 32);
+            m_buffer[m_position + 4] = (byte)(value >> 24);
+            m_buffer[m_position + 5] = (byte)(value >> 16);
+            m_buffer[m_position + 6] = (byte)(value >> 8);
+            m_buffer[m_position + 7] = (byte)value;
+            m_position += 8;
         }
 
         public void Write(ulong value)
@@ -388,11 +402,6 @@ namespace Sttp
             }
         }
 
-        public void Write(SttpValue value)
-        {
-            value.Save(this);
-        }
-
         public void Write(SttpTime value)
         {
             value.Save(this);
@@ -409,20 +418,6 @@ namespace Sttp
             for (var x = 0; x < list.Count; x++)
             {
                 Write(list[x]);
-            }
-        }
-
-        public void Write(List<SttpValue> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
             }
         }
 
@@ -448,6 +443,11 @@ namespace Sttp
             {
                 Write(list[x]);
             }
+        }
+
+        public void Write(SttpBuffer value)
+        {
+            value.Write(this);
         }
 
         public void Write(SttpMarkup value)
@@ -711,8 +711,6 @@ namespace Sttp
             m_buffer[m_position + 3] = (byte)value;
             m_position += 4;
         }
-
-
 
         private void ValidateBitStream()
         {

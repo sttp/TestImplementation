@@ -24,5 +24,10 @@ namespace Sttp
         {
             throw new NotImplementedException();
         }
+
+        public void Write(ByteWriter byteWriter)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

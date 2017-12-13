@@ -13,35 +13,35 @@ namespace Sttp
     /// </summary>
     public abstract partial class SttpValue : IEquatable<SttpValue>
     {
-        public static implicit operator SttpValue(sbyte value)
+        public static explicit operator SttpValue(sbyte value)
         {
             return (SttpValue)(long)value;
         }
-        public static implicit operator SttpValue(short value)
+        public static explicit operator SttpValue(short value)
         {
             return (SttpValue)(long)value;
         }
-        public static implicit operator SttpValue(int value)
+        public static explicit operator SttpValue(int value)
         {
             return (SttpValue)(long)value;
         }
-        public static implicit operator SttpValue(long value)
+        public static explicit operator SttpValue(long value)
         {
             return new SttpValueInt64(value);
         }
-        public static implicit operator SttpValue(byte value)
+        public static explicit operator SttpValue(byte value)
         {
             return (SttpValue)(ulong)value;
         }
-        public static implicit operator SttpValue(ushort value)
+        public static explicit operator SttpValue(ushort value)
         {
             return (SttpValue)(ulong)value;
         }
-        public static implicit operator SttpValue(uint value)
+        public static explicit operator SttpValue(uint value)
         {
             return (SttpValue)(ulong)value;
         }
-        public static implicit operator SttpValue(ulong value)
+        public static explicit operator SttpValue(ulong value)
         {
             if (value > long.MaxValue)
             {
@@ -49,41 +49,41 @@ namespace Sttp
             }
             return (SttpValue)(long)value;
         }
-        public static implicit operator SttpValue(float value)
+        public static explicit operator SttpValue(float value)
         {
             return new SttpValueSingle(value);
         }
-        public static implicit operator SttpValue(double value)
+        public static explicit operator SttpValue(double value)
         {
             return new SttpValueDouble(value);
         }
-        public static implicit operator SttpValue(decimal value)
+        public static explicit operator SttpValue(decimal value)
         {
             return new SttpValueDecimal(value);
         }
-        public static implicit operator SttpValue(DateTime value)
+        public static explicit operator SttpValue(DateTime value)
         {
-            return new SttpTime(value);
+            return (SttpValue)new SttpTime(value);
         }
-        public static implicit operator SttpValue(DateTimeOffset value)
+        public static explicit operator SttpValue(DateTimeOffset value)
         {
-            return new SttpTime(value);
+            return (SttpValue)new SttpTime(value);
         }
-        public static implicit operator SttpValue(SttpTime value)
+        public static explicit operator SttpValue(SttpTime value)
         {
             return new SttpValueSttpTime(value);
         }
-        public static implicit operator SttpValue(bool value)
+        public static explicit operator SttpValue(bool value)
         {
             if (value)
                 return SttpValueBoolean.ValueTrue;
             return SttpValueBoolean.ValueFalse;
         }
-        public static implicit operator SttpValue(Guid value)
+        public static explicit operator SttpValue(Guid value)
         {
             return new SttpValueGuid(value);
         }
-        public static implicit operator SttpValue(string value)
+        public static explicit operator SttpValue(string value)
         {
             if (value == null)
                 return SttpValue.Null;
@@ -91,19 +91,19 @@ namespace Sttp
                 return SttpValueString.EmptyString;
             return new SttpValueString(value);
         }
-        public static implicit operator SttpValue(SttpBuffer value)
+        public static explicit operator SttpValue(SttpBuffer value)
         {
             return new SttpValueSttpBuffer(value);
         }
-        public static implicit operator SttpValue(byte[] value)
+        public static explicit operator SttpValue(byte[] value)
         {
             return new SttpValueSttpBuffer(value);
         }
-        public static implicit operator SttpValue(SttpMarkup value)
+        public static explicit operator SttpValue(SttpMarkup value)
         {
             return new SttpValueSttpMarkup(value);
         }
-        public static implicit operator SttpValue(SttpBulkTransport value)
+        public static explicit operator SttpValue(SttpBulkTransport value)
         {
             return new SttpValueSttpBulkTransport(value);
         }
@@ -205,79 +205,79 @@ namespace Sttp
             var type = value.GetType();
             if (type == typeof(sbyte))
             {
-                return (sbyte)value;
+                return (SttpValue)(sbyte)value;
             }
             else if (type == typeof(short))
             {
-                return (short)value;
+                return (SttpValue)(short)value;
             }
             else if (type == typeof(int))
             {
-                return (int)value;
+                return (SttpValue)(int)value;
             }
             else if (type == typeof(long))
             {
-                return (long)value;
+                return (SttpValue)(long)value;
             }
             else if (type == typeof(byte))
             {
-                return (byte)value;
+                return (SttpValue)(byte)value;
             }
             else if (type == typeof(ushort))
             {
-                return (ushort)value;
+                return (SttpValue)(ushort)value;
             }
             else if (type == typeof(uint))
             {
-                return (uint)value;
+                return (SttpValue)(uint)value;
             }
             else if (type == typeof(ulong))
             {
-                return (ulong)value;
+                return (SttpValue)(ulong)value;
             }
             else if (type == typeof(float))
             {
-                return (float)value;
+                return (SttpValue)(float)value;
             }
             else if (type == typeof(double))
             {
-                return (double)value;
+                return (SttpValue)(double)value;
             }
             else if (type == typeof(decimal))
             {
-                return (decimal)value;
+                return (SttpValue)(decimal)value;
             }
             else if (type == typeof(DateTime))
             {
-                return (DateTime)value;
+                return (SttpValue)(DateTime)value;
             }
             else if (type == typeof(DateTimeOffset))
             {
-                return (DateTimeOffset)value;
+                return (SttpValue)(DateTimeOffset)value;
             }
             else if (type == typeof(SttpTime))
             {
-                return (SttpTime)value;
+                return (SttpValue)(SttpTime)value;
             }
             else if (type == typeof(bool))
             {
-                return (bool)value;
+                return (SttpValue)(bool)value;
             }
             else if (type == typeof(Guid))
             {
-                return (Guid)value;
+                return (SttpValue)(Guid)value;
             }
             else if (type == typeof(string))
             {
-                return (string)value;
+                return (SttpValue)(string)value;
             }
             else if (type == typeof(SttpBuffer))
             {
-                return (SttpBuffer)value;
+                return (SttpValue)(SttpBuffer)value;
             }
             else if (type == typeof(byte[]))
             {
-                return (byte[])value;
+                return (SttpValue)(byte[])value;
             }
             else if (value is SttpValue)
             {
@@ -285,11 +285,11 @@ namespace Sttp
             }
             else if (type == typeof(SttpMarkup))
             {
-                return (SttpMarkup)value;
+                return (SttpValue)(SttpMarkup)value;
             }
             else if (type == typeof(SttpBulkTransport))
             {
-                return (SttpBulkTransport)value;
+                return (SttpValue)(SttpBulkTransport)value;
             }
             else
             {
@@ -298,103 +298,100 @@ namespace Sttp
         }
 
 
-
-
-
         #region [ Nullable Types ]
 
-        public static implicit operator SttpValue(sbyte? value)
+        public static explicit operator SttpValue(sbyte? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return (long)(value.Value);
+            return (SttpValue)(value.Value);
         }
-        public static implicit operator SttpValue(short? value)
+        public static explicit operator SttpValue(short? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return (long)(value.Value);
+            return (SttpValue)(value.Value);
         }
-        public static implicit operator SttpValue(int? value)
+        public static explicit operator SttpValue(int? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return (long)(value.Value);
+            return (SttpValue)(value.Value);
         }
-        public static implicit operator SttpValue(long? value)
+        public static explicit operator SttpValue(long? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return new SttpValueInt64(value.Value);
         }
-        public static implicit operator SttpValue(byte? value)
+        public static explicit operator SttpValue(byte? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return (ulong)(value.Value);
+            return (SttpValue)(value.Value);
         }
-        public static implicit operator SttpValue(ushort? value)
+        public static explicit operator SttpValue(ushort? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return (ulong)(value.Value);
+            return (SttpValue)(value.Value);
         }
-        public static implicit operator SttpValue(uint? value)
+        public static explicit operator SttpValue(uint? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return (ulong)(value.Value);
+            return (SttpValue)(value.Value);
         }
-        public static implicit operator SttpValue(ulong? value)
+        public static explicit operator SttpValue(ulong? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return (SttpValue)(long)(value.Value);
         }
-        public static implicit operator SttpValue(float? value)
+        public static explicit operator SttpValue(float? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return new SttpValueSingle(value.Value);
         }
-        public static implicit operator SttpValue(double? value)
+        public static explicit operator SttpValue(double? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return new SttpValueDouble(value.Value);
         }
-        public static implicit operator SttpValue(decimal? value)
+        public static explicit operator SttpValue(decimal? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return new SttpValueDecimal(value.Value);
         }
-        public static implicit operator SttpValue(DateTime? value)
+        public static explicit operator SttpValue(DateTime? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpTime(value.Value);
+            return (SttpValue)new SttpTime(value.Value);
         }
-        public static implicit operator SttpValue(DateTimeOffset? value)
+        public static explicit operator SttpValue(DateTimeOffset? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
-            return new SttpTime(value.Value);
+            return (SttpValue)new SttpTime(value.Value);
         }
-        public static implicit operator SttpValue(SttpTime? value)
+        public static explicit operator SttpValue(SttpTime? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return new SttpValueSttpTime(value.Value);
         }
-        public static implicit operator SttpValue(bool? value)
+        public static explicit operator SttpValue(bool? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;
             return (SttpValue)(value.Value);
         }
 
-        public static implicit operator SttpValue(Guid? value)
+        public static explicit operator SttpValue(Guid? value)
         {
             if (!value.HasValue)
                 return SttpValue.Null;

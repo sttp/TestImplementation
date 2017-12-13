@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Sttp.IO;
+using Sttp.SttpValueClasses;
 
 namespace Sttp
 {
@@ -60,7 +61,7 @@ namespace Sttp
                     break;
                 case SttpMarkupNodeType.Value:
                     ReadName();
-                    Value.LoadDelta(m_stream, m_prevName.PrevValue);
+                    SttpValueEncodingDelta.Load(m_stream, m_prevName.PrevValue, Value);
                     m_prevName.PrevValue.SetValue(Value);
                     ValueName = m_prevName.Name;
                     break;
@@ -83,7 +84,7 @@ namespace Sttp
                 if (m_stream.ReadBits1() == 1)
                 {
                     m_elements.Add(new NameLookupCache(m_stream.ReadString(), m_elements.Count));
-                    m_prevName.NextNameID = m_elements.Count-1;
+                    m_prevName.NextNameID = m_elements.Count - 1;
                 }
                 else
                 {

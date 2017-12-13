@@ -80,10 +80,7 @@ namespace Sttp
 
         public byte ReadByte()
         {
-            if (m_currentPosition + 1 > m_lastPosition)
-            {
-                ThrowEndOfStreamException();
-            }
+            EnsureCapacity(1);
             byte rv = m_buffer[m_currentPosition];
             m_currentPosition++;
             return rv;
@@ -105,11 +102,8 @@ namespace Sttp
 
         public short ReadInt16()
         {
-            if (m_currentPosition + 2 > m_lastPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            short rv = BigEndian.ToInt16(m_buffer, m_currentPosition);
+            EnsureCapacity(2);
+            short rv = (short)(m_buffer[m_currentPosition] << 8 | m_buffer[m_currentPosition + 1]);
             m_currentPosition += 2;
             return rv;
         }
@@ -134,7 +128,10 @@ namespace Sttp
             {
                 ThrowEndOfStreamException();
             }
-            int rv = BigEndian.ToInt32(m_buffer, m_currentPosition);
+            int rv = m_buffer[m_currentPosition + 0] << 24 |
+                     m_buffer[m_currentPosition + 1] << 16 |
+                     m_buffer[m_currentPosition + 2] << 8 |
+                     m_buffer[m_currentPosition + 3];
             m_currentPosition += 4;
             return rv;
         }
@@ -160,7 +157,14 @@ namespace Sttp
             {
                 ThrowEndOfStreamException();
             }
-            long rv = BigEndian.ToInt64(m_buffer, m_currentPosition);
+            long rv = (long)m_buffer[m_currentPosition + 0] << 56 |
+                      (long)m_buffer[m_currentPosition + 1] << 48 |
+                      (long)m_buffer[m_currentPosition + 2] << 40 |
+                      (long)m_buffer[m_currentPosition + 3] << 32 |
+                      (long)m_buffer[m_currentPosition + 4] << 24 |
+                      (long)m_buffer[m_currentPosition + 5] << 16 |
+                      (long)m_buffer[m_currentPosition + 6] << 8 |
+                      (long)m_buffer[m_currentPosition + 7];
             m_currentPosition += 8;
             return rv;
         }
@@ -345,11 +349,6 @@ namespace Sttp
             return rv;
         }
 
-        public SttpValue ReadSttpValue()
-        {
-            return SttpValue.Load(this);
-        }
-
         public List<int> ReadListInt()
         {
             var rv = new List<int>();
@@ -357,18 +356,6 @@ namespace Sttp
             while (len > 0)
             {
                 rv.Add(ReadInt32());
-                len--;
-            }
-            return rv;
-        }
-
-        public List<SttpValue> ReadListSttpValue()
-        {
-            var rv = new List<SttpValue>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(SttpValue.Load(this));
                 len--;
             }
             return rv;

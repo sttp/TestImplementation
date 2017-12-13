@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sttp.SttpValueClasses;
 
 namespace Sttp.WireProtocol.SendDataPoints
 {
@@ -87,7 +88,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 dataPoint.ExtraFields = new SttpValue[m_stream.Read4BitSegments()];
                 for (int x = 0; x < dataPoint.ExtraFields.Length; x++)
                 {
-                    dataPoint.ExtraFields[x] = SttpValue.Load(m_stream);
+                    dataPoint.ExtraFields[x] = SttpValueEncodingNative.Load(m_stream);
                 }
             }
             else
@@ -118,7 +119,7 @@ namespace Sttp.WireProtocol.SendDataPoints
                 m_lastValueCode = (SttpValueTypeCode)m_stream.ReadBits4();
             }
 
-            dataPoint.Value = SttpValue.LoadWithoutTypeCode(m_stream, m_lastValueCode);
+            dataPoint.Value = SttpValueEncodingWithoutType.Load(m_stream, m_lastValueCode);
             return true;
         }
 

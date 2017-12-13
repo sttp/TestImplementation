@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Sttp.SttpValueClasses;
 
 namespace Sttp.Codec.Metadata
 {
-    public class MetadataCommandBuilder 
+    public class MetadataCommandBuilder
     {
         private PayloadWriter m_stream;
 
@@ -46,14 +47,18 @@ namespace Sttp.Codec.Metadata
         public void DefineRow(SttpValue primaryKey, List<SttpValue> fields)
         {
             m_stream.Write((byte)MetadataSubCommand.DefineRow);
-            m_stream.Write(primaryKey);
-            m_stream.Write(fields);
+            SttpValueEncodingNative.Save(m_stream, primaryKey);
+            m_stream.Write4BitSegments((uint)fields.Count);
+            foreach (var item in fields)
+            {
+                SttpValueEncodingNative.Save(m_stream, item);
+            }
         }
 
         public void UndefineRow(SttpValue primaryKey)
         {
             m_stream.Write((byte)MetadataSubCommand.UndefineRow);
-            m_stream.Write(primaryKey);
+            SttpValueEncodingNative.Save(m_stream, primaryKey);
         }
 
         public void Finished()

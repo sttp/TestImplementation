@@ -1,4 +1,6 @@
-﻿namespace Sttp.Codec.Metadata
+﻿using Sttp.SttpValueClasses;
+
+namespace Sttp.Codec.Metadata
 {
     public class CmdUndefineRow 
     {
@@ -7,7 +9,7 @@
 
         public void Load(PayloadReader reader)
         {
-            PrimaryKey = reader.ReadSttpValue();
+            PrimaryKey = SttpValueEncodingNative.Load(reader);
         }
 
     }
