@@ -31,6 +31,7 @@ namespace Sttp
             m_stream = new ByteReader(data, 0, data.Length);
             Value = new SttpValueMutable();
             m_prevName = new NameLookupCache(string.Empty, 0);
+            NodeType = SttpMarkupNodeType.StartOfDocument;
         }
 
         public int ElementDepth => m_elementStack.Count;
@@ -90,7 +91,6 @@ namespace Sttp
                     int index = (int)m_stream.Read8BitSegments();
                     m_prevName.NextNameID = index;
                 }
-
             }
             m_prevName = m_elements[m_prevName.NextNameID];
         }
@@ -109,11 +109,6 @@ namespace Sttp
                     return string.Empty;
                 return m_elementStack.Peek().Name;
             }
-        }
-
-        public void Reset()
-        {
-            m_stream.Position = 0;
         }
 
     }

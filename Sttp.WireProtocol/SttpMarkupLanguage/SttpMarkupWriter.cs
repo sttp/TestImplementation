@@ -48,6 +48,7 @@ namespace Sttp
         {
             m_endElementHelper = new ElementEndElementHelper(this);
             m_prevName = new NameLookupCache(string.Empty, 0);
+
         }
 
         public string CurrentElement

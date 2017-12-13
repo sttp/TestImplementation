@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sttp.Codec.DataPoint
 {
-    public class Decoder
+    public class BasicDecoder
     {
         private ByteReader m_stream;
         private int m_lastRuntimeID = 0;
@@ -14,7 +14,7 @@ namespace Sttp.Codec.DataPoint
         private byte m_lastValueQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
 
-        public Decoder()
+        public BasicDecoder()
         {
             m_stream = new ByteReader();
         }
@@ -57,6 +57,8 @@ namespace Sttp.Codec.DataPoint
             if (canUseRuntimeID)
             {
                 m_lastRuntimeID ^= (int)(uint)m_stream.Read4BitSegments();
+                if (dataPoint.DataPointID == null)
+                    dataPoint.DataPointID = new SttpDataPointID();
                 dataPoint.DataPointID.RuntimeID = m_lastRuntimeID;
                 dataPoint.DataPointID.IsNull = true;
             }

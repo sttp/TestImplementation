@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
+using Sttp.Codec.DataPoint;
 using Sttp.Codec.Metadata;
 using Sttp.Data;
 
@@ -16,16 +17,8 @@ namespace Sttp.Tests
     public class GetDataTest
     {
         [TestMethod]
-        public void TestLoadFromDataset()
-        {
-            Load();
-        }
-
-        [TestMethod]
         public void TestGetMetadata()
         {
-            var db = Load();
-
             Queue<byte[]> packets = new Queue<byte[]>();
 
             var writer = new WireEncoder();
@@ -33,18 +26,18 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
-            var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup();
-            Console.WriteLine(s.EncodedSize);
-            Console.WriteLine(s.CompressedSize);
-            Console.WriteLine(s.CompressedSize2);
-            Console.WriteLine(s.ToXML());
-
             var markup = new SttpMarkupWriter();
             using (markup.StartElement("Historical"))
             {
                 markup.WriteValue("Start", DateTime.Parse("12/1/2017 1:00 AM"));
-                markup.WriteValue("Stop", DateTime.Parse("12/1/2017 1:01 AM"));
+                markup.WriteValue("Stop", DateTime.Parse("12/1/2017 2:00 AM"));
+                using (markup.StartElement("PointList"))
+                {
+                    markup.WriteValue("ID", 1);
+                    markup.WriteValue("ID", 2);
+                    markup.WriteValue("ID", 3);
+                    markup.WriteValue("ID", 4);
+                }
             }
             writer.DataPointRequest(markup.ToSttpMarkup());
 
@@ -55,20 +48,70 @@ namespace Sttp.Tests
             }
 
             CommandObjects cmd = reader.NextCommand();
-
-            StringBuilder sb = new StringBuilder();
-            cmd.GetMetadata.GetFullOutputString("", sb);
-            Console.WriteLine(sb);
-
             Assert.AreEqual(cmd.CommandCode, CommandCode.DataPointRequest);
+
+            Console.WriteLine(cmd.DataPointRequest.Request.ToXML());
 
             var request = cmd.DataPointRequest.Request.MakeReader().ReadEntireElement();
             DateTime startTime = request.GetValue("Start").AsDateTime;
             DateTime stopTime = request.GetValue("Stop").AsDateTime;
+            var points = request.GetElement("PointList").ForEachValue("ID").Select(x => x.AsInt32).ToList();
 
+            var con = new SqlConnection("Server=phasordb;Database=PhasorValues_5_1PerMin_2017;Trusted_Connection=True;");
+            con.Open();
 
+            var dt = new DataTable();
+            var ta = new SqlDataAdapter($"SELECT [Timestamp],[TermID],[IM_1],[IA_1],[VM_1],[VA_1],[Freq],[DFDT],[Status] FROM [DATA]"
+                + $" where Timestamp between '{startTime}' and '{stopTime}' and TermID in ({string.Join(",", points)})", con);
+            ta.Fill(dt);
+            con.Close();
 
-            db.ProcessCommand(cmd.GetMetadata, writer);
+            var enc = new BasicEncoder(1000);
+            int pointCount = 0;
+            var dataPoint = new SttpDataPoint();
+            foreach (DataRow row in dt.Rows)
+            {
+                var termid = (int)(short)row["TermID"];
+                var time = (DateTime)row["Timestamp"];
+                var vm = (float)row["VM_1"];
+                var va = (float)row["VA_1"];
+                var im = (float)row["IM_1"];
+                var ia = (float)row["IA_1"];
+                var freq = (float)row["Freq"];
+                var dfdt = (float)row["DFDT"];
+                var status = (short)row["Status"];
+
+                dataPoint.DataPointID = new SttpDataPointID();
+                dataPoint.DataPointID.RuntimeID = termid * 10;
+                dataPoint.Time = new SttpTime(time);
+                dataPoint.TimestampQuality = 0;
+                dataPoint.ValueQuality = 0;
+                dataPoint.Value = (SttpValue)vm;
+
+                enc.AddDataPoint(dataPoint);
+                dataPoint.DataPointID.RuntimeID++;
+                dataPoint.Value = (SttpValue)va;
+                enc.AddDataPoint(dataPoint);
+                dataPoint.DataPointID.RuntimeID++;
+                dataPoint.Value = (SttpValue)im;
+                enc.AddDataPoint(dataPoint);
+                dataPoint.DataPointID.RuntimeID++;
+                dataPoint.Value = (SttpValue)ia;
+                enc.AddDataPoint(dataPoint);
+                dataPoint.DataPointID.RuntimeID++;
+                dataPoint.Value = (SttpValue)freq;
+                enc.AddDataPoint(dataPoint);
+                dataPoint.DataPointID.RuntimeID++;
+                dataPoint.Value = (SttpValue)dfdt;
+                enc.AddDataPoint(dataPoint);
+                dataPoint.DataPointID.RuntimeID++;
+                dataPoint.Value = (SttpValue)status;
+                enc.AddDataPoint(dataPoint);
+                pointCount += 7;
+            }
+
+            byte[] d2 = enc.ToArray();
+            writer.DataPointReply(Guid.Empty, true, 0, d2);
 
             while (packets.Count > 0)
             {
@@ -77,78 +120,18 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandCode, CommandCode.Metadata);
+            Assert.AreEqual(cmd.CommandCode, CommandCode.DataPointReply);
 
-            MetadataQueryTable tbl = null;
-            MetadataSubCommandObjects subCmd;
-            while ((subCmd = cmd.Metadata.NextCommand()) != null)
+            var dec = new BasicDecoder();
+            dec.Load(cmd.DataPointReply.Data);
+
+            dataPoint = new SttpDataPoint();
+            while (dec.Read(dataPoint))
             {
-                switch (subCmd.SubCommand)
-                {
-                    case MetadataSubCommand.DefineResponse:
-                        tbl = new MetadataQueryTable(subCmd.DefineResponse);
-                        break;
-                    case MetadataSubCommand.DefineRow:
-                        tbl.ProcessCommand(subCmd.DefineRow);
-                        break;
-                    case MetadataSubCommand.UndefineRow:
-                        tbl.ProcessCommand(subCmd.UndefineRow);
-                        break;
-                    case MetadataSubCommand.Finished:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                Console.WriteLine(dataPoint.ToString());
             }
-
-            var t = tbl.ToTable();
-            MakeCSV(t);
         }
 
-        
-
-        private static SttpQueryStatement BuildRequest(string tableName, params string[] columns)
-        {
-            var s = new SttpQueryStatement();
-            s.DirectTable = tableName;
-
-            for (int x = 0; x < columns.Length; x++)
-            {
-                s.ColumnInputs.Add(new SttpQueryColumn(0, columns[x], x));
-                s.Outputs.Add(new SttpQueryOutputColumns(x, columns[x]));
-            }
-            return s;
-        }
-
-        private static void MakeCSV(DataTable dt)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            IEnumerable<string> columnNames = dt.Columns.Cast<DataColumn>().
-                                                 Select(column => column.ColumnName);
-            sb.AppendLine(string.Join(",", columnNames));
-
-            foreach (DataRow row in dt.Rows)
-            {
-                IEnumerable<string> fields = row.ItemArray.Select(field => string.Concat("\"", field.ToString().Replace("\"", "\"\""), "\""));
-                sb.AppendLine(string.Join(",", fields));
-            }
-
-            File.WriteAllText("c:\\temp\\openPDC-sttp.csv", sb.ToString());
-        }
-
-
-        private MetadataDatabaseSource Load()
-        {
-            DataSet ds = new DataSet("openPDC");
-
-            using (var fs = new FileStream("c:\\temp\\openPDC-sttp.xml", FileMode.Open))
-            {
-                ds.ReadXml(fs);
-            }
-
-            return new MetadataDatabaseSource(ds);
-        }
 
         private byte[] Clone(byte[] data, int pos, int length)
         {

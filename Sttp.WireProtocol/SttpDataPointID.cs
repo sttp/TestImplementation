@@ -196,6 +196,24 @@ namespace Sttp
         }
 
 
+        public override string ToString()
+        {
+            switch (m_valueTypeCode)
+            {
+                case SttpDataPointIDTypeCode.Null:
+                    return "ID: " + RuntimeID + " (null)";
+                case SttpDataPointIDTypeCode.Guid:
+                    return "ID: " + RuntimeID + " " + AsGuid;
+                case SttpDataPointIDTypeCode.String:
+                    return "ID: " + RuntimeID + " " + AsString;
+                case SttpDataPointIDTypeCode.SttpMarkup:
+                    return "ID: " + RuntimeID + " " + AsSttpMarkup.ToXML();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+
 
         #endregion
     }

@@ -99,6 +99,11 @@ namespace Sttp
             throw new NotImplementedException();
         }
 
+        public override string ToString()
+        {
+            return Ticks.ToString();
+        }
+
         public void Save(ByteWriter wr)
         {
             wr.Write(m_upperTicks);

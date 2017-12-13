@@ -6,5 +6,6 @@
         Value,
         EndElement,
         EndOfDocument,
+        StartOfDocument,
     }
 }

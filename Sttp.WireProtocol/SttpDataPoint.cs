@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using Sttp.Codec;
 
 namespace Sttp
@@ -55,6 +56,21 @@ namespace Sttp
         ///   Extra quality bits.
         /// </summary>
         public SttpValue[] ExtraFields;
-        
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(DataPointID.ToString());
+            sb.Append('\t');
+            sb.Append(Time.ToString());
+            sb.Append('\t');
+            sb.Append(Value.ToString());
+            sb.Append('\t');
+            sb.Append(TimestampQuality.ToString());
+            sb.Append('\t');
+            sb.Append(ValueQuality.ToString());
+            return sb.ToString();
+        }
+
     }
 }

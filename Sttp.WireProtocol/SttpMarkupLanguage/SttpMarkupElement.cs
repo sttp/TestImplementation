@@ -14,6 +14,14 @@ namespace Sttp
 
         public SttpMarkupElement(SttpMarkupReader reader)
         {
+            if (reader.NodeType == SttpMarkupNodeType.StartOfDocument)
+            {
+                reader.Read();
+            }
+            while (reader.NodeType == SttpMarkupNodeType.EndElement)
+            {
+                reader.Read();
+            }
             if (reader.NodeType != SttpMarkupNodeType.Element)
                 throw new Exception("Expecting an Element type for the current node.");
             ElementName = reader.ElementName;

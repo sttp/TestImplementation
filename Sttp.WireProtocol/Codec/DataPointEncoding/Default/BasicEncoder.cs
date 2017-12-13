@@ -7,7 +7,7 @@ using Sttp.Codec;
 
 namespace Sttp.Codec.DataPoint
 {
-    public class Encoder
+    public class BasicEncoder
     {
         private int m_maxRuntimeIDCache;
         private ByteWriter m_stream;
@@ -18,7 +18,7 @@ namespace Sttp.Codec.DataPoint
         private byte m_lastValueQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
 
-        public Encoder(int maxRuntimeIDCache)
+        public BasicEncoder(int maxRuntimeIDCache)
         {
             m_maxRuntimeIDCache = maxRuntimeIDCache;
             m_stream = new ByteWriter();
@@ -119,6 +119,11 @@ namespace Sttp.Codec.DataPoint
             }
 
             SttpValueEncodingWithoutType.Save(m_stream, point.Value);
+        }
+
+        public byte[] ToArray()
+        {
+            return m_stream.ToArray();
         }
     }
 }
