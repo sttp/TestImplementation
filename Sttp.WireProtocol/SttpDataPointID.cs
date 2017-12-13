@@ -140,7 +140,7 @@ namespace Sttp
                 {
                     return m_valueObject as SttpMarkup;
                 }
-                throw new InvalidCastException("Value is not a Named Set");
+                throw new InvalidCastException("Value is not SttpMarkup");
             }
             set
             {

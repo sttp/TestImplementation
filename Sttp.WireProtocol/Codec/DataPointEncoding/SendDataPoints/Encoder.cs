@@ -12,10 +12,10 @@ namespace Sttp.WireProtocol.SendDataPoints
         private int m_maxRuntimeIDCache;
         private ByteWriter m_stream;
 
-        int m_lastRuntimeID = 0;
-        SttpTime m_lastTimestamp = default(SttpTime);
-        byte m_lastTimeQuality = 0;
-        byte m_lastValueQuality = 0;
+        private int m_lastRuntimeID = 0;
+        private SttpTime m_lastTimestamp = default(SttpTime);
+        private byte m_lastTimeQuality = 0;
+        private byte m_lastValueQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
 
         public Encoder(int maxRuntimeIDCache)
@@ -31,7 +31,7 @@ namespace Sttp.WireProtocol.SendDataPoints
             m_lastTimeQuality = 0;
             m_lastValueQuality = 0;
             m_lastValueCode = SttpValueTypeCode.Null;
-            m_stream = null;
+            m_stream.Clear();
         }
 
         public void AddDataPoint(SttpDataPoint point)

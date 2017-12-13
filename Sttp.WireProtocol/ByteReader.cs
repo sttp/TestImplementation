@@ -558,7 +558,7 @@ namespace Sttp
             {
                 ThrowEndOfStreamException();
             }
-            uint rv = (uint)m_buffer[m_currentPosition] << 8 
+            uint rv = (uint)m_buffer[m_currentPosition] << 8
                     | (uint)m_buffer[m_currentPosition + 1];
             m_currentPosition += 2;
             return rv;
@@ -670,6 +670,17 @@ namespace Sttp
             {
                 value = value | ((ulong)ReadByte() << bits);
                 bits += 8;
+            }
+            return value;
+        }
+        public ulong Read4BitSegments()
+        {
+            ulong value = 0;
+            int bits = 0;
+            while (ReadBits1() == 1)
+            {
+                value = value | ((ulong)ReadBits4() << bits);
+                bits += 4;
             }
             return value;
         }
