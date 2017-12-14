@@ -49,71 +49,23 @@ namespace Sttp.Codec
         NextFragment,
 
         /// <summary>
-        /// Queries metadata from the server.
-        /// 
-        /// Payload:
-        /// Guid schemaVersion,                 - Can be Guid.Empty. If not empty an error is returned if the schema has changed and the client is out of sync.
-        /// long revision,                      - The revisionID that the database was on. Ignored if IsUpdateQuery is false.
-        /// bool isUpdateQuery                  - Specifies that this query should only be run on rows that have been modified since the specified revision.
-        /// SttpQueryExpression expression      - An sttp query expression.
-        /// 
-        /// Response:
-        /// VersionNotCompatible                - If SchemaVersion does not match the current one, or if revision is too old to do an update query on.
-        /// 
-        /// OR
-        /// 
-        /// DefineResponseSchema                - Defines the response Table
-        /// DefineRow                           - Defines a row of the data
-        /// UndefineRow                         - For update queries, indicates this row should be removed if it exists.
-        /// Finished                            - Indicates that the streaming of the table has completed.
-        /// 
-        /// Note: this response can span multiple packets
-        /// 
+        /// Requests metadata from the server.
         /// </summary>
         GetMetadata,
 
         /// <summary>
-        /// Request the metadata schema if it has changed since the specified version.
-        /// 
-        /// Payload:
-        /// Guid schemaVersion,                 - If a schema mismatch occurs, The entire schema is serialized. Specify Guid.Empty to get a full schema.
-        /// long revision,                      - The revision that is cached on the client.
-        /// 
-        /// Response:
-        /// MetadataSchema schema
-        /// 
+        /// Supplies metadata. Can be solicited or unsolicited.
         /// </summary>
-        GetMetadataSchema,
-
         Metadata,
 
         /// <summary>
-        /// The current metadata schema, or an update if updates were requested.
-        /// </summary>
-        MetadataSchema,
-        MetadataSchemaUpdate,
-
-        MetadataVersionNotCompatible,
-
-        /// <summary>
-        /// Updates the real-time subscription for new measurements. 
-        /// 
-        /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as priority; dead-banding.
-      
-        /// Payload: 
-        /// SubscribeMode { Replace Existing Subscribe | Remove Subscription | Append Subscription }
-        /// SttpPointID[] Points
-        /// SttpNamedSet options
-        /// 
-        /// Success/Failed
-        /// 
+        /// Commands for the real-time subscription data point stream. 
         /// </summary>
         Subscription,
 
         /// <summary>
-        /// Sends a series of DataPoints as a single packet. 
-        /// The encoding of this packet can be rather complex therefore the wire protocol 
-        /// will only deal with a buffer
+        /// Streaming of real-time data. This command is extremely simplified since 
+        /// the payload for this kind of data is small, so overhead is more costly.
         /// 
         /// Payload:
         /// byte encodingMethod 
@@ -123,43 +75,15 @@ namespace Sttp.Codec
         SubscriptionStream,
 
         /// <summary>
-        /// Initiates a request/reply for historical queries of data points.
-        /// 
-        /// Subcommand: ConfigureOptions        - Defines options for the measurements about to be selected. Such as start/stop times; sample resolution.
-        /// Subcommand: AllDataPoints           - Subscribes to everything
-        /// Subcommand: DataPointByID           - Specifies individual data points
-        /// Subcommand: ByQuery                 - Specifies some kind of query to use to select the measurements.
-        /// 
-        /// Success/Failed
-        /// 
+        /// Response to a request/reply method of getting data.
         /// </summary>
-        DataPointRequest,
+        DataPoints,
 
         /// <summary>
-        /// Sends a series of DataPoints as a single packet. 
-        /// The encoding of this packet can be rather complex therefore the wire protocol 
-        /// will only deal with a buffer
-        /// 
-        /// Payload:
-        /// Guid RequestID
-        /// bool IsEndOfResponse
-        /// byte encodingMethod 
-        /// byte[] Data;
-        /// 
+        /// An out of bounds request for specific data. 
+        /// This is formatted as request/reply as compared to streaming data.
         /// </summary>
-        DataPointReply,
-
-        /// <summary>
-        /// Registers a new data point identifier. 
-        /// 
-        /// To minimize the size of SttpDataPackets, their identifiers should be converted into RuntimeIDs. There are a configurable number of 
-        /// runtime IDs that can be mapped, therefore all identifiers do not have to be mapped.
-        /// 
-        /// Payload:
-        /// List<SttpPointID> Points;
-        /// 
-        /// </summary>
-        MapRuntimeIDs,
+        GetDataPoints,
 
         /// <summary>
         /// Negotiates session variables and roles.
@@ -167,74 +91,23 @@ namespace Sttp.Codec
         NegotiateSession,
 
         /// <summary>
-        /// The specified request failed. 
-        /// 
-        /// Payload: 
-        /// CommandCode FailedCommand   - The command code that failed.
-        /// bool TerminateConnection    - Indicates that the connection should be terminated for a failure.
-        /// string Reason               - A user friendly message for the failure, can be null.
-        /// string Details              - A not so friendly message more helpful for troubleshooters.
+        /// A unsolicited or feedback message for a recent command.
         /// </summary>
-        RequestFailed,
-
-        /// <summary>
-        /// The specified request Succeeded. 
-        /// 
-        /// Payload: 
-        /// CommandCode SuccessCommand  - The command code that succeeded.
-        /// string Reason               - A user friendly message for the success, can be null.
-        /// string Details              - A not so friendly message more helpful for troubleshooters.
-        /// </summary>
-        RequestSucceeded,
-
-        /// <summary>
-        /// Notifies that a new bulk transport packet is pending to be sent over the wire.
-        /// 
-        /// Payload:
-        /// Guid ID,
-        /// BulkTransportMode mode,
-        /// BulkTransportCompression compression,
-        /// ulong OrigionalSize,
-        /// byte[] Data
-        /// </summary>
-        BulkTransportBeginSend,
+        Message,
       
+        /// <summary>
+        /// A request for data that would be considered as a large object
+        /// </summary>
+        GetLargeObject,
 
         /// <summary>
-        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
-        /// 
-        /// Payload: 
-        /// Guid ID,
+        /// Replies to large object requests
         /// </summary>
-        BulkTransportCancelSend,
+        LargeObject,
 
         /// <summary>
-        /// Indicates that the pending bulk transfer is to be canceled. Can be sent in either direction.
-        /// 
-        /// Payload: 
-        /// Guid ID,
-        /// long StartingPosition,
-        /// long Length
+        /// A keep-alive packet that can also notify a client of state changes.
         /// </summary>
-        BulkTransportRequest,
-
-        /// <summary>
-        /// Sends a fragment for the previously defined bulk transport. 
-        /// 
-        /// Payload: 
-        /// Guid ID,
-        /// ulong bytesRemaining 
-        /// byte[] Data
-        /// </summary>
-        BulkTransportSendFragment,
-
-        /// <summary>
-        /// A keep-alive packet.
-        /// 
-        /// Payload: 
-        /// bool ShouldEcho              - Indicates if this packet should be echoed back. 
-        /// 
-        /// </summary>
-        NoOp = 0xFF,
+        Heartbeat = 0xFF,
     }
 }

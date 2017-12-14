@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using Ionic.Zlib;
+using OGE.Core.Aced;
 using Sttp.IO;
 using CompressionMode = System.IO.Compression.CompressionMode;
 using DeflateStream = System.IO.Compression.DeflateStream;
@@ -7,110 +9,18 @@ using DeflateStream = System.IO.Compression.DeflateStream;
 namespace Sttp.Codec
 {
     /// <summary>
-    /// Responsible for encoding each command into bytes
+    /// Takes a command and payload and encodes it as a packet. This class will ensure that a large command
+    /// is compressed and fragmented so the encoded data is never larger than the maximum packet size.
     /// </summary>
     public class CommandEncoder
     {
-        /// <summary>
-        /// Occurs when a packet of data must be sent on the wire. This is called immediately
-        /// after completing a Packet;
-        /// </summary>
-        public event Action<byte[], int, int> NewPacket;
-
-        //private DataPointEncoder m_dataPoint;
         private SessionDetails m_sessionDetails;
+        private Action<byte[], int, int> m_sendPacket;
 
-        private byte[] m_buffer;
-
-        /// <summary>
-        /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
-        /// </summary>
-        public CommandEncoder()
+        public CommandEncoder(SessionDetails sessionDetails, Action<byte[], int, int> sendPacket)
         {
-            m_sessionDetails = new SessionDetails();
-            m_buffer = new byte[64];
-        }
-
-        private void SendNewPacket(byte[] buffer, int position, int length)
-        {
-            NewPacket?.Invoke(buffer, position, length);
-        }
-
-        public void GetLargeObject(SttpMarkup request)
-        {
-            Send(CommandCode.GetLargeObject, request);
-        }
-
-        public void LargeObject(SttpMarkup reply)
-        {
-            Send(CommandCode.LargeObject, reply);
-        }
-
-        public void GetDataPoints(SttpMarkup reply)
-        {
-            Send(CommandCode.GetDataPoints, reply);
-        }
-
-        public void DataPoints(SttpMarkup request)
-        {
-            Send(CommandCode.DataPoints, request);
-        }
-
-        public void Subscription(SttpMarkup request)
-        {
-            Send(CommandCode.Subscription, request);
-        }
-
-        public void GetMetadata(SttpMarkup request)
-        {
-            Send(CommandCode.GetMetadata, request);
-        }
-
-        public void Metadata(SttpMarkup reply)
-        {
-            Send(CommandCode.Metadata, reply);
-        }
-
-        public void NegotiateSession(SttpMarkup config)
-        {
-            Send(CommandCode.NegotiateSession, config);
-        }
-
-        public void Heartbeat(SttpMarkup details)
-        {
-            Send(CommandCode.Heartbeat, details);
-        }
-
-        public void Message(SttpMarkup message)
-        {
-            Send(CommandCode.Message, message);
-        }
-
-        public void SubscriptionStream(byte encodingMethod, byte[] buffer, int position, int length)
-        {
-            buffer.ValidateParameters(position, length);
-            EnsureCapacity(15 + 1 + length);
-            m_buffer[15] = encodingMethod;
-            Array.Copy(buffer, position, m_buffer, 16, length);
-            EncodeAndSend(CommandCode.SubscriptionStream, m_buffer, 15, length + 1);
-        }
-
-        private void Send(CommandCode code, SttpMarkup data)
-        {
-            EnsureCapacity(15 + data.Length);
-            data.CopyTo(m_buffer, 15);
-            EncodeAndSend(code, m_buffer, 15, data.Length);
-        }
-
-        private void EnsureCapacity(int bufferSize)
-        {
-            if (m_buffer.Length < bufferSize)
-            {
-                //12% larger than the requested buffer size.
-                byte[] newBuffer = new byte[bufferSize + (bufferSize >> 3)];
-                m_buffer.CopyTo(newBuffer, 0);
-                m_buffer = newBuffer;
-            }
+            m_sessionDetails = sessionDetails;
+            m_sendPacket = sendPacket;
         }
 
         /// <summary>
@@ -122,7 +32,7 @@ namespace Sttp.Codec
         /// since this class modifies the input to put the header before the payload.</param>
         /// <param name="offset"></param>
         /// <param name="length"></param>
-        private void EncodeAndSend(CommandCode command, byte[] payload, int offset, int length)
+        public void EncodeAndSend(CommandCode command, byte[] payload, int offset, int length)
         {
             if (offset < 15)
                 throw new Exception("There must be at least 15 bytes before the start of the byte[] buffer as a working space");
@@ -146,7 +56,7 @@ namespace Sttp.Codec
                 payload[offset - 3] = (byte)command;
                 payload[offset - 2] = (byte)(length >> 8);
                 payload[offset - 1] = (byte)(length);
-                SendNewPacket(payload, offset - 3, length + 3);
+                m_sendPacket(payload, offset - 3, length + 3);
             }
             else
             {
@@ -194,7 +104,7 @@ namespace Sttp.Codec
             data[offset - Overhead + 8] = (byte)(command);
             data[offset - Overhead + 9] = (byte)(compressionMode);
 
-            SendNewPacket(data, offset - Overhead - 3, fragmentLength + Overhead + 3);
+            m_sendPacket(data, offset - Overhead - 3, fragmentLength + Overhead + 3);
 
             offset += fragmentLength;
             length -= fragmentLength;
@@ -207,10 +117,11 @@ namespace Sttp.Codec
                 data[offset - 2] = (byte)(fragmentLength >> 8);
                 data[offset - 1] = (byte)(fragmentLength);
 
-                SendNewPacket(data, offset - 3, fragmentLength + 3);
+                m_sendPacket(data, offset - 3, fragmentLength + 3);
                 offset += fragmentLength;
                 length -= fragmentLength;
             }
+
         }
 
     }

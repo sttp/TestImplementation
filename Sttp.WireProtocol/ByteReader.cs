@@ -320,42 +320,6 @@ namespace Sttp
             return rv;
         }
 
-        public List<MetadataSchemaTables> ReadListMetadataSchemaTables()
-        {
-            var rv = new List<MetadataSchemaTables>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new MetadataSchemaTables(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<MetadataSchemaTableUpdate> ReadListMetadataSchemaTableUpdate()
-        {
-            var rv = new List<MetadataSchemaTableUpdate>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new MetadataSchemaTableUpdate(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<MetadataColumn> ReadListMetadataColumn()
-        {
-            var rv = new List<MetadataColumn>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new MetadataColumn(this));
-                len--;
-            }
-            return rv;
-        }
-
         public List<int> ReadListInt()
         {
             var rv = new List<int>();
@@ -390,18 +354,6 @@ namespace Sttp
         public SttpMarkup ReadSttpMarkup()
         {
             return new SttpMarkup(this);
-        }
-
-        public List<MetadataForeignKey> ReadListMetadataForeignKey()
-        {
-            var rv = new List<MetadataForeignKey>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new MetadataForeignKey(this));
-                len--;
-            }
-            return rv;
         }
 
         public SttpBuffer ReadSttpBuffer()

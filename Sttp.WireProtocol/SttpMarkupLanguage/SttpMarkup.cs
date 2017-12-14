@@ -32,6 +32,13 @@ namespace Sttp
             return new SttpMarkupReader(m_data);
         }
 
+        public int Length => m_data.Length;
+
+        public void CopyTo(byte[] buffer, int offset)
+        {
+            Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
+        }
+
         public string ToXML()
         {
             var reader = MakeReader();

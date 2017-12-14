@@ -330,65 +330,7 @@ namespace Sttp
 
         #endregion
 
-        public void Write(List<MetadataColumn> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<MetadataForeignKey> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-
-
         public void Write(List<SttpDataPointID> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<MetadataSchemaTables> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
-        public void Write(List<MetadataSchemaTableUpdate> list)
         {
             if (list == null)
             {
