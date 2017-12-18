@@ -12,6 +12,16 @@ namespace Sttp.Codec
         public bool AreUpdateQueries;
         public List<SttpQueryBase> Queries;
 
+        public CommandGetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryBase> queries)
+            : base("GetMetadata")
+        {
+            RequestID = requestID;
+            SchemaVersion = schemaVersion;
+            Revision = revision;
+            AreUpdateQueries = areUpdateQueries;
+            Queries = new List<SttpQueryBase>(queries);
+        }
+
         public CommandGetMetadata(SttpMarkupReader reader)
             : base("GetMetadata")
         {

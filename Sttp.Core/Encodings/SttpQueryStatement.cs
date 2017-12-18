@@ -474,5 +474,12 @@ namespace Sttp
                 }
             }
         }
+
+        public SttpMarkup ToSttpMarkup()
+        {
+            var sml = new SttpMarkupWriter();
+            Save(sml);
+            return sml.ToSttpMarkup();
+        }
     }
 }

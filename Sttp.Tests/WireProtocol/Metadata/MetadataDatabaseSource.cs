@@ -43,7 +43,7 @@ namespace Sttp.Tests
             }
 
             CommandObjects cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandCode, CommandCode.GetMetadataSchema);
+            Assert.AreEqual(cmd.CommandName, "GetMetadataSchema");
             Assert.AreEqual(cmd.GetMetadataSchema.SchemaVersion, Guid.Empty);
             Assert.AreEqual(cmd.GetMetadataSchema.Revision, 0L);
 
@@ -56,11 +56,9 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandCode, CommandCode.MetadataSchema);
+            Assert.AreEqual(cmd.CommandName, "MetadataSchema");
 
-            StringBuilder sb = new StringBuilder();
-            cmd.MetadataSchema.GetFullOutputString("", sb);
-            Console.WriteLine(sb);
+            Console.WriteLine(cmd.ToXMLString());
         }
 
         [TestMethod]
@@ -76,13 +74,14 @@ namespace Sttp.Tests
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
-            var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray()).ToSttpMarkup();
-            Console.WriteLine(s.EncodedSize);
-            Console.WriteLine(s.CompressedSize);
-            Console.WriteLine(s.CompressedSize2);
-            Console.WriteLine(s.ToXML());
+            var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
+            var s2 = s.ToSttpMarkup();
+            Console.WriteLine(s2.EncodedSize);
+            Console.WriteLine(s2.CompressedSize);
+            Console.WriteLine(s2.CompressedSize2);
+            Console.WriteLine(s2.ToXML());
 
-            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s);
+            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
 
             while (packets.Count > 0)
             {
@@ -91,12 +90,9 @@ namespace Sttp.Tests
             }
 
             CommandObjects cmd = reader.NextCommand();
+            Console.WriteLine(cmd.ToXMLString());
 
-            StringBuilder sb = new StringBuilder();
-            cmd.GetMetadata.GetFullOutputString("", sb);
-            Console.WriteLine(sb);
-
-            Assert.AreEqual(cmd.CommandCode, CommandCode.GetMetadata);
+            Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
             db.ProcessCommand(cmd.GetMetadata, writer);
 
@@ -107,7 +103,7 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandCode, CommandCode.Metadata);
+            Assert.AreEqual(cmd.CommandName, "Metadata");
 
             MetadataQueryTable tbl = null;
             MetadataSubCommandObjects subCmd;
@@ -164,7 +160,7 @@ namespace Sttp.Tests
             Console.WriteLine(s2.CompressedSize2);
             Console.WriteLine(s2.ToXML());
 
-            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, s2);
+            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
 
             while (packets.Count > 0)
             {
@@ -174,11 +170,9 @@ namespace Sttp.Tests
 
             CommandObjects cmd = reader.NextCommand();
 
-            StringBuilder sb = new StringBuilder();
-            cmd.GetMetadata.GetFullOutputString("", sb);
-            Console.WriteLine(sb);
+            Console.WriteLine(cmd.ToXMLString());
 
-            Assert.AreEqual(cmd.CommandCode, CommandCode.GetMetadata);
+            Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
             db.ProcessCommand(cmd.GetMetadata, writer);
 
@@ -189,7 +183,7 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandCode, CommandCode.Metadata);
+            Assert.AreEqual(cmd.CommandName, "Metadata");
 
             MetadataQueryTable tbl = null;
             MetadataSubCommandObjects subCmd;

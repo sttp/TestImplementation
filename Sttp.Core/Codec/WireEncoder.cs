@@ -110,30 +110,15 @@ namespace Sttp.Codec
         //    m_encoder.LargeObject(request);
         //}
 
-        //public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, SttpMarkup queries)
-        //{
+        public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryBase> queries)
+        {
+            m_encoder.SendMarkupCommand(new CommandGetMetadata(requestID,schemaVersion, revision, areUpdateQueries, queries));
+        }
 
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("GetMetadata"))
-        //    {
-        //        sml.WriteValue("RequestID", requestID);
-        //        sml.WriteValue("SchemaVersion", schemaVersion);
-        //        sml.WriteValue("Revision", revision);
-        //        sml.WriteValue("AreUpdateQueries", areUpdateQueries);
-
-        //        using (sml.StartElement("Queries"))
-        //        {
-        //            sml.UnionWith(queries);
-        //        }
-        //    }
-        //    m_encoder.GetMetadata(sml.ToSttpMarkup());
-        //}
-
-        //public void GetMetadataSchema(Guid schemaVersion, long revision)
-        //{
-        //    var metadataSchema = new CommandGetMetadataSchema(schemaVersion, revision);
-        //    m_encoder.SendCommand(metadataSchema);
-        //}
+        public void GetMetadataSchema(Guid schemaVersion, long revision)
+        {
+            m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(schemaVersion, revision));
+        }
 
         //public void MapRuntimeIDs(List<SttpDataPointID> points)
         //{

@@ -188,7 +188,7 @@ namespace Sttp.Publisher
 
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
-            m_wireDecoder.WriteData(buffer, startIndex, length);
+            m_wireDecoder.FillBuffer(buffer, startIndex, length);
             var packet = m_wireDecoder.NextCommand();
             while (packet != null)
             {
@@ -292,14 +292,14 @@ namespace Sttp.Publisher
                     //    break;
                     //case DecoderCallback.EndOfMessages:
                     //    break;
-                    case CommandCode.NegotiateSession:
-                        break;
-                    case CommandCode.Subscription:
-                        break;
-                    case CommandCode.MapRuntimeIDs:
-                        break;
-                    case CommandCode.NoOp:
-                        break;
+                    //case CommandCode.NegotiateSession:
+                    //    break;
+                    //case CommandCode.Subscription:
+                    //    break;
+                    //case CommandCode.MapRuntimeIDs:
+                    //    break;
+                    //case CommandCode.NoOp:
+                    //    break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
