@@ -18,7 +18,6 @@ namespace Sttp.Codec
         private SessionDetails m_sessionDetails;
         private Metadata.MetadataCommandBuilder m_metadata;
         private CommandEncoder m_encoder;
-        private PayloadWriter m_stream;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -26,8 +25,7 @@ namespace Sttp.Codec
         public WireEncoder()
         {
             m_sessionDetails = new SessionDetails();
-            m_encoder = new CommandEncoder(m_sessionDetails, SendNewPacket);
-            m_stream = new PayloadWriter(m_encoder);
+            m_encoder = new CommandEncoder();
             m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
         }
 
@@ -46,183 +44,233 @@ namespace Sttp.Codec
             NewPacket?.Invoke(buffer, position, length);
         }
 
-        public void BulkTransportRequest(Guid id,long startingPosition, long length)
+        public void BulkTransportRequest(Guid id, long startingPosition, long length)
         {
-            m_stream.Clear();
-            m_stream.Write(id);
-            m_stream.Write(startingPosition);
-            m_stream.Write(length);
-            m_stream.Send(CommandCode.BulkTransportRequest);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("BulkTransportRequest"))
+            {
+                sml.WriteValue("ID", id);
+                sml.WriteValue("StartingPosition", startingPosition);
+                sml.WriteValue("Length", length);
+            }
+            m_encoder.GetLargeObject(sml.ToSttpMarkup());
         }
 
-        public void BulkTransportBeginSend(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, long position, int length)
+        public void BulkTransportBeginSend(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, int position, int length)
         {
-            m_stream.Clear();
-            m_stream.Write(id);
-            m_stream.Write((byte)mode);
-            m_stream.Write((byte)compression);
-            m_stream.Write(originalSize);
-            m_stream.Write(source, position, length);
-            m_stream.Send(CommandCode.BulkTransportBeginSend);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("BulkTransportBeginSend"))
+            {
+                sml.WriteValue("ID", id);
+                sml.WriteValue("BulkTransportMode", mode.ToString());
+                sml.WriteValue("BulkTransportCompression", compression.ToString());
+                sml.WriteValue("OriginalSize", originalSize);
+                sml.WriteValue("Data", source, position, length);
+            }
+            m_encoder.LargeObject(sml.ToSttpMarkup());
         }
 
         public void BulkTransportCancelSend(Guid id)
         {
-            m_stream.Clear();
-            m_stream.Write(id);
-            m_stream.Send(CommandCode.BulkTransportCancelSend);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("BulkTransportCancelSend"))
+            {
+                sml.WriteValue("ID", id);
+            }
+            m_encoder.GetLargeObject(sml.ToSttpMarkup());
         }
 
-        public void BulkTransportSendFragment(Guid id, long bytesRemaining, byte[] content, long position, int length)
+        public void BulkTransportSendFragment(Guid id, long bytesRemaining, byte[] content, int position, int length)
         {
-            m_stream.Clear();
-            m_stream.Write(id);
-            m_stream.Write(bytesRemaining);
-            m_stream.Write(content, position, length);
-            m_stream.Send(CommandCode.BulkTransportSendFragment);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("BulkTransportSendFragment"))
+            {
+                sml.WriteValue("ID", id);
+                sml.WriteValue("bytesRemaining", bytesRemaining);
+                sml.WriteValue("Data", content, position, length);
+            }
+            m_encoder.LargeObject(sml.ToSttpMarkup());
         }
 
         public void DataPointReply(Guid requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
         {
-            m_stream.Clear();
-            m_stream.Write(requestID);
-            m_stream.Write(isEndOfResponse);
-            m_stream.Write(encodingMethod);
-            m_stream.Write(buffer);
-            m_stream.Send(CommandCode.DataPointReply);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("DataPointReply"))
+            {
+                sml.WriteValue("RequestID", requestID);
+                sml.WriteValue("IsEndOfResponse", isEndOfResponse);
+                sml.WriteValue("EncodingMethod", encodingMethod);
+                sml.WriteValue("Data", buffer);
+            }
+            m_encoder.LargeObject(sml.ToSttpMarkup());
         }
 
         public void DataPointRequest(SttpMarkup request)
         {
-            m_stream.Clear();
-            m_stream.Write(request);
-            m_stream.Send(CommandCode.DataPointRequest);
+            m_encoder.LargeObject(request);
         }
 
         public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, SttpMarkup queries)
         {
-            m_stream.Clear();
-            m_stream.Write(requestID);
-            m_stream.Write(schemaVersion);
-            m_stream.Write(revision);
-            m_stream.Write(areUpdateQueries);
-            m_stream.Write(queries);
-            m_stream.Send(CommandCode.GetMetadata);
+
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("GetMetadata"))
+            {
+                sml.WriteValue("RequestID", requestID);
+                sml.WriteValue("SchemaVersion", schemaVersion);
+                sml.WriteValue("Revision", revision);
+                sml.WriteValue("AreUpdateQueries", areUpdateQueries);
+
+                using (sml.StartElement("Queries"))
+                {
+                    sml.UnionWith(queries);
+                }
+            }
+            m_encoder.GetMetadata(sml.ToSttpMarkup());
         }
 
         public void GetMetadataSchema(Guid schemaVersion, long revision)
         {
-            m_stream.Clear();
-            m_stream.Write(schemaVersion);
-            m_stream.Write(revision);
-            m_stream.Send(CommandCode.GetMetadataSchema);
+            var metadataSchema = new CommandGetMetadataSchema(schemaVersion, revision);
+            m_encoder.SendCommand(metadataSchema);
         }
 
         public void MapRuntimeIDs(List<SttpDataPointID> points)
         {
-            m_stream.Clear();
-            m_stream.Write(points.Count);
-            foreach (var point in points)
-            {
-                m_stream.Write(point.RuntimeID);
-                m_stream.Write((byte)point.ValueTypeCode);
-                switch (point.ValueTypeCode)
-                {
-                    case SttpDataPointIDTypeCode.Null:
-                        throw new InvalidOperationException("A registered pointID cannot be null");
-                    case SttpDataPointIDTypeCode.Guid:
-                        m_stream.Write(point.AsGuid);
-                        break;
-                    case SttpDataPointIDTypeCode.String:
-                        m_stream.Write(point.AsString);
-                        break;
-                    case SttpDataPointIDTypeCode.SttpMarkup:
-                        m_stream.Write(point.AsSttpMarkup);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            m_stream.Send(CommandCode.MapRuntimeIDs);
+            throw new NotImplementedException();
+            //Need some more work here. there's probably some kind of request/reply or sent with data point stream.
+
+            //m_stream.Clear();
+            //m_stream.Write(points.Count);
+            //foreach (var point in points)
+            //{
+            //    m_stream.Write(point.RuntimeID);
+            //    m_stream.Write((byte)point.ValueTypeCode);
+            //    switch (point.ValueTypeCode)
+            //    {
+            //        case SttpDataPointIDTypeCode.Null:
+            //            throw new InvalidOperationException("A registered pointID cannot be null");
+            //        case SttpDataPointIDTypeCode.Guid:
+            //            m_stream.Write(point.AsGuid);
+            //            break;
+            //        case SttpDataPointIDTypeCode.String:
+            //            m_stream.Write(point.AsString);
+            //            break;
+            //        case SttpDataPointIDTypeCode.SttpMarkup:
+            //            m_stream.Write(point.AsSttpMarkup);
+            //            break;
+            //        default:
+            //            throw new ArgumentOutOfRangeException();
+            //    }
+            //}
+            //m_stream.Send(CommandCode.MapRuntimeIDs);
         }
 
         public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
         {
-            m_stream.Clear();
-            m_stream.Write(schemaVersion);
-            m_stream.Write(revision);
-            m_stream.Write(tables);
-            m_stream.Send(CommandCode.MetadataSchema);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("MetadataSchema"))
+            {
+                sml.WriteValue("SchemaVersion", schemaVersion);
+                sml.WriteValue("Revision", revision);
+                using (sml.StartElement("Tables"))
+                {
+                    foreach (var table in tables)
+                    {
+                        table.Save(sml);
+                    }
+                }
+            }
+            m_encoder.Metadata(sml.ToSttpMarkup());
         }
 
         public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<MetadataSchemaTableUpdate> tables)
         {
-            m_stream.Clear();
-            m_stream.Write(schemaVersion);
-            m_stream.Write(revision);
-            m_stream.Write(updatedFromRevision);
-            m_stream.Write(tables);
-            m_stream.Send(CommandCode.MetadataSchemaUpdate);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("MetadataSchemaUpdate"))
+            {
+                sml.WriteValue("SchemaVersion", schemaVersion);
+                sml.WriteValue("Revision", revision);
+                sml.WriteValue("UpdatedFromRevision", updatedFromRevision);
+                using (sml.StartElement("Tables"))
+                {
+                    foreach (var table in tables)
+                    {
+                        table.Save(sml);
+                    }
+                }
+            }
+            m_encoder.Metadata(sml.ToSttpMarkup());
         }
 
         public void MetadataVersionNotCompatible()
         {
-            m_stream.Clear();
-            m_stream.Send(CommandCode.MetadataVersionNotCompatible);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("MetadataVersionNotCompatible"))
+            {
+            }
+            m_encoder.Metadata(sml.ToSttpMarkup());
         }
 
         public void NegotiateSession(SttpMarkup config)
         {
-            m_stream.Clear();
-            m_stream.Write(config);
-            m_stream.Send(CommandCode.NegotiateSession);
+            m_encoder.NegotiateSession(config);
         }
 
         public void NoOp(bool shouldEcho)
         {
-            m_stream.Clear();
-            m_stream.Write(shouldEcho);
-            m_stream.Send(CommandCode.NoOp);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("NoOp"))
+            {
+                sml.WriteValue("ShouldEcho", shouldEcho);
+
+            }
+            m_encoder.Heartbeat(sml.ToSttpMarkup());
         }
 
         public void RequestFailed(CommandCode failedCommand, bool terminateConnection, string reason, string details)
         {
-            m_stream.Clear();
-            m_stream.Write((byte)failedCommand);
-            m_stream.Write(terminateConnection);
-            m_stream.Write(reason);
-            m_stream.Write(details);
-            m_stream.Send(CommandCode.RequestFailed);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("RequestFailed"))
+            {
+                sml.WriteValue("CommandCode", failedCommand.ToString());
+                sml.WriteValue("TerminateConnection", terminateConnection);
+                sml.WriteValue("Reason", reason);
+                sml.WriteValue("Details", details);
+            }
+            m_encoder.Message(sml.ToSttpMarkup());
         }
 
         public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
         {
-            m_stream.Clear();
-            m_stream.Write((byte)commandSucceeded);
-            m_stream.Write(reason);
-            m_stream.Write(details);
-            m_stream.Send(CommandCode.RequestSucceeded);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("RequestSucceeded"))
+            {
+                sml.WriteValue("CommandCode", commandSucceeded.ToString());
+                sml.WriteValue("Reason", reason);
+                sml.WriteValue("Details", details);
+            }
+            m_encoder.Message(sml.ToSttpMarkup());
         }
 
         public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
         {
-            m_stream.Clear();
-            m_stream.Write((byte)mode);
-            m_stream.Write(options);
-            m_stream.Write(dataPoints);
-            m_stream.Send(CommandCode.DataPointRequest);
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("RequestSucceeded"))
+            {
+                sml.WriteValue("SubscriptionAppendMode", mode.ToString());
+                sml.WriteValue("Options", options);
+                //ToDo: rework this command.
+                //sml.WriteValue("Reason", reason);
+                //sml.WriteValue("Details", details);
+            }
+            m_encoder.Message(sml.ToSttpMarkup());
         }
 
         public void SubscriptionStream(byte encodingMethod, byte[] buffer)
         {
-            m_stream.Clear();
-            m_stream.Write(encodingMethod);
-            m_stream.Write(buffer);
-            m_stream.Send(CommandCode.SubscriptionStream);
+            m_encoder.SubscriptionStream(encodingMethod, buffer, 0, buffer.Length);
         }
-
-       
-       
 
     }
 }

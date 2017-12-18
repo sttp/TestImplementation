@@ -4,31 +4,56 @@ using System.Text;
 
 namespace Sttp.Codec
 {
-    public class CommandGetMetadata
+    public class CommandGetMetadata : CommandBase
     {
-        public readonly Guid RequestID;
-        public readonly Guid SchemaVersion;
-        public readonly long Revision;
-        public readonly bool AreUpdateQueries;
-        public readonly SttpMarkup Queries;
+        public Guid? RequestID;
+        public Guid? SchemaVersion;
+        public long? Revision;
+        public bool? AreUpdateQueries;
+        public List<SttpQueryBase> Queries;
 
-        public CommandGetMetadata(PayloadReader reader)
+        public CommandGetMetadata(SttpMarkupReader reader)
+            : base("GetMetadataSchema", CommandCode.GetMetadata)
         {
-            RequestID = reader.ReadGuid();
-            SchemaVersion = reader.ReadGuid();
-            Revision = reader.ReadInt64();
-            AreUpdateQueries = reader.ReadBoolean();
-            Queries = reader.ReadSttpMarkup();
+            var element = reader.ReadEntireElement();
+            if (element.ElementName != CommandName)
+                throw new Exception("Invalid command");
+
+            RequestID = (Guid?)element.GetValue("RequestID");
+            SchemaVersion = (Guid?)element.GetValue("SchemaVersion");
+            Revision = (long?)element.GetValue("Revision");
+            AreUpdateQueries = (bool?)element.GetValue("AreUpdateQueries");
+            Queries = new List<SttpQueryBase>();
+
+            foreach (var query in element.GetElement("Queries").ChildElements)
+            {
+                Queries.Add(SttpQueryBase.Create(query));
+            }
+            element.ErrorIfNotHandled();
         }
 
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
+        public override CommandBase Load(SttpMarkupReader reader)
         {
-            builder.Append(linePrefix); builder.AppendLine("(" + nameof(CommandMetadataSchema) + ")");
-            builder.Append(linePrefix); builder.AppendLine($"RequestID: {RequestID} ");
-            builder.Append(linePrefix); builder.AppendLine($"SchemaVersion: {SchemaVersion} ");
-            builder.Append(linePrefix); builder.AppendLine($"Revision: {Revision} ");
-            builder.Append(linePrefix); builder.AppendLine($"AreUpdateQueries {AreUpdateQueries} ");
-            builder.AppendLine(Queries.ToXML());
+            return new CommandGetMetadata(reader);
+        }
+
+        public override void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement(CommandName))
+            {
+                writer.WriteValue("RequestID", RequestID);
+                writer.WriteValue("SchemaVersion", SchemaVersion);
+                writer.WriteValue("Revision", Revision);
+                writer.WriteValue("AreUpdateQueries", AreUpdateQueries);
+                using (writer.StartElement("Queries"))
+                {
+                    foreach (var q in Queries)
+                    {
+                        q.Save(writer);
+                    }
+                }
+
+            }
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using System;
+﻿//using System;
 
-namespace Sttp.Codec
-{
-    public class CommandMetadataVersionNotCompatible
-    {
-        public CommandMetadataVersionNotCompatible(PayloadReader reader)
-        {
+//namespace Sttp.Codec
+//{
+//    public class CommandMetadataVersionNotCompatible
+//    {
+//        public CommandMetadataVersionNotCompatible(PayloadReader reader)
+//        {
 
-        }
-    }
-}
+//        }
+//    }
+//}

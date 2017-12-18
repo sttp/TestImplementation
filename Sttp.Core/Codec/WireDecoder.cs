@@ -11,7 +11,6 @@ namespace Sttp.Codec
         private CommandDecoder m_packetDecoder;
         private SessionDetails m_sessionDetails;
 
-
         public WireDecoder()
         {
             // m_dataPointDecoder = new DataPointDecoder();
@@ -25,23 +24,21 @@ namespace Sttp.Codec
         /// <param name="data">the data to write</param>
         /// <param name="position">the starting position</param>
         /// <param name="length">the length</param>
-        public void WriteData(byte[] data, int position, int length)
+        public void FillBuffer(byte[] data, int position, int length)
         {
-            m_packetDecoder.WriteData(data, position, length);
+            m_packetDecoder.FillBuffer(data, position, length);
         }
 
         /// <summary>
         /// Gets the next data packet. This method should be in a while loop, decoding all
-        /// messages before the next block of data is added to the decoder via <see cref="WriteData"/>
+        /// messages before the next block of data is added to the decoder via <see cref="FillBuffer"/>
         /// </summary>
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
         public CommandObjects NextCommand()
         {
-            PayloadReader reader = m_packetDecoder.NextPacket();
-            if (reader == null)
+            if (!m_packetDecoder.NextCommand())
                 return null;
-
-            return new CommandObjects(reader);
+           return new CommandObjects(m_packetDecoder);
         }
 
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,18 +21,6 @@ namespace Sttp.Codec
             Name = name;
         }
 
-        public MetadataColumn(ByteReader reader)
-        {
-            Name = reader.ReadString();
-            TypeCode = (SttpValueTypeCode)reader.ReadByte();
-        }
-
-        public void Save(ByteWriter writer)
-        {
-            writer.Write(Name);
-            writer.Write((byte)TypeCode);
-        }
-
         public override string ToString()
         {
             return $"{Name} ({TypeCode})";
@@ -44,5 +33,13 @@ namespace Sttp.Codec
             builder.AppendLine();
         }
 
+        public void Save(SttpMarkupWriter sml)
+        {
+            using (sml.StartElement("Column"))
+            {
+                sml.WriteValue("Name", Name);
+                sml.WriteValue("TypeCode", TypeCode.ToString());
+            }
+        }
     }
 }

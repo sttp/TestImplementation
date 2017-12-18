@@ -44,7 +44,7 @@ namespace Sttp.Tests
             while (packets.Count > 0)
             {
                 var data = packets.Dequeue();
-                reader.WriteData(data, 0, data.Length);
+                reader.FillBuffer(data, 0, data.Length);
             }
 
             CommandObjects cmd = reader.NextCommand();
@@ -116,7 +116,7 @@ namespace Sttp.Tests
             while (packets.Count > 0)
             {
                 var data = packets.Dequeue();
-                reader.WriteData(data, 0, data.Length);
+                reader.FillBuffer(data, 0, data.Length);
             }
 
             cmd = reader.NextCommand();

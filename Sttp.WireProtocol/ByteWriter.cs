@@ -309,8 +309,6 @@ namespace Sttp
             WriteUInt7Bit((ulong)value);
         }
 
-
-
         public void WriteUInt7Bit(uint value)
         {
             int size = Encoding7Bit.GetSize(value);

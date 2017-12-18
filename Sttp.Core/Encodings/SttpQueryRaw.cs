@@ -12,16 +12,6 @@ namespace Sttp
         public string SyntaxLanguage;
         public List<Tuple<string, SttpValue>> Literals = new List<Tuple<string, SttpValue>>();
 
-        public SttpQueryRaw(PayloadReader reader)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Save(PayloadWriter payloadWriter)
-        {
-            throw new NotImplementedException();
-        }
-
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
             builder.Append(linePrefix); builder.AppendLine("(" + nameof(SttpQueryRaw) + ")");

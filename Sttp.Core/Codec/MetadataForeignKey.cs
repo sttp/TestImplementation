@@ -15,22 +15,19 @@ namespace Sttp.Codec
             ForeignTableName = foreignTableName;
         }
 
-        public MetadataForeignKey(ByteReader reader)
-        {
-            ColumnName = reader.ReadString();
-            ForeignTableName = reader.ReadString();
-        }
-
-        public void Save(ByteWriter writer)
-        {
-            writer.Write(ColumnName);
-            writer.Write(ForeignTableName);
-        }
-
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
             builder.Append(linePrefix);
             builder.AppendLine($"({nameof(MetadataForeignKey)} {ColumnName} -> {ForeignTableName}");
+        }
+
+        public void Save(SttpMarkupWriter sml)
+        {
+            using (sml.StartElement("Column"))
+            {
+                sml.WriteValue("ColumnName", ColumnName);
+                sml.WriteValue("ForeignTableName", ForeignTableName);
+            }
         }
     }
 }

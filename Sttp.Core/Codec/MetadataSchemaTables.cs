@@ -17,22 +17,6 @@ namespace Sttp.Codec
 
         }
 
-        public MetadataSchemaTables(ByteReader reader)
-        {
-            TableName = reader.ReadString();
-            LastModifiedRevision = reader.ReadInt64();
-            Columns = reader.ReadListMetadataColumn();
-            ForeignKeys = reader.ReadListMetadataForeignKey();
-        }
-
-        public void Save(ByteWriter writer)
-        {
-            writer.Write(TableName);
-            writer.Write(LastModifiedRevision);
-            writer.Write(Columns);
-            writer.Write(ForeignKeys);
-        }
-
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
             builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataSchemaTables) + ")");
@@ -47,6 +31,29 @@ namespace Sttp.Codec
             foreach (var value in ForeignKeys)
             {
                 value.GetFullOutputString(linePrefix + " ", builder);
+            }
+        }
+
+        public void Save(SttpMarkupWriter sml)
+        {
+            using (sml.StartElement("TableRecord"))
+            {
+                sml.WriteValue("TableName", TableName);
+                sml.WriteValue("LastModifiedRevision", LastModifiedRevision);
+                using (sml.StartElement("Columns"))
+                {
+                    foreach (var item in Columns)
+                    {
+                        item.Save(sml);
+                    }
+                }
+                using (sml.StartElement("ForeignKeys"))
+                {
+                    foreach (var item in ForeignKeys)
+                    {
+                        item.Save(sml);
+                    }
+                }
             }
         }
     }

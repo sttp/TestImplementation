@@ -48,7 +48,6 @@ namespace Sttp
         {
             m_endElementHelper = new ElementEndElementHelper(this);
             m_prevName = new NameLookupCache(string.Empty, 0);
-
         }
 
         public string CurrentElement
@@ -134,6 +133,14 @@ namespace Sttp
             WriteValue(name, m_tmpValue);
         }
 
+        public void WriteValue(string name, byte[] value, int offset, int length)
+        {
+            value.ValidateParameters(offset, length);
+            byte[] data2 = new byte[length];
+            Array.Copy(value, offset, data2, 0, length);
+            WriteValue(name, data2);
+        }
+
         public SttpMarkup ToSttpMarkup()
         {
             if (!m_disposed)
@@ -142,6 +149,33 @@ namespace Sttp
                 m_disposed = true;
             }
             return new SttpMarkup(m_stream.ToArray());
+        }
+
+        public void UnionWith(SttpMarkup queries)
+        {
+            var rdr = queries.MakeReader();
+            while (rdr.Read())
+            {
+                switch (rdr.NodeType)
+                {
+                    case SttpMarkupNodeType.Element:
+                        StartElement(rdr.ElementName);
+                        break;
+                    case SttpMarkupNodeType.Value:
+                        WriteValue(rdr.ValueName, rdr.Value);
+                        break;
+                    case SttpMarkupNodeType.EndElement:
+                        EndElement();
+                        break;
+                    case SttpMarkupNodeType.EndOfDocument:
+                        break;
+                    case SttpMarkupNodeType.StartOfDocument:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
         }
     }
 }

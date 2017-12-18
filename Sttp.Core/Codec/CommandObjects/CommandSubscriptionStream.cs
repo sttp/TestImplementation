@@ -12,10 +12,10 @@ namespace Sttp.Codec
         public readonly byte EncodingMethod;
         public readonly byte[] Data;
 
-        public CommandSubscriptionStream(PayloadReader reader)
+        public CommandSubscriptionStream(byte encodingMethod, byte[] data)
         {
-            EncodingMethod = reader.ReadByte();
-            Data = reader.ReadBytes();
+            EncodingMethod = encodingMethod;
+            Data = data;
         }
     }
 }

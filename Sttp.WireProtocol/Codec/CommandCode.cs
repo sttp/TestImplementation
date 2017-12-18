@@ -49,21 +49,6 @@ namespace Sttp.Codec
         NextFragment,
 
         /// <summary>
-        /// Requests metadata from the server.
-        /// </summary>
-        GetMetadata,
-
-        /// <summary>
-        /// Supplies metadata. Can be solicited or unsolicited.
-        /// </summary>
-        Metadata,
-
-        /// <summary>
-        /// Commands for the real-time subscription data point stream. 
-        /// </summary>
-        Subscription,
-
-        /// <summary>
         /// Streaming of real-time data. This command is extremely simplified since 
         /// the payload for this kind of data is small, so overhead is more costly.
         /// 
@@ -75,39 +60,14 @@ namespace Sttp.Codec
         SubscriptionStream,
 
         /// <summary>
-        /// Response to a request/reply method of getting data.
+        /// Streaming of real-time data. This command is extremely simplified since 
+        /// the payload for this kind of data is small, so overhead is more costly.
+        /// 
+        /// Payload:
+        /// string CommandName 
+        /// SttpMarkup Data;
         /// </summary>
-        DataPoints,
+        MarkupCommand,
 
-        /// <summary>
-        /// An out of bounds request for specific data. 
-        /// This is formatted as request/reply as compared to streaming data.
-        /// </summary>
-        GetDataPoints,
-
-        /// <summary>
-        /// Negotiates session variables and roles.
-        /// </summary>
-        NegotiateSession,
-
-        /// <summary>
-        /// A unsolicited or feedback message for a recent command.
-        /// </summary>
-        Message,
-      
-        /// <summary>
-        /// A request for data that would be considered as a large object
-        /// </summary>
-        GetLargeObject,
-
-        /// <summary>
-        /// Replies to large object requests
-        /// </summary>
-        LargeObject,
-
-        /// <summary>
-        /// A keep-alive packet that can also notify a client of state changes.
-        /// </summary>
-        Heartbeat = 0xFF,
     }
 }

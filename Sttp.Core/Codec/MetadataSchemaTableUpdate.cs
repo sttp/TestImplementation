@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Sttp.Codec;
 
@@ -31,6 +32,15 @@ namespace Sttp.Codec
             builder.Append(linePrefix); builder.AppendLine("(" + nameof(MetadataSchemaTables) + ")");
             builder.Append(linePrefix); builder.AppendLine($"TableName: {TableName} ");
             builder.Append(linePrefix); builder.AppendLine($"LastModifiedRevision: {LastModifiedRevision} ");
+        }
+
+        public void Save(SttpMarkupWriter sml)
+        {
+            using (sml.StartElement("TableRecord"))
+            {
+                sml.WriteValue("TableName", TableName);
+                sml.WriteValue("LastModifiedRevision", LastModifiedRevision);
+            }
         }
     }
 }

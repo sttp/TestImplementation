@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Sttp.IO;
 using CompressionMode = System.IO.Compression.CompressionMode;
 using DeflateStream = System.IO.Compression.DeflateStream;
@@ -36,56 +37,6 @@ namespace Sttp.Codec
             NewPacket?.Invoke(buffer, position, length);
         }
 
-        public void GetLargeObject(SttpMarkup request)
-        {
-            Send(CommandCode.GetLargeObject, request);
-        }
-
-        public void LargeObject(SttpMarkup reply)
-        {
-            Send(CommandCode.LargeObject, reply);
-        }
-
-        public void GetDataPoints(SttpMarkup reply)
-        {
-            Send(CommandCode.GetDataPoints, reply);
-        }
-
-        public void DataPoints(SttpMarkup request)
-        {
-            Send(CommandCode.DataPoints, request);
-        }
-
-        public void Subscription(SttpMarkup request)
-        {
-            Send(CommandCode.Subscription, request);
-        }
-
-        public void GetMetadata(SttpMarkup request)
-        {
-            Send(CommandCode.GetMetadata, request);
-        }
-
-        public void Metadata(SttpMarkup reply)
-        {
-            Send(CommandCode.Metadata, reply);
-        }
-
-        public void NegotiateSession(SttpMarkup config)
-        {
-            Send(CommandCode.NegotiateSession, config);
-        }
-
-        public void Heartbeat(SttpMarkup details)
-        {
-            Send(CommandCode.Heartbeat, details);
-        }
-
-        public void Message(SttpMarkup message)
-        {
-            Send(CommandCode.Message, message);
-        }
-
         public void SubscriptionStream(byte encodingMethod, byte[] buffer, int position, int length)
         {
             buffer.ValidateParameters(position, length);
@@ -95,11 +46,20 @@ namespace Sttp.Codec
             EncodeAndSend(CommandCode.SubscriptionStream, m_buffer, 15, length + 1);
         }
 
-        private void Send(CommandCode code, SttpMarkup data)
+        public void SendMarkupCommand(CommandBase command)
         {
-            EnsureCapacity(15 + data.Length);
-            data.CopyTo(m_buffer, 15);
-            EncodeAndSend(code, m_buffer, 15, data.Length);
+            byte[] commandBytes = Encoding.ASCII.GetBytes(command.CommandName);
+            if (commandBytes.Length > 255)
+                throw new Exception("Command cannot be more than 255 characters");
+
+            var writer = new SttpMarkupWriter();
+            command.Save(writer);
+            SttpMarkup data = writer.ToSttpMarkup();
+            EnsureCapacity(15 + 1 + commandBytes.Length + data.Length);
+            m_buffer[15] = (byte)commandBytes.Length;
+            commandBytes.CopyTo(m_buffer, 15 + 1);
+            data.CopyTo(m_buffer, 15 + 1 + commandBytes.Length);
+            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length);
         }
 
         private void EnsureCapacity(int bufferSize)

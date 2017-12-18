@@ -5,12 +5,15 @@ namespace Sttp.Codec
     public class CommandObjects
     {
         private object m_decoder;
-        public CommandCode CommandCode { get; }
 
-        internal CommandObjects(PayloadReader reader)
+        public CommandCode CommandCode { get; }
+        public string CommandName { get; }
+
+        internal CommandObjects(CommandDecoder decoder)
         {
-            CommandCode = reader.Command;
-            switch (CommandCode)
+            CommandCode = decoder.Command;
+
+            switch (decoder.Command)
             {
                 case CommandCode.Invalid:
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
@@ -18,67 +21,62 @@ namespace Sttp.Codec
                     throw new ArgumentOutOfRangeException("BeginFragment is not valid at this level");
                 case CommandCode.NextFragment:
                     throw new ArgumentOutOfRangeException("NextFragment is not valid at this level");
-                case CommandCode.GetMetadata:
-                    m_decoder = new CommandGetMetadata(reader);
-                    break;
-                case CommandCode.GetMetadataSchema:
-                    m_decoder = new CommandGetMetadataSchema(reader);
-                    break;
                 case CommandCode.Metadata:
-                    m_decoder = new CommandMetadata();
-                    Metadata.Fill(reader);
-                    break;
-                case CommandCode.MetadataSchema:
-                    m_decoder = new CommandMetadataSchema(reader);
-                    break;
-                case CommandCode.MetadataSchemaUpdate:
-                    m_decoder = new CommandMetadataSchemaUpdate(reader);
-                    break;
-                case CommandCode.MetadataVersionNotCompatible:
-                    m_decoder = new CommandMetadataVersionNotCompatible(reader);
-                    break;
                 case CommandCode.Subscription:
-                    m_decoder = new CommandSubscription(reader);
+                case CommandCode.DataPoints:
+                case CommandCode.NegotiateSession:
+                case CommandCode.Message:
+                case CommandCode.LargeObject:
+                case CommandCode.Heartbeat:
+                    LoadSttpMarkupBasedCommand(decoder);
                     break;
                 case CommandCode.SubscriptionStream:
-                    m_decoder = new CommandSubscriptionStream(reader);
-                    break;
-                case CommandCode.DataPointRequest:
-                    m_decoder = new CommandDataPointRequest(reader);
-                    break;
-                case CommandCode.DataPointReply:
-                    m_decoder = new CommandDataPointReply(reader);
-                    break;
-                case CommandCode.MapRuntimeIDs:
-                    m_decoder = new CommandMapRuntimeIDs(reader);
-                    break;
-                case CommandCode.NegotiateSession:
-                    m_decoder = new CommandNegotiateSession(reader);
-                    break;
-                case CommandCode.RequestFailed:
-                    m_decoder = new CommandRequestFailed(reader);
-                    break;
-                case CommandCode.RequestSucceeded:
-                    m_decoder = new CommandRequestSucceeded(reader);
-                    break;
-                case CommandCode.BulkTransportCancelSend:
-                    m_decoder = new CommandBulkTransportCancelSend(reader);
-                    break;
-                case CommandCode.BulkTransportBeginSend:
-                    m_decoder = new CommandBulkTransportBeginSend(reader);
-                    break;
-                case CommandCode.BulkTransportRequest:
-                    m_decoder = new CommandBulkTransportRequest(reader);
-                    break;
-                case CommandCode.BulkTransportSendFragment:
-                    m_decoder = new CommandBulkTransportSendFragment(reader);
-                    break;
-                case CommandCode.NoOp:
-                    m_decoder = new CommandNoOp(reader);
+                    m_decoder = new CommandSubscriptionStream(decoder.SubscriptionEncoding, decoder.SubscriptionPayload);
                     break;
                 default:
-                    m_decoder = new CommandUnknown(reader);
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void LoadSttpMarkupBasedCommand(CommandDecoder decoder)
+        {
+            var markup = decoder.MarkupPayload.MakeReader();
+            markup.Read();
+            switch (decoder.Command)
+            {
+                case CommandCode.Metadata:
+                    switch (markup.ElementName)
+                    {
+                        case "GetMetadata":
+                            m_decoder = new CommandGetMetadata(markup);
+                            break;
+                        case "GetMetadataSchema":
+                            m_decoder = new CommandGetMetadata(markup);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(markup.ElementName);
+                    }
                     break;
+                case CommandCode.Subscription:
+
+                    break;
+                case CommandCode.DataPoints:
+
+                    break;
+                case CommandCode.NegotiateSession:
+
+                    break;
+                case CommandCode.Message:
+
+                    break;
+                case CommandCode.LargeObject:
+
+                    break;
+                case CommandCode.Heartbeat:
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
