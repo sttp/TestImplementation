@@ -6,23 +6,23 @@ namespace Sttp.Codec
 {
     public class CommandGetMetadata : CommandBase
     {
-        public Guid? RequestID;
-        public Guid? SchemaVersion;
-        public long? Revision;
-        public bool? AreUpdateQueries;
+        public Guid RequestID;
+        public Guid SchemaVersion;
+        public long Revision;
+        public bool AreUpdateQueries;
         public List<SttpQueryBase> Queries;
 
         public CommandGetMetadata(SttpMarkupReader reader)
-            : base("GetMetadataSchema", CommandCode.GetMetadata)
+            : base("GetMetadata")
         {
             var element = reader.ReadEntireElement();
             if (element.ElementName != CommandName)
                 throw new Exception("Invalid command");
 
-            RequestID = (Guid?)element.GetValue("RequestID");
-            SchemaVersion = (Guid?)element.GetValue("SchemaVersion");
-            Revision = (long?)element.GetValue("Revision");
-            AreUpdateQueries = (bool?)element.GetValue("AreUpdateQueries");
+            RequestID = (Guid)element.GetValue("RequestID");
+            SchemaVersion = (Guid)element.GetValue("SchemaVersion");
+            Revision = (long)element.GetValue("Revision");
+            AreUpdateQueries = (bool)element.GetValue("AreUpdateQueries");
             Queries = new List<SttpQueryBase>();
 
             foreach (var query in element.GetElement("Queries").ChildElements)

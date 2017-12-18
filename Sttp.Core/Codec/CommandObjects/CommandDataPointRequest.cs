@@ -7,8 +7,6 @@
 //{
 //    public class CommandDataPointRequest
 //    {
-//        public CommandCode CommandCode => CommandCode.DataPointRequest;
-
 //        public readonly SttpMarkup Request;
 
 //        public CommandDataPointRequest(PayloadReader reader)

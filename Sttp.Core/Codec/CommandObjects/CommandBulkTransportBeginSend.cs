@@ -1,39 +1,40 @@
-﻿//using System;
+﻿using System;
 
-//namespace Sttp.Codec
-//{
-//    public class CommandBulkTransportBeginSend
-//    {
-//        public readonly CommandCode Code = CommandCode.LargeObject;
+namespace Sttp.Codec
+{
+    public class CommandBulkTransportBeginSend : CommandBase
+    {
+        public readonly Guid ID;
+        public readonly long OrigionalSize;
+        public readonly byte[] Data;
 
-//        public readonly Guid ID;
-//        public readonly BulkTransportMode Mode;
-//        public readonly BulkTransportCompression Compression;
-//        public readonly long OrigionalSize;
-//        public readonly byte[] Data;
+        public CommandBulkTransportBeginSend(SttpMarkupReader reader)
+            : base("BulkTransportBeginSend")
+        {
+            var element = reader.ReadEntireElement();
+            if (element.ElementName != CommandName)
+                throw new Exception("Invalid command");
 
-//        public CommandBulkTransportBeginSend(SttpMarkupElement element)
-//        {
-//            ID = (Guid)element.GetValue("ID");
-//            Mode = (BulkTransportMode)reader.ReadByte();
-//            Compression = (BulkTransportCompression)reader.ReadByte();
-//            OrigionalSize = reader.ReadInt64();
-//            Data = reader.ReadBytes();
-//        }
+            ID = (Guid)element.GetValue("ID");
+            OrigionalSize = (long)element.GetValue("OrigionalSize");
+            Data = (byte[])element.GetValue("Data");
+            
+            element.ErrorIfNotHandled();
+        }
 
-//        public SttpMarkup Save()
-//        {
-//            var sml = new SttpMarkupWriter();
-//            using (sml.StartElement("BulkTransportBeginSend"))
-//            {
-//                sml.WriteValue("ID", ID);
-//                sml.WriteValue("BulkTransportMode", Mode.ToString());
-//                sml.WriteValue("BulkTransportCompression", Compression.ToString());
-//                sml.WriteValue("OriginalSize", OrigionalSize);
-//                sml.WriteValue("Data", Data);
-//            }
-//            return sml.ToSttpMarkup();
-//        }
+        public override CommandBase Load(SttpMarkupReader reader)
+        {
+            return new CommandGetMetadata(reader);
+        }
 
-//    }
-//}
+        public override void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement(CommandName))
+            {
+                writer.WriteValue("ID", ID);
+                writer.WriteValue("OrigionalSize", OrigionalSize);
+                writer.WriteValue("Data", Data);
+            }
+        }
+    }
+}

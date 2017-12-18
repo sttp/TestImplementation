@@ -9,7 +9,7 @@ namespace Sttp.Codec
         public readonly long Revision;
 
         public CommandGetMetadataSchema()
-            : base("GetMetadataSchema", CommandCode.GetMetadata)
+            : base("GetMetadataSchema")
         {
         }
 
