@@ -10,6 +10,24 @@ namespace Sttp.Codec
         public string CommandName { get; }
         private SttpMarkup m_markup;
 
+        static CommandObjects()
+        {
+            CommandBase.Register("BulkTransportBeginSend", x => new CommandBulkTransportBeginSend(x));
+            CommandBase.Register("BulkTransportCancelSend", x => new CommandBulkTransportCancelSend(x));
+            CommandBase.Register("BulkTransportRequest", x => new CommandBulkTransportRequest(x));
+            CommandBase.Register("BulkTransportSendFragment", x => new CommandBulkTransportSendFragment(x));
+            CommandBase.Register("DataPointReply", x => new CommandDataPointReply(x));
+            CommandBase.Register("GetMetadata", x => new CommandGetMetadata(x));
+            CommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
+            CommandBase.Register("Metadata", x => new CommandMetadata(x));
+            CommandBase.Register("MetadataSchema", x => new CommandMetadataSchema(x));
+            CommandBase.Register("MetadataSchemaUpdate", x => new CommandMetadataSchemaUpdate(x));
+            CommandBase.Register("MetadataVersionNotCompatible", x => new CommandMetadataVersionNotCompatible(x));
+            CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
+            CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
+        }
+
+
         internal CommandObjects(CommandDecoder decoder)
         {
             CommandCode = decoder.Command;

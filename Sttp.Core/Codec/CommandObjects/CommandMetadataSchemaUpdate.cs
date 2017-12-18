@@ -38,11 +38,6 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override CommandBase Load(SttpMarkupReader reader)
-        {
-            return new CommandMetadataSchema(reader);
-        }
-
         public override void Save(SttpMarkupWriter writer)
         {
             using (writer.StartElement(CommandName))

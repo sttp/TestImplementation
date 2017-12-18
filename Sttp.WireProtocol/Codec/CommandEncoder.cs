@@ -56,7 +56,7 @@ namespace Sttp.Codec
             m_buffer[15] = (byte)commandBytes.Length;
             commandBytes.CopyTo(m_buffer, 15 + 1);
             data.CopyTo(m_buffer, 15 + 1 + commandBytes.Length);
-            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length);
+            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length + 1 + commandBytes.Length);
         }
         public void SendMarkupCommand(CommandBase command)
         {
@@ -71,7 +71,7 @@ namespace Sttp.Codec
             m_buffer[15] = (byte)commandBytes.Length;
             commandBytes.CopyTo(m_buffer, 15 + 1);
             data.CopyTo(m_buffer, 15 + 1 + commandBytes.Length);
-            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length);
+            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length + 1 + commandBytes.Length);
         }
 
         private void EnsureCapacity(int bufferSize)

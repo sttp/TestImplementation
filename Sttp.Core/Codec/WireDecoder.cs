@@ -11,6 +11,8 @@ namespace Sttp.Codec
         private CommandDecoder m_packetDecoder;
         private SessionDetails m_sessionDetails;
 
+        
+
         public WireDecoder()
         {
             // m_dataPointDecoder = new DataPointDecoder();

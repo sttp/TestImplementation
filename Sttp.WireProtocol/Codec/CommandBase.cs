@@ -15,27 +15,25 @@ namespace Sttp.Codec
             CommandName = name;
         }
 
-        public abstract CommandBase Load(SttpMarkupReader reader);
-
         public abstract void Save(SttpMarkupWriter writer);
 
-        private static ConcurrentDictionary<string, CommandBase> m_commands;
+        private static ConcurrentDictionary<string, Func<SttpMarkupReader, CommandBase>> m_commands;
 
         static CommandBase()
         {
-            m_commands = new ConcurrentDictionary<string, CommandBase>();
+            m_commands = new ConcurrentDictionary<string, Func<SttpMarkupReader, CommandBase>>();
         }
 
         public static CommandBase Create(string commandName, SttpMarkup reader)
         {
-            if (!m_commands.TryGetValue(commandName, out CommandBase command))
+            if (!m_commands.TryGetValue(commandName, out Func<SttpMarkupReader, CommandBase> command))
                 throw new Exception("Command type has not been registered. " + commandName);
-            return command.Load(reader.MakeReader());
+            return command(reader.MakeReader());
         }
 
-        public static void Register(CommandBase command)
+        public static void Register(string commandName, Func<SttpMarkupReader, CommandBase> constructor)
         {
-            m_commands[command.CommandName] = command;
+            m_commands[commandName] = constructor;
         }
 
     }

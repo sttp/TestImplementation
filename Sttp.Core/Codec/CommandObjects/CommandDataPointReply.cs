@@ -27,10 +27,6 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override CommandBase Load(SttpMarkupReader reader)
-        {
-            return new CommandGetMetadata(reader);
-        }
 
         public override void Save(SttpMarkupWriter writer)
         {

@@ -21,6 +21,7 @@ namespace Sttp.Codec
         public CommandMetadataSchema(SttpMarkupReader reader)
             : base("MetadataSchema")
         {
+            Tables = new List<MetadataSchemaTables>();
             var element = reader.ReadEntireElement();
             if (element.ElementName != "MetadataSchema")
                 throw new Exception("Invalid command");
@@ -33,11 +34,6 @@ namespace Sttp.Codec
                 Tables.Add(new MetadataSchemaTables(query));
             }
             element.ErrorIfNotHandled();
-        }
-
-        public override CommandBase Load(SttpMarkupReader reader)
-        {
-            return new CommandMetadataSchema(reader);
         }
 
         public override void Save(SttpMarkupWriter writer)

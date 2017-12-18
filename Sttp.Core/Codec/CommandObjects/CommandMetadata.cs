@@ -49,11 +49,6 @@ namespace Sttp.Codec
             return null;
         }
 
-        public override CommandBase Load(SttpMarkupReader reader)
-        {
-            return new CommandMetadata(reader);
-        }
-
         public override void Save(SttpMarkupWriter writer)
         {
             throw new Exception("This command is for reading only and cannot encode");

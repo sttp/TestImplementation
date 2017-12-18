@@ -27,6 +27,12 @@ namespace Sttp.Codec
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder();
             m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
+            m_encoder.NewPacket += EncoderOnNewPacket;
+        }
+
+        private void EncoderOnNewPacket(byte[] data, int position, int length)
+        {
+            NewPacket?.Invoke(data, position, length);
         }
 
         /// <summary>
@@ -112,7 +118,7 @@ namespace Sttp.Codec
 
         public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryBase> queries)
         {
-            m_encoder.SendMarkupCommand(new CommandGetMetadata(requestID,schemaVersion, revision, areUpdateQueries, queries));
+            m_encoder.SendMarkupCommand(new CommandGetMetadata(requestID, schemaVersion, revision, areUpdateQueries, queries));
         }
 
         public void GetMetadataSchema(Guid schemaVersion, long revision)
@@ -204,7 +210,7 @@ namespace Sttp.Codec
 
         public void RequestSucceeded(string commandSucceeded, string reason, string details)
         {
-            m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded,  reason, details));
+            m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded, reason, details));
         }
 
         //public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
