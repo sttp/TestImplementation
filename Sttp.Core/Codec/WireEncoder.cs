@@ -16,7 +16,7 @@ namespace Sttp.Codec
 
         //private DataPointEncoder m_dataPoint;
         private SessionDetails m_sessionDetails;
-        //private Metadata.MetadataCommandBuilder m_metadata;
+        private Metadata.MetadataCommandBuilder m_metadata;
         private CommandEncoder m_encoder;
 
         /// <summary>
@@ -26,18 +26,18 @@ namespace Sttp.Codec
         {
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder();
-            //m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
+            m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
         }
 
-        ///// <summary>
-        ///// Builds a metadata response message. Be sure to call the SendCommand periodically.
-        ///// </summary>
-        ///// <returns></returns>
-        //public Metadata.MetadataCommandBuilder MetadataCommandBuilder()
-        //{
-        //    m_metadata.BeginCommand();
-        //    return m_metadata;
-        //}
+        /// <summary>
+        /// Builds a metadata response message. Be sure to call the SendCommand periodically.
+        /// </summary>
+        /// <returns></returns>
+        public Metadata.MetadataCommandBuilder MetadataCommandBuilder()
+        {
+            m_metadata.BeginCommand();
+            return m_metadata;
+        }
 
         //private void SendNewPacket(byte[] buffer, int position, int length)
         //{
@@ -166,51 +166,35 @@ namespace Sttp.Codec
         //    //m_stream.Send(CommandCode.MapRuntimeIDs);
         //}
 
-        //public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("MetadataSchema"))
-        //    {
-        //        sml.WriteValue("SchemaVersion", schemaVersion);
-        //        sml.WriteValue("Revision", revision);
-        //        using (sml.StartElement("Tables"))
-        //        {
-        //            foreach (var table in tables)
-        //            {
-        //                table.Save(sml);
-        //            }
-        //        }
-        //    }
-        //    m_encoder.Metadata(sml.ToSttpMarkup());
-        //}
+        public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataSchema(schemaVersion, revision, tables));
+        }
 
-        //public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<MetadataSchemaTableUpdate> tables)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("MetadataSchemaUpdate"))
-        //    {
-        //        sml.WriteValue("SchemaVersion", schemaVersion);
-        //        sml.WriteValue("Revision", revision);
-        //        sml.WriteValue("UpdatedFromRevision", updatedFromRevision);
-        //        using (sml.StartElement("Tables"))
-        //        {
-        //            foreach (var table in tables)
-        //            {
-        //                table.Save(sml);
-        //            }
-        //        }
-        //    }
-        //    m_encoder.Metadata(sml.ToSttpMarkup());
-        //}
+        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<MetadataSchemaTableUpdate> tables)
+        {
+            var sml = new SttpMarkupWriter();
+            using (sml.StartElement("MetadataSchemaUpdate"))
+            {
+                sml.WriteValue("SchemaVersion", schemaVersion);
+                sml.WriteValue("Revision", revision);
+                sml.WriteValue("UpdatedFromRevision", updatedFromRevision);
+                using (sml.StartElement("Tables"))
+                {
+                    foreach (var table in tables)
+                    {
+                        table.Save(sml);
+                    }
+                }
+            }
 
-        //public void MetadataVersionNotCompatible()
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("MetadataVersionNotCompatible"))
-        //    {
-        //    }
-        //    m_encoder.Metadata(sml.ToSttpMarkup());
-        //}
+            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, revision, updatedFromRevision, tables));
+        }
+
+        public void MetadataVersionNotCompatible()
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataVersionNotCompatible());
+        }
 
         //public void NegotiateSession(SttpMarkup config)
         //{
@@ -228,30 +212,15 @@ namespace Sttp.Codec
         //    m_encoder.Heartbeat(sml.ToSttpMarkup());
         //}
 
-        //public void RequestFailed(CommandCode failedCommand, bool terminateConnection, string reason, string details)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("RequestFailed"))
-        //    {
-        //        sml.WriteValue("CommandCode", failedCommand.ToString());
-        //        sml.WriteValue("TerminateConnection", terminateConnection);
-        //        sml.WriteValue("Reason", reason);
-        //        sml.WriteValue("Details", details);
-        //    }
-        //    m_encoder.Message(sml.ToSttpMarkup());
-        //}
+        public void RequestFailed(string failedCommand, bool terminateConnection, string reason, string details)
+        {
+            m_encoder.SendMarkupCommand(new CommandRequestFailed(failedCommand, terminateConnection, reason, details));
+        }
 
-        //public void RequestSucceeded(CommandCode commandSucceeded, string reason, string details)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("RequestSucceeded"))
-        //    {
-        //        sml.WriteValue("CommandCode", commandSucceeded.ToString());
-        //        sml.WriteValue("Reason", reason);
-        //        sml.WriteValue("Details", details);
-        //    }
-        //    m_encoder.Message(sml.ToSttpMarkup());
-        //}
+        public void RequestSucceeded(string commandSucceeded, string reason, string details)
+        {
+            m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded,  reason, details));
+        }
 
         //public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
         //{

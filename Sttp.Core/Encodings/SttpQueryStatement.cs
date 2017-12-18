@@ -225,7 +225,7 @@ namespace Sttp
     /// <summary>
     /// The STTP based query expression object
     /// </summary>
-    public class SttpQueryStatement
+    public class SttpQueryStatement : SttpQueryBase
     {
         public string DirectTable;
         public List<SttpQueryJoinedTable> JoinedTables = new List<SttpQueryJoinedTable>();
@@ -240,85 +240,75 @@ namespace Sttp
         public int? Limit;
 
         public SttpQueryStatement()
+            : base("SttpQuery")
         {
 
         }
 
-        public SttpQueryStatement(SttpMarkupReader reader)
+        public SttpQueryStatement(SttpMarkupElement reader)
+            : base("SttpQuery")
         {
-            if (reader.NodeType != SttpMarkupNodeType.Element)
-                throw new Exception("Must seek to the SttpQuery element.");
             if (reader.ElementName != "SttpQuery")
                 throw new Exception("Must seek to the SttpQuery element.");
 
-            int startingDepth = reader.ElementDepth - 1;
-
-            while (reader.Read())
+            foreach (var element in reader.ChildElements)
             {
-                switch (reader.NodeType)
+                switch (element.ElementName)
                 {
-                    case SttpMarkupNodeType.Element:
-                        switch (reader.ElementName)
-                        {
-                            case "JoinedTable":
-                                JoinedTables.Add(new SttpQueryJoinedTable(reader.ReadEntireElement()));
-                                break;
-                            case "ColumnInput":
-                                ColumnInputs.Add(new SttpQueryColumn(reader.ReadEntireElement()));
-                                break;
-                            case "Literal":
-                                Literals.Add(new SttpQueryLiteral(reader.ReadEntireElement()));
-                                break;
-                            case "Procedure":
-                                Procedure.Add(new SttpQueryProcedureStep(reader.ReadEntireElement(), false));
-                                break;
-                            case "Output":
-                                Outputs.Add(new SttpQueryOutputColumns(reader.ReadEntireElement()));
-                                break;
-                            case "Having":
-                                HavingProcedure.Add(new SttpQueryProcedureStep(reader.ReadEntireElement(), true));
-                                break;
-                            case "GroupBy":
-                                var gb = reader.ReadEntireElement();
-                                foreach (var value in gb.ForEachValue("Item"))
-                                {
-                                    GroupByVariables.Add((int)value);
-                                }
-                                gb.ErrorIfNotHandled();
-                                break;
-                            default:
-                                throw new Exception("Unknown value");
-                        }
+                    case "JoinedTable":
+                        JoinedTables.Add(new SttpQueryJoinedTable(element));
                         break;
-                    case SttpMarkupNodeType.Value:
-                        switch (reader.ValueName)
-                        {
-                            case "DirectTable":
-                                DirectTable = (string)reader.Value;
-                                break;
-                            case "WhereBooleanVariable":
-                                WhereBooleanVariable = (int?)reader.Value;
-                                break;
-                            case "HavingBooleanVariable":
-                                HavingBooleanVariable = (int?)reader.Value;
-                                break;
-                            case "Limit":
-                                Limit = (int?)reader.Value;
-                                break;
-                            default:
-                                throw new Exception("Unknown value");
-                        }
+                    case "ColumnInput":
+                        ColumnInputs.Add(new SttpQueryColumn(element));
                         break;
-                    case SttpMarkupNodeType.EndElement:
-                        if (reader.ElementDepth == startingDepth)
-                            return;
+                    case "Literal":
+                        Literals.Add(new SttpQueryLiteral(element));
+                        break;
+                    case "Procedure":
+                        Procedure.Add(new SttpQueryProcedureStep(element, false));
+                        break;
+                    case "Output":
+                        Outputs.Add(new SttpQueryOutputColumns(element));
+                        break;
+                    case "Having":
+                        HavingProcedure.Add(new SttpQueryProcedureStep(element, true));
+                        break;
+                    case "GroupBy":
+                        foreach (var value in element.ForEachValue("Item"))
+                        {
+                            GroupByVariables.Add((int)value);
+                        }
+                        element.ErrorIfNotHandled();
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new Exception("Unknown value");
                 }
             }
-            throw new Exception("Never found the ending element.");
 
+            foreach (var item in reader.ChildValues)
+            {
+                switch (item.ValueName)
+                {
+                    case "DirectTable":
+                        DirectTable = (string)item.Value;
+                        break;
+                    case "WhereBooleanVariable":
+                        WhereBooleanVariable = (int?)item.Value;
+                        break;
+                    case "HavingBooleanVariable":
+                        HavingBooleanVariable = (int?)item.Value;
+                        break;
+                    case "Limit":
+                        Limit = (int?)item.Value;
+                        break;
+                    default:
+                        throw new Exception("Unknown value");
+                }
+                item.Handled = true;
+                break;
+            }
+
+            reader.ErrorIfNotHandled();
         }
 
         /// <summary>
@@ -425,52 +415,13 @@ namespace Sttp
             variableIndexCount = variableIndexMap.Count;
         }
 
-
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
+        public override SttpQueryBase Load(SttpMarkupElement reader)
         {
-            builder.Append(linePrefix); builder.AppendLine("(" + nameof(SttpQueryStatement) + ")");
-            builder.Append(linePrefix); builder.AppendLine($"DirectTable: {DirectTable} ");
-            builder.Append(linePrefix); builder.AppendLine($"WhereBooleanVariable: {WhereBooleanVariable} ");
-            builder.Append(linePrefix); builder.AppendLine($"HavingBooleanVariable: {HavingBooleanVariable} ");
-            builder.Append(linePrefix); builder.AppendLine($"Limit: {Limit} ");
-
-            builder.Append(linePrefix); builder.AppendLine($"JoinedTables Count {JoinedTables.Count} ");
-            foreach (var table in JoinedTables)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-            builder.Append(linePrefix); builder.AppendLine($"Literals Count {Literals.Count} ");
-            foreach (var table in Literals)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-            builder.Append(linePrefix); builder.AppendLine($"ColumnInputs Count {ColumnInputs.Count} ");
-            foreach (var table in ColumnInputs)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-            builder.Append(linePrefix); builder.AppendLine($"Procedure Count {Procedure.Count} ");
-            foreach (var table in Procedure)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-            builder.Append(linePrefix); builder.AppendLine($"Outputs Count {Outputs.Count} ");
-            foreach (var table in Outputs)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
-            builder.Append(linePrefix); builder.AppendLine($"GroupByVariables Count {GroupByVariables.Count} ");
-            builder.Append(linePrefix); builder.AppendLine($"Group By: ({string.Join(",", GroupByVariables)}) ");
-            builder.Append(linePrefix); builder.AppendLine($"HavingProcedure Count {HavingProcedure.Count} ");
-            foreach (var table in HavingProcedure)
-            {
-                table.GetFullOutputString(linePrefix + " ", builder);
-            }
+            return new SttpQueryStatement(reader);
         }
 
-        public SttpMarkup ToSttpMarkup()
+        public override void Save(SttpMarkupWriter writer)
         {
-            var writer = new SttpMarkupWriter();
             using (writer.StartElement("SttpQuery"))
             {
                 writer.WriteValue("DirectTable", DirectTable);
@@ -522,7 +473,6 @@ namespace Sttp
                     item.Save(writer, true);
                 }
             }
-            return writer.ToSttpMarkup();
         }
     }
 }

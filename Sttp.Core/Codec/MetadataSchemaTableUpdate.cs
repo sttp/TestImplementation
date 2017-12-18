@@ -15,6 +15,16 @@ namespace Sttp.Codec
             LastModifiedRevision = lastModifiedRevision;
         }
 
+        public MetadataSchemaTableUpdate(SttpMarkupElement element)
+        {
+            if (element.ElementName != "TableRecord")
+                throw new Exception("Invalid command");
+
+            TableName = (string)element.GetValue("TableName");
+            LastModifiedRevision = (long)element.GetValue("LastModifiedRevision");
+            element.ErrorIfNotHandled();
+        }
+
         public MetadataSchemaTableUpdate(ByteReader reader)
         {
             TableName = reader.ReadString();

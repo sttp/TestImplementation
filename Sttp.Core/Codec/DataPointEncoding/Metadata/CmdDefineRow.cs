@@ -1,24 +1,29 @@
-﻿//using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-//namespace Sttp.Codec.Metadata
-//{
-//    public class CmdDefineRow
-//    {
-//        public MetadataSubCommand SubCommand => MetadataSubCommand.DefineRow;
-//        public SttpValue PrimaryKey;
-//        public List<SttpValue> Values = new List<SttpValue>();
+namespace Sttp.Codec.Metadata
+{
+    public class CmdDefineRow
+    {
+        public MetadataSubCommand SubCommand => MetadataSubCommand.DefineRow;
+        public SttpValue PrimaryKey;
+        public List<SttpValue> Values = new List<SttpValue>();
 
-//        public void Load(PayloadReader reader)
-//        {
-//            PrimaryKey = SttpValueEncodingNative.Load(reader);
-//            int cnt = (int)reader.Read4BitSegments();
-//            while (cnt > 0)
-//            {
-//                cnt--;
-//                Values.Add(SttpValueEncodingNative.Load(reader));
-//            }
-//        }
+        public void Load(SttpMarkupReader reader)
+        {
+            var element = reader.ReadEntireElement();
+            if (element.ElementName != "DefineRow")
+                throw new Exception("Invalid command");
+
+            PrimaryKey = element.GetValue("PrimaryKey");
+
+            foreach (var query in element.GetElement("Fields").ForEachValue("Field"))
+            {
+                Values.Add(query);
+            }
+            element.ErrorIfNotHandled();
+        }
 
 
-//    }
-//}
+    }
+}

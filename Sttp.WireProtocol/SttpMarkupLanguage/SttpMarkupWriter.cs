@@ -60,6 +60,8 @@ namespace Sttp
             }
         }
 
+        public int CurrentSize => m_stream.Length;
+
         //Encoding Scheme: 
         //
         // First, determine the Node Type.

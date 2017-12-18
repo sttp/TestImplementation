@@ -14,6 +14,26 @@ namespace Sttp.Codec
 
         public MetadataSchemaTables()
         {
+            
+        }
+
+        public MetadataSchemaTables(SttpMarkupElement element)
+        {
+            if (element.ElementName != "TableRecord")
+                throw new Exception("Invalid command");
+
+            TableName = (string)element.GetValue("TableName");
+            LastModifiedRevision = (long)element.GetValue("LastModifiedRevision");
+
+            foreach (var query in element.GetElement("Columns").ChildElements)
+            {
+                Columns.Add(new MetadataColumn(query));
+            }
+            foreach (var query in element.GetElement("ForeignKeys").ChildElements)
+            {
+                ForeignKeys.Add(new MetadataForeignKey(query));
+            }
+            element.ErrorIfNotHandled();
 
         }
 

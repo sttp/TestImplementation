@@ -1,32 +1,60 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-//namespace Sttp.Codec
-//{
-//    public class CommandMetadataSchema
-//    {
-//        public readonly Guid SchemaVersion;
-//        public readonly long Revision;
-//        public readonly List<MetadataSchemaTables> Tables;
+namespace Sttp.Codec
+{
+    public class CommandMetadataSchema : CommandBase
+    {
+        public readonly Guid SchemaVersion;
+        public readonly long Revision;
+        public readonly List<MetadataSchemaTables> Tables;
 
-//        public CommandMetadataSchema(PayloadReader reader)
-//        {
-//            SchemaVersion = reader.ReadGuid();
-//            Revision = reader.ReadInt64();
-//            Tables = reader.ReadListMetadataSchemaTables();
-//        }
+        public CommandMetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
+            : base("MetadataSchema")
+        {
+            SchemaVersion = schemaVersion;
+            Revision = revision;
+            Tables = new List<MetadataSchemaTables>(tables);
+        }
 
-//        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-//        {
-//            builder.Append(linePrefix); builder.AppendLine("(" + nameof(CommandMetadataSchema) + ")");
-//            builder.Append(linePrefix); builder.AppendLine($"SchemaVersion: {SchemaVersion} ");
-//            builder.Append(linePrefix); builder.AppendLine($"Revision: {Revision} ");
-//            builder.Append(linePrefix); builder.AppendLine($"Tables Count {Tables.Count} ");
-//            foreach (var table in Tables)
-//            {
-//                table.GetFullOutputString(linePrefix + " ", builder);
-//            }
-//        }
-//    }
-//}
+        public CommandMetadataSchema(SttpMarkupReader reader)
+            : base("MetadataSchema")
+        {
+            var element = reader.ReadEntireElement();
+            if (element.ElementName != "MetadataSchema")
+                throw new Exception("Invalid command");
+
+            SchemaVersion = (Guid)element.GetValue("SchemaVersion");
+            Revision = (long)element.GetValue("Revision");
+
+            foreach (var query in element.GetElement("Tables").ChildElements)
+            {
+                Tables.Add(new MetadataSchemaTables(query));
+            }
+            element.ErrorIfNotHandled();
+        }
+
+        public override CommandBase Load(SttpMarkupReader reader)
+        {
+            return new CommandMetadataSchema(reader);
+        }
+
+        public override void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement(CommandName))
+            {
+                writer.WriteValue("SchemaVersion", SchemaVersion);
+                writer.WriteValue("Revision", Revision);
+                using (writer.StartElement("Tables"))
+                {
+                    foreach (var q in Tables)
+                    {
+                        q.Save(writer);
+                    }
+                }
+
+            }
+        }
+    }
+}

@@ -243,22 +243,16 @@ namespace Sttp.Data
                 return;
             }
 
-            var reader = command.Queries.MakeReader();
-            while (reader.Read())
+            foreach (var query in command.Queries)
             {
-                switch (reader.NodeType)
+                switch (query.CommandName)
                 {
-                    case SttpMarkupNodeType.Element:
-                        if (reader.ElementName == "SttpQuery")
+                    case "SttpQuery":
                         {
-                            var statement = new SttpQueryStatement(reader);
+                            var statement = query as SttpQueryStatement;
                             var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
+                            break;
                         }
-                        break;
-                    case SttpMarkupNodeType.Value:
-                        break;
-                    case SttpMarkupNodeType.EndElement:
-                        break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

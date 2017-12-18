@@ -46,6 +46,18 @@ namespace Sttp.Codec
             EncodeAndSend(CommandCode.SubscriptionStream, m_buffer, 15, length + 1);
         }
 
+        public void SendMarkupCommand(string command, SttpMarkupWriter markup)
+        {
+            byte[] commandBytes = Encoding.ASCII.GetBytes(command);
+            if (commandBytes.Length > 255)
+                throw new Exception("Command cannot be more than 255 characters");
+            SttpMarkup data = markup.ToSttpMarkup();
+            EnsureCapacity(15 + 1 + commandBytes.Length + data.Length);
+            m_buffer[15] = (byte)commandBytes.Length;
+            commandBytes.CopyTo(m_buffer, 15 + 1);
+            data.CopyTo(m_buffer, 15 + 1 + commandBytes.Length);
+            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length);
+        }
         public void SendMarkupCommand(CommandBase command)
         {
             byte[] commandBytes = Encoding.ASCII.GetBytes(command.CommandName);

@@ -1,25 +1,56 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-//namespace Sttp.Codec
-//{
-//    public class CommandRequestFailed
-//    {
-//        public readonly CommandCode FailedCommand;
-//        public readonly bool TerminateConnection;
-//        public readonly string Reason;
-//        public readonly string Details;
+namespace Sttp.Codec
+{
+    public class CommandRequestFailed : CommandBase
+    {
+        public readonly string FailedCommand;
+        public readonly bool TerminateConnection;
+        public readonly string Reason;
+        public readonly string Details;
 
-//        public CommandCode CommandCode => CommandCode.RequestFailed;
+        public CommandRequestFailed(string failedCommand, bool terminateConnection, string reason, string details)
+            : base("RequestFailed")
+        {
+            FailedCommand = failedCommand;
+            TerminateConnection = terminateConnection;
+            Reason = reason;
+            Details = details;
+        }
 
-//        public CommandRequestFailed(PayloadReader reader)
-//        {
-//            FailedCommand = (CommandCode)reader.ReadByte();
-//            TerminateConnection = reader.ReadBoolean();
-//            Reason = reader.ReadString();
-//            Details = reader.ReadString();
-//        }
-//    }
-//}
+        public CommandRequestFailed(SttpMarkupReader reader)
+              : base("RequestFailed")
+        {
+            var element = reader.ReadEntireElement();
+            if (element.ElementName != CommandName)
+                throw new Exception("Invalid command");
+
+            FailedCommand = (string)element.GetValue("FailedCommand");
+            TerminateConnection = (bool)element.GetValue("TerminateConnection");
+            Reason = (string)element.GetValue("Reason");
+            Details = (string)element.GetValue("Details");
+
+            
+            element.ErrorIfNotHandled();
+        }
+
+        public override CommandBase Load(SttpMarkupReader reader)
+        {
+            return new CommandMetadataSchema(reader);
+        }
+
+        public override void Save(SttpMarkupWriter writer)
+        {
+            using (writer.StartElement(CommandName))
+            {
+                writer.WriteValue("FailedCommand", FailedCommand);
+                writer.WriteValue("TerminateConnection", TerminateConnection);
+                writer.WriteValue("Reason", Reason);
+                writer.WriteValue("Details", Details);
+            }
+        }
+    }
+}

@@ -1,69 +1,93 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
 
-//namespace Sttp.Codec.Metadata
-//{
-//    public class MetadataCommandBuilder
-//    {
-//        private PayloadWriter m_stream;
+namespace Sttp.Codec.Metadata
+{
+    public class MetadataCommandBuilder
+    {
+        private SttpMarkupWriter m_stream;
+        private CommandEncoder m_commandEncoder;
+        private SessionDetails m_sessionDetails;
 
-//        public MetadataCommandBuilder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
-//        {
-//            m_stream = new PayloadWriter(commandEncoder);
-//            m_stream.Clear();
-//        }
+        public MetadataCommandBuilder(CommandEncoder commandEncoder, SessionDetails sessionDetails)
+        {
+            m_commandEncoder = commandEncoder;
+            m_sessionDetails = sessionDetails;
+            m_stream = new SttpMarkupWriter();
+        }
 
-//        /// <summary>
-//        /// Begins a new metadata packet
-//        /// </summary>
-//        public void BeginCommand()
-//        {
-//            m_stream.Clear();
-//        }
+        /// <summary>
+        /// Begins a new metadata packet
+        /// </summary>
+        public void BeginCommand()
+        {
+            m_stream = new SttpMarkupWriter();
+        }
 
-//        /// <summary>
-//        /// Ends a metadata packet and requests the buffer block that was allocated.
-//        /// </summary>
-//        /// <returns></returns>
-//        public void EndCommand()
-//        {
-//            m_stream.Send(CommandCode.Metadata);
-//        }
+        /// <summary>
+        /// Ends a metadata packet and requests the buffer block that was allocated.
+        /// </summary>
+        /// <returns></returns>
+        public void EndCommand()
+        {
+            if (m_stream.CurrentSize > 0)
+            {
+                m_commandEncoder.SendMarkupCommand("Metadata", m_stream);
+                m_stream = new SttpMarkupWriter();
+            }
+        }
 
-//        public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<MetadataColumn> columns)
-//        {
-//            m_stream.Write((byte)MetadataSubCommand.DefineResponse);
-//            m_stream.Write(isUpdateQuery);
-//            m_stream.Write(updatedFromRevision);
-//            m_stream.Write(schemaVersion);
-//            m_stream.Write(revision);
-//            m_stream.Write(tableName);
-//            m_stream.Write(columns);
-//        }
+        public void DefineResponse(bool isUpdateQuery, long updatedFromRevision, Guid schemaVersion, long revision, string tableName, List<MetadataColumn> columns)
+        {
+            using (m_stream.StartElement("DefineResponse"))
+            {
+                m_stream.WriteValue("IsUpdateQuery", isUpdateQuery);
+                m_stream.WriteValue("UpdatedFromRevision", updatedFromRevision);
+                m_stream.WriteValue("SchemaVersion", schemaVersion);
+                m_stream.WriteValue("Revision", revision);
+                m_stream.WriteValue("TableName", tableName);
+                using (m_stream.StartElement("Columns"))
+                {
+                    foreach (var c in columns)
+                    {
+                        c.Save(m_stream);
+                    }
+                }
+            }
+        }
 
-//        public void DefineRow(SttpValue primaryKey, List<SttpValue> fields)
-//        {
-//            m_stream.Write((byte)MetadataSubCommand.DefineRow);
-//            SttpValueEncodingNative.Save(m_stream, primaryKey);
-//            m_stream.Write4BitSegments((uint)fields.Count);
-//            foreach (var item in fields)
-//            {
-//                SttpValueEncodingNative.Save(m_stream, item);
-//            }
-//        }
+        public void DefineRow(SttpValue primaryKey, List<SttpValue> fields)
+        {
+            using (m_stream.StartElement("DefineRow"))
+            {
+                m_stream.WriteValue("PrimaryKey", primaryKey);
+                using (m_stream.StartElement("Fields"))
+                {
+                    foreach (var c in fields)
+                    {
+                        m_stream.WriteValue("Field", c);
+                    }
+                }
+            }
+        }
 
-//        public void UndefineRow(SttpValue primaryKey)
-//        {
-//            m_stream.Write((byte)MetadataSubCommand.UndefineRow);
-//            SttpValueEncodingNative.Save(m_stream, primaryKey);
-//        }
+        public void UndefineRow(SttpValue primaryKey)
+        {
+            using (m_stream.StartElement("UndefineRow"))
+            {
+                m_stream.WriteValue("PrimaryKey", primaryKey);
+            }
+        }
 
-//        public void Finished()
-//        {
-//            m_stream.Write((byte)MetadataSubCommand.Finished);
-//        }
+        public void Finished()
+        {
+            using (m_stream.StartElement("Finished"))
+            {
+            }
+        }
 
-//    }
-//}
+    }
+}

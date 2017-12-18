@@ -15,6 +15,17 @@ namespace Sttp.Codec
             ForeignTableName = foreignTableName;
         }
 
+        public MetadataForeignKey(SttpMarkupElement element)
+        {
+            if (element.ElementName != "Column")
+                throw new Exception("Invalid command");
+
+            ColumnName = (string)element.GetValue("ColumnName");
+            ForeignTableName = (string)element.GetValue("ForeignTableName");
+            element.ErrorIfNotHandled();
+        }
+
+
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {
             builder.Append(linePrefix);

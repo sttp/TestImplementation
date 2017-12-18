@@ -78,11 +78,11 @@ namespace Sttp.Core.Data
         public MetadataQueryExecutionEngine(MetadataDatabaseSource db, CommandGetMetadata command, WireEncoder encoder, SttpQueryStatement query)
         {
             if (query.HavingProcedure.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "HAVING clauses are not supported by this engine");
+                encoder.RequestFailed("GetMetadata", false, "Query Not Supported", "HAVING clauses are not supported by this engine");
             if (query.HavingBooleanVariable >= 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "HAVING clauses are not supported by this engine");
+                encoder.RequestFailed("GetMetadata", false, "Query Not Supported", "HAVING clauses are not supported by this engine");
             if (query.GroupByVariables.Count > 0)
-                encoder.RequestFailed(CommandCode.GetMetadata, false, "Query Not Supported", "GROUP BY clauses are not supported by this engine");
+                encoder.RequestFailed("GetMetadata", false, "Query Not Supported", "GROUP BY clauses are not supported by this engine");
 
             query.ValidateAndRemapAllIndexes(out int variableIndexCount, out int tableIndexCount);
 
