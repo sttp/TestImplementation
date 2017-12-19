@@ -107,5 +107,9 @@ namespace Sttp
             }
         }
 
+        public override string ToString()
+        {
+            return $"Element: {ElementName} Children: {ChildElements.Count} Values: {ChildValues.Count}";
+        }
     }
 }

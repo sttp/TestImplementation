@@ -1,18 +1,21 @@
 ﻿using System;
+using System.Linq;
 using Sttp.Codec;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using OGE.Core.Aced;
 
 namespace Sttp
 {
-    public class SttpMarkup
+    public class SttpMarkup : IEquatable<SttpMarkup>
     {
-        private byte[] m_data;
+        private readonly byte[] m_data;
         public SttpMarkup(ByteReader rd)
         {
             m_data = rd.ReadBytes();
         }
+
         public SttpMarkup(byte[] data)
         {
             m_data = data;
@@ -48,6 +51,7 @@ namespace Sttp
             settings.Indent = true;
             var xml = XmlWriter.Create(sb, settings);
 
+            xml.WriteStartElement(reader.RootElement);
             while (reader.Read())
             {
                 switch (reader.NodeType)
@@ -68,8 +72,44 @@ namespace Sttp
                         throw new ArgumentOutOfRangeException();
                 }
             }
+            xml.WriteEndElement();
             xml.Flush();
             return sb.ToString();
+        }
+
+        public bool Equals(SttpMarkup other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return m_data.SequenceEqual(other.m_data);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != this.GetType())
+                return false;
+            return Equals((SttpMarkup)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (m_data != null ? m_data.GetHashCode() : 0);
+        }
+
+        public static bool operator ==(SttpMarkup left, SttpMarkup right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(SttpMarkup left, SttpMarkup right)
+        {
+            return !Equals(left, right);
         }
     }
 

@@ -92,7 +92,7 @@ namespace Sttp
 
         public DateTime AsDateTime => Ticks;
 
-        public DateTimeOffset AsDateTimeOffset => new DateTimeOffset(UtcTicks, new TimeSpan(m_offset));
+        public DateTimeOffset AsDateTimeOffset => new DateTimeOffset(Ticks.Ticks, new TimeSpan(m_offset * TimeSpan.TicksPerMinute));
 
         public static SttpTime Parse(string isString)
         {

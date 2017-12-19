@@ -22,7 +22,7 @@ namespace Sttp.Core.Data
 
         protected SttpValue Inputs(int index)
         {
-            return m_values[m_inputs[0]];
+            return m_values[m_inputs[index]];
         }
 
         protected SttpValue Output

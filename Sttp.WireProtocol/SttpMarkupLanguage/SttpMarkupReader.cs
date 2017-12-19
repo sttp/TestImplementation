@@ -25,6 +25,7 @@ namespace Sttp
         private List<NameLookupCache> m_elements = new List<NameLookupCache>();
         private Stack<NameLookupCache> m_elementStack = new Stack<NameLookupCache>();
         private NameLookupCache m_prevName;
+        private string m_rootElement;
 
         internal SttpMarkupReader(byte[] data)
         {
@@ -32,8 +33,11 @@ namespace Sttp
             Value = new SttpValueMutable();
             m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = SttpMarkupNodeType.StartOfDocument;
+            m_rootElement = m_stream.ReadString();
+            ElementName = CurrentElement;
         }
 
+        public string RootElement => m_rootElement;
         public int ElementDepth => m_elementStack.Count;
         public string ElementName { get; private set; }
         public string ValueName { get; private set; }
@@ -106,7 +110,7 @@ namespace Sttp
             get
             {
                 if (m_elementStack.Count == 0)
-                    return string.Empty;
+                    return m_rootElement;
                 return m_elementStack.Peek().Name;
             }
         }

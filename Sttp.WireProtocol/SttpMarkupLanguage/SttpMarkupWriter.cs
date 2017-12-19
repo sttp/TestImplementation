@@ -43,19 +43,24 @@ namespace Sttp
         private SttpValueMutable m_tmpValue = new SttpValueMutable();
         private NameLookupCache m_prevName;
         private bool m_disposed;
+        private string m_rootElement;
 
-        public SttpMarkupWriter()
+        public SttpMarkupWriter(string rootElement)
         {
+            m_rootElement = rootElement;
             m_endElementHelper = new ElementEndElementHelper(this);
             m_prevName = new NameLookupCache(string.Empty, 0);
+            m_stream.Write(m_rootElement);
         }
+
+        public string RootElement => m_rootElement;
 
         public string CurrentElement
         {
             get
             {
                 if (m_elementStack.Count == 0)
-                    return string.Empty;
+                    return m_rootElement;
                 return m_elementStack.Peek();
             }
         }

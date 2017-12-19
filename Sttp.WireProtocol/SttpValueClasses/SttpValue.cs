@@ -183,9 +183,109 @@ namespace Sttp
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
+
             if (ValueTypeCode == other.ValueTypeCode)
             {
+                switch (ValueTypeCode)
+                {
+                    case SttpValueTypeCode.Null:
+                        return true; //Null == Null, should that return false?
+                    case SttpValueTypeCode.Int64:
+                        return AsInt64 == other.AsInt64;
+                    case SttpValueTypeCode.Single:
+                        return AsSingle == other.AsSingle;
+                    case SttpValueTypeCode.Double:
+                        return AsDouble == other.AsDouble;
+                    case SttpValueTypeCode.Decimal:
+                        return AsDecimal == other.AsDecimal;
+                    case SttpValueTypeCode.SttpTime:
+                        return AsSttpTime == other.AsSttpTime;
+                    case SttpValueTypeCode.Boolean:
+                        return AsBoolean == other.AsBoolean;
+                    case SttpValueTypeCode.Guid:
+                        return AsGuid == other.AsGuid;
+                    case SttpValueTypeCode.String:
+                        return AsString == other.AsString;
+                    case SttpValueTypeCode.SttpBuffer:
+                        return AsSttpBuffer == other.AsSttpBuffer;
+                    case SttpValueTypeCode.SttpMarkup:
+                        return AsSttpMarkup == other.AsSttpMarkup;
+                    case SttpValueTypeCode.SttpBulkTransport:
+                        return AsSttpBulkTransport == other.AsSttpBulkTransport;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
 
+            if (ValueTypeCode == SttpValueTypeCode.Null || other.ValueTypeCode == SttpValueTypeCode.Null)
+                return false;
+
+            switch (ValueTypeCode)
+            {
+                case SttpValueTypeCode.Int64:
+                    {
+                        var value = AsInt64;
+                        switch (other.ValueTypeCode)
+                        {
+                            case SttpValueTypeCode.Int64:
+                                return value == other.AsInt64;
+                            case SttpValueTypeCode.Single:
+                                return value == other.AsSingle;
+                            case SttpValueTypeCode.Double:
+                                return value == other.AsDouble;
+                            case SttpValueTypeCode.Decimal:
+                                return value == other.AsDecimal;
+                        }
+                        break;
+                    }
+                case SttpValueTypeCode.Single:
+                    {
+                        var value = AsSingle;
+                        switch (other.ValueTypeCode)
+                        {
+                            case SttpValueTypeCode.Int64:
+                                return value == other.AsInt64;
+                            case SttpValueTypeCode.Single:
+                                return value == other.AsSingle;
+                            case SttpValueTypeCode.Double:
+                                return value == other.AsDouble;
+                            case SttpValueTypeCode.Decimal:
+                                return (decimal)value == other.AsDecimal;
+                        }
+                        break;
+                    }
+                case SttpValueTypeCode.Double:
+                    {
+                        var value = AsDouble;
+                        switch (other.ValueTypeCode)
+                        {
+                            case SttpValueTypeCode.Int64:
+                                return value == other.AsInt64;
+                            case SttpValueTypeCode.Single:
+                                return value == other.AsSingle;
+                            case SttpValueTypeCode.Double:
+                                return value == other.AsDouble;
+                            case SttpValueTypeCode.Decimal:
+                                return (decimal)value == other.AsDecimal;
+                        }
+                        break;
+                    }
+                case SttpValueTypeCode.Decimal:
+                    {
+                        var value = AsDecimal;
+                        switch (other.ValueTypeCode)
+                        {
+                            case SttpValueTypeCode.Int64:
+                                return value == other.AsInt64;
+                            case SttpValueTypeCode.Single:
+                                return value == (decimal)other.AsSingle;
+                            case SttpValueTypeCode.Double:
+                                return value == (decimal)other.AsDouble;
+                            case SttpValueTypeCode.Decimal:
+                                return value == other.AsDecimal;
+                        }
+                        break;
+                    }
             }
             return false;
         }
@@ -200,7 +300,6 @@ namespace Sttp
                 return false;
             return Equals((SttpValue)obj);
         }
-
 
         //public abstract override int GetHashCode();
 

@@ -99,13 +99,13 @@ namespace Sttp
             m_position++;
         }
 
-        public void Write(bool value)
-        {
-            if (value)
-                Write((byte)1);
-            else
-                Write((byte)0);
-        }
+        //public void Write(bool value)
+        //{
+        //    if (value)
+        //        Write((byte)1);
+        //    else
+        //        Write((byte)0);
+        //}
 
         public void Write(sbyte value)
         {
@@ -359,16 +359,6 @@ namespace Sttp
             {
                 Write(list[x]);
             }
-        }
-
-        public void Write(int? value)
-        {
-            Write(value.HasValue);
-            if (value.HasValue)
-            {
-                Write(value.Value);
-            }
-
         }
 
         public void Write(List<string> list)

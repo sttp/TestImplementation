@@ -51,7 +51,7 @@ namespace Sttp
                     wr.Write(value.AsSttpTime);
                     break;
                 case SttpValueTypeCode.Boolean:
-                    wr.Write(value.AsBoolean);
+                    wr.WriteBits1(value.AsBoolean);
                     break;
                 case SttpValueTypeCode.Guid:
                     wr.Write(value.AsGuid);

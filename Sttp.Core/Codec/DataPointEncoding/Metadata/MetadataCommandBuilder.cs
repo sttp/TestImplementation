@@ -16,7 +16,7 @@ namespace Sttp.Codec.Metadata
         {
             m_commandEncoder = commandEncoder;
             m_sessionDetails = sessionDetails;
-            m_stream = new SttpMarkupWriter();
+            m_stream = new SttpMarkupWriter("Metadata");
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Sttp.Codec.Metadata
         /// </summary>
         public void BeginCommand()
         {
-            m_stream = new SttpMarkupWriter();
+            m_stream = new SttpMarkupWriter("Metadata");
         }
 
         /// <summary>
@@ -35,8 +35,8 @@ namespace Sttp.Codec.Metadata
         {
             if (m_stream.CurrentSize > 0)
             {
-                m_commandEncoder.SendMarkupCommand("Metadata", m_stream);
-                m_stream = new SttpMarkupWriter();
+                m_commandEncoder.SendMarkupCommand(m_stream);
+                m_stream = new SttpMarkupWriter("Metadata");
             }
         }
 

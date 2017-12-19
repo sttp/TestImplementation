@@ -248,9 +248,6 @@ namespace Sttp
         public SttpQueryStatement(SttpMarkupElement reader)
             : base("SttpQuery")
         {
-            if (reader.ElementName != "SttpQuery")
-                throw new Exception("Must seek to the SttpQuery element.");
-
             foreach (var element in reader.ChildElements)
             {
                 switch (element.ElementName)
@@ -305,7 +302,6 @@ namespace Sttp
                         throw new Exception("Unknown value");
                 }
                 item.Handled = true;
-                break;
             }
 
             reader.ErrorIfNotHandled();
@@ -417,62 +413,59 @@ namespace Sttp
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement("SttpQuery"))
+            writer.WriteValue("DirectTable", DirectTable);
+            if (WhereBooleanVariable.HasValue)
+                writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
+            if (Limit.HasValue)
+                writer.WriteValue("Limit", Limit);
+            if (HavingBooleanVariable.HasValue)
+                writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable);
+
+            foreach (var item in JoinedTables)
             {
-                writer.WriteValue("DirectTable", DirectTable);
-                if (WhereBooleanVariable.HasValue)
-                    writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
-                if (Limit.HasValue)
-                    writer.WriteValue("Limit", Limit);
-                if (HavingBooleanVariable.HasValue)
-                    writer.WriteValue("HavingBooleanVariable", HavingBooleanVariable);
+                item.Save(writer);
+            }
 
-                foreach (var item in JoinedTables)
-                {
-                    item.Save(writer);
-                }
+            foreach (var item in Literals)
+            {
+                item.Save(writer);
+            }
 
-                foreach (var item in Literals)
-                {
-                    item.Save(writer);
-                }
+            foreach (var item in ColumnInputs)
+            {
+                item.Save(writer);
+            }
 
-                foreach (var item in ColumnInputs)
-                {
-                    item.Save(writer);
-                }
+            foreach (var item in Procedure)
+            {
+                item.Save(writer, false);
+            }
 
-                foreach (var item in Procedure)
-                {
-                    item.Save(writer, false);
-                }
+            foreach (var item in Outputs)
+            {
+                item.Save(writer);
+            }
 
-                foreach (var item in Outputs)
+            if (GroupByVariables.Count > 0)
+            {
+                using (writer.StartElement("GroupBy"))
                 {
-                    item.Save(writer);
-                }
-
-                if (GroupByVariables.Count > 0)
-                {
-                    using (writer.StartElement("GroupBy"))
+                    foreach (var item in GroupByVariables)
                     {
-                        foreach (var item in GroupByVariables)
-                        {
-                            writer.WriteValue("Item", item);
-                        }
+                        writer.WriteValue("Item", item);
                     }
                 }
+            }
 
-                foreach (var item in HavingProcedure)
-                {
-                    item.Save(writer, true);
-                }
+            foreach (var item in HavingProcedure)
+            {
+                item.Save(writer, true);
             }
         }
 
         public SttpMarkup ToSttpMarkup()
         {
-            var sml = new SttpMarkupWriter();
+            var sml = new SttpMarkupWriter("SttpQuery");
             Save(sml);
             return sml.ToSttpMarkup();
         }

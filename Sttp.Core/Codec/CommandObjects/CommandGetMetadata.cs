@@ -50,7 +50,7 @@ namespace Sttp.Codec
             {
                 foreach (var q in Queries)
                 {
-                    using (writer.StartElement("Query"))
+                    using (writer.StartElement(q.CommandName))
                     {
                         q.Save(writer);
                     }

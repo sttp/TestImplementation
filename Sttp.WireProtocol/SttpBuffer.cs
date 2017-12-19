@@ -8,26 +8,36 @@ namespace Sttp
 {
     public class SttpBuffer
     {
-        private byte[] Data;
+        private byte[] m_data;
 
         public SttpBuffer(byte[] data)
         {
-            Data = (byte[])data.Clone();
+            m_data = (byte[])data.Clone();
         }
 
-        public SttpBuffer(ByteReader data)
+        public SttpBuffer(ByteReader reader)
         {
-            throw new NotImplementedException();
+            m_data = reader.ReadBytes();
         }
 
         public byte[] ToBuffer()
         {
-            throw new NotImplementedException();
+            return (byte[])m_data.Clone();
         }
 
-        public void Write(ByteWriter byteWriter)
+        public void Write(ByteWriter writer)
         {
-            throw new NotImplementedException();
+            writer.Write(m_data);
+        }
+
+        public static bool operator ==(SttpBuffer a, SttpBuffer b)
+        {
+            return a.m_data.SequenceEqual(b.m_data);
+        }
+
+        public static bool operator !=(SttpBuffer a, SttpBuffer b)
+        {
+            return !(a == b);
         }
     }
 }

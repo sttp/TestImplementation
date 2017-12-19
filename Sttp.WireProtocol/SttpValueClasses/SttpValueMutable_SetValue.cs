@@ -110,10 +110,10 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.SttpMarkup;
             m_valueObject = value;
         }
-        public void SetValueBulkTransportGuid(Guid value)
+        public void SetValue(SttpBulkTransport value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpBulkTransport;
-            m_valueGuid = value;
+            m_valueObject = value;
         }
 
         public void SetValue(byte[] data)
@@ -231,10 +231,6 @@ namespace Sttp
             {
                 SetValue((SttpTime)value);
             }
-            else if (type == typeof(TimeSpan))
-            {
-                SetValue((TimeSpan)value);
-            }
             else if (type == typeof(bool))
             {
                 SetValue((bool)value);
@@ -272,53 +268,6 @@ namespace Sttp
                 throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
             }
         }
-
-        public new void Load(ByteReader rd)
-        {
-            SttpValueTypeCode value = (SttpValueTypeCode)rd.ReadByte();
-            switch (value)
-            {
-                case SttpValueTypeCode.Null:
-                    SetNull();
-                    break;
-                case SttpValueTypeCode.Int64:
-                    SetValue(rd.ReadInt64());
-                    break;
-                case SttpValueTypeCode.Single:
-                    SetValue(rd.ReadSingle());
-                    break;
-                case SttpValueTypeCode.Double:
-                    SetValue(rd.ReadDouble());
-                    break;
-                case SttpValueTypeCode.Decimal:
-                    SetValue(rd.ReadDecimal());
-                    break;
-                case SttpValueTypeCode.SttpTime:
-                    SetValue(rd.ReadSttpTime());
-                    break;
-                case SttpValueTypeCode.Boolean:
-                    SetValue(rd.ReadBoolean());
-                    break;
-                case SttpValueTypeCode.Guid:
-                    SetValue(rd.ReadGuid());
-                    break;
-                case SttpValueTypeCode.String:
-                    SetValue(rd.ReadString());
-                    break;
-                case SttpValueTypeCode.SttpBuffer:
-                    SetValue(rd.ReadSttpBuffer());
-                    break;
-                case SttpValueTypeCode.SttpMarkup:
-                    SetValue(rd.ReadSttpMarkup());
-                    break;
-                case SttpValueTypeCode.SttpBulkTransport:
-                    SetValueBulkTransportGuid(rd.ReadGuid());
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
 
 
         

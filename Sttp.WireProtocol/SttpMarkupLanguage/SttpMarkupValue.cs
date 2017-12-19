@@ -18,5 +18,10 @@ namespace Sttp
             ValueName = reader.ValueName;
             Value = reader.Value.CloneAsImmutable();
         }
+
+        public override string ToString()
+        {
+            return $"Name: {ValueName} Value: {Value.ToTypeString} Handled: {Handled}";
+        }
     }
 }

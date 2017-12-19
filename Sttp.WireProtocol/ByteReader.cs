@@ -93,10 +93,10 @@ namespace Sttp
             return rv;
         }
 
-        public bool ReadBoolean()
-        {
-            return ReadByte() != 0;
-        }
+        //public bool ReadBoolean()
+        //{
+        //    return ReadByte() != 0;
+        //}
 
         public sbyte ReadSByte()
         {
@@ -330,13 +330,6 @@ namespace Sttp
                 len--;
             }
             return rv;
-        }
-
-        public int? ReadNullInt32()
-        {
-            if (ReadBoolean())
-                return ReadInt32();
-            return null;
         }
 
         public List<string> ReadListString()
