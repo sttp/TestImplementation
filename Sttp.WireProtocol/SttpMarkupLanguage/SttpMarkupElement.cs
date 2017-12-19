@@ -16,7 +16,9 @@ namespace Sttp
         {
             if (reader.NodeType == SttpMarkupNodeType.StartOfDocument)
             {
-                reader.Read();
+                ElementName = "{RootElement}";
+                IterateNodes(reader);
+                return;
             }
             while (reader.NodeType == SttpMarkupNodeType.EndElement)
             {
@@ -26,6 +28,11 @@ namespace Sttp
                 throw new Exception("Expecting an Element type for the current node.");
             ElementName = reader.ElementName;
 
+            IterateNodes(reader);
+        }
+
+        private void IterateNodes(SttpMarkupReader reader)
+        {
             while (reader.Read())
             {
                 switch (reader.NodeType)
@@ -37,14 +44,13 @@ namespace Sttp
                         ChildValues.Add(new SttpMarkupValue(reader));
                         break;
                     case SttpMarkupNodeType.EndElement:
+                    case SttpMarkupNodeType.EndOfDocument:
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
         }
-
-
 
         public SttpMarkupElement GetElement(string elementName)
         {

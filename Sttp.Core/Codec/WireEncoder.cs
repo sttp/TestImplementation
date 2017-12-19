@@ -50,53 +50,25 @@ namespace Sttp.Codec
         //    NewPacket?.Invoke(buffer, position, length);
         //}
 
-        //public void BulkTransportRequest(Guid id, long startingPosition, long length)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("BulkTransportRequest"))
-        //    {
-        //        sml.WriteValue("ID", id);
-        //        sml.WriteValue("StartingPosition", startingPosition);
-        //        sml.WriteValue("Length", length);
-        //    }
-        //    m_encoder.GetLargeObject(sml.ToSttpMarkup());
-        //}
+        public void BulkTransportRequest(Guid id, long startingPosition, long length)
+        {
+            m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id,startingPosition,length));
+        }
 
-        //public void BulkTransportBeginSend(Guid id, BulkTransportMode mode, BulkTransportCompression compression, long originalSize, byte[] source, int position, int length)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("BulkTransportBeginSend"))
-        //    {
-        //        sml.WriteValue("ID", id);
-        //        sml.WriteValue("BulkTransportMode", mode.ToString());
-        //        sml.WriteValue("BulkTransportCompression", compression.ToString());
-        //        sml.WriteValue("OriginalSize", originalSize);
-        //        sml.WriteValue("Data", source, position, length);
-        //    }
-        //    m_encoder.LargeObject(sml.ToSttpMarkup());
-        //}
+        public void BulkTransportBeginSend(Guid id, long originalSize, byte[] data)
+        {
+            m_encoder.SendMarkupCommand(new CommandBulkTransportBeginSend(id, originalSize, data));
+        }
 
-        //public void BulkTransportCancelSend(Guid id)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("BulkTransportCancelSend"))
-        //    {
-        //        sml.WriteValue("ID", id);
-        //    }
-        //    m_encoder.GetLargeObject(sml.ToSttpMarkup());
-        //}
+        public void BulkTransportCancelSend(Guid id)
+        {
+            m_encoder.SendMarkupCommand(new CommandBulkTransportCancelSend(id));
+        }
 
-        //public void BulkTransportSendFragment(Guid id, long bytesRemaining, byte[] content, int position, int length)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("BulkTransportSendFragment"))
-        //    {
-        //        sml.WriteValue("ID", id);
-        //        sml.WriteValue("bytesRemaining", bytesRemaining);
-        //        sml.WriteValue("Data", content, position, length);
-        //    }
-        //    m_encoder.LargeObject(sml.ToSttpMarkup());
-        //}
+        public void BulkTransportSendFragment(Guid id, long bytesRemaining, byte[] data)
+        {
+            m_encoder.SendMarkupCommand(new CommandBulkTransportSendFragment(id, bytesRemaining, data));
+        }
 
         //public void DataPointReply(Guid requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
         //{
@@ -164,21 +136,6 @@ namespace Sttp.Codec
 
         public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<MetadataSchemaTableUpdate> tables)
         {
-            var sml = new SttpMarkupWriter();
-            using (sml.StartElement("MetadataSchemaUpdate"))
-            {
-                sml.WriteValue("SchemaVersion", schemaVersion);
-                sml.WriteValue("Revision", revision);
-                sml.WriteValue("UpdatedFromRevision", updatedFromRevision);
-                using (sml.StartElement("Tables"))
-                {
-                    foreach (var table in tables)
-                    {
-                        table.Save(sml);
-                    }
-                }
-            }
-
             m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, revision, updatedFromRevision, tables));
         }
 

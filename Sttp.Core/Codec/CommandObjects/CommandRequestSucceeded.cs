@@ -23,8 +23,6 @@ namespace Sttp.Codec
             : base("RequestSucceeded")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
 
             CommandSucceeded = (string)element.GetValue("CommandSucceeded");
             Reason = (string)element.GetValue("Reason");
@@ -36,12 +34,9 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-                writer.WriteValue("CommandSucceeded", CommandSucceeded);
-                writer.WriteValue("Reason", Reason);
-                writer.WriteValue("Details", Details);
-            }
+            writer.WriteValue("CommandSucceeded", CommandSucceeded);
+            writer.WriteValue("Reason", Reason);
+            writer.WriteValue("Details", Details);
         }
 
     }

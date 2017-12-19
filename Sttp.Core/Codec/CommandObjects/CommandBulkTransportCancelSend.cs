@@ -6,12 +6,16 @@ namespace Sttp.Codec
     {
         public readonly Guid ID;
 
+        public CommandBulkTransportCancelSend(Guid id)
+            : base("BulkTransportCancelSend")
+        {
+            ID = id;
+        }
+
         public CommandBulkTransportCancelSend(SttpMarkupReader reader)
             : base("BulkTransportCancelSend")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
 
             ID = (Guid)element.GetValue("ID");
 
@@ -20,10 +24,7 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-                writer.WriteValue("ID", ID);
-            }
+            writer.WriteValue("ID", ID);
         }
 
 

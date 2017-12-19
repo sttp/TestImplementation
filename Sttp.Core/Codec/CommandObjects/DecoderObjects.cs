@@ -25,6 +25,8 @@ namespace Sttp.Codec
             CommandBase.Register("MetadataVersionNotCompatible", x => new CommandMetadataVersionNotCompatible(x));
             CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
             CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
+
+            SttpQueryBase.Register("SttpQuery", x => new SttpQueryStatement(x));
         }
 
 

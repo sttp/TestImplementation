@@ -8,28 +8,30 @@ namespace Sttp.Codec
         public readonly long OrigionalSize;
         public readonly byte[] Data;
 
+        public CommandBulkTransportBeginSend(Guid id, long origionalSize, byte[] data)
+            : base("BulkTransportBeginSend")
+        {
+            ID = id;
+            OrigionalSize = origionalSize;
+            Data = data;
+        }
+
         public CommandBulkTransportBeginSend(SttpMarkupReader reader)
             : base("BulkTransportBeginSend")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
-
             ID = (Guid)element.GetValue("ID");
             OrigionalSize = (long)element.GetValue("OrigionalSize");
             Data = (byte[])element.GetValue("Data");
-            
+
             element.ErrorIfNotHandled();
         }
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-                writer.WriteValue("ID", ID);
-                writer.WriteValue("OrigionalSize", OrigionalSize);
-                writer.WriteValue("Data", Data);
-            }
+            writer.WriteValue("ID", ID);
+            writer.WriteValue("OrigionalSize", OrigionalSize);
+            writer.WriteValue("Data", Data);
         }
     }
 }

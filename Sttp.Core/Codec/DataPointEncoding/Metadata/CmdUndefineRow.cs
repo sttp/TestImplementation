@@ -12,8 +12,6 @@ namespace Sttp.Codec.Metadata
         public void Load(SttpMarkupReader reader)
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != "UndefineRow")
-                throw new Exception("Invalid command");
 
             PrimaryKey = element.GetValue("PrimaryKey");
             element.ErrorIfNotHandled();

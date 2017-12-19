@@ -17,8 +17,6 @@ namespace Sttp.Codec.Metadata
         public void Load(SttpMarkupReader reader)
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != "DefineResponse")
-                throw new Exception("Invalid command");
 
             IsUpdateQuery = (bool)element.GetValue("IsUpdateQuery");
             SchemaVersion = (Guid)element.GetValue("SchemaVersion");

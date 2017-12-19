@@ -16,8 +16,6 @@ namespace Sttp.Codec
             : base("DataPointReply")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
 
             RequestID = (Guid?)element.GetValue("RequestID");
             IsEndOfResponse = (bool)element.GetValue("IsEndOfResponse");
@@ -30,13 +28,10 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-                writer.WriteValue("ID", RequestID);
-                writer.WriteValue("IsEndOfResponse", IsEndOfResponse);
-                writer.WriteValue("EncodingMethod", EncodingMethod);
-                writer.WriteValue("Data", Data);
-            }
+            writer.WriteValue("RequestID", RequestID);
+            writer.WriteValue("IsEndOfResponse", IsEndOfResponse);
+            writer.WriteValue("EncodingMethod", EncodingMethod);
+            writer.WriteValue("Data", Data);
         }
     }
 }

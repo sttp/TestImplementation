@@ -17,9 +17,6 @@ namespace Sttp.Codec
 
         public MetadataForeignKey(SttpMarkupElement element)
         {
-            if (element.ElementName != "Column")
-                throw new Exception("Invalid command");
-
             ColumnName = (string)element.GetValue("ColumnName");
             ForeignTableName = (string)element.GetValue("ForeignTableName");
             element.ErrorIfNotHandled();
@@ -34,11 +31,8 @@ namespace Sttp.Codec
 
         public void Save(SttpMarkupWriter sml)
         {
-            using (sml.StartElement("Column"))
-            {
-                sml.WriteValue("ColumnName", ColumnName);
-                sml.WriteValue("ForeignTableName", ForeignTableName);
-            }
+            sml.WriteValue("ColumnName", ColumnName);
+            sml.WriteValue("ForeignTableName", ForeignTableName);
         }
     }
 }

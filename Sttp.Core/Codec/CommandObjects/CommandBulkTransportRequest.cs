@@ -8,12 +8,18 @@ namespace Sttp.Codec
         public readonly long StartingPosition;
         public readonly long Length;
 
+        public CommandBulkTransportRequest(Guid id, long startingPosition, long length)
+            : base("BulkTransportRequest")
+        {
+            ID = id;
+            StartingPosition = startingPosition;
+            Length = length;
+        }
+
         public CommandBulkTransportRequest(SttpMarkupReader reader)
             : base("BulkTransportRequest")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
 
             ID = (Guid)element.GetValue("ID");
             StartingPosition = (long)element.GetValue("StartingPosition");
@@ -24,12 +30,9 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-                writer.WriteValue("ID", ID);
-                writer.WriteValue("StartingPosition", StartingPosition);
-                writer.WriteValue("Length", Length);
-            }
+            writer.WriteValue("ID", ID);
+            writer.WriteValue("StartingPosition", StartingPosition);
+            writer.WriteValue("Length", Length);
         }
 
     }

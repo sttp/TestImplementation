@@ -26,8 +26,6 @@ namespace Sttp.Codec
             : base("GetMetadata")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
 
             RequestID = (Guid)element.GetValue("RequestID");
             SchemaVersion = (Guid)element.GetValue("SchemaVersion");
@@ -44,21 +42,21 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
+            writer.WriteValue("RequestID", RequestID);
+            writer.WriteValue("SchemaVersion", SchemaVersion);
+            writer.WriteValue("Revision", Revision);
+            writer.WriteValue("AreUpdateQueries", AreUpdateQueries);
+            using (writer.StartElement("Queries"))
             {
-                writer.WriteValue("RequestID", RequestID);
-                writer.WriteValue("SchemaVersion", SchemaVersion);
-                writer.WriteValue("Revision", Revision);
-                writer.WriteValue("AreUpdateQueries", AreUpdateQueries);
-                using (writer.StartElement("Queries"))
+                foreach (var q in Queries)
                 {
-                    foreach (var q in Queries)
+                    using (writer.StartElement("Query"))
                     {
                         q.Save(writer);
                     }
                 }
-
             }
+
         }
     }
 }

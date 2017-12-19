@@ -53,7 +53,10 @@ namespace Sttp.Codec.Metadata
                 {
                     foreach (var c in columns)
                     {
-                        c.Save(m_stream);
+                        using (m_stream.StartElement("Column"))
+                        {
+                            c.Save(m_stream);
+                        }
                     }
                 }
             }

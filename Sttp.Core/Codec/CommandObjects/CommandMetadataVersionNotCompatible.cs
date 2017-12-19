@@ -14,16 +14,12 @@ namespace Sttp.Codec
             : base("MetadataVersionNotCompatible")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
             element.ErrorIfNotHandled();
         }
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-            }
+          
         }
     }
 }

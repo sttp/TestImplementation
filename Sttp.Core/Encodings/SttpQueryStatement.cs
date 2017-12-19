@@ -415,11 +415,6 @@ namespace Sttp
             variableIndexCount = variableIndexMap.Count;
         }
 
-        public override SttpQueryBase Load(SttpMarkupElement reader)
-        {
-            return new SttpQueryStatement(reader);
-        }
-
         public override void Save(SttpMarkupWriter writer)
         {
             using (writer.StartElement("SttpQuery"))

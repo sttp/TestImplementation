@@ -17,9 +17,6 @@ namespace Sttp.Codec
 
         public MetadataColumn(SttpMarkupElement element)
         {
-            if (element.ElementName != "Column")
-                throw new Exception("Invalid command");
-
             Name = (string)element.GetValue("Name");
             TypeCode = (SttpValueTypeCode)Enum.Parse(typeof(SttpValueTypeCode), (string)element.GetValue("TypeCode"));
             element.ErrorIfNotHandled();
@@ -45,11 +42,8 @@ namespace Sttp.Codec
 
         public void Save(SttpMarkupWriter sml)
         {
-            using (sml.StartElement("Column"))
-            {
-                sml.WriteValue("Name", Name);
-                sml.WriteValue("TypeCode", TypeCode.ToString());
-            }
+            sml.WriteValue("Name", Name);
+            sml.WriteValue("TypeCode", TypeCode.ToString());
         }
     }
 }

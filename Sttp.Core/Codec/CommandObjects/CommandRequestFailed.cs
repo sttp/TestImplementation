@@ -25,27 +25,22 @@ namespace Sttp.Codec
               : base("RequestFailed")
         {
             var element = reader.ReadEntireElement();
-            if (element.ElementName != CommandName)
-                throw new Exception("Invalid command");
 
             FailedCommand = (string)element.GetValue("FailedCommand");
             TerminateConnection = (bool)element.GetValue("TerminateConnection");
             Reason = (string)element.GetValue("Reason");
             Details = (string)element.GetValue("Details");
 
-            
+
             element.ErrorIfNotHandled();
         }
 
         public override void Save(SttpMarkupWriter writer)
         {
-            using (writer.StartElement(CommandName))
-            {
-                writer.WriteValue("FailedCommand", FailedCommand);
-                writer.WriteValue("TerminateConnection", TerminateConnection);
-                writer.WriteValue("Reason", Reason);
-                writer.WriteValue("Details", Details);
-            }
+            writer.WriteValue("FailedCommand", FailedCommand);
+            writer.WriteValue("TerminateConnection", TerminateConnection);
+            writer.WriteValue("Reason", Reason);
+            writer.WriteValue("Details", Details);
         }
     }
 }
