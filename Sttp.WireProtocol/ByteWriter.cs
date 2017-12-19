@@ -26,16 +26,6 @@ namespace Sttp
             Clear();
         }
 
-        protected ByteWriter(int reservedPrefixBytes)
-        {
-            m_reservedPrfixBytes = reservedPrefixBytes;
-            m_positionOfReservedBits = -1;
-            m_bitStreamCacheBitCount = 0;
-            m_bitStreamCache = 0;
-            m_buffer = new byte[64];
-            Clear();
-        }
-
         public int Length => m_position - m_reservedPrfixBytes;
 
         protected void GetBuffer(out byte[] data, out int offset, out int length)
@@ -69,8 +59,6 @@ namespace Sttp
             }
         }
 
-
-
         public byte[] ToArray()
         {
             GetBuffer(out byte[] origBuffer, out int offset, out int length);
@@ -99,19 +87,6 @@ namespace Sttp
             m_position++;
         }
 
-        //public void Write(bool value)
-        //{
-        //    if (value)
-        //        Write((byte)1);
-        //    else
-        //        Write((byte)0);
-        //}
-
-        public void Write(sbyte value)
-        {
-            Write((byte)value);
-        }
-
         #endregion
 
         #region [ 2-byte values ]
@@ -123,17 +98,7 @@ namespace Sttp
             m_buffer[m_position + 1] = (byte)value;
             m_position += 2;
         }
-
-        public void Write(ushort value)
-        {
-            Write((short)value);
-        }
-
-        public void Write(char value)
-        {
-            Write((short)value);
-        }
-
+       
         #endregion
 
         #region [ 4-byte values ]
@@ -186,11 +151,6 @@ namespace Sttp
             Write(*(long*)&value);
         }
 
-        public void Write(DateTime value)
-        {
-            Write(value.Ticks);
-        }
-
         #endregion
 
         #region [ 16-byte values ]
@@ -212,40 +172,6 @@ namespace Sttp
 
         #region [ Variable Length Types ]
 
-        public void Write(Stream stream, long start, int length)
-        {
-            if (length > 1024 * 1024)
-                throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
-
-            // write null and empty
-            EnsureCapacity(1);
-
-            if (stream == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            if (length == 0)
-            {
-                Write((byte)1);
-                return;
-            }
-
-            EnsureCapacity(Encoding7Bit.GetSize((uint)(length + 1)) + length);
-            WriteUInt7Bit((uint)(length + 1));
-
-            stream.Read(m_buffer, m_position, length);
-            m_position += length;
-        }
-
-        public void WriteWithoutLength(byte[] value, int start, int length)
-        {
-            value.ValidateParameters(start, length);
-            EnsureCapacity(length);
-            Array.Copy(value, start, m_buffer, m_position, length); // write data
-            m_position += length;
-        }
-
         public void Write(byte[] value, long start, int length)
         {
             if (length > 1024 * 1024)
@@ -266,7 +192,7 @@ namespace Sttp
             }
 
             EnsureCapacity(Encoding7Bit.GetSize((uint)(length + 1)) + length);
-            WriteUInt7Bit((uint)(length + 1));
+            Write4BitSegments((uint)(length + 1));
 
             Array.Copy(value, start, m_buffer, m_position, length); // write data
             m_position += length;
@@ -297,82 +223,9 @@ namespace Sttp
 
         #endregion
 
-        #region [ Write Bits ]
-
-        public void WriteInt7Bit(int value)
-        {
-            WriteUInt7Bit((uint)value);
-        }
-
-        public void WriteInt7Bit(long value)
-        {
-            WriteUInt7Bit((ulong)value);
-        }
-
-        public void WriteUInt7Bit(uint value)
-        {
-            int size = Encoding7Bit.GetSize(value);
-            EnsureCapacity(size);
-
-            // position is incremented within method.
-            Encoding7Bit.Write(m_buffer, ref m_position, value);
-        }
-        public void WriteUInt7Bit(ulong value)
-        {
-            int size = Encoding7Bit.GetSize(value);
-            EnsureCapacity(size);
-
-            // position is incremented within method.
-            Encoding7Bit.Write(m_buffer, ref m_position, value);
-        }
-
-        #endregion
-
-        public void Write(List<SttpDataPointID> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                list[x].Save(this);
-            }
-        }
-
         public void Write(SttpTime value)
         {
             value.Save(this);
-        }
-
-        public void Write(List<int> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                Write(list[x]);
-            }
-        }
-
-        public void Write(List<string> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                Write(list[x]);
-            }
         }
 
         public void Write(SttpBuffer value)
@@ -385,23 +238,9 @@ namespace Sttp
             value.Write(this);
         }
 
-        public void Write(List<SttpMarkup> list)
-        {
-            if (list == null)
-            {
-                Write((byte)0);
-                return;
-            }
-            WriteInt7Bit(list.Count);
-            for (var x = 0; x < list.Count; x++)
-            {
-                Write(list[x]);
-            }
-        }
-
         public void Write(SttpBulkTransport value)
         {
-            throw new NotImplementedException();
+            value.Write(this);
         }
 
 

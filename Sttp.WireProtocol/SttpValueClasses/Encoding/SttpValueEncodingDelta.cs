@@ -95,7 +95,7 @@ namespace Sttp
                 case SttpValueTypeCode.Double:
                     {
                         double value2 = reference.AsDouble;
-                        ulong result = rd.ReadUInt64() ^ *(uint*)&value2;
+                        ulong result = rd.ReadUInt64() ^ *(ulong*)&value2;
                         return (SttpValue)(*(double*)&result);
                     }
                 case SttpValueTypeCode.Decimal:

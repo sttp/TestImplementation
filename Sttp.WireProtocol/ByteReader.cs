@@ -24,8 +24,6 @@ namespace Sttp
             m_buffer = Empty;
         }
 
-
-
         public ByteReader(byte[] data)
         {
             SetBuffer(data, 0, data.Length);
@@ -93,16 +91,6 @@ namespace Sttp
             return rv;
         }
 
-        //public bool ReadBoolean()
-        //{
-        //    return ReadByte() != 0;
-        //}
-
-        public sbyte ReadSByte()
-        {
-            return (sbyte)ReadByte();
-        }
-
         #endregion
 
         #region [ 2-byte values ]
@@ -113,16 +101,6 @@ namespace Sttp
             short rv = (short)(m_buffer[m_currentPosition] << 8 | m_buffer[m_currentPosition + 1]);
             m_currentPosition += 2;
             return rv;
-        }
-
-        public ushort ReadUInt16()
-        {
-            return (ushort)ReadInt16();
-        }
-
-        public char ReadChar()
-        {
-            return (char)ReadInt16();
         }
 
         #endregion
@@ -187,11 +165,6 @@ namespace Sttp
             return (ulong)ReadInt64();
         }
 
-        public DateTime ReadDateTime()
-        {
-            return new DateTime(ReadInt64());
-        }
-
         #endregion
 
         #region [ 16-byte values ]
@@ -223,18 +196,9 @@ namespace Sttp
 
         #region [ Variable Length ]
 
-        public byte[] ReadRawBytes(int length)
-        {
-            byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_currentPosition, rv, 0, length);
-
-            m_currentPosition += length;
-            return rv;
-        }
-
         public byte[] ReadBytes()
         {
-            int length = (int)ReadUInt7Bit();
+            int length = (int)Read4BitSegments();
             if (length == 0)
             {
                 return null;
@@ -266,83 +230,7 @@ namespace Sttp
 
         #endregion
 
-        #region [ ReadBits ]
-
-        public int ReadInt7Bit()
-        {
-            uint u = ReadUInt7Bit();
-            return *(int*)&u;
-        }
-
-        public uint ReadUInt7Bit()
-        {
-            Read7BitEnsureCapacity();
-            return Encoding7Bit.ReadUInt32(m_buffer, ref m_currentPosition);
-        }
-
-        private void Read7BitEnsureCapacity()
-        {
-            if (m_buffer[m_currentPosition] < 128)
-            {
-                return;
-            }
-            if (m_buffer[m_currentPosition + 1] < 128)
-            {
-                EnsureCapacity(1);
-                return;
-            }
-            if (m_buffer[m_currentPosition + 2] < 128)
-            {
-                EnsureCapacity(2);
-                return;
-            }
-            if (m_buffer[m_currentPosition + 3] < 128)
-            {
-                EnsureCapacity(3);
-                return;
-            }
-            EnsureCapacity(4);
-        }
-
         #endregion
-
-        #endregion
-
-        public List<SttpDataPointID> ReadListSttpDataPointID()
-        {
-            var rv = new List<SttpDataPointID>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpDataPointID(this));
-                len--;
-            }
-            return rv;
-        }
-
-        public List<int> ReadListInt()
-        {
-            var rv = new List<int>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(ReadInt32());
-                len--;
-            }
-            return rv;
-        }
-
-        public List<string> ReadListString()
-        {
-            var rv = new List<string>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(ReadString());
-                len--;
-            }
-            return rv;
-        }
 
         public SttpMarkup ReadSttpMarkup()
         {
@@ -354,39 +242,15 @@ namespace Sttp
             return new SttpBuffer(this);
         }
 
-        public DateTimeOffset ReadDateTimeOffset()
-        {
-            throw new NotImplementedException();
-        }
-
         public SttpTime ReadSttpTime()
         {
             return new SttpTime(this);
         }
 
-        public TimeSpan ReadTimeSpan()
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<SttpMarkup> ReadListSttpMarkup()
-        {
-            var rv = new List<SttpMarkup>();
-            int len = ReadInt7Bit();
-            while (len > 0)
-            {
-                rv.Add(new SttpMarkup(this));
-                len--;
-            }
-            return rv;
-        }
-
         public SttpBulkTransport ReadSttpBulkTransport()
         {
-            throw new NotImplementedException();
+            return new SttpBulkTransport(this);
         }
-
-
 
         #region [ Read Bits ]
 
