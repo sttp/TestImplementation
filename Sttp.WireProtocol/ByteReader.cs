@@ -165,14 +165,9 @@ namespace Sttp
             int length = (int)Read4BitSegments();
             if (length == 0)
             {
-                return null;
-            }
-            if (length == 1)
-            {
                 return Empty;
             }
 
-            length--; // minus one, because 1 added to len before writing since (1) is used for empty.
             EnsureCapacity(length);
 
             byte[] rv = new byte[length];
@@ -184,13 +179,12 @@ namespace Sttp
         public string ReadString()
         {
             byte[] rv = ReadBytes();
-            if (rv == null)
-                return null;
             if (rv.Length == 0)
                 return string.Empty;
 
             return Encoding.UTF8.GetString(rv);
         }
+
 
         #endregion
 

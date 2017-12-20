@@ -18,9 +18,6 @@ namespace Sttp
 
         public ByteWriter()
         {
-            m_bitLength = 0;
-            m_bitStreamCacheBitCount = 0;
-            m_bitStreamCache = 0;
             m_byteBuffer = new byte[64];
             m_bitBuffer = new byte[8];
             Clear();
@@ -30,8 +27,6 @@ namespace Sttp
 
         protected void GetBuffer(out byte[] data, out int offset, out int length)
         {
-            //ToDo: Come back and fix this
-
             //Copy the bit stream to the end of the byte stream.
 
             //Flush any pending data to the stream, but don't reset any of the values since that would mess up the state if the 
@@ -193,52 +188,33 @@ namespace Sttp
 
         #region [ Variable Length Types ]
 
-        public void Write(byte[] value, long start, int length)
+        public void Write(byte[] value, int start, int length)
         {
-            //ToDo: Rework this method.
-            if (length > 1024 * 1024)
-                throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
-
-            // write null and empty
-            EnsureCapacityBytes(1);
-
-            if (value == null)
-            {
-                Write((byte)0);
+            value.ValidateParameters(start, length);
+            Write4BitSegments((uint)length);
+            if (length == 0)
                 return;
-            }
-            if (value.Length == 0)
-            {
-                Write((byte)1);
-                return;
-            }
 
-            EnsureCapacityBytes(Encoding7Bit.GetSize((uint)(length + 1)) + length);
-            Write4BitSegments((uint)(length + 1));
-
+            EnsureCapacityBytes(length);
             Array.Copy(value, start, m_byteBuffer, m_byteLength, length); // write data
             m_byteLength += length;
         }
 
         public void Write(byte[] value)
         {
-            Write(value, 0, value?.Length ?? 0);
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            Write(value, 0, value.Length);
         }
 
         public void Write(string value)
         {
-            //ToDo: Rework this method. Nulls should probably throw an exception
-
-            EnsureCapacityBytes(1);
-
             if (value == null)
-            {
-                Write((byte)0);
-                return;
-            }
+                throw new ArgumentNullException(nameof(value));
+
             if (value.Length == 0)
             {
-                Write((byte)1);
+                Write4BitSegments(0);
                 return;
             }
 
