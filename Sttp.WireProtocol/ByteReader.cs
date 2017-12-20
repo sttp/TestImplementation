@@ -19,6 +19,7 @@ namespace Sttp
 
         private int m_bitStreamCacheBitCount;
         private uint m_bitStreamCache;
+        private byte m_usedBitsForLastBitWord;
 
         public ByteReader()
         {
@@ -35,7 +36,7 @@ namespace Sttp
             SetBuffer(data, position, length);
         }
 
-        public bool IsEmpty => false; //ToDo: Fix this.
+        public bool IsEmpty => m_currentBytePosition == m_currentBitPosition && m_bitStreamCacheBitCount >= m_usedBitsForLastBitWord;
 
         public void SetBuffer(byte[] data)
         {
@@ -53,6 +54,7 @@ namespace Sttp
 
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
+            m_usedBitsForLastBitWord = 0;
         }
 
         private void ThrowEndOfStreamException()
@@ -258,7 +260,7 @@ namespace Sttp
         {
             const int bits = 1;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -266,7 +268,7 @@ namespace Sttp
         {
             const int bits = 2;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -275,7 +277,7 @@ namespace Sttp
         {
             const int bits = 3;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -283,7 +285,7 @@ namespace Sttp
         {
             const int bits = 4;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -291,7 +293,7 @@ namespace Sttp
         {
             const int bits = 5;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -299,7 +301,7 @@ namespace Sttp
         {
             const int bits = 6;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -307,7 +309,7 @@ namespace Sttp
         {
             const int bits = 7;
             if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits();
+                ReadMoreBits(bits);
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
@@ -454,15 +456,30 @@ namespace Sttp
             return rv;
         }
 
-        private void ReadMoreBits()
+        private void ReadMoreBits(int len)
         {
             if (m_currentBitPosition - m_currentBytePosition < 1)
             {
                 ThrowEndOfStreamException();
             }
-            m_currentBitPosition--;
-            m_bitStreamCacheBitCount += 8;
-            m_bitStreamCache = (m_bitStreamCache << 8) | m_buffer[m_currentBitPosition];
+            if (m_currentBitPosition == m_lastPosition)
+            {
+                m_currentBitPosition--;
+                m_bitStreamCacheBitCount = 5;
+                m_bitStreamCache = m_buffer[m_currentBitPosition];
+                m_usedBitsForLastBitWord = (byte)(m_bitStreamCache >> 5);
+                if (len > 5)
+                {
+                    ReadMoreBits(len - 5);
+                }
+            }
+            else
+            {
+                m_currentBitPosition--;
+                m_bitStreamCacheBitCount += 8;
+                m_bitStreamCache = (m_bitStreamCache << 8) | m_buffer[m_currentBitPosition];
+            }
+
         }
 
         public ulong Read8BitSegments()
@@ -476,6 +493,7 @@ namespace Sttp
             }
             return value;
         }
+
         public ulong Read4BitSegments()
         {
             ulong value = 0;

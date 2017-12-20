@@ -14,6 +14,7 @@ namespace Sttp
         private int m_bitStreamCacheBitCount;
         private uint m_bitStreamCache;
         private int m_bitLength;
+        private bool m_hasReservedUnusedBitsHeader;
 
         public ByteWriter()
         {
@@ -43,6 +44,11 @@ namespace Sttp
                 //Make up 8 bits by padding.
                 uint cache = m_bitStreamCache << (8 - m_bitStreamCacheBitCount);
                 m_bitBuffer[m_bitBuffer.Length - bitLength] = (byte)cache;
+            }
+            if (m_hasReservedUnusedBitsHeader)
+            {
+                m_bitBuffer[m_bitBuffer.Length - 1] &= 31; //Clear bits 6,7,8
+                m_bitBuffer[m_bitBuffer.Length - 1] |= (byte)(m_bitStreamCache << 5);
             }
             EnsureCapacityBytes(m_bitLength);
             Array.Copy(m_bitBuffer, m_bitBuffer.Length - bitLength, m_byteBuffer, m_byteLength, bitLength);
@@ -520,16 +526,25 @@ namespace Sttp
 
         private void ValidateBitStream()
         {
-            if (m_bitStreamCacheBitCount > 7)
+            if (!m_hasReservedUnusedBitsHeader || m_bitStreamCacheBitCount > 7)
                 ProcessBitStream();
         }
 
         private void ProcessBitStream()
         {
-            EnsureCapacityBits(2); //It's ok to be too large here. It just ensures that at least 2 bytes are free before doing anything.
+            if (!m_hasReservedUnusedBitsHeader)
+            {
+                //reserve 3 bits for the number of unused bits in the bitstream.
+                //To reserve bits at the beginning of the bit stream, all we have to do is say there were 3 more bits.
+                m_bitStreamCacheBitCount += 3;
+                m_hasReservedUnusedBitsHeader = true;
+            }
 
+            EnsureCapacityBits(2); //It's ok to be too large here. It just ensures that at least 2 bytes are free before doing anything.
             while (m_bitStreamCacheBitCount > 7)
             {
+
+
                 m_bitLength++;
                 m_bitBuffer[m_bitBuffer.Length - m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
                 m_bitStreamCacheBitCount -= 8;
