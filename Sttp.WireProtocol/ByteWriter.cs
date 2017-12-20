@@ -295,18 +295,16 @@ namespace Sttp
         /// <param name="value"></param>
         public void Write8BitSegments(ulong value)
         {
-            TryAgain:
-            if (value <= 0)
+            int bits = 0;
+            ulong tmpValue = value;
+            while (tmpValue > 0)
             {
-                WriteBits1(0);
-            }
-            else
-            {
+                bits += 8;
+                tmpValue >>= 8;
                 WriteBits1(1);
-                WriteBits8((byte)value);
-                value >>= 8;
-                goto TryAgain;
             }
+            WriteBits1(0);
+            WriteBits(bits, value);
         }
 
         /// <summary>
@@ -315,17 +313,82 @@ namespace Sttp
         /// <param name="value"></param>
         public void Write4BitSegments(ulong value)
         {
-            TryAgain:
-            if (value <= 0)
+            int bits = 0;
+            ulong tmpValue = value;
+            while (tmpValue > 0)
             {
-                WriteBits1(0);
-            }
-            else
-            {
+                bits += 4;
+                tmpValue >>= 4;
                 WriteBits1(1);
-                WriteBits4((uint)value);
-                value >>= 4;
-                goto TryAgain;
+            }
+            WriteBits1(0);
+            WriteBits(bits, value);
+        }
+
+        private void WriteBits(int bits, ulong value)
+        {
+            if (bits > 64 || bits < 0)
+                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
+
+            //Since the lowest order bits are most chaotic, these should be stored in the bit stream.
+
+            switch (bits & 7)
+            {
+                case 0:
+                    break;
+                case 1:
+                    WriteBits1((uint)value);
+                    break;
+                case 2:
+                    WriteBits2((uint)value);
+                    break;
+                case 3:
+                    WriteBits3((uint)value);
+                    break;
+                case 4:
+                    WriteBits4((uint)value);
+                    break;
+                case 5:
+                    WriteBits5((uint)value);
+                    break;
+                case 6:
+                    WriteBits6((uint)value);
+                    break;
+                case 7:
+                    WriteBits7((uint)value);
+                    break;
+            }
+
+            value >>= bits & 7;
+
+            switch (bits >> 3)
+            {
+                case 0:
+                    return;
+                case 1:
+                    WriteBits8((uint)value);
+                    return;
+                case 2:
+                    WriteBits16((uint)value);
+                    return;
+                case 3:
+                    WriteBits24((uint)value);
+                    return;
+                case 4:
+                    WriteBits32((uint)value);
+                    return;
+                case 5:
+                    WriteBits40(value);
+                    return;
+                case 6:
+                    WriteBits48(value);
+                    return;
+                case 7:
+                    WriteBits56(value);
+                    return;
+                case 8:
+                    WriteBits64(value);
+                    return;
             }
         }
 
@@ -394,82 +457,12 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 0] = (byte)value;
             m_byteLength += 1;
         }
-        public void WriteBits9(uint value)
-        {
-            WriteBits8(value);
-            WriteBits1(value >> 8);
-        }
-        public void WriteBits10(uint value)
-        {
-            WriteBits8(value);
-            WriteBits2(value >> 8);
-        }
-        public void WriteBits11(uint value)
-        {
-            WriteBits8(value);
-            WriteBits3(value >> 8);
-        }
-        public void WriteBits12(uint value)
-        {
-            WriteBits8(value);
-            WriteBits4(value >> 8);
-        }
-        public void WriteBits13(uint value)
-        {
-            WriteBits8(value);
-            WriteBits5(value >> 8);
-        }
-        public void WriteBits14(uint value)
-        {
-            WriteBits8(value);
-            WriteBits6(value >> 8);
-        }
-        public void WriteBits15(uint value)
-        {
-            WriteBits8(value);
-            WriteBits7(value >> 8);
-        }
         public void WriteBits16(uint value)
         {
             EnsureCapacityBytes(2);
             m_byteBuffer[m_byteLength + 0] = (byte)(value >> 8);
             m_byteBuffer[m_byteLength + 1] = (byte)value;
             m_byteLength += 2;
-        }
-        public void WriteBits17(uint value)
-        {
-            WriteBits16(value);
-            WriteBits1(value >> 16);
-        }
-        public void WriteBits18(uint value)
-        {
-            WriteBits16(value);
-            WriteBits2(value >> 16);
-        }
-        public void WriteBits19(uint value)
-        {
-            WriteBits16(value);
-            WriteBits3(value >> 16);
-        }
-        public void WriteBits20(uint value)
-        {
-            WriteBits16(value);
-            WriteBits4(value >> 16);
-        }
-        public void WriteBits21(uint value)
-        {
-            WriteBits16(value);
-            WriteBits5(value >> 16);
-        }
-        public void WriteBits22(uint value)
-        {
-            WriteBits16(value);
-            WriteBits6(value >> 16);
-        }
-        public void WriteBits23(uint value)
-        {
-            WriteBits16(value);
-            WriteBits7(value >> 16);
         }
         public void WriteBits24(uint value)
         {
@@ -479,41 +472,6 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 2] = (byte)value;
             m_byteLength += 3;
         }
-        public void WriteBits25(uint value)
-        {
-            WriteBits24(value);
-            WriteBits1(value >> 24);
-        }
-        public void WriteBits26(uint value)
-        {
-            WriteBits24(value);
-            WriteBits2(value >> 24);
-        }
-        public void WriteBits27(uint value)
-        {
-            WriteBits24(value);
-            WriteBits3(value >> 24);
-        }
-        public void WriteBits28(uint value)
-        {
-            WriteBits24(value);
-            WriteBits4(value >> 24);
-        }
-        public void WriteBits29(uint value)
-        {
-            WriteBits24(value);
-            WriteBits5(value >> 24);
-        }
-        public void WriteBits30(uint value)
-        {
-            WriteBits24(value);
-            WriteBits6(value >> 24);
-        }
-        public void WriteBits31(uint value)
-        {
-            WriteBits24(value);
-            WriteBits7(value >> 24);
-        }
         public void WriteBits32(uint value)
         {
             EnsureCapacityBytes(4);
@@ -522,6 +480,52 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 2] = (byte)(value >> 8);
             m_byteBuffer[m_byteLength + 3] = (byte)value;
             m_byteLength += 4;
+        }
+        public void WriteBits40(ulong value)
+        {
+            EnsureCapacityBytes(5);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 32);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 4] = (byte)value;
+            m_byteLength += 5;
+        }
+        public void WriteBits48(ulong value)
+        {
+            EnsureCapacityBytes(6);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 40);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 32);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 5] = (byte)value;
+            m_byteLength += 6;
+        }
+        public void WriteBits56(ulong value)
+        {
+            EnsureCapacityBytes(7);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 48);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 40);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 32);
+            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 6] = (byte)value;
+            m_byteLength += 7;
+        }
+        public void WriteBits64(ulong value)
+        {
+            EnsureCapacityBytes(8);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 56);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 48);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 40);
+            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 32);
+            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 6] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 7] = (byte)value;
+            m_byteLength += 8;
         }
 
         private void ValidateBitStream()

@@ -323,35 +323,7 @@ namespace Sttp
             m_currentBytePosition++;
             return rv;
         }
-        public uint ReadBits9()
-        {
-            //Note, .NET evaluates Left to Right. If ported, be sure to correct this for the target language.
-            return ReadBits8() | (ReadBits1() << 8);
-        }
-        public uint ReadBits10()
-        {
-            return ReadBits8() | (ReadBits2() << 8);
-        }
-        public uint ReadBits11()
-        {
-            return ReadBits8() | (ReadBits3() << 8);
-        }
-        public uint ReadBits12()
-        {
-            return ReadBits8() | (ReadBits4() << 8);
-        }
-        public uint ReadBits13()
-        {
-            return ReadBits8() | (ReadBits5() << 8);
-        }
-        public uint ReadBits14()
-        {
-            return ReadBits8() | (ReadBits6() << 8);
-        }
-        public uint ReadBits15()
-        {
-            return ReadBits8() | (ReadBits7() << 8);
-        }
+       
         public uint ReadBits16()
         {
             if (m_currentBytePosition + 2 > m_currentBitPosition)
@@ -363,42 +335,7 @@ namespace Sttp
             m_currentBytePosition += 2;
             return rv;
         }
-        public uint ReadBits17()
-        {
-            return ReadBits16() | (ReadBits1() << 16);
-
-        }
-        public uint ReadBits18()
-        {
-            return ReadBits16() | (ReadBits2() << 16);
-
-        }
-        public uint ReadBits19()
-        {
-            return ReadBits16() | (ReadBits3() << 16);
-
-        }
-
-        public uint ReadBits20()
-        {
-            return ReadBits16() | (ReadBits4() << 16);
-
-        }
-        public uint ReadBits21()
-        {
-            return ReadBits16() | (ReadBits5() << 16);
-
-        }
-        public uint ReadBits22()
-        {
-            return ReadBits16() | (ReadBits6() << 16);
-        }
-
-        public uint ReadBits23()
-        {
-            return ReadBits16() | (ReadBits7() << 16);
-
-        }
+        
         public uint ReadBits24()
         {
             if (m_currentBytePosition + 3 > m_currentBitPosition)
@@ -410,36 +347,6 @@ namespace Sttp
                       | (uint)m_buffer[m_currentBytePosition + 2];
             m_currentBytePosition += 3;
             return rv;
-        }
-        public uint ReadBits25()
-        {
-            return ReadBits24() | (ReadBits1() << 24);
-        }
-        public uint ReadBits26()
-        {
-            return ReadBits24() | (ReadBits2() << 24);
-        }
-        public uint ReadBits27()
-        {
-            return ReadBits24() | (ReadBits3() << 24);
-        }
-        public uint ReadBits28()
-        {
-            return ReadBits24() | (ReadBits4() << 24);
-        }
-        public uint ReadBits29()
-        {
-            return ReadBits24() | (ReadBits5() << 24);
-        }
-
-        public uint ReadBits30()
-        {
-            return ReadBits24() | (ReadBits6() << 24);
-        }
-
-        public uint ReadBits31()
-        {
-            return ReadBits24() | (ReadBits7() << 24);
         }
 
         public uint ReadBits32()
@@ -453,6 +360,72 @@ namespace Sttp
                       | (uint)m_buffer[m_currentBytePosition + 2] << 8
                       | (uint)m_buffer[m_currentBytePosition + 3];
             m_currentBytePosition += 4;
+            return rv;
+        }
+
+        public ulong ReadBits40()
+        {
+            if (m_currentBytePosition + 5 > m_currentBitPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 32 |
+                       (ulong)m_buffer[m_currentBytePosition + 1] << 24 |
+                       (ulong)m_buffer[m_currentBytePosition + 2] << 16 |
+                       (ulong)m_buffer[m_currentBytePosition + 3] << 8 |
+                       (ulong)m_buffer[m_currentBytePosition + 4];
+            m_currentBytePosition += 5;
+            return rv;
+        }
+
+        public ulong ReadBits48()
+        {
+            if (m_currentBytePosition + 6 > m_currentBitPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 40 |
+                       (ulong)m_buffer[m_currentBytePosition + 1] << 32 |
+                       (ulong)m_buffer[m_currentBytePosition + 2] << 24 |
+                       (ulong)m_buffer[m_currentBytePosition + 3] << 16 |
+                       (ulong)m_buffer[m_currentBytePosition + 4] << 8 |
+                       (ulong)m_buffer[m_currentBytePosition + 5];
+            m_currentBytePosition += 6;
+            return rv;
+        }
+
+        public ulong ReadBits56()
+        {
+            if (m_currentBytePosition + 7 > m_currentBitPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 48 |
+                       (ulong)m_buffer[m_currentBytePosition + 1] << 40 |
+                       (ulong)m_buffer[m_currentBytePosition + 2] << 32 |
+                       (ulong)m_buffer[m_currentBytePosition + 3] << 24 |
+                       (ulong)m_buffer[m_currentBytePosition + 4] << 16 |
+                       (ulong)m_buffer[m_currentBytePosition + 5] << 8 |
+                       (ulong)m_buffer[m_currentBytePosition + 6];
+            m_currentBytePosition += 7;
+            return rv;
+        }
+
+        public ulong ReadBits64()
+        {
+            if (m_currentBytePosition + 8 > m_currentBitPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 56 |
+                      (ulong)m_buffer[m_currentBytePosition + 1] << 48 |
+                      (ulong)m_buffer[m_currentBytePosition + 2] << 40 |
+                      (ulong)m_buffer[m_currentBytePosition + 3] << 32 |
+                      (ulong)m_buffer[m_currentBytePosition + 4] << 24 |
+                      (ulong)m_buffer[m_currentBytePosition + 5] << 16 |
+                      (ulong)m_buffer[m_currentBytePosition + 6] << 8 |
+                      (ulong)m_buffer[m_currentBytePosition + 7];
+            m_currentBytePosition += 8;
             return rv;
         }
 
@@ -484,26 +457,79 @@ namespace Sttp
 
         public ulong Read8BitSegments()
         {
-            ulong value = 0;
             int bits = 0;
             while (ReadBits1() == 1)
             {
-                value = value | ((ulong)ReadByte() << bits);
                 bits += 8;
             }
-            return value;
+            return ReadBits(bits);
         }
 
         public ulong Read4BitSegments()
         {
-            ulong value = 0;
             int bits = 0;
             while (ReadBits1() == 1)
             {
-                value = value | ((ulong)ReadBits4() << bits);
                 bits += 4;
             }
-            return value;
+            return ReadBits(bits);
+        }
+
+        public ulong ReadBits(int bits)
+        {
+            ulong value = 0;
+            if (bits > 64 || bits < 0)
+                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
+
+            switch (bits & 7)
+            {
+                case 0:
+                    break;
+                case 1:
+                    value = ReadBits1();
+                    break;
+                case 2:
+                    value = ReadBits2();
+                    break;
+                case 3:
+                    value = ReadBits3();
+                    break;
+                case 4:
+                    value = ReadBits4();
+                    break;
+                case 5:
+                    value = ReadBits5();
+                    break;
+                case 6:
+                    value = ReadBits6();
+                    break;
+                case 7:
+                    value = ReadBits7();
+                    break;
+            }
+
+            switch (bits >> 3)
+            {
+                case 0:
+                    return value;
+                case 1:
+                    return value | ((ulong)ReadBits8() << (bits & 7));
+                case 2:
+                    return value | ((ulong)ReadBits16() << (bits & 7));
+                case 3:
+                    return value | ((ulong)ReadBits24() << (bits & 7));
+                case 4:
+                    return value | ((ulong)ReadBits32() << (bits & 7));
+                case 5:
+                    return value | ((ulong)ReadBits40() << (bits & 7));
+                case 6:
+                    return value | ((ulong)ReadBits48() << (bits & 7));
+                case 7:
+                    return value | ((ulong)ReadBits56() << (bits & 7));
+                case 8:
+                    return ReadBits64();
+            }
+            throw new InvalidOperationException("Should never happen");
         }
 
         #endregion
