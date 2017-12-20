@@ -27,6 +27,7 @@ namespace Sttp.Codec
             CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
 
             SttpQueryBase.Register("SttpQuery", x => new SttpQueryStatement(x));
+            SttpQueryBase.Register("SttpQuerySimple", x => new SttpQuerySimple(x));
         }
 
 

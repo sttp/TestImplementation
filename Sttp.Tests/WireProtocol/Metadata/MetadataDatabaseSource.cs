@@ -151,6 +151,94 @@ namespace Sttp.Tests
 
 
         [TestMethod]
+        public void TestGetMetadataSimple()
+        {
+            var db = Load();
+
+            Queue<byte[]> packets = new Queue<byte[]>();
+
+            var writer = new WireEncoder();
+            var reader = new WireDecoder();
+
+            writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
+
+            var s = SttpQuerySimple.Parse("Measurement", db["Measurement"].Columns.Select(x => x.Name));
+            //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
+            //var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
+            var s2 = s.ToSttpMarkup();
+            Console.WriteLine(s2.EncodedSize);
+            Console.WriteLine(s2.CompressedSize);
+            Console.WriteLine(s2.CompressedSize2);
+            Console.WriteLine(s2.CompressedSize3);
+            Console.WriteLine(s2.ToYAML());
+
+            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
+
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.FillBuffer(data, 0, data.Length);
+            }
+
+            CommandObjects cmd = reader.NextCommand();
+            //Console.WriteLine(cmd.ToXMLString());
+
+            Assert.AreEqual(cmd.CommandName, "GetMetadata");
+
+            db.ProcessCommand(cmd.GetMetadata, writer);
+
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.FillBuffer(data, 0, data.Length);
+            }
+
+            cmd = reader.NextCommand();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.EncodedSize);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.CompressedSize);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.CompressedSize2);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.CompressedSize3);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+
+            Assert.AreEqual(cmd.CommandName, "Metadata");
+
+            MetadataQueryTable tbl = null;
+            MetadataSubCommandObjects subCmd;
+            while ((subCmd = cmd.Metadata.NextCommand()) != null)
+            {
+                switch (subCmd.SubCommand)
+                {
+                    case MetadataSubCommand.DefineResponse:
+                        tbl = new MetadataQueryTable(subCmd.DefineResponse);
+                        break;
+                    case MetadataSubCommand.DefineRow:
+                        tbl.ProcessCommand(subCmd.DefineRow);
+                        break;
+                    case MetadataSubCommand.UndefineRow:
+                        tbl.ProcessCommand(subCmd.UndefineRow);
+                        break;
+                    case MetadataSubCommand.Finished:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            var t = tbl.ToTable();
+            MakeCSV(t);
+        }
+
+        [TestMethod]
         public void TestGetMetadataJoin()
         {
             var db = Load();

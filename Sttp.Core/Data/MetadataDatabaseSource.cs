@@ -247,6 +247,12 @@ namespace Sttp.Data
             {
                 switch (query.CommandName)
                 {
+                    case "SttpQuerySimple":
+                    {
+                        var statement = query as SttpQuerySimple;
+                        var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement.ToSttpQuery());
+                        break;
+                    }
                     case "SttpQuery":
                         {
                             var statement = query as SttpQueryStatement;
