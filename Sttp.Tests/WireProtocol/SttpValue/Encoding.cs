@@ -88,45 +88,45 @@ namespace Sttp.Tests.WireProtocol
         }
 
 
-        [TestMethod]
-        public void Test3()
-        {
-            var wr = new ByteWriter();
-            var rd = new ByteReader();
-            for (int x = -100; x < 100; x++)
-            {
-                var y = -x;
-                SttpValueEncodingDelta.Save(wr, (SttpValue)x.ToString(), (SttpValue)y.ToString());
-                SttpValueEncodingDelta.Save(wr, (SttpValue)x, (SttpValue)y);
-                SttpValueEncodingDelta.Save(wr, (SttpValue)(float)x, (SttpValue)(float)y);
-                SttpValueEncodingDelta.Save(wr, (SttpValue)(double)x, (SttpValue)(float)y);
-                SttpValueEncodingDelta.Save(wr, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(x), (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y));
-                SttpValueEncodingDelta.Save(wr, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x), (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(y));
-                SttpValueEncodingDelta.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                SttpValueEncodingDelta.Save(wr, (SttpValue)((x & 1) == 1), (SttpValue)((y & 1) == 1));
-                SttpValueEncodingDelta.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true), (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true));
-                SttpValueEncodingDelta.Save(wr, (SttpValue)(decimal)x, (SttpValue)(decimal)y);
-                SttpValueEncodingDelta.Save(wr, (SttpValue)BigEndian.GetBytes(x), (SttpValue)BigEndian.GetBytes(y));
-            }
+        //[TestMethod]
+        //public void Test3()
+        //{
+        //    var wr = new ByteWriter();
+        //    var rd = new ByteReader();
+        //    for (int x = -100; x < 100; x++)
+        //    {
+        //        var y = -x;
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)x.ToString(), (SttpValue)y.ToString());
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)x, (SttpValue)y);
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(float)x, (SttpValue)(float)y);
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(double)x, (SttpValue)(float)y);
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(x), (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y));
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x), (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(y));
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)((x & 1) == 1), (SttpValue)((y & 1) == 1));
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true), (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true));
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(decimal)x, (SttpValue)(decimal)y);
+        //        SttpValueEncodingDelta.Save(wr, (SttpValue)BigEndian.GetBytes(x), (SttpValue)BigEndian.GetBytes(y));
+        //    }
 
-            rd.SetBuffer(wr.ToArray());
+        //    rd.SetBuffer(wr.ToArray());
 
-            for (int x = -100; x < 100; x++)
-            {
-                var y = -x;
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)y.ToString()).AsString, x.ToString());
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)y).AsInt32, x);
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsSingle, (float)x);
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsDouble, (double)x);
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y)).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(y)).AsDateTimeOffset, DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)((y & 1) == 1)).AsBoolean, ((x & 1) == 1));
-                Assert.AreEqual((bool?)SttpValueEncodingDelta.Load(rd, (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true)), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(decimal)y).AsDecimal, (decimal)x);
-                Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingDelta.Load(rd, (SttpValue)BigEndian.GetBytes(y))));
-            }
-        }
+        //    for (int x = -100; x < 100; x++)
+        //    {
+        //        var y = -x;
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)y.ToString()).AsString, x.ToString());
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)y).AsInt32, x);
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsSingle, (float)x);
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsDouble, (double)x);
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y)).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(y)).AsDateTimeOffset, DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)((y & 1) == 1)).AsBoolean, ((x & 1) == 1));
+        //        Assert.AreEqual((bool?)SttpValueEncodingDelta.Load(rd, (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true)), ((x & 1) == 1) ? (bool?)null : (bool?)true);
+        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(decimal)y).AsDecimal, (decimal)x);
+        //        Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingDelta.Load(rd, (SttpValue)BigEndian.GetBytes(y))));
+        //    }
+        //}
 
     }
 }

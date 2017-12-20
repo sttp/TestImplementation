@@ -11,13 +11,13 @@ namespace Sttp
         {
             public string Name;
             public int NextNameID;
-            public SttpValueMutable PrevValue;
+            public SttpValueTypeCode PrevValueTypeCode;
 
             public NameLookupCache(string name, int nextNameID)
             {
                 Name = name;
                 NextNameID = nextNameID;
-                PrevValue = new SttpValueMutable();
+                PrevValueTypeCode = SttpValueTypeCode.Null;
             }
         }
 
@@ -65,8 +65,16 @@ namespace Sttp
                     break;
                 case SttpMarkupNodeType.Value:
                     ReadName();
-                    SttpValueEncodingDelta.Load(m_stream, m_prevName.PrevValue, Value);
-                    m_prevName.PrevValue.SetValue(Value);
+                    if (m_stream.ReadBits1() == 0)
+                    {
+                        //Same type code;
+                        SttpValueEncodingWithoutType.Load(m_stream, m_prevName.PrevValueTypeCode, Value);
+                    }
+                    else
+                    {
+                        SttpValueEncodingNative.Load(m_stream, Value);
+                        m_prevName.PrevValueTypeCode = Value.ValueTypeCode;
+                    }
                     ValueName = m_prevName.Name;
                     break;
                 case SttpMarkupNodeType.EndElement:

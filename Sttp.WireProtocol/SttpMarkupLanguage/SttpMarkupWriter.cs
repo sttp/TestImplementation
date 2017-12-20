@@ -12,13 +12,13 @@ namespace Sttp
         {
             public string Name;
             public int NextNameID;
-            public SttpValueMutable PrevValue;
+            public SttpValueTypeCode PrevValueTypeCode;
 
             public NameLookupCache(string name, int nextNameID)
             {
                 Name = name;
                 NextNameID = nextNameID;
-                PrevValue = new SttpValueMutable();
+                PrevValueTypeCode = SttpValueTypeCode.Null;
             }
         }
 
@@ -105,8 +105,17 @@ namespace Sttp
 
             m_stream.WriteBits2((uint)SttpMarkupNodeType.Value);
             WriteName(name);
-            SttpValueEncodingDelta.Save(m_stream, value, m_prevName.PrevValue);
-            m_prevName.PrevValue.SetValue(value);
+            if (value.ValueTypeCode == m_prevName.PrevValueTypeCode)
+            {
+                m_stream.WriteBits1(0);
+                SttpValueEncodingWithoutType.Save(m_stream, value);
+            }
+            else
+            {
+                m_stream.WriteBits1(1);
+                SttpValueEncodingNative.Save(m_stream, value);
+                m_prevName.PrevValueTypeCode = value.ValueTypeCode;
+            }
         }
 
         private void WriteName(string name)
