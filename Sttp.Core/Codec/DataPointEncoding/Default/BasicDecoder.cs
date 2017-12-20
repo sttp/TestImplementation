@@ -31,7 +31,7 @@ namespace Sttp.Codec.DataPoint
 
         public bool Read(SttpDataPoint dataPoint)
         {
-            if (m_stream.Position == m_stream.Length)
+            if (m_stream.IsEmpty)
             {
                 //It's possible that this is not enough since items might eventually be stored with a few bits, so I need some kind of extra escape sequence.
                 return false;

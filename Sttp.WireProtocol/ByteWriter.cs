@@ -8,59 +8,93 @@ namespace Sttp
 {
     public unsafe class ByteWriter
     {
-        private int m_reservedPrfixBytes;
-        private byte[] m_buffer;
-        private int m_position;
-
+        private byte[] m_byteBuffer;
+        private byte[] m_bitBuffer;
+        private int m_byteLength;
         private int m_bitStreamCacheBitCount;
         private uint m_bitStreamCache;
-        private int m_positionOfReservedBits;
+        private int m_bitLength;
 
         public ByteWriter()
         {
-            m_positionOfReservedBits = -1;
+            m_bitLength = 0;
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
-            m_reservedPrfixBytes = 0;
-            m_buffer = new byte[64];
+            m_byteBuffer = new byte[64];
+            m_bitBuffer = new byte[8];
             Clear();
         }
 
-        public int Length => m_position - m_reservedPrfixBytes;
+        public int Length => m_byteLength + m_bitLength + (m_bitStreamCacheBitCount + 7) >> 3;
 
         protected void GetBuffer(out byte[] data, out int offset, out int length)
         {
+            //ToDo: Come back and fix this
+
+            //Copy the bit stream to the end of the byte stream.
+
             //Flush any pending data to the stream, but don't reset any of the values since that would mess up the state if the 
             //user decides to continue to write data to the stream afterwords.
+            int bitLength = m_bitLength;
             if (m_bitStreamCacheBitCount > 0)
             {
+                EnsureCapacityBits(1);
+                bitLength++;
                 //Make up 8 bits by padding.
                 uint cache = m_bitStreamCache << (8 - m_bitStreamCacheBitCount);
-                m_buffer[m_positionOfReservedBits] = (byte)cache;
+                m_bitBuffer[m_bitBuffer.Length - bitLength] = (byte)cache;
             }
-            data = m_buffer;
-            offset = m_reservedPrfixBytes;
-            length = Length;
+            EnsureCapacityBytes(m_bitLength);
+            Array.Copy(m_bitBuffer, m_bitBuffer.Length - bitLength, m_byteBuffer, m_byteLength, bitLength);
+            data = m_byteBuffer;
+            offset = 0;
+            length = m_byteLength + bitLength;
         }
 
-        private void EnsureCapacity(int neededBytes)
+        /// <summary>
+        /// Ensures that the byte stream has the room to store the specified number of bytes.
+        /// </summary>
+        /// <param name="neededBytes"></param>
+        private void EnsureCapacityBytes(int neededBytes)
         {
-            if (m_position + neededBytes >= m_buffer.Length)
-                Grow(neededBytes);
+            if (m_byteLength + neededBytes >= m_byteBuffer.Length)
+                GrowBytes(neededBytes);
         }
 
-        private void Grow(int neededBytes)
+        private void GrowBytes(int neededBytes)
         {
-            while (m_position + neededBytes >= m_buffer.Length)
+            while (m_byteLength + neededBytes >= m_byteBuffer.Length)
             {
-                byte[] newBuffer = new byte[m_buffer.Length * 2];
-                m_buffer.CopyTo(newBuffer, 0);
-                m_buffer = newBuffer;
+                byte[] newBuffer = new byte[m_byteBuffer.Length * 2];
+                m_byteBuffer.CopyTo(newBuffer, 0);
+                m_byteBuffer = newBuffer;
             }
         }
+
+        /// <summary>
+        /// Ensures that the byte stream has the room to store the specified number of bytes.
+        /// </summary>
+        /// <param name="neededBytes"></param>
+        private void EnsureCapacityBits(int neededBytes)
+        {
+            if (m_bitLength + neededBytes >= m_bitBuffer.Length)
+                GrowBits(neededBytes);
+        }
+
+        private void GrowBits(int neededBytes)
+        {
+            while (m_bitLength + neededBytes >= m_bitBuffer.Length)
+            {
+                byte[] newBuffer = new byte[m_bitBuffer.Length * 2];
+                m_bitBuffer.CopyTo(newBuffer, newBuffer.Length - m_bitBuffer.Length);
+                m_bitBuffer = newBuffer;
+            }
+        }
+
 
         public byte[] ToArray()
         {
+            //ToDo: There might be a better CopyTo alternative.
             GetBuffer(out byte[] origBuffer, out int offset, out int length);
 
             byte[] data = new byte[length];
@@ -70,10 +104,10 @@ namespace Sttp
 
         public void Clear()
         {
-            m_positionOfReservedBits = -1;
+            m_bitLength = 0;
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
-            m_position = m_reservedPrfixBytes;
+            m_byteLength = 0;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
@@ -82,9 +116,9 @@ namespace Sttp
 
         public void Write(byte value)
         {
-            EnsureCapacity(1);
-            m_buffer[m_position] = value;
-            m_position++;
+            EnsureCapacityBytes(1);
+            m_byteBuffer[m_byteLength] = value;
+            m_byteLength++;
         }
 
         #endregion
@@ -93,24 +127,24 @@ namespace Sttp
 
         public void Write(short value)
         {
-            EnsureCapacity(2);
-            m_buffer[m_position] = (byte)(value >> 8);
-            m_buffer[m_position + 1] = (byte)value;
-            m_position += 2;
+            EnsureCapacityBytes(2);
+            m_byteBuffer[m_byteLength] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 1] = (byte)value;
+            m_byteLength += 2;
         }
-       
+
         #endregion
 
         #region [ 4-byte values ]
 
         public void Write(int value)
         {
-            EnsureCapacity(4);
-            m_buffer[m_position + 0] = (byte)(value >> 24);
-            m_buffer[m_position + 1] = (byte)(value >> 16);
-            m_buffer[m_position + 2] = (byte)(value >> 8);
-            m_buffer[m_position + 3] = (byte)value;
-            m_position += 4;
+            EnsureCapacityBytes(4);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 3] = (byte)value;
+            m_byteLength += 4;
         }
 
         public void Write(uint value)
@@ -129,16 +163,16 @@ namespace Sttp
 
         public void Write(long value)
         {
-            EnsureCapacity(8);
-            m_buffer[m_position + 0] = (byte)(value >> 56);
-            m_buffer[m_position + 1] = (byte)(value >> 48);
-            m_buffer[m_position + 2] = (byte)(value >> 40);
-            m_buffer[m_position + 3] = (byte)(value >> 32);
-            m_buffer[m_position + 4] = (byte)(value >> 24);
-            m_buffer[m_position + 5] = (byte)(value >> 16);
-            m_buffer[m_position + 6] = (byte)(value >> 8);
-            m_buffer[m_position + 7] = (byte)value;
-            m_position += 8;
+            EnsureCapacityBytes(8);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 56);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 48);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 40);
+            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 32);
+            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 6] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 7] = (byte)value;
+            m_byteLength += 8;
         }
 
         public void Write(ulong value)
@@ -157,15 +191,15 @@ namespace Sttp
 
         public void Write(decimal value)
         {
-            EnsureCapacity(16);
-            m_position += BigEndian.CopyBytes(value, m_buffer, m_position);
+            EnsureCapacityBytes(16);
+            m_byteLength += BigEndian.CopyBytes(value, m_byteBuffer, m_byteLength);
         }
 
         public void Write(Guid value)
         {
-            EnsureCapacity(16);
-            Array.Copy(value.ToRfcBytes(), 0, m_buffer, m_position, 16);
-            m_position += 16;
+            EnsureCapacityBytes(16);
+            Array.Copy(value.ToRfcBytes(), 0, m_byteBuffer, m_byteLength, 16);
+            m_byteLength += 16;
         }
 
         #endregion
@@ -174,11 +208,12 @@ namespace Sttp
 
         public void Write(byte[] value, long start, int length)
         {
+            //ToDo: Rework this method.
             if (length > 1024 * 1024)
                 throw new ArgumentException("Encoding more than 1MB is prohibited", nameof(length));
 
             // write null and empty
-            EnsureCapacity(1);
+            EnsureCapacityBytes(1);
 
             if (value == null)
             {
@@ -191,11 +226,11 @@ namespace Sttp
                 return;
             }
 
-            EnsureCapacity(Encoding7Bit.GetSize((uint)(length + 1)) + length);
+            EnsureCapacityBytes(Encoding7Bit.GetSize((uint)(length + 1)) + length);
             Write4BitSegments((uint)(length + 1));
 
-            Array.Copy(value, start, m_buffer, m_position, length); // write data
-            m_position += length;
+            Array.Copy(value, start, m_byteBuffer, m_byteLength, length); // write data
+            m_byteLength += length;
         }
 
         public void Write(byte[] value)
@@ -205,7 +240,9 @@ namespace Sttp
 
         public void Write(string value)
         {
-            EnsureCapacity(1);
+            //ToDo: Rework this method. Nulls should probably throw an exception
+
+            EnsureCapacityBytes(1);
 
             if (value == null)
             {
@@ -347,9 +384,9 @@ namespace Sttp
         }
         public void WriteBits8(uint value)
         {
-            EnsureCapacity(1);
-            m_buffer[m_position + 0] = (byte)value;
-            m_position += 1;
+            EnsureCapacityBytes(1);
+            m_byteBuffer[m_byteLength + 0] = (byte)value;
+            m_byteLength += 1;
         }
         public void WriteBits9(uint value)
         {
@@ -388,10 +425,10 @@ namespace Sttp
         }
         public void WriteBits16(uint value)
         {
-            EnsureCapacity(2);
-            m_buffer[m_position + 0] = (byte)(value >> 8);
-            m_buffer[m_position + 1] = (byte)value;
-            m_position += 2;
+            EnsureCapacityBytes(2);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 1] = (byte)value;
+            m_byteLength += 2;
         }
         public void WriteBits17(uint value)
         {
@@ -430,11 +467,11 @@ namespace Sttp
         }
         public void WriteBits24(uint value)
         {
-            EnsureCapacity(3);
-            m_buffer[m_position + 0] = (byte)(value >> 16);
-            m_buffer[m_position + 1] = (byte)(value >> 8);
-            m_buffer[m_position + 2] = (byte)value;
-            m_position += 3;
+            EnsureCapacityBytes(3);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 2] = (byte)value;
+            m_byteLength += 3;
         }
         public void WriteBits25(uint value)
         {
@@ -473,37 +510,29 @@ namespace Sttp
         }
         public void WriteBits32(uint value)
         {
-            EnsureCapacity(4);
-            m_buffer[m_position + 0] = (byte)(value >> 24);
-            m_buffer[m_position + 1] = (byte)(value >> 16);
-            m_buffer[m_position + 2] = (byte)(value >> 8);
-            m_buffer[m_position + 3] = (byte)value;
-            m_position += 4;
+            EnsureCapacityBytes(4);
+            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 24);
+            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 16);
+            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 8);
+            m_byteBuffer[m_byteLength + 3] = (byte)value;
+            m_byteLength += 4;
         }
 
         private void ValidateBitStream()
         {
-            if (m_bitStreamCacheBitCount > 7 || m_positionOfReservedBits < 0)
+            if (m_bitStreamCacheBitCount > 7)
                 ProcessBitStream();
         }
 
         private void ProcessBitStream()
         {
-            EnsureCapacity(8); //It's ok to be too large here. It just ensures that at least 8 bytes are free before doing anything.
-
-            //Reserve an 8 byte boundary if data has been written 
-            if (m_positionOfReservedBits < 0)
-                m_positionOfReservedBits = m_position++;
+            EnsureCapacityBits(2); //It's ok to be too large here. It just ensures that at least 2 bytes are free before doing anything.
 
             while (m_bitStreamCacheBitCount > 7)
             {
-                m_buffer[m_positionOfReservedBits++] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
+                m_bitLength++;
+                m_bitBuffer[m_bitBuffer.Length - m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
                 m_bitStreamCacheBitCount -= 8;
-
-                if (m_bitStreamCacheBitCount == 0)
-                    m_positionOfReservedBits = -1;
-                else
-                    m_positionOfReservedBits = m_position++;
             }
         }
 
