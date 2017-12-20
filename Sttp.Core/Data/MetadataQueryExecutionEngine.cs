@@ -96,6 +96,7 @@ namespace Sttp.Core.Data
             send.DefineResponse(false, 0, db.SchemaVersion, db.Revision, tables[0].TableName, outputColumns.ToList());
 
             MetadataRow[] tableRows = new MetadataRow[tableIndexCount];
+
             foreach (var row in tables[0].Rows)
             {
                 TraverseAllJoinsForRows(db, tableRows, row, joinPath, tables);
@@ -132,9 +133,8 @@ namespace Sttp.Core.Data
                     }
                     send.DefineRow(row.Key, values);
                 }
-
-
             }
+
             send.Finished();
             send.EndCommand();
         }

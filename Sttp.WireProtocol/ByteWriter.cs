@@ -26,7 +26,7 @@ namespace Sttp
             Clear();
         }
 
-        public int Length => m_byteLength + m_bitLength + (m_bitStreamCacheBitCount + 7) >> 3;
+        public int Length => m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
 
         protected void GetBuffer(out byte[] data, out int offset, out int length)
         {
