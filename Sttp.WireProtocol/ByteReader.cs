@@ -76,13 +76,7 @@ namespace Sttp
 
         public byte ReadByte()
         {
-            if (m_currentBytePosition + 1 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            byte rv = m_buffer[m_currentBytePosition];
-            m_currentBytePosition++;
-            return rv;
+            return (byte)ReadBits8();
         }
 
         #endregion
@@ -91,13 +85,7 @@ namespace Sttp
 
         public short ReadInt16()
         {
-            if (m_currentBytePosition + 2 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            short rv = (short)(m_buffer[m_currentBytePosition] << 8 | m_buffer[m_currentBytePosition + 1]);
-            m_currentBytePosition += 2;
-            return rv;
+            return (short)(ushort)ReadBits16();
         }
 
         #endregion
@@ -106,26 +94,17 @@ namespace Sttp
 
         public int ReadInt32()
         {
-            if (m_currentBytePosition + 4 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            int rv = m_buffer[m_currentBytePosition + 0] << 24 |
-                     m_buffer[m_currentBytePosition + 1] << 16 |
-                     m_buffer[m_currentBytePosition + 2] << 8 |
-                     m_buffer[m_currentBytePosition + 3];
-            m_currentBytePosition += 4;
-            return rv;
+            return (int)ReadBits32();
         }
 
         public uint ReadUInt32()
         {
-            return (uint)ReadInt32();
+            return ReadBits32();
         }
 
         public float ReadSingle()
         {
-            var value = ReadInt32();
+            var value = ReadBits32();
             return *(float*)&value;
         }
 
@@ -135,31 +114,18 @@ namespace Sttp
 
         public long ReadInt64()
         {
-            if (m_currentBytePosition + 8 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            long rv = (long)m_buffer[m_currentBytePosition + 0] << 56 |
-                      (long)m_buffer[m_currentBytePosition + 1] << 48 |
-                      (long)m_buffer[m_currentBytePosition + 2] << 40 |
-                      (long)m_buffer[m_currentBytePosition + 3] << 32 |
-                      (long)m_buffer[m_currentBytePosition + 4] << 24 |
-                      (long)m_buffer[m_currentBytePosition + 5] << 16 |
-                      (long)m_buffer[m_currentBytePosition + 6] << 8 |
-                      (long)m_buffer[m_currentBytePosition + 7];
-            m_currentBytePosition += 8;
-            return rv;
+            return (long)ReadBits64();
         }
 
         public double ReadDouble()
         {
-            var value = ReadInt64();
+            var value = ReadBits64();
             return *(double*)&value;
         }
 
         public ulong ReadUInt64()
         {
-            return (ulong)ReadInt64();
+            return ReadBits64();
         }
 
         #endregion
@@ -323,7 +289,7 @@ namespace Sttp
             m_currentBytePosition++;
             return rv;
         }
-       
+
         public uint ReadBits16()
         {
             if (m_currentBytePosition + 2 > m_currentBitPosition)
@@ -335,7 +301,7 @@ namespace Sttp
             m_currentBytePosition += 2;
             return rv;
         }
-        
+
         public uint ReadBits24()
         {
             if (m_currentBytePosition + 3 > m_currentBitPosition)

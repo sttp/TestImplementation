@@ -122,9 +122,7 @@ namespace Sttp
 
         public void Write(byte value)
         {
-            EnsureCapacityBytes(1);
-            m_byteBuffer[m_byteLength] = value;
-            m_byteLength++;
+            WriteBits8(value);
         }
 
         #endregion
@@ -133,10 +131,7 @@ namespace Sttp
 
         public void Write(short value)
         {
-            EnsureCapacityBytes(2);
-            m_byteBuffer[m_byteLength] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 1] = (byte)value;
-            m_byteLength += 2;
+            WriteBits16((ushort)value);
         }
 
         #endregion
@@ -145,22 +140,17 @@ namespace Sttp
 
         public void Write(int value)
         {
-            EnsureCapacityBytes(4);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 3] = (byte)value;
-            m_byteLength += 4;
+            WriteBits32((uint)value);
         }
 
         public void Write(uint value)
         {
-            Write((int)value);
+            WriteBits32(value);
         }
 
         public void Write(float value)
         {
-            Write(*(int*)&value);
+            WriteBits32(*(uint*)&value);
         }
 
         #endregion
@@ -169,26 +159,17 @@ namespace Sttp
 
         public void Write(long value)
         {
-            EnsureCapacityBytes(8);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 56);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 48);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 40);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 6] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 7] = (byte)value;
-            m_byteLength += 8;
+            WriteBits64((ulong)value);
         }
 
         public void Write(ulong value)
         {
-            Write((long)value);
+            WriteBits64(value);
         }
 
         public void Write(double value)
         {
-            Write(*(long*)&value);
+            WriteBits64(*(ulong*)&value);
         }
 
         #endregion
