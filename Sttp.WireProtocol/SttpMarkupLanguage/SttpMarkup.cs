@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Sttp.Codec;
 using System.Text;
@@ -26,6 +27,7 @@ namespace Sttp
         public int CompressedSize => AcedDeflator.Instance.Compress(m_data, 0, m_data.Length, AcedCompressionLevel.Fastest, 0, 0).Length;
         public int CompressedSize2 => Sttp.Codec.CompressionLibraries.Ionic.Zlib.ZLibTools.Compress(m_data).Length;
         public int CompressedSize3 => LZ4.Compress(m_data).Length;
+        public int Length => m_data.Length;
 
         public void Write(ByteWriter wr)
         {
@@ -36,8 +38,6 @@ namespace Sttp
         {
             return new SttpMarkupReader(m_data);
         }
-
-        public int Length => m_data.Length;
 
         public void CopyTo(byte[] buffer, int offset)
         {
@@ -76,6 +76,93 @@ namespace Sttp
             }
             xml.WriteEndElement();
             xml.Flush();
+            return sb.ToString();
+        }
+        public string ToJSON()
+        {
+            var reader = MakeReader();
+
+            var sb = new StringBuilder();
+
+            Stack<string> prefix = new Stack<string>();
+            prefix.Push("  ");
+
+            sb.Append('"');
+            sb.Append(reader.RootElement);
+            sb.AppendLine("\": {");
+
+            //Note: There's an issue with a trailing commas.
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case SttpMarkupNodeType.Element:
+                        sb.Append(prefix.Peek());
+                        sb.Append('"');
+                        sb.Append(reader.ElementName);
+                        sb.AppendLine("\": {");
+                        prefix.Push(prefix.Peek() + "  ");
+                        break;
+                    case SttpMarkupNodeType.Value:
+                        sb.Append(prefix.Peek());
+                        sb.Append('"');
+                        sb.Append(reader.ValueName);
+                        sb.Append("\": \"");
+                        sb.Append(reader.Value.ToTypeString);
+                        sb.AppendLine("\",");
+                        break;
+                    case SttpMarkupNodeType.EndElement:
+                        prefix.Pop();
+                        sb.Append(prefix.Peek());
+                        sb.AppendLine("},");
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
+        public string ToYAML()
+        {
+            var reader = MakeReader();
+
+            var sb = new StringBuilder();
+
+            Stack<string> prefix = new Stack<string>();
+            prefix.Push(" ");
+
+            sb.Append("---");
+            sb.Append(reader.RootElement);
+            sb.AppendLine();
+
+            //Note: There's an issue with a trailing commas.
+
+            while (reader.Read())
+            {
+                switch (reader.NodeType)
+                {
+                    case SttpMarkupNodeType.Element:
+                        sb.Append(prefix.Peek());
+                        sb.Append(reader.ElementName);
+                        sb.AppendLine(":");
+                        prefix.Push(prefix.Peek() + " ");
+                        break;
+                    case SttpMarkupNodeType.Value:
+                        sb.Append(prefix.Peek());
+                        sb.Append(reader.ValueName);
+                        sb.Append(": ");
+                        sb.Append(reader.Value.ToTypeString);
+                        sb.AppendLine();
+                        break;
+                    case SttpMarkupNodeType.EndElement:
+                        prefix.Pop();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
             return sb.ToString();
         }
 

@@ -176,7 +176,7 @@ namespace Sttp.Tests
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
             Console.WriteLine(s2.CompressedSize2);
-            Console.WriteLine(s2.ToXML());
+            Console.WriteLine(s2.ToYAML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
 
@@ -201,6 +201,9 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
+
+            Console.WriteLine(cmd.Markup.ToYAML());
+
             Assert.AreEqual(cmd.CommandName, "Metadata");
 
             MetadataQueryTable tbl = null;
