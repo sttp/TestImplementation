@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -79,7 +80,8 @@ namespace Sttp.Tests
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
             Console.WriteLine(s2.CompressedSize2);
-            Console.WriteLine(s2.ToXML());
+            Console.WriteLine(s2.CompressedSize3);
+            //Console.WriteLine(s2.ToXML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
 
@@ -90,7 +92,7 @@ namespace Sttp.Tests
             }
 
             CommandObjects cmd = reader.NextCommand();
-            Console.WriteLine(cmd.ToXMLString());
+            //Console.WriteLine(cmd.ToXMLString());
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
@@ -103,6 +105,22 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.EncodedSize);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.CompressedSize);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.CompressedSize2);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+            Console.WriteLine(cmd.Markup.CompressedSize3);
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            sw.Restart();
+
             Assert.AreEqual(cmd.CommandName, "Metadata");
 
             MetadataQueryTable tbl = null;

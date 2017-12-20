@@ -84,6 +84,8 @@ namespace Sttp.Codec
             return m_markup.ToXML();
         }
 
+        public SttpMarkup Markup => m_markup;
+
 
     }
 }

@@ -15,9 +15,10 @@ namespace Sttp.Codec.Metadata
 
             PrimaryKey = element.GetValue("PrimaryKey");
 
-            foreach (var query in element.GetElement("Fields").ForEachValue("Field"))
+            foreach (var query in element.GetElement("Fields").ChildValues)
             {
-                Values.Add(query);
+                Values.Add(query.Value);
+                query.Handled = true;
             }
             element.ErrorIfNotHandled();
         }

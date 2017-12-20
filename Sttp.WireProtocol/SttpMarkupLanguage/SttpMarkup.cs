@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using OGE.Core.Aced;
+using Sttp.Codec.CompressionLibraries;
 
 namespace Sttp
 {
@@ -22,8 +23,9 @@ namespace Sttp
         }
 
         public int EncodedSize => m_data.Length;
-        public int CompressedSize => AcedDeflator.Instance.Compress(m_data, 0, m_data.Length, AcedCompressionLevel.Maximum, 0, 0).Length;
+        public int CompressedSize => AcedDeflator.Instance.Compress(m_data, 0, m_data.Length, AcedCompressionLevel.Fastest, 0, 0).Length;
         public int CompressedSize2 => Sttp.Codec.CompressionLibraries.Ionic.Zlib.ZLibTools.Compress(m_data).Length;
+        public int CompressedSize3 => LZ4.Compress(m_data).Length;
 
         public void Write(ByteWriter wr)
         {

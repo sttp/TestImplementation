@@ -69,9 +69,10 @@ namespace Sttp.Codec.Metadata
                 m_stream.WriteValue("PrimaryKey", primaryKey);
                 using (m_stream.StartElement("Fields"))
                 {
-                    foreach (var c in fields)
+                    for (var index = 0; index < fields.Count; index++)
                     {
-                        m_stream.WriteValue("Field", c);
+                        var c = fields[index];
+                        m_stream.WriteValue("Field" + index, c);
                     }
                 }
             }
