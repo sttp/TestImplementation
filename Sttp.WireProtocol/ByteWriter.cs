@@ -43,7 +43,7 @@ namespace Sttp
             if (m_hasReservedUnusedBitsHeader)
             {
                 m_bitBuffer[m_bitBuffer.Length - 1] &= 31; //Clear bits 6,7,8
-                m_bitBuffer[m_bitBuffer.Length - 1] |= (byte)(m_bitStreamCache << 5);
+                m_bitBuffer[m_bitBuffer.Length - 1] |= (byte)(m_bitStreamCacheBitCount << 5);
             }
             EnsureCapacityBytes(m_bitLength);
             Array.Copy(m_bitBuffer, m_bitBuffer.Length - bitLength, m_byteBuffer, m_byteLength, bitLength);

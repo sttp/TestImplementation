@@ -45,7 +45,7 @@ namespace Sttp.Codec
             Array.Copy(buffer, position, m_buffer, 16, length);
             EncodeAndSend(CommandCode.SubscriptionStream, m_buffer, 15, length + 1);
         }
-
+        
         public void SendMarkupCommand(SttpMarkupWriter markup)
         {
             byte[] commandBytes = Encoding.ASCII.GetBytes(markup.RootElement);

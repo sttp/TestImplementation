@@ -12,6 +12,15 @@ namespace Sttp.Codec
         public readonly byte EncodingMethod;
         public readonly byte[] Data;
 
+        public CommandDataPointReply(Guid? requestID, bool isEndOfResponse, byte encodingMethod, byte[] data)
+            : base("DataPointReply")
+        {
+            RequestID = requestID;
+            IsEndOfResponse = isEndOfResponse;
+            EncodingMethod = encodingMethod;    
+            Data = data;
+        }
+
         public CommandDataPointReply(SttpMarkupReader reader)
             : base("DataPointReply")
         {

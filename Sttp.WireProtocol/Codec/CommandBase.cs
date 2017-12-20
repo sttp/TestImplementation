@@ -27,7 +27,10 @@ namespace Sttp.Codec
         public static CommandBase Create(string commandName, SttpMarkup reader)
         {
             if (!m_commands.TryGetValue(commandName, out Func<SttpMarkupReader, CommandBase> command))
+            {
+                return new CommandUnknown(commandName, reader);
                 throw new Exception("Command type has not been registered. " + commandName);
+            }
             return command(reader.MakeReader());
         }
 

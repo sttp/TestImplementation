@@ -76,7 +76,8 @@ namespace Sttp.Codec
         public CommandRequestSucceeded RequestSucceeded => m_decoder as CommandRequestSucceeded;
         //public CommandSubscription Subscription => m_decoder as CommandSubscription;
         public CommandSubscriptionStream SubscriptionStream => m_decoder as CommandSubscriptionStream;
-        //public CommandUnknown Unknown => m_decoder as CommandUnknown;
+        public CommandUnknown Unknown => m_decoder as CommandUnknown;
+
         public string ToXMLString()
         {
             if (m_markup == null)

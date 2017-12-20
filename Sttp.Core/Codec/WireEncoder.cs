@@ -52,7 +52,7 @@ namespace Sttp.Codec
 
         public void BulkTransportRequest(Guid id, long startingPosition, long length)
         {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id,startingPosition,length));
+            m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id, startingPosition, length));
         }
 
         public void BulkTransportBeginSend(Guid id, long originalSize, byte[] data)
@@ -70,18 +70,10 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandBulkTransportSendFragment(id, bytesRemaining, data));
         }
 
-        //public void DataPointReply(Guid requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("DataPointReply"))
-        //    {
-        //        sml.WriteValue("RequestID", requestID);
-        //        sml.WriteValue("IsEndOfResponse", isEndOfResponse);
-        //        sml.WriteValue("EncodingMethod", encodingMethod);
-        //        sml.WriteValue("Data", buffer);
-        //    }
-        //    m_encoder.LargeObject(sml.ToSttpMarkup());
-        //}
+        public void DataPointReply(Guid requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
+        {
+            m_encoder.SendMarkupCommand(new CommandDataPointReply(requestID, isEndOfResponse, encodingMethod, buffer));
+        }
 
         //public void DataPointRequest(SttpMarkup request)
         //{
@@ -128,6 +120,11 @@ namespace Sttp.Codec
         //    //}
         //    //m_stream.Send(CommandCode.MapRuntimeIDs);
         //}
+
+        public void SendCustomCommand(SttpMarkupWriter command)
+        {
+            m_encoder.SendMarkupCommand(command);
+        }
 
         public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
         {
