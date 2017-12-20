@@ -36,7 +36,8 @@ namespace Sttp
             SetBuffer(data, position, length);
         }
 
-        public bool IsEmpty => m_currentBytePosition == m_currentBitPosition && m_bitStreamCacheBitCount >= m_usedBitsForLastBitWord;
+        //This definately has a bug, but I'll fix it later
+        public bool IsEmpty => m_currentBytePosition == m_currentBitPosition && (m_bitStreamCacheBitCount == 8 || m_bitStreamCacheBitCount >= (8-m_usedBitsForLastBitWord));
 
         public void SetBuffer(byte[] data)
         {

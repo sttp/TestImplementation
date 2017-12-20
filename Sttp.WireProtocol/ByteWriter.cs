@@ -528,8 +528,6 @@ namespace Sttp
             EnsureCapacityBits(2); //It's ok to be too large here. It just ensures that at least 2 bytes are free before doing anything.
             while (m_bitStreamCacheBitCount > 7)
             {
-
-
                 m_bitLength++;
                 m_bitBuffer[m_bitBuffer.Length - m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
                 m_bitStreamCacheBitCount -= 8;
