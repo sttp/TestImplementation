@@ -10,40 +10,79 @@ using Sttp.Codec.CompressionLibraries;
 
 namespace Sttp
 {
+    /// <summary>
+    /// A container class around the byte array containing the SttpMarkup data. To read data from this class, call <see cref="MakeReader"/>.
+    /// This class is Immutable.
+    /// 
+    /// To write an SttpMarkup object use <see cref="SttpMarkupWriter"/>
+    /// </summary>
     public class SttpMarkup : IEquatable<SttpMarkup>
     {
         private readonly byte[] m_data;
+
+        /// <summary>
+        /// Creates an SttpMarkup from a input stream.
+        /// </summary>
+        /// <param name="rd">where to read the data from</param>
         public SttpMarkup(ByteReader rd)
         {
             m_data = rd.ReadBytes();
         }
 
+        /// <summary>
+        /// Creates an SttpMarkup from a byte array.
+        /// </summary>
+        /// <param name="data"></param>
         public SttpMarkup(byte[] data)
         {
             m_data = data;
         }
 
+        //ToDo: These methods will eventually be removed. This is just to compare compression sizes of data.
         public int EncodedSize => m_data.Length;
         public int CompressedSize => AcedDeflator.Instance.Compress(m_data, 0, m_data.Length, AcedCompressionLevel.Fastest, 0, 0).Length;
         public int CompressedSize2 => Sttp.Codec.CompressionLibraries.Ionic.Zlib.ZLibTools.Compress(m_data).Length;
         public int CompressedSize3 => LZ4.Compress(m_data).Length;
+
+        /// <summary>
+        /// The size of the data block.
+        /// </summary>
         public int Length => m_data.Length;
 
+        /// <summary>
+        /// Writes the SttpMarkup data to a byte array.
+        /// </summary>
+        /// <param name="wr"></param>
         public void Write(ByteWriter wr)
         {
             wr.Write(m_data);
         }
 
+        /// <summary>
+        /// Create a means for reading the data from the SttpMarkup.
+        /// </summary>
+        /// <returns></returns>
         public SttpMarkupReader MakeReader()
         {
             return new SttpMarkupReader(m_data);
         }
 
+        /// <summary>
+        /// Copies the internal buffer to the provided byte array.
+        /// Be sure to call <see cref="Length"/> to ensure that the destination buffer
+        /// has enough space to receive the copy.
+        /// </summary>
+        /// <param name="buffer">the buffer to copy to.</param>
+        /// <param name="offset">the offset position of <see pref="buffer"/></param>
         public void CopyTo(byte[] buffer, int offset)
         {
             Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
         }
 
+        /// <summary>
+        /// Creates an XML string representation of this SttpMarkup file.
+        /// </summary>
+        /// <returns></returns>
         public string ToXML()
         {
             var reader = MakeReader();
@@ -78,6 +117,11 @@ namespace Sttp
             xml.Flush();
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Creates a JSON string representation of this SttpMarkup file.
+        /// </summary>
+        /// <returns></returns>
         public string ToJSON()
         {
             var reader = MakeReader();
@@ -124,6 +168,11 @@ namespace Sttp
             sb.AppendLine("}");
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Creates a YAML string representation of this SttpMarkup file.
+        /// </summary>
+        /// <returns></returns>
         public string ToYAML()
         {
             var reader = MakeReader();
@@ -166,6 +215,13 @@ namespace Sttp
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Checks if the byte representation of two separate STTPMarkup files are the same. 
+        /// Note: Due to reordering and encoding mechanics, it's possible for two records to be 
+        /// externally the same, while internally they are not.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public bool Equals(SttpMarkup other)
         {
             if (ReferenceEquals(null, other))
@@ -175,6 +231,11 @@ namespace Sttp
             return m_data.SequenceEqual(other.m_data);
         }
 
+        /// <summary>
+        /// Checks if two objects are equal.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -186,16 +247,32 @@ namespace Sttp
             return Equals((SttpMarkup)obj);
         }
 
+        /// <summary>
+        /// Computes a hashcode for this data.
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             return (m_data != null ? m_data.GetHashCode() : 0);
         }
 
+        /// <summary>
+        /// Compares two object for equality.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static bool operator ==(SttpMarkup left, SttpMarkup right)
         {
             return Equals(left, right);
         }
 
+        /// <summary>
+        /// Compares two object for inequality.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <
         public static bool operator !=(SttpMarkup left, SttpMarkup right)
         {
             return !Equals(left, right);
