@@ -7,7 +7,7 @@ using Sttp.IO;
 namespace Sttp.Codec
 {
     /// <summary>
-    /// Responsible for decoding each packet into commands.
+    /// Decodes an incoming byte stream into a series of command objects. This class will align packets, reassemble fragments, and decompress packets. 
     /// </summary>
     public class CommandDecoder
     {
@@ -34,18 +34,107 @@ namespace Sttp.Codec
         /// </summary>
         private byte[] m_compressionBuffer;
 
+        /// <summary>
+        /// Constraints on the inbound data.
+        /// </summary>
         private SessionDetails m_sessionDetails;
-        private bool m_isProcessingFragments;
-        private int m_fragmentTotalSize;
-        private int m_fragmentTotalRawSize;
-        private CommandCode m_fragmentCommandCode;
-        private byte m_fragmentCompressionMode;
-        private int m_fragmentBytesReceived;
 
-        public CommandCode Command { get; private set; }
-        public SttpMarkup MarkupPayload { get; private set; }
-        public byte[] SubscriptionPayload { get; private set; }
-        public byte SubscriptionEncoding { get; private set; }
+        /// <summary>
+        /// A state variable to ensure that fragmented packets are properly sequenced.
+        /// </summary>
+        private bool m_isProcessingFragments;
+        /// <summary>
+        /// The compressed size of a fragmented packet.
+        /// </summary>
+        private int m_fragmentTotalSize;
+        /// <summary>
+        /// The uncompressed size of a fragmented packet.
+        /// </summary>
+        private int m_fragmentTotalRawSize;
+        /// <summary>
+        /// The CommandCode that is contained within a fragmented or compressed packet
+        /// </summary>
+        private CommandCode m_fragmentCommandCode;
+        /// <summary>
+        /// The compression mode for the data being sent.
+        /// </summary>
+        private byte m_fragmentCompressionMode;
+        /// <summary>
+        /// The number of bytes of the fragment that have been received thus far.
+        /// </summary>
+        private int m_fragmentBytesReceived;
+        private CommandCode m_command;
+        private SttpMarkup m_markupPayload;
+        private byte[] m_subscriptionPayload;
+        private byte m_subscriptionEncoding;
+
+        /// <summary>
+        /// Indicates if a command has successfully been decoded. 
+        /// This is equal to the return value of the most recent 
+        /// <see cref="NextCommand"/> method call.
+        /// </summary>
+        public bool IsValid => m_command != CommandCode.Invalid;
+
+        /// <summary>
+        /// If valid, This is the command that was decoded.
+        /// </summary>
+        public CommandCode Command
+        {
+            get
+            {
+                if (!IsValid)
+                    throw new InvalidOperationException("IsValid is false.");
+                return m_command;
+            }
+        }
+
+        /// <summary>
+        /// Valid if <see cref="NextCommand"/> returned true. And the command 
+        /// This is the command that was decoded.
+        /// </summary>
+        public SttpMarkup MarkupPayload
+        {
+            get
+            {
+                if (!IsValid)
+                    throw new InvalidOperationException("IsValid is false.");
+                if (m_command != CommandCode.MarkupCommand)
+                    throw new InvalidOperationException("Command is not a MarkupCommand.");
+                return m_markupPayload;
+            }
+        }
+
+        /// <summary>
+        /// Valid if <see cref="NextCommand"/> returned true. 
+        /// This is the command that was decoded.
+        /// </summary>
+        public byte[] SubscriptionPayload
+        {
+            get
+            {
+                if (!IsValid)
+                    throw new InvalidOperationException("IsValid is false.");
+                if (m_command != CommandCode.SubscriptionStream)
+                    throw new InvalidOperationException("Command is not a SubscriptionStream.");
+                return m_subscriptionPayload;
+            }
+        }
+
+        /// <summary>
+        /// Valid if <see cref="NextCommand"/> returned true. 
+        /// This is the command that was decoded.
+        /// </summary>
+        public byte SubscriptionEncoding
+        {
+            get
+            {
+                if (!IsValid)
+                    throw new InvalidOperationException("IsValid is false.");
+                if (m_command != CommandCode.SubscriptionStream)
+                    throw new InvalidOperationException("Command is not a SubscriptionStream.");
+                return m_subscriptionEncoding;
+            }
+        }
 
         public CommandDecoder(SessionDetails sessionDetails)
         {
@@ -56,7 +145,7 @@ namespace Sttp.Codec
         }
 
         /// <summary>
-        /// Writes the wire protocol data to the decoder.
+        /// Writes the wire protocol data to the decoder. This data does not have to be packet aligned.
         /// </summary>
         /// <param name="data">the data to write</param>
         /// <param name="position">the starting position</param>
@@ -95,10 +184,10 @@ namespace Sttp.Codec
         /// </summary>
         public bool NextCommand()
         {
-            Command = CommandCode.Invalid;
-            MarkupPayload = null;
-            SubscriptionPayload = null;
-            SubscriptionEncoding = 0;
+            m_command = CommandCode.Invalid;
+            m_markupPayload = null;
+            m_subscriptionPayload = null;
+            m_subscriptionEncoding = 0;
 
             TryAgain:
 
@@ -167,6 +256,9 @@ namespace Sttp.Codec
             }
         }
 
+        /// <summary>
+        /// Combined and decompresses a fragmented packet.
+        /// </summary>
         private void SendFragmentedPacket()
         {
             m_isProcessingFragments = false;
@@ -187,6 +279,13 @@ namespace Sttp.Codec
             ProcessNextCommand(m_fragmentCommandCode, m_compressionBuffer, 0, m_fragmentTotalRawSize);
         }
 
+        /// <summary>
+        /// Decodes a packet and assigns the member variables of this class with the results.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="data"></param>
+        /// <param name="position"></param>
+        /// <param name="length"></param>
         private void ProcessNextCommand(CommandCode code, byte[] data, int position, int length)
         {
             data.ValidateParameters(position, length);
@@ -201,19 +300,19 @@ namespace Sttp.Codec
                 case CommandCode.NextFragment:
                     throw new ArgumentOutOfRangeException("NextFragment is not valid at this level");
                 case CommandCode.MarkupCommand:
-                    Command = code;
+                    m_command = code;
                     int markupLength = length;
                     int markupStart = position;
                     results = new byte[markupLength];
                     Array.Copy(data, markupStart, results, 0, markupLength);
-                    MarkupPayload = new SttpMarkup(results);
+                    m_markupPayload = new SttpMarkup(results);
                     break;
                 case CommandCode.SubscriptionStream:
-                    Command = code;
+                    m_command = code;
                     results = new byte[length - 1];
                     Array.Copy(data, position + 1, results, 0, length - 1);
-                    SubscriptionEncoding = data[position];
-                    MarkupPayload = new SttpMarkup(results);
+                    m_subscriptionEncoding = data[position];
+                    m_subscriptionPayload = results;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unknown Command");

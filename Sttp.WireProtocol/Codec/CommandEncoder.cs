@@ -8,27 +8,32 @@ using DeflateStream = System.IO.Compression.DeflateStream;
 namespace Sttp.Codec
 {
     /// <summary>
-    /// Responsible for encoding each command into bytes
+    /// Responsible for encoding each command into bytes that can be sent on the socket. 
+    /// This class will fragment and compress packets to ensure that all packets fit inside the desired maximum fragment size.
     /// </summary>
     public class CommandEncoder
     {
         /// <summary>
         /// Occurs when a packet of data must be sent on the wire. This is called immediately
-        /// after completing a Packet;
+        /// after completing each packet or fragment;
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
 
-        //private DataPointEncoder m_dataPoint;
         private SessionDetails m_sessionDetails;
 
+        /// <summary>
+        /// A buffer to use to form all of the packets with.
+        /// </summary>
         private byte[] m_buffer;
+        private const int BufferOffset = 15;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
-        public CommandEncoder()
+        /// <param name="sessionDetails">Details concerning the maximum command size and the maximum packet size.</param>
+        public CommandEncoder(SessionDetails sessionDetails = null)
         {
-            m_sessionDetails = new SessionDetails();
+            m_sessionDetails = sessionDetails ?? new SessionDetails();
             m_buffer = new byte[64];
         }
 
@@ -37,22 +42,39 @@ namespace Sttp.Codec
             NewPacket?.Invoke(buffer, position, length);
         }
 
+        /// <summary>
+        /// Sends a subscription stream packets
+        /// </summary>
+        /// <param name="encodingMethod">the encoding method for this particular packet.</param>
+        /// <param name="buffer">the byte buffer to send.</param>
+        /// <param name="position">the offset in <see pref="buffer"/></param>
+        /// <param name="length">the length of the data to send.</param>
         public void SubscriptionStream(byte encodingMethod, byte[] buffer, int position, int length)
         {
             buffer.ValidateParameters(position, length);
-            EnsureCapacity(15 + 1 + length);
-            m_buffer[15] = encodingMethod;
-            Array.Copy(buffer, position, m_buffer, 16, length);
-            EncodeAndSend(CommandCode.SubscriptionStream, m_buffer, 15, length + 1);
+            EnsureCapacity(BufferOffset + 1 + length);
+            m_buffer[BufferOffset] = encodingMethod;
+            Array.Copy(buffer, position, m_buffer, BufferOffset+1, length);
+            EncodeAndSend(CommandCode.SubscriptionStream, length + 1);
         }
-        
+
+        /// <summary>
+        /// Encodes and sends the data specified in <see cref="markup"/>. It's recommended to use
+        /// the other overload that contains <see cref="CommandBase"/> if one exists.
+        /// </summary>
+        /// <param name="markup">The data to send.</param>
         public void SendMarkupCommand(SttpMarkupWriter markup)
         {
             SttpMarkup data = markup.ToSttpMarkup();
-            EnsureCapacity(15 + data.Length);
-            data.CopyTo(m_buffer, 15);
-            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length);
+            EnsureCapacity(BufferOffset + data.Length);
+            data.CopyTo(m_buffer, BufferOffset);
+            EncodeAndSend(CommandCode.MarkupCommand, data.Length);
         }
+
+        /// <summary>
+        /// Encodes and sends the supplied command to the client.
+        /// </summary>
+        /// <param name="command">The command to send.</param>
         public void SendMarkupCommand(CommandBase command)
         {
             var writer = new SttpMarkupWriter(command.CommandName);
@@ -60,6 +82,11 @@ namespace Sttp.Codec
             SendMarkupCommand(writer);
         }
 
+        /// <summary>
+        /// Ensures that <see cref="m_buffer"/> has at least the supplied number of bytes
+        /// before returning.
+        /// </summary>
+        /// <param name="bufferSize"></param>
         private void EnsureCapacity(int bufferSize)
         {
             if (m_buffer.Length < bufferSize)
@@ -72,20 +99,16 @@ namespace Sttp.Codec
         }
 
         /// <summary>
-        /// Sends a command of data over the wire. Note: This class modifies the input stream, 
-        /// so after sending the data, the buffer must be discarded. 
+        /// Sends a command of data over the wire. 
+        /// This data must already be copied to <see cref="m_buffer"/> with an offset of <see cref="BufferOffset"/> bytes.
         /// </summary>
-        /// <param name="command"></param>
-        /// <param name="payload">There must be at least 15 bytes before the start of the payload 
-        /// since this class modifies the input to put the header before the payload.</param>
-        /// <param name="offset"></param>
-        /// <param name="length"></param>
-        private void EncodeAndSend(CommandCode command, byte[] payload, int offset, int length)
+        /// <param name="command">The command that is being sent</param>
+        /// <param name="length">The length of the data being sent</param>
+        private void EncodeAndSend(CommandCode command, int length)
         {
-            if (offset < 15)
-                throw new Exception("There must be at least 15 bytes before the start of the byte[] buffer as a working space");
-
-            if (length > m_sessionDetails.Limits.MaxPacketSize)
+            byte[] payload = m_buffer;
+            int offset = BufferOffset;
+            if (length > m_sessionDetails.MaximumCommandSize)
             {
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
             }
@@ -98,7 +121,7 @@ namespace Sttp.Codec
                 return;
             }
 
-            if (length + 3 < m_sessionDetails.MaximumSegmentSize)
+            if (length + 3 < m_sessionDetails.MaximumPacketSize)
             {
                 //This packet doesn't have to be fragmented.
                 payload[offset - 3] = (byte)command;
@@ -117,7 +140,7 @@ namespace Sttp.Codec
             //ToDo: Determine if and what kind of compression should occur, Maybe try multiple 
             using (var ms = new MemoryStream())
             {
-                ms.Write(new byte[15]); //a 15 byte prefix.
+                ms.Write(new byte[BufferOffset]); //a 15 byte prefix.
                 using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
                 {
                     deflate.Write(data, offset, length);
@@ -127,7 +150,7 @@ namespace Sttp.Codec
                 //File.WriteAllBytes("C:\\temp\\openPDC-sttp.raw", raw);
                 //byte[] aced = AcedDeflator.Instance.Compress(data, offset, length, AcedCompressionLevel.Maximum, 0, 0);
                 data = ms.ToArray();
-                SendFragmentedPacket(command, length, 1, data, 15, data.Length - 15);
+                SendFragmentedPacket(command, length, 1, data, BufferOffset, data.Length - BufferOffset);
             }
 
         }
@@ -136,7 +159,7 @@ namespace Sttp.Codec
         {
             const int Overhead = 4 + 4 + 1 + 1; //10 bytes.
 
-            int fragmentLength = Math.Min(m_sessionDetails.MaximumSegmentSize - Overhead - 3, length);
+            int fragmentLength = Math.Min(m_sessionDetails.MaximumPacketSize - Overhead - 3, length);
 
             data[offset - Overhead - 3] = (byte)CommandCode.BeginFragment;
             data[offset - Overhead - 2] = (byte)((fragmentLength + Overhead) >> 8);
@@ -159,7 +182,7 @@ namespace Sttp.Codec
 
             while (length > 0)
             {
-                fragmentLength = Math.Min(m_sessionDetails.MaximumSegmentSize - 3, length);
+                fragmentLength = Math.Min(m_sessionDetails.MaximumPacketSize - 3, length);
 
                 data[offset - 3] = (byte)CommandCode.NextFragment;
                 data[offset - 2] = (byte)(fragmentLength >> 8);

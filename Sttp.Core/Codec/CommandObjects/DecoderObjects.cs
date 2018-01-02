@@ -46,12 +46,11 @@ namespace Sttp.Codec
                 case CommandCode.MarkupCommand:
                     m_markup = decoder.MarkupPayload;
                     CommandName = m_markup.MakeReader().RootElement;
-                    m_decoder = CommandBase.Create(CommandName, decoder.MarkupPayload);
+                    m_decoder = CommandBase.Create(decoder.MarkupPayload);
                     break;
                 case CommandCode.SubscriptionStream:
                     m_markup = null;
                     CommandName = "SubscriptionStream";
-
                     m_decoder = new CommandSubscriptionStream(decoder.SubscriptionEncoding, decoder.SubscriptionPayload);
                     break;
                 default:
