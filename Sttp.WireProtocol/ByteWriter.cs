@@ -221,6 +221,27 @@ namespace Sttp
             Write(Encoding.UTF8.GetBytes(value));
         }
 
+        public void WriteAsciiShort(string value)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (value.Length > 255)
+                throw new Exception("Length of string cannot exceed 255 characters");
+
+            EnsureCapacityBytes(value.Length + 1);
+
+            m_byteBuffer[m_byteLength + 0] = (byte)value.Length;
+
+            for (var x = 0; x < value.Length; x++)
+            {
+                if ((ushort)value[x] > 127) //casting to ushort also takes care of negative numbers if they exist.
+                    throw new Exception("Not an ASCII string");
+                m_byteBuffer[m_byteLength + 1 + x] = (byte)value[x];
+            }
+
+            m_byteLength += 1 + value.Length;
+        }
+
         #endregion
 
         public void Write(SttpTime value)
@@ -511,6 +532,8 @@ namespace Sttp
         }
 
         #endregion
+
+
     }
 }
 

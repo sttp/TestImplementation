@@ -50,7 +50,7 @@ namespace Sttp
             m_rootElement = rootElement;
             m_endElementHelper = new ElementEndElementHelper(this);
             m_prevName = new NameLookupCache(string.Empty, 0);
-            m_stream.Write(m_rootElement);
+            m_stream.WriteAsciiShort(m_rootElement);
         }
 
         public string RootElement => m_rootElement;
@@ -127,7 +127,7 @@ namespace Sttp
                 index = m_nameCache.Count - 1;
                 m_stream.WriteBits1(1);
                 m_stream.WriteBits1(1);
-                m_stream.Write(name);
+                m_stream.WriteAsciiShort(name);
             }
             else if (m_prevName.NextNameID == index)
             {

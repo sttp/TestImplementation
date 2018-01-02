@@ -33,7 +33,7 @@ namespace Sttp
             Value = new SttpValueMutable();
             m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = SttpMarkupNodeType.StartOfDocument;
-            m_rootElement = m_stream.ReadString();
+            m_rootElement = m_stream.ReadAsciiShort();
             ElementName = CurrentElement;
         }
 
@@ -95,7 +95,7 @@ namespace Sttp
             {
                 if (m_stream.ReadBits1() == 1)
                 {
-                    m_elements.Add(new NameLookupCache(m_stream.ReadString(), m_elements.Count));
+                    m_elements.Add(new NameLookupCache(m_stream.ReadAsciiShort(), m_elements.Count));
                     m_prevName.NextNameID = m_elements.Count - 1;
                 }
                 else

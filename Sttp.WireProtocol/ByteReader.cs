@@ -200,6 +200,27 @@ namespace Sttp
             return Encoding.UTF8.GetString(rv);
         }
 
+        public string ReadAsciiShort()
+        {
+            if (m_currentBytePosition + 1 > m_currentBitPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            if (m_currentBytePosition + 1 + m_buffer[m_currentBytePosition] > m_currentBitPosition)
+            {
+                ThrowEndOfStreamException();
+            }
+            char[] data = new char[m_buffer[m_currentBytePosition]];
+            for (int x = 0; x < data.Length; x++)
+            {
+                data[x] = (char)m_buffer[m_currentBytePosition + 1 + x];
+                if (data[x] > 127)
+                    throw new Exception("Not an ASCII string");
+            }
+            m_currentBytePosition += 1 + data.Length;
+            return new string(data);
+        }
+
 
         #endregion
 
