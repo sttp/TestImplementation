@@ -8,6 +8,7 @@ namespace Sttp
     /// <remarks>>
     /// If information needs to change, the DataPoint will need to be re-negotiated.
     /// </remarks>
+    //ToDo: Get rid of this class
     public class DataPointKey
     {
         /// <summary>
