@@ -34,7 +34,6 @@ namespace Sttp.Codec
         internal CommandObjects(CommandDecoder decoder)
         {
             CommandCode = decoder.Command;
-            CommandName = decoder.CommandName;
 
             switch (decoder.Command)
             {
@@ -46,10 +45,13 @@ namespace Sttp.Codec
                     throw new ArgumentOutOfRangeException("NextFragment is not valid at this level");
                 case CommandCode.MarkupCommand:
                     m_markup = decoder.MarkupPayload;
-                    m_decoder = CommandBase.Create(decoder.CommandName, decoder.MarkupPayload);
+                    CommandName = m_markup.MakeReader().RootElement;
+                    m_decoder = CommandBase.Create(CommandName, decoder.MarkupPayload);
                     break;
                 case CommandCode.SubscriptionStream:
                     m_markup = null;
+                    CommandName = "SubscriptionStream";
+
                     m_decoder = new CommandSubscriptionStream(decoder.SubscriptionEncoding, decoder.SubscriptionPayload);
                     break;
                 default:

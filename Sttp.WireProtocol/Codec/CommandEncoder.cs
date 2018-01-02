@@ -48,30 +48,16 @@ namespace Sttp.Codec
         
         public void SendMarkupCommand(SttpMarkupWriter markup)
         {
-            byte[] commandBytes = Encoding.ASCII.GetBytes(markup.RootElement);
-            if (commandBytes.Length > 255)
-                throw new Exception("Command cannot be more than 255 characters");
             SttpMarkup data = markup.ToSttpMarkup();
-            EnsureCapacity(15 + 1 + commandBytes.Length + data.Length);
-            m_buffer[15] = (byte)commandBytes.Length;
-            commandBytes.CopyTo(m_buffer, 15 + 1);
-            data.CopyTo(m_buffer, 15 + 1 + commandBytes.Length);
-            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length + 1 + commandBytes.Length);
+            EnsureCapacity(15 + data.Length);
+            data.CopyTo(m_buffer, 15);
+            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length);
         }
         public void SendMarkupCommand(CommandBase command)
         {
-            byte[] commandBytes = Encoding.ASCII.GetBytes(command.CommandName);
-            if (commandBytes.Length > 255)
-                throw new Exception("Command cannot be more than 255 characters");
-
             var writer = new SttpMarkupWriter(command.CommandName);
             command.Save(writer);
-            SttpMarkup data = writer.ToSttpMarkup();
-            EnsureCapacity(15 + 1 + commandBytes.Length + data.Length);
-            m_buffer[15] = (byte)commandBytes.Length;
-            commandBytes.CopyTo(m_buffer, 15 + 1);
-            data.CopyTo(m_buffer, 15 + 1 + commandBytes.Length);
-            EncodeAndSend(CommandCode.MarkupCommand, m_buffer, 15, data.Length + 1 + commandBytes.Length);
+            SendMarkupCommand(writer);
         }
 
         private void EnsureCapacity(int bufferSize)

@@ -43,7 +43,6 @@ namespace Sttp.Codec
         private int m_fragmentBytesReceived;
 
         public CommandCode Command { get; private set; }
-        public string CommandName { get; private set; }
         public SttpMarkup MarkupPayload { get; private set; }
         public byte[] SubscriptionPayload { get; private set; }
         public byte SubscriptionEncoding { get; private set; }
@@ -203,16 +202,13 @@ namespace Sttp.Codec
                     throw new ArgumentOutOfRangeException("NextFragment is not valid at this level");
                 case CommandCode.MarkupCommand:
                     Command = code;
-                    int markupLength = length - data[position] - 1;
-                    int markupStart = position + data[position] + 1;
-                    int commandLength = data[position];
-                    CommandName = Encoding.ASCII.GetString(data, position + 1, commandLength);
+                    int markupLength = length;
+                    int markupStart = position;
                     results = new byte[markupLength];
                     Array.Copy(data, markupStart, results, 0, markupLength);
                     MarkupPayload = new SttpMarkup(results);
                     break;
                 case CommandCode.SubscriptionStream:
-                    CommandName = "SubscriptionStream";
                     Command = code;
                     results = new byte[length - 1];
                     Array.Copy(data, position + 1, results, 0, length - 1);
