@@ -27,7 +27,6 @@ namespace Sttp.Tests.WireProtocol
                 SttpValueEncodingNative.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 SttpValueEncodingNative.Save(wr, (SttpValue)((x & 1) == 1));
                 SttpValueEncodingNative.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                SttpValueEncodingNative.Save(wr, (SttpValue)(decimal)x);
                 SttpValueEncodingNative.Save(wr, (SttpValue)BigEndian.GetBytes(x));
             }
 
@@ -44,7 +43,6 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsBoolean, ((x & 1) == 1));
                 Assert.AreEqual((bool?)SttpValueEncodingNative.Load(rd), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsDecimal, (decimal)x);
                 Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingNative.Load(rd)));
             }
         }
@@ -65,7 +63,6 @@ namespace Sttp.Tests.WireProtocol
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)((x & 1) == 1));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                SttpValueEncodingWithoutType.Save(wr, (SttpValue)(decimal)x);
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)BigEndian.GetBytes(x));
             }
 
@@ -82,7 +79,6 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Guid).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Boolean).AsBoolean, ((x & 1) == 1));
                 Assert.AreEqual((bool?)SttpValueEncodingWithoutType.Load(rd, ((x & 1) == 1) ? SttpValueTypeCode.Null : SttpValueTypeCode.Boolean), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Decimal).AsDecimal, (decimal)x);
                 Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.SttpBuffer)));
             }
         }

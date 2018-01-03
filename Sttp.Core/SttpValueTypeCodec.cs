@@ -33,8 +33,6 @@ namespace Sttp
                 return SttpValueTypeCode.Int64;
             if (columnDataType == typeof(UInt64))
                 return SttpValueTypeCode.Int64;
-            if (columnDataType == typeof(Decimal))
-                return SttpValueTypeCode.Decimal;
             if (columnDataType == typeof(Double))
                 return SttpValueTypeCode.Double;
             if (columnDataType == typeof(Single))
@@ -65,8 +63,6 @@ namespace Sttp
                     return typeof(Single);
                 case SttpValueTypeCode.Double:
                     return typeof(Double);
-                case SttpValueTypeCode.Decimal:
-                    return typeof(Decimal);
                 case SttpValueTypeCode.SttpTime:
                     return typeof(SttpTime);
                 case SttpValueTypeCode.Boolean:

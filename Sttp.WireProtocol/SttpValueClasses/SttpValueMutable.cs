@@ -27,8 +27,6 @@ namespace Sttp
         [FieldOffset(0)]
         private SttpTime m_valueSttpTime;
         [FieldOffset(0)]
-        private decimal m_valueDecimal;
-        [FieldOffset(0)]
         private Guid m_valueGuid;
 
         [FieldOffset(16)]
@@ -77,8 +75,6 @@ namespace Sttp
                     return (SttpValue)AsSingle;
                 case SttpValueTypeCode.Double:
                     return (SttpValue)AsDouble;
-                case SttpValueTypeCode.Decimal:
-                    return (SttpValue)AsDecimal;
                 case SttpValueTypeCode.SttpTime:
                     return (SttpValue)AsSttpTime;
                 case SttpValueTypeCode.Boolean:

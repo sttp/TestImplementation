@@ -22,7 +22,6 @@ namespace Sttp
         public abstract long AsInt64 { get; }
         public abstract float AsSingle { get; }
         public abstract double AsDouble { get; }
-        public abstract decimal AsDecimal { get; }
         public abstract SttpTime AsSttpTime { get; }
         public abstract bool AsBoolean { get; }
 
@@ -53,14 +52,7 @@ namespace Sttp
             {
                 checked
                 {
-                    if (ValueTypeCode == SttpValueTypeCode.Int64)
-                    {
-                        return (ulong)AsInt64;
-                    }
-                    else
-                    {
-                        return (ulong)AsDecimal;
-                    }
+                    return (ulong)AsInt64;
                 }
             }
         }
@@ -196,8 +188,6 @@ namespace Sttp
                         return AsSingle == other.AsSingle;
                     case SttpValueTypeCode.Double:
                         return AsDouble == other.AsDouble;
-                    case SttpValueTypeCode.Decimal:
-                        return AsDecimal == other.AsDecimal;
                     case SttpValueTypeCode.SttpTime:
                         return AsSttpTime == other.AsSttpTime;
                     case SttpValueTypeCode.Boolean:
@@ -233,8 +223,6 @@ namespace Sttp
                                 return value == other.AsSingle;
                             case SttpValueTypeCode.Double:
                                 return value == other.AsDouble;
-                            case SttpValueTypeCode.Decimal:
-                                return value == other.AsDecimal;
                         }
                         break;
                     }
@@ -249,8 +237,6 @@ namespace Sttp
                                 return value == other.AsSingle;
                             case SttpValueTypeCode.Double:
                                 return value == other.AsDouble;
-                            case SttpValueTypeCode.Decimal:
-                                return (decimal)value == other.AsDecimal;
                         }
                         break;
                     }
@@ -265,24 +251,6 @@ namespace Sttp
                                 return value == other.AsSingle;
                             case SttpValueTypeCode.Double:
                                 return value == other.AsDouble;
-                            case SttpValueTypeCode.Decimal:
-                                return (decimal)value == other.AsDecimal;
-                        }
-                        break;
-                    }
-                case SttpValueTypeCode.Decimal:
-                    {
-                        var value = AsDecimal;
-                        switch (other.ValueTypeCode)
-                        {
-                            case SttpValueTypeCode.Int64:
-                                return value == other.AsInt64;
-                            case SttpValueTypeCode.Single:
-                                return value == (decimal)other.AsSingle;
-                            case SttpValueTypeCode.Double:
-                                return value == (decimal)other.AsDouble;
-                            case SttpValueTypeCode.Decimal:
-                                return value == other.AsDecimal;
                         }
                         break;
                     }

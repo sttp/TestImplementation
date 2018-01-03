@@ -38,7 +38,7 @@ namespace Sttp.Codec.DataPoint
             }
 
             bool canUseRuntimeID = true;
-            bool hasExtraFields = false;
+            bool hasExtendedData = false;
             bool timeQualityChanged = false;
             bool valueQualityChanged = false;
             bool timeChanged = false;
@@ -47,7 +47,7 @@ namespace Sttp.Codec.DataPoint
             if (m_stream.ReadBits1() == 0)
             {
                 canUseRuntimeID = m_stream.ReadBits1() == 1;
-                hasExtraFields = m_stream.ReadBits1() == 1;
+                hasExtendedData = m_stream.ReadBits1() == 1;
                 timeQualityChanged = m_stream.ReadBits1() == 1;
                 valueQualityChanged = m_stream.ReadBits1() == 1;
                 timeChanged = m_stream.ReadBits1() == 1;
@@ -84,17 +84,13 @@ namespace Sttp.Codec.DataPoint
                 }
             }
 
-            if (hasExtraFields)
+            if (hasExtendedData)
             {
-                dataPoint.ExtraFields = new SttpValue[m_stream.Read4BitSegments()];
-                for (int x = 0; x < dataPoint.ExtraFields.Length; x++)
-                {
-                    dataPoint.ExtraFields[x] = SttpValueEncodingNative.Load(m_stream);
-                }
+                dataPoint.ExtendedData = SttpValueEncodingNative.Load(m_stream);
             }
             else
             {
-                dataPoint.ExtraFields = null;
+                dataPoint.ExtendedData = null;
             }
 
             if (timeQualityChanged)

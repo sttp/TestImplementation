@@ -26,9 +26,6 @@ namespace Sttp
                 case SttpValueTypeCode.Double:
                     wr.Write(value.AsDouble);
                     break;
-                case SttpValueTypeCode.Decimal:
-                    wr.Write(value.AsDecimal);
-                    break;
                 case SttpValueTypeCode.SttpTime:
                     wr.Write(value.AsSttpTime);
                     break;
@@ -67,8 +64,6 @@ namespace Sttp
                     return (SttpValue)rd.ReadSingle();
                 case SttpValueTypeCode.Double:
                     return (SttpValue)rd.ReadDouble();
-                case SttpValueTypeCode.Decimal:
-                    return (SttpValue)rd.ReadDecimal();
                 case SttpValueTypeCode.SttpTime:
                     return (SttpValue)rd.ReadSttpTime();
                 case SttpValueTypeCode.Boolean:
@@ -103,9 +98,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.Double:
                     output.SetValue(rd.ReadDouble());
-                    break;
-                case SttpValueTypeCode.Decimal:
-                    output.SetValue(rd.ReadDecimal());
                     break;
                 case SttpValueTypeCode.SttpTime:
                     output.SetValue(rd.ReadSttpTime());

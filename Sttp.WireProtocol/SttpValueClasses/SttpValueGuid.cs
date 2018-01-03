@@ -22,7 +22,6 @@ namespace Sttp
         public override long AsInt64 => SttpValueGuidMethods.AsInt64(Value);
         public override float AsSingle => SttpValueGuidMethods.AsSingle(Value);
         public override double AsDouble => SttpValueGuidMethods.AsDouble(Value);
-        public override decimal AsDecimal => SttpValueGuidMethods.AsDecimal(Value);
         public override SttpTime AsSttpTime => SttpValueGuidMethods.AsSttpTime(Value);
         public override bool AsBoolean => SttpValueGuidMethods.AsBoolean(Value);
         public override Guid AsGuid => SttpValueGuidMethods.AsGuid(Value);
@@ -61,11 +60,6 @@ namespace Sttp
         public static double AsDouble(Guid value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Double");
-        }
-
-        public static decimal AsDecimal(Guid value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Decimal");
         }
 
         public static SttpTime AsSttpTime(Guid value)

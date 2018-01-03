@@ -20,7 +20,6 @@ namespace Sttp
         public override object ToNativeType => null;
 
         public override long AsInt64 => throw new InvalidCastException();
-        public override decimal AsDecimal => throw new InvalidCastException();
         public override double AsDouble => throw new InvalidCastException();
         public override float AsSingle => throw new InvalidCastException();
         public override SttpTime AsSttpTime => throw new InvalidCastException();

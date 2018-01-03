@@ -67,11 +67,6 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.Double;
             m_valueDouble = value;
         }
-        public void SetValue(decimal value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.Decimal;
-            m_valueDecimal = value;
-        }
         public void SetValue(DateTime value)
         {
             SetValue(new SttpTime(value));
@@ -136,9 +131,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.Double:
                     SetValue(value.AsDouble);
-                    break;
-                case SttpValueTypeCode.Decimal:
-                    SetValue(value.AsDecimal);
                     break;
                 case SttpValueTypeCode.SttpTime:
                     SetValue(value.AsSttpTime);

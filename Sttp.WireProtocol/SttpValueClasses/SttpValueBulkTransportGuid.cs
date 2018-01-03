@@ -22,7 +22,6 @@ namespace Sttp
         public override long AsInt64 => SttpValueSttpBulkTransportMethods.AsInt64(Value);
         public override float AsSingle => SttpValueSttpBulkTransportMethods.AsSingle(Value);
         public override double AsDouble => SttpValueSttpBulkTransportMethods.AsDouble(Value);
-        public override decimal AsDecimal => SttpValueSttpBulkTransportMethods.AsDecimal(Value);
         public override SttpTime AsSttpTime => SttpValueSttpBulkTransportMethods.AsSttpTime(Value);
         public override bool AsBoolean => SttpValueSttpBulkTransportMethods.AsBoolean(Value);
         public override Guid AsGuid => SttpValueSttpBulkTransportMethods.AsGuid(Value);
@@ -61,11 +60,6 @@ namespace Sttp
         public static double AsDouble(SttpBulkTransport value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Double");
-        }
-
-        public static decimal AsDecimal(SttpBulkTransport value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Decimal");
         }
 
         public static SttpTime AsSttpTime(SttpBulkTransport value)

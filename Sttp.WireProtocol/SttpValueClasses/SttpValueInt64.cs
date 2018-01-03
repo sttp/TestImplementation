@@ -22,7 +22,6 @@ namespace Sttp
         public override long AsInt64 => SttpValueInt64Methods.AsInt64(Value);
         public override float AsSingle => SttpValueInt64Methods.AsSingle(Value);
         public override double AsDouble => SttpValueInt64Methods.AsDouble(Value);
-        public override decimal AsDecimal => SttpValueInt64Methods.AsDecimal(Value);
         public override SttpTime AsSttpTime => SttpValueInt64Methods.AsSttpTime(Value);
         public override bool AsBoolean => SttpValueInt64Methods.AsBoolean(Value);
         public override Guid AsGuid => SttpValueInt64Methods.AsGuid(Value);
@@ -69,14 +68,6 @@ namespace Sttp
             checked
             {
                 return (double)value;
-            }
-        }
-
-        public static decimal AsDecimal(long value)
-        {
-            checked
-            {
-                return (decimal)value;
             }
         }
 

@@ -37,13 +37,13 @@ namespace Sttp.Codec.DataPoint
         public void AddDataPoint(SttpDataPoint point)
         {
             bool canUseRuntimeID = point.DataPointID.RuntimeID >= 0 && point.DataPointID.RuntimeID < m_maxRuntimeIDCache;
-            bool hasExtraFields = point.ExtraFields != null && point.ExtraFields.Length > 0;
+            bool hasExtendedData = point.ExtendedData != null && !point.ExtendedData.IsNull;
             bool timeQualityChanged = (byte)point.TimestampQuality != m_lastTimeQuality;
             bool valueQualityChanged = (byte)point.ValueQuality != m_lastValueQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
             bool typeChanged = point.Value.ValueTypeCode != m_lastValueCode;
 
-            if (canUseRuntimeID && !hasExtraFields && !timeQualityChanged && !valueQualityChanged && !timeChanged && !typeChanged)
+            if (canUseRuntimeID && !hasExtendedData && !timeQualityChanged && !valueQualityChanged && !timeChanged && !typeChanged)
             {
                 m_stream.WriteBits1(true); //Is the common header.
             }
@@ -51,7 +51,7 @@ namespace Sttp.Codec.DataPoint
             {
                 m_stream.WriteBits1(false); //Is not the common header.
                 m_stream.WriteBits1(canUseRuntimeID);
-                m_stream.WriteBits1(hasExtraFields);
+                m_stream.WriteBits1(hasExtendedData);
                 m_stream.WriteBits1(timeQualityChanged);
                 m_stream.WriteBits1(valueQualityChanged);
                 m_stream.WriteBits1(timeChanged);
@@ -85,13 +85,9 @@ namespace Sttp.Codec.DataPoint
                 }
             }
 
-            if (hasExtraFields)
+            if (hasExtendedData)
             {
-                m_stream.Write4BitSegments((uint)point.ExtraFields.Length);
-                foreach (var field in point.ExtraFields)
-                {
-                    SttpValueEncodingNative.Save(m_stream, field);
-                }
+                SttpValueEncodingNative.Save(m_stream, point.ExtendedData);
             }
 
             if (timeQualityChanged)

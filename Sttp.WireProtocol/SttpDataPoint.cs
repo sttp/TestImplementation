@@ -55,7 +55,7 @@ namespace Sttp
         ///   Some kind of pivot field. 
         ///   Extra quality bits.
         /// </summary>
-        public SttpValue[] ExtraFields;
+        public SttpValue ExtendedData;
 
         public override string ToString()
         {

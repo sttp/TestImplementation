@@ -44,7 +44,7 @@ namespace Sttp
         {
             if (value > long.MaxValue)
             {
-                return (SttpValue)(decimal)value;
+                throw new OverflowException("uint64 values greater than int64.MaxValue are not supported.");
             }
             return (SttpValue)(long)value;
         }
@@ -55,10 +55,6 @@ namespace Sttp
         public static explicit operator SttpValue(double value)
         {
             return new SttpValueDouble(value);
-        }
-        public static explicit operator SttpValue(decimal value)
-        {
-            return new SttpValueDecimal(value);
         }
         public static explicit operator SttpValue(DateTime value)
         {
@@ -146,10 +142,6 @@ namespace Sttp
         public static explicit operator double(SttpValue value)
         {
             return value.AsDouble;
-        }
-        public static explicit operator decimal(SttpValue value)
-        {
-            return value.AsDecimal;
         }
         public static explicit operator DateTime(SttpValue value)
         {
@@ -242,10 +234,6 @@ namespace Sttp
             {
                 return (SttpValue)(double)value;
             }
-            else if (type == typeof(decimal))
-            {
-                return (SttpValue)(decimal)value;
-            }
             else if (type == typeof(DateTime))
             {
                 return (SttpValue)(DateTime)value;
@@ -289,6 +277,10 @@ namespace Sttp
             else if (type == typeof(SttpBulkTransport))
             {
                 return (SttpValue)(SttpBulkTransport)value;
+            }
+            else if (type == typeof(decimal))
+            {
+                return (SttpValue)(double)(decimal)value;
             }
             else
             {
@@ -358,12 +350,6 @@ namespace Sttp
             if (!value.HasValue)
                 return SttpValue.Null;
             return new SttpValueDouble(value.Value);
-        }
-        public static explicit operator SttpValue(decimal? value)
-        {
-            if (!value.HasValue)
-                return SttpValue.Null;
-            return new SttpValueDecimal(value.Value);
         }
         public static explicit operator SttpValue(DateTime? value)
         {
@@ -456,12 +442,6 @@ namespace Sttp
             if (value.IsNull)
                 return null;
             return value.AsDouble;
-        }
-        public static explicit operator decimal? (SttpValue value)
-        {
-            if (value.IsNull)
-                return null;
-            return value.AsDecimal;
         }
         public static explicit operator DateTime? (SttpValue value)
         {
