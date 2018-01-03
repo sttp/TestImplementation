@@ -26,7 +26,7 @@ namespace Sttp.Tests.WireProtocol
                 SttpValueEncodingNative.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 SttpValueEncodingNative.Save(wr, (SttpValue)((x & 1) == 1));
                 SttpValueEncodingNative.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                SttpValueEncodingNative.Save(wr, (SttpValue)BigEndian.GetBytes(x));
+                SttpValueEncodingNative.Save(wr, (SttpValue)GetBytes(x));
             }
 
             rd.SetBuffer(wr.ToArray());
@@ -41,7 +41,7 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsBoolean, ((x & 1) == 1));
                 Assert.AreEqual((bool?)SttpValueEncodingNative.Load(rd), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingNative.Load(rd)));
+                Assert.IsTrue(GetBytes(x).SequenceEqual((byte[])SttpValueEncodingNative.Load(rd)));
             }
         }
 
@@ -60,7 +60,7 @@ namespace Sttp.Tests.WireProtocol
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)((x & 1) == 1));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                SttpValueEncodingWithoutType.Save(wr, (SttpValue)BigEndian.GetBytes(x));
+                SttpValueEncodingWithoutType.Save(wr, (SttpValue)GetBytes(x));
             }
 
             rd.SetBuffer(wr.ToArray());
@@ -75,48 +75,21 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Guid).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Boolean).AsBoolean, ((x & 1) == 1));
                 Assert.AreEqual((bool?)SttpValueEncodingWithoutType.Load(rd, ((x & 1) == 1) ? SttpValueTypeCode.Null : SttpValueTypeCode.Boolean), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.SttpBuffer)));
+                Assert.IsTrue(GetBytes(x).SequenceEqual((byte[])SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.SttpBuffer)));
             }
         }
 
 
-        //[TestMethod]
-        //public void Test3()
-        //{
-        //    var wr = new ByteWriter();
-        //    var rd = new ByteReader();
-        //    for (int x = -100; x < 100; x++)
-        //    {
-        //        var y = -x;
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)x.ToString(), (SttpValue)y.ToString());
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)x, (SttpValue)y);
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(float)x, (SttpValue)(float)y);
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(double)x, (SttpValue)(float)y);
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(x), (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y));
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)((x & 1) == 1), (SttpValue)((y & 1) == 1));
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true), (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true));
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)(decimal)x, (SttpValue)(decimal)y);
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)BigEndian.GetBytes(x), (SttpValue)BigEndian.GetBytes(y));
-        //    }
-
-        //    rd.SetBuffer(wr.ToArray());
-
-        //    for (int x = -100; x < 100; x++)
-        //    {
-        //        var y = -x;
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)y.ToString()).AsString, x.ToString());
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)y).AsInt32, x);
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsSingle, (float)x);
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsDouble, (double)x);
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y)).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)((y & 1) == 1)).AsBoolean, ((x & 1) == 1));
-        //        Assert.AreEqual((bool?)SttpValueEncodingDelta.Load(rd, (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true)), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(decimal)y).AsDecimal, (decimal)x);
-        //        Assert.IsTrue(BigEndian.GetBytes(x).SequenceEqual((byte[])SttpValueEncodingDelta.Load(rd, (SttpValue)BigEndian.GetBytes(y))));
-        //    }
-        //}
+        public static byte[] GetBytes(int value)
+        {
+            return new[]
+                   {
+                       (byte)(value >> 24),
+                       (byte)(value >> 16),
+                       (byte)(value >> 8),
+                       (byte)(value)
+                   };
+        }
 
     }
 }

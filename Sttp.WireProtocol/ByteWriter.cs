@@ -171,12 +171,6 @@ namespace Sttp
 
         #region [ 16-byte values ]
 
-        public void Write(decimal value)
-        {
-            EnsureCapacityBytes(16);
-            m_byteLength += BigEndian.CopyBytes(value, m_byteBuffer, m_byteLength);
-        }
-
         public void Write(Guid value)
         {
             EnsureCapacityBytes(16);

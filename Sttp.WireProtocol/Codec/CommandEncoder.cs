@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using Sttp.IO;
 using CompressionMode = System.IO.Compression.CompressionMode;
 using DeflateStream = System.IO.Compression.DeflateStream;
 
@@ -54,7 +53,7 @@ namespace Sttp.Codec
             buffer.ValidateParameters(position, length);
             EnsureCapacity(BufferOffset + 1 + length);
             m_buffer[BufferOffset] = encodingMethod;
-            Array.Copy(buffer, position, m_buffer, BufferOffset+1, length);
+            Array.Copy(buffer, position, m_buffer, BufferOffset + 1, length);
             EncodeAndSend(CommandCode.SubscriptionStream, length + 1);
         }
 
@@ -140,7 +139,7 @@ namespace Sttp.Codec
             //ToDo: Determine if and what kind of compression should occur, Maybe try multiple 
             using (var ms = new MemoryStream())
             {
-                ms.Write(new byte[BufferOffset]); //a 15 byte prefix.
+                ms.Write(new byte[BufferOffset], 0, BufferOffset); //a 15 byte prefix.
                 using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
                 {
                     deflate.Write(data, offset, length);

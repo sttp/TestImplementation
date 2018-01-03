@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using Sttp.Codec;
 using Sttp.Codec.Metadata;
-using Sttp.IO;
 
 namespace Sttp.Data
 {

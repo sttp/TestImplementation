@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 using Ionic.Zlib;
-using Sttp.IO;
 
 namespace Sttp.Codec
 {
@@ -195,7 +194,7 @@ namespace Sttp.Codec
                 return false;
 
             CommandCode code = (CommandCode)m_inboundBuffer[m_inboundBufferCurrentPosition];
-            int payloadLength = BigEndian.ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
+            int payloadLength = ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
             if (m_inboundBufferLength < payloadLength + 3)
             {
                 return false;
@@ -206,8 +205,8 @@ namespace Sttp.Codec
                     throw new Exception("A previous fragment has not finished.");
 
                 m_isProcessingFragments = true;
-                m_fragmentTotalSize = BigEndian.ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition + 3);
-                m_fragmentTotalRawSize = BigEndian.ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition + 7);
+                m_fragmentTotalSize = ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition + 3);
+                m_fragmentTotalRawSize = ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition + 7);
                 m_fragmentCommandCode = (CommandCode)m_inboundBuffer[m_inboundBufferCurrentPosition + 11];
                 m_fragmentCompressionMode = m_inboundBuffer[m_inboundBufferCurrentPosition + 12];
 
@@ -317,6 +316,19 @@ namespace Sttp.Codec
                 default:
                     throw new ArgumentOutOfRangeException("Unknown Command");
             }
+        }
+
+        private static short ToInt16(byte[] buffer, int startIndex)
+        {
+            return (short)((int)buffer[startIndex] << 8 | (int)buffer[startIndex + 1]);
+        }
+
+        private static int ToInt32(byte[] buffer, int startIndex)
+        {
+            return (int)buffer[startIndex + 0] << 24 |
+                   (int)buffer[startIndex + 1] << 16 |
+                   (int)buffer[startIndex + 2] << 8 |
+                   (int)buffer[startIndex + 3];
         }
     }
 }

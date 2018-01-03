@@ -148,25 +148,13 @@ namespace Sttp
 
         #region [ 16-byte values ]
 
-        public decimal ReadDecimal()
-        {
-            if (m_currentBytePosition + 16 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            decimal rv = BigEndian.ToDecimal(m_buffer, m_currentBytePosition);
-            m_currentBytePosition += 16;
-            return rv;
-        }
-
         public Guid ReadGuid()
         {
             if (m_currentBytePosition + 16 > m_currentBitPosition)
             {
                 ThrowEndOfStreamException();
             }
-
-            Guid rv = GuidExtensions.ToRfcGuid(m_buffer, m_currentBytePosition);
+            Guid rv = m_buffer.ToRfcGuid(m_currentBitPosition);
             m_currentBytePosition += 16;
             return rv;
         }
