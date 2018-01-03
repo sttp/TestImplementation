@@ -79,8 +79,6 @@ namespace Sttp.Tests
             var s2 = s.ToSttpMarkup();
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
-            Console.WriteLine(s2.CompressedSize2);
-            Console.WriteLine(s2.CompressedSize3);
             //Console.WriteLine(s2.ToXML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
@@ -112,12 +110,6 @@ namespace Sttp.Tests
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
             Console.WriteLine(cmd.Markup.CompressedSize);
-            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
-            sw.Restart();
-            Console.WriteLine(cmd.Markup.CompressedSize2);
-            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
-            sw.Restart();
-            Console.WriteLine(cmd.Markup.CompressedSize3);
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
 
@@ -168,8 +160,6 @@ namespace Sttp.Tests
             var s2 = s.ToSttpMarkup();
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
-            Console.WriteLine(s2.CompressedSize2);
-            Console.WriteLine(s2.CompressedSize3);
             Console.WriteLine(s2.ToYAML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
@@ -201,12 +191,6 @@ namespace Sttp.Tests
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
             Console.WriteLine(cmd.Markup.CompressedSize);
-            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
-            sw.Restart();
-            Console.WriteLine(cmd.Markup.CompressedSize2);
-            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
-            sw.Restart();
-            Console.WriteLine(cmd.Markup.CompressedSize3);
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
 
@@ -263,7 +247,6 @@ namespace Sttp.Tests
             var s2 = s.ToSttpMarkup();
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
-            Console.WriteLine(s2.CompressedSize2);
             Console.WriteLine(s2.ToYAML());
 
             writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });

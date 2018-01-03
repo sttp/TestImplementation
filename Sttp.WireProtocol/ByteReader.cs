@@ -154,7 +154,7 @@ namespace Sttp
             {
                 ThrowEndOfStreamException();
             }
-            Guid rv = m_buffer.ToRfcGuid(m_currentBitPosition);
+            Guid rv = m_buffer.ToRfcGuid(m_currentBytePosition);
             m_currentBytePosition += 16;
             return rv;
         }
