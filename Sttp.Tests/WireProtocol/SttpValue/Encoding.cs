@@ -23,7 +23,6 @@ namespace Sttp.Tests.WireProtocol
                 SttpValueEncodingNative.Save(wr, (SttpValue)(float)x);
                 SttpValueEncodingNative.Save(wr, (SttpValue)(double)x);
                 SttpValueEncodingNative.Save(wr, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(x));
-                SttpValueEncodingNative.Save(wr, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
                 SttpValueEncodingNative.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 SttpValueEncodingNative.Save(wr, (SttpValue)((x & 1) == 1));
                 SttpValueEncodingNative.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
@@ -39,7 +38,6 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsSingle, (float)x);
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsDouble, (double)x);
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-                Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsDateTimeOffset, DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(SttpValueEncodingNative.Load(rd).AsBoolean, ((x & 1) == 1));
                 Assert.AreEqual((bool?)SttpValueEncodingNative.Load(rd), ((x & 1) == 1) ? (bool?)null : (bool?)true);
@@ -59,7 +57,6 @@ namespace Sttp.Tests.WireProtocol
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)(float)x);
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)(double)x);
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(x));
-                SttpValueEncodingWithoutType.Save(wr, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)((x & 1) == 1));
                 SttpValueEncodingWithoutType.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
@@ -75,7 +72,6 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Single).AsSingle, (float)x);
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Double).AsDouble, (double)x);
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.SttpTime).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-                Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.SttpTime).AsDateTimeOffset, DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Guid).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(SttpValueEncodingWithoutType.Load(rd, SttpValueTypeCode.Boolean).AsBoolean, ((x & 1) == 1));
                 Assert.AreEqual((bool?)SttpValueEncodingWithoutType.Load(rd, ((x & 1) == 1) ? SttpValueTypeCode.Null : SttpValueTypeCode.Boolean), ((x & 1) == 1) ? (bool?)null : (bool?)true);
@@ -97,7 +93,6 @@ namespace Sttp.Tests.WireProtocol
         //        SttpValueEncodingDelta.Save(wr, (SttpValue)(float)x, (SttpValue)(float)y);
         //        SttpValueEncodingDelta.Save(wr, (SttpValue)(double)x, (SttpValue)(float)y);
         //        SttpValueEncodingDelta.Save(wr, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(x), (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y));
-        //        SttpValueEncodingDelta.Save(wr, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x), (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(y));
         //        SttpValueEncodingDelta.Save(wr, (SttpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         //        SttpValueEncodingDelta.Save(wr, (SttpValue)((x & 1) == 1), (SttpValue)((y & 1) == 1));
         //        SttpValueEncodingDelta.Save(wr, (SttpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true), (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true));
@@ -115,7 +110,6 @@ namespace Sttp.Tests.WireProtocol
         //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsSingle, (float)x);
         //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)(float)y).AsDouble, (double)x);
         //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTime.Parse("1/1/2010").AddMinutes(y)).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-        //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(y)).AsDateTimeOffset, DateTimeOffset.Parse("1/1/2010").ToLocalTime().AddMinutes(x));
         //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)new Guid(y, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         //        Assert.AreEqual(SttpValueEncodingDelta.Load(rd, (SttpValue)((y & 1) == 1)).AsBoolean, ((x & 1) == 1));
         //        Assert.AreEqual((bool?)SttpValueEncodingDelta.Load(rd, (SttpValue)(((y & 1) == 1) ? (bool?)null : (bool?)true)), ((x & 1) == 1) ? (bool?)null : (bool?)true);

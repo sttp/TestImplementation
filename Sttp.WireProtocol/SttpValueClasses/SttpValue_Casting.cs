@@ -60,10 +60,6 @@ namespace Sttp
         {
             return (SttpValue)new SttpTime(value);
         }
-        public static explicit operator SttpValue(DateTimeOffset value)
-        {
-            return (SttpValue)new SttpTime(value);
-        }
         public static explicit operator SttpValue(SttpTime value)
         {
             return new SttpValueSttpTime(value);
@@ -146,10 +142,6 @@ namespace Sttp
         public static explicit operator DateTime(SttpValue value)
         {
             return value.AsDateTime;
-        }
-        public static explicit operator DateTimeOffset(SttpValue value)
-        {
-            return value.AsDateTimeOffset;
         }
         public static explicit operator SttpTime(SttpValue value)
         {
@@ -237,10 +229,6 @@ namespace Sttp
             else if (type == typeof(DateTime))
             {
                 return (SttpValue)(DateTime)value;
-            }
-            else if (type == typeof(DateTimeOffset))
-            {
-                return (SttpValue)(DateTimeOffset)value;
             }
             else if (type == typeof(SttpTime))
             {
@@ -357,12 +345,6 @@ namespace Sttp
                 return SttpValue.Null;
             return (SttpValue)new SttpTime(value.Value);
         }
-        public static explicit operator SttpValue(DateTimeOffset? value)
-        {
-            if (!value.HasValue)
-                return SttpValue.Null;
-            return (SttpValue)new SttpTime(value.Value);
-        }
         public static explicit operator SttpValue(SttpTime? value)
         {
             if (!value.HasValue)
@@ -448,12 +430,6 @@ namespace Sttp
             if (value.IsNull)
                 return null;
             return value.AsDateTime;
-        }
-        public static explicit operator DateTimeOffset? (SttpValue value)
-        {
-            if (value.IsNull)
-                return null;
-            return value.AsDateTimeOffset;
         }
         public static explicit operator SttpTime? (SttpValue value)
         {

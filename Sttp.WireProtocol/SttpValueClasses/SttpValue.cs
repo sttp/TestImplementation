@@ -114,8 +114,6 @@ namespace Sttp
 
         public DateTime AsDateTime => AsSttpTime.AsDateTime;
 
-        public DateTimeOffset AsDateTimeOffset => AsSttpTime.AsDateTimeOffset;
-
         /// <summary>
         /// Gets if this class has a value. Clear this by setting a value.
         /// </summary>

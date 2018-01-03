@@ -71,10 +71,6 @@ namespace Sttp
         {
             SetValue(new SttpTime(value));
         }
-        public void SetValue(DateTimeOffset value)
-        {
-            SetValue(new SttpTime(value));
-        }
         public void SetValue(SttpTime value)
         {
             m_valueTypeCode = SttpValueTypeCode.SttpTime;
@@ -209,15 +205,11 @@ namespace Sttp
             }
             else if (type == typeof(decimal))
             {
-                SetValue((decimal)value);
+                SetValue((double)(decimal)value);
             }
             else if (type == typeof(DateTime))
             {
                 SetValue((DateTime)value);
-            }
-            else if (type == typeof(DateTimeOffset))
-            {
-                SetValue((DateTimeOffset)value);
             }
             else if (type == typeof(SttpTime))
             {
