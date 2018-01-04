@@ -80,31 +80,30 @@ namespace Sttp.Tests
                 var dfdt = (float)row["DFDT"];
                 var status = (short)row["Status"];
 
-                dataPoint.DataPointID = new SttpDataPointID();
-                dataPoint.DataPointID.RuntimeID = termid * 10;
-                dataPoint.Time = new SttpTime(time);
+                dataPoint.DataPointRuntimeID = termid * 10;
+                dataPoint.Time.SetValue(time);
                 dataPoint.TimestampQuality = 0;
                 dataPoint.ValueQuality = 0;
-                dataPoint.Value = (SttpValue)vm;
+                dataPoint.Value.SetValue(vm);
 
                 enc.AddDataPoint(dataPoint);
-                dataPoint.DataPointID.RuntimeID++;
-                dataPoint.Value = (SttpValue)va;
+                dataPoint.DataPointRuntimeID++;
+                dataPoint.Value.SetValue(va);
                 enc.AddDataPoint(dataPoint);
-                dataPoint.DataPointID.RuntimeID++;
-                dataPoint.Value = (SttpValue)im;
+                dataPoint.DataPointRuntimeID++;
+                dataPoint.Value.SetValue(im);
                 enc.AddDataPoint(dataPoint);
-                dataPoint.DataPointID.RuntimeID++;
-                dataPoint.Value = (SttpValue)ia;
+                dataPoint.DataPointRuntimeID++;
+                dataPoint.Value.SetValue(ia);
                 enc.AddDataPoint(dataPoint);
-                dataPoint.DataPointID.RuntimeID++;
-                dataPoint.Value = (SttpValue)freq;
+                dataPoint.DataPointRuntimeID++;
+                dataPoint.Value.SetValue(freq);
                 enc.AddDataPoint(dataPoint);
-                dataPoint.DataPointID.RuntimeID++;
-                dataPoint.Value = (SttpValue)dfdt;
+                dataPoint.DataPointRuntimeID++;
+                dataPoint.Value.SetValue(dfdt);
                 enc.AddDataPoint(dataPoint);
-                dataPoint.DataPointID.RuntimeID++;
-                dataPoint.Value = (SttpValue)status;
+                dataPoint.DataPointRuntimeID++;
+                dataPoint.Value.SetValue(status);
                 enc.AddDataPoint(dataPoint);
                 pointCount += 7;
             }

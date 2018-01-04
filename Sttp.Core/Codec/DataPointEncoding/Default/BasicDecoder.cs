@@ -9,7 +9,7 @@ namespace Sttp.Codec.DataPoint
     {
         private ByteReader m_stream;
         private int m_lastRuntimeID = 0;
-        private SttpTime m_lastTimestamp = default(SttpTime);
+        private SttpValueMutable m_lastTimestamp = new SttpValueMutable();
         private byte m_lastTimeQuality = 0;
         private byte m_lastValueQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
@@ -22,7 +22,7 @@ namespace Sttp.Codec.DataPoint
         public void Load(byte[] data)
         {
             m_lastRuntimeID = 0;
-            m_lastTimestamp = default(SttpTime);
+            m_lastTimestamp.SetNull();
             m_lastTimeQuality = 0;
             m_lastValueQuality = 0;
             m_lastValueCode = SttpValueTypeCode.Null;
@@ -57,24 +57,22 @@ namespace Sttp.Codec.DataPoint
             if (canUseRuntimeID)
             {
                 m_lastRuntimeID ^= (int)(uint)m_stream.Read4BitSegments();
-                if (dataPoint.DataPointID == null)
-                    dataPoint.DataPointID = new SttpDataPointID();
-                dataPoint.DataPointID.RuntimeID = m_lastRuntimeID;
-                dataPoint.DataPointID.PointID = SttpValue.Null;
+                dataPoint.DataPointRuntimeID = m_lastRuntimeID;
+                dataPoint.DataPointID.SetNull();
             }
             else
             {
-                dataPoint.DataPointID.RuntimeID = -1;
-                dataPoint.DataPointID.PointID = SttpValueEncodingNative.Load(m_stream);
+                dataPoint.DataPointRuntimeID = -1;
+                SttpValueEncodingNative.Load(m_stream, dataPoint.DataPointID);
             }
 
             if (hasExtendedData)
             {
-                dataPoint.ExtendedData = SttpValueEncodingNative.Load(m_stream);
+                SttpValueEncodingNative.Load(m_stream, dataPoint.ExtendedData);
             }
             else
             {
-                dataPoint.ExtendedData = null;
+                dataPoint.ExtendedData.SetNull();
             }
 
             if (timeQualityChanged)
@@ -91,16 +89,17 @@ namespace Sttp.Codec.DataPoint
 
             if (timeChanged)
             {
-                m_lastTimestamp = m_stream.ReadSttpTime();
+                SttpValueEncodingNative.Load(m_stream, m_lastTimestamp);
             }
-            dataPoint.Time = m_lastTimestamp;
+
+            dataPoint.Time.SetValue(m_lastTimestamp);
 
             if (typeChanged)
             {
                 m_lastValueCode = (SttpValueTypeCode)m_stream.ReadBits4();
             }
 
-            dataPoint.Value = SttpValueEncodingWithoutType.Load(m_stream, m_lastValueCode);
+            SttpValueEncodingWithoutType.Load(m_stream, m_lastValueCode, dataPoint.Value);
             return true;
         }
 

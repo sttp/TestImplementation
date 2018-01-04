@@ -13,7 +13,7 @@ namespace Sttp.Codec.DataPoint
         private ByteWriter m_stream;
 
         private int m_lastRuntimeID = 0;
-        private SttpTime m_lastTimestamp = default(SttpTime);
+        private readonly SttpValueMutable m_lastTimestamp = new SttpValueMutable();
         private byte m_lastTimeQuality = 0;
         private byte m_lastValueQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
@@ -27,7 +27,7 @@ namespace Sttp.Codec.DataPoint
         public void Clear()
         {
             m_lastRuntimeID = 0;
-            m_lastTimestamp = default(SttpTime);
+            m_lastTimestamp.SetNull();
             m_lastTimeQuality = 0;
             m_lastValueQuality = 0;
             m_lastValueCode = SttpValueTypeCode.Null;
@@ -36,8 +36,8 @@ namespace Sttp.Codec.DataPoint
 
         public void AddDataPoint(SttpDataPoint point)
         {
-            bool canUseRuntimeID = point.DataPointID.RuntimeID >= 0 && point.DataPointID.RuntimeID < m_maxRuntimeIDCache;
-            bool hasExtendedData = point.ExtendedData != null && !point.ExtendedData.IsNull;
+            bool canUseRuntimeID = point.DataPointRuntimeID >= 0 && point.DataPointRuntimeID < m_maxRuntimeIDCache;
+            bool hasExtendedData = !point.ExtendedData.IsNull;
             bool timeQualityChanged = (byte)point.TimestampQuality != m_lastTimeQuality;
             bool valueQualityChanged = (byte)point.ValueQuality != m_lastValueQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
@@ -60,13 +60,13 @@ namespace Sttp.Codec.DataPoint
 
             if (canUseRuntimeID)
             {
-                int pointIDDelta = point.DataPointID.RuntimeID ^ m_lastRuntimeID;
+                int pointIDDelta = point.DataPointRuntimeID ^ m_lastRuntimeID;
                 m_stream.Write4BitSegments((uint)pointIDDelta);
-                m_lastRuntimeID = point.DataPointID.RuntimeID;
+                m_lastRuntimeID = point.DataPointRuntimeID;
             }
             else
             {
-                SttpValueEncodingNative.Save(m_stream, point.DataPointID.PointID);
+                SttpValueEncodingNative.Save(m_stream, point.DataPointID);
             }
 
             if (hasExtendedData)
@@ -88,8 +88,8 @@ namespace Sttp.Codec.DataPoint
 
             if (timeChanged)
             {
-                m_stream.Write(point.Time);
-                m_lastTimestamp = point.Time;
+                SttpValueEncodingNative.Save(m_stream, point.Time);
+                m_lastTimestamp.SetValue(point.Time);
             }
 
             if (typeChanged)
