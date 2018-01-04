@@ -60,28 +60,12 @@ namespace Sttp.Codec.DataPoint
                 if (dataPoint.DataPointID == null)
                     dataPoint.DataPointID = new SttpDataPointID();
                 dataPoint.DataPointID.RuntimeID = m_lastRuntimeID;
-                dataPoint.DataPointID.IsNull = true;
+                dataPoint.DataPointID.PointID = SttpValue.Null;
             }
             else
             {
                 dataPoint.DataPointID.RuntimeID = -1;
-                switch ((SttpDataPointIDTypeCode)m_stream.ReadBits2())
-                {
-                    case SttpDataPointIDTypeCode.Null:
-                        dataPoint.DataPointID.IsNull = true;
-                        break;
-                    case SttpDataPointIDTypeCode.Guid:
-                        dataPoint.DataPointID.AsGuid = m_stream.ReadGuid();
-                        break;
-                    case SttpDataPointIDTypeCode.String:
-                        dataPoint.DataPointID.AsString = m_stream.ReadString();
-                        break;
-                    case SttpDataPointIDTypeCode.SttpMarkup:
-                        dataPoint.DataPointID.AsSttpMarkup = m_stream.ReadSttpMarkup();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                dataPoint.DataPointID.PointID = SttpValueEncodingNative.Load(m_stream);
             }
 
             if (hasExtendedData)

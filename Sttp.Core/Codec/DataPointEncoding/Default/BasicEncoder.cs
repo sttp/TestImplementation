@@ -66,23 +66,7 @@ namespace Sttp.Codec.DataPoint
             }
             else
             {
-                m_stream.WriteBits2((byte)point.DataPointID.ValueTypeCode);
-                switch (point.DataPointID.ValueTypeCode)
-                {
-                    case SttpDataPointIDTypeCode.Null:
-                        break;
-                    case SttpDataPointIDTypeCode.Guid:
-                        m_stream.Write(point.DataPointID.AsGuid);
-                        break;
-                    case SttpDataPointIDTypeCode.String:
-                        m_stream.Write(point.DataPointID.AsString);
-                        break;
-                    case SttpDataPointIDTypeCode.SttpMarkup:
-                        m_stream.Write(point.DataPointID.AsSttpMarkup);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                SttpValueEncodingNative.Save(m_stream, point.DataPointID.PointID);
             }
 
             if (hasExtendedData)
