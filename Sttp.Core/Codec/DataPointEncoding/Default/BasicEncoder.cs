@@ -14,8 +14,7 @@ namespace Sttp.Codec.DataPoint
 
         private int m_lastRuntimeID = 0;
         private readonly SttpValueMutable m_lastTimestamp = new SttpValueMutable();
-        private byte m_lastTimeQuality = 0;
-        private byte m_lastValueQuality = 0;
+        private long m_lastQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
 
         public BasicEncoder(int maxRuntimeIDCache)
@@ -28,8 +27,7 @@ namespace Sttp.Codec.DataPoint
         {
             m_lastRuntimeID = 0;
             m_lastTimestamp.SetNull();
-            m_lastTimeQuality = 0;
-            m_lastValueQuality = 0;
+            m_lastQuality = 0;
             m_lastValueCode = SttpValueTypeCode.Null;
             m_stream.Clear();
         }
@@ -38,12 +36,11 @@ namespace Sttp.Codec.DataPoint
         {
             bool canUseRuntimeID = point.DataPointRuntimeID >= 0 && point.DataPointRuntimeID < m_maxRuntimeIDCache;
             bool hasExtendedData = !point.ExtendedData.IsNull;
-            bool timeQualityChanged = (byte)point.TimestampQuality != m_lastTimeQuality;
-            bool valueQualityChanged = (byte)point.ValueQuality != m_lastValueQuality;
+            bool qualityChanged = point.Quality != m_lastQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
             bool typeChanged = point.Value.ValueTypeCode != m_lastValueCode;
 
-            if (canUseRuntimeID && !hasExtendedData && !timeQualityChanged && !valueQualityChanged && !timeChanged && !typeChanged)
+            if (canUseRuntimeID && !hasExtendedData && qualityChanged && !timeChanged && !typeChanged)
             {
                 m_stream.WriteBits1(true); //Is the common header.
             }
@@ -52,8 +49,7 @@ namespace Sttp.Codec.DataPoint
                 m_stream.WriteBits1(false); //Is not the common header.
                 m_stream.WriteBits1(canUseRuntimeID);
                 m_stream.WriteBits1(hasExtendedData);
-                m_stream.WriteBits1(timeQualityChanged);
-                m_stream.WriteBits1(valueQualityChanged);
+                m_stream.WriteBits1(qualityChanged);
                 m_stream.WriteBits1(timeChanged);
                 m_stream.WriteBits1(typeChanged);
             }
@@ -74,16 +70,9 @@ namespace Sttp.Codec.DataPoint
                 SttpValueEncodingNative.Save(m_stream, point.ExtendedData);
             }
 
-            if (timeQualityChanged)
+            if (qualityChanged)
             {
-                m_stream.Write((byte)point.TimestampQuality);
-                m_lastTimeQuality = (byte)point.TimestampQuality;
-            }
-
-            if (valueQualityChanged)
-            {
-                m_stream.Write((byte)point.ValueQuality);
-                m_lastValueQuality = (byte)point.ValueQuality;
+                m_stream.Write(point.Quality);
             }
 
             if (timeChanged)

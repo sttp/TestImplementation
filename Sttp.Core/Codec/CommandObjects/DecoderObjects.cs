@@ -44,10 +44,10 @@ namespace Sttp.Codec
                     CommandName = m_markup.MakeReader().RootElement;
                     m_decoder = CommandBase.Create(decoder.MarkupPayload);
                     break;
-                case CommandCode.SubscriptionStream:
+                case CommandCode.RawCommand:
                     m_markup = null;
                     CommandName = "SubscriptionStream";
-                    m_decoder = new CommandSubscriptionStream(decoder.SubscriptionEncoding, decoder.SubscriptionPayload);
+                    m_decoder = new CommandSubscriptionStream(decoder.RawCommandCode, decoder.RawCommandPayload);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

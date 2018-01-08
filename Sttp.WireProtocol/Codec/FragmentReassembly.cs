@@ -6,6 +6,9 @@ using Sttp.IO.Checksums;
 
 namespace Sttp.Codec
 {
+    /// <summary>
+    /// This class assists in the reassembly of fragmented data.
+    /// </summary>
     public class FragmentReassembly
     {
         /// <summary>

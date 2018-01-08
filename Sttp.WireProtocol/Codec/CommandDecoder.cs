@@ -37,8 +37,8 @@ namespace Sttp.Codec
 
         private CommandCode m_command;
         private SttpMarkup m_markupPayload;
-        private byte[] m_subscriptionPayload;
-        private byte m_subscriptionEncoding;
+        private byte[] m_rawCommandPayload;
+        private byte m_rawCommandCode;
 
         /// <summary>
         /// Indicates if a command has successfully been decoded. 
@@ -80,15 +80,15 @@ namespace Sttp.Codec
         /// Valid if <see cref="NextCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public byte[] SubscriptionPayload
+        public byte[] RawCommandPayload
         {
             get
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.SubscriptionStream)
-                    throw new InvalidOperationException("Command is not a SubscriptionStream.");
-                return m_subscriptionPayload;
+                if (m_command != CommandCode.RawCommand)
+                    throw new InvalidOperationException("Command is not a Raw Command.");
+                return m_rawCommandPayload;
             }
         }
 
@@ -96,15 +96,15 @@ namespace Sttp.Codec
         /// Valid if <see cref="NextCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public byte SubscriptionEncoding
+        public byte RawCommandCode
         {
             get
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.SubscriptionStream)
-                    throw new InvalidOperationException("Command is not a SubscriptionStream.");
-                return m_subscriptionEncoding;
+                if (m_command != CommandCode.RawCommand)
+                    throw new InvalidOperationException("Command is not a Raw Command.");
+                return m_rawCommandCode;
             }
         }
 
@@ -157,8 +157,8 @@ namespace Sttp.Codec
         {
             m_command = CommandCode.Invalid;
             m_markupPayload = null;
-            m_subscriptionPayload = null;
-            m_subscriptionEncoding = 0;
+            m_rawCommandPayload = null;
+            m_rawCommandCode = 0;
 
             TryAgain:
             if (m_inboundBufferLength < 1)
@@ -243,7 +243,7 @@ namespace Sttp.Codec
                 }
 
                 var ms = new MemoryStream(buffer);
-                ms.Position = position+8;
+                ms.Position = position + 8;
                 ms.Read(m_compressionBuffer, 0, headerToKeepLength);
                 using (var inflate = new DeflateStream(ms, CompressionMode.Decompress, true))
                 {
@@ -274,11 +274,11 @@ namespace Sttp.Codec
             }
             else
             {
-                m_command = CommandCode.SubscriptionStream;
+                m_command = CommandCode.RawCommand;
                 results = new byte[length - 1];
                 Array.Copy(buffer, position + 1, results, 0, length - 1);
-                m_subscriptionEncoding = buffer[position];
-                m_subscriptionPayload = results;
+                m_rawCommandCode = buffer[position];
+                m_rawCommandPayload = results;
             }
         }
 
@@ -298,8 +298,8 @@ namespace Sttp.Codec
 
             var results = new byte[payloadLength];
             Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition + 2, results, 0, payloadLength);
-            m_subscriptionEncoding = (byte)(header >> 10);
-            m_subscriptionPayload = results;
+            m_rawCommandCode = (byte)(header >> 10);
+            m_rawCommandPayload = results;
             m_inboundBufferCurrentPosition += payloadLength + 3;
             m_inboundBufferLength -= payloadLength + 3;
             return true;

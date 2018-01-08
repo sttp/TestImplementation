@@ -44,14 +44,9 @@ namespace Sttp
         public readonly SttpValueMutable Value = new SttpValueMutable();
 
         /// <summary>
-        /// 8-bits for identifying the quality of the time.
+        /// A quality field.
         /// </summary>
-        public TimeQualityFlags TimestampQuality;
-
-        /// <summary>
-        /// 8-bits for identifying the quality of the value.
-        /// </summary>
-        public ValueQualityFlags ValueQuality;
+        public long Quality;
 
         /// <summary>
         /// An extra field in the event that one is needed. It's not recommended to use this field for complex value types, but rather
@@ -77,9 +72,7 @@ namespace Sttp
             sb.Append('\t');
             sb.Append(Value.ToString());
             sb.Append('\t');
-            sb.Append(TimestampQuality.ToString());
-            sb.Append('\t');
-            sb.Append(ValueQuality.ToString());
+            sb.Append(Quality.ToString());
             return sb.ToString();
         }
     }

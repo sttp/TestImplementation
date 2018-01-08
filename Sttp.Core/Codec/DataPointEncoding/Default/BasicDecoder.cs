@@ -10,8 +10,7 @@ namespace Sttp.Codec.DataPoint
         private ByteReader m_stream;
         private int m_lastRuntimeID = 0;
         private SttpValueMutable m_lastTimestamp = new SttpValueMutable();
-        private byte m_lastTimeQuality = 0;
-        private byte m_lastValueQuality = 0;
+        private long m_lastQuality = 0;
         private SttpValueTypeCode m_lastValueCode;
 
         public BasicDecoder()
@@ -23,8 +22,7 @@ namespace Sttp.Codec.DataPoint
         {
             m_lastRuntimeID = 0;
             m_lastTimestamp.SetNull();
-            m_lastTimeQuality = 0;
-            m_lastValueQuality = 0;
+            m_lastQuality = 0;
             m_lastValueCode = SttpValueTypeCode.Null;
             m_stream.SetBuffer(data, 0, data.Length);
         }
@@ -39,8 +37,7 @@ namespace Sttp.Codec.DataPoint
 
             bool canUseRuntimeID = true;
             bool hasExtendedData = false;
-            bool timeQualityChanged = false;
-            bool valueQualityChanged = false;
+            bool qualityChanged = false;
             bool timeChanged = false;
             bool typeChanged = false;
 
@@ -48,8 +45,7 @@ namespace Sttp.Codec.DataPoint
             {
                 canUseRuntimeID = m_stream.ReadBits1() == 1;
                 hasExtendedData = m_stream.ReadBits1() == 1;
-                timeQualityChanged = m_stream.ReadBits1() == 1;
-                valueQualityChanged = m_stream.ReadBits1() == 1;
+                qualityChanged = m_stream.ReadBits1() == 1;
                 timeChanged = m_stream.ReadBits1() == 1;
                 typeChanged = m_stream.ReadBits1() == 1;
             }
@@ -75,17 +71,11 @@ namespace Sttp.Codec.DataPoint
                 dataPoint.ExtendedData.SetNull();
             }
 
-            if (timeQualityChanged)
+            if (qualityChanged)
             {
-                m_lastTimeQuality = m_stream.ReadByte();
+                m_lastQuality = m_stream.ReadInt64();
             }
-            dataPoint.TimestampQuality = (TimeQualityFlags)m_lastTimeQuality;
-
-            if (valueQualityChanged)
-            {
-                m_lastValueQuality = m_stream.ReadByte();
-            }
-            dataPoint.ValueQuality = (ValueQualityFlags)m_lastValueQuality;
+            dataPoint.Quality = m_lastQuality;
 
             if (timeChanged)
             {

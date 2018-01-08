@@ -82,8 +82,7 @@ namespace Sttp.Tests
 
                 dataPoint.DataPointRuntimeID = termid * 10;
                 dataPoint.Time.SetValue(time);
-                dataPoint.TimestampQuality = 0;
-                dataPoint.ValueQuality = 0;
+                dataPoint.Quality = 0;
                 dataPoint.Value.SetValue(vm);
 
                 enc.AddDataPoint(dataPoint);

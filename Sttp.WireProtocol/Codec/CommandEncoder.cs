@@ -44,23 +44,23 @@ namespace Sttp.Codec
         /// <summary>
         /// Sends a raw unstructured command.
         /// </summary>
-        /// <param name="encodingMethod">the encoding method for this particular packet.</param>
+        /// <param name="rawCode">a user code for this raw stream</param>
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="position">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void SendRawCommand(byte encodingMethod, byte[] payload, int position, int length)
+        public void SendRawCommand(byte rawCode, byte[] payload, int position, int length)
         {
             payload.ValidateParameters(position, length);
             EnsureCapacity(BufferOffset + 1 + length);
             Array.Copy(payload, position, m_buffer, BufferOffset, length);
 
             //Check the special case for encoding this packet with a 2 bytes of header.
-            if (encodingMethod < 32 && length < 1024 && length <= m_sessionDetails.MaximumCommandSize && length + 2 <= m_sessionDetails.MaximumPacketSize)
+            if (rawCode < 32 && length < 1024 && length <= m_sessionDetails.MaximumCommandSize && length + 2 <= m_sessionDetails.MaximumPacketSize)
             {
                 bool shouldAttemptCompression = m_sessionDetails.SupportsDeflate && length >= m_sessionDetails.DeflateThreshold;
                 if (!shouldAttemptCompression)
                 {
-                    ushort header = (ushort)(encodingMethod << 10);
+                    ushort header = (ushort)(rawCode << 10);
                     header |= (ushort)length;
 
                     payload[BufferOffset - 2 + 0] = (byte)(header >> 8);
@@ -71,7 +71,7 @@ namespace Sttp.Codec
                 }
             }
 
-            m_buffer[BufferOffset - 1] = encodingMethod;
+            m_buffer[BufferOffset - 1] = rawCode;
             EncodeAndSend(false, m_buffer, BufferOffset - 1, BufferOffset, length);
         }
 
