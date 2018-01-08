@@ -7,8 +7,6 @@ namespace Sttp.Codec
 {
     public class CommandSubscriptionStream
     {
-        public CommandCode CommandCode => CommandCode.SubscriptionStream;
-
         public readonly byte EncodingMethod;
         public readonly byte[] Data;
 

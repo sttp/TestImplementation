@@ -39,10 +39,6 @@ namespace Sttp.Codec
             {
                 case CommandCode.Invalid:
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
-                case CommandCode.BeginFragment:
-                    throw new ArgumentOutOfRangeException("BeginFragment is not valid at this level");
-                case CommandCode.NextFragment:
-                    throw new ArgumentOutOfRangeException("NextFragment is not valid at this level");
                 case CommandCode.MarkupCommand:
                     m_markup = decoder.MarkupPayload;
                     CommandName = m_markup.MakeReader().RootElement;

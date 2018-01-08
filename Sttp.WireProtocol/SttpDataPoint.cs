@@ -18,7 +18,7 @@ namespace Sttp
         /// 
         /// Suggestions for this token include the properly mapped point identifier and possibly routing information.
         /// </summary>
-        public object PointToken;
+        public object DataPointAPIToken;
 
         /// <summary>
         /// A runtime ID for the data point. A negative value designates that this runtime ID is not valid. 

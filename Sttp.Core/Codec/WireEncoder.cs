@@ -183,7 +183,7 @@ namespace Sttp.Codec
 
         public void SubscriptionStream(byte encodingMethod, byte[] buffer)
         {
-            m_encoder.SubscriptionStream(encodingMethod, buffer, 0, buffer.Length);
+            m_encoder.SendRawCommand(encodingMethod, buffer, 0, buffer.Length);
         }
 
     }

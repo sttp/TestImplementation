@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
+using Sttp.IO.Checksums;
 
 namespace Sttp.Codec
 {
@@ -24,11 +24,6 @@ namespace Sttp.Codec
         private int m_inboundBufferLength;
 
         /// <summary>
-        /// A buffer for building fragmented packets.
-        /// </summary>
-        private byte[] m_fragmentBuffer;
-
-        /// <summary>
         /// A buffer for extracting a compressed packet.
         /// </summary>
         private byte[] m_compressionBuffer;
@@ -38,30 +33,8 @@ namespace Sttp.Codec
         /// </summary>
         private SessionDetails m_sessionDetails;
 
-        /// <summary>
-        /// A state variable to ensure that fragmented packets are properly sequenced.
-        /// </summary>
-        private bool m_isProcessingFragments;
-        /// <summary>
-        /// The compressed size of a fragmented packet.
-        /// </summary>
-        private int m_fragmentTotalSize;
-        /// <summary>
-        /// The uncompressed size of a fragmented packet.
-        /// </summary>
-        private int m_fragmentTotalRawSize;
-        /// <summary>
-        /// The CommandCode that is contained within a fragmented or compressed packet
-        /// </summary>
-        private CommandCode m_fragmentCommandCode;
-        /// <summary>
-        /// The compression mode for the data being sent.
-        /// </summary>
-        private byte m_fragmentCompressionMode;
-        /// <summary>
-        /// The number of bytes of the fragment that have been received thus far.
-        /// </summary>
-        private int m_fragmentBytesReceived;
+        private FragmentReassembly m_fragmentReassembly = new FragmentReassembly();
+
         private CommandCode m_command;
         private SttpMarkup m_markupPayload;
         private byte[] m_subscriptionPayload;
@@ -137,7 +110,6 @@ namespace Sttp.Codec
 
         public CommandDecoder(SessionDetails sessionDetails)
         {
-            m_fragmentBuffer = new byte[512];
             m_compressionBuffer = new byte[512];
             m_sessionDetails = sessionDetails;
             m_inboundBuffer = new byte[512];
@@ -189,133 +161,148 @@ namespace Sttp.Codec
             m_subscriptionEncoding = 0;
 
             TryAgain:
+            if (m_inboundBufferLength < 1)
+                return false;
+
+            if (m_inboundBuffer[m_inboundBufferCurrentPosition] < 128)
+                return Decode2ByteHeader();
 
             if (m_inboundBufferLength < 3)
                 return false;
 
-            CommandCode code = (CommandCode)m_inboundBuffer[m_inboundBufferCurrentPosition];
-            int payloadLength = ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
-            if (m_inboundBufferLength < payloadLength + 3)
+            int packetLength = ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
+            if (m_inboundBufferLength < packetLength)
             {
                 return false;
             }
-            if (code == CommandCode.BeginFragment)
+
+            DataPacketHeader header = (DataPacketHeader)m_inboundBuffer[m_inboundBufferCurrentPosition];
+
+            if ((header & DataPacketHeader.PacketTypeMask) == DataPacketHeader.BeginFragment)
             {
-                if (m_isProcessingFragments)
-                    throw new Exception("A previous fragment has not finished.");
+                m_fragmentReassembly.BeginFragment(m_inboundBuffer, m_inboundBufferCurrentPosition);
+                m_inboundBufferCurrentPosition += packetLength;
+                m_inboundBufferLength -= packetLength;
 
-                m_isProcessingFragments = true;
-                m_fragmentTotalSize = ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition + 3);
-                m_fragmentTotalRawSize = ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition + 7);
-                m_fragmentCommandCode = (CommandCode)m_inboundBuffer[m_inboundBufferCurrentPosition + 11];
-                m_fragmentCompressionMode = m_inboundBuffer[m_inboundBufferCurrentPosition + 12];
-
-                if (m_fragmentBuffer.Length < m_fragmentTotalSize)
+                if (m_fragmentReassembly.IsComplete)
                 {
-                    m_fragmentBuffer = new byte[m_fragmentTotalSize];
-                }
-
-                Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition + 13, m_fragmentBuffer, 0, payloadLength - 10);
-                m_fragmentBytesReceived = payloadLength - 10;
-                m_inboundBufferCurrentPosition += payloadLength + 3;
-                m_inboundBufferLength -= payloadLength + 3;
-
-                if (m_fragmentBytesReceived == m_fragmentTotalSize)
-                {
-                    SendFragmentedPacket();
+                    ProcessPacket(m_fragmentReassembly.Header, m_fragmentReassembly.Buffer, 0, m_fragmentReassembly.TotalSize);
                     return true;
                 }
                 goto TryAgain;
             }
-            else if (code == CommandCode.NextFragment)
+            else if ((header & DataPacketHeader.PacketTypeMask) == DataPacketHeader.NextFragment)
             {
-                if (!m_isProcessingFragments)
-                    throw new Exception("A fragment has not been defined.");
+                m_fragmentReassembly.NextPacket(m_inboundBuffer, m_inboundBufferCurrentPosition);
+                m_inboundBufferCurrentPosition += packetLength;
+                m_inboundBufferLength -= packetLength;
 
-                Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition + 3, m_fragmentBuffer, m_fragmentBytesReceived, payloadLength);
-                m_fragmentBytesReceived += payloadLength;
-                m_inboundBufferCurrentPosition += payloadLength + 3;
-                m_inboundBufferLength -= payloadLength + 3;
-
-                if (m_fragmentBytesReceived == m_fragmentTotalSize)
+                if (m_fragmentReassembly.IsComplete)
                 {
-                    SendFragmentedPacket();
+                    ProcessPacket(m_fragmentReassembly.Header, m_fragmentReassembly.Buffer, 0, m_fragmentReassembly.TotalSize);
                     return true;
                 }
                 goto TryAgain;
+            }
+            //Packets that are not fragmented can also be processed now.
+            else if ((header & DataPacketHeader.PacketTypeMask) == DataPacketHeader.NotFragmented)
+            {
+                ProcessPacket(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 3, packetLength - 3);
+                m_inboundBufferCurrentPosition += packetLength;
+                m_inboundBufferLength -= packetLength;
+                return true;
             }
             else
             {
-                if (m_isProcessingFragments)
-                    throw new Exception("Expecting the next fragment");
-                ProcessNextCommand(code, m_inboundBuffer, m_inboundBufferCurrentPosition + 3, payloadLength);
-                m_inboundBufferCurrentPosition += payloadLength + 3;
-                m_inboundBufferLength -= payloadLength + 3;
-                return true;
+                throw new Exception("Invalid header");
             }
+
         }
 
-        /// <summary>
-        /// Combined and decompresses a fragmented packet.
-        /// </summary>
-        private void SendFragmentedPacket()
+        private void ProcessPacket(DataPacketHeader header, byte[] buffer, int position, int length)
         {
-            m_isProcessingFragments = false;
-            if (m_fragmentCompressionMode == 0)
-            {
-                ProcessNextCommand(m_fragmentCommandCode, m_fragmentBuffer, 0, m_fragmentTotalRawSize);
-                return;
-            }
-            if (m_compressionBuffer.Length < m_fragmentTotalRawSize)
-            {
-                m_compressionBuffer = new byte[m_fragmentTotalRawSize];
-            }
-            var ms = new MemoryStream(m_fragmentBuffer);
-            using (var inflate = new DeflateStream(ms, CompressionMode.Decompress, true))
-            {
-                inflate.ReadAll(m_compressionBuffer, 0, m_fragmentTotalRawSize);
-            }
-            ProcessNextCommand(m_fragmentCommandCode, m_compressionBuffer, 0, m_fragmentTotalRawSize);
-        }
+            bool isCompressed = (header & DataPacketHeader.IsCompressed) != 0;
+            bool isMarkup = (header & DataPacketHeader.IsMarkupCommand) != 0;
 
-        /// <summary>
-        /// Decodes a packet and assigns the member variables of this class with the results.
-        /// </summary>
-        /// <param name="code"></param>
-        /// <param name="data"></param>
-        /// <param name="position"></param>
-        /// <param name="length"></param>
-        private void ProcessNextCommand(CommandCode code, byte[] data, int position, int length)
-        {
-            data.ValidateParameters(position, length);
+            if (isCompressed)
+            {
+                //Decompresses the data.
+                int inflatedSize = ToInt32(buffer, position);
+                uint checksum = (uint)ToInt32(buffer, position + 4);
+
+                //Only the payload is compressed, but some payload has to be copied to the decompressed block.
+                int headerToKeepLength = 1;
+                int headerToKeepOffset = position + 8;
+                if (isMarkup)
+                {
+                    headerToKeepLength += buffer[headerToKeepOffset];
+                }
+                if (m_compressionBuffer.Length < inflatedSize + headerToKeepLength)
+                {
+                    m_compressionBuffer = new byte[inflatedSize + headerToKeepLength];
+                }
+
+                var ms = new MemoryStream(buffer);
+                ms.Position = position+8;
+                ms.Read(m_compressionBuffer, 0, headerToKeepLength);
+                using (var inflate = new DeflateStream(ms, CompressionMode.Decompress, true))
+                {
+                    inflate.ReadAll(m_compressionBuffer, headerToKeepLength, inflatedSize);
+                }
+
+                if (checksum != Crc32.Compute(m_compressionBuffer, headerToKeepLength, inflatedSize))
+                {
+                    throw new InvalidOperationException("Decompression checksum failed.");
+                }
+
+                buffer = m_compressionBuffer;
+                position = 0;
+                length = inflatedSize + headerToKeepLength;
+            }
+
+            buffer.ValidateParameters(position, length);
 
             byte[] results;
-            switch (code)
+            if (isMarkup)
             {
-                case CommandCode.Invalid:
-                    throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
-                case CommandCode.BeginFragment:
-                    throw new ArgumentOutOfRangeException("BeginFragment is not valid at this level");
-                case CommandCode.NextFragment:
-                    throw new ArgumentOutOfRangeException("NextFragment is not valid at this level");
-                case CommandCode.MarkupCommand:
-                    m_command = code;
-                    int markupLength = length;
-                    int markupStart = position;
-                    results = new byte[markupLength];
-                    Array.Copy(data, markupStart, results, 0, markupLength);
-                    m_markupPayload = new SttpMarkup(results);
-                    break;
-                case CommandCode.SubscriptionStream:
-                    m_command = code;
-                    results = new byte[length - 1];
-                    Array.Copy(data, position + 1, results, 0, length - 1);
-                    m_subscriptionEncoding = data[position];
-                    m_subscriptionPayload = results;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("Unknown Command");
+                m_command = CommandCode.MarkupCommand;
+                int markupLength = length;
+                int markupStart = position;
+                results = new byte[markupLength];
+                Array.Copy(buffer, markupStart, results, 0, markupLength);
+                m_markupPayload = new SttpMarkup(results);
             }
+            else
+            {
+                m_command = CommandCode.SubscriptionStream;
+                results = new byte[length - 1];
+                Array.Copy(buffer, position + 1, results, 0, length - 1);
+                m_subscriptionEncoding = buffer[position];
+                m_subscriptionPayload = results;
+            }
+        }
+
+        private bool Decode2ByteHeader()
+        {
+            if (m_inboundBufferLength < 2)
+                return false;
+            int header = (m_inboundBuffer[m_inboundBufferCurrentPosition] << 8)
+                           | (m_inboundBuffer[m_inboundBufferCurrentPosition + 1]);
+
+            int payloadLength = header & 1023;
+
+            if (m_inboundBufferLength < payloadLength + 2)
+            {
+                return false;
+            }
+
+            var results = new byte[payloadLength];
+            Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition + 2, results, 0, payloadLength);
+            m_subscriptionEncoding = (byte)(header >> 10);
+            m_subscriptionPayload = results;
+            m_inboundBufferCurrentPosition += payloadLength + 3;
+            m_inboundBufferLength -= payloadLength + 3;
+            return true;
         }
 
         private static short ToInt16(byte[] buffer, int startIndex)
