@@ -24,7 +24,7 @@ namespace Sttp.Codec
         /// </summary>
         private byte[] m_buffer;
 
-        private const int BufferOffset = 20;
+        private const int BufferOffset = 25;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -199,29 +199,47 @@ namespace Sttp.Codec
 
         private void SendFragment(DataPacketHeader header, byte[] buffer, int offset, int length)
         {
-            int bytesToSendThisFragment = Math.Min(m_sessionDetails.MaximumPacketSize - 3, length);
-            int packetLength = bytesToSendThisFragment + 3;
+            int bytesSentPerFragment = m_sessionDetails.MaximumPacketSize - 7;
+
+            int bytesToSendThisFragment = Math.Min(bytesSentPerFragment, length);
+            int packetLength = bytesToSendThisFragment + 7;
+
+            int totalFragments = (length + bytesSentPerFragment - 1) / bytesSentPerFragment; //Adding (bytesSentPerFragment - 1) with integer division means round up.
+            int currentFragment = 1;
+
+            if (totalFragments > ushort.MaxValue)
+                throw new OverflowException();
 
             //The size of the payload.
-            buffer[offset - 3] = (byte)header;
-            buffer[offset - 2] = (byte)(packetLength >> 8);
-            buffer[offset - 1] = (byte)(packetLength);
+            buffer[offset - 7] = (byte)header;
+            buffer[offset - 6] = (byte)(packetLength >> 8);
+            buffer[offset - 5] = (byte)(packetLength);
+            buffer[offset - 4] = (byte)(currentFragment >> 8);
+            buffer[offset - 3] = (byte)(currentFragment);
+            buffer[offset - 2] = (byte)(totalFragments >> 8);
+            buffer[offset - 1] = (byte)(totalFragments);
 
-            SendNewPacket(buffer, offset - 3, packetLength);
+
+            SendNewPacket(buffer, offset - 7, packetLength);
 
             offset += bytesToSendThisFragment;
             length -= bytesToSendThisFragment;
 
             while (length > 0)
             {
-                bytesToSendThisFragment = Math.Min(m_sessionDetails.MaximumPacketSize - 3, length);
-                packetLength = bytesToSendThisFragment + 3;
+                bytesToSendThisFragment = Math.Min(bytesSentPerFragment, length);
+                packetLength = bytesToSendThisFragment + 7;
+                currentFragment++;
 
-                buffer[offset - 3] = (byte)DataPacketHeader.NextFragment;
-                buffer[offset - 2] = (byte)(packetLength >> 8);
-                buffer[offset - 1] = (byte)(packetLength);
+                buffer[offset - 7] = (byte)DataPacketHeader.NextFragment;
+                buffer[offset - 6] = (byte)(packetLength >> 8);
+                buffer[offset - 5] = (byte)(packetLength);
+                buffer[offset - 4] = (byte)(currentFragment >> 8);
+                buffer[offset - 3] = (byte)(currentFragment);
+                buffer[offset - 2] = (byte)(totalFragments >> 8);
+                buffer[offset - 1] = (byte)(totalFragments);
 
-                SendNewPacket(buffer, offset - 3, packetLength);
+                SendNewPacket(buffer, offset - 7, packetLength);
                 offset += bytesToSendThisFragment;
                 length -= bytesToSendThisFragment;
             }
