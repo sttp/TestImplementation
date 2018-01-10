@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sttp.Transport;
 
 namespace Sttp.Tests.WireProtocol
 {
@@ -67,56 +69,35 @@ namespace Sttp.Tests.WireProtocol
         }
 
         [TestMethod]
-        public void TestECDH()
+        public void TestMakeKey()
         {
-            using (var clientRSA = new RSACryptoServiceProvider(0))
-            using (var serverRSA = new RSACryptoServiceProvider(0))
+            var key = new UdpKeyExchange(ClientPublicKey, ServerPrivateKey, 0);
+
+            Console.WriteLine(key.CompletePacket.Length);
+            foreach (var b in key.CompletePacket)
             {
-                clientRSA.PersistKeyInCsp = false;
-                clientRSA.FromXmlString(ClientPublicKey);
-
-                serverRSA.PersistKeyInCsp = false;
-                serverRSA.FromXmlString(ServerPrivateKey);
-
-                var rng = RandomNumberGenerator.Create();
-                byte[] epic = new byte[4];
-                byte[] key = new byte[32];
-                byte[] mac = new byte[32];
-                byte[] nonce = new byte[32];
-                byte[] iv = new byte[32];
-                byte[] dataToEncrypt = new byte[64];
-
-                rng.GetBytes(epic);
-                rng.GetBytes(key);
-                rng.GetBytes(mac);
-                rng.GetBytes(nonce);
-                rng.GetBytes(iv);
-
-                key.CopyTo(dataToEncrypt, 0);
-                mac.CopyTo(dataToEncrypt, 32);
-
-                byte[] encryptionData = clientRSA.Encrypt(dataToEncrypt, true);
-
-                var ms = new MemoryStream();
-                var wr = new BinaryWriter(ms);
-                wr.Write((byte)0);
-                wr.Write(epic);
-                wr.Write(DateTime.UtcNow.AddMinutes(-5).Ticks);
-                wr.Write(DateTime.UtcNow.AddHours(1).Ticks);
-                wr.Write(nonce);
-                wr.Write(encryptionData.Length);
-                wr.Write(encryptionData);
-
-                var signature = serverRSA.SignData(ms.ToArray(), new SHA1CryptoServiceProvider());
-                wr.Write(signature);
-
-                foreach (var b in ms.ToArray())
-                {
-                    Console.Write(b.ToString("X2") + " ");
-                }
-                Console.WriteLine();
+                Console.Write(b.ToString("X2") + " ");
             }
+            Console.WriteLine();
+
+            UdpKeyExchange key2;
+
+            if (!UdpKeyExchange.TryValidate(ClientPrivateKey, ServerPublicKey, key.CompletePacket, out key2))
+            {
+                throw new Exception();
+            }
+
+            if (!key.IV.SequenceEqual(key2.IV))
+                throw new Exception();
+
+            if (!key.AESKey.SequenceEqual(key2.AESKey))
+                throw new Exception();
+
+            if (!key.MACKey.SequenceEqual(key2.MACKey))
+                throw new Exception();
         }
+
+
 
 
         [TestMethod]
@@ -134,19 +115,6 @@ namespace Sttp.Tests.WireProtocol
             }
         }
 
-        [TestMethod]
-        public void GenerateKeyPairEC()
-        {
-            var cngKey = CngKey.Create(CngAlgorithm.ECDiffieHellmanP256, null, new CngKeyCreationParameters { ExportPolicy = CngExportPolicies.AllowPlaintextExport });
 
-            var privateKey = cngKey.Export(CngKeyBlobFormat.EccPrivateBlob);
-            var publicKey = cngKey.Export(CngKeyBlobFormat.EccPublicBlob);
-
-            Console.WriteLine("Public Key");
-            Console.WriteLine(Convert.ToBase64String(publicKey));
-            Console.WriteLine("Private Key");
-            Console.WriteLine(Convert.ToBase64String(privateKey));
-
-        }
     }
 }
