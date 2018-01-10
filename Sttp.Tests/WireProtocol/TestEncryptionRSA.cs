@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Transport;
 
@@ -95,6 +96,23 @@ namespace Sttp.Tests.WireProtocol
 
             if (!key.MACKey.SequenceEqual(key2.MACKey))
                 throw new Exception();
+
+
+            var cipher = new UdpCipher(key2);
+            byte[] cipherText = cipher.Encrypt(System.Text.Encoding.ASCII.GetBytes("Hello World"));
+
+            Console.WriteLine("Encrypted Packet");
+            Console.WriteLine(cipherText);
+            foreach (var b in cipherText)
+            {
+                Console.Write(b.ToString("X2") + " ");
+            }
+            Console.WriteLine();
+
+            var cipher2 = new UdpCipher(key);
+            byte[] clearText = cipher2.Decrypt(cipherText);
+            Console.WriteLine(System.Text.Encoding.ASCII.GetString(clearText));
+
         }
 
 

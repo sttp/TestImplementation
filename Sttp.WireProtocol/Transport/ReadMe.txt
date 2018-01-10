@@ -50,12 +50,11 @@ Each data packet will consist of:
  * (byte) Packet Type = 0
  * (int32) EpicID (the encryption method)
  * (int64) Sequence Number.
- * (int16) The encrypted data
- * Encrypted Data consisting of:  (Using AES-256, CBC, Padding: PKCS7)
- *  (int64) Sequence Number
- *  (int16) Length of Data
+ * (int16) The encrypted data Length
+ * Encrypted Data consisting of:  (Using AES-256, CBC, Padding: None)
+ *  (byte) Length of HMAC (Note, rather than traditional padding, the padding bytes will be the increased HMAC length)
+ *	(byte[16..31]) Truncated HMAC. HMAC-SHA256 (Of the entire packet). This is Mac then Encrypt.
  *	(byte[]) Data 
- *	(byte[16]) Truncated HMAC. HMAC-SHA384 (Of the entire packet). This is Mac then Encrypt.
 
 
 
