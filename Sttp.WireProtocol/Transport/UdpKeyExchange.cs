@@ -26,7 +26,7 @@ namespace Sttp.Transport
         {
             IV = new byte[16];
             AESKey = new byte[32];
-            MACKey = new byte[32];
+            MACKey = new byte[64];
             CompletePacket = completePacket;
 
             var ms = new MemoryStream(completePacket);
@@ -66,7 +66,7 @@ namespace Sttp.Transport
 
                 Array.Copy(rawData, 32, IV, 0, 16);
                 Array.Copy(rawData, 32 + 16, AESKey, 0, 32);
-                Array.Copy(rawData, 32 + 16 + 32, MACKey, 0, 32);
+                Array.Copy(rawData, 32 + 16 + 32, MACKey, 0, 64);
             }
 
             IsValid = true;
@@ -76,7 +76,7 @@ namespace Sttp.Transport
         {
             IV = new byte[16];
             AESKey = new byte[32];
-            MACKey = new byte[32];
+            MACKey = new byte[64];
             EpicID = epicID;
             ValidAfter = DateTime.UtcNow.AddMinutes(-5);
             ValidBefore = DateTime.UtcNow.AddHours(1);
