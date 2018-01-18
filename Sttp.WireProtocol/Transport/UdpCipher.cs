@@ -10,15 +10,12 @@ namespace Sttp.Transport
     public class UdpCipher
     {
         //      It still need deduplication detection somewhere.
-
-
-
-        private readonly UdpKeyExchange m_keyData;
+        private readonly UtlsKeyPacket m_keyData;
         private long SequenceID = 0;
         private HMACSHA256 m_hmac;
         private AesCryptoServiceProvider m_aes;
 
-        public UdpCipher(UdpKeyExchange keyData)
+        public UdpCipher(UtlsKeyPacket keyData)
         {
             m_keyData = keyData;
             m_hmac = new HMACSHA256(keyData.MACKey);
@@ -42,7 +39,7 @@ namespace Sttp.Transport
             const int CipherStart = 1 + 4 + 8 + 2;
 
             wr.Write((byte)0);
-            wr.Write(m_keyData.EpicID);
+            wr.Write(m_keyData.KeyID);
             wr.Write(SequenceID++);
             wr.Write((short)(1 + hmacLen + data.Length));
             //The start of the cipher text
@@ -98,7 +95,7 @@ namespace Sttp.Transport
 
             if (rd.ReadByte() != 0)
                 throw new Exception();
-            if (rd.ReadInt32() != m_keyData.EpicID)
+            if (rd.ReadInt32() != m_keyData.KeyID)
                 throw new Exception();
             rd.ReadInt64(); //Do something with the sequence number
             int cipherLength = rd.ReadInt16();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -7,23 +8,64 @@ using System.Text;
 
 namespace Sttp.Transport
 {
-    public class UdpKeyExchange
+    public class UtlsReceiverState
     {
+        public Queue<Guid> LastInstanceID = new Queue<Guid>();
+        /// <summary>
+        /// The number of seconds to allow the KeyPacket to drift before discarding it as too old.
+        /// </summary>
+        public int LatencyToleranceSec = 15;
 
-        public readonly int EpicID;
-        public readonly DateTime ValidAfter;
-        public readonly DateTime ValidBefore;
 
+    }
+
+    public enum UtlsCipherMode : byte
+    {
+        AES_CTR_128 = 0,
+        AES_CTR_192 = 1,
+        AES_CTR_256 = 2,
+    }
+
+    public enum UtlsHMACMode : byte
+    {
+        HMAC_SHA256_32 = 0,
+        HMAC_SHA256_64 = 1,
+        HMAC_SHA256_96 = 2,
+        HMAC_SHA256_128 = 3,
+        HMAC_SHA256_256 = 4,
+        HMAC_SHA384_384 = 5,
+        HMAC_SHA512_512 = 6,
+    }
+
+    public class UtlsKeyPacket
+    {
+        public readonly Stopwatch ElapsedSinceParsing;
+
+        public readonly Guid InstanceID;
+        public readonly DateTime CreationTime;
+        public readonly byte[] EncryptKeyHash;
+        public readonly byte[] SignKeyHash;
+
+        public readonly byte KeyID;
+        public readonly short ExpireSeconds;
+        public readonly int ValidSequence;
+        public readonly UtlsCipherMode CipherMode;
+        public readonly UtlsHMACMode HmacMode;
         public readonly byte[] IV;
         public readonly byte[] AESKey;
         public readonly byte[] MACKey;
 
+
         public readonly byte[] CompletePacket;
+        /// <summary>
+        /// Gets if there was a parsing error
+        /// </summary>
+        private bool m_isValid = false;
 
-        public bool IsValid = false;
-
-        private UdpKeyExchange(string clientPrivate, string serverPublic, byte[] completePacket)
+        private UtlsKeyPacket(string clientPrivate, string serverPublic, byte[] completePacket)
         {
+            ElapsedSinceParsing = Stopwatch.StartNew();
+
             IV = new byte[16];
             AESKey = new byte[32];
             MACKey = new byte[64];
@@ -34,9 +76,6 @@ namespace Sttp.Transport
 
             if (rd.ReadByte() != 1)
                 return;
-            EpicID = rd.ReadInt32();
-            ValidAfter = new DateTime(rd.ReadInt64());
-            ValidBefore = new DateTime(rd.ReadInt64());
             rd.ReadBytes(32); //Nonce
             int lenEncryptedBlock = rd.ReadInt16();
             byte[] encBlock = rd.ReadBytes(lenEncryptedBlock);
@@ -69,17 +108,14 @@ namespace Sttp.Transport
                 Array.Copy(rawData, 32 + 16 + 32, MACKey, 0, 64);
             }
 
-            IsValid = true;
+            m_isValid = true;
         }
 
-        public UdpKeyExchange(string clientPublic, string serverPrivate, int epicID)
+        public UtlsKeyPacket(string clientPublic, string serverPrivate, int epicID)
         {
             IV = new byte[16];
             AESKey = new byte[32];
             MACKey = new byte[64];
-            EpicID = epicID;
-            ValidAfter = DateTime.UtcNow.AddMinutes(-5);
-            ValidBefore = DateTime.UtcNow.AddHours(1);
 
             using (var clientRSA = new RSACryptoServiceProvider(0))
             using (var serverRSA = new RSACryptoServiceProvider(0))
@@ -111,10 +147,6 @@ namespace Sttp.Transport
                 var wr = new BinaryWriter(ms);
                 wr.Write((byte)1);
 
-                wr.Write(EpicID);
-                wr.Write(ValidAfter.Ticks);
-                wr.Write(ValidBefore.Ticks);
-
                 wr.Write(nonce);
                 wr.Write((short)encryptionData.Length);
                 wr.Write(encryptionData);
@@ -128,10 +160,10 @@ namespace Sttp.Transport
         }
 
 
-        public static bool TryValidate(string clientPrivate, string serverPublic, byte[] completePacket, out UdpKeyExchange keyData)
+        public static bool TryValidate(string clientPrivate, string serverPublic, byte[] completePacket, out UtlsKeyPacket keyData)
         {
-            var item = new UdpKeyExchange(clientPrivate, serverPublic, completePacket);
-            if (item.IsValid)
+            var item = new UtlsKeyPacket(clientPrivate, serverPublic, completePacket);
+            if (item.m_isValid)
             {
                 keyData = item;
                 return true;

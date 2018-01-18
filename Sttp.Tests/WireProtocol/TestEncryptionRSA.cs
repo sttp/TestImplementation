@@ -72,7 +72,7 @@ namespace Sttp.Tests.WireProtocol
         [TestMethod]
         public void TestMakeKey()
         {
-            var key = new UdpKeyExchange(ClientPublicKey, ServerPrivateKey, 0);
+            var key = new UtlsKeyPacket(ClientPublicKey, ServerPrivateKey, 0);
 
             Console.WriteLine(key.CompletePacket.Length);
             foreach (var b in key.CompletePacket)
@@ -81,9 +81,9 @@ namespace Sttp.Tests.WireProtocol
             }
             Console.WriteLine();
 
-            UdpKeyExchange key2;
+            UtlsKeyPacket key2;
 
-            if (!UdpKeyExchange.TryValidate(ClientPrivateKey, ServerPublicKey, key.CompletePacket, out key2))
+            if (!UtlsKeyPacket.TryValidate(ClientPrivateKey, ServerPublicKey, key.CompletePacket, out key2))
             {
                 throw new Exception();
             }
