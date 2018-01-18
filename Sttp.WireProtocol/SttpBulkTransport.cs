@@ -20,14 +20,14 @@ namespace Sttp
 
         public SttpBulkTransport(ByteReader reader)
         {
-            FundamentalType = (SttpValueTypeCode)reader.ReadByte();
+            FundamentalType = (SttpValueTypeCode)reader.ReadBits4();
             BulkTransportID = reader.ReadGuid();
             Length = reader.ReadInt64();
         }
 
         public void Write(ByteWriter writer)
         {
-            writer.Write((byte)FundamentalType);
+            writer.WriteBits4((byte)FundamentalType);
             writer.Write(BulkTransportID);
             writer.Write(Length);
         }
