@@ -221,7 +221,7 @@ namespace Sttp.Data
             {
                 var t = new MetadataSchemaTable();
                 t.TableName = table.TableName;
-                t.LastModifiedVersion = table.LastModifiedRevision;
+                t.LastModifiedSequenceNumber = table.LastModifiedSequenceNumber;
                 foreach (var col in table.Columns)
                 {
                     t.Columns.Add(col);
@@ -234,7 +234,7 @@ namespace Sttp.Data
             }
         }
 
-        public void ProcessCommand(CommandGetMetadataSimple command, WireEncoder encoder)
+        public void ProcessCommand(CommandGetMetadataBasic command, WireEncoder encoder)
         {
             if (command.SchemaVersion != SchemaVersion)
             {
@@ -244,7 +244,7 @@ namespace Sttp.Data
             var engine = new MetadataQueryExecutionEngine(this, encoder, command.ToSttpQuery());
         }
 
-        public void ProcessCommand(CommandGetMetadataStatement command, WireEncoder encoder)
+        public void ProcessCommand(CommandGetMetadataAdvance command, WireEncoder encoder)
         {
             if (command.SchemaVersion != SchemaVersion)
             {
@@ -265,7 +265,7 @@ namespace Sttp.Data
                 List<MetadataSchemaTableUpdate> tableRevisions = new List<MetadataSchemaTableUpdate>();
                 foreach (var tables in m_metadataSchema)
                 {
-                    tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedVersion));
+                    tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedSequenceNumber));
                 }
                 encoder.MetadataSchemaUpdate(SchemaVersion, Revision, tableRevisions);
             }

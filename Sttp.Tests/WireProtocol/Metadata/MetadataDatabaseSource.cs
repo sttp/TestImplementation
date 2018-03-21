@@ -93,7 +93,7 @@ namespace Sttp.Tests
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
-            db.ProcessCommand(cmd.GetMetadataSimple, writer);
+            db.ProcessCommand(cmd.GetMetadataBasic, writer);
 
             while (packets.Count > 0)
             {
@@ -153,7 +153,7 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var s = new CommandGetMetadataSimple(null, null, "Measurement", db["Measurement"].Columns.Select(x => x.Name));
+            var s = new CommandGetMetadataBasic(null, null, "Measurement", db["Measurement"].Columns.Select(x => x.Name));
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
             //var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
             var s2 = s.ToSttpMarkup();
@@ -174,7 +174,7 @@ namespace Sttp.Tests
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
-            db.ProcessCommand(cmd.GetMetadataSimple, writer);
+            db.ProcessCommand(cmd.GetMetadataBasic, writer);
 
             while (packets.Count > 0)
             {
@@ -236,7 +236,7 @@ namespace Sttp.Tests
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
-            s.JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", null, 1));
+            s.JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", 1));
             s.ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
             s.Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
             s.Literals.Add(new SttpQueryLiteral((SttpValue)327, -2));
@@ -262,7 +262,7 @@ namespace Sttp.Tests
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
-            db.ProcessCommand(cmd.GetMetadataSimple, writer);
+            db.ProcessCommand(cmd.GetMetadataBasic, writer);
 
             while (packets.Count > 0)
             {
@@ -302,9 +302,9 @@ namespace Sttp.Tests
             MakeCSV(t);
         }
 
-        private static CommandGetMetadataStatement BuildRequest(string tableName, params string[] columns)
+        private static CommandGetMetadataAdvance BuildRequest(string tableName, params string[] columns)
         {
-            var s = new CommandGetMetadataStatement();
+            var s = new CommandGetMetadataAdvance();
             s.DirectTable = tableName;
 
             for (int x = 0; x < columns.Length; x++)

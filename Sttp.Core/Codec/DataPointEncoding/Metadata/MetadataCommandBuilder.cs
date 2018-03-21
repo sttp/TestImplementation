@@ -40,14 +40,13 @@ namespace Sttp.Codec.Metadata
             }
         }
 
-        public void DefineResponse(bool isUpdateQuery, long updatesSinceDataVersion, Guid schemaVersion, long dataVersion, string tableName, List<MetadataColumn> columns)
+        public void DefineResponse(Guid? schemaVersion, long? sequenceNumber, long? updatesSinceSequenceNumber, string tableName, List<MetadataColumn> columns)
         {
             using (m_stream.StartElement("DefineResponse"))
             {
-                m_stream.WriteValue("IsUpdateQuery", isUpdateQuery);
-                m_stream.WriteValue("UpdatesSinceDataVersion", updatesSinceDataVersion);
                 m_stream.WriteValue("SchemaVersion", schemaVersion);
-                m_stream.WriteValue("DataVersion", dataVersion);
+                m_stream.WriteValue("SequenceNumber", sequenceNumber);
+                m_stream.WriteValue("UpdatesSinceSequenceNumber", updatesSinceSequenceNumber);
                 m_stream.WriteValue("TableName", tableName);
                 using (m_stream.StartElement("Columns"))
                 {

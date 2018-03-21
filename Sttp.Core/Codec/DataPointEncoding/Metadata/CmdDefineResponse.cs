@@ -7,10 +7,9 @@ namespace Sttp.Codec.Metadata
     {
         public MetadataSubCommand SubCommand => MetadataSubCommand.DefineResponse;
 
-        public bool IsUpdateQuery;
-        public Guid SchemaVersion;
-        public long DataVersion;
-        public long UpdatesSinceDataVersion;
+        public Guid? SchemaVersion;
+        public long? SequenceNumber;
+        public long? UpdatesSinceSequenceNumber;
         public string TableName;
         public List<MetadataColumn> Columns;
 
@@ -18,10 +17,9 @@ namespace Sttp.Codec.Metadata
         {
             var element = reader.ReadEntireElement();
 
-            IsUpdateQuery = (bool)element.GetValue("IsUpdateQuery");
-            SchemaVersion = (Guid)element.GetValue("SchemaVersion");
-            DataVersion = (long)element.GetValue("DataVersion");
-            UpdatesSinceDataVersion = (long)element.GetValue("UpdatesSinceDataVersion");
+            SchemaVersion = (Guid?)element.GetValue("SchemaVersion");
+            SequenceNumber = (long?)element.GetValue("DataVersion");
+            UpdatesSinceSequenceNumber = (long?)element.GetValue("UpdatesSinceSequenceNumber");
             TableName = (string)element.GetValue("TableName");
             Columns = new List<MetadataColumn>();
 

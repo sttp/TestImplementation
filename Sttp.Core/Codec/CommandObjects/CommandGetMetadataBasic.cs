@@ -4,29 +4,29 @@ using System.Text;
 
 namespace Sttp.Codec
 {
-    public class CommandGetMetadataSimple : CommandBase
+    public class CommandGetMetadataBasic : CommandBase
     {
         public Guid? SchemaVersion;
-        public long? LastModifiedVersion;
+        public long? SequenceNumber;
         public string Table;
         public List<string> Columns = new List<string>();
 
-        public CommandGetMetadataSimple(Guid? schemaVersion, long? lastModifiedVersion, string table, IEnumerable<string> columns)
-            : base("GetMetadataSimple")
+        public CommandGetMetadataBasic(Guid? schemaVersion, long? sequenceNumber, string table, IEnumerable<string> columns)
+            : base("CommandGetMetadataBasic")
         {
             SchemaVersion = schemaVersion;
-            LastModifiedVersion = lastModifiedVersion;
+            SequenceNumber = sequenceNumber;
             Table = table;
             Columns.AddRange(columns);
         }
 
-        public CommandGetMetadataSimple(SttpMarkupReader reader)
-            : base("GetMetadataSimple")
+        public CommandGetMetadataBasic(SttpMarkupReader reader)
+            : base("CommandGetMetadataBasic")
         {
             var element = reader.ReadEntireElement();
 
             SchemaVersion = (Guid?)element.GetValue("SchemaVersion");
-            LastModifiedVersion = (long)element.GetValue("LastModifiedVersion");
+            SequenceNumber = (long)element.GetValue("SequenceNumber");
             Table = (string)element.GetValue("Table");
             foreach (string c in element.ForEachValue("Column"))
             {
@@ -38,7 +38,7 @@ namespace Sttp.Codec
         public override void Save(SttpMarkupWriter writer)
         {
             writer.WriteValue("SchemaVersion", SchemaVersion);
-            writer.WriteValue("LastModifiedVersion", LastModifiedVersion);
+            writer.WriteValue("SequenceNumber", SequenceNumber);
             writer.WriteValue("Table", Table);
             foreach (var column in Columns)
             {
@@ -46,9 +46,9 @@ namespace Sttp.Codec
             }
         }
 
-        public CommandGetMetadataStatement ToSttpQuery()
+        public CommandGetMetadataAdvance ToSttpQuery()
         {
-            var qs = new CommandGetMetadataStatement();
+            var qs = new CommandGetMetadataAdvance();
             qs.DirectTable = Table;
             for (int x = 0; x < Columns.Count; x++)
             {

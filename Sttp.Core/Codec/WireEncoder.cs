@@ -72,7 +72,7 @@ namespace Sttp.Codec
 
         public void GetMetadataSimple(Guid? schemaVersion, long? lastModifiedVersion, string table, IEnumerable<string> columns)
         {
-            m_encoder.SendMarkupCommand(new CommandGetMetadataSimple(schemaVersion, lastModifiedVersion, table, columns));
+            m_encoder.SendMarkupCommand(new CommandGetMetadataBasic(schemaVersion, lastModifiedVersion, table, columns));
         }
 
         public void GetMetadataSchema(Guid? schemaVersion, long? sequenceNumber)

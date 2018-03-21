@@ -51,7 +51,6 @@ namespace Sttp.Codec
         public int ExistingTableIndex;
         public string ExistingForeignKeyColumn;
         public string ForeignTable;
-        public long? ForeignTableLastModifiedVersion;
         public int ForeignTableIndex;
 
         public SttpQueryJoinedTable(SttpMarkupElement element)
@@ -62,18 +61,16 @@ namespace Sttp.Codec
             ExistingTableIndex = (int)element.GetValue("ExistingTableIndex");
             ExistingForeignKeyColumn = (string)element.GetValue("ExistingForeignKeyColumn");
             ForeignTable = (string)element.GetValue("ForeignTable");
-            ForeignTableLastModifiedVersion = (long?)element.GetValue("ForeignTableLastModifiedVersion");
             ForeignTableIndex = (int)element.GetValue("ForeignTableIndex");
 
             element.ErrorIfNotHandled();
         }
 
-        public SttpQueryJoinedTable(int existingTableIndex, string existingForeignKeyColumn, string foreignTable, long? foreignTableLastModifiedVersion, int foreignTableIndex)
+        public SttpQueryJoinedTable(int existingTableIndex, string existingForeignKeyColumn, string foreignTable, int foreignTableIndex)
         {
             ExistingTableIndex = existingTableIndex;
             ExistingForeignKeyColumn = existingForeignKeyColumn;
             ForeignTable = foreignTable;
-            ForeignTableLastModifiedVersion = foreignTableLastModifiedVersion;
             ForeignTableIndex = foreignTableIndex;
         }
 
@@ -89,7 +86,6 @@ namespace Sttp.Codec
                 writer.WriteValue("ExistingTableIndex", ExistingTableIndex);
                 writer.WriteValue("ExistingForeignKeyColumn", ExistingForeignKeyColumn);
                 writer.WriteValue("ForeignTable", ForeignTable);
-                writer.WriteValue("ForeignTableLastModifiedVersion", ForeignTableLastModifiedVersion);
                 writer.WriteValue("ForeignTableIndex", ForeignTableIndex);
             }
         }
@@ -226,11 +222,11 @@ namespace Sttp.Codec
     /// <summary>
     /// The STTP based query expression object
     /// </summary>
-    public class CommandGetMetadataStatement : CommandBase
+    public class CommandGetMetadataAdvance : CommandBase
     {
         public Guid? SchemaVersion;
+        public long? SequenceNumber;
         public string DirectTable;
-        public long? DirectTableLastModifiedVersion;
         public List<SttpQueryJoinedTable> JoinedTables = new List<SttpQueryJoinedTable>();
         public List<SttpQueryLiteral> Literals = new List<SttpQueryLiteral>();
         public List<SttpQueryColumn> ColumnInputs = new List<SttpQueryColumn>();
@@ -242,14 +238,14 @@ namespace Sttp.Codec
         public int? HavingBooleanVariable;
         public int? Limit;
 
-        public CommandGetMetadataStatement()
-            : base("GetMetadataStatement")
+        public CommandGetMetadataAdvance()
+            : base("GetMetadataAdvance")
         {
 
         }
 
-        public CommandGetMetadataStatement(SttpMarkupReader rdr)
-            : base("GetMetadataStatement")
+        public CommandGetMetadataAdvance(SttpMarkupReader rdr)
+            : base("GetMetadataAdvance")
         {
             var reader = rdr.ReadEntireElement();
             foreach (var element in reader.ChildElements)
@@ -296,8 +292,8 @@ namespace Sttp.Codec
                     case "DirectTable":
                         DirectTable = (string)item.Value;
                         break;
-                    case "DirectTableLastModifiedVersion":
-                        DirectTableLastModifiedVersion = (long?)item.Value;
+                    case "SequenceNumber":
+                        SequenceNumber = (long?)item.Value;
                         break;
                     case "WhereBooleanVariable":
                         WhereBooleanVariable = (int?)item.Value;
@@ -425,7 +421,7 @@ namespace Sttp.Codec
         {
             writer.WriteValue("SchemaVersion", SchemaVersion);
             writer.WriteValue("DirectTable", DirectTable);
-            writer.WriteValue("DirectTableLastModifiedVersion", DirectTableLastModifiedVersion);
+            writer.WriteValue("SequenceNumber", SequenceNumber);
             if (WhereBooleanVariable.HasValue)
                 writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
             if (Limit.HasValue)

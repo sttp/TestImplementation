@@ -29,7 +29,7 @@ namespace Sttp.Tests.CommandsAndResponses
             var tbl = new List<MetadataSchemaTable>();
             var t = new MetadataSchemaTable();
             t.TableName = "Measurement";
-            t.LastModifiedVersion = 391774092;
+            t.LastModifiedSequenceNumber = 382;
             t.Columns.Add(new MetadataColumn("ID", SttpValueTypeCode.Int64));
             t.Columns.Add(new MetadataColumn("Name", SttpValueTypeCode.String));
             t.Columns.Add(new MetadataColumn("DeviceID", SttpValueTypeCode.Int64));
@@ -37,7 +37,7 @@ namespace Sttp.Tests.CommandsAndResponses
             tbl.Add(t);
             t = new MetadataSchemaTable();
             t.TableName = "Device";
-            t.LastModifiedVersion = 39192;
+            t.LastModifiedSequenceNumber = 382;
             t.Columns.Add(new MetadataColumn("ID", SttpValueTypeCode.Int64));
             t.Columns.Add(new MetadataColumn("Name", SttpValueTypeCode.String));
             tbl.Add(t);
@@ -49,9 +49,9 @@ namespace Sttp.Tests.CommandsAndResponses
         public void CommandMetadataSchemaUpdate()
         {
             var tbl = new List<MetadataSchemaTableUpdate>();
-            var t = new MetadataSchemaTableUpdate("Measurement", 391774092);
+            var t = new MetadataSchemaTableUpdate("Measurement", 382);
             tbl.Add(t);
-            t = new MetadataSchemaTableUpdate("Device", 39192);
+            t = new MetadataSchemaTableUpdate("Device", 382);
             tbl.Add(t);
             var cmd = new CommandMetadataSchemaUpdate(Guid.NewGuid(), 382, tbl);
             Console.WriteLine(cmd.ToString());

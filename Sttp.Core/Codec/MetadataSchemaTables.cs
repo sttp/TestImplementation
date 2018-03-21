@@ -8,7 +8,7 @@ namespace Sttp.Codec
     public class MetadataSchemaTable
     {
         public string TableName;
-        public long LastModifiedVersion;
+        public long LastModifiedSequenceNumber;
         public List<MetadataColumn> Columns = new List<MetadataColumn>();
         public List<MetadataForeignKey> ForeignKeys = new List<MetadataForeignKey>();
 
@@ -20,7 +20,7 @@ namespace Sttp.Codec
         public MetadataSchemaTable(SttpMarkupElement element)
         {
             TableName = (string)element.GetValue("TableName");
-            LastModifiedVersion = (long)element.GetValue("LastModifiedVersion");
+            LastModifiedSequenceNumber = (long)element.GetValue("LastModifiedSequenceNumber");
 
             foreach (var query in element.GetElement("Columns").ChildElements)
             {
@@ -37,7 +37,7 @@ namespace Sttp.Codec
         public void Save(SttpMarkupWriter sml)
         {
             sml.WriteValue("TableName", TableName);
-            sml.WriteValue("LastModifiedVersion", LastModifiedVersion);
+            sml.WriteValue("LastModifiedSequenceNumber", LastModifiedSequenceNumber);
             using (sml.StartElement("Columns"))
             {
                 foreach (var item in Columns)

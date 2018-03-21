@@ -33,7 +33,7 @@ namespace Sttp.Data
 
         public MetadataQueryTable(CmdDefineResponse command)
         {
-            if (command.IsUpdateQuery)
+            if (command.UpdatesSinceSequenceNumber.HasValue)
                 throw new Exception("Update responses must path an existing table.");
 
             ProcessCommand(command);
@@ -60,12 +60,12 @@ namespace Sttp.Data
 
         public void ProcessCommand(CmdDefineResponse command)
         {
-            if (command.IsUpdateQuery)
+            if (command.UpdatesSinceSequenceNumber.HasValue)
             {
                 if (SchemaVersion != command.SchemaVersion)
                     throw new Exception("Schema Version Mismatch");
 
-                if (Revision < command.UpdatesSinceDataVersion)
+                if (Revision < command.UpdatesSinceSequenceNumber)
                     throw new Exception("The version cannot be updated");
 
                 if (TableName != command.TableName)
@@ -83,12 +83,12 @@ namespace Sttp.Data
                         throw new Exception("There was a schema change");
                 }
 
-                Revision = command.DataVersion;
+                Revision = command.SequenceNumber.Value;
             }
             else
             {
-                SchemaVersion = command.SchemaVersion;
-                Revision = command.DataVersion;
+                SchemaVersion = command.SchemaVersion.Value;
+                Revision = command.SequenceNumber.Value;
                 TableName = command.TableName;
                 Columns = new List<MetadataColumn>(command.Columns);
                 Rows = new Dictionary<SttpValue, List<SttpValue>>();

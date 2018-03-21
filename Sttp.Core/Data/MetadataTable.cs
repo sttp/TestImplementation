@@ -21,7 +21,7 @@ namespace Sttp.Data
 
         public readonly List<MetadataForeignKey2> ForeignKeys;
 
-        public readonly long LastModifiedRevision;
+        public readonly long LastModifiedSequenceNumber;
 
         private bool m_isReadOnly;
 
@@ -46,7 +46,7 @@ namespace Sttp.Data
             {
                 fk.LocalColumnIndex = Columns.FindIndex(y => y.Name == fk.ColumnName);
             }
-            LastModifiedRevision = 0;
+            LastModifiedSequenceNumber = 0;
             m_rowLookup = new ConcurrentDictionary<SttpValue, int>();
             m_rows = new List<MetadataRow>();
             m_isReadOnly = false;
@@ -59,7 +59,7 @@ namespace Sttp.Data
             ForeignKeys = other.ForeignKeys;
             Columns = other.Columns;
             TableName = other.TableName;
-            LastModifiedRevision = other.LastModifiedRevision;
+            LastModifiedSequenceNumber = other.LastModifiedSequenceNumber;
             m_isReadOnly = false;
         }
 
