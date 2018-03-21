@@ -28,8 +28,7 @@ namespace Sttp.Tests
 
             SttpValue[] pointList = new SttpValue[] { (SttpValue)1, (SttpValue)2, (SttpValue)3, (SttpValue)4 };
 
-            writer.DataPointRequest(null,
-                                    (SttpTime)DateTime.Parse("3/14/2017 1:00 AM"),
+            writer.DataPointRequest((SttpTime)DateTime.Parse("3/14/2017 1:00 AM"),
                                     (SttpTime)DateTime.Parse("3/14/2017 2:00 AM"),
                                     pointList,
                                     null);
@@ -116,7 +115,8 @@ namespace Sttp.Tests
             }
 
             byte[] d2 = enc.ToArray();
-            writer.DataPointReply(request.RequestID, true, 0, d2);
+            writer.SubscriptionStream(0,d2);
+            writer.DataPointRequestCompleted();
 
             while (packets.Count > 0)
             {
@@ -125,10 +125,10 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandName, "DataPointReply");
+            Assert.AreEqual(cmd.CommandName, "SubscriptionStream");
 
             var dec = new BasicDecoder();
-            dec.Load(cmd.DataPointReply.Data);
+            dec.Load(cmd.SubscriptionStream.Data);
 
             dataPoint = new SttpDataPoint();
             while (dec.Read(dataPoint))

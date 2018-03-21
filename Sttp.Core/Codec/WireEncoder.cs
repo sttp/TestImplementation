@@ -60,19 +60,14 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, bytesRemaining, data));
         }
 
-        public void DataPointReply(Guid? requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
+        public void DataPointRequest(SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
         {
-            m_encoder.SendMarkupCommand(new CommandDataPointReply(requestID, isEndOfResponse, encodingMethod, buffer));
+            m_encoder.SendMarkupCommand(new CommandDataPointRequest(startTime, stopTime, dataPointIDs, samplesPerSecond));
         }
 
-        public void CancelDataPointRequest(Guid requestID)
+        public void DataPointRequestCompleted()
         {
-            m_encoder.SendMarkupCommand(new CommandCancelDataPointRequest(requestID));
-        }
-
-        public void DataPointRequest(Guid? requestID, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
-        {
-            m_encoder.SendMarkupCommand(new CommandDataPointRequest(requestID, startTime, stopTime, dataPointIDs, samplesPerSecond));
+            m_encoder.SendMarkupCommand(new CommandDataPointRequestCompleted());
         }
 
         public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryBase> queries)
