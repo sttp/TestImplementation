@@ -75,7 +75,7 @@ namespace Sttp.Core.Data
         }
 
 
-        public MetadataQueryExecutionEngine(MetadataDatabaseSource db, CommandGetMetadata command, WireEncoder encoder, SttpQueryStatement query)
+        public MetadataQueryExecutionEngine(MetadataDatabaseSource db, WireEncoder encoder, CommandGetMetadataStatement query)
         {
             if (query.HavingProcedure.Count > 0)
                 encoder.RequestFailed("GetMetadata", false, "Query Not Supported", "HAVING clauses are not supported by this engine");
@@ -171,7 +171,7 @@ namespace Sttp.Core.Data
         }
 
 
-        private static JoinedTablePath[] MapAllJoins(MetadataDatabaseSource db, SttpQueryStatement query)
+        private static JoinedTablePath[] MapAllJoins(MetadataDatabaseSource db, CommandGetMetadataStatement query)
         {
             //Export:
             //JoinIndex. This is the Column->Table join index that exists in the table.
@@ -193,7 +193,7 @@ namespace Sttp.Core.Data
 
         }
 
-        private static MetadataColumn[] MapOutputColumns(SttpQueryStatement query, int variableIndexCount, ColumnsLookedUp[] inputColumns, MetadataTable[] tables, Procedure[] procedures)
+        private static MetadataColumn[] MapOutputColumns(CommandGetMetadataStatement query, int variableIndexCount, ColumnsLookedUp[] inputColumns, MetadataTable[] tables, Procedure[] procedures)
         {
             var typeCodes = new SttpValueTypeCode[variableIndexCount];
             foreach (var input in query.Literals)
@@ -221,7 +221,7 @@ namespace Sttp.Core.Data
 
         }
 
-        private static MetadataTable[] FindAllTables(MetadataDatabaseSource db, SttpQueryStatement query, int tableIndexCount)
+        private static MetadataTable[] FindAllTables(MetadataDatabaseSource db, CommandGetMetadataStatement query, int tableIndexCount)
         {
             var rv = new MetadataTable[tableIndexCount];
             rv[0] = db[query.DirectTable];
@@ -232,7 +232,7 @@ namespace Sttp.Core.Data
             return rv;
         }
 
-        private static ColumnsLookedUp[] MapInputColumns(SttpQueryStatement query, MetadataTable[] tables)
+        private static ColumnsLookedUp[] MapInputColumns(CommandGetMetadataStatement query, MetadataTable[] tables)
         {
             var rv = new ColumnsLookedUp[query.ColumnInputs.Count];
             for (var x = 0; x < query.ColumnInputs.Count; x++)
@@ -243,7 +243,7 @@ namespace Sttp.Core.Data
             return rv;
         }
 
-        private static Procedure[] CompileProcedures(SttpQueryStatement query, SttpValue[] variables)
+        private static Procedure[] CompileProcedures(CommandGetMetadataStatement query, SttpValue[] variables)
         {
             var rv = new Procedure[query.Procedure.Count];
             for (var x = 0; x < query.Procedure.Count; x++)

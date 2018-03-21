@@ -7,29 +7,29 @@ namespace Sttp.Codec
     public class CommandMetadataSchema : CommandBase
     {
         public readonly Guid SchemaVersion;
-        public readonly long Revision;
-        public readonly List<MetadataSchemaTables> Tables;
+        public readonly long SequenceNumber;
+        public readonly List<MetadataSchemaTable> Tables;
 
-        public CommandMetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
+        public CommandMetadataSchema(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTable> tables)
             : base("MetadataSchema")
         {
             SchemaVersion = schemaVersion;
-            Revision = revision;
-            Tables = new List<MetadataSchemaTables>(tables);
+            SequenceNumber = sequenceNumber;
+            Tables = new List<MetadataSchemaTable>(tables);
         }
 
         public CommandMetadataSchema(SttpMarkupReader reader)
             : base("MetadataSchema")
         {
-            Tables = new List<MetadataSchemaTables>();
+            Tables = new List<MetadataSchemaTable>();
             var element = reader.ReadEntireElement();
 
             SchemaVersion = (Guid)element.GetValue("SchemaVersion");
-            Revision = (long)element.GetValue("Revision");
+            SequenceNumber = (long)element.GetValue("SequenceNumber");
 
             foreach (var query in element.GetElement("Tables").ChildElements)
             {
-                Tables.Add(new MetadataSchemaTables(query));
+                Tables.Add(new MetadataSchemaTable(query));
             }
             element.ErrorIfNotHandled();
         }
@@ -37,7 +37,7 @@ namespace Sttp.Codec
         public override void Save(SttpMarkupWriter writer)
         {
             writer.WriteValue("SchemaVersion", SchemaVersion);
-            writer.WriteValue("Revision", Revision);
+            writer.WriteValue("SequenceNumber", SequenceNumber);
             using (writer.StartElement("Tables"))
             {
                 foreach (var q in Tables)

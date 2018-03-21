@@ -9,8 +9,8 @@ namespace Sttp.Codec.Metadata
 
         public bool IsUpdateQuery;
         public Guid SchemaVersion;
-        public long Revision;
-        public long UpdatedFromRevision;
+        public long DataVersion;
+        public long UpdatesSinceDataVersion;
         public string TableName;
         public List<MetadataColumn> Columns;
 
@@ -20,10 +20,9 @@ namespace Sttp.Codec.Metadata
 
             IsUpdateQuery = (bool)element.GetValue("IsUpdateQuery");
             SchemaVersion = (Guid)element.GetValue("SchemaVersion");
-            Revision = (long)element.GetValue("Revision");
-            UpdatedFromRevision = (long)element.GetValue("UpdatedFromRevision");
+            DataVersion = (long)element.GetValue("DataVersion");
+            UpdatesSinceDataVersion = (long)element.GetValue("UpdatesSinceDataVersion");
             TableName = (string)element.GetValue("TableName");
-
             Columns = new List<MetadataColumn>();
 
             foreach (var e in element.GetElement("Columns").ChildElements)

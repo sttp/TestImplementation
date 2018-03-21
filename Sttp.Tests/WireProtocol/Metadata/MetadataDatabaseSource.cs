@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -46,7 +45,7 @@ namespace Sttp.Tests
             CommandObjects cmd = reader.NextCommand();
             Assert.AreEqual(cmd.CommandName, "GetMetadataSchema");
             Assert.AreEqual(cmd.GetMetadataSchema.SchemaVersion, Guid.Empty);
-            Assert.AreEqual(cmd.GetMetadataSchema.Revision, 0L);
+            Assert.AreEqual(cmd.GetMetadataSchema.SequenceNumber, 0L);
 
             db.ProcessCommand(cmd.GetMetadataSchema, writer);
 
@@ -81,7 +80,7 @@ namespace Sttp.Tests
             Console.WriteLine(s2.CompressedSize);
             //Console.WriteLine(s2.ToXML());
 
-            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
+            writer.SendCustomCommand(s);
 
             while (packets.Count > 0)
             {
@@ -94,7 +93,7 @@ namespace Sttp.Tests
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
-            db.ProcessCommand(cmd.GetMetadata, writer);
+            db.ProcessCommand(cmd.GetMetadataSimple, writer);
 
             while (packets.Count > 0)
             {
@@ -154,7 +153,7 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var s = SttpQuerySimple.Parse("Measurement", db["Measurement"].Columns.Select(x => x.Name));
+            var s = new CommandGetMetadataSimple(null, null, "Measurement", db["Measurement"].Columns.Select(x => x.Name));
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
             //var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
             var s2 = s.ToSttpMarkup();
@@ -162,7 +161,7 @@ namespace Sttp.Tests
             Console.WriteLine(s2.CompressedSize);
             Console.WriteLine(s2.ToYAML());
 
-            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
+            writer.SendCustomCommand(s);
 
             while (packets.Count > 0)
             {
@@ -175,7 +174,7 @@ namespace Sttp.Tests
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
-            db.ProcessCommand(cmd.GetMetadata, writer);
+            db.ProcessCommand(cmd.GetMetadataSimple, writer);
 
             while (packets.Count > 0)
             {
@@ -237,7 +236,7 @@ namespace Sttp.Tests
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
 
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
-            s.JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", 1));
+            s.JoinedTables.Add(new SttpQueryJoinedTable(0, "DeviceID", "Device", null, 1));
             s.ColumnInputs.Add(new SttpQueryColumn(1, "Name", -1));
             s.Outputs.Add(new SttpQueryOutputColumns(-1, "DeviceName"));
             s.Literals.Add(new SttpQueryLiteral((SttpValue)327, -2));
@@ -249,7 +248,7 @@ namespace Sttp.Tests
             Console.WriteLine(s2.CompressedSize);
             Console.WriteLine(s2.ToYAML());
 
-            writer.GetMetadata(Guid.NewGuid(), Guid.Empty, 0, false, new List<SttpQueryBase>() { s });
+            writer.SendCustomCommand(s);
 
             while (packets.Count > 0)
             {
@@ -263,7 +262,7 @@ namespace Sttp.Tests
 
             Assert.AreEqual(cmd.CommandName, "GetMetadata");
 
-            db.ProcessCommand(cmd.GetMetadata, writer);
+            db.ProcessCommand(cmd.GetMetadataSimple, writer);
 
             while (packets.Count > 0)
             {
@@ -303,9 +302,9 @@ namespace Sttp.Tests
             MakeCSV(t);
         }
 
-        private static SttpQueryStatement BuildRequest(string tableName, params string[] columns)
+        private static CommandGetMetadataStatement BuildRequest(string tableName, params string[] columns)
         {
-            var s = new SttpQueryStatement();
+            var s = new CommandGetMetadataStatement();
             s.DirectTable = tableName;
 
             for (int x = 0; x < columns.Length; x++)

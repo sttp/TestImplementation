@@ -22,13 +22,6 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix);
-            builder.AppendLine($"({nameof(MetadataForeignKey)} {ColumnName} -> {ForeignTableName}");
-        }
-
         public void Save(SttpMarkupWriter sml)
         {
             sml.WriteValue("ColumnName", ColumnName);

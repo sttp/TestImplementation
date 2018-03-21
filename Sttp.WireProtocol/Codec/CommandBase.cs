@@ -25,6 +25,19 @@ namespace Sttp.Codec
         /// <param name="writer">The writer to save the command to.</param>
         public abstract void Save(SttpMarkupWriter writer);
 
+
+        public SttpMarkup ToSttpMarkup()
+        {
+            var wr = new SttpMarkupWriter(CommandName);
+            Save(wr);
+            return wr.ToSttpMarkup();
+        }
+
+        public override string ToString()
+        {
+            return ToSttpMarkup().ToYAML();
+        }
+
         #region [ Static ]
 
         /// <summary>

@@ -32,14 +32,7 @@ namespace Sttp.Codec
         {
             return $"{Name} ({TypeCode})";
         }
-
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix);
-            builder.Append($"({nameof(MetadataColumn)}) Name: { Name} ({TypeCode})");
-            builder.AppendLine();
-        }
-
+       
         public void Save(SttpMarkupWriter sml)
         {
             sml.WriteValue("Name", Name);

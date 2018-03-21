@@ -5,19 +5,20 @@ namespace Sttp.Codec
 {
     public class CommandGetMetadataSchema : CommandBase
     {
-        public readonly Guid SchemaVersion;
-        public readonly long Revision;
+        public readonly Guid? SchemaVersion;
+        public readonly long? SequenceNumber;
 
         public CommandGetMetadataSchema()
             : base("GetMetadataSchema")
         {
+
         }
 
-        public CommandGetMetadataSchema(Guid schemaVersion, long revision)
+        public CommandGetMetadataSchema(Guid? schemaVersion, long? sequenceNumber)
             : this()
         {
             SchemaVersion = schemaVersion;
-            Revision = revision;
+            SequenceNumber = sequenceNumber;
         }
 
         public CommandGetMetadataSchema(SttpMarkupReader reader)
@@ -25,16 +26,15 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            SchemaVersion = (Guid)element.GetValue("SchemaVersion");
-            Revision = (long)element.GetValue("Revision");
+            SchemaVersion = (Guid?)element.GetValue("SchemaVersion");
+            SequenceNumber = (long?)element.GetValue("SequenceNumber");
             element.ErrorIfNotHandled();
         }
 
         public override void Save(SttpMarkupWriter writer)
         {
             writer.WriteValue("SchemaVersion", SchemaVersion);
-            writer.WriteValue("Revision", Revision);
+            writer.WriteValue("SequenceNumber", SequenceNumber);
         }
-
     }
 }

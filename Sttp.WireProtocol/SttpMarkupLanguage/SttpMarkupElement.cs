@@ -110,7 +110,7 @@ namespace Sttp
                     return value.Value;
                 }
             }
-            throw new Exception("Item Not Found");
+            return SttpValue.Null;
         }
 
         /// <summary>

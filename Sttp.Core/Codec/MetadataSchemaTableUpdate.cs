@@ -7,25 +7,25 @@ namespace Sttp.Codec
     public class MetadataSchemaTableUpdate
     {
         public string TableName;
-        public long LastModifiedRevision;
+        public long LastModifiedVersion;
 
-        public MetadataSchemaTableUpdate(string tableName, long lastModifiedRevision)
+        public MetadataSchemaTableUpdate(string tableName, long lastModifiedVersion)
         {
             TableName = tableName;
-            LastModifiedRevision = lastModifiedRevision;
+            LastModifiedVersion = lastModifiedVersion;
         }
 
         public MetadataSchemaTableUpdate(SttpMarkupElement element)
         {
             TableName = (string)element.GetValue("TableName");
-            LastModifiedRevision = (long)element.GetValue("LastModifiedRevision");
+            LastModifiedVersion = (long)element.GetValue("LastModifiedVersion");
             element.ErrorIfNotHandled();
         }
 
         public void Save(SttpMarkupWriter sml)
         {
             sml.WriteValue("TableName", TableName);
-            sml.WriteValue("LastModifiedRevision", LastModifiedRevision);
+            sml.WriteValue("LastModifiedVersion", LastModifiedVersion);
         }
     }
 }

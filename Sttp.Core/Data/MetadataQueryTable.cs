@@ -65,7 +65,7 @@ namespace Sttp.Data
                 if (SchemaVersion != command.SchemaVersion)
                     throw new Exception("Schema Version Mismatch");
 
-                if (Revision < command.UpdatedFromRevision)
+                if (Revision < command.UpdatesSinceDataVersion)
                     throw new Exception("The version cannot be updated");
 
                 if (TableName != command.TableName)
@@ -83,12 +83,12 @@ namespace Sttp.Data
                         throw new Exception("There was a schema change");
                 }
 
-                Revision = command.Revision;
+                Revision = command.DataVersion;
             }
             else
             {
                 SchemaVersion = command.SchemaVersion;
-                Revision = command.Revision;
+                Revision = command.DataVersion;
                 TableName = command.TableName;
                 Columns = new List<MetadataColumn>(command.Columns);
                 Rows = new Dictionary<SttpValue, List<SttpValue>>();

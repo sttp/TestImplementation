@@ -70,14 +70,14 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandDataPointRequestCompleted());
         }
 
-        public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryBase> queries)
+        public void GetMetadataSimple(Guid? schemaVersion, long? lastModifiedVersion, string table, IEnumerable<string> columns)
         {
-            m_encoder.SendMarkupCommand(new CommandGetMetadata(requestID, schemaVersion, revision, areUpdateQueries, queries));
+            m_encoder.SendMarkupCommand(new CommandGetMetadataSimple(schemaVersion, lastModifiedVersion, table, columns));
         }
 
-        public void GetMetadataSchema(Guid schemaVersion, long revision)
+        public void GetMetadataSchema(Guid? schemaVersion, long? sequenceNumber)
         {
-            m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(schemaVersion, revision));
+            m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(schemaVersion, sequenceNumber));
         }
 
         //public void MapRuntimeIDs(List<SttpDataPointID> points)
@@ -111,19 +111,25 @@ namespace Sttp.Codec
         //    //m_stream.Send(CommandCode.MapRuntimeIDs);
         //}
 
+
+        public void SendCustomCommand(CommandBase command)
+        {
+            m_encoder.SendMarkupCommand(command);
+        }
+
         public void SendCustomCommand(SttpMarkupWriter command)
         {
             m_encoder.SendMarkupCommand(command);
         }
 
-        public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTables> tables)
+        public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTable> tables)
         {
             m_encoder.SendMarkupCommand(new CommandMetadataSchema(schemaVersion, revision, tables));
         }
 
-        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, long updatedFromRevision, List<MetadataSchemaTableUpdate> tables)
+        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, List<MetadataSchemaTableUpdate> tables)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, revision, updatedFromRevision, tables));
+            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, revision, tables));
         }
 
         public void MetadataVersionNotCompatible()

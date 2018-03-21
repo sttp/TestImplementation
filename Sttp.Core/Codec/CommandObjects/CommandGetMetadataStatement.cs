@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Text;
-using System.Xml;
 using Sttp.Codec;
 
-namespace Sttp
+namespace Sttp.Codec
 {
     public class SttpQueryColumn
     {
@@ -54,6 +51,7 @@ namespace Sttp
         public int ExistingTableIndex;
         public string ExistingForeignKeyColumn;
         public string ForeignTable;
+        public long? ForeignTableLastModifiedVersion;
         public int ForeignTableIndex;
 
         public SttpQueryJoinedTable(SttpMarkupElement element)
@@ -64,16 +62,18 @@ namespace Sttp
             ExistingTableIndex = (int)element.GetValue("ExistingTableIndex");
             ExistingForeignKeyColumn = (string)element.GetValue("ExistingForeignKeyColumn");
             ForeignTable = (string)element.GetValue("ForeignTable");
+            ForeignTableLastModifiedVersion = (long?)element.GetValue("ForeignTableLastModifiedVersion");
             ForeignTableIndex = (int)element.GetValue("ForeignTableIndex");
 
             element.ErrorIfNotHandled();
         }
 
-        public SttpQueryJoinedTable(int existingTableIndex, string existingForeignKeyColumn, string foreignTable, int foreignTableIndex)
+        public SttpQueryJoinedTable(int existingTableIndex, string existingForeignKeyColumn, string foreignTable, long? foreignTableLastModifiedVersion, int foreignTableIndex)
         {
             ExistingTableIndex = existingTableIndex;
             ExistingForeignKeyColumn = existingForeignKeyColumn;
             ForeignTable = foreignTable;
+            ForeignTableLastModifiedVersion = foreignTableLastModifiedVersion;
             ForeignTableIndex = foreignTableIndex;
         }
 
@@ -89,6 +89,7 @@ namespace Sttp
                 writer.WriteValue("ExistingTableIndex", ExistingTableIndex);
                 writer.WriteValue("ExistingForeignKeyColumn", ExistingForeignKeyColumn);
                 writer.WriteValue("ForeignTable", ForeignTable);
+                writer.WriteValue("ForeignTableLastModifiedVersion", ForeignTableLastModifiedVersion);
                 writer.WriteValue("ForeignTableIndex", ForeignTableIndex);
             }
         }
@@ -225,9 +226,11 @@ namespace Sttp
     /// <summary>
     /// The STTP based query expression object
     /// </summary>
-    public class SttpQueryStatement : SttpQueryBase
+    public class CommandGetMetadataStatement : CommandBase
     {
+        public Guid? SchemaVersion;
         public string DirectTable;
+        public long? DirectTableLastModifiedVersion;
         public List<SttpQueryJoinedTable> JoinedTables = new List<SttpQueryJoinedTable>();
         public List<SttpQueryLiteral> Literals = new List<SttpQueryLiteral>();
         public List<SttpQueryColumn> ColumnInputs = new List<SttpQueryColumn>();
@@ -239,15 +242,16 @@ namespace Sttp
         public int? HavingBooleanVariable;
         public int? Limit;
 
-        public SttpQueryStatement()
-            : base("SttpQuery")
+        public CommandGetMetadataStatement()
+            : base("GetMetadataStatement")
         {
 
         }
 
-        public SttpQueryStatement(SttpMarkupElement reader)
-            : base("SttpQuery")
+        public CommandGetMetadataStatement(SttpMarkupReader rdr)
+            : base("GetMetadataStatement")
         {
+            var reader = rdr.ReadEntireElement();
             foreach (var element in reader.ChildElements)
             {
                 switch (element.ElementName)
@@ -286,8 +290,14 @@ namespace Sttp
             {
                 switch (item.ValueName)
                 {
+                    case "SchemaVersion":
+                        SchemaVersion = (Guid?)item.Value;
+                        break;
                     case "DirectTable":
                         DirectTable = (string)item.Value;
+                        break;
+                    case "DirectTableLastModifiedVersion":
+                        DirectTableLastModifiedVersion = (long?)item.Value;
                         break;
                     case "WhereBooleanVariable":
                         WhereBooleanVariable = (int?)item.Value;
@@ -413,7 +423,9 @@ namespace Sttp
 
         public override void Save(SttpMarkupWriter writer)
         {
+            writer.WriteValue("SchemaVersion", SchemaVersion);
             writer.WriteValue("DirectTable", DirectTable);
+            writer.WriteValue("DirectTableLastModifiedVersion", DirectTableLastModifiedVersion);
             if (WhereBooleanVariable.HasValue)
                 writer.WriteValue("WhereBooleanVariable", WhereBooleanVariable);
             if (Limit.HasValue)
@@ -463,11 +475,5 @@ namespace Sttp
             }
         }
 
-        public SttpMarkup ToSttpMarkup()
-        {
-            var sml = new SttpMarkupWriter("SttpQuery");
-            Save(sml);
-            return sml.ToSttpMarkup();
-        }
     }
 }

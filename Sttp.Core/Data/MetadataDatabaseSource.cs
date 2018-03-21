@@ -28,7 +28,7 @@ namespace Sttp.Data
         private List<MetadataTable> m_tables;
 
         private bool m_isReadOnly;
-        private List<MetadataSchemaTables> m_metadataSchema;
+        private List<MetadataSchemaTable> m_metadataSchema;
 
         public MetadataDatabaseSource()
         {
@@ -216,12 +216,12 @@ namespace Sttp.Data
 
         private void RefreshSchema()
         {
-            m_metadataSchema = new List<MetadataSchemaTables>();
+            m_metadataSchema = new List<MetadataSchemaTable>();
             foreach (var table in m_tables)
             {
-                var t = new MetadataSchemaTables();
+                var t = new MetadataSchemaTable();
                 t.TableName = table.TableName;
-                t.LastModifiedRevision = table.LastModifiedRevision;
+                t.LastModifiedVersion = table.LastModifiedRevision;
                 foreach (var col in table.Columns)
                 {
                     t.Columns.Add(col);
@@ -234,35 +234,24 @@ namespace Sttp.Data
             }
         }
 
-        public void ProcessCommand(CommandGetMetadata command, WireEncoder encoder)
+        public void ProcessCommand(CommandGetMetadataSimple command, WireEncoder encoder)
         {
-            if (command.SchemaVersion != SchemaVersion &&
-                (command.AreUpdateQueries || command.SchemaVersion != Guid.Empty))
+            if (command.SchemaVersion != SchemaVersion)
             {
                 encoder.MetadataVersionNotCompatible();
                 return;
             }
+            var engine = new MetadataQueryExecutionEngine(this, encoder, command.ToSttpQuery());
+        }
 
-            foreach (var query in command.Queries)
+        public void ProcessCommand(CommandGetMetadataStatement command, WireEncoder encoder)
+        {
+            if (command.SchemaVersion != SchemaVersion)
             {
-                switch (query.CommandName)
-                {
-                    case "SttpQuerySimple":
-                    {
-                        var statement = query as SttpQuerySimple;
-                        var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement.ToSttpQuery());
-                        break;
-                    }
-                    case "SttpQuery":
-                        {
-                            var statement = query as SttpQueryStatement;
-                            var engine = new MetadataQueryExecutionEngine(this, command, encoder, statement);
-                            break;
-                        }
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                encoder.MetadataVersionNotCompatible();
+                return;
             }
+            var engine = new MetadataQueryExecutionEngine(this, encoder, command);
         }
 
         public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)
@@ -276,12 +265,9 @@ namespace Sttp.Data
                 List<MetadataSchemaTableUpdate> tableRevisions = new List<MetadataSchemaTableUpdate>();
                 foreach (var tables in m_metadataSchema)
                 {
-                    if (tables.LastModifiedRevision > command.Revision)
-                    {
-                        tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedRevision));
-                    }
+                    tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedVersion));
                 }
-                encoder.MetadataSchemaUpdate(SchemaVersion, Revision, command.Revision, tableRevisions);
+                encoder.MetadataSchemaUpdate(SchemaVersion, Revision, tableRevisions);
             }
         }
 

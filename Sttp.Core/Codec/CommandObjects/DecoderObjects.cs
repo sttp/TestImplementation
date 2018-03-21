@@ -16,7 +16,8 @@ namespace Sttp.Codec
             CommandBase.Register("BulkTransportReply", x => new CommandBulkTransportReply(x));
             CommandBase.Register("DataPointRequest", x => new CommandDataPointRequest(x));
             CommandBase.Register("DataPointRequestCompleted", x => new CommandDataPointRequestCompleted(x));
-            CommandBase.Register("GetMetadata", x => new CommandGetMetadata(x));
+            CommandBase.Register("GetMetadataSimple", x => new CommandGetMetadataSimple(x));
+            CommandBase.Register("GetMetadataStatement", x => new CommandGetMetadataStatement(x));
             CommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
             CommandBase.Register("Metadata", x => new CommandMetadata(x));
             CommandBase.Register("MetadataSchema", x => new CommandMetadataSchema(x));
@@ -24,8 +25,6 @@ namespace Sttp.Codec
             CommandBase.Register("MetadataVersionNotCompatible", x => new CommandMetadataVersionNotCompatible(x));
             CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
             CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
-            SttpQueryBase.Register("SttpQuery", x => new SttpQueryStatement(x));
-            SttpQueryBase.Register("SttpQuerySimple", x => new SttpQuerySimple(x));
         }
 
 
@@ -56,7 +55,8 @@ namespace Sttp.Codec
         public CommandBulkTransportReply BulkTransportReply => m_decoder as CommandBulkTransportReply;
         public CommandDataPointRequestCompleted DataPointRequestCompleted => m_decoder as CommandDataPointRequestCompleted;
         public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;
-        public CommandGetMetadata GetMetadata => m_decoder as CommandGetMetadata;
+        public CommandGetMetadataSimple GetMetadataSimple => m_decoder as CommandGetMetadataSimple;
+        public CommandGetMetadataStatement GetMetadataStatement => m_decoder as CommandGetMetadataStatement;
         public CommandGetMetadataSchema GetMetadataSchema => m_decoder as CommandGetMetadataSchema;
         //public CommandMapRuntimeIDs MapRuntimeIDs => m_decoder as CommandMapRuntimeIDs;
         public CommandMetadata Metadata => m_decoder as CommandMetadata;

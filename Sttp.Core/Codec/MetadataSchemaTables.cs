@@ -5,22 +5,22 @@ using Sttp.Codec;
 
 namespace Sttp.Codec
 {
-    public class MetadataSchemaTables
+    public class MetadataSchemaTable
     {
         public string TableName;
-        public long LastModifiedRevision;
+        public long LastModifiedVersion;
         public List<MetadataColumn> Columns = new List<MetadataColumn>();
         public List<MetadataForeignKey> ForeignKeys = new List<MetadataForeignKey>();
 
-        public MetadataSchemaTables()
+        public MetadataSchemaTable()
         {
 
         }
 
-        public MetadataSchemaTables(SttpMarkupElement element)
+        public MetadataSchemaTable(SttpMarkupElement element)
         {
             TableName = (string)element.GetValue("TableName");
-            LastModifiedRevision = (long)element.GetValue("LastModifiedRevision");
+            LastModifiedVersion = (long)element.GetValue("LastModifiedVersion");
 
             foreach (var query in element.GetElement("Columns").ChildElements)
             {
@@ -37,7 +37,7 @@ namespace Sttp.Codec
         public void Save(SttpMarkupWriter sml)
         {
             sml.WriteValue("TableName", TableName);
-            sml.WriteValue("LastModifiedRevision", LastModifiedRevision);
+            sml.WriteValue("LastModifiedVersion", LastModifiedVersion);
             using (sml.StartElement("Columns"))
             {
                 foreach (var item in Columns)
