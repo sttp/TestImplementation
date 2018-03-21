@@ -16,6 +16,7 @@ namespace Sttp.Codec
             CommandBase.Register("BulkTransportCancelSend", x => new CommandBulkTransportCancelSend(x));
             CommandBase.Register("BulkTransportRequest", x => new CommandBulkTransportRequest(x));
             CommandBase.Register("BulkTransportSendFragment", x => new CommandBulkTransportSendFragment(x));
+            CommandBase.Register("DataPointRequest", x => new CommandDataPointRequest(x));
             CommandBase.Register("DataPointReply", x => new CommandDataPointReply(x));
             CommandBase.Register("GetMetadata", x => new CommandGetMetadata(x));
             CommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
@@ -59,7 +60,7 @@ namespace Sttp.Codec
         public CommandBulkTransportRequest BulkTransportRequest => m_decoder as CommandBulkTransportRequest;
         public CommandBulkTransportSendFragment BulkTransportSendFragment => m_decoder as CommandBulkTransportSendFragment;
         public CommandDataPointReply DataPointReply => m_decoder as CommandDataPointReply;
-        //public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;
+        public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;
         public CommandGetMetadata GetMetadata => m_decoder as CommandGetMetadata;
         public CommandGetMetadataSchema GetMetadataSchema => m_decoder as CommandGetMetadataSchema;
         //public CommandMapRuntimeIDs MapRuntimeIDs => m_decoder as CommandMapRuntimeIDs;

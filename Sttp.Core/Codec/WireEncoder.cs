@@ -70,15 +70,15 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandBulkTransportSendFragment(id, bytesRemaining, data));
         }
 
-        public void DataPointReply(Guid requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
+        public void DataPointReply(Guid? requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)
         {
             m_encoder.SendMarkupCommand(new CommandDataPointReply(requestID, isEndOfResponse, encodingMethod, buffer));
         }
 
-        //public void DataPointRequest(SttpMarkup request)
-        //{
-        //    m_encoder.LargeObject(request);
-        //}
+        public void DataPointRequest(Guid? requestID, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        {
+            m_encoder.SendMarkupCommand(new CommandDataPointRequest(requestID, startTime, stopTime, dataPointIDs, samplesPerSecond));
+        }
 
         public void GetMetadata(Guid requestID, Guid schemaVersion, long revision, bool areUpdateQueries, List<SttpQueryBase> queries)
         {

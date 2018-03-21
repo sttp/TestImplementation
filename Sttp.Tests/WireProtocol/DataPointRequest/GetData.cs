@@ -26,19 +26,27 @@ namespace Sttp.Tests
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
 
-            var markup = new SttpMarkupWriter("Historical");
-            {
-                markup.WriteValue("Start", DateTime.Parse("12/1/2017 1:00 AM"));
-                markup.WriteValue("Stop", DateTime.Parse("12/1/2017 2:00 AM"));
-                using (markup.StartElement("PointList"))
-                {
-                    markup.WriteValue("ID", 1);
-                    markup.WriteValue("ID", 2);
-                    markup.WriteValue("ID", 3);
-                    markup.WriteValue("ID", 4);
-                }
-            }
-            writer.SendCustomCommand(markup);
+            SttpValue[] pointList = new SttpValue[] { (SttpValue)1, (SttpValue)2, (SttpValue)3, (SttpValue)4 };
+
+            writer.DataPointRequest(null,
+                                    (SttpTime)DateTime.Parse("3/14/2017 1:00 AM"),
+                                    (SttpTime)DateTime.Parse("3/14/2017 2:00 AM"),
+                                    pointList,
+                                    null);
+
+            //var markup = new SttpMarkupWriter("Historical");
+            //{
+            //    markup.WriteValue("Start", DateTime.Parse("3/14/2017 1:00 AM"));
+            //    markup.WriteValue("Stop", DateTime.Parse("3/14/2017 2:00 AM"));
+            //    using (markup.StartElement("PointList"))
+            //    {
+            //        markup.WriteValue("ID", 1);
+            //        markup.WriteValue("ID", 2);
+            //        markup.WriteValue("ID", 3);
+            //        markup.WriteValue("ID", 4);
+            //    }
+            //}
+            //writer.SendCustomCommand(markup);
 
             while (packets.Count > 0)
             {
@@ -47,14 +55,14 @@ namespace Sttp.Tests
             }
 
             CommandObjects cmd = reader.NextCommand();
-            Assert.AreEqual(cmd.CommandName, "Historical");
+            Assert.AreEqual(cmd.CommandName, "DataPointRequest");
 
-            Console.WriteLine(cmd.Unknown.Markup.ToYAML());
+            Console.WriteLine(cmd.Markup.ToYAML());
 
-            var request = cmd.Unknown.Markup.MakeReader().ReadEntireElement();
-            DateTime startTime = request.GetValue("Start").AsDateTime;
-            DateTime stopTime = request.GetValue("Stop").AsDateTime;
-            var points = request.GetElement("PointList").ForEachValue("ID").Select(x => x.AsInt32).ToList();
+            var request = cmd.DataPointRequest;
+            DateTime startTime = request.StartTime.AsDateTime;
+            DateTime stopTime = request.StopTime.AsDateTime;
+            var points = request.DataPointIDs.Select(x => x.AsInt32).ToList();
 
             var con = new SqlConnection("Server=phasordb;Database=PhasorValues_5_1PerMin_2017;Trusted_Connection=True;");
             con.Open();
@@ -108,7 +116,7 @@ namespace Sttp.Tests
             }
 
             byte[] d2 = enc.ToArray();
-            writer.DataPointReply(Guid.Empty, true, 0, d2);
+            writer.DataPointReply(request.RequestID, true, 0, d2);
 
             while (packets.Count > 0)
             {
