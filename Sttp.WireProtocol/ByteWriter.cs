@@ -240,7 +240,7 @@ namespace Sttp
 
         public void Write(SttpTime value)
         {
-            value.Save(this);
+            Write(value.Ticks);
         }
 
         public void Write(SttpBuffer value)

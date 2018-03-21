@@ -1,21 +1,21 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace Sttp
 {
-    /// <summary>
-    /// The default timestamp field for STTP.
-    /// </summary>
-    public struct SttpTime
+    public struct SttpTime : IComparable<SttpTime>, IEquatable<SttpTime>, IComparable, IFormattable, ISerializable
     {
         //((DateTime.MaxValue.Ticks / TimeSpan.TicksPerMinute) << 30) + TimeSpan.TicksPerSecond * 61;
-        private const long MaxValue = 5646770628038745215;
-
+        private const long MaxTicks = 5646770628038745215;
         private const int LeapSecondCheckRange = 59 * (int)TimeSpan.TicksPerSecond;
         private const int LeapSecondLowerRange = 60 * (int)TimeSpan.TicksPerSecond;
         private const int LeapSecondUpperRange = 61 * (int)TimeSpan.TicksPerSecond;
-        private const int TicksPerMinute = (1 << 30) - 1;
+        private const int TicksPerMinuteMask = (1 << 30) - 1;
         private const int MinutesPastEpocShift = 30;
         private readonly long m_ticks;
+
+        public static readonly SttpTime MinValue = new SttpTime(0);
+        public static readonly SttpTime MaxValue = new SttpTime(MaxTicks);
 
         public SttpTime(long ticks)
         {
@@ -42,23 +42,17 @@ namespace Sttp
             Validate();
         }
 
-        public SttpTime(ByteReader rd)
-        {
-            m_ticks = rd.ReadInt64();
-            Validate();
-        }
-
         private void Validate()
         {
-            if (m_ticks < 0 || m_ticks > MaxValue || ElapsedTicks > LeapSecondUpperRange)
+            if (m_ticks < 0 || m_ticks > MaxTicks || TicksPastMinute > LeapSecondUpperRange)
             {
                 throw new Exception("Encoding Error");
             }
         }
 
-        private int ElapsedTicks => (int)(m_ticks * TicksPerMinute);
+        public int TicksPastMinute => (int)(m_ticks & TicksPerMinuteMask);
 
-        private long ElapsedMinutes => (m_ticks >> MinutesPastEpocShift);
+        public long MinutesPastEpoc => (m_ticks >> MinutesPastEpocShift);
 
         public long Ticks => m_ticks;
 
@@ -66,7 +60,7 @@ namespace Sttp
         {
             get
             {
-                long ticks = (ElapsedMinutes * TimeSpan.TicksPerMinute + ElapsedTicks);
+                long ticks = (MinutesPastEpoc * TimeSpan.TicksPerMinute + TicksPastMinute);
                 if (LeapSecondInProgress)
                 {
                     ticks -= TimeSpan.TicksPerSecond;
@@ -75,7 +69,7 @@ namespace Sttp
             }
         }
 
-        public bool LeapSecondInProgress => ElapsedTicks >= LeapSecondLowerRange;
+        public bool LeapSecondInProgress => TicksPastMinute >= LeapSecondLowerRange;
 
 
         public static SttpTime Parse(string value)
@@ -83,14 +77,14 @@ namespace Sttp
             return new SttpTime(DateTime.Parse(value));
         }
 
-        public override string ToString()
+        public int CompareTo(SttpTime other)
         {
-            return AsDateTime.ToString();
+            return m_ticks.CompareTo(other.m_ticks);
         }
 
-        public void Save(ByteWriter wr)
+        public bool Equals(SttpTime other)
         {
-            wr.Write(m_ticks);
+            return m_ticks == other.m_ticks;
         }
 
         public static bool operator ==(SttpTime a, SttpTime b)
@@ -100,7 +94,96 @@ namespace Sttp
 
         public static bool operator !=(SttpTime a, SttpTime b)
         {
-            return !(a == b);
+            return a.m_ticks != b.m_ticks;
         }
+
+        public static bool operator <(SttpTime a, SttpTime b)
+        {
+            return a.m_ticks < b.m_ticks;
+        }
+
+        public static bool operator >(SttpTime a, SttpTime b)
+        {
+            return a.m_ticks > b.m_ticks;
+        }
+
+        public static bool operator <=(SttpTime a, SttpTime b)
+        {
+            return a.m_ticks <= b.m_ticks;
+        }
+
+        public static bool operator >=(SttpTime a, SttpTime b)
+        {
+            return a.m_ticks >= b.m_ticks;
+        }
+
+        public static explicit operator DateTime(SttpTime a)
+        {
+            return a.AsDateTime;
+        }
+
+        public static explicit operator SttpTime(DateTime a)
+        {
+            return new SttpTime(a);
+        }
+
+
+        public override bool Equals(object value)
+        {
+            if (value is SttpTime)
+            {
+                return m_ticks == ((SttpTime)value).m_ticks;
+            }
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return AsDateTime.ToString();
+        }
+
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException("info");
+            }
+            info.AddValue("ticks", m_ticks);
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)m_ticks ^ (int)(m_ticks >> 32);
+        }
+
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CompareTo(object value)
+        {
+            if (value == null)
+            {
+                return 1;
+            }
+            if (!(value is SttpTime))
+            {
+                throw new ArgumentException("Type must be SnapTime");
+            }
+            long internalTicks = ((SttpTime)value).m_ticks;
+            long internalTicks2 = m_ticks;
+            if (internalTicks2 > internalTicks)
+            {
+                return 1;
+            }
+            if (internalTicks2 < internalTicks)
+            {
+                return -1;
+            }
+            return 0;
+        }
+
+
     } // 8-bytes
 }

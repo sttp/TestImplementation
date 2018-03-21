@@ -226,7 +226,7 @@ namespace Sttp
 
         public SttpTime ReadSttpTime()
         {
-            return new SttpTime(this);
+            return new SttpTime(ReadInt64());
         }
 
         public SttpBulkTransport ReadSttpBulkTransport()
