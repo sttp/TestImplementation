@@ -1,27 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sttp.Codec
 {
-    public class CommandBulkTransportBeginSend : CommandBase
+    public class CommandBulkTransportReply : CommandBase
     {
         public readonly Guid ID;
-        public readonly long OrigionalSize;
+        public readonly long Offset;
         public readonly byte[] Data;
 
-        public CommandBulkTransportBeginSend(Guid id, long origionalSize, byte[] data)
-            : base("BulkTransportBeginSend")
+        public CommandBulkTransportReply(Guid id, long offset, byte[] data)
+            : base("BulkTransportReply")
         {
             ID = id;
-            OrigionalSize = origionalSize;
+            Offset = offset;
             Data = data;
         }
 
-        public CommandBulkTransportBeginSend(SttpMarkupReader reader)
-            : base("BulkTransportBeginSend")
+        public CommandBulkTransportReply(SttpMarkupReader reader)
+            : base("BulkTransportReply")
         {
             var element = reader.ReadEntireElement();
+
             ID = (Guid)element.GetValue("ID");
-            OrigionalSize = (long)element.GetValue("OrigionalSize");
+            Offset = (long)element.GetValue("Offset");
             Data = (byte[])element.GetValue("Data");
 
             element.ErrorIfNotHandled();
@@ -30,7 +32,7 @@ namespace Sttp.Codec
         public override void Save(SttpMarkupWriter writer)
         {
             writer.WriteValue("ID", ID);
-            writer.WriteValue("OrigionalSize", OrigionalSize);
+            writer.WriteValue("Offset", Offset);
             writer.WriteValue("Data", Data);
         }
     }

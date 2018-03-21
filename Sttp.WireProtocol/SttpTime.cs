@@ -169,7 +169,7 @@ namespace Sttp
             }
             if (!(value is SttpTime))
             {
-                throw new ArgumentException("Type must be SnapTime");
+                throw new ArgumentException("Type must be SttpTime");
             }
             long internalTicks = ((SttpTime)value).m_ticks;
             long internalTicks2 = m_ticks;

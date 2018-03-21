@@ -50,24 +50,14 @@ namespace Sttp.Codec
         //    NewPacket?.Invoke(buffer, position, length);
         //}
 
-        public void BulkTransportRequest(Guid id, long startingPosition, long length)
+        public void BulkTransportRequest(Guid id, long offset, int length)
         {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id, startingPosition, length));
+            m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id, offset, length));
         }
 
-        public void BulkTransportBeginSend(Guid id, long originalSize, byte[] data)
+        public void BulkTransportReply(Guid id, long bytesRemaining, byte[] data)
         {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportBeginSend(id, originalSize, data));
-        }
-
-        public void BulkTransportCancelSend(Guid id)
-        {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportCancelSend(id));
-        }
-
-        public void BulkTransportSendFragment(Guid id, long bytesRemaining, byte[] data)
-        {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportSendFragment(id, bytesRemaining, data));
+            m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, bytesRemaining, data));
         }
 
         public void DataPointReply(Guid? requestID, bool isEndOfResponse, byte encodingMethod, byte[] buffer)

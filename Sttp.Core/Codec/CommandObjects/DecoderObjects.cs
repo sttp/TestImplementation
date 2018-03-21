@@ -12,10 +12,8 @@ namespace Sttp.Codec
 
         static CommandObjects()
         {
-            CommandBase.Register("BulkTransportBeginSend", x => new CommandBulkTransportBeginSend(x));
-            CommandBase.Register("BulkTransportCancelSend", x => new CommandBulkTransportCancelSend(x));
             CommandBase.Register("BulkTransportRequest", x => new CommandBulkTransportRequest(x));
-            CommandBase.Register("BulkTransportSendFragment", x => new CommandBulkTransportSendFragment(x));
+            CommandBase.Register("BulkTransportReply", x => new CommandBulkTransportReply(x));
             CommandBase.Register("CancelDataPointRequest", x => new CommandCancelDataPointRequest(x));
             CommandBase.Register("DataPointRequest", x => new CommandDataPointRequest(x));
             CommandBase.Register("DataPointReply", x => new CommandDataPointReply(x));
@@ -56,10 +54,8 @@ namespace Sttp.Codec
             }
         }
 
-        public CommandBulkTransportBeginSend BulkTransportBeginSend => m_decoder as CommandBulkTransportBeginSend;
-        public CommandBulkTransportCancelSend BulkTransportCancelSend => m_decoder as CommandBulkTransportCancelSend;
         public CommandBulkTransportRequest BulkTransportRequest => m_decoder as CommandBulkTransportRequest;
-        public CommandBulkTransportSendFragment BulkTransportSendFragment => m_decoder as CommandBulkTransportSendFragment;
+        public CommandBulkTransportReply BulkTransportReply => m_decoder as CommandBulkTransportReply;
         public CommandDataPointReply DataPointReply => m_decoder as CommandDataPointReply;
         public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;
         public CommandCancelDataPointRequest CancelDataPointRequest => m_decoder as CommandCancelDataPointRequest;

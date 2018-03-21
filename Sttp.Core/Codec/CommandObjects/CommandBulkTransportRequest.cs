@@ -5,14 +5,14 @@ namespace Sttp.Codec
     public class CommandBulkTransportRequest : CommandBase
     {
         public readonly Guid ID;
-        public readonly long StartingPosition;
-        public readonly long Length;
+        public readonly long Offset;
+        public readonly int Length;
 
-        public CommandBulkTransportRequest(Guid id, long startingPosition, long length)
+        public CommandBulkTransportRequest(Guid id, long offset, int length)
             : base("BulkTransportRequest")
         {
             ID = id;
-            StartingPosition = startingPosition;
+            Offset = offset;
             Length = length;
         }
 
@@ -22,8 +22,8 @@ namespace Sttp.Codec
             var element = reader.ReadEntireElement();
 
             ID = (Guid)element.GetValue("ID");
-            StartingPosition = (long)element.GetValue("StartingPosition");
-            Length = (long)element.GetValue("Length");
+            Offset = (long)element.GetValue("Offset");
+            Length = (int)element.GetValue("Length");
 
             element.ErrorIfNotHandled();
         }
@@ -31,7 +31,7 @@ namespace Sttp.Codec
         public override void Save(SttpMarkupWriter writer)
         {
             writer.WriteValue("ID", ID);
-            writer.WriteValue("StartingPosition", StartingPosition);
+            writer.WriteValue("Offset", Offset);
             writer.WriteValue("Length", Length);
         }
 
