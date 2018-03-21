@@ -75,6 +75,11 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandDataPointReply(requestID, isEndOfResponse, encodingMethod, buffer));
         }
 
+        public void CancelDataPointRequest(Guid requestID)
+        {
+            m_encoder.SendMarkupCommand(new CommandCancelDataPointRequest(requestID));
+        }
+
         public void DataPointRequest(Guid? requestID, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
         {
             m_encoder.SendMarkupCommand(new CommandDataPointRequest(requestID, startTime, stopTime, dataPointIDs, samplesPerSecond));
