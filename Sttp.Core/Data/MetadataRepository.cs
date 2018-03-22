@@ -27,6 +27,17 @@ namespace Sttp.Data
         private List<MetadataTable> m_tables;
         private bool m_isReadOnly;
 
+        public MetadataRepository()
+        {
+            SchemaVersion = Guid.NewGuid();
+            SequenceNumber = 0;
+            m_tablesLookup = new Dictionary<string, int>();
+            m_tables = new List<MetadataTable>();
+            MetadataSchema = new List<MetadataSchemaTable>();
+            m_isReadOnly = false;
+            IsReadOnly = true;
+        }
+
         public MetadataRepository(DataSet schema)
         {
             SchemaVersion = Guid.NewGuid();

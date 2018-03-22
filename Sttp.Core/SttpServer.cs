@@ -18,15 +18,26 @@ namespace Sttp.Core
         private Thread m_processing;
         private Dictionary<string, ISttpCommandHandler> m_handler;
 
+        public SttpBulkTransportServer BulkTransport;
+        public SttpMetadataServer MetadataServer;
+
         public SttpServer(Stream networkStream)
         {
             m_handler = new Dictionary<string, ISttpCommandHandler>();
             m_stream = networkStream;
             m_encoder = new WireEncoder();
+            m_encoder.NewPacket += M_encoder_NewPacket;
             m_decoder = new WireDecoder();
 
-            RegisterCommandHandler(new SttpBulkTransportServer());
-            RegisterCommandHandler(new SttpMetadataServer());
+            BulkTransport = new SttpBulkTransportServer();
+            MetadataServer = new SttpMetadataServer();
+            RegisterCommandHandler(BulkTransport);
+            RegisterCommandHandler(MetadataServer);
+        }
+
+        private void M_encoder_NewPacket(byte[] data, int offset, int length)
+        {
+            m_stream.Write(data, offset, length);
         }
 
         public void RegisterCommandHandler(ISttpCommandHandler handler)
@@ -62,6 +73,7 @@ namespace Sttp.Core
         public void Start()
         {
             m_processing = new Thread(ProcessRequest);
+            m_processing.IsBackground = true;
             m_processing.Start();
         }
 

@@ -75,7 +75,7 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandGetMetadataBasic(schemaVersion, lastModifiedVersion, table, columns));
         }
 
-        public void GetMetadataSchema(Guid? schemaVersion, long? sequenceNumber)
+        public void GetMetadataSchema(Guid? schemaVersion = null, long? sequenceNumber = null)
         {
             m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(schemaVersion, sequenceNumber));
         }
@@ -122,14 +122,19 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(command);
         }
 
-        public void MetadataSchema(Guid schemaVersion, long revision, List<MetadataSchemaTable> tables)
+        public void MetadataSchema(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTable> tables)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchema(schemaVersion, revision, tables));
+            m_encoder.SendMarkupCommand(new CommandMetadataSchema(schemaVersion, sequenceNumber, tables));
         }
 
-        public void MetadataSchemaUpdate(Guid schemaVersion, long revision, List<MetadataSchemaTableUpdate> tables)
+        public void MetadataSchemaUpdate(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTableUpdate> tables)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, revision, tables));
+            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, sequenceNumber, tables));
+        }
+
+        public void MetadataSchemaVersion(Guid schemaVersion, long sequenceNumber)
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataSchemaVersion(schemaVersion, sequenceNumber));
         }
 
         public void MetadataVersionNotCompatible()

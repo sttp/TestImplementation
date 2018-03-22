@@ -17,6 +17,7 @@ namespace Sttp.Core.Data
         public SttpMetadataServer()
         {
             m_procedureHandlers = new Dictionary<string, IMetadataProcedureHandler>();
+            m_repository = new MetadataRepository();
         }
 
         public MetadataTable this[string tableName] => m_repository[tableName];
@@ -89,11 +90,11 @@ namespace Sttp.Core.Data
         public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)
         {
             var repository = m_repository;
-            if (command.SequenceNumber.HasValue && command.SchemaVersion != repository.SchemaVersion)
+            if (!command.SchemaVersion.HasValue || command.SchemaVersion != repository.SchemaVersion)
             {
                 encoder.MetadataSchema(repository.SchemaVersion, repository.SequenceNumber, repository.MetadataSchema);
             }
-            else
+            else if (command.SequenceNumber != repository.SequenceNumber)
             {
                 List<MetadataSchemaTableUpdate> tableRevisions = new List<MetadataSchemaTableUpdate>();
                 foreach (var tables in repository.MetadataSchema)
@@ -101,6 +102,10 @@ namespace Sttp.Core.Data
                     tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedSequenceNumber));
                 }
                 encoder.MetadataSchemaUpdate(repository.SchemaVersion, repository.SequenceNumber, tableRevisions);
+            }
+            else
+            {
+                encoder.MetadataSchemaVersion(repository.SchemaVersion, repository.SequenceNumber);
             }
         }
 
