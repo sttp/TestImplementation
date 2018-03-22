@@ -56,7 +56,6 @@ namespace Sttp.Core.Data
         {
             m_pendingRepository = m_pendingRepository ?? m_repository.CloneEditable();
             m_pendingRepository.FillData(tableName, table);
-
         }
 
         public void FillData(string tableName, DbDataReader data)

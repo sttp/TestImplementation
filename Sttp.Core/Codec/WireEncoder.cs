@@ -55,9 +55,9 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id, offset, length));
         }
 
-        public void BulkTransportReply(Guid id, long bytesRemaining, byte[] data)
+        public void BulkTransportReply(Guid id, long offset, byte[] data)
         {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, bytesRemaining, data));
+            m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, offset, data));
         }
 
         public void DataPointRequest(SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
