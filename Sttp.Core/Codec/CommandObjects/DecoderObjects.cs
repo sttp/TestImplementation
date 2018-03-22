@@ -22,6 +22,7 @@ namespace Sttp.Codec
             CommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
             CommandBase.Register("Metadata", x => new CommandMetadata(x));
             CommandBase.Register("MetadataSchema", x => new CommandMetadataSchema(x));
+            CommandBase.Register("MetadataSchemaVersion", x => new CommandMetadataSchemaVersion(x));
             CommandBase.Register("MetadataSchemaUpdate", x => new CommandMetadataSchemaUpdate(x));
             CommandBase.Register("MetadataVersionNotCompatible", x => new CommandMetadataVersionNotCompatible(x));
             CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
@@ -62,6 +63,7 @@ namespace Sttp.Codec
         //public CommandMapRuntimeIDs MapRuntimeIDs => m_decoder as CommandMapRuntimeIDs;
         public CommandMetadata Metadata => m_decoder as CommandMetadata;
         public CommandMetadataSchema MetadataSchema => m_decoder as CommandMetadataSchema;
+        public CommandMetadataSchemaVersion MetadataSchemaVersion => m_decoder as CommandMetadataSchemaVersion;
         public CommandMetadataSchemaUpdate MetadataSchemaUpdate => m_decoder as CommandMetadataSchemaUpdate;
         public CommandMetadataVersionNotCompatible MetadataVersionNotCompatible => m_decoder as CommandMetadataVersionNotCompatible;
         //public CommandNegotiateSession NegotiateSession => m_decoder as CommandNegotiateSession;

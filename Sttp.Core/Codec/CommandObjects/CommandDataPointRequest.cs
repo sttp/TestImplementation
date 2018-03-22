@@ -5,14 +5,16 @@ namespace Sttp.Codec
 {
     public class CommandDataPointRequest : CommandBase
     {
+        public readonly string InstanceName;
         public readonly SttpTime StartTime;
         public readonly SttpTime StopTime;
         public readonly SttpValue[] DataPointIDs;
         public readonly double? SamplePerSecond;
 
-        public CommandDataPointRequest(SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        public CommandDataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
             : base("DataPointRequest")
         {
+            InstanceName = instanceName;
             StartTime = startTime;
             StopTime = stopTime;
             DataPointIDs = dataPointIDs;
@@ -24,6 +26,7 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
+            InstanceName = (string)element.GetValue("InstanceName");
             StartTime = (SttpTime)element.GetValue("StartTime");
             StopTime = (SttpTime)element.GetValue("StopTime");
             DataPointIDs = element.GetElement("PointList").ForEachValue("ID").ToArray();
@@ -35,6 +38,7 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
+            writer.WriteValue("InstanceName", InstanceName);
             writer.WriteValue("StartTime", StartTime);
             writer.WriteValue("StopTime", StopTime);
             using (writer.StartElement("PointList"))

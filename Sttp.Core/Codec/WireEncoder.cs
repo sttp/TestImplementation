@@ -60,9 +60,9 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, offset, data));
         }
 
-        public void DataPointRequest(SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
         {
-            m_encoder.SendMarkupCommand(new CommandDataPointRequest(startTime, stopTime, dataPointIDs, samplesPerSecond));
+            m_encoder.SendMarkupCommand(new CommandDataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond));
         }
 
         public void DataPointRequestCompleted()
