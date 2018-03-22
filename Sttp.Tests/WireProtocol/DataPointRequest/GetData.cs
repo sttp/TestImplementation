@@ -28,7 +28,7 @@ namespace Sttp.Tests
 
             SttpValue[] pointList = new SttpValue[] { (SttpValue)1, (SttpValue)2, (SttpValue)3, (SttpValue)4 };
 
-            writer.DataPointRequest((SttpTime)DateTime.Parse("3/14/2017 1:00 AM"),
+            writer.DataPointRequest("default", (SttpTime)DateTime.Parse("3/14/2017 1:00 AM"),
                                     (SttpTime)DateTime.Parse("3/14/2017 2:00 AM"),
                                     pointList,
                                     null);
