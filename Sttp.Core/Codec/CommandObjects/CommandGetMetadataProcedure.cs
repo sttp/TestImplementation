@@ -10,14 +10,14 @@ namespace Sttp.Codec
         public SttpMarkup Options;
 
         public CommandGetMetadataProcedure(string procedureName, SttpMarkup options)
-            : base("CommandGetMetadataProcedure")
+            : base("GetMetadataProcedure")
         {
             ProcedureName = procedureName;
             Options = options;
         }
 
         public CommandGetMetadataProcedure(SttpMarkupReader reader)
-            : base("CommandGetMetadataProcedure")
+            : base("GetMetadataProcedure")
         {
             var element = reader.ReadEntireElement();
 
