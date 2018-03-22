@@ -8,7 +8,7 @@ using Sttp.Data;
 
 namespace Sttp.Core.Data
 {
-    public class SttpMetadataServer
+    public class SttpMetadataServer : ISttpCommandHandler
     {
         private MetadataRepository m_repository;
         private MetadataRepository m_pendingRepository;
@@ -140,5 +140,35 @@ namespace Sttp.Core.Data
             }
         }
 
+        public List<string> CommandsHandled()
+        {
+            var lst = new List<string>();
+            lst.Add("GetMetadataBasic");
+            lst.Add("GetMetadataAdvance");
+            lst.Add("GetMetadataSchema");
+            lst.Add("GetMetadataProcedure");
+            return lst;
+        }
+
+        public void HandleCommand(CommandObjects command, WireEncoder encoder)
+        {
+            switch (command.CommandName)
+            {
+                case "GetMetadataBasic":
+                    ProcessCommand(command.GetMetadataBasic, encoder);
+                    return;
+                case "GetMetadataAdvance":
+                    ProcessCommand(command.GetMetadataAdvance, encoder);
+                    return;
+                case "GetMetadataSchema":
+                    ProcessCommand(command.GetMetadataSchema, encoder);
+                    return;
+                case "GetMetadataProcedure":
+                    ProcessCommand(command.GetMetadataProcedure, encoder);
+                    return;
+                default:
+                    throw new Exception("This command is not supported");
+            }
+        }
     }
 }

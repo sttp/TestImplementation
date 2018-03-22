@@ -7,7 +7,7 @@ using Sttp.Codec;
 
 namespace Sttp.Core.BulkTransport
 {
-    public class SttpBulkTransportServer
+    public class SttpBulkTransportServer : ISttpCommandHandler
     {
         private class BulkTransportRecord
         {
@@ -57,5 +57,18 @@ namespace Sttp.Core.BulkTransport
             }
         }
 
+        public List<string> CommandsHandled()
+        {
+            var lst = new List<string>();
+            lst.Add("BulkTransportRequest");
+            return lst;
+        }
+
+        public void HandleCommand(CommandObjects command, WireEncoder encoder)
+        {
+            if (command.CommandName != "BulkTransportRequest")
+                throw new Exception("This command is not supported");
+            ProcessCommand(command.BulkTransportRequest, encoder);
+        }
     }
 }
