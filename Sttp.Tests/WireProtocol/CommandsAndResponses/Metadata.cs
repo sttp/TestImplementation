@@ -1,15 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
-using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
-using Sttp.Codec.DataPoint;
-using Sttp.Codec.Metadata;
-using Sttp.Data;
 
 namespace Sttp.Tests.CommandsAndResponses
 {

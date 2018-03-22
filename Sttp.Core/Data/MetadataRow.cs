@@ -18,7 +18,7 @@ namespace Sttp.Data
         public MetadataRow(SttpValue key, List<SttpValue> fields, int foreignKeyCount, long revision)
         {
             Revision = revision;
-            Key = key;
+            Key = key.Clone();
             Fields = fields;
             ForeignKeys = new int[foreignKeyCount];
             for (int x = 0; x < foreignKeyCount; x++)

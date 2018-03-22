@@ -75,7 +75,7 @@ namespace Sttp.Core.Data
         }
 
 
-        public MetadataQueryExecutionEngine(MetadataDatabaseSource db, WireEncoder encoder, CommandGetMetadataAdvance query)
+        public MetadataQueryExecutionEngine(MetadataRepository db, WireEncoder encoder, CommandGetMetadataAdvance query)
         {
             if (query.HavingProcedure.Count > 0)
                 encoder.RequestFailed("GetMetadata", false, "Query Not Supported", "HAVING clauses are not supported by this engine");
@@ -93,7 +93,7 @@ namespace Sttp.Core.Data
             var outputColumns = MapOutputColumns(query, variableIndexCount, inputColumns, tables, procedures);
             var joinPath = MapAllJoins(db, query);
             var send = encoder.MetadataCommandBuilder();
-            send.DefineResponse(null,null,null, tables[0].TableName, outputColumns.ToList());
+            send.DefineResponse(db.SchemaVersion, db.SequenceNumber, null, tables[0].TableName, outputColumns.ToList());
 
             MetadataRow[] tableRows = new MetadataRow[tableIndexCount];
 
@@ -139,7 +139,7 @@ namespace Sttp.Core.Data
             send.EndCommand();
         }
 
-        private void TraverseAllJoinsForRows(MetadataDatabaseSource db, MetadataRow[] tableRows, MetadataRow row, JoinedTablePath[] joinPath, MetadataTable[] tables)
+        private void TraverseAllJoinsForRows(MetadataRepository db, MetadataRow[] tableRows, MetadataRow row, JoinedTablePath[] joinPath, MetadataTable[] tables)
         {
             tableRows[0] = row;
             foreach (var item in joinPath)
@@ -171,7 +171,7 @@ namespace Sttp.Core.Data
         }
 
 
-        private static JoinedTablePath[] MapAllJoins(MetadataDatabaseSource db, CommandGetMetadataAdvance query)
+        private static JoinedTablePath[] MapAllJoins(MetadataRepository db, CommandGetMetadataAdvance query)
         {
             //Export:
             //JoinIndex. This is the Column->Table join index that exists in the table.
@@ -221,7 +221,7 @@ namespace Sttp.Core.Data
 
         }
 
-        private static MetadataTable[] FindAllTables(MetadataDatabaseSource db, CommandGetMetadataAdvance query, int tableIndexCount)
+        private static MetadataTable[] FindAllTables(MetadataRepository db, CommandGetMetadataAdvance query, int tableIndexCount)
         {
             var rv = new MetadataTable[tableIndexCount];
             rv[0] = db[query.DirectTable];

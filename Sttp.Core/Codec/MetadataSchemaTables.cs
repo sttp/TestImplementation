@@ -31,7 +31,6 @@ namespace Sttp.Codec
                 ForeignKeys.Add(new MetadataForeignKey(query));
             }
             element.ErrorIfNotHandled();
-
         }
 
         public void Save(SttpMarkupWriter sml)
@@ -58,6 +57,13 @@ namespace Sttp.Codec
                     }
                 }
             }
+        }
+
+        public MetadataSchemaTable Clone(long tableLastModifiedSequenceNumber)
+        {
+            var item = (MetadataSchemaTable)MemberwiseClone();
+            item.LastModifiedSequenceNumber = LastModifiedSequenceNumber;
+            return item;
         }
     }
 }

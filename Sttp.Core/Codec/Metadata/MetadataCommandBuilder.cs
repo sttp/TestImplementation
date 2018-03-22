@@ -40,7 +40,7 @@ namespace Sttp.Codec.Metadata
             }
         }
 
-        public void DefineResponse(Guid? schemaVersion, long? sequenceNumber, long? updatesSinceSequenceNumber, string tableName, List<MetadataColumn> columns)
+        public void DefineResponse(Guid schemaVersion, long sequenceNumber, long? updatesSinceSequenceNumber, string tableName, List<MetadataColumn> columns)
         {
             using (m_stream.StartElement("DefineResponse"))
             {

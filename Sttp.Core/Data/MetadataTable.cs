@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
 using Sttp.Codec;
 
@@ -14,16 +15,16 @@ namespace Sttp.Data
         /// </summary>
         public readonly string TableName;
 
+        public readonly string PrimaryKey;
+
         /// <summary>
         /// All possible columns that are defined for the table.
         /// </summary>
         public readonly List<MetadataColumn> Columns;
 
-        public readonly List<MetadataForeignKey2> ForeignKeys;
+        public readonly List<MetadataForeignKeyMapping> ForeignKeys;
 
         public readonly long LastModifiedSequenceNumber;
-
-        private bool m_isReadOnly;
 
         /// <summary>
         /// This is concurrent since it will be shared with all modified instances. To check 
@@ -34,144 +35,146 @@ namespace Sttp.Data
 
         public IEnumerable<MetadataRow> Rows => m_rows;
 
-        private readonly List<MetadataRow> m_rows;
+        private readonly MetadataRow[] m_rows;
 
-        public MetadataTable(string tableName, List<MetadataColumn> columns, List<MetadataForeignKey> tableRelationships)
+        public MetadataTable(string tableName, string primaryKey, List<MetadataColumn> columns, List<MetadataForeignKeyMapping> tableRelationships)
         {
             TableName = tableName;
+            PrimaryKey = primaryKey ?? string.Empty;
             Columns = columns.ToList();
-            ForeignKeys = tableRelationships.Select(x => new MetadataForeignKey2(x)).ToList();
-
-            foreach (var fk in ForeignKeys)
-            {
-                fk.LocalColumnIndex = Columns.FindIndex(y => y.Name == fk.ColumnName);
-            }
+            ForeignKeys = tableRelationships;
             LastModifiedSequenceNumber = 0;
             m_rowLookup = new ConcurrentDictionary<SttpValue, int>();
-            m_rows = new List<MetadataRow>();
-            m_isReadOnly = false;
+            m_rows = new MetadataRow[0];
+            foreach (var fk in ForeignKeys)
+            {
+            
+            }
         }
 
-        public MetadataTable(MetadataTable other)
+        private MetadataTable(MetadataTable other, MetadataRow[] copiedRows, List<MetadataRow> newRows, long newSequenceNumber)
         {
-            m_rowLookup = other.m_rowLookup;
-            m_rows = other.m_rows.ToList();
             ForeignKeys = other.ForeignKeys;
             Columns = other.Columns;
             TableName = other.TableName;
-            LastModifiedSequenceNumber = other.LastModifiedSequenceNumber;
-            m_isReadOnly = false;
+            m_rowLookup = other.m_rowLookup;
+            m_rows = new MetadataRow[copiedRows.Length + newRows.Count];
+            copiedRows.CopyTo(m_rows, 0);
+            newRows.CopyTo(m_rows, copiedRows.Length);
+            LastModifiedSequenceNumber = newSequenceNumber;
         }
 
-        /// <summary>
-        /// Gets/Sets the readonly nature of this class.
-        /// </summary>
-        public bool IsReadOnly
+        public MetadataTable MergeDataSets(DataTable table, long newSequenceNumber)
         {
-            get
+            using (var rdr = table.CreateDataReader())
             {
-                return m_isReadOnly;
+                return MergeDataSets(rdr, newSequenceNumber);
             }
         }
 
-        public void SetIsReadOnly(long revision, Func<string, int> tableLookup, Func<int, SttpValue, int> lookupForeignKey)
+        public MetadataTable MergeDataSets(DbDataReader table, long newSequenceNumber)
         {
-            if (IsReadOnly)
-                throw new Exception("This class is immutable");
-            int x = 0;
+            List<MetadataRow> newRows = new List<MetadataRow>();
+            MetadataRow[] copiedRows = new MetadataRow[m_rows.Length];
+            bool hasChanges = false;
+            int fieldCount = table.FieldCount;
 
-            if (revision == 0)
+            if (Columns.Count != fieldCount)
             {
-                for (x = 0; x < m_rows.Count; x++)
+                throw new Exception("Schema has changed, Cannot fill data set.");
+            }
+            for (var x = 0; x < fieldCount; x++)
+            {
+                if (Columns[x].Name != table.GetName(x))
+                    throw new Exception("Schema has changed, Cannot fill data set.");
+                if (Columns[x].TypeCode != SttpValueTypeCodec.FromType(table.GetFieldType(x)))
+                    throw new Exception("Schema has changed, Cannot fill data set.");
+            }
+
+            int indexOfKey = table.GetOrdinal(PrimaryKey);
+
+            object[] row = new object[fieldCount];
+            while (table.Read())
+            {
+                if (table.GetValues(row) != fieldCount)
+                    throw new Exception("Field count did not match");
+
+                SttpValueMutable key = new SttpValueMutable();
+                List<SttpValue> values = new List<SttpValue>();
+                values.AddRange(row.Select(SttpValue.FromObject));
+                key.SetValue(values[indexOfKey]);
+
+                if (m_rowLookup.TryGetValue(key, out int rowIndex))
                 {
-                    if (m_rows[x].Revision != 0)
+                    if (m_rows[rowIndex].Fields == null)
                     {
-                        m_rows[x] = new MetadataRow(m_rows[x].Key, m_rows[x].Fields, ForeignKeys.Count, 0);
+                        //Row was previously deleted
+                        copiedRows[rowIndex] = new MetadataRow(key, values, ForeignKeys.Count, newSequenceNumber);
+                        hasChanges = true;
+                    }
+                    else if (!m_rows[rowIndex].Fields.SequenceEqual(values))
+                    {
+                        //Row has changed
+                        copiedRows[rowIndex] = new MetadataRow(key, values, ForeignKeys.Count, newSequenceNumber);
+                        hasChanges = true;
+                    }
+                    else
+                    {
+                        copiedRows[rowIndex] = m_rows[rowIndex];
                     }
                 }
-                //For a schema change, all foreign keys must be reassigned
-                for (x = 0; x < ForeignKeys.Count; x++)
+                else
                 {
-                    if (ForeignKeys[x].TableIndex < 0)
-                    {
-                        ForeignKeys[x].TableIndex = tableLookup(ForeignKeys[x].ForeignTableName);
-                    }
-                    if (ForeignKeys[x].TableIndex >= 0 && ForeignKeys[x].LocalColumnIndex >= 0)
-                    {
-                        int tableIndex = ForeignKeys[x].TableIndex;
-                        int columnIndex = ForeignKeys[x].LocalColumnIndex;
+                    m_rowLookup.TryAdd(key, m_rows.Length + newRows.Count);
+                    newRows.Add(new MetadataRow(key, values, ForeignKeys.Count, newSequenceNumber));
+                    hasChanges = true;
+                }
+            }
 
-                        foreach (var row in m_rows)
+
+            for (int x = 0; x < copiedRows.Length; x++)
+            {
+                if (copiedRows[x] == null)
+                {
+                    if (m_rows[x].Fields == null)
+                    {
+                        copiedRows[x] = m_rows[x];
+                    }
+                    else
+                    {
+                        copiedRows[x] = new MetadataRow(m_rows[x].Key, null, ForeignKeys.Count, newSequenceNumber);
+                        hasChanges = true;
+                    }
+                }
+            }
+
+            if (!hasChanges)
+            {
+                return this;
+            }
+
+            return new MetadataTable(this, copiedRows, newRows, newSequenceNumber);
+        }
+
+        public void LookupForeignKeys(Func<int, SttpValue, int> lookupForeignKey)
+        {
+            //All the foreign key tree must be searched 
+            //even if there is not a schema update to check if a foreign table has been updated.
+            for (int x = 0; x < ForeignKeys.Count; x++)
+            {
+                if (ForeignKeys[x].TableIndex >= 0 && ForeignKeys[x].LocalColumnIndex >= 0)
+                {
+                    int tableIndex = ForeignKeys[x].TableIndex;
+                    int columnIndex = ForeignKeys[x].LocalColumnIndex;
+
+                    foreach (var row in m_rows)
+                    {
+                        if (row.Fields != null && row.ForeignKeys[x] < 0)
                         {
-                            if (row.Fields != null)
-                            {
-                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields[columnIndex]);
-                            }
+                            row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields[columnIndex]);
                         }
                     }
                 }
-
-            }
-            else
-            {
-                //All the foreign key tree must be searched 
-                //even if there is not a schema update to check if a foreign table has been updated.
-                for (x = 0; x < ForeignKeys.Count; x++)
-                {
-                    if (ForeignKeys[x].TableIndex < 0)
-                    {
-                        ForeignKeys[x].TableIndex = tableLookup(TableName);
-                    }
-                    if (ForeignKeys[x].TableIndex >= 0 && ForeignKeys[x].LocalColumnIndex >= 0)
-                    {
-                        int tableIndex = ForeignKeys[x].TableIndex;
-                        int columnIndex = ForeignKeys[x].LocalColumnIndex;
-
-                        foreach (var row in m_rows)
-                        {
-                            if (row.Fields != null && row.ForeignKeys[x] < 0)
-                            {
-                                row.ForeignKeys[x] = lookupForeignKey(tableIndex, row.Fields[columnIndex]);
-                            }
-                        }
-                    }
-                }
-            }
-            m_isReadOnly = true;
-        }
-
-        public void AddOrUpdateRow(SttpValue key, List<SttpValue> fields, long revision)
-        {
-            if (IsReadOnly)
-                throw new Exception("This class is immutable");
-
-            if (m_rowLookup.TryGetValue(key, out int rowIndex))
-            {
-                if (m_rows[rowIndex].Fields != fields)
-                {
-                    m_rows[rowIndex] = new MetadataRow(key, fields, ForeignKeys.Count, revision);
-                }
-            }
-            else
-            {
-                m_rowLookup.TryAdd(key, m_rows.Count);
-                m_rows.Add(new MetadataRow(key, fields, ForeignKeys.Count, revision));
-            }
-        }
-
-        public MetadataTable CloneEditable()
-        {
-            return new MetadataTable(this);
-        }
-
-        public void DeleteRow(SttpValue key, long revision)
-        {
-            if (IsReadOnly)
-                throw new Exception("This class is immutable");
-
-            if (m_rowLookup.TryGetValue(key, out int rowIndex))
-            {
-                m_rows[rowIndex] = new MetadataRow(key, null, 0, revision);
             }
         }
 
@@ -179,7 +182,7 @@ namespace Sttp.Data
         {
             if (m_rowLookup.TryGetValue(sttpValue, out int index))
             {
-                if (index < m_rows.Count)
+                if (index < m_rows.Length)
                 {
                     return index;
                 }
@@ -190,7 +193,7 @@ namespace Sttp.Data
 
         public override string ToString()
         {
-            return $"{TableName} Columns: {Columns.Count} Rows: {m_rows.Count} ForeignKeys: {ForeignKeys.Count}";
+            return $"{TableName} Columns: {Columns.Count} Rows: {m_rows.Length} ForeignKeys: {ForeignKeys.Count}";
         }
 
         public MetadataRow LookupRow(int nextRowIndex)

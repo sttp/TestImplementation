@@ -12,7 +12,7 @@ namespace Sttp.Codec
         public List<string> Columns = new List<string>();
 
         public CommandGetMetadataBasic(Guid? schemaVersion, long? sequenceNumber, string table, IEnumerable<string> columns)
-            : base("CommandGetMetadataBasic")
+            : base("GetMetadataBasic")
         {
             SchemaVersion = schemaVersion;
             SequenceNumber = sequenceNumber;
@@ -21,12 +21,12 @@ namespace Sttp.Codec
         }
 
         public CommandGetMetadataBasic(SttpMarkupReader reader)
-            : base("CommandGetMetadataBasic")
+            : base("GetMetadataBasic")
         {
             var element = reader.ReadEntireElement();
 
             SchemaVersion = (Guid?)element.GetValue("SchemaVersion");
-            SequenceNumber = (long)element.GetValue("SequenceNumber");
+            SequenceNumber = (long?)element.GetValue("SequenceNumber");
             Table = (string)element.GetValue("Table");
             foreach (string c in element.ForEachValue("Column"))
             {

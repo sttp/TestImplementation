@@ -83,12 +83,12 @@ namespace Sttp.Data
                         throw new Exception("There was a schema change");
                 }
 
-                Revision = command.SequenceNumber.Value;
+                Revision = command.SequenceNumber;
             }
             else
             {
-                SchemaVersion = command.SchemaVersion.Value;
-                Revision = command.SequenceNumber.Value;
+                SchemaVersion = command.SchemaVersion;
+                Revision = command.SequenceNumber;
                 TableName = command.TableName;
                 Columns = new List<MetadataColumn>(command.Columns);
                 Rows = new Dictionary<SttpValue, List<SttpValue>>();

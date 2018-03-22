@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 using Sttp.Codec.Metadata;
+using Sttp.Core.Data;
 using Sttp.Data;
 
 namespace Sttp.Tests
@@ -91,9 +92,9 @@ namespace Sttp.Tests
             CommandObjects cmd = reader.NextCommand();
             //Console.WriteLine(cmd.ToXMLString());
 
-            Assert.AreEqual(cmd.CommandName, "GetMetadata");
+            Assert.AreEqual(cmd.CommandName, "GetMetadataAdvance");
 
-            db.ProcessCommand(cmd.GetMetadataBasic, writer);
+            db.ProcessCommand(cmd.GetMetadataAdvance, writer);
 
             while (packets.Count > 0)
             {
@@ -172,7 +173,7 @@ namespace Sttp.Tests
             CommandObjects cmd = reader.NextCommand();
             //Console.WriteLine(cmd.ToXMLString());
 
-            Assert.AreEqual(cmd.CommandName, "GetMetadata");
+            Assert.AreEqual(cmd.CommandName, "GetMetadataBasic");
 
             db.ProcessCommand(cmd.GetMetadataBasic, writer);
 
@@ -260,9 +261,9 @@ namespace Sttp.Tests
 
             Console.WriteLine(cmd.ToXMLString());
 
-            Assert.AreEqual(cmd.CommandName, "GetMetadata");
+            Assert.AreEqual(cmd.CommandName, "GetMetadataAdvance");
 
-            db.ProcessCommand(cmd.GetMetadataBasic, writer);
+            db.ProcessCommand(cmd.GetMetadataAdvance, writer);
 
             while (packets.Count > 0)
             {
@@ -333,7 +334,7 @@ namespace Sttp.Tests
         }
 
 
-        private MetadataDatabaseSource Load()
+        private SttpMetadataServer Load()
         {
             DataSet ds = new DataSet("openPDC");
 
@@ -342,7 +343,11 @@ namespace Sttp.Tests
                 ds.ReadXml(fs);
             }
 
-            return new MetadataDatabaseSource(ds);
+            var db = new SttpMetadataServer();
+            db.DefineSchema(ds);
+            db.FillData(ds);
+            db.CommitData();
+            return db;
         }
 
         private byte[] Clone(byte[] data, int pos, int length)
