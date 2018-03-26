@@ -4,9 +4,11 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using Sttp.Codec;
+using Sttp.Core;
+using Sttp.Core.Data;
 using Sttp.Data;
 
-namespace Sttp.Core.Data
+namespace Sttp.Services
 {
     public class SttpMetadataServer : ISttpCommandHandler
     {

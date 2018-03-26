@@ -5,10 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Sttp.Codec;
-using Sttp.Core.BulkTransport;
-using Sttp.Core.Data;
+using Sttp.Core;
 
-namespace Sttp.Core
+namespace Sttp.Services
 {
     public class SttpServer
     {

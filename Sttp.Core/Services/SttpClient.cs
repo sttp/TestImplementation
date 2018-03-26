@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Sttp.Codec;
-using Sttp.Core.BulkTransport;
 using Sttp.Core.Data;
 
-namespace Sttp.Core
+namespace Sttp.Services
 {
     public class SttpClient
     {
+
+
         private Stream m_stream;
         private WireEncoder m_encoder;
         private WireDecoder m_decoder;
@@ -42,6 +45,32 @@ namespace Sttp.Core
             m_encoder.GetMetadataSchema();
             var cmd = GetNextCommand();
             return cmd.MetadataSchema.Tables.First(x => x.TableName == tableName).Columns.Select(x => x.Name).ToList();
+        }
+
+        public DataTable GetMetadata(string query)
+        {
+            string[] parts = Regex.Split(query, @"^SELECT\s", RegexOptions.IgnoreCase);
+            if (parts.Length != 2)
+                throw new Exception("Not properly formatted select statement.");
+            if (parts[0].Length > 0)
+                throw new Exception("Not properly formatted select statement.");
+
+            parts = Regex.Split(parts[1], " FROM ", RegexOptions.IgnoreCase);
+
+            if (parts.Length != 2)
+                throw new Exception("Not properly formatted select statement.");
+
+            string[] columns = parts[0].Split(',').Select(x => x.Trim()).ToArray();
+            string[] tables = parts[1].Split(',').Select(x => x.Trim()).ToArray();
+
+            if (tables.Length != 1)
+                throw new Exception("Not properly formatted select statement.");
+
+            if (columns.Length == 0)
+                throw new Exception("Not properly formatted select statement.");
+
+            throw new NotImplementedException();
+
         }
 
         private CommandObjects GetNextCommand()

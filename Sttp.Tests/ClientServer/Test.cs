@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Core;
+using Sttp.Services;
 
 namespace Sttp.Tests.ClientServer
 {

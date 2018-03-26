@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Sttp.Codec
@@ -32,6 +33,23 @@ namespace Sttp.Codec
                 Tables.Add(new MetadataSchemaTable(query));
             }
             element.ErrorIfNotHandled();
+        }
+
+        public CommandMetadataSchema Combine(CommandMetadataSchemaUpdate update)
+        {
+            List<MetadataSchemaTable> newList = new List<MetadataSchemaTable>(Tables);
+
+            //Only support patching if the schemas match and the sequence number is less than the update.
+            if (SchemaVersion == update.SchemaVersion && SequenceNumber < update.SequenceNumber)
+            {
+                foreach (var item in update.Tables)
+                {
+                    int indx = Tables.FindIndex(x => x.TableName == item.TableName);
+                    newList[indx] = newList[indx].Clone(item.LastModifiedSequenceNumber);
+                }
+                return new CommandMetadataSchema(update.SchemaVersion, update.SequenceNumber, newList);
+            }
+            return this;
         }
 
         public override void Save(SttpMarkupWriter writer)

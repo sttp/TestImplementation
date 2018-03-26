@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Sttp.Codec;
+using Sttp.Core;
 
-namespace Sttp.Core.BulkTransport
+namespace Sttp.Services
 {
     public class SttpBulkTransportServer : ISttpCommandHandler
     {

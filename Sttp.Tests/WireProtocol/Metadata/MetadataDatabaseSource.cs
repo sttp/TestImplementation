@@ -10,6 +10,7 @@ using Sttp.Codec;
 using Sttp.Codec.Metadata;
 using Sttp.Core.Data;
 using Sttp.Data;
+using Sttp.Services;
 
 namespace Sttp.Tests
 {

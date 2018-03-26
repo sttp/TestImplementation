@@ -61,6 +61,9 @@ namespace Sttp.Codec
 
         public MetadataSchemaTable Clone(long tableLastModifiedSequenceNumber)
         {
+            if (LastModifiedSequenceNumber == tableLastModifiedSequenceNumber)
+                return this;
+
             var item = (MetadataSchemaTable)MemberwiseClone();
             item.LastModifiedSequenceNumber = LastModifiedSequenceNumber;
             return item;
