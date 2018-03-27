@@ -5,15 +5,15 @@ using System.Text;
 
 namespace Sttp.Codec
 {
-    public class CommandDataPointRequestCompleted : CommandBase
+    public class CommandDataPointResponseCompleted : CommandBase
     {
-        public CommandDataPointRequestCompleted()
-            : base("DataPointRequestCompleted")
+        public CommandDataPointResponseCompleted()
+            : base("DataPointResponseCompleted")
         {
         }
 
-        public CommandDataPointRequestCompleted(SttpMarkupReader reader)
-            : base("DataPointRequestCompleted")
+        public CommandDataPointResponseCompleted(SttpMarkupReader reader)
+            : base("DataPointResponseCompleted")
         {
             var element = reader.ReadEntireElement();
             element.ErrorIfNotHandled();

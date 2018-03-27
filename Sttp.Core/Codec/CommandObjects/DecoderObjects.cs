@@ -15,7 +15,8 @@ namespace Sttp.Codec
             CommandBase.Register("BulkTransportRequest", x => new CommandBulkTransportRequest(x));
             CommandBase.Register("BulkTransportReply", x => new CommandBulkTransportReply(x));
             CommandBase.Register("DataPointRequest", x => new CommandDataPointRequest(x));
-            CommandBase.Register("DataPointRequestCompleted", x => new CommandDataPointRequestCompleted(x));
+            CommandBase.Register("DataPointResponseCompleted", x => new CommandDataPointResponseCompleted(x));
+            CommandBase.Register("DataPointResponse", x => new CommandDataPointResponse(x));
             CommandBase.Register("GetMetadataBasic", x => new CommandGetMetadataBasic(x));
             CommandBase.Register("GetMetadataAdvance", x => new CommandGetMetadataAdvance(x));
             CommandBase.Register("GetMetadataProcedure", x => new CommandGetMetadataProcedure(x));
@@ -27,6 +28,7 @@ namespace Sttp.Codec
             CommandBase.Register("MetadataVersionNotCompatible", x => new CommandMetadataVersionNotCompatible(x));
             CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
             CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
+            CommandBase.Register("KeepAlive", x => new CommandKeepAlive(x));
         }
 
         internal CommandObjects(CommandDecoder decoder)
@@ -52,9 +54,11 @@ namespace Sttp.Codec
             }
         }
 
+        public CommandKeepAlive KeepAlive => m_decoder as CommandKeepAlive;
         public CommandBulkTransportRequest BulkTransportRequest => m_decoder as CommandBulkTransportRequest;
         public CommandBulkTransportReply BulkTransportReply => m_decoder as CommandBulkTransportReply;
-        public CommandDataPointRequestCompleted DataPointRequestCompleted => m_decoder as CommandDataPointRequestCompleted;
+        public CommandDataPointResponseCompleted DataPointResponseCompleted => m_decoder as CommandDataPointResponseCompleted;
+        public CommandDataPointResponse DataPointResponse => m_decoder as CommandDataPointResponse;
         public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;
         public CommandGetMetadataProcedure GetMetadataProcedure => m_decoder as CommandGetMetadataProcedure;
         public CommandGetMetadataBasic GetMetadataBasic => m_decoder as CommandGetMetadataBasic;

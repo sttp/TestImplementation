@@ -32,6 +32,7 @@ namespace Sttp.Services
             MetadataServer = new SttpMetadataServer();
             RegisterCommandHandler(BulkTransport);
             RegisterCommandHandler(MetadataServer);
+            RegisterCommandHandler(new SttpKeepAlive());
         }
 
         private void M_encoder_NewPacket(byte[] data, int offset, int length)
@@ -59,7 +60,7 @@ namespace Sttp.Services
                 {
                     if (m_handler.TryGetValue(obj.CommandName, out ISttpCommandHandler handler))
                     {
-                        //handler.HandleCommand(obj, m_encoder, );
+                        handler.HandleCommand(obj, m_encoder);
                     }
                     else
                     {

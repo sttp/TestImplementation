@@ -50,6 +50,11 @@ namespace Sttp.Codec
         //    NewPacket?.Invoke(buffer, position, length);
         //}
 
+        public void KeepAlive()
+        {
+            m_encoder.SendMarkupCommand(new CommandKeepAlive());
+        }
+
         public void BulkTransportRequest(Guid id, long offset, int length)
         {
             m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id, offset, length));
@@ -67,7 +72,7 @@ namespace Sttp.Codec
 
         public void DataPointRequestCompleted()
         {
-            m_encoder.SendMarkupCommand(new CommandDataPointRequestCompleted());
+            m_encoder.SendMarkupCommand(new CommandDataPointResponseCompleted());
         }
 
         public void GetMetadataSimple(Guid? schemaVersion, long? lastModifiedVersion, string table, IEnumerable<string> columns)
