@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Sttp.Codec;
+using Sttp.Services;
 
 namespace Sttp.Core
 {

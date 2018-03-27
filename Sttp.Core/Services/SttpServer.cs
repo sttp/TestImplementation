@@ -59,7 +59,7 @@ namespace Sttp.Services
                 {
                     if (m_handler.TryGetValue(obj.CommandName, out ISttpCommandHandler handler))
                     {
-                        handler.HandleCommand(obj, m_encoder);
+                        //handler.HandleCommand(obj, m_encoder, );
                     }
                     else
                     {

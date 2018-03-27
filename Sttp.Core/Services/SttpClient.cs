@@ -13,8 +13,6 @@ namespace Sttp.Services
 {
     public class SttpClient
     {
-
-
         private Stream m_stream;
         private WireEncoder m_encoder;
         private WireDecoder m_decoder;
@@ -70,7 +68,6 @@ namespace Sttp.Services
                 throw new Exception("Not properly formatted select statement.");
 
             throw new NotImplementedException();
-
         }
 
         private CommandObjects GetNextCommand()
