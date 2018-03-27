@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
-using Sttp.Core.Data;
+using Sttp.Codec.Metadata;
+using Sttp.Data;
 
 namespace Sttp.Services
 {
-
     public class SttpClient
     {
         private class SttpDataPointResponse
         {
-            public SttpClient m_client;
+            private SttpClient m_client;
             private bool m_isEos;
             private BasicDecoder m_decoder;
             private byte m_streamID;
@@ -109,6 +107,45 @@ namespace Sttp.Services
             return cmd.MetadataSchema.Tables.First(x => x.TableName == tableName).Columns.Select(x => x.Name).ToList();
         }
 
+        public DataTable Exec(string procedureName, SttpMarkup options)
+        {
+            m_encoder.GetMetadataProcedure(procedureName, options);
+            return ParseDT();
+        }
+
+        private DataTable ParseDT()
+        {
+            MetadataQueryTable table = null;
+            TryAgain:
+
+            var cmd = GetNextCommand();
+            if (cmd.CommandName != "Metadata")
+                throw new Exception("Wrong command");
+
+            MetadataSubCommandObjects subCmd;
+            while ((subCmd = cmd.Metadata.NextCommand()) != null)
+            {
+                switch (subCmd.SubCommand)
+                {
+                    case MetadataSubCommand.DefineResponse:
+                        table = new MetadataQueryTable(subCmd.DefineResponse);
+                        break;
+                    case MetadataSubCommand.DefineRow:
+                        table.ProcessCommand(subCmd.DefineRow);
+                        break;
+                    case MetadataSubCommand.UndefineRow:
+                        table.ProcessCommand(subCmd.UndefineRow);
+                        break;
+                    case MetadataSubCommand.Finished:
+                        return table.ToTable();
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            goto TryAgain;
+        }
+
         public DataTable GetMetadata(string query)
         {
             string[] parts = Regex.Split(query, @"^SELECT\s", RegexOptions.IgnoreCase);
@@ -131,7 +168,8 @@ namespace Sttp.Services
             if (columns.Length == 0)
                 throw new Exception("Not properly formatted select statement.");
 
-            throw new NotImplementedException();
+            m_encoder.GetMetadataSimple(null, null, tables[0], columns);
+            return ParseDT();
         }
 
         public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)

@@ -65,6 +65,11 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, offset, data));
         }
 
+        public void GetMetadataProcedure(string procedureName, SttpMarkup options)
+        {
+            m_encoder.SendMarkupCommand(new CommandGetMetadataProcedure(procedureName, options));
+        }
+
         public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
         {
             m_encoder.SendMarkupCommand(new CommandDataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond));
