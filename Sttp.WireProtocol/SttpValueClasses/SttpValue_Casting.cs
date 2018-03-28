@@ -94,10 +94,6 @@ namespace Sttp
         {
             return new SttpValueSttpMarkup(value);
         }
-        public static explicit operator SttpValue(SttpBulkTransport value)
-        {
-            return new SttpValueSttpBulkTransport(value);
-        }
 
         public static explicit operator sbyte(SttpValue value)
         {
@@ -171,11 +167,6 @@ namespace Sttp
         public static explicit operator byte[] (SttpValue value)
         {
             return value.AsSttpBuffer.ToBuffer();
-        }
-
-        public static explicit operator SttpBulkTransport(SttpValue value)
-        {
-            return value.AsSttpBulkTransport;
         }
 
         public static SttpValue FromObject(object value)
@@ -261,10 +252,6 @@ namespace Sttp
             else if (type == typeof(SttpMarkup))
             {
                 return (SttpValue)(SttpMarkup)value;
-            }
-            else if (type == typeof(SttpBulkTransport))
-            {
-                return (SttpValue)(SttpBulkTransport)value;
             }
             else if (type == typeof(decimal))
             {

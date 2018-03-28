@@ -101,11 +101,6 @@ namespace Sttp
             m_valueTypeCode = SttpValueTypeCode.SttpMarkup;
             m_valueObject = value;
         }
-        public void SetValue(SttpBulkTransport value)
-        {
-            m_valueTypeCode = SttpValueTypeCode.SttpBulkTransport;
-            m_valueObject = value;
-        }
 
         public void SetValue(byte[] data)
         {
@@ -145,9 +140,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.SttpMarkup:
                     SetValue(value.AsSttpMarkup);
-                    break;
-                case SttpValueTypeCode.SttpBulkTransport:
-                    SetValue(value.AsSttpBulkTransport);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

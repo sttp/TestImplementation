@@ -12,8 +12,6 @@ namespace Sttp.Codec
 
         static CommandObjects()
         {
-            CommandBase.Register("BulkTransportRequest", x => new CommandBulkTransportRequest(x));
-            CommandBase.Register("BulkTransportReply", x => new CommandBulkTransportReply(x));
             CommandBase.Register("DataPointRequest", x => new CommandDataPointRequest(x));
             CommandBase.Register("DataPointResponseCompleted", x => new CommandDataPointResponseCompleted(x));
             CommandBase.Register("DataPointResponse", x => new CommandDataPointResponse(x));
@@ -55,8 +53,6 @@ namespace Sttp.Codec
         }
 
         public CommandKeepAlive KeepAlive => m_decoder as CommandKeepAlive;
-        public CommandBulkTransportRequest BulkTransportRequest => m_decoder as CommandBulkTransportRequest;
-        public CommandBulkTransportReply BulkTransportReply => m_decoder as CommandBulkTransportReply;
         public CommandDataPointResponseCompleted DataPointResponseCompleted => m_decoder as CommandDataPointResponseCompleted;
         public CommandDataPointResponse DataPointResponse => m_decoder as CommandDataPointResponse;
         public CommandDataPointRequest DataPointRequest => m_decoder as CommandDataPointRequest;

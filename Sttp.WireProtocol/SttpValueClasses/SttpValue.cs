@@ -30,8 +30,6 @@ namespace Sttp
         public abstract string AsString { get; }
         public abstract SttpBuffer AsSttpBuffer { get; }
         public abstract SttpMarkup AsSttpMarkup { get; }
-        public abstract SttpBulkTransport AsSttpBulkTransport { get; }
-
         public abstract object ToNativeType { get; }
         public abstract string ToTypeString { get; }
 
@@ -198,8 +196,6 @@ namespace Sttp
                         return AsSttpBuffer == other.AsSttpBuffer;
                     case SttpValueTypeCode.SttpMarkup:
                         return AsSttpMarkup == other.AsSttpMarkup;
-                    case SttpValueTypeCode.SttpBulkTransport:
-                        return AsSttpBulkTransport == other.AsSttpBulkTransport;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

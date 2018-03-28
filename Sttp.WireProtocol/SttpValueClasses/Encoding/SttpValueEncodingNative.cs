@@ -45,9 +45,6 @@ namespace Sttp
                 case SttpValueTypeCode.SttpMarkup:
                     wr.Write(value.AsSttpMarkup);
                     break;
-                case SttpValueTypeCode.SttpBulkTransport:
-                    wr.Write(value.AsSttpBulkTransport);
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -78,8 +75,6 @@ namespace Sttp
                     return (SttpValue)rd.ReadSttpBuffer();
                 case SttpValueTypeCode.SttpMarkup:
                     return (SttpValue)rd.ReadSttpMarkup();
-                case SttpValueTypeCode.SttpBulkTransport:
-                    return (SttpValue)rd.ReadSttpBulkTransport();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -119,9 +114,6 @@ namespace Sttp
                     break;
                 case SttpValueTypeCode.SttpMarkup:
                     output.SetValue(rd.ReadSttpMarkup());
-                    break;
-                case SttpValueTypeCode.SttpBulkTransport:
-                    output.SetValue(rd.ReadSttpBulkTransport());
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

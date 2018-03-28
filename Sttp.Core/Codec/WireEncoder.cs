@@ -55,16 +55,6 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandKeepAlive());
         }
 
-        public void BulkTransportRequest(Guid id, long offset, int length)
-        {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportRequest(id, offset, length));
-        }
-
-        public void BulkTransportReply(Guid id, long offset, byte[] data)
-        {
-            m_encoder.SendMarkupCommand(new CommandBulkTransportReply(id, offset, data));
-        }
-
         public void GetMetadataProcedure(string procedureName, SttpMarkup options)
         {
             m_encoder.SendMarkupCommand(new CommandGetMetadataProcedure(procedureName, options));

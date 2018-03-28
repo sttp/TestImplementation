@@ -28,7 +28,6 @@ namespace Sttp
         public override string AsString => SttpValueGuidMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueGuidMethods.AsSttpBuffer(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueGuidMethods.AsSttpMarkup(Value);
-        public override SttpBulkTransport AsSttpBulkTransport => SttpValueGuidMethods.AsSttpBulkTransport(Value);
     }
 
     internal static class SttpValueGuidMethods
@@ -90,11 +89,6 @@ namespace Sttp
         public static SttpMarkup AsSttpMarkup(Guid value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
-        }
-
-        public static SttpBulkTransport AsSttpBulkTransport(Guid value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBulkTransport");
         }
 
         #endregion

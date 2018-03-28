@@ -31,7 +31,6 @@ namespace Sttp
         public override string AsString => SttpValueBooleanMethods.AsString(Value);
         public override SttpBuffer AsSttpBuffer => SttpValueBooleanMethods.AsSttpBuffer(Value);
         public override SttpMarkup AsSttpMarkup => SttpValueBooleanMethods.AsSttpMarkup(Value);
-        public override SttpBulkTransport AsSttpBulkTransport => SttpValueBooleanMethods.AsSttpBulkTransport(Value);
     }
 
     internal static class SttpValueBooleanMethods
@@ -94,11 +93,6 @@ namespace Sttp
         public static SttpMarkup AsSttpMarkup(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
-        }
-
-        public static SttpBulkTransport AsSttpBulkTransport(bool value)
-        {
-            throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to BulkTransportGuid");
         }
 
         #endregion

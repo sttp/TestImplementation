@@ -253,12 +253,6 @@ namespace Sttp
             value.Write(this);
         }
 
-        public void Write(SttpBulkTransport value)
-        {
-            value.Write(this);
-        }
-
-
         #region [ Writing Bits ]
 
         /// <summary>

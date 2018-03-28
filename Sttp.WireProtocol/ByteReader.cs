@@ -229,11 +229,6 @@ namespace Sttp
             return new SttpTime(ReadInt64());
         }
 
-        public SttpBulkTransport ReadSttpBulkTransport()
-        {
-            return new SttpBulkTransport(this);
-        }
-
         #region [ Read Bits ]
 
         public uint ReadBits0()

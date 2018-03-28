@@ -17,7 +17,6 @@ namespace Sttp.Services
         private Thread m_processing;
         private Dictionary<string, ISttpCommandHandler> m_handler;
 
-        public SttpBulkTransportServer BulkTransport;
         public SttpMetadataServer MetadataServer;
 
         public SttpServer(Stream networkStream)
@@ -28,9 +27,7 @@ namespace Sttp.Services
             m_encoder.NewPacket += M_encoder_NewPacket;
             m_decoder = new WireDecoder();
 
-            BulkTransport = new SttpBulkTransportServer();
             MetadataServer = new SttpMetadataServer();
-            RegisterCommandHandler(BulkTransport);
             RegisterCommandHandler(MetadataServer);
             RegisterCommandHandler(new SttpKeepAlive());
         }
