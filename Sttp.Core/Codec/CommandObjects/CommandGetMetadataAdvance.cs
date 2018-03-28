@@ -30,11 +30,6 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryColumn)}) {Variable} = {TableIndex}.{ColumnName} ");
-        }
-
         public void Save(SttpMarkupWriter writer)
         {
             using (writer.StartElement("ColumnInput"))
@@ -74,11 +69,6 @@ namespace Sttp.Codec
             ForeignTableIndex = foreignTableIndex;
         }
 
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryJoinedTable)}) ({ExistingTableIndex}) LEFT JOIN {ForeignTable} AS ({ForeignTableIndex}) ON ({ExistingTableIndex}).{ExistingForeignKeyColumn} = ({ForeignTableIndex}).[PrimaryKey]");
-        }
-
         public void Save(SttpMarkupWriter writer)
         {
             using (writer.StartElement("JoinedTable"))
@@ -111,11 +101,6 @@ namespace Sttp.Codec
             Variable = (int)element.GetValue("Variable");
 
             element.ErrorIfNotHandled();
-        }
-
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryLiteral)}) {Variable} = {Value.AsString} ");
         }
 
         public void Save(SttpMarkupWriter writer)
@@ -157,11 +142,6 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryProcedureStep)}) {OutputVariable} = {Function}({string.Join(",", InputVariables)}) ");
-        }
-
         public void Save(SttpMarkupWriter writer, bool isHavingStep)
         {
             using (writer.StartElement(isHavingStep ? "Having" : "Procedure"))
@@ -201,11 +181,6 @@ namespace Sttp.Codec
             Variable = (int)element.GetValue("Variable");
 
             element.ErrorIfNotHandled();
-        }
-
-        public void GetFullOutputString(string linePrefix, StringBuilder builder)
-        {
-            builder.Append(linePrefix); builder.AppendLine($"({nameof(SttpQueryOutputColumns)}) {Variable} = {ColumnName} ");
         }
 
         public void Save(SttpMarkupWriter writer)

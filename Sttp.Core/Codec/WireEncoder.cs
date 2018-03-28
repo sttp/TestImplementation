@@ -168,6 +168,11 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded, reason, details));
         }
 
+        public void Subscribe(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        {
+            m_encoder.SendMarkupCommand(new CommandSubscribe(instanceName, dataPointIDs, samplesPerSecond));
+        }
+
         //public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
         //{
         //    var sml = new SttpMarkupWriter();
@@ -182,9 +187,9 @@ namespace Sttp.Codec
         //    m_encoder.Message(sml.ToSttpMarkup());
         //}
 
-        public void SubscriptionStream(byte encodingMethod, byte[] buffer)
+        public void Raw(byte rawCommandCode, byte[] payload)
         {
-            m_encoder.SendRawCommand(encodingMethod, buffer, 0, buffer.Length);
+            m_encoder.SendRawCommand(rawCommandCode, payload, 0, payload.Length);
         }
 
     }

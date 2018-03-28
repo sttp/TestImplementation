@@ -19,11 +19,11 @@ namespace Sttp.Codec
         /// One example is a measurement stream. 
         /// 
         /// Payload:
-        /// byte encodingMethod 
-        /// byte[] Data;
+        /// byte rawCommandCode 
+        /// byte[] Payload;
         /// 
         /// </summary>
-        RawCommand,
+        Raw,
 
         /// <summary>
         /// All other commands fall under the classification of Markup commands. These use the SttpMarkup Language

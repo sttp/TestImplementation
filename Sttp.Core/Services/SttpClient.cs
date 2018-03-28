@@ -27,7 +27,7 @@ namespace Sttp.Services
                 if (cmd.CommandName != "DataPointResponse")
                 {
                     m_decoder = new BasicDecoder();
-                    m_streamID = cmd.DataPointResponse.StreamingCode;
+                    m_streamID = cmd.DataPointResponse.RawCommandCode;
                 }
 
                 cmd = m_client.m_decoder.NextCommand();
@@ -37,9 +37,9 @@ namespace Sttp.Services
                 }
                 else if (cmd.CommandName == "SubscriptionStream")
                 {
-                    if (cmd.SubscriptionStream.EncodingMethod != m_streamID)
+                    if (cmd.Raw.RawCommandCode != m_streamID)
                         throw new Exception("Wrong encoding method");
-                    m_decoder.Load(cmd.SubscriptionStream.Data);
+                    m_decoder.Load(cmd.Raw.Payload);
                 }
                 else
                 {
@@ -63,9 +63,9 @@ namespace Sttp.Services
                 }
                 else if (cmd.CommandName == "SubscriptionStream")
                 {
-                    if (cmd.SubscriptionStream.EncodingMethod != m_streamID)
+                    if (cmd.Raw.RawCommandCode != m_streamID)
                         throw new Exception("Wrong encoding method");
-                    m_decoder.Load(cmd.SubscriptionStream.Data);
+                    m_decoder.Load(cmd.Raw.Payload);
                     goto tryAgain;
                 }
                 else

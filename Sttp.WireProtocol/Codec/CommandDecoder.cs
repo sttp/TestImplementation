@@ -80,13 +80,13 @@ namespace Sttp.Codec
         /// Valid if <see cref="NextCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public byte[] RawCommandPayload
+        public byte[] RawPayload
         {
             get
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.RawCommand)
+                if (m_command != CommandCode.Raw)
                     throw new InvalidOperationException("Command is not a Raw Command.");
                 return m_rawCommandPayload;
             }
@@ -102,7 +102,7 @@ namespace Sttp.Codec
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.RawCommand)
+                if (m_command != CommandCode.Raw)
                     throw new InvalidOperationException("Command is not a Raw Command.");
                 return m_rawCommandCode;
             }
@@ -274,7 +274,7 @@ namespace Sttp.Codec
             }
             else
             {
-                m_command = CommandCode.RawCommand;
+                m_command = CommandCode.Raw;
                 results = new byte[length - 1];
                 Array.Copy(buffer, position + 1, results, 0, length - 1);
                 m_rawCommandCode = buffer[position];

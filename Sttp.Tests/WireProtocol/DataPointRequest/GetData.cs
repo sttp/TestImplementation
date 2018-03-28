@@ -115,7 +115,7 @@ namespace Sttp.Tests
             }
 
             byte[] d2 = enc.ToArray();
-            writer.SubscriptionStream(0,d2);
+            writer.Raw(0,d2);
             writer.DataPointRequestCompleted();
 
             while (packets.Count > 0)
@@ -128,7 +128,7 @@ namespace Sttp.Tests
             Assert.AreEqual(cmd.CommandName, "SubscriptionStream");
 
             var dec = new BasicDecoder();
-            dec.Load(cmd.SubscriptionStream.Data);
+            dec.Load(cmd.Raw.Payload);
 
             dataPoint = new SttpDataPoint();
             while (dec.Read(dataPoint))

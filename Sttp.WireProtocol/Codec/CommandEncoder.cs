@@ -42,7 +42,7 @@ namespace Sttp.Codec
         }
 
         /// <summary>
-        /// Sends a raw unstructured command.
+        /// Sends a raw command.
         /// </summary>
         /// <param name="rawCode">a user code for this raw stream</param>
         /// <param name="payload">the byte payload to send.</param>

@@ -27,6 +27,7 @@ namespace Sttp.Codec
             CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
             CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
             CommandBase.Register("KeepAlive", x => new CommandKeepAlive(x));
+            CommandBase.Register("Subscribe", x => new CommandSubscribe(x));
         }
 
         internal CommandObjects(CommandDecoder decoder)
@@ -42,10 +43,10 @@ namespace Sttp.Codec
                     CommandName = m_markup.MakeReader().RootElement;
                     m_decoder = CommandBase.Create(decoder.MarkupPayload);
                     break;
-                case CommandCode.RawCommand:
+                case CommandCode.Raw:
                     m_markup = null;
-                    CommandName = "SubscriptionStream";
-                    m_decoder = new CommandSubscriptionStream(decoder.RawCommandCode, decoder.RawCommandPayload);
+                    CommandName = "Raw";
+                    m_decoder = new CommandRaw(decoder.RawCommandCode, decoder.RawPayload);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -70,8 +71,8 @@ namespace Sttp.Codec
         //public CommandNoOp NoOp => m_decoder as CommandNoOp;
         public CommandRequestFailed RequestFailed => m_decoder as CommandRequestFailed;
         public CommandRequestSucceeded RequestSucceeded => m_decoder as CommandRequestSucceeded;
-        //public CommandSubscription Subscription => m_decoder as CommandSubscription;
-        public CommandSubscriptionStream SubscriptionStream => m_decoder as CommandSubscriptionStream;
+        public CommandSubscribe Subscribe => m_decoder as CommandSubscribe;
+        public CommandRaw Raw => m_decoder as CommandRaw;
         public CommandUnknown Unknown => m_decoder as CommandUnknown;
 
         public string ToXMLString()
