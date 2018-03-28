@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribe : CommandBase
+    public class CommandPollCompleted : CommandBase
     {
-        public CommandSubscribe()
-            : base("Subscribe")
+        public CommandPollCompleted()
+            : base("PollCompleted")
         {
         }
 
-        public CommandSubscribe(SttpMarkupReader reader)
-            : base("Subscribe")
+        public CommandPollCompleted(SttpMarkupReader reader)
+            : base("PollCompleted")
         {
             var element = reader.ReadEntireElement();
-
             element.ErrorIfNotHandled();
         }
 

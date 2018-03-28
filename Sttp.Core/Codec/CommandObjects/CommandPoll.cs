@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribe : CommandBase
+    public class CommandPoll : CommandBase
     {
-        public CommandSubscribe()
-            : base("Subscribe")
+        public CommandPoll()
+            : base("Poll")
         {
         }
 
-        public CommandSubscribe(SttpMarkupReader reader)
-            : base("Subscribe")
+        public CommandPoll(SttpMarkupReader reader)
+            : base("Poll")
         {
             var element = reader.ReadEntireElement();
 

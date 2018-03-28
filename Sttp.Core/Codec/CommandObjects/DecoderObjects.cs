@@ -27,7 +27,7 @@ namespace Sttp.Codec
             CommandBase.Register("RequestFailed", x => new CommandRequestFailed(x));
             CommandBase.Register("RequestSucceeded", x => new CommandRequestSucceeded(x));
             CommandBase.Register("KeepAlive", x => new CommandKeepAlive(x));
-            CommandBase.Register("Subscribe", x => new CommandSubscribe(x));
+            CommandBase.Register("Subscribe", x => new CommandConfigureSubscription(x));
         }
 
         internal CommandObjects(CommandDecoder decoder)
@@ -71,7 +71,7 @@ namespace Sttp.Codec
         //public CommandNoOp NoOp => m_decoder as CommandNoOp;
         public CommandRequestFailed RequestFailed => m_decoder as CommandRequestFailed;
         public CommandRequestSucceeded RequestSucceeded => m_decoder as CommandRequestSucceeded;
-        public CommandSubscribe Subscribe => m_decoder as CommandSubscribe;
+        public CommandConfigureSubscription ConfigureSubscription => m_decoder as CommandConfigureSubscription;
         public CommandRaw Raw => m_decoder as CommandRaw;
         public CommandUnknown Unknown => m_decoder as CommandUnknown;
 

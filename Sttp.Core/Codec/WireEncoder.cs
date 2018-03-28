@@ -170,7 +170,7 @@ namespace Sttp.Codec
 
         public void Subscribe(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
         {
-            m_encoder.SendMarkupCommand(new CommandSubscribe(instanceName, dataPointIDs, samplesPerSecond));
+            m_encoder.SendMarkupCommand(new CommandConfigureSubscription(instanceName, dataPointIDs, samplesPerSecond));
         }
 
         //public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
