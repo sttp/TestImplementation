@@ -75,19 +75,19 @@ namespace Sttp.Services
                 encoder.MetadataVersionNotCompatible();
                 return;
             }
-            var engine = new MetadataQueryExecutionEngine(repository, encoder, command.ToSttpQuery());
+            //var engine = new MetadataQueryExecutionEngine(repository, encoder, command.ToSttpQuery());
         }
 
-        public void ProcessCommand(CommandGetMetadataAdvance command, WireEncoder encoder)
-        {
-            var repository = m_repository;
-            if (command.SequenceNumber.HasValue && command.SchemaVersion != repository.SchemaVersion)
-            {
-                encoder.MetadataVersionNotCompatible();
-                return;
-            }
-            var engine = new MetadataQueryExecutionEngine(repository, encoder, command);
-        }
+        //public void ProcessCommand(CommandGetMetadataAdvance command, WireEncoder encoder)
+        //{
+        //    var repository = m_repository;
+        //    if (command.SequenceNumber.HasValue && command.SchemaVersion != repository.SchemaVersion)
+        //    {
+        //        encoder.MetadataVersionNotCompatible();
+        //        return;
+        //    }
+        //    var engine = new MetadataQueryExecutionEngine(repository, encoder, command);
+        //}
 
         public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)
         {
@@ -111,49 +111,49 @@ namespace Sttp.Services
             }
         }
 
-        public void ProcessCommand(CommandGetMetadataProcedure command, WireEncoder encoder)
-        {
-            if (m_procedureHandlers.TryGetValue(command.ProcedureName, out IMetadataProcedureHandler handler))
-            {
-                using (var rdr = handler.ProcessRequest(command.Options))
-                {
-                    int fieldCount = rdr.FieldCount;
-                    var col = new List<MetadataColumn>(fieldCount);
-                    for (var x = 0; x < fieldCount; x++)
-                    {
-                        col.Add(new MetadataColumn(rdr.GetName(x), SttpValueTypeCodec.FromType(rdr.GetFieldType(x))));
-                    }
+        //public void ProcessCommand(CommandGetMetadataProcedure command, WireEncoder encoder)
+        //{
+        //    if (m_procedureHandlers.TryGetValue(command.ProcedureName, out IMetadataProcedureHandler handler))
+        //    {
+        //        using (var rdr = handler.ProcessRequest(command.Options))
+        //        {
+        //            int fieldCount = rdr.FieldCount;
+        //            var col = new List<MetadataColumn>(fieldCount);
+        //            for (var x = 0; x < fieldCount; x++)
+        //            {
+        //                col.Add(new MetadataColumn(rdr.GetName(x), SttpValueTypeCodec.FromType(rdr.GetFieldType(x))));
+        //            }
 
-                    var wr = encoder.MetadataCommandBuilder();
-                    wr.DefineResponse(Guid.Empty, 0, null, command.ProcedureName, col);
-                    object[] row = new object[fieldCount];
-                    while (rdr.Read())
-                    {
-                        if (rdr.GetValues(row) != fieldCount)
-                            throw new Exception("Field count did not match");
+        //            var wr = encoder.MetadataCommandBuilder();
+        //            wr.DefineResponse(Guid.Empty, 0, null, command.ProcedureName, col);
+        //            object[] row = new object[fieldCount];
+        //            while (rdr.Read())
+        //            {
+        //                if (rdr.GetValues(row) != fieldCount)
+        //                    throw new Exception("Field count did not match");
 
-                        List<SttpValue> values = new List<SttpValue>();
-                        values.AddRange(row.Select(SttpValue.FromObject));
+        //                List<SttpValue> values = new List<SttpValue>();
+        //                values.AddRange(row.Select(SttpValue.FromObject));
 
-                        wr.DefineRow(null, values);
-                    }
-                    wr.Finished();
-                    wr.EndCommand();
-                }
-            }
-            else
-            {
-                encoder.RequestFailed("GetMetadataProcedure", false, "Procedure handler does not exist on the server.", command.ProcedureName);
-            }
-        }
+        //                wr.DefineRow(null, values);
+        //            }
+        //            wr.Finished();
+        //            wr.EndCommand();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        encoder.RequestFailed("GetMetadataProcedure", false, "Procedure handler does not exist on the server.", command.ProcedureName);
+        //    }
+        //}
 
         public List<string> CommandsHandled()
         {
             var lst = new List<string>();
             lst.Add("GetMetadataBasic");
-            lst.Add("GetMetadataAdvance");
+            //lst.Add("GetMetadataAdvance");
             lst.Add("GetMetadataSchema");
-            lst.Add("GetMetadataProcedure");
+            //lst.Add("GetMetadataProcedure");
             return lst;
         }
 
@@ -164,15 +164,15 @@ namespace Sttp.Services
                 case "GetMetadataBasic":
                     ProcessCommand(command.GetMetadataBasic, encoder);
                     return;
-                case "GetMetadataAdvance":
-                    ProcessCommand(command.GetMetadataAdvance, encoder);
-                    return;
+                //case "GetMetadataAdvance":
+                //    ProcessCommand(command.GetMetadataAdvance, encoder);
+                //    return;
                 case "GetMetadataSchema":
                     ProcessCommand(command.GetMetadataSchema, encoder);
                     return;
-                case "GetMetadataProcedure":
-                    ProcessCommand(command.GetMetadataProcedure, encoder);
-                    return;
+                //case "GetMetadataProcedure":
+                //    ProcessCommand(command.GetMetadataProcedure, encoder);
+                //    return;
                 default:
                     throw new Exception("This command is not supported");
             }

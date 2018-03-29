@@ -46,16 +46,16 @@ namespace Sttp.Codec
             }
         }
 
-        public CommandGetMetadataAdvance ToSttpQuery()
-        {
-            var qs = new CommandGetMetadataAdvance();
-            qs.DirectTable = Table;
-            for (int x = 0; x < Columns.Count; x++)
-            {
-                qs.ColumnInputs.Add(new SttpQueryColumn(0, Columns[0], x));
-                qs.Outputs.Add(new SttpQueryOutputColumns(x, Columns[x]));
-            }
-            return qs;
-        }
+        //public CommandGetMetadataAdvance ToSttpQuery()
+        //{
+        //    var qs = new CommandGetMetadataAdvance();
+        //    qs.DirectTable = Table;
+        //    for (int x = 0; x < Columns.Count; x++)
+        //    {
+        //        qs.ColumnInputs.Add(new SttpQueryColumn(0, Columns[0], x));
+        //        qs.Outputs.Add(new SttpQueryOutputColumns(x, Columns[x]));
+        //    }
+        //    return qs;
+        //}
     }
 }

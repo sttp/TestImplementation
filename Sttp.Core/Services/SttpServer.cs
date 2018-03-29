@@ -61,7 +61,7 @@ namespace Sttp.Services
                     }
                     else
                     {
-                        m_encoder.RequestFailed(obj.CommandName, false, "Command Handler does not exist", "");
+                        //m_encoder.RequestFailed(obj.CommandName, false, "Command Handler does not exist", "");
                     }
                 }
             }

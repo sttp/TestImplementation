@@ -22,7 +22,5 @@ namespace Sttp.Codec.Metadata
             }
             element.ErrorIfNotHandled();
         }
-
-
     }
 }

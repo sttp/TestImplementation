@@ -55,20 +55,20 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandKeepAlive());
         }
 
-        public void GetMetadataProcedure(string procedureName, SttpMarkup options)
-        {
-            m_encoder.SendMarkupCommand(new CommandGetMetadataProcedure(procedureName, options));
-        }
+        //public void GetMetadataProcedure(string procedureName, SttpMarkup options)
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandGetMetadataProcedure(procedureName, options));
+        //}
 
-        public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
-        {
-            m_encoder.SendMarkupCommand(new CommandDataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond));
-        }
+        //public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandDataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond));
+        //}
 
-        public void DataPointRequestCompleted()
-        {
-            m_encoder.SendMarkupCommand(new CommandDataPointResponseCompleted());
-        }
+        //public void DataPointRequestCompleted()
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandDataPointResponseCompleted());
+        //}
 
         public void GetMetadataSimple(Guid? schemaVersion, long? lastModifiedVersion, string table, IEnumerable<string> columns)
         {
@@ -158,15 +158,15 @@ namespace Sttp.Codec
         //    m_encoder.Heartbeat(sml.ToSttpMarkup());
         //}
 
-        public void RequestFailed(string failedCommand, bool terminateConnection, string reason, string details)
-        {
-            m_encoder.SendMarkupCommand(new CommandRequestFailed(failedCommand, terminateConnection, reason, details));
-        }
+        //public void RequestFailed(string failedCommand, bool terminateConnection, string reason, string details)
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandRequestFailed(failedCommand, terminateConnection, reason, details));
+        //}
 
-        public void RequestSucceeded(string commandSucceeded, string reason, string details)
-        {
-            m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded, reason, details));
-        }
+        //public void RequestSucceeded(string commandSucceeded, string reason, string details)
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded, reason, details));
+        //}
 
         public void Subscribe(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
         {

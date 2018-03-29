@@ -13,72 +13,72 @@ namespace Sttp.Services
 {
     public class SttpClient
     {
-        private class SttpDataPointResponse
-        {
-            private SttpClient m_client;
-            private bool m_isEos;
-            private BasicDecoder m_decoder;
-            private byte m_streamID;
+        //private class SttpDataPointResponse
+        //{
+        //    private SttpClient m_client;
+        //    private bool m_isEos;
+        //    private BasicDecoder m_decoder;
+        //    private byte m_streamID;
 
-            public SttpDataPointResponse(SttpClient client)
-            {
-                m_client = client;
-                var cmd = m_client.m_decoder.NextCommand();
-                if (cmd.CommandName != "DataPointResponse")
-                {
-                    m_decoder = new BasicDecoder();
-                    m_streamID = cmd.DataPointResponse.RawCommandCode;
-                }
+        //    public SttpDataPointResponse(SttpClient client)
+        //    {
+        //        m_client = client;
+        //        var cmd = m_client.m_decoder.NextCommand();
+        //        if (cmd.CommandName != "DataPointResponse")
+        //        {
+        //            m_decoder = new BasicDecoder();
+        //            m_streamID = cmd.DataPointResponse.RawCommandCode;
+        //        }
 
-                cmd = m_client.m_decoder.NextCommand();
-                if (cmd.CommandName == "DataPointResponseCompleted")
-                {
-                    m_isEos = true;
-                }
-                else if (cmd.CommandName == "SubscriptionStream")
-                {
-                    if (cmd.Raw.RawCommandCode != m_streamID)
-                        throw new Exception("Wrong encoding method");
-                    m_decoder.Load(cmd.Raw.Payload);
-                }
-                else
-                {
-                    throw new Exception("Unknown Command");
-                }
-            }
+        //        cmd = m_client.m_decoder.NextCommand();
+        //        if (cmd.CommandName == "DataPointResponseCompleted")
+        //        {
+        //            m_isEos = true;
+        //        }
+        //        else if (cmd.CommandName == "SubscriptionStream")
+        //        {
+        //            if (cmd.Raw.RawCommandCode != m_streamID)
+        //                throw new Exception("Wrong encoding method");
+        //            m_decoder.Load(cmd.Raw.Payload);
+        //        }
+        //        else
+        //        {
+        //            throw new Exception("Unknown Command");
+        //        }
+        //    }
 
-            public bool Read(SttpDataPoint dataPoint)
-            {
-                tryAgain:
-                if (m_isEos)
-                    return false;
-                if (m_decoder.Read(dataPoint))
-                    return true;
+        //    public bool Read(SttpDataPoint dataPoint)
+        //    {
+        //        tryAgain:
+        //        if (m_isEos)
+        //            return false;
+        //        if (m_decoder.Read(dataPoint))
+        //            return true;
 
-                var cmd = m_client.m_decoder.NextCommand();
-                if (cmd.CommandName == "DataPointResponseCompleted")
-                {
-                    m_isEos = true;
-                    return false;
-                }
-                else if (cmd.CommandName == "SubscriptionStream")
-                {
-                    if (cmd.Raw.RawCommandCode != m_streamID)
-                        throw new Exception("Wrong encoding method");
-                    m_decoder.Load(cmd.Raw.Payload);
-                    goto tryAgain;
-                }
-                else
-                {
-                    throw new Exception("Unknown Command");
-                }
-            }
-        }
+        //        var cmd = m_client.m_decoder.NextCommand();
+        //        if (cmd.CommandName == "DataPointResponseCompleted")
+        //        {
+        //            m_isEos = true;
+        //            return false;
+        //        }
+        //        else if (cmd.CommandName == "SubscriptionStream")
+        //        {
+        //            if (cmd.Raw.RawCommandCode != m_streamID)
+        //                throw new Exception("Wrong encoding method");
+        //            m_decoder.Load(cmd.Raw.Payload);
+        //            goto tryAgain;
+        //        }
+        //        else
+        //        {
+        //            throw new Exception("Unknown Command");
+        //        }
+        //    }
+        //}
         private Stream m_stream;
         private WireEncoder m_encoder;
         private WireDecoder m_decoder;
         private byte[] m_buffer = new byte[4096];
-        private SttpDataPointResponse m_dataPointResponse;
+        //private SttpDataPointResponse m_dataPointResponse;
 
         public SttpClient(Stream networkStream)
         {
@@ -107,11 +107,11 @@ namespace Sttp.Services
             return cmd.MetadataSchema.Tables.First(x => x.TableName == tableName).Columns.Select(x => x.Name).ToList();
         }
 
-        public DataTable Exec(string procedureName, SttpMarkup options)
-        {
-            m_encoder.GetMetadataProcedure(procedureName, options);
-            return ParseDT();
-        }
+        //public DataTable Exec(string procedureName, SttpMarkup options)
+        //{
+        //    m_encoder.GetMetadataProcedure(procedureName, options);
+        //    return ParseDT();
+        //}
 
         private DataTable ParseDT()
         {
@@ -172,21 +172,21 @@ namespace Sttp.Services
             return ParseDT();
         }
 
-        public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
-        {
-            m_encoder.DataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond);
-            m_dataPointResponse = new SttpDataPointResponse(this);
-        }
+        //public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        //{
+        //    m_encoder.DataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond);
+        //    m_dataPointResponse = new SttpDataPointResponse(this);
+        //}
 
-        public bool Read(SttpDataPoint value)
-        {
-            if (m_dataPointResponse == null)
-                return false;
-            if (m_dataPointResponse.Read(value))
-                return true;
-            m_dataPointResponse = null;
-            return false;
-        }
+        //public bool Read(SttpDataPoint value)
+        //{
+        //    if (m_dataPointResponse == null)
+        //        return false;
+        //    if (m_dataPointResponse.Read(value))
+        //        return true;
+        //    m_dataPointResponse = null;
+        //    return false;
+        //}
 
         private CommandObjects GetNextCommand()
         {
