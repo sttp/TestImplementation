@@ -7,9 +7,12 @@ namespace Sttp.Codec
 {
     public class CommandUnsubscribeResponse : CommandBase
     {
-        public CommandUnsubscribeResponse()
+        public readonly byte RawChannelID;
+
+        public CommandUnsubscribeResponse(byte rawChannelID)
             : base("UnsubscribeResponse")
         {
+            RawChannelID = rawChannelID;
         }
 
         public CommandUnsubscribeResponse(SttpMarkupReader reader)

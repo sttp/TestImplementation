@@ -5,13 +5,13 @@ namespace Sttp.Codec
 {
     public class CommandSubscribeResponse : CommandBase
     {
-        public readonly byte RawCommandCode;
+        public readonly byte RawChannelID;
         public readonly Guid EncodingMethod;
 
-        public CommandSubscribeResponse(byte rawCommandCode, Guid encodingMethod)
+        public CommandSubscribeResponse(byte rawChannelID, Guid encodingMethod)
             : base("SubscribeResponse")
         {
-            RawCommandCode = rawCommandCode;
+            RawChannelID = rawChannelID;
             EncodingMethod = encodingMethod;
         }
 
@@ -20,7 +20,7 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            RawCommandCode = (byte)element.GetValue("RawCommandCode");
+            RawChannelID = (byte)element.GetValue("RawChannelID");
             EncodingMethod = (Guid)element.GetValue("EncodingMethod");
 
             element.ErrorIfNotHandled();
@@ -29,7 +29,7 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            writer.WriteValue("RawCommandCode", RawCommandCode);
+            writer.WriteValue("RawChannelID", RawChannelID);
             writer.WriteValue("EncodingMethod", EncodingMethod);
         }
     }
