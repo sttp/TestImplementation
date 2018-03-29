@@ -7,12 +7,12 @@ namespace Sttp.Codec
 {
     public class CommandRaw
     {
-        public readonly byte RawCommandCode;
+        public readonly byte ChannelID;
         public readonly byte[] Payload;
 
-        public CommandRaw(byte rawCommandCode, byte[] payload)
+        public CommandRaw(byte channelID, byte[] payload)
         {
-            RawCommandCode = rawCommandCode;
+            ChannelID = channelID;
             Payload = payload;
         }
     }

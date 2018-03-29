@@ -96,7 +96,7 @@ namespace Sttp.Codec
         /// Valid if <see cref="NextCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public byte RawCommandCode
+        public byte RawChannelID
         {
             get
             {

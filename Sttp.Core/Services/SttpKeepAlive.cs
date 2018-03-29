@@ -21,7 +21,8 @@ namespace Sttp.Services
             if (command.CommandName != "KeepAlive")
                 throw new Exception("This command is not supported");
 
-            encoder.KeepAlive();
+            throw new NotImplementedException();
+            //encoder.KeepAlive();
         }
     }
 }

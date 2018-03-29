@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
-using Sttp.Codec.Metadata;
 using Sttp.Data;
 
 namespace Sttp.Services
@@ -115,35 +114,36 @@ namespace Sttp.Services
 
         private DataTable ParseDT()
         {
-            MetadataQueryTable table = null;
-            TryAgain:
+            throw new NotImplementedException();
+            //MetadataQueryTable table = null;
+            //TryAgain:
 
-            var cmd = GetNextCommand();
-            if (cmd.CommandName != "Metadata")
-                throw new Exception("Wrong command");
+            //var cmd = GetNextCommand();
+            //if (cmd.CommandName != "Metadata")
+            //    throw new Exception("Wrong command");
 
-            MetadataSubCommandObjects subCmd;
-            while ((subCmd = cmd.Metadata.NextCommand()) != null)
-            {
-                switch (subCmd.SubCommand)
-                {
-                    case MetadataSubCommand.DefineResponse:
-                        table = new MetadataQueryTable(subCmd.DefineResponse);
-                        break;
-                    case MetadataSubCommand.DefineRow:
-                        table.ProcessCommand(subCmd.DefineRow);
-                        break;
-                    case MetadataSubCommand.UndefineRow:
-                        table.ProcessCommand(subCmd.UndefineRow);
-                        break;
-                    case MetadataSubCommand.Finished:
-                        return table.ToTable();
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            //MetadataSubCommandObjects subCmd;
+            //while ((subCmd = cmd.Metadata.NextCommand()) != null)
+            //{
+            //    switch (subCmd.SubCommand)
+            //    {
+            //        case MetadataSubCommand.DefineResponse:
+            //            table = new MetadataQueryTable(subCmd.DefineResponse);
+            //            break;
+            //        case MetadataSubCommand.DefineRow:
+            //            table.ProcessCommand(subCmd.DefineRow);
+            //            break;
+            //        case MetadataSubCommand.UndefineRow:
+            //            table.ProcessCommand(subCmd.UndefineRow);
+            //            break;
+            //        case MetadataSubCommand.Finished:
+            //            return table.ToTable();
+            //        default:
+            //            throw new ArgumentOutOfRangeException();
+            //    }
+            //}
 
-            goto TryAgain;
+            //goto TryAgain;
         }
 
         public DataTable GetMetadata(string query)
@@ -168,7 +168,7 @@ namespace Sttp.Services
             if (columns.Length == 0)
                 throw new Exception("Not properly formatted select statement.");
 
-            m_encoder.GetMetadataSimple(null, null, tables[0], columns);
+            m_encoder.GetMetadata(tables[0], columns);
             return ParseDT();
         }
 

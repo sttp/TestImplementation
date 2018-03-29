@@ -6,15 +6,15 @@ namespace Sttp.Codec
 {
     public class CommandMetadataSchemaUpdate : CommandBase
     {
-        public readonly Guid SchemaVersion;
-        public readonly long SequenceNumber;
+        public readonly Guid RuntimeID;
+        public readonly long VersionNumber;
         public readonly List<MetadataSchemaTableUpdate> Tables;
 
-        public CommandMetadataSchemaUpdate(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTableUpdate> tables)
+        public CommandMetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
             : base("MetadataSchemaUpdate")
         {
-            SchemaVersion = schemaVersion;
-            SequenceNumber = sequenceNumber;
+            RuntimeID = runtimeID;
+            VersionNumber = versionNumber;
             Tables = new List<MetadataSchemaTableUpdate>(tables);
         }
 
@@ -23,8 +23,8 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            SchemaVersion = (Guid)element.GetValue("SchemaVersion");
-            SequenceNumber = (long)element.GetValue("SequenceNumber");
+            RuntimeID = (Guid)element.GetValue("RuntimeID");
+            VersionNumber = (long)element.GetValue("VersionNumber");
 
             foreach (var query in element.GetElement("Tables").ChildElements)
             {
@@ -35,8 +35,8 @@ namespace Sttp.Codec
 
         public override void Save(SttpMarkupWriter writer)
         {
-            writer.WriteValue("SchemaVersion", SchemaVersion);
-            writer.WriteValue("SequenceNumber", SequenceNumber);
+            writer.WriteValue("RuntimeID", RuntimeID);
+            writer.WriteValue("VersionNumber", VersionNumber);
             using (writer.StartElement("Tables"))
             {
                 foreach (var q in Tables)

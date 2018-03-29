@@ -16,7 +16,6 @@ namespace Sttp.Codec
 
         //private DataPointEncoder m_dataPoint;
         private SessionDetails m_sessionDetails;
-        private Metadata.MetadataCommandBuilder m_metadata;
         private CommandEncoder m_encoder;
 
         /// <summary>
@@ -26,7 +25,6 @@ namespace Sttp.Codec
         {
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder();
-            m_metadata = new Metadata.MetadataCommandBuilder(m_encoder, m_sessionDetails);
             m_encoder.NewPacket += EncoderOnNewPacket;
         }
 
@@ -35,14 +33,44 @@ namespace Sttp.Codec
             NewPacket?.Invoke(data, position, length);
         }
 
-        /// <summary>
-        /// Builds a metadata response message. Be sure to call the SendCommand periodically.
-        /// </summary>
-        /// <returns></returns>
-        public Metadata.MetadataCommandBuilder MetadataCommandBuilder()
+        public void GetMetadataSchema(Guid? lastKnownRuntimeID = null, long? lastKnownVersionNumber = null)
         {
-            m_metadata.BeginCommand();
-            return m_metadata;
+            m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
+        }
+
+        public void MetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataSchema(runtimeID, versionNumber, tables));
+        }
+
+        public void MetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
+        }
+
+        public void MetadataSchemaVersion(Guid runtimeID, long versionNumber)
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataSchemaVersion(runtimeID, versionNumber));
+        }
+
+        public void GetMetadata(string table, IEnumerable<string> columns)
+        {
+            m_encoder.SendMarkupCommand(new CommandGetMetadata(table, columns));
+        }
+
+        public void MetadataRequestFailed(string reason, string details)
+        {
+            m_encoder.SendMarkupCommand(new CommandMetadataRequestFailed(reason, details));
+        }
+
+        public void BeginMetadataResponse(byte rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
+        {
+            m_encoder.SendMarkupCommand(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
+        }
+
+        public void EndMetadataResponse(byte rawChannelID, int rowCount)
+        {
+            m_encoder.SendMarkupCommand(new CommandEndMetadataResponse(rawChannelID, rowCount));
         }
 
         //private void SendNewPacket(byte[] buffer, int position, int length)
@@ -50,10 +78,10 @@ namespace Sttp.Codec
         //    NewPacket?.Invoke(buffer, position, length);
         //}
 
-        public void KeepAlive()
-        {
-            m_encoder.SendMarkupCommand(new CommandKeepAlive());
-        }
+        //public void KeepAlive()
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandKeepAlive());
+        //}
 
         //public void GetMetadataProcedure(string procedureName, SttpMarkup options)
         //{
@@ -69,16 +97,6 @@ namespace Sttp.Codec
         //{
         //    m_encoder.SendMarkupCommand(new CommandDataPointResponseCompleted());
         //}
-
-        public void GetMetadataSimple(Guid? schemaVersion, long? lastModifiedVersion, string table, IEnumerable<string> columns)
-        {
-            m_encoder.SendMarkupCommand(new CommandGetMetadataBasic(schemaVersion, lastModifiedVersion, table, columns));
-        }
-
-        public void GetMetadataSchema(Guid? schemaVersion = null, long? sequenceNumber = null)
-        {
-            m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(schemaVersion, sequenceNumber));
-        }
 
         //public void MapRuntimeIDs(List<SttpDataPointID> points)
         //{
@@ -122,26 +140,6 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(command);
         }
 
-        public void MetadataSchema(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTable> tables)
-        {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchema(schemaVersion, sequenceNumber, tables));
-        }
-
-        public void MetadataSchemaUpdate(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTableUpdate> tables)
-        {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(schemaVersion, sequenceNumber, tables));
-        }
-
-        public void MetadataSchemaVersion(Guid schemaVersion, long sequenceNumber)
-        {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchemaVersion(schemaVersion, sequenceNumber));
-        }
-
-        public void MetadataVersionNotCompatible()
-        {
-            m_encoder.SendMarkupCommand(new CommandMetadataVersionNotCompatible());
-        }
-
         //public void NegotiateSession(SttpMarkup config)
         //{
         //    m_encoder.NegotiateSession(config);
@@ -168,10 +166,10 @@ namespace Sttp.Codec
         //    m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded, reason, details));
         //}
 
-        public void Subscribe(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
-        {
-            m_encoder.SendMarkupCommand(new CommandConfigureSubscription(instanceName, dataPointIDs, samplesPerSecond));
-        }
+        //public void Subscribe(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        //{
+        //    m_encoder.SendMarkupCommand(new CommandConfigureSubscription(instanceName, dataPointIDs, samplesPerSecond));
+        //}
 
         //public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
         //{

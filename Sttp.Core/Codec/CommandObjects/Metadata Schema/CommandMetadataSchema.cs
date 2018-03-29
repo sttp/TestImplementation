@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Sttp.Codec
 {
     public class CommandMetadataSchema : CommandBase
     {
-        public readonly Guid SchemaVersion;
-        public readonly long SequenceNumber;
+        public readonly Guid RuntimeID;
+        public readonly long VersionNumber;
         public readonly List<MetadataSchemaTable> Tables;
 
-        public CommandMetadataSchema(Guid schemaVersion, long sequenceNumber, List<MetadataSchemaTable> tables)
+        public CommandMetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
             : base("MetadataSchema")
         {
-            SchemaVersion = schemaVersion;
-            SequenceNumber = sequenceNumber;
+            RuntimeID = runtimeID;
+            VersionNumber = versionNumber;
             Tables = new List<MetadataSchemaTable>(tables);
         }
 
@@ -23,8 +25,8 @@ namespace Sttp.Codec
             Tables = new List<MetadataSchemaTable>();
             var element = reader.ReadEntireElement();
 
-            SchemaVersion = (Guid)element.GetValue("SchemaVersion");
-            SequenceNumber = (long)element.GetValue("SequenceNumber");
+            RuntimeID = (Guid)element.GetValue("RuntimeID");
+            VersionNumber = (long)element.GetValue("VersionNumber");
 
             foreach (var query in element.GetElement("Tables").ChildElements)
             {
@@ -38,22 +40,22 @@ namespace Sttp.Codec
             List<MetadataSchemaTable> newList = new List<MetadataSchemaTable>(Tables);
 
             //Only support patching if the schemas match and the sequence number is less than the update.
-            if (SchemaVersion == update.SchemaVersion && SequenceNumber < update.SequenceNumber)
+            if (RuntimeID == update.RuntimeID && VersionNumber < update.VersionNumber)
             {
                 foreach (var item in update.Tables)
                 {
                     int indx = Tables.FindIndex(x => x.TableName == item.TableName);
-                    newList[indx] = newList[indx].Clone(item.LastModifiedSequenceNumber);
+                    newList[indx] = newList[indx].Clone(item.LastModifiedVersionNumber);
                 }
-                return new CommandMetadataSchema(update.SchemaVersion, update.SequenceNumber, newList);
+                return new CommandMetadataSchema(update.RuntimeID, update.VersionNumber, newList);
             }
             return this;
         }
 
         public override void Save(SttpMarkupWriter writer)
         {
-            writer.WriteValue("SchemaVersion", SchemaVersion);
-            writer.WriteValue("SequenceNumber", SequenceNumber);
+            writer.WriteValue("RuntimeID", RuntimeID);
+            writer.WriteValue("VersionNumber", VersionNumber);
             using (writer.StartElement("Tables"))
             {
                 foreach (var q in Tables)

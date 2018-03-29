@@ -67,14 +67,14 @@ namespace Sttp.Services
             m_pendingRepository.FillData(tableName, data);
         }
 
-        public void ProcessCommand(CommandGetMetadataBasic command, WireEncoder encoder)
+        public void ProcessCommand(CommandGetMetadata command, WireEncoder encoder)
         {
             var repository = m_repository;
-            if (command.SequenceNumber.HasValue && command.SchemaVersion != repository.SchemaVersion)
-            {
-                encoder.MetadataVersionNotCompatible();
-                return;
-            }
+            //if (command.SchemaVersion.HasValue && command.SchemaVersion != repository.SchemaVersion)
+            //{
+            //    encoder.MetadataVersionNotCompatible();
+            //    return;
+            //}
             //var engine = new MetadataQueryExecutionEngine(repository, encoder, command.ToSttpQuery());
         }
 
@@ -92,16 +92,16 @@ namespace Sttp.Services
         public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)
         {
             var repository = m_repository;
-            if (!command.SchemaVersion.HasValue || command.SchemaVersion != repository.SchemaVersion)
+            if (!command.LastKnownRuntimeID.HasValue || command.LastKnownRuntimeID != repository.SchemaVersion)
             {
                 encoder.MetadataSchema(repository.SchemaVersion, repository.SequenceNumber, repository.MetadataSchema);
             }
-            else if (command.SequenceNumber != repository.SequenceNumber)
+            else if (command.LastKnownVersionNumber != repository.SequenceNumber)
             {
                 List<MetadataSchemaTableUpdate> tableRevisions = new List<MetadataSchemaTableUpdate>();
                 foreach (var tables in repository.MetadataSchema)
                 {
-                    tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedSequenceNumber));
+                    tableRevisions.Add(new MetadataSchemaTableUpdate(tables.TableName, tables.LastModifiedVersionNumber));
                 }
                 encoder.MetadataSchemaUpdate(repository.SchemaVersion, repository.SequenceNumber, tableRevisions);
             }
@@ -162,7 +162,7 @@ namespace Sttp.Services
             switch (command.CommandName)
             {
                 case "GetMetadataBasic":
-                    ProcessCommand(command.GetMetadataBasic, encoder);
+                    ProcessCommand(command.GetMetadata, encoder);
                     return;
                 //case "GetMetadataAdvance":
                 //    ProcessCommand(command.GetMetadataAdvance, encoder);

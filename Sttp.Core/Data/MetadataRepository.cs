@@ -101,14 +101,10 @@ namespace Sttp.Data
             {
                 var t = new MetadataSchemaTable();
                 t.TableName = table.TableName;
-                t.LastModifiedSequenceNumber = table.LastModifiedSequenceNumber;
+                t.LastModifiedVersionNumber = table.LastModifiedSequenceNumber;
                 foreach (var col in table.Columns)
                 {
                     t.Columns.Add(col);
-                }
-                foreach (var col in table.ForeignKeys)
-                {
-                    t.ForeignKeys.Add(new MetadataForeignKey(col.ColumnName, col.ForeignTableName));
                 }
                 MetadataSchema.Add(t);
             }
@@ -167,7 +163,7 @@ namespace Sttp.Data
                     {
                         var table = m_tables[x];
                         var t = MetadataSchema[x];
-                        if (t.LastModifiedSequenceNumber != table.LastModifiedSequenceNumber)
+                        if (t.LastModifiedVersionNumber != table.LastModifiedSequenceNumber)
                         {
                             MetadataSchema[x] = t.Clone(table.LastModifiedSequenceNumber);
                         }

@@ -4,7 +4,6 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using Sttp.Codec;
-using Sttp.Codec.Metadata;
 
 namespace Sttp.Data
 {
@@ -26,16 +25,12 @@ namespace Sttp.Data
         /// <summary>
         /// All possible rows.
         /// </summary>
-        public Dictionary<SttpValue, List<SttpValue>> Rows;
+        public List<SttpValue[]> Rows;
+        public Guid RuntimeID;
+        public long VersionNumber;
 
-        public Guid SchemaVersion;
-        public long Revision;
-
-        public MetadataQueryTable(CmdDefineResponse command)
+        public MetadataQueryTable(CommandBeginMetadataResponse command)
         {
-            if (command.UpdatesSinceSequenceNumber.HasValue)
-                throw new Exception("Update responses must path an existing table.");
-
             ProcessCommand(command);
         }
 
@@ -51,59 +46,30 @@ namespace Sttp.Data
             {
                 for (int x = 0; x < list.Length; x++)
                 {
-                    list[x] = row.Value[x].ToNativeType;
+                    list[x] = row[x].ToNativeType;
                 }
                 tbl.Rows.Add(list);
             }
             return tbl;
         }
 
-        public void ProcessCommand(CmdDefineResponse command)
+        private void ProcessCommand(CommandBeginMetadataResponse command)
         {
-            if (command.UpdatesSinceSequenceNumber.HasValue)
-            {
-                if (SchemaVersion != command.SchemaVersion)
-                    throw new Exception("Schema Version Mismatch");
-
-                if (Revision < command.UpdatesSinceSequenceNumber)
-                    throw new Exception("The version cannot be updated");
-
-                if (TableName != command.TableName)
-                    throw new Exception("There was a schema change");
-
-                if (Columns.Count != command.Columns.Count)
-                    throw new Exception("There was a schema change");
-
-                for (int x = 0; x < Columns.Count; x++)
-                {
-                    if (Columns[x].Name != command.Columns[x].Name)
-                        throw new Exception("There was a schema change");
-
-                    if (Columns[x].TypeCode != command.Columns[x].TypeCode)
-                        throw new Exception("There was a schema change");
-                }
-
-                Revision = command.SequenceNumber;
-            }
-            else
-            {
-                SchemaVersion = command.SchemaVersion;
-                Revision = command.SequenceNumber;
-                TableName = command.TableName;
-                Columns = new List<MetadataColumn>(command.Columns);
-                Rows = new Dictionary<SttpValue, List<SttpValue>>();
-            }
-
+            RuntimeID = command.RuntimeID;
+            VersionNumber = command.VersionNumber;
+            TableName = command.TableName;
+            Columns = new List<MetadataColumn>(command.Columns);
+            Rows = new List<SttpValue[]>();
         }
 
-        public void ProcessCommand(CmdDefineRow command)
+        public void AddRow(SttpValueMutable[] values)
         {
-            Rows[command.PrimaryKey] = command.Values;
-        }
-
-        public void ProcessCommand(CmdUndefineRow command)
-        {
-            Rows.Remove(command.PrimaryKey);
+            SttpValue[] item = new SttpValue[values.Length];
+            for (int x = 0; x < values.Length; x++)
+            {
+                item[x] = values[x].CloneAsImmutable();
+            }
+            Rows.Add(item);
         }
 
     }

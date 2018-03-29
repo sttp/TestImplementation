@@ -21,15 +21,14 @@ namespace Sttp.Tests.CommandsAndResponses
             var tbl = new List<MetadataSchemaTable>();
             var t = new MetadataSchemaTable();
             t.TableName = "Measurement";
-            t.LastModifiedSequenceNumber = 382;
+            t.LastModifiedVersionNumber = 382;
             t.Columns.Add(new MetadataColumn("ID", SttpValueTypeCode.Int64));
             t.Columns.Add(new MetadataColumn("Name", SttpValueTypeCode.String));
             t.Columns.Add(new MetadataColumn("DeviceID", SttpValueTypeCode.Int64));
-            t.ForeignKeys.Add(new MetadataForeignKey("DeviceID", "Device"));
             tbl.Add(t);
             t = new MetadataSchemaTable();
             t.TableName = "Device";
-            t.LastModifiedSequenceNumber = 382;
+            t.LastModifiedVersionNumber = 382;
             t.Columns.Add(new MetadataColumn("ID", SttpValueTypeCode.Int64));
             t.Columns.Add(new MetadataColumn("Name", SttpValueTypeCode.String));
             tbl.Add(t);
