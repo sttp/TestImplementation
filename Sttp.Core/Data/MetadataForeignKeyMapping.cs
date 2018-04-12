@@ -17,12 +17,5 @@ namespace Sttp.Data
             ColumnName = columnName;
             ForeignTableName = foreignTableName;
         }
-
-        public MetadataForeignKeyMapping(MetadataForeignKey key)
-        {
-            ColumnName = key.ColumnName;
-            ForeignTableName = key.ForeignTableName;
-        }
-        
     }
 }

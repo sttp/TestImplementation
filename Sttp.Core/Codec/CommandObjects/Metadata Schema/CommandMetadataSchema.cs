@@ -35,6 +35,22 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
+        public override void Save(SttpMarkupWriter writer)
+        {
+            writer.WriteValue("RuntimeID", RuntimeID);
+            writer.WriteValue("VersionNumber", VersionNumber);
+            using (writer.StartElement("Tables"))
+            {
+                foreach (var q in Tables)
+                {
+                    using (writer.StartElement("Table"))
+                    {
+                        q.Save(writer);
+                    }
+                }
+            }
+        }
+
         public CommandMetadataSchema Combine(CommandMetadataSchemaUpdate update)
         {
             List<MetadataSchemaTable> newList = new List<MetadataSchemaTable>(Tables);
@@ -50,22 +66,6 @@ namespace Sttp.Codec
                 return new CommandMetadataSchema(update.RuntimeID, update.VersionNumber, newList);
             }
             return this;
-        }
-
-        public override void Save(SttpMarkupWriter writer)
-        {
-            writer.WriteValue("RuntimeID", RuntimeID);
-            writer.WriteValue("VersionNumber", VersionNumber);
-            using (writer.StartElement("Tables"))
-            {
-                foreach (var q in Tables)
-                {
-                    using (writer.StartElement("Table"))
-                    {
-                        q.Save(writer);
-                    }
-                }
-            }
         }
     }
 }

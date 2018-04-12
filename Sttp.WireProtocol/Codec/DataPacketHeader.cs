@@ -2,12 +2,11 @@ using System;
 
 namespace Sttp.Codec
 {
-    // A custom 2 byte header exists if the 7th bit if the first byte is 0.
+    // A custom 2 byte header exists if the 7th bit of the first byte is 0.
     // This header is a 2 byte big-endian value where bits:
     //  0-9 Payload Length (<= 1023 bytes)
     //  10-14 RawPacketCode (<= 31)
     //  15: By definition, always 0
-
     [Flags]
     public enum DataPacketHeader : byte
     {
@@ -45,12 +44,11 @@ namespace Sttp.Codec
         /// 5: First Fragment
         /// 6: Next Fragment
         /// 7: Unused
-
         Special2ByteHeader = 0 << 5,
         NotFragmented = 4 << 5,
         BeginFragment = 5 << 5,
         NextFragment = 6 << 5,
-        PacketTypeMask = 7<<5,
+        PacketTypeMask = 7 << 5,
 
         /// <summary>
         /// A flag designating the type of packet. 

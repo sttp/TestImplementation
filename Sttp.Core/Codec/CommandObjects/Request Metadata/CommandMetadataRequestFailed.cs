@@ -18,7 +18,7 @@ namespace Sttp.Codec
         }
 
         public CommandMetadataRequestFailed(SttpMarkupReader reader)
-              : base("MetadataRequestFailed")
+            : base("MetadataRequestFailed")
         {
             var element = reader.ReadEntireElement();
 
