@@ -40,7 +40,7 @@ namespace Sttp.Codec
 
         /// <summary>
         /// The maximum size of every atomic packet. After this threshold, the packet must be fragmented.
-        /// Must be between 100 and 16KB.
+        /// Must be between 300 and 4095.
         /// </summary>
         public int MaximumPacketSize
         {
@@ -50,14 +50,14 @@ namespace Sttp.Codec
             }
             set
             {
-                ValidateLimit(100, 16 * 1024, value);
+                ValidateLimit(300, 4095, value);
                 m_maximumPacketSize = value;
             }
         }
 
         /// <summary>
         /// The maximum size of any single command. This size is the uncompressed size.
-        /// Must be between 1000 and 100,000,000.
+        /// Must be between 1,000 and 100,000,000.
         /// </summary>
         public int MaximumCommandSize
         {

@@ -30,6 +30,8 @@ namespace Sttp.Codec
         private int m_totalFragments;
         private int m_prevFragment;
 
+        public int FragmentID;
+
         /// <summary>
         /// The header that was included in this packet.
         /// </summary>
@@ -45,37 +47,64 @@ namespace Sttp.Codec
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="header"></param>
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
-        public void BeginFragment(byte[] buffer, int offset)
+        /// <param name="length"></param>
+        public void ProcessFragment(DataPacketHeader header, byte[] buffer, int offset, int length)
         {
-            Header = (DataPacketHeader)buffer[offset];
-            int packetLength = ToInt16(buffer, offset + 1);
+            int fragmentID = ToInt32(buffer, offset);
+            int currentFragment = (int)(ushort)ToInt16(buffer, offset + 4); //Current fragment
+            int totalFragments = (int)(ushort)ToInt16(buffer, offset + 6);
 
-            m_prevFragment = (int)(ushort)ToInt16(buffer, offset + 3);
-            m_totalFragments = (int)(ushort)ToInt16(buffer, offset + 5);
-
-            TotalSize = ToInt32(buffer, offset + 7);
-            m_checksum = (uint)ToInt32(buffer, offset + 11);
-
-           
-
-            if (m_prevFragment != 1)
-                throw new Exception("Wrong Current Fragment Number");
-
-            if (packetLength - 15 > TotalSize)
-                throw new Exception("Fragment overflow. Too many bytes were received for a fragment.");
-
-            if (Buffer.Length < TotalSize)
+            if (currentFragment == 0)
             {
-                Buffer = new byte[TotalSize];
+                Header = header;
+                FragmentID = fragmentID;
+                m_prevFragment = currentFragment;
+                m_totalFragments = totalFragments;
+                TotalSize = ToInt32(buffer, offset + 8);
+                m_checksum = (uint)ToInt32(buffer, offset + 12);
+
+                if (Buffer.Length < TotalSize)
+                {
+                    Buffer = new byte[TotalSize];
+                }
+                if (length - 16 > TotalSize)
+                    throw new Exception("Fragment overflow. Too many bytes were received for a fragment.");
+                ReceivedSize = length - 16;
+                Array.Copy(buffer, offset + 16, Buffer, 0, length - 16);
+                if (IsComplete)
+                {
+                    ValidateChecksum();
+                }
             }
-            ReceivedSize = packetLength - 15;
-            Array.Copy(buffer, offset + 15, Buffer, 0, packetLength - 15);
-
-            if (IsComplete)
+            else
             {
-                ValidateChecksum();
+                if (IsComplete)
+                    throw new Exception("Fragment has already been assembled");
+
+                if (fragmentID != FragmentID)
+                    throw new Exception("Fragment IDs don't match");
+
+                if (totalFragments != m_totalFragments)
+                    throw new Exception("Total fragment mismatched");
+
+                if (m_prevFragment + 1 != currentFragment)
+                    throw new Exception("Wrong Current Fragment Number");
+
+                m_prevFragment++;
+
+                if (ReceivedSize + length - 8 > TotalSize)
+                    throw new Exception("Fragment overflow. Too many bytes were received by the packet.");
+
+                Array.Copy(buffer, offset + 8, Buffer, ReceivedSize, length - 8);
+                ReceivedSize += length - 8;
+
+                if (IsComplete)
+                {
+                    ValidateChecksum();
+                }
             }
         }
 
@@ -84,35 +113,6 @@ namespace Sttp.Codec
             if (m_checksum != Crc32.Compute(Buffer, 0, TotalSize))
             {
                 throw new InvalidOperationException("Fragment Checksum is not valid.");
-            }
-        }
-
-        public void NextPacket(byte[] buffer, int offset)
-        {
-            if (IsComplete)
-                throw new Exception("Fragment has already been assembled");
-            int packetLength = ToInt16(buffer, offset + 1);
-
-            int curFragment = (int)(ushort)ToInt16(buffer, offset + 3);
-            int totalFragments = (int)(ushort)ToInt16(buffer, offset + 5);
-
-            if (totalFragments != m_totalFragments)
-                throw new Exception("Total fragment mismatched");
-
-            if (m_prevFragment + 1 != curFragment)
-                throw new Exception("Wrong Current Fragment Number");
-
-            m_prevFragment++;
-
-            if (ReceivedSize + packetLength - 7 > TotalSize)
-                throw new Exception("Fragment overflow. Too many bytes were received by the packet.");
-
-            Array.Copy(buffer, offset + 7, Buffer, ReceivedSize, packetLength - 7);
-            ReceivedSize += packetLength - 7;
-
-            if (IsComplete)
-            {
-                ValidateChecksum();
             }
         }
 

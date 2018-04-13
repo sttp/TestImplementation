@@ -38,7 +38,7 @@ namespace Sttp.Codec
         private CommandCode m_command;
         private SttpMarkup m_markupPayload;
         private byte[] m_rawCommandPayload;
-        private byte m_rawCommandCode;
+        private int m_rawCommandCode;
 
         /// <summary>
         /// Indicates if a command has successfully been decoded. 
@@ -96,7 +96,7 @@ namespace Sttp.Codec
         /// Valid if <see cref="NextCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public byte RawChannelID
+        public int RawChannelID
         {
             get
             {
@@ -161,26 +161,17 @@ namespace Sttp.Codec
             m_rawCommandCode = 0;
 
             TryAgain:
-            if (m_inboundBufferLength < 1)
+            if (m_inboundBufferLength < 2)
                 return false;
 
-            if (m_inboundBuffer[m_inboundBufferCurrentPosition] < 128)
-                return Decode2ByteHeader();
-
-            if (m_inboundBufferLength < 3)
-                return false;
-
-            int packetLength = ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
+            DataPacketHeader header = (DataPacketHeader)ToUInt16(m_inboundBuffer, m_inboundBufferCurrentPosition);
+            int packetLength = (int)(header & DataPacketHeader.PacketLengthMask);
             if (m_inboundBufferLength < packetLength)
-            {
                 return false;
-            }
 
-            DataPacketHeader header = (DataPacketHeader)m_inboundBuffer[m_inboundBufferCurrentPosition];
-
-            if ((header & DataPacketHeader.PacketTypeMask) == DataPacketHeader.BeginFragment)
+            if ((header & DataPacketHeader.IsFragmented) == DataPacketHeader.IsFragmented)
             {
-                m_fragmentReassembly.BeginFragment(m_inboundBuffer, m_inboundBufferCurrentPosition);
+                m_fragmentReassembly.ProcessFragment(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 2, packetLength - 2);
                 m_inboundBufferCurrentPosition += packetLength;
                 m_inboundBufferLength -= packetLength;
 
@@ -191,79 +182,50 @@ namespace Sttp.Codec
                 }
                 goto TryAgain;
             }
-            else if ((header & DataPacketHeader.PacketTypeMask) == DataPacketHeader.NextFragment)
+            else
             {
-                m_fragmentReassembly.NextPacket(m_inboundBuffer, m_inboundBufferCurrentPosition);
-                m_inboundBufferCurrentPosition += packetLength;
-                m_inboundBufferLength -= packetLength;
-
-                if (m_fragmentReassembly.IsComplete)
-                {
-                    ProcessPacket(m_fragmentReassembly.Header, m_fragmentReassembly.Buffer, 0, m_fragmentReassembly.TotalSize);
-                    return true;
-                }
-                goto TryAgain;
-            }
-            //Packets that are not fragmented can also be processed now.
-            else if ((header & DataPacketHeader.PacketTypeMask) == DataPacketHeader.NotFragmented)
-            {
-                ProcessPacket(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 3, packetLength - 3);
+                ProcessPacket(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 2, packetLength - 2);
                 m_inboundBufferCurrentPosition += packetLength;
                 m_inboundBufferLength -= packetLength;
                 return true;
             }
-            else
-            {
-                throw new Exception("Invalid header");
-            }
-
         }
 
         private void ProcessPacket(DataPacketHeader header, byte[] buffer, int position, int length)
         {
-            bool isCompressed = (header & DataPacketHeader.IsCompressed) != 0;
-            bool isMarkup = (header & DataPacketHeader.IsMarkupCommand) != 0;
-
-            if (isCompressed)
+            if ((header & DataPacketHeader.IsCompressed) == DataPacketHeader.IsCompressed)
             {
                 //Decompresses the data.
                 int inflatedSize = ToInt32(buffer, position);
                 uint checksum = (uint)ToInt32(buffer, position + 4);
 
                 //Only the payload is compressed, but some payload has to be copied to the decompressed block.
-                int headerToKeepLength = 1;
-                int headerToKeepOffset = position + 8;
-                if (isMarkup)
+                if (m_compressionBuffer.Length < inflatedSize)
                 {
-                    headerToKeepLength += buffer[headerToKeepOffset];
-                }
-                if (m_compressionBuffer.Length < inflatedSize + headerToKeepLength)
-                {
-                    m_compressionBuffer = new byte[inflatedSize + headerToKeepLength];
+                    m_compressionBuffer = new byte[inflatedSize];
                 }
 
                 var ms = new MemoryStream(buffer);
                 ms.Position = position + 8;
-                ms.Read(m_compressionBuffer, 0, headerToKeepLength);
                 using (var inflate = new DeflateStream(ms, CompressionMode.Decompress, true))
                 {
-                    inflate.ReadAll(m_compressionBuffer, headerToKeepLength, inflatedSize);
+                    inflate.ReadAll(m_compressionBuffer, 0, inflatedSize);
                 }
 
-                if (checksum != Crc32.Compute(m_compressionBuffer, headerToKeepLength, inflatedSize))
+                if (checksum != Crc32.Compute(m_compressionBuffer, 0, inflatedSize))
                 {
                     throw new InvalidOperationException("Decompression checksum failed.");
                 }
 
                 buffer = m_compressionBuffer;
                 position = 0;
-                length = inflatedSize + headerToKeepLength;
+                length = inflatedSize;
             }
 
             buffer.ValidateParameters(position, length);
 
             byte[] results;
-            if (isMarkup)
+            if ((header & DataPacketHeader.CommandMask) == DataPacketHeader.CommandMarkup)
             {
                 m_command = CommandCode.MarkupCommand;
                 int markupLength = length;
@@ -275,39 +237,32 @@ namespace Sttp.Codec
             else
             {
                 m_command = CommandCode.Raw;
-                results = new byte[length - 1];
-                Array.Copy(buffer, position + 1, results, 0, length - 1);
+
+                if ((header & DataPacketHeader.CommandRaw0) == DataPacketHeader.CommandRaw0)
+                {
+                    m_rawCommandCode = 0;
+                }
+                else if ((header & DataPacketHeader.CommandRaw1) == DataPacketHeader.CommandRaw1)
+                {
+                    m_rawCommandCode = 1;
+                }
+                else
+                {
+                    m_rawCommandCode = ToInt32(buffer, position);
+                    position += 4;
+                    length -= 4;
+                }
+
+                results = new byte[length];
+                Array.Copy(buffer, position, results, 0, length);
                 m_rawCommandCode = buffer[position];
                 m_rawCommandPayload = results;
             }
         }
 
-        private bool Decode2ByteHeader()
+        private static ushort ToUInt16(byte[] buffer, int startIndex)
         {
-            if (m_inboundBufferLength < 2)
-                return false;
-            int header = (m_inboundBuffer[m_inboundBufferCurrentPosition] << 8)
-                           | (m_inboundBuffer[m_inboundBufferCurrentPosition + 1]);
-
-            int payloadLength = header & 1023;
-
-            if (m_inboundBufferLength < payloadLength + 2)
-            {
-                return false;
-            }
-
-            var results = new byte[payloadLength];
-            Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition + 2, results, 0, payloadLength);
-            m_rawCommandCode = (byte)(header >> 10);
-            m_rawCommandPayload = results;
-            m_inboundBufferCurrentPosition += payloadLength + 3;
-            m_inboundBufferLength -= payloadLength + 3;
-            return true;
-        }
-
-        private static short ToInt16(byte[] buffer, int startIndex)
-        {
-            return (short)((int)buffer[startIndex] << 8 | (int)buffer[startIndex + 1]);
+            return (ushort)((uint)buffer[startIndex] << 8 | (uint)buffer[startIndex + 1]);
         }
 
         private static int ToInt32(byte[] buffer, int startIndex)

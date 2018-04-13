@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using Sttp.IO.Checksums;
 
 namespace Sttp.Codec
 {
+
     /// <summary>
     /// Responsible for encoding each command into bytes that can be sent on the socket. 
     /// This class will fragment and compress packets to ensure that all packets fit inside the desired maximum fragment size.
@@ -16,8 +18,8 @@ namespace Sttp.Codec
         /// after completing each packet or fragment;
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
-
         private SessionDetails m_sessionDetails;
+        private int m_fragmentID = 0;
 
         /// <summary>
         /// A buffer to use to for all of the packets.
@@ -48,31 +50,33 @@ namespace Sttp.Codec
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="position">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void SendRawCommand(byte rawCode, byte[] payload, int position, int length)
+        public void SendRawCommand(int rawCode, byte[] payload, int position, int length)
         {
             payload.ValidateParameters(position, length);
             EnsureCapacity(BufferOffset + 1 + length);
             Array.Copy(payload, position, m_buffer, BufferOffset, length);
 
-            //Check the special case for encoding this packet with a 2 bytes of header.
-            if (rawCode < 32 && length < 1024 && length <= m_sessionDetails.MaximumCommandSize && length + 2 <= m_sessionDetails.MaximumPacketSize)
+            DataPacketHeader header;
+            int headerOffset = BufferOffset;
+            if (rawCode == 0)
             {
-                bool shouldAttemptCompression = m_sessionDetails.SupportsDeflate && length >= m_sessionDetails.DeflateThreshold;
-                if (!shouldAttemptCompression)
-                {
-                    ushort header = (ushort)(rawCode << 10);
-                    header |= (ushort)length;
-
-                    payload[BufferOffset - 2 + 0] = (byte)(header >> 8);
-                    payload[BufferOffset - 2 + 1] = (byte)(header);
-
-                    SendNewPacket(payload, BufferOffset - 2, length + 2);
-                    return;
-                }
+                header = DataPacketHeader.CommandRaw0;
             }
-
-            m_buffer[BufferOffset - 1] = rawCode;
-            EncodeAndSend(false, m_buffer, BufferOffset - 1, BufferOffset, length);
+            else if (rawCode == 1)
+            {
+                header = DataPacketHeader.CommandRaw1;
+            }
+            else
+            {
+                header = DataPacketHeader.CommandRawInt32;
+                m_buffer[BufferOffset - 4] = (byte)(rawCode >> 24);
+                m_buffer[BufferOffset - 3] = (byte)(rawCode >> 16);
+                m_buffer[BufferOffset - 2] = (byte)(rawCode >> 8);
+                m_buffer[BufferOffset - 1] = (byte)(rawCode);
+                headerOffset -= 4;
+                length += 4;
+            }
+            EncodeAndSend(header, m_buffer, headerOffset, length);
         }
 
         /// <summary>
@@ -95,20 +99,10 @@ namespace Sttp.Codec
         {
             //ToDo: Consider changing the MarkupCommand to split the RootElement and the other payload.
             SttpMarkup data = markup.ToSttpMarkup();
-            //The data at this point includes:
-            // byte Length of Root Element
-            // ASCII root Element
-            // byte[] payload.
-
             EnsureCapacity(BufferOffset + data.Length);
             data.CopyTo(m_buffer, BufferOffset);
 
-            int headerLength = m_buffer[BufferOffset] + 1;
-            //Data encoded here includes:
-            // byte Length of Root Element
-            // ASCII root Element
-            // byte[] payload.
-            EncodeAndSend(true, m_buffer, BufferOffset, BufferOffset + headerLength, data.Length - headerLength);
+            EncodeAndSend(DataPacketHeader.CommandMarkup, m_buffer, BufferOffset, data.Length);
         }
 
         /// <summary>
@@ -130,97 +124,97 @@ namespace Sttp.Codec
         /// <summary>
         /// Sends a command of data over the wire. 
         /// </summary>
-        /// <param name="isMarkup">indicates if this command is a markup command</param>
+        /// <param name="header">The existing header word</param>
         /// <param name="buffer"></param>
-        /// <param name="headerOffset">the offset of the buffer that is the first byte of the header</param>
-        /// <param name="payloadOffset">the offset for the first byte of the payload</param>
-        /// <param name="payloadLength">The length of the payload segment.</param>
-        private void EncodeAndSend(bool isMarkup, byte[] buffer, int headerOffset, int payloadOffset, int payloadLength)
+        /// <param name="offset">the offset of the buffer</param>
+        /// <param name="length">The length of the data to send</param>
+        private void EncodeAndSend(DataPacketHeader header, byte[] buffer, int offset, int length)
         {
-            if (payloadLength > m_sessionDetails.MaximumCommandSize)
+            if (length > m_sessionDetails.MaximumCommandSize)
             {
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
             }
 
-            int packetLength;
-            bool isCompressed = false;
 
-            if (m_sessionDetails.SupportsDeflate && payloadLength >= m_sessionDetails.DeflateThreshold)
+            if (m_sessionDetails.SupportsDeflate && length >= m_sessionDetails.DeflateThreshold)
             {
-                if (TryCompressPayload(buffer, payloadOffset, payloadLength, out int newSize, out uint checksum))
+                if (TryCompressPayload(buffer, offset, length, out int newSize, out uint checksum))
                 {
-                    isCompressed = true;
-                    headerOffset -= 8;
-                    buffer[headerOffset + 0] = (byte)(payloadLength >> 24);
-                    buffer[headerOffset + 1] = (byte)(payloadLength >> 16);
-                    buffer[headerOffset + 2] = (byte)(payloadLength >> 8);
-                    buffer[headerOffset + 3] = (byte)(payloadLength >> 0);
+                    header |= DataPacketHeader.IsCompressed;
+                    offset -= 8;
+                    buffer[offset + 0] = (byte)(length >> 24);
+                    buffer[offset + 1] = (byte)(length >> 16);
+                    buffer[offset + 2] = (byte)(length >> 8);
+                    buffer[offset + 3] = (byte)(length >> 0);
 
-                    buffer[headerOffset + 4] = (byte)(checksum >> 24);
-                    buffer[headerOffset + 5] = (byte)(checksum >> 16);
-                    buffer[headerOffset + 6] = (byte)(checksum >> 8);
-                    buffer[headerOffset + 7] = (byte)(checksum >> 0);
-                    payloadLength = newSize;
+                    buffer[offset + 4] = (byte)(checksum >> 24);
+                    buffer[offset + 5] = (byte)(checksum >> 16);
+                    buffer[offset + 6] = (byte)(checksum >> 8);
+                    buffer[offset + 7] = (byte)(checksum >> 0);
+                    length = newSize + 8;
                 }
             }
 
-            if (3 + (payloadOffset - headerOffset) + payloadLength < m_sessionDetails.MaximumPacketSize)
+            int packetLength = 2 + length;
+
+            if (packetLength <= m_sessionDetails.MaximumPacketSize)
             {
                 //This packet doesn't have to be fragmented.
-                headerOffset -= 3;
-                packetLength = (payloadOffset - headerOffset) + payloadLength;
-                buffer[headerOffset + 0] = (byte)MakeHeader(isMarkup, isCompressed, false);
-                buffer[headerOffset + 1] = (byte)(packetLength >> 8);
-                buffer[headerOffset + 2] = (byte)(packetLength);
-                SendNewPacket(buffer, headerOffset, packetLength);
+                offset -= 2;
+                header |= (DataPacketHeader)packetLength;
+                buffer[offset + 0] = (byte)((ushort)header >> 8);
+                buffer[offset + 1] = (byte)((ushort)header);
+                SendNewPacket(buffer, offset, packetLength);
             }
             else
             {
+                header |= DataPacketHeader.IsFragmented;
 
-                int fragmentLength = (payloadOffset - headerOffset) + payloadLength;
+                uint checksum = Crc32.Compute(buffer, offset, length);
 
-                uint checksum = Crc32.Compute(buffer, headerOffset, fragmentLength);
+                offset -= 8;
+                buffer[offset + 0] = (byte)(length >> 24);
+                buffer[offset + 1] = (byte)(length >> 16);
+                buffer[offset + 2] = (byte)(length >> 8);
+                buffer[offset + 3] = (byte)(length >> 0);
 
-                headerOffset -= 8;
-                buffer[headerOffset + 0] = (byte)(fragmentLength >> 24);
-                buffer[headerOffset + 1] = (byte)(fragmentLength >> 16);
-                buffer[headerOffset + 2] = (byte)(fragmentLength >> 8);
-                buffer[headerOffset + 3] = (byte)(fragmentLength >> 0);
+                buffer[offset + 4] = (byte)(checksum >> 24);
+                buffer[offset + 5] = (byte)(checksum >> 16);
+                buffer[offset + 6] = (byte)(checksum >> 8);
+                buffer[offset + 7] = (byte)(checksum >> 0);
 
-                buffer[headerOffset + 4] = (byte)(checksum >> 24);
-                buffer[headerOffset + 5] = (byte)(checksum >> 16);
-                buffer[headerOffset + 6] = (byte)(checksum >> 8);
-                buffer[headerOffset + 7] = (byte)(checksum >> 0);
-
-                DataPacketHeader header = MakeHeader(isMarkup, isCompressed, true);
-                SendFragment(header, buffer, headerOffset, fragmentLength + 8);
+                SendFragment(header, buffer, offset, length + 8);
             }
         }
 
         private void SendFragment(DataPacketHeader header, byte[] buffer, int offset, int length)
         {
-            int bytesSentPerFragment = m_sessionDetails.MaximumPacketSize - 7;
-
+            int bytesSentPerFragment = m_sessionDetails.MaximumPacketSize - 10;
             int bytesToSendThisFragment = Math.Min(bytesSentPerFragment, length);
-            int packetLength = bytesToSendThisFragment + 7;
+            int packetLength = bytesToSendThisFragment + 10;
 
             int totalFragments = (length + bytesSentPerFragment - 1) / bytesSentPerFragment; //Adding (bytesSentPerFragment - 1) with integer division means round up.
-            int currentFragment = 1;
+            int currentFragment = 0;
 
             if (totalFragments > ushort.MaxValue)
                 throw new OverflowException();
 
-            //The size of the payload.
-            buffer[offset - 7] = (byte)header;
-            buffer[offset - 6] = (byte)(packetLength >> 8);
-            buffer[offset - 5] = (byte)(packetLength);
+            int fragmentID = Interlocked.Increment(ref m_fragmentID);
+
+            DataPacketHeader headerToSend = header | (DataPacketHeader)packetLength;
+
+            buffer[offset - 10] = (byte)((ushort)headerToSend >> 8);
+            buffer[offset - 9] = (byte)((ushort)headerToSend);
+            buffer[offset - 8] = (byte)(fragmentID >> 24);
+            buffer[offset - 7] = (byte)(fragmentID >> 16);
+            buffer[offset - 6] = (byte)(fragmentID >> 8);
+            buffer[offset - 5] = (byte)(fragmentID >> 0);
             buffer[offset - 4] = (byte)(currentFragment >> 8);
             buffer[offset - 3] = (byte)(currentFragment);
             buffer[offset - 2] = (byte)(totalFragments >> 8);
             buffer[offset - 1] = (byte)(totalFragments);
 
-
-            SendNewPacket(buffer, offset - 7, packetLength);
+            SendNewPacket(buffer, offset - 10, packetLength);
 
             offset += bytesToSendThisFragment;
             length -= bytesToSendThisFragment;
@@ -228,51 +222,26 @@ namespace Sttp.Codec
             while (length > 0)
             {
                 bytesToSendThisFragment = Math.Min(bytesSentPerFragment, length);
-                packetLength = bytesToSendThisFragment + 7;
+                packetLength = bytesToSendThisFragment + 10;
                 currentFragment++;
 
-                buffer[offset - 7] = (byte)DataPacketHeader.NextFragment;
-                buffer[offset - 6] = (byte)(packetLength >> 8);
-                buffer[offset - 5] = (byte)(packetLength);
+                headerToSend = header | (DataPacketHeader)packetLength;
+
+                buffer[offset - 10] = (byte)((ushort)headerToSend >> 8);
+                buffer[offset - 9] = (byte)((ushort)headerToSend);
+                buffer[offset - 8] = (byte)(fragmentID >> 24);
+                buffer[offset - 7] = (byte)(fragmentID >> 16);
+                buffer[offset - 6] = (byte)(fragmentID >> 8);
+                buffer[offset - 5] = (byte)(fragmentID >> 0);
                 buffer[offset - 4] = (byte)(currentFragment >> 8);
                 buffer[offset - 3] = (byte)(currentFragment);
                 buffer[offset - 2] = (byte)(totalFragments >> 8);
                 buffer[offset - 1] = (byte)(totalFragments);
 
-                SendNewPacket(buffer, offset - 7, packetLength);
+                SendNewPacket(buffer, offset - 10, packetLength);
                 offset += bytesToSendThisFragment;
                 length -= bytesToSendThisFragment;
             }
-        }
-
-        /// <summary>
-        /// Creates a header byte for a packet with the provided classifications. Note: This method is not valid for 
-        /// headers that are part of fragmented packets.
-        /// </summary>
-        /// <param name="isMarkup"></param>
-        /// <param name="isCompressed"></param>
-        /// <param name="isFragmented"></param>
-        /// <returns></returns>
-        private DataPacketHeader MakeHeader(bool isMarkup, bool isCompressed, bool isFragmented)
-        {
-            DataPacketHeader header = DataPacketHeader.None;
-            if (isMarkup)
-            {
-                header |= DataPacketHeader.IsMarkupCommand;
-            }
-            if (isCompressed)
-            {
-                header |= DataPacketHeader.IsCompressed;
-            }
-            if (isFragmented)
-            {
-                header |= DataPacketHeader.BeginFragment;
-            }
-            else
-            {
-                header |= DataPacketHeader.NotFragmented;
-            }
-            return header;
         }
 
         /// <summary>
@@ -280,33 +249,33 @@ namespace Sttp.Codec
         /// data is copied over the original and <see cref="newLength"/> contains the length of the compressed data.
         /// Otherwise, this method returns false.
         /// </summary>
-        /// <param name="payload">the data to compress</param>
-        /// <param name="payloadOffset">the offset</param>
-        /// <param name="payloadLength">the length of the payload</param>
+        /// <param name="buffer">the data to compress</param>
+        /// <param name="offset">the offset</param>
+        /// <param name="length">the length of the payload</param>
         /// <param name="newLength">the length of the compressed data if successful, -1 if the compression failed.</param>
         /// <param name="checksum">A computed CRC32 of compressed data if compression is successful.</param>
         /// <returns></returns>
-        private bool TryCompressPayload(byte[] payload, int payloadOffset, int payloadLength, out int newLength, out uint checksum)
+        private bool TryCompressPayload(byte[] buffer, int offset, int length, out int newLength, out uint checksum)
         {
             using (var ms = new MemoryStream())
             {
                 using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
                 {
-                    deflate.Write(payload, payloadOffset, payloadLength);
+                    deflate.Write(buffer, offset, length);
                 }
 
                 //Verifies that there was a size reduction with compression.
-                if (ms.Position + 8 >= payloadLength)
+                if (ms.Position + 8 >= length)
                 {
                     newLength = -1;
                     checksum = 0;
                     return false;
                 }
 
-                checksum = Crc32.Compute(payload, payloadOffset, payloadLength);
+                checksum = Crc32.Compute(buffer, offset, length);
                 newLength = (int)ms.Position;
                 ms.Position = 0;
-                ms.Read(payload, payloadOffset, newLength);
+                ms.Read(buffer, offset, newLength);
                 return true;
             }
         }

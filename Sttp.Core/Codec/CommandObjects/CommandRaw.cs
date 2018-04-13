@@ -7,10 +7,10 @@ namespace Sttp.Codec
 {
     public class CommandRaw
     {
-        public readonly byte ChannelID;
+        public readonly int ChannelID;
         public readonly byte[] Payload;
 
-        public CommandRaw(byte channelID, byte[] payload)
+        public CommandRaw(int channelID, byte[] payload)
         {
             ChannelID = channelID;
             Payload = payload;
