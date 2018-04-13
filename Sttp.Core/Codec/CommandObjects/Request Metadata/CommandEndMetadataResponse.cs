@@ -6,10 +6,10 @@ namespace Sttp.Codec
 {
     public class CommandEndMetadataResponse : CommandBase
     {
-        public readonly byte RawChannelID;
+        public readonly int RawChannelID;
         public readonly int RowCount;
 
-        public CommandEndMetadataResponse(byte rawChannelID, int rowCount)
+        public CommandEndMetadataResponse(int rawChannelID, int rowCount)
             : base("EndMetadataResponse")
         {
             RawChannelID = rawChannelID;
@@ -20,7 +20,7 @@ namespace Sttp.Codec
             : base("EndMetadataResponse")
         {
             var element = reader.ReadEntireElement();
-            RawChannelID = (byte)element.GetValue("RawChannelID");
+            RawChannelID = (int)element.GetValue("RawChannelID");
             RowCount = (int)element.GetValue("RowCount");
             element.ErrorIfNotHandled();
         }

@@ -6,14 +6,14 @@ namespace Sttp.Codec
 {
     public class CommandBeginMetadataResponse : CommandBase
     {
-        public readonly byte RawChannelID;
+        public readonly int RawChannelID;
         public readonly Guid EncodingMethod;
         public Guid RuntimeID;
         public long VersionNumber;
         public string TableName;
         public List<MetadataColumn> Columns;
 
-        public CommandBeginMetadataResponse(byte rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
+        public CommandBeginMetadataResponse(int rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
             : base("BeginMetadataResponse")
         {
             RawChannelID = rawChannelID;
@@ -29,7 +29,7 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            RawChannelID = (byte)element.GetValue("RawChannelID");
+            RawChannelID = (int)element.GetValue("RawChannelID");
             EncodingMethod = (Guid)element.GetValue("EncodingMethod");
             RuntimeID = (Guid)element.GetValue("RuntimeID");
             VersionNumber = (long)element.GetValue("VersionNumber");

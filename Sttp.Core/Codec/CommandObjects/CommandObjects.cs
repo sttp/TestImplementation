@@ -56,7 +56,6 @@ namespace Sttp.Codec
         public CommandBeginMetadataResponse BeginMetadataResponse => m_decoder as CommandBeginMetadataResponse;
         public CommandEndMetadataResponse EndMetadataResponse => m_decoder as CommandEndMetadataResponse;
 
-
         public CommandRaw Raw => m_decoder as CommandRaw;
         public CommandUnknown Unknown => m_decoder as CommandUnknown;
 

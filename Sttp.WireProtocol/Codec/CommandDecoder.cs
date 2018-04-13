@@ -238,11 +238,11 @@ namespace Sttp.Codec
             {
                 m_command = CommandCode.Raw;
 
-                if ((header & DataPacketHeader.CommandRaw0) == DataPacketHeader.CommandRaw0)
+                if ((header & DataPacketHeader.CommandMask) == DataPacketHeader.CommandRaw0)
                 {
                     m_rawCommandCode = 0;
                 }
-                else if ((header & DataPacketHeader.CommandRaw1) == DataPacketHeader.CommandRaw1)
+                else if ((header & DataPacketHeader.CommandMask) == DataPacketHeader.CommandRaw1)
                 {
                     m_rawCommandCode = 1;
                 }

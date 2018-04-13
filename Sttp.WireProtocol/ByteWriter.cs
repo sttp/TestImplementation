@@ -92,7 +92,6 @@ namespace Sttp
             }
         }
 
-
         public byte[] ToArray()
         {
             //ToDo: There might be a better CopyTo alternative.
@@ -109,6 +108,7 @@ namespace Sttp
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
             m_byteLength = 0;
+            m_hasReservedUnusedBitsHeader = false;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }

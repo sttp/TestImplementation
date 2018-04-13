@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Sttp.Codec
 {
@@ -17,6 +18,7 @@ namespace Sttp.Codec
         //private DataPointEncoder m_dataPoint;
         private SessionDetails m_sessionDetails;
         private CommandEncoder m_encoder;
+        private int m_rawChannelID;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -26,6 +28,17 @@ namespace Sttp.Codec
             m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder();
             m_encoder.NewPacket += EncoderOnNewPacket;
+        }
+
+
+        public int GetNextRawChannelID()
+        {
+            int id = 0;
+            while (id == 0 || id == 1)
+            {
+                id = Interlocked.Increment(ref m_rawChannelID);
+            }
+            return id;
         }
 
         private void EncoderOnNewPacket(byte[] data, int position, int length)
@@ -63,12 +76,12 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandMetadataRequestFailed(reason, details));
         }
 
-        public void BeginMetadataResponse(byte rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
+        public void BeginMetadataResponse(int rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
         {
             m_encoder.SendMarkupCommand(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
         }
 
-        public void EndMetadataResponse(byte rawChannelID, int rowCount)
+        public void EndMetadataResponse(int rawChannelID, int rowCount)
         {
             m_encoder.SendMarkupCommand(new CommandEndMetadataResponse(rawChannelID, rowCount));
         }
@@ -185,7 +198,7 @@ namespace Sttp.Codec
         //    m_encoder.Message(sml.ToSttpMarkup());
         //}
 
-        public void Raw(byte rawCommandCode, byte[] payload)
+        public void Raw(int rawCommandCode, byte[] payload)
         {
             m_encoder.SendRawCommand(rawCommandCode, payload, 0, payload.Length);
         }

@@ -1,7 +1,7 @@
-
+﻿
 namespace Sttp.Codec
 {
-   
+
 
     /// <summary>
     /// The lowest level command codes supported by the protocol. Nearly all commands exposed to higher level APIs will be in the form of a MarkupCommand.

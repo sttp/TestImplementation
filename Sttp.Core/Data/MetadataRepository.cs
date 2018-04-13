@@ -15,12 +15,12 @@ namespace Sttp.Data
         /// <summary>
         /// If logging is enabled, this is the ID for the transaction log.
         /// </summary>
-        public Guid SchemaVersion { get; private set; }
+        public Guid RuntimeID { get; private set; }
 
         /// <summary>
         /// This identifies the transaction number of the supplied log. 
         /// </summary>
-        public long SequenceNumber { get; private set; }
+        public long VersionNumber { get; private set; }
 
         public List<MetadataSchemaTable> MetadataSchema { get; private set; }
         private Dictionary<string, int> m_tablesLookup;
@@ -29,8 +29,8 @@ namespace Sttp.Data
 
         public MetadataRepository()
         {
-            SchemaVersion = Guid.NewGuid();
-            SequenceNumber = 0;
+            RuntimeID = Guid.NewGuid();
+            VersionNumber = 0;
             m_tablesLookup = new Dictionary<string, int>();
             m_tables = new List<MetadataTable>();
             MetadataSchema = new List<MetadataSchemaTable>();
@@ -40,8 +40,8 @@ namespace Sttp.Data
 
         public MetadataRepository(DataSet schema)
         {
-            SchemaVersion = Guid.NewGuid();
-            SequenceNumber = 0;
+            RuntimeID = Guid.NewGuid();
+            VersionNumber = 0;
             m_tablesLookup = new Dictionary<string, int>();
             m_tables = new List<MetadataTable>();
             m_isReadOnly = false;
@@ -116,7 +116,7 @@ namespace Sttp.Data
                 throw new Exception("Object is readonly");
 
             int indx = m_tablesLookup[tableName];
-            m_tables[indx] = m_tables[indx].MergeDataSets(table, SequenceNumber);
+            m_tables[indx] = m_tables[indx].MergeDataSets(table, VersionNumber);
         }
 
         public void FillData(string tableName, DbDataReader table)
@@ -125,7 +125,7 @@ namespace Sttp.Data
                 throw new Exception("Object is readonly");
 
             int indx = m_tablesLookup[tableName];
-            m_tables[indx] = m_tables[indx].MergeDataSets(table, SequenceNumber);
+            m_tables[indx] = m_tables[indx].MergeDataSets(table, VersionNumber);
         }
 
         private MetadataRepository(MetadataRepository other)
@@ -133,8 +133,8 @@ namespace Sttp.Data
             m_tablesLookup = other.m_tablesLookup;
             MetadataSchema = other.MetadataSchema.ToList();
             m_tables = other.m_tables.ToList();
-            SchemaVersion = other.SchemaVersion;
-            SequenceNumber = other.SequenceNumber + 1;
+            RuntimeID = other.RuntimeID;
+            VersionNumber = other.VersionNumber + 1;
         }
 
         public MetadataTable this[string tableName] => m_tables[m_tablesLookup[tableName]];
@@ -186,6 +186,11 @@ namespace Sttp.Data
         public MetadataRepository CloneEditable()
         {
             return new MetadataRepository(this);
+        }
+
+        public bool ContainsTable(string tableName)
+        {
+            return m_tablesLookup.ContainsKey(tableName);
         }
     }
 

@@ -9,7 +9,6 @@ namespace Sttp.Codec
     {
         private ByteReader m_stream;
         private CommandBeginMetadataResponse m_response;
-
         public MetadataRowDecoder(CommandBeginMetadataResponse metadataResponse)
         {
             m_response = metadataResponse;

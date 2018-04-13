@@ -26,7 +26,7 @@ namespace Sttp.Codec
         /// </summary>
         private byte[] m_buffer;
 
-        private const int BufferOffset = 25;
+        private const int BufferOffset = 35;
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
