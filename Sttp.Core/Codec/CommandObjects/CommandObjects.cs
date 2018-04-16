@@ -1,6 +1,5 @@
 ﻿using System;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -10,7 +9,7 @@ namespace Sttp.Codec
 
         public CommandCode CommandCode { get; }
         public string CommandName { get; }
-        private CtpMarkup m_markup;
+        private CtpDocument m_document;
 
         static CommandObjects()
         {
@@ -34,12 +33,12 @@ namespace Sttp.Codec
                 case CommandCode.Invalid:
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
                 case CommandCode.MarkupCommand:
-                    m_markup = decoder.MarkupPayload;
-                    CommandName = m_markup.MakeReader().RootElement;
-                    m_decoder = CommandBase.Create(decoder.MarkupPayload);
+                    m_document = decoder.DocumentPayload;
+                    CommandName = m_document.MakeReader().RootElement;
+                    m_decoder = CommandBase.Create(decoder.DocumentPayload);
                     break;
                 case CommandCode.Raw:
-                    m_markup = null;
+                    m_document = null;
                     CommandName = "Raw";
                     m_decoder = new CommandRaw(decoder.RawChannelID, decoder.RawPayload);
                     break;
@@ -63,13 +62,13 @@ namespace Sttp.Codec
 
         public string ToXMLString()
         {
-            if (m_markup == null)
+            if (m_document == null)
                 return "Null";
 
-            return m_markup.ToXML();
+            return m_document.ToXML();
         }
 
-        public CtpMarkup Markup => m_markup;
+        public CtpDocument Document => m_document;
 
 
     }

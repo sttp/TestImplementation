@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CTP.Codec
+namespace CTP
 {
     /// <summary>
     /// This class assists in the reassembly of fragmented data.

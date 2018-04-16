@@ -1,6 +1,6 @@
 using System;
 
-namespace CTP.Codec
+namespace CTP
 {
     [Flags]
     public enum CtpHeader : ushort

@@ -16,11 +16,11 @@ namespace Sttp.Codec
         /// </summary>
         public readonly CtpTypeCode TypeCode;
 
-        public MetadataColumn(CtpMarkupElement element)
+        public MetadataColumn(CtpDocumentElement documentElement)
         {
-            Name = (string)element.GetValue("Name");
-            TypeCode = (CtpTypeCode)Enum.Parse(typeof(CtpTypeCode), (string)element.GetValue("TypeCode"));
-            element.ErrorIfNotHandled();
+            Name = (string)documentElement.GetValue("Name");
+            TypeCode = (CtpTypeCode)Enum.Parse(typeof(CtpTypeCode), (string)documentElement.GetValue("TypeCode"));
+            documentElement.ErrorIfNotHandled();
         }
 
         public MetadataColumn(string name, CtpTypeCode typeCode)
@@ -34,7 +34,7 @@ namespace Sttp.Codec
             return $"{Name} ({TypeCode})";
         }
        
-        public void Save(CtpMarkupWriter sml)
+        public void Save(CtpDocumentWriter sml)
         {
             sml.WriteValue("Name", Name);
             sml.WriteValue("TypeCode", TypeCode.ToString());

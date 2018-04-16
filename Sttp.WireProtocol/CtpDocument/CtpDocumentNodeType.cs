@@ -1,9 +1,9 @@
 ﻿namespace CTP
 {
     /// <summary>
-    /// The valid node types of <see cref="CtpMarkup"/>
+    /// The valid node types of <see cref="CtpDocument"/>
     /// </summary>
-    public enum CtpMarkupNodeType
+    public enum CtpDocumentNodeType
     {
         /// <summary>
         /// Indicates that the node type is an element.

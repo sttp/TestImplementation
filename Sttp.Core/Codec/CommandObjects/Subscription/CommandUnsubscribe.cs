@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -13,7 +12,7 @@ namespace Sttp.Codec
         {
         }
 
-        public CommandUnsubscribe(CtpMarkupReader reader)
+        public CommandUnsubscribe(CtpDocumentReader reader)
             : base("Unsubscribe")
         {
             var element = reader.ReadEntireElement();
@@ -21,7 +20,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
         }
     }

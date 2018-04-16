@@ -1,5 +1,5 @@
 ﻿using System;
-using CTP.Codec;
+using CTP;
 
 namespace Sttp.Codec
 {

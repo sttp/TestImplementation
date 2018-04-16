@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -27,7 +26,7 @@ namespace Sttp.Codec
             Columns.AddRange(columns);
         }
 
-        public CommandGetMetadata(CtpMarkupReader reader)
+        public CommandGetMetadata(CtpDocumentReader reader)
             : base("GetMetadata")
         {
             var element = reader.ReadEntireElement();
@@ -40,7 +39,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("Table", Table);
             foreach (var column in Columns)

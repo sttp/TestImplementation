@@ -31,8 +31,8 @@ namespace CTP
                         return SttpValueStringMethods.ToTypeString(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.ToTypeString(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.ToTypeString(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.ToTypeString(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -62,8 +62,8 @@ namespace CTP
                         return SttpValueStringMethods.ToNativeType(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.ToNativeType(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.ToNativeType(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.ToNativeType(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -94,8 +94,8 @@ namespace CTP
                         return SttpValueStringMethods.AsInt64(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsInt64(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsInt64(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsInt64(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -127,8 +127,8 @@ namespace CTP
                         return SttpValueStringMethods.AsSingle(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsSingle(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsSingle(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsSingle(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -160,8 +160,8 @@ namespace CTP
                         return SttpValueStringMethods.AsDouble(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsDouble(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsDouble(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsDouble(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -193,8 +193,8 @@ namespace CTP
                         return SttpValueStringMethods.AsSttpTime(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsSttpTime(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsSttpTime(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsSttpTime(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -226,8 +226,8 @@ namespace CTP
                         return SttpValueStringMethods.AsBoolean(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsBoolean(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsBoolean(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsBoolean(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -258,8 +258,8 @@ namespace CTP
                         return SttpValueStringMethods.AsGuid(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsGuid(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsGuid(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsGuid(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -292,8 +292,8 @@ namespace CTP
                         return SttpValueStringMethods.AsString(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsString(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsString(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsString(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -325,8 +325,8 @@ namespace CTP
                         return SttpValueStringMethods.AsSttpBuffer(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsSttpBuffer(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsSttpBuffer(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsSttpBuffer(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -334,7 +334,7 @@ namespace CTP
 
         }
 
-        public override CtpMarkup AsSttpMarkup
+        public override CtpDocument AsDocument
         {
             get
             {
@@ -358,8 +358,8 @@ namespace CTP
                         return SttpValueStringMethods.AsSttpMarkup(m_valueObject as string);
                     case CtpTypeCode.CtpBuffer:
                         return SttpValueSttpBufferMethods.AsSttpMarkup(m_valueObject as CtpBuffer);
-                    case CtpTypeCode.CtpMarkup:
-                        return SttpValueSttpMarkupMethods.AsSttpMarkup(m_valueObject as CtpMarkup);
+                    case CtpTypeCode.CtpDocument:
+                        return SttpValueSttpMarkupMethods.AsSttpMarkup(m_valueObject as CtpDocument);
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

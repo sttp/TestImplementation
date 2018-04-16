@@ -213,9 +213,9 @@ namespace CTP
 
         #endregion
 
-        public CtpMarkup ReadSttpMarkup()
+        public CtpDocument ReadSttpMarkup()
         {
-            return new CtpMarkup(this);
+            return new CtpDocument(this);
         }
 
         public CtpBuffer ReadSttpBuffer()

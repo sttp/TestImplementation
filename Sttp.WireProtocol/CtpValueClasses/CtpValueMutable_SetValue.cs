@@ -95,9 +95,9 @@ namespace CTP
             m_valueTypeCode = CtpTypeCode.CtpBuffer;
             m_valueObject = value;
         }
-        public void SetValue(CtpMarkup value)
+        public void SetValue(CtpDocument value)
         {
-            m_valueTypeCode = CtpTypeCode.CtpMarkup;
+            m_valueTypeCode = CtpTypeCode.CtpDocument;
             m_valueObject = value;
         }
 
@@ -137,8 +137,8 @@ namespace CTP
                 case CtpTypeCode.CtpBuffer:
                     SetValue(value.AsSttpBuffer);
                     break;
-                case CtpTypeCode.CtpMarkup:
-                    SetValue(value.AsSttpMarkup);
+                case CtpTypeCode.CtpDocument:
+                    SetValue(value.AsDocument);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -234,9 +234,9 @@ namespace CTP
             {
                 SetValue((CtpValue)value);
             }
-            else if (type == typeof(CtpMarkup))
+            else if (type == typeof(CtpDocument))
             {
-                SetValue((CtpMarkup)value);
+                SetValue((CtpDocument)value);
             }
             else
             {

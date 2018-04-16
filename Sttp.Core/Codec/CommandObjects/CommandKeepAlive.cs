@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -14,7 +13,7 @@ namespace Sttp.Codec
         {
         }
 
-        public CommandKeepAlive(CtpMarkupReader reader)
+        public CommandKeepAlive(CtpDocumentReader reader)
             : base("KeepAlive")
         {
             var element = reader.ReadEntireElement();
@@ -22,7 +21,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
         }
     }

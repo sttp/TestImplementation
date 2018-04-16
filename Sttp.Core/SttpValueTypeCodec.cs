@@ -74,7 +74,7 @@ namespace Sttp
                     return typeof(String);
                 case CtpTypeCode.CtpBuffer:
                     return typeof(byte[]);
-                case CtpTypeCode.CtpMarkup:
+                case CtpTypeCode.CtpDocument:
                     return typeof(byte[]);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(columnTypeCode), columnTypeCode, null);

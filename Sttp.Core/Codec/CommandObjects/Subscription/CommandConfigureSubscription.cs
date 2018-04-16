@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -20,7 +19,7 @@ namespace Sttp.Codec
             SamplePerSecond = samplesPerSecond;
         }
 
-        public CommandSubscribeToSome(CtpMarkupReader reader)
+        public CommandSubscribeToSome(CtpDocumentReader reader)
             : base("SubscribeToSome")
         {
             var element = reader.ReadEntireElement();
@@ -33,7 +32,7 @@ namespace Sttp.Codec
         }
 
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("InstanceName", InstanceName);
             using (writer.StartElement("PointList"))

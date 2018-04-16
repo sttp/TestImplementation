@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -21,7 +20,7 @@ namespace Sttp.Codec
             Tables = new List<MetadataSchemaTable>(tables);
         }
 
-        public CommandMetadataSchema(CtpMarkupReader reader)
+        public CommandMetadataSchema(CtpDocumentReader reader)
             : base("MetadataSchema")
         {
             Tables = new List<MetadataSchemaTable>();
@@ -37,7 +36,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("RuntimeID", RuntimeID);
             writer.WriteValue("VersionNumber", VersionNumber);

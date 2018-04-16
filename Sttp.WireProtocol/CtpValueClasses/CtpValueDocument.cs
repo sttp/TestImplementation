@@ -6,11 +6,11 @@ using System.Text;
 
 namespace CTP
 {
-    public class CtpValueMarkup : CtpValue
+    public class CtpValueDocument : CtpValue
     {
-        public readonly CtpMarkup Value;
+        public readonly CtpDocument Value;
 
-        public CtpValueMarkup(CtpMarkup value)
+        public CtpValueDocument(CtpDocument value)
         {
             Value = value;
         }
@@ -26,66 +26,66 @@ namespace CTP
         public override Guid AsGuid => SttpValueSttpMarkupMethods.AsGuid(Value);
         public override string AsString => SttpValueSttpMarkupMethods.AsString(Value);
         public override CtpBuffer AsSttpBuffer => SttpValueSttpMarkupMethods.AsSttpBuffer(Value);
-        public override CtpMarkup AsSttpMarkup => SttpValueSttpMarkupMethods.AsSttpMarkup(Value);
+        public override CtpDocument AsDocument => SttpValueSttpMarkupMethods.AsSttpMarkup(Value);
     }
 
     internal static class SttpValueSttpMarkupMethods
     {
-        public static CtpTypeCode ValueTypeCode => CtpTypeCode.CtpMarkup;
+        public static CtpTypeCode ValueTypeCode => CtpTypeCode.CtpDocument;
 
-        public static string ToTypeString(CtpMarkup value)
+        public static string ToTypeString(CtpDocument value)
         {
-            return $"(SttpMarkup){value.ToString()}";
+            return $"(CtpDocument){value.ToString()}";
         }
 
-        public static object ToNativeType(CtpMarkup value)
+        public static object ToNativeType(CtpDocument value)
         {
             return value;
         }
 
         #region [ Type Casting ]
 
-        public static long AsInt64(CtpMarkup value)
+        public static long AsInt64(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Int64");
         }
 
-        public static float AsSingle(CtpMarkup value)
+        public static float AsSingle(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Single");
         }
 
-        public static double AsDouble(CtpMarkup value)
+        public static double AsDouble(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Double");
         }
 
-        public static CtpTime AsSttpTime(CtpMarkup value)
+        public static CtpTime AsSttpTime(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpTime");
         }
 
-        public static bool AsBoolean(CtpMarkup value)
+        public static bool AsBoolean(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Boolean");
         }
 
-        public static Guid AsGuid(CtpMarkup value)
+        public static Guid AsGuid(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to Guid");
         }
 
-        public static string AsString(CtpMarkup value)
+        public static string AsString(CtpDocument value)
         {
             return value.ToString();
         }
 
-        public static CtpBuffer AsSttpBuffer(CtpMarkup value)
+        public static CtpBuffer AsSttpBuffer(CtpDocument value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static CtpMarkup AsSttpMarkup(CtpMarkup value)
+        public static CtpDocument AsSttpMarkup(CtpDocument value)
         {
             return value;
         }

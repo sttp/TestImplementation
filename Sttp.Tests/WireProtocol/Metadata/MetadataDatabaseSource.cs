@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CTP;
-using CTP.Codec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 using Sttp.Core.Data;
@@ -108,10 +107,10 @@ namespace Sttp.Tests
 
             Stopwatch sw = new Stopwatch();
             sw.Restart();
-            Console.WriteLine(cmd.Markup.EncodedSize);
+            Console.WriteLine(cmd.Document.EncodedSize);
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
-            Console.WriteLine(cmd.Markup.CompressedSize);
+            Console.WriteLine(cmd.Document.CompressedSize);
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
 

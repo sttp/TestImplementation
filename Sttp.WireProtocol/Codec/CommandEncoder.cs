@@ -3,7 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 
-namespace CTP.Codec
+namespace CTP
 {
 
     /// <summary>
@@ -84,7 +84,7 @@ namespace CTP.Codec
         /// <param name="command">The command to send.</param>
         public void SendMarkupCommand(CommandBase command)
         {
-            var writer = new CtpMarkupWriter(command.CommandName);
+            var writer = new CtpDocumentWriter(command.CommandName);
             command.Save(writer);
             SendMarkupCommand(writer);
         }
@@ -94,10 +94,10 @@ namespace CTP.Codec
         /// the other overload that contains <see cref="CommandBase"/> if one exists.
         /// </summary>
         /// <param name="markup">The data to send.</param>
-        public void SendMarkupCommand(CtpMarkupWriter markup)
+        public void SendMarkupCommand(CtpDocumentWriter markup)
         {
             //ToDo: Consider changing the MarkupCommand to split the RootElement and the other payload.
-            CtpMarkup data = markup.ToSttpMarkup();
+            CtpDocument data = markup.ToSttpMarkup();
             EnsureCapacity(BufferOffset + data.Length);
             data.CopyTo(m_buffer, BufferOffset);
 

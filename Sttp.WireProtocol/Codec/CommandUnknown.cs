@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CTP.Codec
+namespace CTP
 {
     /// <summary>
     /// If a command code is not registered by this API layer, it is therefore reported in it's raw format. 
@@ -14,20 +14,20 @@ namespace CTP.Codec
         /// <summary>
         /// The Markup data for this command.
         /// </summary>
-        public readonly CtpMarkup Markup;
+        public readonly CtpDocument Document;
 
 
-        public CommandUnknown(string commandName, CtpMarkup markup)
+        public CommandUnknown(string commandName, CtpDocument document)
             : base(commandName)
         {
-            Markup = markup;
+            Document = document;
         }
 
         /// <summary>
-        /// Saves this command object to a <see cref="CtpMarkup"/>.
+        /// Saves this command object to a <see cref="CtpDocument"/>.
         /// </summary>
         /// <param name="writer">The writer to save the command to.</param>
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             throw new NotSupportedException();
         }

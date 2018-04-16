@@ -26,7 +26,7 @@ namespace CTP
         public override Guid AsGuid => SttpValueDoubleMethods.AsGuid(Value);
         public override string AsString => SttpValueDoubleMethods.AsString(Value);
         public override CtpBuffer AsSttpBuffer => SttpValueDoubleMethods.AsSttpBuffer(Value);
-        public override CtpMarkup AsSttpMarkup => SttpValueDoubleMethods.AsSttpMarkup(Value);
+        public override CtpDocument AsDocument => SttpValueDoubleMethods.AsSttpMarkup(Value);
     }
 
     internal static class SttpValueDoubleMethods
@@ -94,7 +94,7 @@ namespace CTP
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static CtpMarkup AsSttpMarkup(double value)
+        public static CtpDocument AsSttpMarkup(double value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using CTP;
-using CTP.Codec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 

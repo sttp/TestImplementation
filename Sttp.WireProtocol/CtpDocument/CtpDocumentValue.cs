@@ -6,9 +6,9 @@ using System.Text;
 namespace CTP
 {
     /// <summary>
-    /// A single value that is contained in a <see cref="CtpMarkupElement"/>. 
+    /// A single value that is contained in a <see cref="CtpDocumentElement"/>. 
     /// </summary>
-    public class CtpMarkupValue
+    public class CtpDocumentValue
     {
         /// <summary>
         /// The name of the value.
@@ -19,7 +19,7 @@ namespace CTP
         /// </summary>
         public readonly CtpValue Value;
         /// <summary>
-        /// Gets if this value has been handled. See <see cref="CtpMarkupElement.ErrorIfNotHandled"/> for more details.
+        /// Gets if this value has been handled. See <see cref="CtpDocumentElement.ErrorIfNotHandled"/> for more details.
         /// </summary>
         public bool Handled;
 
@@ -27,9 +27,9 @@ namespace CTP
         /// Creates this class from the provided reader.
         /// </summary>
         /// <param name="reader">where to read this from.</param>
-        public CtpMarkupValue(CtpMarkupReader reader)
+        public CtpDocumentValue(CtpDocumentReader reader)
         {
-            if (reader.NodeType != CtpMarkupNodeType.Value)
+            if (reader.NodeType != CtpDocumentNodeType.Value)
                 throw new Exception("Expecting a Value type for the current node.");
             ValueName = reader.ValueName;
             Value = reader.Value.CloneAsImmutable();

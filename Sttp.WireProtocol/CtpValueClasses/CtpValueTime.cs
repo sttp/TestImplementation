@@ -26,7 +26,7 @@ namespace CTP
         public override Guid AsGuid => SttpValueSttpTimeMethods.AsGuid(Value);
         public override string AsString => SttpValueSttpTimeMethods.AsString(Value);
         public override CtpBuffer AsSttpBuffer => SttpValueSttpTimeMethods.AsSttpBuffer(Value);
-        public override CtpMarkup AsSttpMarkup => SttpValueSttpTimeMethods.AsSttpMarkup(Value);
+        public override CtpDocument AsDocument => SttpValueSttpTimeMethods.AsSttpMarkup(Value);
     }
 
     internal static class SttpValueSttpTimeMethods
@@ -85,7 +85,7 @@ namespace CTP
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static CtpMarkup AsSttpMarkup(CtpTime value)
+        public static CtpDocument AsSttpMarkup(CtpTime value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
         }

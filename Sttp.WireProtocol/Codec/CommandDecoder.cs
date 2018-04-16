@@ -2,7 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 
-namespace CTP.Codec
+namespace CTP
 {
     /// <summary>
     /// Decodes an incoming byte stream into a series of command objects. This class will align packets, reassemble fragments, and decompress packets. 
@@ -35,7 +35,7 @@ namespace CTP.Codec
         private FragmentReassembly m_fragmentReassembly = new FragmentReassembly();
 
         private CommandCode m_command;
-        private CtpMarkup m_markupPayload;
+        private CtpDocument m_documentPayload;
         private byte[] m_rawCommandPayload;
         private int m_rawCommandCode;
 
@@ -63,7 +63,7 @@ namespace CTP.Codec
         /// Valid if <see cref="NextCommand"/> returned true. And the command 
         /// This is the command that was decoded.
         /// </summary>
-        public CtpMarkup MarkupPayload
+        public CtpDocument DocumentPayload
         {
             get
             {
@@ -71,7 +71,7 @@ namespace CTP.Codec
                     throw new InvalidOperationException("IsValid is false.");
                 if (m_command != CommandCode.MarkupCommand)
                     throw new InvalidOperationException("Command is not a MarkupCommand.");
-                return m_markupPayload;
+                return m_documentPayload;
             }
         }
 
@@ -155,7 +155,7 @@ namespace CTP.Codec
         public bool NextCommand()
         {
             m_command = CommandCode.Invalid;
-            m_markupPayload = null;
+            m_documentPayload = null;
             m_rawCommandPayload = null;
             m_rawCommandCode = 0;
 
@@ -231,7 +231,7 @@ namespace CTP.Codec
                 int markupStart = position;
                 results = new byte[markupLength];
                 Array.Copy(buffer, markupStart, results, 0, markupLength);
-                m_markupPayload = new CtpMarkup(results);
+                m_documentPayload = new CtpDocument(results);
             }
             else
             {

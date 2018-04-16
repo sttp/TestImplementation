@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
-using CTP.Codec;
 
 namespace CTP
 {
@@ -12,38 +11,38 @@ namespace CTP
     /// A container class around the byte array containing the SttpMarkup data. To read data from this class, call <see cref="MakeReader"/>.
     /// This class is Immutable.
     /// 
-    /// To write an SttpMarkup object use <see cref="CtpMarkupWriter"/>
+    /// To write an SttpMarkup object use <see cref="CtpDocumentWriter"/>
     /// </summary>
-    public class CtpMarkup : IEquatable<CtpMarkup>
+    public class CtpDocument : IEquatable<CtpDocument>
     {
-        private readonly byte[] m_data;
+        private readonly byte[] m_contents;
 
         /// <summary>
         /// Creates an SttpMarkup from a input stream.
         /// </summary>
         /// <param name="rd">where to read the data from</param>
-        public CtpMarkup(ByteReader rd)
+        public CtpDocument(ByteReader rd)
         {
-            m_data = rd.ReadBytes();
+            m_contents = rd.ReadBytes();
         }
 
         /// <summary>
         /// Creates an SttpMarkup from a byte array.
         /// </summary>
-        /// <param name="data"></param>
-        public CtpMarkup(byte[] data)
+        /// <param name="contents"></param>
+        public CtpDocument(byte[] contents)
         {
-            m_data = data;
+            m_contents = contents;
         }
 
         //ToDo: These methods will eventually be removed. This is just to compare compression sizes of data.
-        public int EncodedSize => m_data.Length;
-        public int CompressedSize => DeflateHelper.Compress(m_data).Length;
+        public int EncodedSize => m_contents.Length;
+        public int CompressedSize => DeflateHelper.Compress(m_contents).Length;
 
         /// <summary>
         /// The size of the data block.
         /// </summary>
-        public int Length => m_data.Length;
+        public int Length => m_contents.Length;
 
         /// <summary>
         /// Writes the SttpMarkup data to a byte array.
@@ -51,16 +50,16 @@ namespace CTP
         /// <param name="wr"></param>
         public void Write(ByteWriter wr)
         {
-            wr.Write(m_data);
+            wr.Write(m_contents);
         }
 
         /// <summary>
         /// Create a means for reading the data from the SttpMarkup.
         /// </summary>
         /// <returns></returns>
-        public CtpMarkupReader MakeReader()
+        public CtpDocumentReader MakeReader()
         {
-            return new CtpMarkupReader(m_data);
+            return new CtpDocumentReader(m_contents);
         }
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace CTP
         /// <param name="offset">the offset position of <see pref="buffer"/></param>
         public void CopyTo(byte[] buffer, int offset)
         {
-            Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
+            Array.Copy(m_contents, 0, buffer, offset, m_contents.Length); // write data
         }
 
         /// <summary>
@@ -93,16 +92,16 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpMarkupNodeType.Element:
+                    case CtpDocumentNodeType.Element:
                         xml.WriteStartElement(reader.ElementName);
                         break;
-                    case CtpMarkupNodeType.Value:
+                    case CtpDocumentNodeType.Value:
                         xml.WriteStartElement(reader.ValueName);
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
                         xml.WriteValue(reader.Value.AsString ?? string.Empty);
                         xml.WriteEndElement();
                         break;
-                    case CtpMarkupNodeType.EndElement:
+                    case CtpDocumentNodeType.EndElement:
                         xml.WriteEndElement();
                         break;
                     default:
@@ -137,14 +136,14 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpMarkupNodeType.Element:
+                    case CtpDocumentNodeType.Element:
                         sb.Append(prefix.Peek());
                         sb.Append('"');
                         sb.Append(reader.ElementName);
                         sb.AppendLine("\": {");
                         prefix.Push(prefix.Peek() + "  ");
                         break;
-                    case CtpMarkupNodeType.Value:
+                    case CtpDocumentNodeType.Value:
                         sb.Append(prefix.Peek());
                         sb.Append('"');
                         sb.Append(reader.ValueName);
@@ -152,7 +151,7 @@ namespace CTP
                         sb.Append(reader.Value.ToTypeString);
                         sb.AppendLine("\",");
                         break;
-                    case CtpMarkupNodeType.EndElement:
+                    case CtpDocumentNodeType.EndElement:
                         prefix.Pop();
                         sb.Append(prefix.Peek());
                         sb.AppendLine("},");
@@ -188,20 +187,20 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpMarkupNodeType.Element:
+                    case CtpDocumentNodeType.Element:
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ElementName);
                         sb.AppendLine(":");
                         prefix.Push(prefix.Peek() + " ");
                         break;
-                    case CtpMarkupNodeType.Value:
+                    case CtpDocumentNodeType.Value:
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ValueName);
                         sb.Append(": ");
                         sb.Append(reader.Value.ToTypeString);
                         sb.AppendLine();
                         break;
-                    case CtpMarkupNodeType.EndElement:
+                    case CtpDocumentNodeType.EndElement:
                         prefix.Pop();
                         break;
                     default:
@@ -218,13 +217,13 @@ namespace CTP
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public bool Equals(CtpMarkup other)
+        public bool Equals(CtpDocument other)
         {
             if (ReferenceEquals(null, other))
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            return m_data.SequenceEqual(other.m_data);
+            return m_contents.SequenceEqual(other.m_contents);
         }
 
         /// <summary>
@@ -240,7 +239,7 @@ namespace CTP
                 return true;
             if (obj.GetType() != this.GetType())
                 return false;
-            return Equals((CtpMarkup)obj);
+            return Equals((CtpDocument)obj);
         }
 
         /// <summary>
@@ -249,7 +248,7 @@ namespace CTP
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return (m_data != null ? m_data.GetHashCode() : 0);
+            return (m_contents != null ? m_contents.GetHashCode() : 0);
         }
 
         /// <summary>
@@ -258,7 +257,7 @@ namespace CTP
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator ==(CtpMarkup left, CtpMarkup right)
+        public static bool operator ==(CtpDocument left, CtpDocument right)
         {
             return Equals(left, right);
         }
@@ -269,7 +268,7 @@ namespace CTP
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <
-        public static bool operator !=(CtpMarkup left, CtpMarkup right)
+        public static bool operator !=(CtpDocument left, CtpDocument right)
         {
             return !Equals(left, right);
         }

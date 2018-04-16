@@ -29,7 +29,7 @@ namespace CTP
         public override Guid AsGuid => SttpValueBooleanMethods.AsGuid(Value);
         public override string AsString => SttpValueBooleanMethods.AsString(Value);
         public override CtpBuffer AsSttpBuffer => SttpValueBooleanMethods.AsSttpBuffer(Value);
-        public override CtpMarkup AsSttpMarkup => SttpValueBooleanMethods.AsSttpMarkup(Value);
+        public override CtpDocument AsDocument => SttpValueBooleanMethods.AsSttpMarkup(Value);
     }
 
     internal static class SttpValueBooleanMethods
@@ -89,7 +89,7 @@ namespace CTP
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpBuffer");
         }
 
-        public static CtpMarkup AsSttpMarkup(bool value)
+        public static CtpDocument AsSttpMarkup(bool value)
         {
             throw new InvalidCastException($"Cannot cast from {ToTypeString(value)} to SttpMarkup");
         }

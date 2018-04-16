@@ -6,12 +6,12 @@ using System.Text;
 namespace CTP
 {
     /// <summary>
-    /// Represents an element of an <see cref="CtpMarkup"/> file with all of it's children.
+    /// Represents an element of an <see cref="CtpDocument"/> file with all of it's children.
     /// 
-    /// This class is created by <see cref="CtpMarkupReader.ReadEntireElement"/> and makes it easier to 
-    /// parse an <see cref="CtpMarkup"/> object.
+    /// This class is created by <see cref="CtpDocumentReader.ReadEntireElement"/> and makes it easier to 
+    /// parse an <see cref="CtpDocument"/> object.
     /// </summary>
-    public class CtpMarkupElement
+    public class CtpDocumentElement
     {
         /// <summary>
         /// The name of the element.
@@ -21,30 +21,30 @@ namespace CTP
         /// <summary>
         /// The list of all of the child elements. Can be empty.
         /// </summary>
-        public List<CtpMarkupElement> ChildElements = new List<CtpMarkupElement>();
+        public List<CtpDocumentElement> ChildElements = new List<CtpDocumentElement>();
         /// <summary>
         /// The list of all of the child values. Can be empty.
         /// </summary>
-        public List<CtpMarkupValue> ChildValues = new List<CtpMarkupValue>();
+        public List<CtpDocumentValue> ChildValues = new List<CtpDocumentValue>();
 
         /// <summary>
-        /// Creates a <see cref="CtpMarkupElement"/> from a <see cref="CtpMarkupReader"/> advancing the position 
+        /// Creates a <see cref="CtpDocumentElement"/> from a <see cref="CtpDocumentReader"/> advancing the position 
         /// of the reader to the end of the current element.
         /// </summary>
         /// <param name="reader"></param>
-        public CtpMarkupElement(CtpMarkupReader reader)
+        public CtpDocumentElement(CtpDocumentReader reader)
         {
-            if (reader.NodeType == CtpMarkupNodeType.StartOfDocument)
+            if (reader.NodeType == CtpDocumentNodeType.StartOfDocument)
             {
                 ElementName = reader.RootElement;
                 IterateNodes(reader);
                 return;
             }
-            while (reader.NodeType == CtpMarkupNodeType.EndElement)
+            while (reader.NodeType == CtpDocumentNodeType.EndElement)
             {
                 reader.Read();
             }
-            if (reader.NodeType != CtpMarkupNodeType.Element)
+            if (reader.NodeType != CtpDocumentNodeType.Element)
                 throw new Exception("Expecting an Element type for the current node.");
             ElementName = reader.ElementName;
 
@@ -55,20 +55,20 @@ namespace CTP
         /// Iterates all of the nodes in a recursive manor to build a complete object of child elements.
         /// </summary>
         /// <param name="reader">the reader to parse.</param>
-        private void IterateNodes(CtpMarkupReader reader)
+        private void IterateNodes(CtpDocumentReader reader)
         {
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
-                    case CtpMarkupNodeType.Element:
-                        ChildElements.Add(new CtpMarkupElement(reader));  //Recursion occurs here.
+                    case CtpDocumentNodeType.Element:
+                        ChildElements.Add(new CtpDocumentElement(reader));  //Recursion occurs here.
                         break;
-                    case CtpMarkupNodeType.Value:
-                        ChildValues.Add(new CtpMarkupValue(reader));
+                    case CtpDocumentNodeType.Value:
+                        ChildValues.Add(new CtpDocumentValue(reader));
                         break;
-                    case CtpMarkupNodeType.EndElement:
-                    case CtpMarkupNodeType.EndOfDocument:
+                    case CtpDocumentNodeType.EndElement:
+                    case CtpDocumentNodeType.EndOfDocument:
                         return;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -81,7 +81,7 @@ namespace CTP
         /// </summary>
         /// <param name="elementName">the case sensitive name of the element.</param>
         /// <returns></returns>
-        public CtpMarkupElement GetElement(string elementName)
+        public CtpDocumentElement GetElement(string elementName)
         {
             foreach (var value in ChildElements)
             {

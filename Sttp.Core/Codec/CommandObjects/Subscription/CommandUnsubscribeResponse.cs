@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -17,7 +16,7 @@ namespace Sttp.Codec
             RawChannelID = rawChannelID;
         }
 
-        public CommandUnsubscribeResponse(CtpMarkupReader reader)
+        public CommandUnsubscribeResponse(CtpDocumentReader reader)
             : base("UnsubscribeResponse")
         {
             var element = reader.ReadEntireElement();
@@ -28,7 +27,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("RawChannelID", RawChannelID);
 

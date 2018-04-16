@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -17,7 +16,7 @@ namespace Sttp.Codec
             EncodingMethod = encodingMethod;
         }
 
-        public CommandSubscribeResponse(CtpMarkupReader reader)
+        public CommandSubscribeResponse(CtpDocumentReader reader)
             : base("SubscribeResponse")
         {
             var element = reader.ReadEntireElement();
@@ -29,7 +28,7 @@ namespace Sttp.Codec
         }
 
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("RawChannelID", RawChannelID);
             writer.WriteValue("EncodingMethod", EncodingMethod);

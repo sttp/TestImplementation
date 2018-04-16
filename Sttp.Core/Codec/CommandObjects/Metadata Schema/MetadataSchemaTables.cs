@@ -17,19 +17,19 @@ namespace Sttp.Codec
 
         }
 
-        public MetadataSchemaTable(CtpMarkupElement element)
+        public MetadataSchemaTable(CtpDocumentElement documentElement)
         {
-            TableName = (string)element.GetValue("TableName");
-            LastModifiedVersionNumber = (long)element.GetValue("LastModifiedVersionNumber");
+            TableName = (string)documentElement.GetValue("TableName");
+            LastModifiedVersionNumber = (long)documentElement.GetValue("LastModifiedVersionNumber");
 
-            foreach (var query in element.GetElement("Columns").ChildElements)
+            foreach (var query in documentElement.GetElement("Columns").ChildElements)
             {
                 Columns.Add(new MetadataColumn(query));
             }
-            element.ErrorIfNotHandled();
+            documentElement.ErrorIfNotHandled();
         }
 
-        public void Save(CtpMarkupWriter sml)
+        public void Save(CtpDocumentWriter sml)
         {
             sml.WriteValue("TableName", TableName);
             sml.WriteValue("LastModifiedVersionNumber", LastModifiedVersionNumber);

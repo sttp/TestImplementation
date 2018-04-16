@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -10,11 +9,11 @@ namespace Sttp.Codec
     {
         public readonly string Name;
         public readonly CtpValue Value;
-        public MetadataProcedureParameters(CtpMarkupElement element)
+        public MetadataProcedureParameters(CtpDocumentElement documentElement)
         {
-            Name = (string)element.GetValue("Name");
-            Value = element.GetValue("Value");
-            element.ErrorIfNotHandled();
+            Name = (string)documentElement.GetValue("Name");
+            Value = documentElement.GetValue("Value");
+            documentElement.ErrorIfNotHandled();
         }
 
         public MetadataProcedureParameters(string name, CtpValue value)
@@ -28,7 +27,7 @@ namespace Sttp.Codec
             return $"{Name}: ({Value})";
         }
 
-        public void Save(CtpMarkupWriter sml)
+        public void Save(CtpDocumentWriter sml)
         {
             sml.WriteValue("Name", Name);
             sml.WriteValue("Value", Value);
@@ -46,7 +45,7 @@ namespace Sttp.Codec
             Parameters = parameters;
         }
 
-        public CommandGetMetadataProcedure(CtpMarkupReader reader)
+        public CommandGetMetadataProcedure(CtpDocumentReader reader)
             : base("GetMetadataProcedure")
         {
             var element = reader.ReadEntireElement();
@@ -61,7 +60,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("Name", Name);
 

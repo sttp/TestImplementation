@@ -42,8 +42,8 @@ namespace CTP
                 case CtpTypeCode.CtpBuffer:
                     wr.Write(value.AsSttpBuffer);
                     break;
-                case CtpTypeCode.CtpMarkup:
-                    wr.Write(value.AsSttpMarkup);
+                case CtpTypeCode.CtpDocument:
+                    wr.Write(value.AsDocument);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -73,7 +73,7 @@ namespace CTP
                     return (CtpValue)rd.ReadString();
                 case CtpTypeCode.CtpBuffer:
                     return (CtpValue)rd.ReadSttpBuffer();
-                case CtpTypeCode.CtpMarkup:
+                case CtpTypeCode.CtpDocument:
                     return (CtpValue)rd.ReadSttpMarkup();
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -112,7 +112,7 @@ namespace CTP
                 case CtpTypeCode.CtpBuffer:
                     output.SetValue(rd.ReadSttpBuffer());
                     break;
-                case CtpTypeCode.CtpMarkup:
+                case CtpTypeCode.CtpDocument:
                     output.SetValue(rd.ReadSttpMarkup());
                     break;
                 default:

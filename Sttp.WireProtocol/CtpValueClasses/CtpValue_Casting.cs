@@ -89,9 +89,9 @@ namespace CTP
         {
             return new CtpValueBuffer(value);
         }
-        public static explicit operator CtpValue(CtpMarkup value)
+        public static explicit operator CtpValue(CtpDocument value)
         {
-            return new CtpValueMarkup(value);
+            return new CtpValueDocument(value);
         }
 
         public static explicit operator sbyte(CtpValue value)
@@ -158,9 +158,9 @@ namespace CTP
         {
             return value.AsSttpBuffer;
         }
-        public static explicit operator CtpMarkup(CtpValue value)
+        public static explicit operator CtpDocument(CtpValue value)
         {
-            return value.AsSttpMarkup;
+            return value.AsDocument;
         }
 
         public static explicit operator byte[] (CtpValue value)
@@ -248,9 +248,9 @@ namespace CTP
             {
                 return (CtpValue)value;
             }
-            else if (type == typeof(CtpMarkup))
+            else if (type == typeof(CtpDocument))
             {
-                return (CtpValue)(CtpMarkup)value;
+                return (CtpValue)(CtpDocument)value;
             }
             else if (type == typeof(decimal))
             {

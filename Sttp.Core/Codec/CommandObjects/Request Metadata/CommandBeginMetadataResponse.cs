@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -26,7 +25,7 @@ namespace Sttp.Codec
             Columns = columns;
         }
 
-        public CommandBeginMetadataResponse(CtpMarkupReader reader)
+        public CommandBeginMetadataResponse(CtpDocumentReader reader)
             : base("BeginMetadataResponse")
         {
             var element = reader.ReadEntireElement();
@@ -44,7 +43,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("RawChannelID", RawChannelID);
             writer.WriteValue("EncodingMethod", EncodingMethod);

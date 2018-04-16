@@ -16,14 +16,14 @@ namespace Sttp.Codec
             LastModifiedVersionNumber = lastModifiedVersionNumber;
         }
 
-        public MetadataSchemaTableUpdate(CtpMarkupElement element)
+        public MetadataSchemaTableUpdate(CtpDocumentElement documentElement)
         {
-            TableName = (string)element.GetValue("TableName");
-            LastModifiedVersionNumber = (long)element.GetValue("LastModifiedVersionNumber");
-            element.ErrorIfNotHandled();
+            TableName = (string)documentElement.GetValue("TableName");
+            LastModifiedVersionNumber = (long)documentElement.GetValue("LastModifiedVersionNumber");
+            documentElement.ErrorIfNotHandled();
         }
 
-        public void Save(CtpMarkupWriter sml)
+        public void Save(CtpDocumentWriter sml)
         {
             sml.WriteValue("TableName", TableName);
             sml.WriteValue("LastModifiedVersionNumber", LastModifiedVersionNumber);

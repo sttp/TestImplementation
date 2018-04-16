@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace CTP.Codec
+namespace CTP
 {
     /// <summary>
     /// Limits are in place to prevent misuse of the protocol. It also limits the exposure to a server

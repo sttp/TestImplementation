@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -32,7 +31,7 @@ namespace Sttp.Codec
             LastKnownVersionNumber = lastKnownVersionNumber;
         }
 
-        public CommandGetMetadataSchema(CtpMarkupReader reader)
+        public CommandGetMetadataSchema(CtpDocumentReader reader)
             : this()
         {
             var element = reader.ReadEntireElement();
@@ -41,7 +40,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("LastKnownRuntimeID", LastKnownRuntimeID);
             writer.WriteValue("LastKnownVersionNumber", LastKnownVersionNumber);

@@ -247,7 +247,7 @@ namespace CTP
             value.Write(this);
         }
 
-        public void Write(CtpMarkup value)
+        public void Write(CtpDocument value)
         {
             value.Write(this);
         }

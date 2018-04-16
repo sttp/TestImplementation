@@ -26,7 +26,7 @@ namespace CTP
         public override Guid AsGuid => throw new InvalidCastException();
         public override string AsString => throw new InvalidCastException();
         public override CtpBuffer AsSttpBuffer => throw new InvalidCastException();
-        public override CtpMarkup AsSttpMarkup => throw new InvalidCastException();
+        public override CtpDocument AsDocument => throw new InvalidCastException();
 
        
     }

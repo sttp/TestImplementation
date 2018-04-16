@@ -28,7 +28,7 @@ namespace CTP
 
         public abstract string AsString { get; }
         public abstract CtpBuffer AsSttpBuffer { get; }
-        public abstract CtpMarkup AsSttpMarkup { get; }
+        public abstract CtpDocument AsDocument { get; }
         public abstract object ToNativeType { get; }
         public abstract string ToTypeString { get; }
 
@@ -193,8 +193,8 @@ namespace CTP
                         return AsString == other.AsString;
                     case CtpTypeCode.CtpBuffer:
                         return AsSttpBuffer == other.AsSttpBuffer;
-                    case CtpTypeCode.CtpMarkup:
-                        return AsSttpMarkup == other.AsSttpMarkup;
+                    case CtpTypeCode.CtpDocument:
+                        return AsDocument == other.AsDocument;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

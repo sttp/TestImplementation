@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace CTP.Codec
+namespace CTP
 {
     /// <summary>
     /// This base class assists in serializing <see cref="CommandCode.MarkupCommand"/> into 
-    /// concrete objects from their corresponding <see cref="CtpMarkup"/> data.
+    /// concrete objects from their corresponding <see cref="CtpDocument"/> data.
     /// </summary>
     public abstract class CommandBase
     {
@@ -20,15 +20,15 @@ namespace CTP.Codec
         }
 
         /// <summary>
-        /// Saves this command object to a <see cref="CtpMarkup"/>.
+        /// Saves this command object to a <see cref="CtpDocument"/>.
         /// </summary>
         /// <param name="writer">The writer to save the command to.</param>
-        public abstract void Save(CtpMarkupWriter writer);
+        public abstract void Save(CtpDocumentWriter writer);
 
 
-        public CtpMarkup ToSttpMarkup()
+        public CtpDocument ToSttpMarkup()
         {
-            var wr = new CtpMarkupWriter(CommandName);
+            var wr = new CtpDocumentWriter(CommandName);
             Save(wr);
             return wr.ToSttpMarkup();
         }
@@ -43,11 +43,11 @@ namespace CTP.Codec
         /// <summary>
         /// Contains all commands and their corresponding initializers.
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Func<CtpMarkupReader, CommandBase>> CommandsInitializers;
+        private static readonly ConcurrentDictionary<string, Func<CtpDocumentReader, CommandBase>> CommandsInitializers;
 
         static CommandBase()
         {
-            CommandsInitializers = new ConcurrentDictionary<string, Func<CtpMarkupReader, CommandBase>>();
+            CommandsInitializers = new ConcurrentDictionary<string, Func<CtpDocumentReader, CommandBase>>();
         }
 
         /// <summary>
@@ -56,10 +56,10 @@ namespace CTP.Codec
         /// </summary>
         /// <param name="reader">the serialized data to extract from this reader.</param>
         /// <returns></returns>
-        public static CommandBase Create(CtpMarkup reader)
+        public static CommandBase Create(CtpDocument reader)
         {
             string rootElement = reader.MakeReader().RootElement;
-            if (!CommandsInitializers.TryGetValue(rootElement, out Func<CtpMarkupReader, CommandBase> command))
+            if (!CommandsInitializers.TryGetValue(rootElement, out Func<CtpDocumentReader, CommandBase> command))
             {
                 return new CommandUnknown(rootElement, reader);
             }
@@ -72,7 +72,7 @@ namespace CTP.Codec
         /// </summary>
         /// <param name="commandName">The name of the command</param>
         /// <param name="initializer">The initializer</param>
-        public static void Register(string commandName, Func<CtpMarkupReader, CommandBase> initializer)
+        public static void Register(string commandName, Func<CtpDocumentReader, CommandBase> initializer)
         {
             CommandsInitializers[commandName] = initializer;
         }

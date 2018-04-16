@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -20,7 +19,7 @@ namespace Sttp.Codec
             Tables = new List<MetadataSchemaTableUpdate>(tables);
         }
 
-        public CommandMetadataSchemaUpdate(CtpMarkupReader reader)
+        public CommandMetadataSchemaUpdate(CtpDocumentReader reader)
             : base("MetadataSchemaUpdate")
         {
             var element = reader.ReadEntireElement();
@@ -35,7 +34,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("RuntimeID", RuntimeID);
             writer.WriteValue("VersionNumber", VersionNumber);

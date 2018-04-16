@@ -1,5 +1,5 @@
 ﻿
-namespace CTP.Codec
+namespace CTP
 {
 
 

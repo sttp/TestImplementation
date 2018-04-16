@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CTP;
-using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -18,7 +17,7 @@ namespace Sttp.Codec
             RowCount = rowCount;
         }
 
-        public CommandEndMetadataResponse(CtpMarkupReader reader)
+        public CommandEndMetadataResponse(CtpDocumentReader reader)
             : base("EndMetadataResponse")
         {
             var element = reader.ReadEntireElement();
@@ -27,7 +26,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(CtpMarkupWriter writer)
+        public override void Save(CtpDocumentWriter writer)
         {
             writer.WriteValue("RawChannelID", RawChannelID);
             writer.WriteValue("RowCount", RowCount);

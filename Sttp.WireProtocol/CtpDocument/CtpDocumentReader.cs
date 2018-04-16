@@ -7,7 +7,7 @@ namespace CTP
     /// <summary>
     /// A class for reading SttpMarkup documents.
     /// </summary>
-    public class CtpMarkupReader
+    public class CtpDocumentReader
     {
         /// <summary>
         /// Helper class that contains the state data to assist in decompressing the data.
@@ -62,12 +62,12 @@ namespace CTP
         /// Creates a markup reader from the specified byte array.
         /// </summary>
         /// <param name="data"></param>
-        internal CtpMarkupReader(byte[] data)
+        internal CtpDocumentReader(byte[] data)
         {
             m_stream = new ByteReader(data, 0, data.Length);
             Value = new CtpValueMutable();
             m_prevName = new NameLookupCache(string.Empty, 0);
-            NodeType = CtpMarkupNodeType.StartOfDocument;
+            NodeType = CtpDocumentNodeType.StartOfDocument;
             m_rootElement = m_stream.ReadAsciiShort();
             ElementName = GetCurrentElement();
         }
@@ -81,16 +81,16 @@ namespace CTP
         /// </summary>
         public int ElementDepth => m_elementStack.Count;
         /// <summary>
-        /// The current name of the current element. Can be the RootElement if ElementDepth is 0 and <see cref="NodeType"/> is not <see cref="CtpMarkupNodeType.EndElement"/>.
+        /// The current name of the current element. Can be the RootElement if ElementDepth is 0 and <see cref="NodeType"/> is not <see cref="CtpDocumentNodeType.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
         public string ElementName { get; private set; }
         /// <summary>
-        /// If <see cref="NodeType"/> is <see cref="CtpMarkupNodeType.Value"/>, the name of the value. Otherwise, null.
+        /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the name of the value. Otherwise, null.
         /// </summary>
         public string ValueName { get; private set; }
         /// <summary>
-        /// If <see cref="NodeType"/> is <see cref="CtpMarkupNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
+        /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
         /// contents, be sure to call <see cref="CtpValue.Clone"/>
         /// </summary>
@@ -99,7 +99,7 @@ namespace CTP
         /// <summary>
         /// The type of the current node. To Advance the nodes calll <see cref="Read"/>
         /// </summary>
-        public CtpMarkupNodeType NodeType { get; private set; }
+        public CtpDocumentNodeType NodeType { get; private set; }
 
         /// <summary>
         /// Reads to the next node. If the next node is the end of the document. False is returned. Otherwise true.
@@ -107,25 +107,25 @@ namespace CTP
         /// <returns></returns>
         public bool Read()
         {
-            if (NodeType == CtpMarkupNodeType.EndOfDocument)
+            if (NodeType == CtpDocumentNodeType.EndOfDocument)
                 return false;
 
-            if (NodeType == CtpMarkupNodeType.EndElement)
+            if (NodeType == CtpDocumentNodeType.EndElement)
             {
                 ElementName = GetCurrentElement();
             }
 
-            NodeType = (CtpMarkupNodeType)m_stream.ReadBits2();
+            NodeType = (CtpDocumentNodeType)m_stream.ReadBits2();
             switch (NodeType)
             {
-                case CtpMarkupNodeType.Element:
+                case CtpDocumentNodeType.Element:
                     Value.SetNull();
                     ReadName();
                     m_elementStack.Push(m_prevName);
                     ElementName = m_prevName.Name;
                     ValueName = null;
                     break;
-                case CtpMarkupNodeType.Value:
+                case CtpDocumentNodeType.Value:
                     ReadName();
                     if (m_stream.ReadBits1() == 0)
                     {
@@ -139,11 +139,11 @@ namespace CTP
                     }
                     ValueName = m_prevName.Name;
                     break;
-                case CtpMarkupNodeType.EndElement:
+                case CtpDocumentNodeType.EndElement:
                     ElementName = GetCurrentElement();
                     m_elementStack.Pop();
                     break;
-                case CtpMarkupNodeType.EndOfDocument:
+                case CtpDocumentNodeType.EndOfDocument:
                     return false;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -174,9 +174,9 @@ namespace CTP
         /// but is impractical for large elements. The intended mode of operation is to interweave calls to <see cref="Read"/> with <see cref="ReadEntireElement"/> to assist in parsing.
         /// </summary>
         /// <returns></returns>
-        public CtpMarkupElement ReadEntireElement()
+        public CtpDocumentElement ReadEntireElement()
         {
-            return new CtpMarkupElement(this);
+            return new CtpDocumentElement(this);
         }
 
         private string GetCurrentElement()

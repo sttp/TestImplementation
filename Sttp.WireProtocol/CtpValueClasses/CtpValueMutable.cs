@@ -84,8 +84,8 @@ namespace CTP
                     return (CtpValue)AsString;
                 case CtpTypeCode.CtpBuffer:
                     return (CtpValue)AsSttpBuffer;
-                case CtpTypeCode.CtpMarkup:
-                    return (CtpValue)AsSttpMarkup;
+                case CtpTypeCode.CtpDocument:
+                    return (CtpValue)AsDocument;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

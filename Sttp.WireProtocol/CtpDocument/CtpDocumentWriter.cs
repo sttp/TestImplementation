@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CTP
 {
-    public class CtpMarkupWriter
+    public class CtpDocumentWriter
     {
         /// <summary>
         /// Helper class that contains the state data to assist in compressing the data.
@@ -34,14 +34,14 @@ namespace CTP
         }
 
         /// <summary>
-        /// A helper class so calls to <see cref="CtpMarkupWriter.EndElement"/> can be wrapped in a using clause.
+        /// A helper class so calls to <see cref="CtpDocumentWriter.EndElement"/> can be wrapped in a using clause.
         /// Note: this class is a single instance class and does not protect against multiple calls to Dispose. Therefore,
         /// it's not intended to be used outside of making it easier to section out code.
         /// </summary>
         public class ElementEndElementHelper : IDisposable
         {
-            private CtpMarkupWriter m_parent;
-            public ElementEndElementHelper(CtpMarkupWriter parent)
+            private CtpDocumentWriter m_parent;
+            public ElementEndElementHelper(CtpDocumentWriter parent)
             {
                 m_parent = parent;
             }
@@ -93,7 +93,7 @@ namespace CTP
         /// Create a new writer with the provided root element.
         /// </summary>
         /// <param name="rootElement"></param>
-        public CtpMarkupWriter(string rootElement)
+        public CtpDocumentWriter(string rootElement)
         {
             m_rootElement = rootElement;
             m_endElementHelper = new ElementEndElementHelper(this);
@@ -149,7 +149,7 @@ namespace CTP
                 throw new ArgumentNullException(nameof(name));
 
             m_elementStack.Push(name);
-            m_stream.WriteBits2((uint)CtpMarkupNodeType.Element);
+            m_stream.WriteBits2((uint)CtpDocumentNodeType.Element);
             WriteName(name);
 
             return m_endElementHelper;
@@ -165,7 +165,7 @@ namespace CTP
                 throw new ObjectDisposedException("Once ToSttpMarkup has been called, no more data can be written to this object.");
 
             m_elementStack.Pop();
-            m_stream.WriteBits2((uint)CtpMarkupNodeType.EndElement);
+            m_stream.WriteBits2((uint)CtpDocumentNodeType.EndElement);
         }
 
 
@@ -184,7 +184,7 @@ namespace CTP
             if ((object)value == null)
                 throw new ArgumentNullException(nameof(value));
 
-            m_stream.WriteBits2((uint)CtpMarkupNodeType.Value);
+            m_stream.WriteBits2((uint)CtpDocumentNodeType.Value);
             WriteName(name);
             if (value.ValueTypeCode == m_prevName.PrevValueTypeCode)
             {
@@ -252,17 +252,17 @@ namespace CTP
         }
 
         /// <summary>
-        /// Completes the writing to an <see cref="CtpMarkup"/> and returns the completed buffer. This may be called multiple times.
+        /// Completes the writing to an <see cref="CtpDocument"/> and returns the completed buffer. This may be called multiple times.
         /// </summary>
         /// <returns></returns>
-        public CtpMarkup ToSttpMarkup()
+        public CtpDocument ToSttpMarkup()
         {
             if (!m_disposed)
             {
-                m_stream.WriteBits2((byte)CtpMarkupNodeType.EndOfDocument);
+                m_stream.WriteBits2((byte)CtpDocumentNodeType.EndOfDocument);
                 m_disposed = true;
             }
-            return new CtpMarkup(m_stream.ToArray());
+            return new CtpDocument(m_stream.ToArray());
         }
     }
 }
