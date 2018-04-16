@@ -4,22 +4,22 @@ using System.Linq;
 
 namespace Sttp.Codec
 {
-    public class CommandConfigureSubscription : CommandBase
+    public class CommandSubscribeToSome : CommandBase
     {
         public readonly string InstanceName;
         public readonly SttpValue[] DataPointIDs;
         public readonly double? SamplePerSecond;
 
-        public CommandConfigureSubscription(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
-            : base("ConfigureSubscription")
+        public CommandSubscribeToSome(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
+            : base("SubscribeToSome")
         {
             InstanceName = instanceName;
             DataPointIDs = dataPointIDs;
             SamplePerSecond = samplesPerSecond;
         }
 
-        public CommandConfigureSubscription(SttpMarkupReader reader)
-            : base("ConfigureSubscription")
+        public CommandSubscribeToSome(SttpMarkupReader reader)
+            : base("SubscribeToSome")
         {
             var element = reader.ReadEntireElement();
 

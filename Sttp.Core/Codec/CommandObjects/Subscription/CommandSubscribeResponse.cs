@@ -5,10 +5,10 @@ namespace Sttp.Codec
 {
     public class CommandSubscribeResponse : CommandBase
     {
-        public readonly byte RawChannelID;
+        public readonly int RawChannelID;
         public readonly Guid EncodingMethod;
 
-        public CommandSubscribeResponse(byte rawChannelID, Guid encodingMethod)
+        public CommandSubscribeResponse(int rawChannelID, Guid encodingMethod)
             : base("SubscribeResponse")
         {
             RawChannelID = rawChannelID;
@@ -20,7 +20,7 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            RawChannelID = (byte)element.GetValue("RawChannelID");
+            RawChannelID = (int)element.GetValue("RawChannelID");
             EncodingMethod = (Guid)element.GetValue("EncodingMethod");
 
             element.ErrorIfNotHandled();

@@ -7,9 +7,9 @@ namespace Sttp.Codec
 {
     public class CommandUnsubscribeResponse : CommandBase
     {
-        public readonly byte RawChannelID;
+        public readonly int RawChannelID;
 
-        public CommandUnsubscribeResponse(byte rawChannelID)
+        public CommandUnsubscribeResponse(int rawChannelID)
             : base("UnsubscribeResponse")
         {
             RawChannelID = rawChannelID;
@@ -19,11 +19,16 @@ namespace Sttp.Codec
             : base("UnsubscribeResponse")
         {
             var element = reader.ReadEntireElement();
+
+            RawChannelID = (int)element.GetValue("RawChannelID");
+
+
             element.ErrorIfNotHandled();
         }
 
         public override void Save(SttpMarkupWriter writer)
         {
+            writer.WriteValue("RawChannelID", RawChannelID);
 
         }
     }
