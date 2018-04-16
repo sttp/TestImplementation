@@ -48,42 +48,6 @@ namespace Sttp.Data
 
             //--   Fill the schema
             //-------------------------------------
-            Dictionary<string, string> primaryKeys = new Dictionary<string, string>();
-            Dictionary<string, List<MetadataForeignKeyMapping>> foreignKeys = new Dictionary<string, List<MetadataForeignKeyMapping>>();
-            List<string> tableNames = new List<string>();
-
-            foreach (DataTable table in schema.Tables)
-            {
-                if (table.PrimaryKey == null)
-                    throw new Exception("All tables must have 1 primary keys defined");
-                if (table.PrimaryKey.Length != 1)
-                    throw new Exception("All tables must have 1 primary keys defined");
-                tableNames.Add(table.TableName);
-                primaryKeys.Add(table.TableName, table.PrimaryKey[0].ColumnName);
-                foreignKeys.Add(table.TableName, new List<MetadataForeignKeyMapping>());
-            }
-
-            foreach (DataRelation relation in schema.Relations)
-            {
-                if (relation.ChildColumns.Length == 1 && relation.ParentColumns.Length == 1)
-                {
-                    //Foreign keys are only permitted with a single column primary key. This is an implementation issue, not a protocol issue.
-
-                    string table = relation.ChildTable.TableName;
-                    string column = relation.ChildColumns[0].ColumnName;
-                    string foreignTable = relation.ParentTable.TableName;
-                    string foreignColumn = relation.ParentColumns[0].ColumnName;
-
-                    if (primaryKeys[foreignTable] == foreignColumn)
-                    {
-                        var fk = new MetadataForeignKeyMapping(column, foreignTable);
-                        fk.LocalColumnIndex = relation.ChildTable.Columns.IndexOf(column);
-                        fk.TableIndex = tableNames.IndexOf(fk.ForeignTableName);
-
-                        foreignKeys[table].Add(fk);
-                    }
-                }
-            }
 
             foreach (DataTable table in schema.Tables)
             {
@@ -92,7 +56,7 @@ namespace Sttp.Data
                 {
                     columns.Add(new MetadataColumn(c.ColumnName, SttpValueTypeCodec.FromType(c.DataType)));
                 }
-                m_tables.Add(new MetadataTable(table.TableName, table.PrimaryKey[0].ColumnName, columns, foreignKeys[table.TableName]));
+                m_tables.Add(new MetadataTable(table.TableName, columns));
                 m_tablesLookup[table.TableName] = m_tables.Count - 1;
             }
 
@@ -101,7 +65,7 @@ namespace Sttp.Data
             {
                 var t = new MetadataSchemaTable();
                 t.TableName = table.TableName;
-                t.LastModifiedVersionNumber = table.LastModifiedSequenceNumber;
+                t.LastModifiedVersionNumber = table.LastModifiedVersionNumber;
                 foreach (var col in table.Columns)
                 {
                     t.Columns.Add(col);
@@ -154,33 +118,18 @@ namespace Sttp.Data
                     throw new Exception("This class is immutable");
                 if (!m_isReadOnly && value) //False changing to true
                 {
-                    foreach (var metadataTable in m_tables)
-                    {
-                        metadataTable.LookupForeignKeys(LookupForeignKey);
-                    }
-
                     for (var x = 0; x < m_tables.Count; x++)
                     {
                         var table = m_tables[x];
                         var t = MetadataSchema[x];
-                        if (t.LastModifiedVersionNumber != table.LastModifiedSequenceNumber)
+                        if (t.LastModifiedVersionNumber != table.LastModifiedVersionNumber)
                         {
-                            MetadataSchema[x] = t.Clone(table.LastModifiedSequenceNumber);
+                            MetadataSchema[x] = t.Clone(table.LastModifiedVersionNumber);
                         }
                     }
                     m_isReadOnly = true;
                 }
             }
-        }
-
-        private int LookupForeignKey(int i, SttpValue sttpValue)
-        {
-            return m_tables[i].LookupRowIndex(sttpValue);
-        }
-
-        public MetadataTable LookupTable(int index)
-        {
-            return m_tables[index];
         }
 
         public MetadataRepository CloneEditable()
