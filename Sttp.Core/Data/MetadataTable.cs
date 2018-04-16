@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp.Data
@@ -74,8 +75,8 @@ namespace Sttp.Data
                 if (table.GetValues(row) != fieldCount)
                     throw new Exception("Field count did not match");
 
-                List<SttpValue> values = new List<SttpValue>();
-                values.AddRange(row.Select(SttpValue.FromObject));
+                List<CtpValue> values = new List<CtpValue>();
+                values.AddRange(row.Select(CtpValue.FromObject));
 
                 newRows.Add(new MetadataRow(values));
             }

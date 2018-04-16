@@ -1,4 +1,6 @@
 ﻿using System;
+using CTP;
+using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -14,7 +16,7 @@ namespace Sttp.Codec
             VersionNumber = versionNumber;
         }
 
-        public CommandMetadataSchemaVersion(SttpMarkupReader reader)
+        public CommandMetadataSchemaVersion(CtpMarkupReader reader)
             : base("MetadataSchemaVersion")
         {
             var element = reader.ReadEntireElement();
@@ -25,7 +27,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public override void Save(SttpMarkupWriter writer)
+        public override void Save(CtpMarkupWriter writer)
         {
             writer.WriteValue("RuntimeID", RuntimeID);
             writer.WriteValue("VersionNumber", VersionNumber);

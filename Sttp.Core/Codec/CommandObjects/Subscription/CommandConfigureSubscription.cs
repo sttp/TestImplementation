@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CTP;
+using CTP.Codec;
 
 namespace Sttp.Codec
 {
     public class CommandSubscribeToSome : CommandBase
     {
         public readonly string InstanceName;
-        public readonly SttpValue[] DataPointIDs;
+        public readonly CtpValue[] DataPointIDs;
         public readonly double? SamplePerSecond;
 
-        public CommandSubscribeToSome(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
+        public CommandSubscribeToSome(string instanceName, CtpValue[] dataPointIDs, double? samplesPerSecond)
             : base("SubscribeToSome")
         {
             InstanceName = instanceName;
@@ -18,7 +20,7 @@ namespace Sttp.Codec
             SamplePerSecond = samplesPerSecond;
         }
 
-        public CommandSubscribeToSome(SttpMarkupReader reader)
+        public CommandSubscribeToSome(CtpMarkupReader reader)
             : base("SubscribeToSome")
         {
             var element = reader.ReadEntireElement();
@@ -31,7 +33,7 @@ namespace Sttp.Codec
         }
 
 
-        public override void Save(SttpMarkupWriter writer)
+        public override void Save(CtpMarkupWriter writer)
         {
             writer.WriteValue("InstanceName", InstanceName);
             using (writer.StartElement("PointList"))

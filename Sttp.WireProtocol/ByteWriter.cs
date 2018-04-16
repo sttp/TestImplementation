@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Sttp.Codec;
 
-namespace Sttp
+namespace CTP
 {
     public unsafe class ByteWriter
     {
@@ -238,17 +237,17 @@ namespace Sttp
 
         #endregion
 
-        public void Write(SttpTime value)
+        public void Write(CtpTime value)
         {
             Write(value.Ticks);
         }
 
-        public void Write(SttpBuffer value)
+        public void Write(CtpBuffer value)
         {
             value.Write(this);
         }
 
-        public void Write(SttpMarkup value)
+        public void Write(CtpMarkup value)
         {
             value.Write(this);
         }

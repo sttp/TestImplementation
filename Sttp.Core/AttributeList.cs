@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CTP;
 
 namespace Sttp
 {
@@ -11,7 +12,7 @@ namespace Sttp
         private Dictionary<string, Table> m_tables;
 
         public int Version { get; private set; } //a change counter
-        public void Set(string table, string attributeName, SttpValueTypeCode attributeTypeCode, object value)
+        public void Set(string table, string attributeName, CtpTypeCode attributeTypeCode, object value)
         {
             //ToDO: Update and the sort
 
@@ -33,7 +34,7 @@ namespace Sttp
             }
         }
 
-        public IEnumerable<Tuple<string, string, SttpValueTypeCode>> GetSchema()
+        public IEnumerable<Tuple<string, string, CtpTypeCode>> GetSchema()
         {
             foreach (var table in m_tables)
             {
@@ -59,7 +60,7 @@ namespace Sttp
         {
             public Dictionary<string, Column> Columns;
 
-            public Column this[string columnName, SttpValueTypeCode columnTypeCode]
+            public Column this[string columnName, CtpTypeCode columnTypeCode]
             {
                 get
                 {
@@ -76,11 +77,11 @@ namespace Sttp
 
         private class Column
         {
-            public SttpValueTypeCode ColumnTypeCode;
+            public CtpTypeCode ColumnTypeCode;
 
             public object Value;
 
-            public Column(SttpValueTypeCode columnTypeCode)
+            public Column(CtpTypeCode columnTypeCode)
             {
                 ColumnTypeCode = columnTypeCode;
             }

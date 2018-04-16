@@ -2,9 +2,8 @@
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
-using Sttp.IO.Checksums;
 
-namespace Sttp.Codec
+namespace CTP.Codec
 {
 
     /// <summary>
@@ -56,19 +55,19 @@ namespace Sttp.Codec
             EnsureCapacity(BufferOffset + 1 + length);
             Array.Copy(payload, position, m_buffer, BufferOffset, length);
 
-            DataPacketHeader header;
+            CtpHeader header;
             int headerOffset = BufferOffset;
             if (rawCode == 0)
             {
-                header = DataPacketHeader.CommandRaw0;
+                header = CtpHeader.CommandRaw0;
             }
             else if (rawCode == 1)
             {
-                header = DataPacketHeader.CommandRaw1;
+                header = CtpHeader.CommandRaw1;
             }
             else
             {
-                header = DataPacketHeader.CommandRawInt32;
+                header = CtpHeader.CommandRawInt32;
                 m_buffer[BufferOffset - 4] = (byte)(rawCode >> 24);
                 m_buffer[BufferOffset - 3] = (byte)(rawCode >> 16);
                 m_buffer[BufferOffset - 2] = (byte)(rawCode >> 8);
@@ -85,7 +84,7 @@ namespace Sttp.Codec
         /// <param name="command">The command to send.</param>
         public void SendMarkupCommand(CommandBase command)
         {
-            var writer = new SttpMarkupWriter(command.CommandName);
+            var writer = new CtpMarkupWriter(command.CommandName);
             command.Save(writer);
             SendMarkupCommand(writer);
         }
@@ -95,14 +94,14 @@ namespace Sttp.Codec
         /// the other overload that contains <see cref="CommandBase"/> if one exists.
         /// </summary>
         /// <param name="markup">The data to send.</param>
-        public void SendMarkupCommand(SttpMarkupWriter markup)
+        public void SendMarkupCommand(CtpMarkupWriter markup)
         {
             //ToDo: Consider changing the MarkupCommand to split the RootElement and the other payload.
-            SttpMarkup data = markup.ToSttpMarkup();
+            CtpMarkup data = markup.ToSttpMarkup();
             EnsureCapacity(BufferOffset + data.Length);
             data.CopyTo(m_buffer, BufferOffset);
 
-            EncodeAndSend(DataPacketHeader.CommandMarkup, m_buffer, BufferOffset, data.Length);
+            EncodeAndSend(CtpHeader.CommandMarkup, m_buffer, BufferOffset, data.Length);
         }
 
         /// <summary>
@@ -128,7 +127,7 @@ namespace Sttp.Codec
         /// <param name="buffer"></param>
         /// <param name="offset">the offset of the buffer</param>
         /// <param name="length">The length of the data to send</param>
-        private void EncodeAndSend(DataPacketHeader header, byte[] buffer, int offset, int length)
+        private void EncodeAndSend(CtpHeader header, byte[] buffer, int offset, int length)
         {
             if (length > m_sessionDetails.MaximumCommandSize)
             {
@@ -140,7 +139,7 @@ namespace Sttp.Codec
             {
                 if (TryCompressPayload(buffer, offset, length, out int newSize, out uint checksum))
                 {
-                    header |= DataPacketHeader.IsCompressed;
+                    header |= CtpHeader.IsCompressed;
                     offset -= 8;
                     buffer[offset + 0] = (byte)(length >> 24);
                     buffer[offset + 1] = (byte)(length >> 16);
@@ -161,14 +160,14 @@ namespace Sttp.Codec
             {
                 //This packet doesn't have to be fragmented.
                 offset -= 2;
-                header |= (DataPacketHeader)packetLength;
+                header |= (CtpHeader)packetLength;
                 buffer[offset + 0] = (byte)((ushort)header >> 8);
                 buffer[offset + 1] = (byte)((ushort)header);
                 SendNewPacket(buffer, offset, packetLength);
             }
             else
             {
-                header |= DataPacketHeader.IsFragmented;
+                header |= CtpHeader.IsFragmented;
 
                 uint checksum = Crc32.Compute(buffer, offset, length);
 
@@ -187,7 +186,7 @@ namespace Sttp.Codec
             }
         }
 
-        private void SendFragment(DataPacketHeader header, byte[] buffer, int offset, int length)
+        private void SendFragment(CtpHeader header, byte[] buffer, int offset, int length)
         {
             int bytesSentPerFragment = m_sessionDetails.MaximumPacketSize - 10;
             int bytesToSendThisFragment = Math.Min(bytesSentPerFragment, length);
@@ -201,7 +200,7 @@ namespace Sttp.Codec
 
             int fragmentID = Interlocked.Increment(ref m_fragmentID);
 
-            DataPacketHeader headerToSend = header | (DataPacketHeader)packetLength;
+            CtpHeader headerToSend = header | (CtpHeader)packetLength;
 
             buffer[offset - 10] = (byte)((ushort)headerToSend >> 8);
             buffer[offset - 9] = (byte)((ushort)headerToSend);
@@ -225,7 +224,7 @@ namespace Sttp.Codec
                 packetLength = bytesToSendThisFragment + 10;
                 currentFragment++;
 
-                headerToSend = header | (DataPacketHeader)packetLength;
+                headerToSend = header | (CtpHeader)packetLength;
 
                 buffer[offset - 10] = (byte)((ushort)headerToSend >> 8);
                 buffer[offset - 9] = (byte)((ushort)headerToSend);

@@ -13,6 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sttp.Core\Sttp.Core.csproj" />
-    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj" />
+    <ProjectReference Include="..\Sttp.WireProtocol\CTP.csproj" />
   </ItemGroup>
 </Project>

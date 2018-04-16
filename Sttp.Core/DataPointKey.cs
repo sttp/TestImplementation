@@ -1,4 +1,5 @@
 ﻿using System;
+using CTP;
 
 namespace Sttp
 {
@@ -15,7 +16,7 @@ namespace Sttp
         /// Unique data point identifier
         /// </summary>
         public readonly Guid UniqueID;
-        public readonly SttpValueTypeCode TypeCode;   // Value type of `DataPoint`
+        public readonly CtpTypeCode TypeCode;   // Value type of `DataPoint`
         public readonly bool HasQuality;
 
         /// <summary>

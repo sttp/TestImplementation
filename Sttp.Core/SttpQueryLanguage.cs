@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CTP;
 
 namespace Sttp
 {
@@ -62,17 +63,17 @@ namespace Sttp
     public class SttpQueryLanguage
     {
         public Dictionary<string, List<string>> Sections;
-        public Dictionary<string, SttpValue> Literals;
+        public Dictionary<string, CtpValue> Literals;
 
-        public SttpQueryLanguage(string expression, Dictionary<string, SttpValue> literals = null)
+        public SttpQueryLanguage(string expression, Dictionary<string, CtpValue> literals = null)
         {
             if (literals != null)
             {
-                Literals = new Dictionary<string, SttpValue>(literals);
+                Literals = new Dictionary<string, CtpValue>(literals);
             }
             else
             {
-                Literals = new Dictionary<string, SttpValue>();
+                Literals = new Dictionary<string, CtpValue>();
             }
             Sections = new Dictionary<string, List<string>>();
 
@@ -112,7 +113,7 @@ namespace Sttp
                         }
                         else
                         {
-                            SttpValue value = ParseLiteral(ToTrimString(sbLiteral));
+                            CtpValue value = ParseLiteral(ToTrimString(sbLiteral));
                             while (Literals.ContainsKey($"{{{param}}}"))
                             {
                                 param++;
@@ -265,10 +266,10 @@ namespace Sttp
             return sb.ToString().Trim();
         }
 
-        private SttpValue ParseLiteral(string literal)
+        private CtpValue ParseLiteral(string literal)
         {
             //ToDo: Actually attempt to parse the literal
-            return (SttpValue)literal;
+            return (CtpValue)literal;
         }
 
         private static readonly char[] TrimChars = ", \t\r\n".ToCharArray();

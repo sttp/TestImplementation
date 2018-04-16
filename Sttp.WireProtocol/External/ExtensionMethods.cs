@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace Sttp
+namespace CTP
 {
     /// <summary>
     /// Defines extension functions related to <see cref="Array"/> manipulation.

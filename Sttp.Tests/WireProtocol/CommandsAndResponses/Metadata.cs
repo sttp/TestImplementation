@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using CTP;
+using CTP.Codec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 
@@ -22,15 +24,15 @@ namespace Sttp.Tests.CommandsAndResponses
             var t = new MetadataSchemaTable();
             t.TableName = "Measurement";
             t.LastModifiedVersionNumber = 382;
-            t.Columns.Add(new MetadataColumn("ID", SttpValueTypeCode.Int64));
-            t.Columns.Add(new MetadataColumn("Name", SttpValueTypeCode.String));
-            t.Columns.Add(new MetadataColumn("DeviceID", SttpValueTypeCode.Int64));
+            t.Columns.Add(new MetadataColumn("ID", CtpTypeCode.Int64));
+            t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
+            t.Columns.Add(new MetadataColumn("DeviceID", CtpTypeCode.Int64));
             tbl.Add(t);
             t = new MetadataSchemaTable();
             t.TableName = "Device";
             t.LastModifiedVersionNumber = 382;
-            t.Columns.Add(new MetadataColumn("ID", SttpValueTypeCode.Int64));
-            t.Columns.Add(new MetadataColumn("Name", SttpValueTypeCode.String));
+            t.Columns.Add(new MetadataColumn("ID", CtpTypeCode.Int64));
+            t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
             Console.WriteLine(cmd.ToString());

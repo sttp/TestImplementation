@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CTP;
 
 namespace Sttp.Data
 {
     public class MetadataRow
     {
-        public readonly List<SttpValue> Fields;
+        public readonly List<CtpValue> Fields;
 
-        public MetadataRow(List<SttpValue> fields)
+        public MetadataRow(List<CtpValue> fields)
         {
             Fields = fields;
         }

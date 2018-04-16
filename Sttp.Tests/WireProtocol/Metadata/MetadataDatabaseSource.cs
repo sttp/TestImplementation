@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CTP;
+using CTP.Codec;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 using Sttp.Core.Data;
@@ -117,10 +119,10 @@ namespace Sttp.Tests
 
             MetadataQueryTable tbl = new MetadataQueryTable(cmd.BeginMetadataResponse);
             var decoder = new MetadataRowDecoder(cmd.BeginMetadataResponse);
-            SttpValueMutable[] values = new SttpValueMutable[cmd.BeginMetadataResponse.Columns.Count];
+            CtpValueMutable[] values = new CtpValueMutable[cmd.BeginMetadataResponse.Columns.Count];
             for (int x = 0; x < values.Length; x++)
             {
-                values[x] = new SttpValueMutable();
+                values[x] = new CtpValueMutable();
             }
             while ((cmd = reader.NextCommand()) != null)
             {

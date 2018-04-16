@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp.Codec
@@ -16,7 +17,7 @@ namespace Sttp.Codec
 
         }
 
-        public MetadataSchemaTable(SttpMarkupElement element)
+        public MetadataSchemaTable(CtpMarkupElement element)
         {
             TableName = (string)element.GetValue("TableName");
             LastModifiedVersionNumber = (long)element.GetValue("LastModifiedVersionNumber");
@@ -28,7 +29,7 @@ namespace Sttp.Codec
             element.ErrorIfNotHandled();
         }
 
-        public void Save(SttpMarkupWriter sml)
+        public void Save(CtpMarkupWriter sml)
         {
             sml.WriteValue("TableName", TableName);
             sml.WriteValue("LastModifiedVersionNumber", LastModifiedVersionNumber);

@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace Sttp.Codec
+namespace CTP.Codec
 {
     public static class DeflateHelper
     {

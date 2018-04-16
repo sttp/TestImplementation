@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sttp.IO.Checksums;
 
-namespace Sttp.Codec
+namespace CTP.Codec
 {
     /// <summary>
     /// This class assists in the reassembly of fragmented data.
@@ -35,7 +34,7 @@ namespace Sttp.Codec
         /// <summary>
         /// The header that was included in this packet.
         /// </summary>
-        public DataPacketHeader Header;
+        public CtpHeader Header;
 
         public FragmentReassembly()
         {
@@ -51,7 +50,7 @@ namespace Sttp.Codec
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
         /// <param name="length"></param>
-        public void ProcessFragment(DataPacketHeader header, byte[] buffer, int offset, int length)
+        public void ProcessFragment(CtpHeader header, byte[] buffer, int offset, int length)
         {
             int fragmentID = ToInt32(buffer, offset);
             int currentFragment = (int)(ushort)ToInt16(buffer, offset + 4); //Current fragment

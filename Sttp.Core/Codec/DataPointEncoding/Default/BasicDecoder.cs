@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CTP;
 
 namespace Sttp.Codec.DataPoint
 {
@@ -9,9 +10,9 @@ namespace Sttp.Codec.DataPoint
     {
         private ByteReader m_stream;
         private int m_lastRuntimeID = 0;
-        private SttpValueMutable m_lastTimestamp = new SttpValueMutable();
+        private CtpValueMutable m_lastTimestamp = new CtpValueMutable();
         private long m_lastQuality = 0;
-        private SttpValueTypeCode m_lastValueCode;
+        private CtpTypeCode m_lastValueCode;
 
         public BasicDecoder()
         {
@@ -23,7 +24,7 @@ namespace Sttp.Codec.DataPoint
             m_lastRuntimeID = 0;
             m_lastTimestamp.SetNull();
             m_lastQuality = 0;
-            m_lastValueCode = SttpValueTypeCode.Null;
+            m_lastValueCode = CtpTypeCode.Null;
             m_stream.SetBuffer(data, 0, data.Length);
         }
 
@@ -59,12 +60,12 @@ namespace Sttp.Codec.DataPoint
             else
             {
                 dataPoint.DataPointRuntimeID = -1;
-                SttpValueEncodingNative.Load(m_stream, dataPoint.DataPointID);
+                CtpValueEncodingNative.Load(m_stream, dataPoint.DataPointID);
             }
 
             if (hasExtendedData)
             {
-                SttpValueEncodingNative.Load(m_stream, dataPoint.ExtendedData);
+                CtpValueEncodingNative.Load(m_stream, dataPoint.ExtendedData);
             }
             else
             {
@@ -79,17 +80,17 @@ namespace Sttp.Codec.DataPoint
 
             if (timeChanged)
             {
-                SttpValueEncodingNative.Load(m_stream, m_lastTimestamp);
+                CtpValueEncodingNative.Load(m_stream, m_lastTimestamp);
             }
 
             dataPoint.Time.SetValue(m_lastTimestamp);
 
             if (typeChanged)
             {
-                m_lastValueCode = (SttpValueTypeCode)m_stream.ReadBits4();
+                m_lastValueCode = (CtpTypeCode)m_stream.ReadBits4();
             }
 
-            SttpValueEncodingWithoutType.Load(m_stream, m_lastValueCode, dataPoint.Value);
+            CtpValueEncodingWithoutType.Load(m_stream, m_lastValueCode, dataPoint.Value);
             return true;
         }
 

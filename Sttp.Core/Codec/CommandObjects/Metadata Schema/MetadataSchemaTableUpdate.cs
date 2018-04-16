@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp.Codec
@@ -15,14 +16,14 @@ namespace Sttp.Codec
             LastModifiedVersionNumber = lastModifiedVersionNumber;
         }
 
-        public MetadataSchemaTableUpdate(SttpMarkupElement element)
+        public MetadataSchemaTableUpdate(CtpMarkupElement element)
         {
             TableName = (string)element.GetValue("TableName");
             LastModifiedVersionNumber = (long)element.GetValue("LastModifiedVersionNumber");
             element.ErrorIfNotHandled();
         }
 
-        public void Save(SttpMarkupWriter sml)
+        public void Save(CtpMarkupWriter sml)
         {
             sml.WriteValue("TableName", TableName);
             sml.WriteValue("LastModifiedVersionNumber", LastModifiedVersionNumber);

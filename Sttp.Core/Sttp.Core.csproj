@@ -21,9 +21,9 @@
     <PackageReference Include="Microsoft.Bcl" Version="1.1.10" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj" />
+    <Folder Include="Codec\CommandObjects\Negotiate Session\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Codec\CommandObjects\Negotiate Session\" />
+    <ProjectReference Include="..\Sttp.WireProtocol\CTP.csproj" />
   </ItemGroup>
 </Project>

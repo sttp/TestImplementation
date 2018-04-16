@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp.Codec
@@ -25,14 +26,14 @@ namespace Sttp.Codec
 
         public int Size => m_stream.Length;
 
-        public void AddRow(SttpValueMutable[] row)
+        public void AddRow(CtpValueMutable[] row)
         {
             if (row.Length != m_columns.Count)
                 throw new ArgumentException("The number of elements in array does not match the number of columns in the response", nameof(row));
 
             for (int x = 0; x < row.Length; x++)
             {
-                SttpValueEncodingNative.Save(m_stream, row[x]);
+                CtpValueEncodingNative.Save(m_stream, row[x]);
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp.Codec.DataPoint
@@ -13,9 +14,9 @@ namespace Sttp.Codec.DataPoint
         private ByteWriter m_stream;
 
         private int m_lastRuntimeID = 0;
-        private readonly SttpValueMutable m_lastTimestamp = new SttpValueMutable();
+        private readonly CtpValueMutable m_lastTimestamp = new CtpValueMutable();
         private long m_lastQuality = 0;
-        private SttpValueTypeCode m_lastValueCode;
+        private CtpTypeCode m_lastValueCode;
 
         public BasicEncoder(int maxRuntimeIDCache)
         {
@@ -28,7 +29,7 @@ namespace Sttp.Codec.DataPoint
             m_lastRuntimeID = 0;
             m_lastTimestamp.SetNull();
             m_lastQuality = 0;
-            m_lastValueCode = SttpValueTypeCode.Null;
+            m_lastValueCode = CtpTypeCode.Null;
             m_stream.Clear();
         }
 
@@ -62,12 +63,12 @@ namespace Sttp.Codec.DataPoint
             }
             else
             {
-                SttpValueEncodingNative.Save(m_stream, point.DataPointID);
+                CtpValueEncodingNative.Save(m_stream, point.DataPointID);
             }
 
             if (hasExtendedData)
             {
-                SttpValueEncodingNative.Save(m_stream, point.ExtendedData);
+                CtpValueEncodingNative.Save(m_stream, point.ExtendedData);
             }
 
             if (qualityChanged)
@@ -77,7 +78,7 @@ namespace Sttp.Codec.DataPoint
 
             if (timeChanged)
             {
-                SttpValueEncodingNative.Save(m_stream, point.Time);
+                CtpValueEncodingNative.Save(m_stream, point.Time);
                 m_lastTimestamp.SetValue(point.Time);
             }
 
@@ -87,7 +88,7 @@ namespace Sttp.Codec.DataPoint
                 m_lastValueCode = point.Value.ValueTypeCode;
             }
 
-            SttpValueEncodingWithoutType.Save(m_stream, point.Value);
+            CtpValueEncodingWithoutType.Save(m_stream, point.Value);
         }
 
         public byte[] ToArray()

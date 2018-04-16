@@ -1,4 +1,6 @@
 ﻿using System;
+using CTP;
+using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -8,7 +10,7 @@ namespace Sttp.Codec
 
         public CommandCode CommandCode { get; }
         public string CommandName { get; }
-        private SttpMarkup m_markup;
+        private CtpMarkup m_markup;
 
         static CommandObjects()
         {
@@ -67,7 +69,7 @@ namespace Sttp.Codec
             return m_markup.ToXML();
         }
 
-        public SttpMarkup Markup => m_markup;
+        public CtpMarkup Markup => m_markup;
 
 
     }

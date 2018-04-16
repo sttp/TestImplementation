@@ -26,14 +26,13 @@
 //******************************************************************************************************
 
 using System;
-using Sttp;
 
-namespace Sttp.IO.Checksums
+namespace CTP
 {
     /// <summary>
     /// Generates a byte-wise 32-bit CRC calculation.
     /// </summary>
-    public sealed class Crc32
+    internal sealed class Crc32
     {
         #region [ Members ]
 

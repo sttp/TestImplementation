@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Sttp.Codec;
 
-namespace Sttp
+namespace CTP
 {
     public unsafe class ByteReader
     {
@@ -214,19 +213,19 @@ namespace Sttp
 
         #endregion
 
-        public SttpMarkup ReadSttpMarkup()
+        public CtpMarkup ReadSttpMarkup()
         {
-            return new SttpMarkup(this);
+            return new CtpMarkup(this);
         }
 
-        public SttpBuffer ReadSttpBuffer()
+        public CtpBuffer ReadSttpBuffer()
         {
-            return new SttpBuffer(this);
+            return new CtpBuffer(this);
         }
 
-        public SttpTime ReadSttpTime()
+        public CtpTime ReadSttpTime()
         {
-            return new SttpTime(ReadInt64());
+            return new CtpTime(ReadInt64());
         }
 
         #region [ Read Bits ]

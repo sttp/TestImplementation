@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp
@@ -10,7 +11,7 @@ namespace Sttp
     {
         public string QueryText;
         public string SyntaxLanguage;
-        public List<Tuple<string, SttpValue>> Literals = new List<Tuple<string, SttpValue>>();
+        public List<Tuple<string, CtpValue>> Literals = new List<Tuple<string, CtpValue>>();
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {

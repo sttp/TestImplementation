@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using CTP;
 using Sttp.Codec;
 
 namespace Sttp.Data
@@ -25,7 +26,7 @@ namespace Sttp.Data
         /// <summary>
         /// All possible rows.
         /// </summary>
-        public List<SttpValue[]> Rows;
+        public List<CtpValue[]> Rows;
         public Guid RuntimeID;
         public long VersionNumber;
 
@@ -59,12 +60,12 @@ namespace Sttp.Data
             VersionNumber = command.VersionNumber;
             TableName = command.TableName;
             Columns = new List<MetadataColumn>(command.Columns);
-            Rows = new List<SttpValue[]>();
+            Rows = new List<CtpValue[]>();
         }
 
-        public void AddRow(SttpValueMutable[] values)
+        public void AddRow(CtpValueMutable[] values)
         {
-            SttpValue[] item = new SttpValue[values.Length];
+            CtpValue[] item = new CtpValue[values.Length];
             for (int x = 0; x < values.Length; x++)
             {
                 item[x] = values[x].CloneAsImmutable();

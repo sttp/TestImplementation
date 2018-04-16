@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using CTP;
+using CTP.Codec;
 
 namespace Sttp.Codec
 {
@@ -91,7 +93,7 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(command);
         }
 
-        public void SendCustomCommand(SttpMarkupWriter command)
+        public void SendCustomCommand(CtpMarkupWriter command)
         {
             m_encoder.SendMarkupCommand(command);
         }

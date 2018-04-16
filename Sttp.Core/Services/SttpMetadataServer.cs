@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Threading;
+using CTP;
 using Sttp.Codec;
 using Sttp.Core;
 using Sttp.Core.Data;
@@ -103,10 +104,10 @@ namespace Sttp.Services
                 int rowCount = 0;
 
                 var rowEncoder = new MetadataRowEncoder(columns);
-                SttpValueMutable[] values = new SttpValueMutable[columns.Count];
+                CtpValueMutable[] values = new CtpValueMutable[columns.Count];
                 for (int x = 0; x < values.Length; x++)
                 {
-                    values[x] = new SttpValueMutable();
+                    values[x] = new CtpValueMutable();
                 }
                 encoder.BeginMetadataResponse(channelID, Guid.Empty, repository.RuntimeID, repository.VersionNumber, command.Table, columns);
                 foreach (var row in table.Rows)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using CTP;
 
 namespace Sttp
 {
@@ -15,65 +16,65 @@ namespace Sttp
         //    return data.ToNativeType(typeCode);
         //}
 
-        public static SttpValueTypeCode FromType(Type columnDataType)
+        public static CtpTypeCode FromType(Type columnDataType)
         {
             if (columnDataType == typeof(sbyte))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(Int16))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(Int32))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(Int64))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(Byte))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(UInt16))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(UInt32))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(UInt64))
-                return SttpValueTypeCode.Int64;
+                return CtpTypeCode.Int64;
             if (columnDataType == typeof(Double))
-                return SttpValueTypeCode.Double;
+                return CtpTypeCode.Double;
             if (columnDataType == typeof(Single))
-                return SttpValueTypeCode.Single;
+                return CtpTypeCode.Single;
             if (columnDataType == typeof(DateTime))
-                return SttpValueTypeCode.SttpTime;
+                return CtpTypeCode.CtpTime;
             if (columnDataType == typeof(bool))
-                return SttpValueTypeCode.Boolean;
+                return CtpTypeCode.Boolean;
             if (columnDataType == typeof(Guid))
-                return SttpValueTypeCode.Guid;
+                return CtpTypeCode.Guid;
             if (columnDataType == typeof(String))
-                return SttpValueTypeCode.String;
+                return CtpTypeCode.String;
             if (columnDataType == typeof(byte[]))
-                return SttpValueTypeCode.SttpBuffer;
+                return CtpTypeCode.CtpBuffer;
 
-            return SttpValueTypeCode.Null;
+            return CtpTypeCode.Null;
         }
 
-        public static Type ToType(SttpValueTypeCode columnTypeCode)
+        public static Type ToType(CtpTypeCode columnTypeCode)
         {
             switch (columnTypeCode)
             {
-                case SttpValueTypeCode.Null:
+                case CtpTypeCode.Null:
                     return typeof(DBNull);
-                case SttpValueTypeCode.Int64:
+                case CtpTypeCode.Int64:
                     return typeof(Int64);
-                case SttpValueTypeCode.Single:
+                case CtpTypeCode.Single:
                     return typeof(Single);
-                case SttpValueTypeCode.Double:
+                case CtpTypeCode.Double:
                     return typeof(Double);
-                case SttpValueTypeCode.SttpTime:
-                    return typeof(SttpTime);
-                case SttpValueTypeCode.Boolean:
+                case CtpTypeCode.CtpTime:
+                    return typeof(CtpTime);
+                case CtpTypeCode.Boolean:
                     return typeof(Boolean);
-                case SttpValueTypeCode.Guid:
+                case CtpTypeCode.Guid:
                     return typeof(Guid);
-                case SttpValueTypeCode.String:
+                case CtpTypeCode.String:
                     return typeof(String);
-                case SttpValueTypeCode.SttpBuffer:
+                case CtpTypeCode.CtpBuffer:
                     return typeof(byte[]);
-                case SttpValueTypeCode.SttpMarkup:
+                case CtpTypeCode.CtpMarkup:
                     return typeof(byte[]);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(columnTypeCode), columnTypeCode, null);

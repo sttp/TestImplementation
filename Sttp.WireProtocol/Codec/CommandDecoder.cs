@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
-using Sttp.IO.Checksums;
 
-namespace Sttp.Codec
+namespace CTP.Codec
 {
     /// <summary>
     /// Decodes an incoming byte stream into a series of command objects. This class will align packets, reassemble fragments, and decompress packets. 
@@ -36,7 +35,7 @@ namespace Sttp.Codec
         private FragmentReassembly m_fragmentReassembly = new FragmentReassembly();
 
         private CommandCode m_command;
-        private SttpMarkup m_markupPayload;
+        private CtpMarkup m_markupPayload;
         private byte[] m_rawCommandPayload;
         private int m_rawCommandCode;
 
@@ -64,7 +63,7 @@ namespace Sttp.Codec
         /// Valid if <see cref="NextCommand"/> returned true. And the command 
         /// This is the command that was decoded.
         /// </summary>
-        public SttpMarkup MarkupPayload
+        public CtpMarkup MarkupPayload
         {
             get
             {
@@ -164,12 +163,12 @@ namespace Sttp.Codec
             if (m_inboundBufferLength < 2)
                 return false;
 
-            DataPacketHeader header = (DataPacketHeader)ToUInt16(m_inboundBuffer, m_inboundBufferCurrentPosition);
-            int packetLength = (int)(header & DataPacketHeader.PacketLengthMask);
+            CtpHeader header = (CtpHeader)ToUInt16(m_inboundBuffer, m_inboundBufferCurrentPosition);
+            int packetLength = (int)(header & CtpHeader.PacketLengthMask);
             if (m_inboundBufferLength < packetLength)
                 return false;
 
-            if ((header & DataPacketHeader.IsFragmented) == DataPacketHeader.IsFragmented)
+            if ((header & CtpHeader.IsFragmented) == CtpHeader.IsFragmented)
             {
                 m_fragmentReassembly.ProcessFragment(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 2, packetLength - 2);
                 m_inboundBufferCurrentPosition += packetLength;
@@ -191,9 +190,9 @@ namespace Sttp.Codec
             }
         }
 
-        private void ProcessPacket(DataPacketHeader header, byte[] buffer, int position, int length)
+        private void ProcessPacket(CtpHeader header, byte[] buffer, int position, int length)
         {
-            if ((header & DataPacketHeader.IsCompressed) == DataPacketHeader.IsCompressed)
+            if ((header & CtpHeader.IsCompressed) == CtpHeader.IsCompressed)
             {
                 //Decompresses the data.
                 int inflatedSize = ToInt32(buffer, position);
@@ -225,24 +224,24 @@ namespace Sttp.Codec
             buffer.ValidateParameters(position, length);
 
             byte[] results;
-            if ((header & DataPacketHeader.CommandMask) == DataPacketHeader.CommandMarkup)
+            if ((header & CtpHeader.CommandMask) == CtpHeader.CommandMarkup)
             {
                 m_command = CommandCode.MarkupCommand;
                 int markupLength = length;
                 int markupStart = position;
                 results = new byte[markupLength];
                 Array.Copy(buffer, markupStart, results, 0, markupLength);
-                m_markupPayload = new SttpMarkup(results);
+                m_markupPayload = new CtpMarkup(results);
             }
             else
             {
                 m_command = CommandCode.Raw;
 
-                if ((header & DataPacketHeader.CommandMask) == DataPacketHeader.CommandRaw0)
+                if ((header & CtpHeader.CommandMask) == CtpHeader.CommandRaw0)
                 {
                     m_rawCommandCode = 0;
                 }
-                else if ((header & DataPacketHeader.CommandMask) == DataPacketHeader.CommandRaw1)
+                else if ((header & CtpHeader.CommandMask) == CtpHeader.CommandRaw1)
                 {
                     m_rawCommandCode = 1;
                 }
