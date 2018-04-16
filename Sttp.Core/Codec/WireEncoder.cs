@@ -86,63 +86,6 @@ namespace Sttp.Codec
             m_encoder.SendMarkupCommand(new CommandEndMetadataResponse(rawChannelID, rowCount));
         }
 
-        //private void SendNewPacket(byte[] buffer, int position, int length)
-        //{
-        //    NewPacket?.Invoke(buffer, position, length);
-        //}
-
-        //public void KeepAlive()
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandKeepAlive());
-        //}
-
-        //public void GetMetadataProcedure(string procedureName, SttpMarkup options)
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandGetMetadataProcedure(procedureName, options));
-        //}
-
-        //public void DataPointRequest(string instanceName, SttpTime startTime, SttpTime stopTime, SttpValue[] dataPointIDs, double? samplesPerSecond)
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandDataPointRequest(instanceName, startTime, stopTime, dataPointIDs, samplesPerSecond));
-        //}
-
-        //public void DataPointRequestCompleted()
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandDataPointResponseCompleted());
-        //}
-
-        //public void MapRuntimeIDs(List<SttpDataPointID> points)
-        //{
-        //    throw new NotImplementedException();
-        //    //Need some more work here. there's probably some kind of request/reply or sent with data point stream.
-
-        //    //m_stream.Clear();
-        //    //m_stream.Write(points.Count);
-        //    //foreach (var point in points)
-        //    //{
-        //    //    m_stream.Write(point.RuntimeID);
-        //    //    m_stream.Write((byte)point.ValueTypeCode);
-        //    //    switch (point.ValueTypeCode)
-        //    //    {
-        //    //        case SttpDataPointIDTypeCode.Null:
-        //    //            throw new InvalidOperationException("A registered pointID cannot be null");
-        //    //        case SttpDataPointIDTypeCode.Guid:
-        //    //            m_stream.Write(point.AsGuid);
-        //    //            break;
-        //    //        case SttpDataPointIDTypeCode.String:
-        //    //            m_stream.Write(point.AsString);
-        //    //            break;
-        //    //        case SttpDataPointIDTypeCode.SttpMarkup:
-        //    //            m_stream.Write(point.AsSttpMarkup);
-        //    //            break;
-        //    //        default:
-        //    //            throw new ArgumentOutOfRangeException();
-        //    //    }
-        //    //}
-        //    //m_stream.Send(CommandCode.MapRuntimeIDs);
-        //}
-
-
         public void SendCustomCommand(CommandBase command)
         {
             m_encoder.SendMarkupCommand(command);
@@ -152,51 +95,6 @@ namespace Sttp.Codec
         {
             m_encoder.SendMarkupCommand(command);
         }
-
-        //public void NegotiateSession(SttpMarkup config)
-        //{
-        //    m_encoder.NegotiateSession(config);
-        //}
-
-        //public void NoOp(bool shouldEcho)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("NoOp"))
-        //    {
-        //        sml.WriteValue("ShouldEcho", shouldEcho);
-
-        //    }
-        //    m_encoder.Heartbeat(sml.ToSttpMarkup());
-        //}
-
-        //public void RequestFailed(string failedCommand, bool terminateConnection, string reason, string details)
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandRequestFailed(failedCommand, terminateConnection, reason, details));
-        //}
-
-        //public void RequestSucceeded(string commandSucceeded, string reason, string details)
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandRequestSucceeded(commandSucceeded, reason, details));
-        //}
-
-        //public void Subscribe(string instanceName, SttpValue[] dataPointIDs, double? samplesPerSecond)
-        //{
-        //    m_encoder.SendMarkupCommand(new CommandConfigureSubscription(instanceName, dataPointIDs, samplesPerSecond));
-        //}
-
-        //public void Subscription(SubscriptionAppendMode mode, SttpMarkup options, List<SttpDataPointID> dataPoints)
-        //{
-        //    var sml = new SttpMarkupWriter();
-        //    using (sml.StartElement("RequestSucceeded"))
-        //    {
-        //        sml.WriteValue("SubscriptionAppendMode", mode.ToString());
-        //        sml.WriteValue("Options", options);
-        //        //ToDo: rework this command.
-        //        //sml.WriteValue("Reason", reason);
-        //        //sml.WriteValue("Details", details);
-        //    }
-        //    m_encoder.Message(sml.ToSttpMarkup());
-        //}
 
         public void Raw(int rawCommandCode, byte[] payload)
         {
