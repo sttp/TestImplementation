@@ -138,7 +138,7 @@ namespace CTP
         public void Write(byte[] value, int start, int length)
         {
             value.ValidateParameters(start, length);
-            Write4BitSegments((uint)length);
+            Write8BitSegments((uint)length);
             if (length == 0)
                 return;
 
@@ -161,7 +161,7 @@ namespace CTP
 
             if (value.Length == 0)
             {
-                Write4BitSegments(0);
+                Write8BitSegments(0);
                 return;
             }
 
@@ -196,12 +196,12 @@ namespace CTP
 
         public void Write(CtpBuffer value)
         {
-            value.Write(this);
+            Write(value.ToBuffer());
         }
 
         public void Write(CtpDocument value)
         {
-            value.Write(this);
+            Write(value.ToBuffer());
         }
 
         #region [ Writing Bits ]
@@ -212,73 +212,24 @@ namespace CTP
         /// <param name="value"></param>
         public void Write8BitSegments(ulong value)
         {
-            int bits = 0;
+            int bytes = 0;
             ulong tmpValue = value;
             while (tmpValue > 0)
             {
-                bits += 8;
+                bytes++;
                 tmpValue >>= 8;
                 WriteBits1(1);
             }
             WriteBits1(0);
-            WriteBits(bits, value);
+            WriteBytes(bytes, value);
         }
 
-        /// <summary>
-        /// While (NotZero), WriteBits4
-        /// </summary>
-        /// <param name="value"></param>
-        public void Write4BitSegments(ulong value)
+        private void WriteBytes(int bytes, ulong value)
         {
-            int bits = 0;
-            ulong tmpValue = value;
-            while (tmpValue > 0)
-            {
-                bits += 4;
-                tmpValue >>= 4;
-                WriteBits1(1);
-            }
-            WriteBits1(0);
-            WriteBits(bits, value);
-        }
+            if (bytes > 8 || bytes < 0)
+                throw new ArgumentOutOfRangeException(nameof(bytes), "Must be between 0 and 8 inclusive");
 
-        private void WriteBits(int bits, ulong value)
-        {
-            if (bits > 64 || bits < 0)
-                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
-
-            //Since the lowest order bits are most chaotic, these should be stored in the bit stream.
-
-            switch (bits & 7)
-            {
-                case 0:
-                    break;
-                case 1:
-                    WriteBits1((uint)value);
-                    break;
-                case 2:
-                    WriteBits2((uint)value);
-                    break;
-                case 3:
-                    WriteBits3((uint)value);
-                    break;
-                case 4:
-                    WriteBits4((uint)value);
-                    break;
-                case 5:
-                    WriteBits5((uint)value);
-                    break;
-                case 6:
-                    WriteBits6((uint)value);
-                    break;
-                case 7:
-                    WriteBits7((uint)value);
-                    break;
-            }
-
-            value >>= bits & 7;
-
-            switch (bits >> 3)
+            switch (bytes)
             {
                 case 0:
                     return;
@@ -342,27 +293,7 @@ namespace CTP
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
-        public void WriteBits5(uint value)
-        {
-            const int bits = 5;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-        public void WriteBits6(uint value)
-        {
-            const int bits = 6;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-        public void WriteBits7(uint value)
-        {
-            const int bits = 7;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
+       
         public void WriteBits8(uint value)
         {
             EnsureCapacityBytes(1);

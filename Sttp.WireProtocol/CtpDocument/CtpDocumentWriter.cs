@@ -189,12 +189,12 @@ namespace CTP
             if (value.ValueTypeCode == m_prevName.PrevValueTypeCode)
             {
                 m_stream.WriteBits1(0);
-                CtpValueEncodingWithoutType.Save(m_stream, value);
+                SaveWO(m_stream, value);
             }
             else
             {
                 m_stream.WriteBits1(1);
-                CtpValueEncodingNative.Save(m_stream, value);
+                Save(m_stream, value);
                 m_prevName.PrevValueTypeCode = value.ValueTypeCode;
             }
         }
@@ -264,5 +264,71 @@ namespace CTP
             }
             return new CtpDocument(m_stream.ToArray());
         }
+
+
+
+        private static void Save(DocumentBitWriter wr, CtpObject value)
+        {
+            if (value == null)
+                value = CtpObject.Null;
+
+            var typeCode = value.ValueTypeCode;
+            wr.WriteBits4((byte)typeCode);
+            SaveWO(wr,value);
+        }
+
+        private static void SaveWO(DocumentBitWriter wr, CtpObject value)
+        {
+            if (value == null)
+                value = CtpObject.Null;
+
+            var typeCode = value.ValueTypeCode;
+            switch (typeCode)
+            {
+                case CtpTypeCode.Null:
+                    break;
+                case CtpTypeCode.Int64:
+                    wr.Write8BitSegments((ulong)PackSign(value.AsInt64));
+                    break;
+                case CtpTypeCode.Single:
+                    wr.Write(value.AsSingle);
+                    break;
+                case CtpTypeCode.Double:
+                    wr.Write(value.AsDouble);
+                    break;
+                case CtpTypeCode.CtpTime:
+                    wr.Write(value.AsCtpTime);
+                    break;
+                case CtpTypeCode.Boolean:
+                    wr.WriteBits1(value.AsBoolean);
+                    break;
+                case CtpTypeCode.Guid:
+                    wr.Write(value.AsGuid);
+                    break;
+                case CtpTypeCode.String:
+                    wr.Write(value.AsString);
+                    break;
+                case CtpTypeCode.CtpBuffer:
+                    wr.Write(value.AsCtpBuffer);
+                    break;
+                case CtpTypeCode.CtpDocument:
+                    wr.Write(value.AsDocument);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+
+        private static long PackSign(long value)
+        {
+            //since negative signed values have leading 1's and positive have leading 0's, 
+            //it's important to change it into a common format.
+            //Basically, we rotate left to move the leading sign bit to bit0, and if bit 0 is set, we invert bits 1-63.
+            if (value >= 0)
+                return value << 1;
+            return (~value << 1) + 1;
+        }
+
     }
 }

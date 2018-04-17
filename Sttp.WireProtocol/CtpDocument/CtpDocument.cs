@@ -17,15 +17,6 @@ namespace CTP
         private readonly byte[] m_contents;
 
         /// <summary>
-        /// Creates an CtpDocument from a input stream.
-        /// </summary>
-        /// <param name="rd">where to read the data from</param>
-        internal CtpDocument(DocumentBitReader rd)
-        {
-            m_contents = rd.ReadBytes();
-        }
-
-        /// <summary>
         /// Creates an CtpDocument from a byte array.
         /// </summary>
         /// <param name="contents"></param>
@@ -42,15 +33,6 @@ namespace CTP
         /// The size of the data block.
         /// </summary>
         public int Length => m_contents.Length;
-
-        /// <summary>
-        /// Writes the CtpDocument data to a byte array.
-        /// </summary>
-        /// <param name="wr"></param>
-        internal void Write(DocumentBitWriter wr)
-        {
-            wr.Write(m_contents);
-        }
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.

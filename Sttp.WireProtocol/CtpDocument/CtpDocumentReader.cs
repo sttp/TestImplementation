@@ -129,11 +129,11 @@ namespace CTP
                     if (m_stream.ReadBits1() == 0)
                     {
                         //Same type code;
-                        CtpValueEncodingWithoutType.Load(m_stream, m_prevName.PrevValueTypeCode, Value);
+                        LoadWO(m_stream, m_prevName.PrevValueTypeCode, Value);
                     }
                     else
                     {
-                        CtpValueEncodingNative.Load(m_stream, Value);
+                        Load(m_stream, Value);
                         m_prevName.PrevValueTypeCode = Value.ValueTypeCode;
                     }
                     ValueName = m_prevName.Name;
@@ -183,6 +183,58 @@ namespace CTP
             if (m_elementStack.Count == 0)
                 return m_rootElement;
             return m_elementStack.Peek().Name;
+        }
+
+        private static void Load(DocumentBitReader rd, CtpObject output)
+        {
+            CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
+            LoadWO(rd, value, output);
+        }
+
+        private static void LoadWO(DocumentBitReader rd, CtpTypeCode value, CtpObject output)
+        {
+            switch (value)
+            {
+                case CtpTypeCode.Null:
+                    output.SetNull();
+                    break;
+                case CtpTypeCode.Int64:
+                    output.SetValue(UnPackSign((long)rd.Read8BitSegments()));
+                    break;
+                case CtpTypeCode.Single:
+                    output.SetValue(rd.ReadSingle());
+                    break;
+                case CtpTypeCode.Double:
+                    output.SetValue(rd.ReadDouble());
+                    break;
+                case CtpTypeCode.CtpTime:
+                    output.SetValue(rd.ReadSttpTime());
+                    break;
+                case CtpTypeCode.Boolean:
+                    output.SetValue(rd.ReadBits1() == 1);
+                    break;
+                case CtpTypeCode.Guid:
+                    output.SetValue(rd.ReadGuid());
+                    break;
+                case CtpTypeCode.String:
+                    output.SetValue(rd.ReadString());
+                    break;
+                case CtpTypeCode.CtpBuffer:
+                    output.SetValue(rd.ReadCtpBufffer());
+                    break;
+                case CtpTypeCode.CtpDocument:
+                    output.SetValue(rd.ReadCtpDocument());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static long UnPackSign(long value)
+        {
+            if ((value & 1) == 0) //If it was positive
+                return (value >> 1) & long.MaxValue;  //Clear the upper bit since rightshift might assign a leading bit.
+            return (~value >> 1) | long.MinValue; //Set the upper bit.
         }
 
     }

@@ -82,7 +82,7 @@ namespace CTP
 
         public byte[] ReadBytes()
         {
-            int length = (int)Read4BitSegments();
+            int length = (int)Read8BitSegments();
             if (length == 0)
             {
                 return Empty;
@@ -126,14 +126,14 @@ namespace CTP
             return new string(data);
         }
 
-        public CtpDocument ReadSttpMarkup()
+        public CtpDocument ReadCtpDocument()
         {
-            return new CtpDocument(this);
+            return new CtpDocument(ReadBytes());
         }
 
-        public CtpBuffer ReadSttpBuffer()
+        public CtpBuffer ReadCtpBufffer()
         {
-            return new CtpBuffer(this);
+            return new CtpBuffer(ReadBytes());
         }
 
         public CtpTime ReadSttpTime()
@@ -347,76 +347,35 @@ namespace CTP
             int bits = 0;
             while (ReadBits1() == 1)
             {
-                bits += 8;
-            }
-            return ReadBits(bits);
-        }
-
-        public ulong Read4BitSegments()
-        {
-            int bits = 0;
-            while (ReadBits1() == 1)
-            {
-                bits += 4;
+                bits++;
             }
             return ReadBits(bits);
         }
 
         public ulong ReadBits(int bits)
         {
-            ulong value = 0;
-            if (bits > 64 || bits < 0)
-                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
-
-            switch (bits & 7)
+            switch (bits)
             {
                 case 0:
-                    break;
+                    return 0;
                 case 1:
-                    value = ReadBits1();
-                    break;
+                    return ReadBits8();
                 case 2:
-                    value = ReadBits2();
-                    break;
+                    return ReadBits16();
                 case 3:
-                    value = ReadBits3();
-                    break;
+                    return ReadBits24();
                 case 4:
-                    value = ReadBits4();
-                    break;
+                    return ReadBits32();
                 case 5:
-                    value = ReadBits5();
-                    break;
+                    return ReadBits40();
                 case 6:
-                    value = ReadBits6();
-                    break;
+                    return ReadBits48();
                 case 7:
-                    value = ReadBits7();
-                    break;
-            }
-
-            switch (bits >> 3)
-            {
-                case 0:
-                    return value;
-                case 1:
-                    return value | ((ulong)ReadBits8() << (bits & 7));
-                case 2:
-                    return value | ((ulong)ReadBits16() << (bits & 7));
-                case 3:
-                    return value | ((ulong)ReadBits24() << (bits & 7));
-                case 4:
-                    return value | ((ulong)ReadBits32() << (bits & 7));
-                case 5:
-                    return value | ((ulong)ReadBits40() << (bits & 7));
-                case 6:
-                    return value | ((ulong)ReadBits48() << (bits & 7));
-                case 7:
-                    return value | ((ulong)ReadBits56() << (bits & 7));
+                    return ReadBits56();
                 case 8:
                     return ReadBits64();
             }
-            throw new InvalidOperationException("Should never happen");
+            throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 8 inclusive");
         }
 
         #endregion

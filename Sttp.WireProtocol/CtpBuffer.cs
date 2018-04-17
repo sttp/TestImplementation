@@ -14,19 +14,9 @@ namespace CTP
             m_data = (byte[])data.Clone();
         }
 
-        internal CtpBuffer(DocumentBitReader reader)
-        {
-            m_data = reader.ReadBytes();
-        }
-
         public byte[] ToBuffer()
         {
             return (byte[])m_data.Clone();
-        }
-
-        internal void Write(DocumentBitWriter writer)
-        {
-            writer.Write(m_data);
         }
 
         public static bool operator ==(CtpBuffer a, CtpBuffer b)
