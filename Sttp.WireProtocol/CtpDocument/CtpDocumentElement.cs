@@ -99,7 +99,7 @@ namespace CTP
         /// <param name="valueName">The name of the value</param>
         /// <param name="setHandled">allows to not automatically set the value as handled. </param>
         /// <returns></returns>
-        public CtpValue GetValue(string valueName, bool setHandled = true)
+        public CtpObject GetValue(string valueName, bool setHandled = true)
         {
             foreach (var value in ChildValues)
             {
@@ -110,7 +110,7 @@ namespace CTP
                     return value.Value;
                 }
             }
-            return CtpValue.Null;
+            return CtpObject.Null;
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace CTP
         /// <param name="valueName">The name of the value</param>
         /// <param name="setHandled">allows to not automatically set the value as handled. </param>
         /// <returns></returns>
-        public IEnumerable<CtpValue> ForEachValue(string valueName, bool setHandled = true)
+        public IEnumerable<CtpObject> ForEachValue(string valueName, bool setHandled = true)
         {
             foreach (var value in ChildValues)
             {
@@ -134,7 +134,7 @@ namespace CTP
 
         /// <summary>
         /// Checks all children elements and children values to see if their values were read as part of the parsing. 
-        /// This will throw an error for any SttpMarkupValue that exists but was not read. This assists in improperly interpreting all
+        /// This will throw an error for any CtpDocumentValue that exists but was not read. This assists in improperly interpreting all
         /// of the options present.
         /// </summary>
         public void ErrorIfNotHandled()

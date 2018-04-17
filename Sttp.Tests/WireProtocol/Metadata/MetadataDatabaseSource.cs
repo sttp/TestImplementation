@@ -77,7 +77,7 @@ namespace Sttp.Tests
 
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
-            var s2 = s.ToSttpMarkup();
+            var s2 = s.ToCtpDocument();
             Console.WriteLine(s2.EncodedSize);
             Console.WriteLine(s2.CompressedSize);
             //Console.WriteLine(s2.ToXML());
@@ -118,10 +118,10 @@ namespace Sttp.Tests
 
             MetadataQueryTable tbl = new MetadataQueryTable(cmd.BeginMetadataResponse);
             var decoder = new MetadataRowDecoder(cmd.BeginMetadataResponse);
-            CtpValueMutable[] values = new CtpValueMutable[cmd.BeginMetadataResponse.Columns.Count];
+            CtpObject[] values = new CtpObject[cmd.BeginMetadataResponse.Columns.Count];
             for (int x = 0; x < values.Length; x++)
             {
-                values[x] = new CtpValueMutable();
+                values[x] = new CtpObject();
             }
             while ((cmd = reader.NextCommand()) != null)
             {
@@ -133,7 +133,7 @@ namespace Sttp.Tests
                         tbl.AddRow(values);
                     }
                 }
-                else if (cmd.CommandCode == CommandCode.MarkupCommand)
+                else if (cmd.CommandCode == CommandCode.DocumentCommand)
                 {
                     break;
                 }

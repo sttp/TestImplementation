@@ -69,7 +69,7 @@ namespace CTP
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.MarkupCommand)
+                if (m_command != CommandCode.DocumentCommand)
                     throw new InvalidOperationException("Command is not a MarkupCommand.");
                 return m_documentPayload;
             }
@@ -226,7 +226,7 @@ namespace CTP
             byte[] results;
             if ((header & CtpHeader.CommandMask) == CtpHeader.CommandMarkup)
             {
-                m_command = CommandCode.MarkupCommand;
+                m_command = CommandCode.DocumentCommand;
                 int markupLength = length;
                 int markupStart = position;
                 results = new byte[markupLength];

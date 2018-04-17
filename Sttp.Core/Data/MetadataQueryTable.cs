@@ -26,7 +26,7 @@ namespace Sttp.Data
         /// <summary>
         /// All possible rows.
         /// </summary>
-        public List<CtpValue[]> Rows;
+        public List<CtpObject[]> Rows;
         public Guid RuntimeID;
         public long VersionNumber;
 
@@ -60,15 +60,15 @@ namespace Sttp.Data
             VersionNumber = command.VersionNumber;
             TableName = command.TableName;
             Columns = new List<MetadataColumn>(command.Columns);
-            Rows = new List<CtpValue[]>();
+            Rows = new List<CtpObject[]>();
         }
 
-        public void AddRow(CtpValueMutable[] values)
+        public void AddRow(CtpObject[] values)
         {
-            CtpValue[] item = new CtpValue[values.Length];
+            CtpObject[] item = new CtpObject[values.Length];
             for (int x = 0; x < values.Length; x++)
             {
-                item[x] = values[x].CloneAsImmutable();
+                item[x] = values[x].Clone();
             }
             Rows.Add(item);
         }

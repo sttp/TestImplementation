@@ -11,7 +11,7 @@ namespace Sttp
     {
         public string QueryText;
         public string SyntaxLanguage;
-        public List<Tuple<string, CtpValue>> Literals = new List<Tuple<string, CtpValue>>();
+        public List<Tuple<string, CtpObject>> Literals = new List<Tuple<string, CtpObject>>();
 
         public void GetFullOutputString(string linePrefix, StringBuilder builder)
         {

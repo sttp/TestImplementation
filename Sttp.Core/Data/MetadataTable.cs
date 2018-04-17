@@ -75,8 +75,8 @@ namespace Sttp.Data
                 if (table.GetValues(row) != fieldCount)
                     throw new Exception("Field count did not match");
 
-                List<CtpValue> values = new List<CtpValue>();
-                values.AddRange(row.Select(CtpValue.FromObject));
+                List<CtpObject> values = new List<CtpObject>();
+                values.AddRange(row.Select(CtpObject.FromObject));
 
                 newRows.Add(new MetadataRow(values));
             }

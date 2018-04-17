@@ -104,10 +104,10 @@ namespace Sttp.Services
                 int rowCount = 0;
 
                 var rowEncoder = new MetadataRowEncoder(columns);
-                CtpValueMutable[] values = new CtpValueMutable[columns.Count];
+                CtpObject[] values = new CtpObject[columns.Count];
                 for (int x = 0; x < values.Length; x++)
                 {
-                    values[x] = new CtpValueMutable();
+                    values[x] = new CtpObject();
                 }
                 encoder.BeginMetadataResponse(channelID, Guid.Empty, repository.RuntimeID, repository.VersionNumber, command.Table, columns);
                 foreach (var row in table.Rows)

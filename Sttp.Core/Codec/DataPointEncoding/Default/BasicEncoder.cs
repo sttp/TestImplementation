@@ -14,7 +14,7 @@ namespace Sttp.Codec.DataPoint
         private ByteWriter m_stream;
 
         private int m_lastRuntimeID = 0;
-        private readonly CtpValueMutable m_lastTimestamp = new CtpValueMutable();
+        private readonly CtpObject m_lastTimestamp = new CtpObject();
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
 

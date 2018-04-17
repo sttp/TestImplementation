@@ -74,7 +74,7 @@ namespace CTP
         /// <summary>
         /// A temporary value so this class can support setting from an object type.
         /// </summary>
-        private CtpValueMutable m_tmpValue = new CtpValueMutable();
+        private CtpObject m_tmpValue = new CtpObject();
         /// <summary>
         /// The most recent name that was encountered
         /// </summary>
@@ -120,7 +120,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// The approximate current size of the writer. It's not exact until <see cref="ToSttpMarkup"/> has been called.
+        /// The approximate current size of the writer. It's not exact until <see cref="ToCtpDocument"/> has been called.
         /// </summary>
         public int CurrentSize => m_stream.Length;
 
@@ -174,7 +174,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(string name, CtpValue value)
+        public void WriteValue(string name, CtpObject value)
         {
             if (m_disposed)
                 throw new ObjectDisposedException("Once ToSttpMarkup has been called, no more data can be written to this object.");
@@ -255,7 +255,7 @@ namespace CTP
         /// Completes the writing to an <see cref="CtpDocument"/> and returns the completed buffer. This may be called multiple times.
         /// </summary>
         /// <returns></returns>
-        public CtpDocument ToSttpMarkup()
+        public CtpDocument ToCtpDocument()
         {
             if (!m_disposed)
             {

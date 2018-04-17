@@ -32,7 +32,7 @@ namespace Sttp.Codec
             {
                 case CommandCode.Invalid:
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
-                case CommandCode.MarkupCommand:
+                case CommandCode.DocumentCommand:
                     m_document = decoder.DocumentPayload;
                     CommandName = m_document.MakeReader().RootElement;
                     m_decoder = CommandBase.Create(decoder.DocumentPayload);

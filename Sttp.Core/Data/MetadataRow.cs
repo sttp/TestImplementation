@@ -7,9 +7,9 @@ namespace Sttp.Data
 {
     public class MetadataRow
     {
-        public readonly List<CtpValue> Fields;
+        public readonly List<CtpObject> Fields;
 
-        public MetadataRow(List<CtpValue> fields)
+        public MetadataRow(List<CtpObject> fields)
         {
             Fields = fields;
         }

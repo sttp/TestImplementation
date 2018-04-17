@@ -8,10 +8,10 @@ namespace Sttp.Codec
     public class CommandSubscribeToSome : CommandBase
     {
         public readonly string InstanceName;
-        public readonly CtpValue[] DataPointIDs;
+        public readonly CtpObject[] DataPointIDs;
         public readonly double? SamplePerSecond;
 
-        public CommandSubscribeToSome(string instanceName, CtpValue[] dataPointIDs, double? samplesPerSecond)
+        public CommandSubscribeToSome(string instanceName, CtpObject[] dataPointIDs, double? samplesPerSecond)
             : base("SubscribeToSome")
         {
             InstanceName = instanceName;

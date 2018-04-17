@@ -9,7 +9,7 @@ namespace CTP
     /// <summary>
     /// This class contains the fundamental value for STTP.
     /// </summary>
-    public partial class CtpValueMutable : CtpValue
+    public partial class CtpObject
     {
         public void SetNull()
         {
@@ -106,7 +106,7 @@ namespace CTP
             SetValue(new CtpBuffer(data));
         }
 
-        public void SetValue(CtpValue value)
+        public void SetValue(CtpObject value)
         {
             switch (value.ValueTypeCode)
             {
@@ -135,7 +135,7 @@ namespace CTP
                     SetValue(value.AsString);
                     break;
                 case CtpTypeCode.CtpBuffer:
-                    SetValue(value.AsSttpBuffer);
+                    SetValue(value.AsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpDocument:
                     SetValue(value.AsDocument);
@@ -230,9 +230,9 @@ namespace CTP
             {
                 SetValue((byte[])value);
             }
-            else if (value is CtpValue)
+            else if (value is CtpObject)
             {
-                SetValue((CtpValue)value);
+                SetValue((CtpObject)value);
             }
             else if (type == typeof(CtpDocument))
             {
@@ -243,10 +243,5 @@ namespace CTP
                 throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
             }
         }
-
-
-        
-
-
     }
 }

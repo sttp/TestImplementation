@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace CTP
 {
@@ -10,27 +7,154 @@ namespace CTP
     /// This class contains the fundamental value for STTP.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public abstract partial class CtpValue : IEquatable<CtpValue>
+    public partial class CtpObject : IEquatable<CtpObject>
     {
-        public static readonly CtpValue Null = CtpNull.NullValue;
+        public static CtpObject Null => new CtpObject();
 
-        protected CtpValue()
+        #region [ Members ]
+
+        [FieldOffset(0)]
+        private long m_valueInt64;
+        [FieldOffset(0)]
+        private double m_valueDouble;
+
+        [FieldOffset(0)]
+        private float m_valueSingle;
+        [FieldOffset(0)]
+        private bool m_valueBoolean;
+        [FieldOffset(0)]
+        private CtpTime m_valueCtpTime;
+        [FieldOffset(0)]
+        private Guid m_valueGuid;
+
+        [FieldOffset(16)]
+        private object m_valueObject;
+
+        [FieldOffset(33)]
+        private CtpTypeCode m_valueTypeCode;
+
+        #endregion
+
+        #region [ Constructors ]
+
+        public CtpObject()
         {
+            SetNull();
         }
 
-        public abstract long AsInt64 { get; }
-        public abstract float AsSingle { get; }
-        public abstract double AsDouble { get; }
-        public abstract CtpTime AsCtpTime { get; }
-        public abstract bool AsBoolean { get; }
+        public CtpObject(object value)
+        {
+            if (value == null || value == DBNull.Value)
+            {
+                m_valueTypeCode = CtpTypeCode.Null;
+                return;
+            }
 
-        public abstract Guid AsGuid { get; }
+            var type = value.GetType();
+            if (type == typeof(sbyte))
+            {
+                SetValue((sbyte)value);
+            }
+            else if (type == typeof(short))
+            {
+                SetValue((short)value);
+            }
+            else if (type == typeof(int))
+            {
+                SetValue((int)value);
+            }
+            else if (type == typeof(long))
+            {
+                SetValue((long)value);
+            }
+            else if (type == typeof(byte))
+            {
+                SetValue((byte)value);
+            }
+            else if (type == typeof(ushort))
+            {
+                SetValue((ushort)value);
+            }
+            else if (type == typeof(uint))
+            {
+                SetValue((uint)value);
+            }
+            else if (type == typeof(ulong))
+            {
+                SetValue((ulong)value);
+            }
+            else if (type == typeof(float))
+            {
+                SetValue((float)value);
+            }
+            else if (type == typeof(double))
+            {
+                SetValue((double)value);
+            }
+            else if (type == typeof(decimal))
+            {
+                SetValue((double)(decimal)value);
+            }
+            else if (type == typeof(DateTime))
+            {
+                SetValue((DateTime)value);
+            }
+            else if (type == typeof(CtpTime))
+            {
+                SetValue((CtpTime)value);
+            }
+            else if (type == typeof(bool))
+            {
+                SetValue((bool)value);
+            }
+            else if (type == typeof(char))
+            {
+                SetValue((char)value);
+            }
+            else if (type == typeof(Guid))
+            {
+                SetValue((Guid)value);
+            }
+            else if (type == typeof(string))
+            {
+                SetValue((string)value);
+            }
+            else if (type == typeof(CtpBuffer))
+            {
+                SetValue((CtpBuffer)value);
+            }
+            else if (type == typeof(byte[]))
+            {
+                SetValue((byte[])value);
+            }
+            else if (value is CtpObject)
+            {
+                SetValue((CtpObject)value);
+            }
+            else if (type == typeof(CtpDocument))
+            {
+                SetValue((CtpDocument)value);
+            }
+            else
+            {
+                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
+            }
+        }
 
-        public abstract string AsString { get; }
-        public abstract CtpBuffer AsSttpBuffer { get; }
-        public abstract CtpDocument AsDocument { get; }
-        public abstract object ToNativeType { get; }
-        public abstract string ToTypeString { get; }
+        #endregion
+
+        #region [ Properties ]
+
+        /// <summary>
+        /// The type code of the raw value.
+        /// </summary>
+        public CtpTypeCode ValueTypeCode
+        {
+            get
+            {
+                return m_valueTypeCode;
+            }
+        }
 
         public sbyte AsSByte
         {
@@ -116,55 +240,21 @@ namespace CTP
         /// </summary>
         public bool IsNull => ValueTypeCode == CtpTypeCode.Null;
 
-        /// <summary>
-        /// The type code of the raw value.
-        /// </summary>
-        public abstract CtpTypeCode ValueTypeCode { get; }
+        #endregion
 
-        public bool IsImmutable => !(this is CtpValueMutable);
+        #region [ Methods ] 
 
-        /// <summary>
-        /// Clones the value
-        /// </summary>
-        /// <returns></returns>
-        public CtpValue Clone()
+        public CtpObject Clone()
         {
-            if (IsImmutable)
-                return this;
-            return ((CtpValueMutable)this).CloneAsImmutable();
+            return (CtpObject)MemberwiseClone();
         }
-
-        //public static bool operator ==(SttpValue a, SttpValue b)
-        //{
-        //    if (ReferenceEquals(a, b))
-        //        return true;
-        //    if (ReferenceEquals(a, null))
-        //        return false;
-        //    if (ReferenceEquals(b, null))
-        //        return false;
-        //    if (a.ValueTypeCode != b.ValueTypeCode)
-        //        return false;
-        //    return true;
-        //}
-
-        //public static bool operator !=(SttpValue a, SttpValue b)
-        //{
-        //    return !(a == b);
-        //}
-
-        //public object ToNativeType(SttpValueTypeCode typeCode)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-
 
         public override string ToString()
         {
             return ToTypeString;
         }
 
-        public bool Equals(CtpValue other)
+        public bool Equals(CtpObject other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -192,7 +282,7 @@ namespace CTP
                     case CtpTypeCode.String:
                         return AsString == other.AsString;
                     case CtpTypeCode.CtpBuffer:
-                        return AsSttpBuffer == other.AsSttpBuffer;
+                        return AsCtpBuffer == other.AsCtpBuffer;
                     case CtpTypeCode.CtpDocument:
                         return AsDocument == other.AsDocument;
                     default:
@@ -259,20 +349,32 @@ namespace CTP
                 return true;
             if (obj.GetType() != this.GetType())
                 return false;
-            return Equals((CtpValue)obj);
+            return Equals((CtpObject)obj);
         }
 
-        //public abstract override int GetHashCode();
+        public static bool operator ==(CtpObject a, CtpObject b)
+        {
+            if (ReferenceEquals(a, b))
+                return true;
+            if (ReferenceEquals(a, null))
+                return false;
+            if (ReferenceEquals(b, null))
+                return false;
+            if (a.m_valueTypeCode != b.m_valueTypeCode)
+                return false;
+            switch (a.m_valueTypeCode)
+            {
+                //ToDo: Finish.
+            }
+            return true;
+        }
 
-        //public void Save(PayloadWriter payloadWriter, bool includeTypeCode)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public static bool operator !=(CtpObject a, CtpObject b)
+        {
+            return !(a == b);
+        }
 
-        //public static SttpValue CreateBulkTransportGuid(Guid guid)
-        //{
-        //    return new SttpValueBulkTransportGuid(guid);
-        //}
+        #endregion
 
     }
 }

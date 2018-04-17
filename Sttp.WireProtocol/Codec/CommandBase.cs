@@ -4,13 +4,13 @@ using System.Collections.Concurrent;
 namespace CTP
 {
     /// <summary>
-    /// This base class assists in serializing <see cref="CommandCode.MarkupCommand"/> into 
+    /// This base class assists in serializing <see cref="CommandCode.DocumentCommand"/> into 
     /// concrete objects from their corresponding <see cref="CtpDocument"/> data.
     /// </summary>
     public abstract class CommandBase
     {
         /// <summary>
-        /// The name of the command, this corresponds to the SttpMarkup's Root Element.
+        /// The name of the command, this corresponds to the CtpDocument's Root Element.
         /// </summary>
         public readonly string CommandName;
 
@@ -26,16 +26,16 @@ namespace CTP
         public abstract void Save(CtpDocumentWriter writer);
 
 
-        public CtpDocument ToSttpMarkup()
+        public CtpDocument ToCtpDocument()
         {
             var wr = new CtpDocumentWriter(CommandName);
             Save(wr);
-            return wr.ToSttpMarkup();
+            return wr.ToCtpDocument();
         }
 
         public override string ToString()
         {
-            return ToSttpMarkup().ToYAML();
+            return ToCtpDocument().ToYAML();
         }
 
         #region [ Static ]

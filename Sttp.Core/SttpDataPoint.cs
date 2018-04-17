@@ -31,17 +31,17 @@ namespace Sttp
         /// <summary>
         /// The unique identifier for this PointID.
         /// </summary>
-        public readonly CtpValueMutable DataPointID = new CtpValueMutable();
+        public readonly CtpObject DataPointID = new CtpObject();
 
         /// <summary>
         /// A timestamp field. Virtually all instances will use SttpTime as the means of storing time, but it's not required.
         /// </summary>
-        public readonly CtpValueMutable Time = new CtpValueMutable();
+        public readonly CtpObject Time = new CtpObject();
 
         /// <summary>
         /// The value for the data point.
         /// </summary>
-        public readonly CtpValueMutable Value = new CtpValueMutable();
+        public readonly CtpObject Value = new CtpObject();
 
         /// <summary>
         /// A quality field.
@@ -59,7 +59,7 @@ namespace Sttp
         /// 
         /// Note: Since this field is considered ancillary assigning something other than null will introduce a penalty that may be considerable in some circumstances.
         /// </summary>
-        public readonly CtpValueMutable ExtendedData = new CtpValueMutable();
+        public readonly CtpObject ExtendedData = new CtpObject();
 
         public override string ToString()
         {

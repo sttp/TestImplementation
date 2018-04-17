@@ -8,7 +8,7 @@ namespace Sttp.Codec
     public class MetadataProcedureParameters
     {
         public readonly string Name;
-        public readonly CtpValue Value;
+        public readonly CtpObject Value;
         public MetadataProcedureParameters(CtpDocumentElement documentElement)
         {
             Name = (string)documentElement.GetValue("Name");
@@ -16,7 +16,7 @@ namespace Sttp.Codec
             documentElement.ErrorIfNotHandled();
         }
 
-        public MetadataProcedureParameters(string name, CtpValue value)
+        public MetadataProcedureParameters(string name, CtpObject value)
         {
             Name = name;
             Value = value;

@@ -19,15 +19,15 @@ namespace Sttp.Tests.WireProtocol
             var rd = new ByteReader();
             for (int x = -100; x < 100; x++)
             {
-                CtpValueEncodingNative.Save(wr, (CtpValue)x.ToString());
-                CtpValueEncodingNative.Save(wr, (CtpValue)x);
-                CtpValueEncodingNative.Save(wr, (CtpValue)(float)x);
-                CtpValueEncodingNative.Save(wr, (CtpValue)(double)x);
-                CtpValueEncodingNative.Save(wr, (CtpValue)DateTime.Parse("1/1/2010").AddMinutes(x));
-                CtpValueEncodingNative.Save(wr, (CtpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                CtpValueEncodingNative.Save(wr, (CtpValue)((x & 1) == 1));
-                CtpValueEncodingNative.Save(wr, (CtpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                CtpValueEncodingNative.Save(wr, (CtpValue)GetBytes(x));
+                CtpValueEncodingNative.Save(wr, (CtpObject)x.ToString());
+                CtpValueEncodingNative.Save(wr, (CtpObject)x);
+                CtpValueEncodingNative.Save(wr, (CtpObject)(float)x);
+                CtpValueEncodingNative.Save(wr, (CtpObject)(double)x);
+                CtpValueEncodingNative.Save(wr, (CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
+                CtpValueEncodingNative.Save(wr, (CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                CtpValueEncodingNative.Save(wr, (CtpObject)((x & 1) == 1));
+                CtpValueEncodingNative.Save(wr, (CtpObject)(((x & 1) == 1) ? (bool?)null : (bool?)true));
+                CtpValueEncodingNative.Save(wr, (CtpObject)GetBytes(x));
             }
 
             rd.SetBuffer(wr.ToArray());
@@ -53,15 +53,15 @@ namespace Sttp.Tests.WireProtocol
             var rd = new ByteReader();
             for (int x = -100; x < 100; x++)
             {
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)x.ToString());
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)(float)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)(double)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)DateTime.Parse("1/1/2010").AddMinutes(x));
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)((x & 1) == 1));
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                CtpValueEncodingWithoutType.Save(wr, (CtpValue)GetBytes(x));
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)x.ToString());
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)x);
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(float)x);
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(double)x);
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)((x & 1) == 1));
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(((x & 1) == 1) ? (bool?)null : (bool?)true));
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)GetBytes(x));
             }
 
             rd.SetBuffer(wr.ToArray());

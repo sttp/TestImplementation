@@ -63,17 +63,17 @@ namespace Sttp
     public class SttpQueryLanguage
     {
         public Dictionary<string, List<string>> Sections;
-        public Dictionary<string, CtpValue> Literals;
+        public Dictionary<string, CtpObject> Literals;
 
-        public SttpQueryLanguage(string expression, Dictionary<string, CtpValue> literals = null)
+        public SttpQueryLanguage(string expression, Dictionary<string, CtpObject> literals = null)
         {
             if (literals != null)
             {
-                Literals = new Dictionary<string, CtpValue>(literals);
+                Literals = new Dictionary<string, CtpObject>(literals);
             }
             else
             {
-                Literals = new Dictionary<string, CtpValue>();
+                Literals = new Dictionary<string, CtpObject>();
             }
             Sections = new Dictionary<string, List<string>>();
 
@@ -113,7 +113,7 @@ namespace Sttp
                         }
                         else
                         {
-                            CtpValue value = ParseLiteral(ToTrimString(sbLiteral));
+                            CtpObject value = ParseLiteral(ToTrimString(sbLiteral));
                             while (Literals.ContainsKey($"{{{param}}}"))
                             {
                                 param++;
@@ -266,10 +266,10 @@ namespace Sttp
             return sb.ToString().Trim();
         }
 
-        private CtpValue ParseLiteral(string literal)
+        private CtpObject ParseLiteral(string literal)
         {
             //ToDo: Actually attempt to parse the literal
-            return (CtpValue)literal;
+            return (CtpObject)literal;
         }
 
         private static readonly char[] TrimChars = ", \t\r\n".ToCharArray();

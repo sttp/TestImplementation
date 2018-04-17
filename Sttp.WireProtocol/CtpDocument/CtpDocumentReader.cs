@@ -65,7 +65,7 @@ namespace CTP
         internal CtpDocumentReader(byte[] data)
         {
             m_stream = new ByteReader(data, 0, data.Length);
-            Value = new CtpValueMutable();
+            Value = new CtpObject();
             m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = CtpDocumentNodeType.StartOfDocument;
             m_rootElement = m_stream.ReadAsciiShort();
@@ -94,7 +94,7 @@ namespace CTP
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
         /// contents, be sure to call <see cref="CtpValue.Clone"/>
         /// </summary>
-        public CtpValueMutable Value { get; private set; }
+        public CtpObject Value { get; private set; }
 
         /// <summary>
         /// The type of the current node. To Advance the nodes calll <see cref="Read"/>

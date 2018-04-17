@@ -7,10 +7,10 @@ namespace CTP
 {
     public static class CtpValueEncodingNative
     {
-        public static void Save(ByteWriter wr, CtpValue value)
+        public static void Save(ByteWriter wr, CtpObject value)
         {
             if (value == null)
-                value = CtpValue.Null;
+                value = CtpObject.Null;
 
             var typeCode = value.ValueTypeCode;
             wr.WriteBits4((byte)typeCode);
@@ -40,7 +40,7 @@ namespace CTP
                     wr.Write(value.AsString);
                     break;
                 case CtpTypeCode.CtpBuffer:
-                    wr.Write(value.AsSttpBuffer);
+                    wr.Write(value.AsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpDocument:
                     wr.Write(value.AsDocument);
@@ -50,37 +50,37 @@ namespace CTP
             }
         }
 
-        public static CtpValue Load(ByteReader rd)
+        public static CtpObject Load(ByteReader rd)
         {
             CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             switch (value)
             {
                 case CtpTypeCode.Null:
-                    return CtpValue.Null;
+                    return CtpObject.Null;
                 case CtpTypeCode.Int64:
-                    return (CtpValue)UnPackSign((long)rd.Read8BitSegments());
+                    return (CtpObject)UnPackSign((long)rd.Read8BitSegments());
                 case CtpTypeCode.Single:
-                    return (CtpValue)rd.ReadSingle();
+                    return (CtpObject)rd.ReadSingle();
                 case CtpTypeCode.Double:
-                    return (CtpValue)rd.ReadDouble();
+                    return (CtpObject)rd.ReadDouble();
                 case CtpTypeCode.CtpTime:
-                    return (CtpValue)rd.ReadSttpTime();
+                    return (CtpObject)rd.ReadSttpTime();
                 case CtpTypeCode.Boolean:
-                    return (CtpValue)(rd.ReadBits1() == 1);
+                    return (CtpObject)(rd.ReadBits1() == 1);
                 case CtpTypeCode.Guid:
-                    return (CtpValue)rd.ReadGuid();
+                    return (CtpObject)rd.ReadGuid();
                 case CtpTypeCode.String:
-                    return (CtpValue)rd.ReadString();
+                    return (CtpObject)rd.ReadString();
                 case CtpTypeCode.CtpBuffer:
-                    return (CtpValue)rd.ReadSttpBuffer();
+                    return (CtpObject)rd.ReadSttpBuffer();
                 case CtpTypeCode.CtpDocument:
-                    return (CtpValue)rd.ReadSttpMarkup();
+                    return (CtpObject)rd.ReadSttpMarkup();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        public static void Load(ByteReader rd, CtpValueMutable output)
+        public static void Load(ByteReader rd, CtpObject output)
         {
             CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             switch (value)

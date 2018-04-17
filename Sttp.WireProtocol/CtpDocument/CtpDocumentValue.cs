@@ -17,7 +17,7 @@ namespace CTP
         /// <summary>
         /// The immutable value.
         /// </summary>
-        public readonly CtpValue Value;
+        public readonly CtpObject Value;
         /// <summary>
         /// Gets if this value has been handled. See <see cref="CtpDocumentElement.ErrorIfNotHandled"/> for more details.
         /// </summary>
@@ -32,7 +32,7 @@ namespace CTP
             if (reader.NodeType != CtpDocumentNodeType.Value)
                 throw new Exception("Expecting a Value type for the current node.");
             ValueName = reader.ValueName;
-            Value = reader.Value.CloneAsImmutable();
+            Value = reader.Value;
         }
 
         /// <summary>

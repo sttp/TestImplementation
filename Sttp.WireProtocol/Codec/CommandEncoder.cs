@@ -97,7 +97,7 @@ namespace CTP
         public void SendMarkupCommand(CtpDocumentWriter markup)
         {
             //ToDo: Consider changing the MarkupCommand to split the RootElement and the other payload.
-            CtpDocument data = markup.ToSttpMarkup();
+            CtpDocument data = markup.ToCtpDocument();
             EnsureCapacity(BufferOffset + data.Length);
             data.CopyTo(m_buffer, BufferOffset);
 

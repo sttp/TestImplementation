@@ -21,7 +21,7 @@ namespace Sttp.Codec
             m_stream.SetBuffer(data, 0, data.Length);
         }
 
-        public bool Read(CtpValueMutable[] row)
+        public bool Read(CtpObject[] row)
         {
             if (row.Length != m_response.Columns.Count)
                 throw new ArgumentException("The number of elements in array does not match the number of columns in the response", nameof(row));

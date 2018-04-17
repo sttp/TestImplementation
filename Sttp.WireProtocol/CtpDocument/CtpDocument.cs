@@ -8,17 +8,17 @@ using System.Xml.Schema;
 namespace CTP
 {
     /// <summary>
-    /// A container class around the byte array containing the SttpMarkup data. To read data from this class, call <see cref="MakeReader"/>.
+    /// A container class around the byte array containing the Document data. To read data from this class, call <see cref="MakeReader"/>.
     /// This class is Immutable.
     /// 
-    /// To write an SttpMarkup object use <see cref="CtpDocumentWriter"/>
+    /// To write an CtpDocument object use <see cref="CtpDocumentWriter"/>
     /// </summary>
     public class CtpDocument : IEquatable<CtpDocument>
     {
         private readonly byte[] m_contents;
 
         /// <summary>
-        /// Creates an SttpMarkup from a input stream.
+        /// Creates an CtpDocument from a input stream.
         /// </summary>
         /// <param name="rd">where to read the data from</param>
         public CtpDocument(ByteReader rd)
@@ -27,7 +27,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// Creates an SttpMarkup from a byte array.
+        /// Creates an CtpDocument from a byte array.
         /// </summary>
         /// <param name="contents"></param>
         public CtpDocument(byte[] contents)
@@ -45,7 +45,7 @@ namespace CTP
         public int Length => m_contents.Length;
 
         /// <summary>
-        /// Writes the SttpMarkup data to a byte array.
+        /// Writes the CtpDocument data to a byte array.
         /// </summary>
         /// <param name="wr"></param>
         public void Write(ByteWriter wr)
@@ -54,7 +54,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// Create a means for reading the data from the SttpMarkup.
+        /// Create a means for reading the data from the CtpDocument.
         /// </summary>
         /// <returns></returns>
         public CtpDocumentReader MakeReader()
@@ -75,7 +75,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// Creates an XML string representation of this SttpMarkup file.
+        /// Creates an XML string representation of this CtpDocument file.
         /// </summary>
         /// <returns></returns>
         public string ToXML()
@@ -114,7 +114,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// Creates a JSON string representation of this SttpMarkup file.
+        /// Creates a JSON string representation of this CtpDocument file.
         /// </summary>
         /// <returns></returns>
         public string ToJSON()
@@ -165,7 +165,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// Creates a YAML string representation of this SttpMarkup file.
+        /// Creates a YAML string representation of this CtpDocument file.
         /// </summary>
         /// <returns></returns>
         public string ToYAML()
@@ -211,7 +211,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// Checks if the byte representation of two separate STTPMarkup files are the same. 
+        /// Checks if the byte representation of two separate CtpDocument files are the same. 
         /// Note: Due to reordering and encoding mechanics, it's possible for two records to be 
         /// externally the same, while internally they are not.
         /// </summary>
