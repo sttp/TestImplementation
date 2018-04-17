@@ -224,7 +224,7 @@ namespace CTP
                     m_stream.Write(value.AsCtpBuffer.ToBuffer());
                     break;
                 case CtpTypeCode.CtpDocument:
-                    m_stream.Write(value.AsDocument.ToBuffer());
+                    m_stream.Write(value.AsCtpDocument.ToBuffer());
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -43,7 +43,7 @@ namespace Sttp
                     wr.Write(value.AsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpDocument:
-                    wr.Write(value.AsDocument);
+                    wr.Write(value.AsCtpDocument);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
