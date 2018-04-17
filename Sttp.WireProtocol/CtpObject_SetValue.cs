@@ -1,13 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace CTP
 {
     /// <summary>
-    /// This class contains the fundamental value for STTP.
+    /// This class contains the fundamental value for CTP.
     /// </summary>
     public partial class CtpObject
     {
@@ -15,7 +11,10 @@ namespace CTP
         {
             m_valueTypeCode = CtpTypeCode.Null;
         }
-
+        public void SetValue(DBNull value)
+        {
+            SetNull();
+        }
         public void SetValue(sbyte value)
         {
             SetValue((long)value);
@@ -37,6 +36,7 @@ namespace CTP
         {
             SetValue((ulong)value);
         }
+
         public void SetValue(ushort value)
         {
             SetValue((ulong)value);
@@ -49,7 +49,7 @@ namespace CTP
         {
             if (value > long.MaxValue)
             {
-                SetValue((decimal)value);
+                SetValue((double)value);
             }
             else
             {
@@ -65,6 +65,10 @@ namespace CTP
         {
             m_valueTypeCode = CtpTypeCode.Double;
             m_valueDouble = value;
+        }
+        public void SetValue(decimal value)
+        {
+            SetValue((double)value);
         }
         public void SetValue(DateTime value)
         {
@@ -85,71 +89,169 @@ namespace CTP
             m_valueTypeCode = CtpTypeCode.Guid;
             m_valueGuid = value;
         }
+        public void SetValue(char value)
+        {
+            SetValue(value.ToString());
+        }
         public void SetValue(string value)
         {
+            if (value == null)
+            {
+                SetNull();
+                return;
+            }
             m_valueTypeCode = CtpTypeCode.String;
             m_valueObject = value;
         }
         public void SetValue(CtpBuffer value)
         {
+            if (value == null)
+            {
+                SetNull();
+                return;
+            }
             m_valueTypeCode = CtpTypeCode.CtpBuffer;
             m_valueObject = value;
         }
         public void SetValue(CtpDocument value)
         {
+            if (value == null)
+            {
+                SetNull();
+                return;
+            }
             m_valueTypeCode = CtpTypeCode.CtpDocument;
             m_valueObject = value;
         }
 
-        public void SetValue(byte[] data)
+        public void SetValue(byte[] value)
         {
-            SetValue(new CtpBuffer(data));
+            if (value == null)
+            {
+                SetNull();
+                return;
+            }
+            SetValue(new CtpBuffer(value));
         }
 
-        public void SetValue(CtpObject value)
+        public void SetValue(sbyte? value)
         {
-            switch (value.ValueTypeCode)
-            {
-                case CtpTypeCode.Null:
-                    SetNull();
-                    break;
-                case CtpTypeCode.Int64:
-                    SetValue(value.AsInt64);
-                    break;
-                case CtpTypeCode.Single:
-                    SetValue(value.AsSingle);
-                    break;
-                case CtpTypeCode.Double:
-                    SetValue(value.AsDouble);
-                    break;
-                case CtpTypeCode.CtpTime:
-                    SetValue(value.AsCtpTime);
-                    break;
-                case CtpTypeCode.Boolean:
-                    SetValue(value.AsBoolean);
-                    break;
-                case CtpTypeCode.Guid:
-                    SetValue(value.AsGuid);
-                    break;
-                case CtpTypeCode.String:
-                    SetValue(value.AsString);
-                    break;
-                case CtpTypeCode.CtpBuffer:
-                    SetValue(value.AsCtpBuffer);
-                    break;
-                case CtpTypeCode.CtpDocument:
-                    SetValue(value.AsDocument);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(short? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(int? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(long? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(byte? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(ushort? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(uint? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(ulong? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(float? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(double? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(decimal? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(DateTime? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(CtpTime? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(bool? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(Guid? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
+        }
+        public void SetValue(char? value)
+        {
+            if (!value.HasValue)
+                SetNull();
+            else
+                SetValue(value.Value);
         }
 
         public void SetValue(object value)
         {
             if (value == null || value == DBNull.Value)
             {
-                m_valueTypeCode = CtpTypeCode.Null;
+                SetNull();
                 return;
             }
 
@@ -196,7 +298,7 @@ namespace CTP
             }
             else if (type == typeof(decimal))
             {
-                SetValue((double)(decimal)value);
+                SetValue((decimal)value);
             }
             else if (type == typeof(DateTime))
             {
@@ -210,13 +312,13 @@ namespace CTP
             {
                 SetValue((bool)value);
             }
-            else if (type == typeof(char))
-            {
-                SetValue((char)value);
-            }
             else if (type == typeof(Guid))
             {
                 SetValue((Guid)value);
+            }
+            else if (type == typeof(char))
+            {
+                SetValue((char)value);
             }
             else if (type == typeof(string))
             {
@@ -226,6 +328,10 @@ namespace CTP
             {
                 SetValue((CtpBuffer)value);
             }
+            else if (type == typeof(CtpDocument))
+            {
+                SetValue((CtpDocument)value);
+            }
             else if (type == typeof(byte[]))
             {
                 SetValue((byte[])value);
@@ -234,14 +340,19 @@ namespace CTP
             {
                 SetValue((CtpObject)value);
             }
-            else if (type == typeof(CtpDocument))
-            {
-                SetValue((CtpDocument)value);
-            }
             else
             {
-                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
+                throw new NotSupportedException("Type is not a supported CtpValue type: " + type.ToString());
             }
         }
+
+        public void SetValue(CtpObject value)
+        {
+            m_raw0 = value.m_raw0;
+            m_raw1 = value.m_raw1;
+            m_valueObject = value.m_valueObject;
+            m_valueTypeCode = value.m_valueTypeCode;
+        }
+
     }
 }

@@ -93,18 +93,6 @@ namespace CTP
         }
 
         /// <summary>
-        /// Encodes a <see cref="Guid"/> following RFC 4122.
-        /// </summary>
-        /// <param name="guid"><see cref="Guid"/> to serialize.</param>
-        /// <returns>A <see cref="byte"/> array that represents a big-endian encoded <see cref="Guid"/>.</returns>
-        public static byte[] ToRfcBytes(this Guid guid)
-        {
-            byte[] rv = new byte[16];
-            guid.ToRfcBytes(rv, 0);
-            return rv;
-        }
-
-        /// <summary>
         /// Decodes a <see cref="Guid"/> following RFC 4122
         /// </summary>
         /// <param name="buffer">Buffer containing a serialized big-endian encoded <see cref="Guid"/>.</param>

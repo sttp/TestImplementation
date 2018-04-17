@@ -33,6 +33,11 @@ namespace CTP
         [FieldOffset(24)]
         private CtpTypeCode m_valueTypeCode;
 
+        [FieldOffset(0)]
+        private long m_raw0;
+        [FieldOffset(8)]
+        private long m_raw1; 
+
         #endregion
 
         #region [ Constructors ]
@@ -42,104 +47,201 @@ namespace CTP
             SetNull();
         }
 
+        public CtpObject(DBNull value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(sbyte value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(short value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(int value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(long value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(byte value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(ushort value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(uint value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(ulong value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(float value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(double value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(decimal value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(DateTime value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(CtpTime value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(bool value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(Guid value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(char value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(string value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(CtpBuffer value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(CtpDocument value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(byte[] value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(sbyte? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(short? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(int? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(long? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(byte? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(ushort? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(uint? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(ulong? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(float? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(double? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(decimal? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(DateTime? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(CtpTime? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(bool? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(Guid? value)
+        {
+            SetValue(value);
+        }
+
+        public CtpObject(char? value)
+        {
+            SetValue(value);
+        }
+
         public CtpObject(object value)
         {
-            if (value == null || value == DBNull.Value)
-            {
-                m_valueTypeCode = CtpTypeCode.Null;
-                return;
-            }
-
-            var type = value.GetType();
-            if (type == typeof(sbyte))
-            {
-                SetValue((sbyte)value);
-            }
-            else if (type == typeof(short))
-            {
-                SetValue((short)value);
-            }
-            else if (type == typeof(int))
-            {
-                SetValue((int)value);
-            }
-            else if (type == typeof(long))
-            {
-                SetValue((long)value);
-            }
-            else if (type == typeof(byte))
-            {
-                SetValue((byte)value);
-            }
-            else if (type == typeof(ushort))
-            {
-                SetValue((ushort)value);
-            }
-            else if (type == typeof(uint))
-            {
-                SetValue((uint)value);
-            }
-            else if (type == typeof(ulong))
-            {
-                SetValue((ulong)value);
-            }
-            else if (type == typeof(float))
-            {
-                SetValue((float)value);
-            }
-            else if (type == typeof(double))
-            {
-                SetValue((double)value);
-            }
-            else if (type == typeof(decimal))
-            {
-                SetValue((double)(decimal)value);
-            }
-            else if (type == typeof(DateTime))
-            {
-                SetValue((DateTime)value);
-            }
-            else if (type == typeof(CtpTime))
-            {
-                SetValue((CtpTime)value);
-            }
-            else if (type == typeof(bool))
-            {
-                SetValue((bool)value);
-            }
-            else if (type == typeof(char))
-            {
-                SetValue((char)value);
-            }
-            else if (type == typeof(Guid))
-            {
-                SetValue((Guid)value);
-            }
-            else if (type == typeof(string))
-            {
-                SetValue((string)value);
-            }
-            else if (type == typeof(CtpBuffer))
-            {
-                SetValue((CtpBuffer)value);
-            }
-            else if (type == typeof(byte[]))
-            {
-                SetValue((byte[])value);
-            }
-            else if (value is CtpObject)
-            {
-                SetValue((CtpObject)value);
-            }
-            else if (type == typeof(CtpDocument))
-            {
-                SetValue((CtpDocument)value);
-            }
-            else
-            {
-                throw new NotSupportedException("Type is not a supported SttpValue type: " + type.ToString());
-            }
+            SetValue(value);
         }
+
+        public CtpObject(CtpObject value)
+        {
+            SetValue(value);
+        }
+
 
         #endregion
 
@@ -195,7 +297,7 @@ namespace CTP
             {
                 checked
                 {
-                    return (short)AsInt32;
+                    return (short)AsInt64;
                 }
             }
         }
@@ -206,7 +308,7 @@ namespace CTP
             {
                 checked
                 {
-                    return (byte)AsInt32;
+                    return (byte)AsInt64;
                 }
             }
         }
@@ -217,7 +319,7 @@ namespace CTP
             {
                 checked
                 {
-                    return (ushort)AsInt32;
+                    return (ushort)AsInt64;
                 }
             }
         }
@@ -360,13 +462,7 @@ namespace CTP
                 return false;
             if (ReferenceEquals(b, null))
                 return false;
-            if (a.m_valueTypeCode != b.m_valueTypeCode)
-                return false;
-            switch (a.m_valueTypeCode)
-            {
-                //ToDo: Finish.
-            }
-            return true;
+            return a.Equals(b);
         }
 
         public static bool operator !=(CtpObject a, CtpObject b)

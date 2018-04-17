@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace CTP
 {
-    internal unsafe class DocumentBitWriter
+    /// <summary>
+    /// This class is used to write a CtpDocument.
+    /// </summary>
+    internal unsafe class CtpDocumentBitWriter
     {
         private byte[] m_byteBuffer;
         private byte[] m_bitBuffer;
         private int m_byteLength;
+        private int m_bitLength;
         private int m_bitStreamCacheBitCount;
         private uint m_bitStreamCache;
-        private int m_bitLength;
-        private bool m_hasReservedUnusedBitsHeader;
 
-        public DocumentBitWriter()
+        public CtpDocumentBitWriter()
         {
             m_byteBuffer = new byte[64];
             m_bitBuffer = new byte[8];
@@ -24,7 +25,7 @@ namespace CTP
 
         public int Length => m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
 
-        protected void GetBuffer(out byte[] data, out int offset, out int length)
+        void GetBuffer(out byte[] data, out int offset, out int length)
         {
             //Copy the bit stream to the end of the byte stream.
 
@@ -38,11 +39,6 @@ namespace CTP
                 //Make up 8 bits by padding.
                 uint cache = m_bitStreamCache << (8 - m_bitStreamCacheBitCount);
                 m_bitBuffer[m_bitBuffer.Length - bitLength] = (byte)cache;
-            }
-            if (m_hasReservedUnusedBitsHeader)
-            {
-                m_bitBuffer[m_bitBuffer.Length - 1] &= 31; //Clear bits 6,7,8
-                m_bitBuffer[m_bitBuffer.Length - 1] |= (byte)(m_bitStreamCacheBitCount << 5);
             }
             EnsureCapacityBytes(m_bitLength);
             Array.Copy(m_bitBuffer, m_bitBuffer.Length - bitLength, m_byteBuffer, m_byteLength, bitLength);
@@ -93,9 +89,7 @@ namespace CTP
 
         public byte[] ToArray()
         {
-            //ToDo: There might be a better CopyTo alternative.
             GetBuffer(out byte[] origBuffer, out int offset, out int length);
-
             byte[] data = new byte[length];
             Array.Copy(origBuffer, offset, data, 0, length);
             return data;
@@ -107,9 +101,7 @@ namespace CTP
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
             m_byteLength = 0;
-            m_hasReservedUnusedBitsHeader = false;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
-            //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
 
         public void Write(float value)
@@ -130,7 +122,7 @@ namespace CTP
         public void Write(Guid value)
         {
             EnsureCapacityBytes(16);
-            Array.Copy(value.ToRfcBytes(), 0, m_byteBuffer, m_byteLength, 16);
+            value.ToRfcBytes(m_byteBuffer, m_byteLength);
             m_byteLength += 16;
         }
 
@@ -253,28 +245,14 @@ namespace CTP
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
-       
+
         public void WriteBits8(uint value)
         {
             EnsureCapacityBytes(1);
             m_byteBuffer[m_byteLength + 0] = (byte)value;
             m_byteLength += 1;
         }
-        public void WriteBits16(uint value)
-        {
-            EnsureCapacityBytes(2);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 1] = (byte)value;
-            m_byteLength += 2;
-        }
-        public void WriteBits24(uint value)
-        {
-            EnsureCapacityBytes(3);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 2] = (byte)value;
-            m_byteLength += 3;
-        }
+
         public void WriteBits32(uint value)
         {
             EnsureCapacityBytes(4);
@@ -284,39 +262,7 @@ namespace CTP
             m_byteBuffer[m_byteLength + 3] = (byte)value;
             m_byteLength += 4;
         }
-        public void WriteBits40(ulong value)
-        {
-            EnsureCapacityBytes(5);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 4] = (byte)value;
-            m_byteLength += 5;
-        }
-        public void WriteBits48(ulong value)
-        {
-            EnsureCapacityBytes(6);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 40);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 5] = (byte)value;
-            m_byteLength += 6;
-        }
-        public void WriteBits56(ulong value)
-        {
-            EnsureCapacityBytes(7);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 48);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 40);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 6] = (byte)value;
-            m_byteLength += 7;
-        }
+
         public void WriteBits64(ulong value)
         {
             EnsureCapacityBytes(8);
@@ -333,27 +279,17 @@ namespace CTP
 
         private void ValidateBitStream()
         {
-            if (!m_hasReservedUnusedBitsHeader || m_bitStreamCacheBitCount > 7)
-                ProcessBitStream();
+            if (m_bitStreamCacheBitCount > 7)
+                ValidateBitStream2();
         }
 
-        private void ProcessBitStream()
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ValidateBitStream2()
         {
-            if (!m_hasReservedUnusedBitsHeader)
-            {
-                //reserve 3 bits for the number of unused bits in the bitstream.
-                //To reserve bits at the beginning of the bit stream, all we have to do is say there were 3 more bits.
-                m_bitStreamCacheBitCount += 3;
-                m_hasReservedUnusedBitsHeader = true;
-            }
-
             EnsureCapacityBits(2); //It's ok to be too large here. It just ensures that at least 2 bytes are free before doing anything.
-            while (m_bitStreamCacheBitCount > 7)
-            {
-                m_bitLength++;
-                m_bitBuffer[m_bitBuffer.Length - m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
-                m_bitStreamCacheBitCount -= 8;
-            }
+            m_bitLength++;
+            m_bitBuffer[m_bitBuffer.Length - m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
+            m_bitStreamCacheBitCount -= 8;
         }
 
         #endregion
