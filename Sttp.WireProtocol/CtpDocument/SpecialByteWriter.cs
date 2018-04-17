@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CTP
 {
-    public unsafe class ByteWriter
+    internal unsafe class SpecialByteWriter
     {
         private byte[] m_byteBuffer;
         private byte[] m_bitBuffer;
@@ -15,7 +15,7 @@ namespace CTP
         private int m_bitLength;
         private bool m_hasReservedUnusedBitsHeader;
 
-        public ByteWriter()
+        public SpecialByteWriter()
         {
             m_byteBuffer = new byte[64];
             m_bitBuffer = new byte[8];

@@ -211,7 +211,7 @@ namespace CTP
                 switch (m_valueTypeCode)
                 {
                     case CtpTypeCode.Null:
-                        return "";
+                        return "{null}";
                     case CtpTypeCode.Int64:
                         return m_valueInt64.ToString();
                     case CtpTypeCode.Single:

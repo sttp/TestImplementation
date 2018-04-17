@@ -21,7 +21,7 @@ namespace CTP
         /// Creates an CtpDocument from a input stream.
         /// </summary>
         /// <param name="rd">where to read the data from</param>
-        public CtpDocument(ByteReader rd)
+        internal CtpDocument(SpecialByteReader rd)
         {
             m_contents = rd.ReadBytes();
         }
@@ -48,7 +48,7 @@ namespace CTP
         /// Writes the CtpDocument data to a byte array.
         /// </summary>
         /// <param name="wr"></param>
-        public void Write(ByteWriter wr)
+        internal void Write(SpecialByteWriter wr)
         {
             wr.Write(m_contents);
         }
@@ -72,6 +72,11 @@ namespace CTP
         public void CopyTo(byte[] buffer, int offset)
         {
             Array.Copy(m_contents, 0, buffer, offset, m_contents.Length); // write data
+        }
+
+        public byte[] ToBuffer()
+        {
+            return (byte[])m_contents.Clone();
         }
 
         /// <summary>

@@ -40,7 +40,7 @@ namespace CTP
         /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
-        private ByteReader m_stream;
+        private SpecialByteReader m_stream;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
@@ -64,7 +64,7 @@ namespace CTP
         /// <param name="data"></param>
         internal CtpDocumentReader(byte[] data)
         {
-            m_stream = new ByteReader(data, 0, data.Length);
+            m_stream = new SpecialByteReader(data, 0, data.Length);
             Value = new CtpObject();
             m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = CtpDocumentNodeType.StartOfDocument;

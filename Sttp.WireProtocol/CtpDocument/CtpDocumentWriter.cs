@@ -66,7 +66,7 @@ namespace CTP
         /// <summary>
         /// Where to write the data.
         /// </summary>
-        private ByteWriter m_stream = new ByteWriter();
+        private SpecialByteWriter m_stream = new SpecialByteWriter();
         /// <summary>
         /// A reusable class to ease in calling the <see cref="EndElement"/> method.
         /// </summary>

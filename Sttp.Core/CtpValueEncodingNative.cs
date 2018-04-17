@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CTP;
 
-namespace CTP
+namespace Sttp
 {
-    public static class CtpValueEncodingWithoutType
+    public static class CtpValueEncodingNative
     {
         public static void Save(ByteWriter wr, CtpObject value)
         {
@@ -13,6 +14,7 @@ namespace CTP
                 value = CtpObject.Null;
 
             var typeCode = value.ValueTypeCode;
+            wr.WriteBits4((byte)typeCode);
             switch (typeCode)
             {
                 case CtpTypeCode.Null:
@@ -49,8 +51,9 @@ namespace CTP
             }
         }
 
-        public static CtpObject Load(ByteReader rd, CtpTypeCode value)
+        public static CtpObject Load(ByteReader rd)
         {
+            CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             switch (value)
             {
                 case CtpTypeCode.Null:
@@ -78,8 +81,9 @@ namespace CTP
             }
         }
 
-        public static void Load(ByteReader rd, CtpTypeCode value, CtpObject output)
+        public static void Load(ByteReader rd, CtpObject output)
         {
+            CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             switch (value)
             {
                 case CtpTypeCode.Null:

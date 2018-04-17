@@ -30,7 +30,7 @@ namespace CTP
         [FieldOffset(16)]
         private object m_valueObject;
 
-        [FieldOffset(33)]
+        [FieldOffset(24)]
         private CtpTypeCode m_valueTypeCode;
 
         #endregion

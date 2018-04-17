@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CTP
 {
-    public unsafe class ByteReader
+    internal unsafe class SpecialByteReader
     {
         private static readonly byte[] Empty = new byte[0];
 
@@ -20,17 +20,17 @@ namespace CTP
         private uint m_bitStreamCache;
         private byte m_usedBitsForLastBitWord;
 
-        public ByteReader()
+        public SpecialByteReader()
         {
             m_buffer = Empty;
         }
 
-        public ByteReader(byte[] data)
+        public SpecialByteReader(byte[] data)
         {
             SetBuffer(data, 0, data.Length);
         }
 
-        public ByteReader(byte[] data, int position, int length)
+        public SpecialByteReader(byte[] data, int position, int length)
         {
             SetBuffer(data, position, length);
         }
