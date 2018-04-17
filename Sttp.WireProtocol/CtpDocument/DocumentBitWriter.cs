@@ -127,7 +127,6 @@ namespace CTP
             WriteBits64(*(ulong*)&value);
         }
 
-
         public void Write(Guid value)
         {
             EnsureCapacityBytes(16);
@@ -138,7 +137,7 @@ namespace CTP
         public void Write(byte[] value, int start, int length)
         {
             value.ValidateParameters(start, length);
-            Write8BitSegments((uint)length);
+            Write4BitSegments((uint)length);
             if (length == 0)
                 return;
 
@@ -161,14 +160,14 @@ namespace CTP
 
             if (value.Length == 0)
             {
-                Write8BitSegments(0);
+                Write4BitSegments(0);
                 return;
             }
 
             Write(Encoding.UTF8.GetBytes(value));
         }
 
-        public void WriteAsciiShort(string value)
+        public void WriteAscii(string value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -189,22 +188,22 @@ namespace CTP
             m_byteLength += 1 + value.Length;
         }
 
-        public void Write(CtpTime value)
-        {
-            Write(value.Ticks);
-        }
-
-        public void Write(CtpBuffer value)
-        {
-            Write(value.ToBuffer());
-        }
-
-        public void Write(CtpDocument value)
-        {
-            Write(value.ToBuffer());
-        }
-
         #region [ Writing Bits ]
+
+        /// <summary>
+        /// While (NotZero), WriteBits8
+        /// </summary>
+        /// <param name="value"></param>
+        public void Write4BitSegments(uint value)
+        {
+            while (value > 0)
+            {
+                value >>= 4;
+                WriteBits1(1);
+                WriteBits4((byte)value);
+            }
+            WriteBits1(0);
+        }
 
         /// <summary>
         /// While (NotZero), WriteBits8
@@ -212,52 +211,13 @@ namespace CTP
         /// <param name="value"></param>
         public void Write8BitSegments(ulong value)
         {
-            int bytes = 0;
-            ulong tmpValue = value;
-            while (tmpValue > 0)
+            while (value > 0)
             {
-                bytes++;
-                tmpValue >>= 8;
+                value >>= 8;
                 WriteBits1(1);
+                WriteBits8((byte)value);
             }
             WriteBits1(0);
-            WriteBytes(bytes, value);
-        }
-
-        private void WriteBytes(int bytes, ulong value)
-        {
-            if (bytes > 8 || bytes < 0)
-                throw new ArgumentOutOfRangeException(nameof(bytes), "Must be between 0 and 8 inclusive");
-
-            switch (bytes)
-            {
-                case 0:
-                    return;
-                case 1:
-                    WriteBits8((uint)value);
-                    return;
-                case 2:
-                    WriteBits16((uint)value);
-                    return;
-                case 3:
-                    WriteBits24((uint)value);
-                    return;
-                case 4:
-                    WriteBits32((uint)value);
-                    return;
-                case 5:
-                    WriteBits40(value);
-                    return;
-                case 6:
-                    WriteBits48(value);
-                    return;
-                case 7:
-                    WriteBits56(value);
-                    return;
-                case 8:
-                    WriteBits64(value);
-                    return;
-            }
         }
 
         public void WriteBits1(bool value)

@@ -67,7 +67,7 @@ namespace CTP
             Value = new CtpObject();
             m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = CtpDocumentNodeType.StartOfDocument;
-            m_rootElement = m_stream.ReadAsciiShort();
+            m_rootElement = m_stream.ReadAscii();
             ElementName = GetCurrentElement();
         }
 
@@ -156,12 +156,12 @@ namespace CTP
             {
                 if (m_stream.ReadBits1() == 1)
                 {
-                    m_namesList.Add(new NameLookupCache(m_stream.ReadAsciiShort(), m_namesList.Count));
+                    m_namesList.Add(new NameLookupCache(m_stream.ReadAscii(), m_namesList.Count));
                     m_prevName.NextNameID = m_namesList.Count - 1;
                 }
                 else
                 {
-                    int index = (int)m_stream.Read8BitSegments();
+                    int index = (int)m_stream.Read4BitSegments();
                     m_prevName.NextNameID = index;
                 }
             }

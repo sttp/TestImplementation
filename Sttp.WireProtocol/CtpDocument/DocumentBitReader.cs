@@ -82,7 +82,7 @@ namespace CTP
 
         public byte[] ReadBytes()
         {
-            int length = (int)Read8BitSegments();
+            int length = (int)Read4BitSegments();
             if (length == 0)
             {
                 return Empty;
@@ -105,7 +105,7 @@ namespace CTP
             return Encoding.UTF8.GetString(rv);
         }
 
-        public string ReadAsciiShort()
+        public string ReadAscii()
         {
             if (m_currentBytePosition + 1 > m_currentBitPosition)
             {
@@ -342,40 +342,33 @@ namespace CTP
 
         }
 
+        public uint Read4BitSegments()
+        {
+            int bits = 0;
+            uint value = 0;
+            while (ReadBits1() == 1)
+            {
+                if (bits == 32)
+                    throw new InvalidOperationException("Improperly encoded 4-bit segment");
+                value |= (uint)ReadBits8() << bits;
+                bits += 8;
+            }
+            return value;
+        }
+
         public ulong Read8BitSegments()
         {
             int bits = 0;
+            ulong value = 0;
             while (ReadBits1() == 1)
             {
-                bits++;
+                if (bits == 64)
+                    throw new InvalidOperationException("Improperly encoded 8-bit segment");
+                value |= (ulong)ReadBits8() << bits;
+                bits += 8;
             }
-            return ReadBits(bits);
-        }
 
-        public ulong ReadBits(int bits)
-        {
-            switch (bits)
-            {
-                case 0:
-                    return 0;
-                case 1:
-                    return ReadBits8();
-                case 2:
-                    return ReadBits16();
-                case 3:
-                    return ReadBits24();
-                case 4:
-                    return ReadBits32();
-                case 5:
-                    return ReadBits40();
-                case 6:
-                    return ReadBits48();
-                case 7:
-                    return ReadBits56();
-                case 8:
-                    return ReadBits64();
-            }
-            throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 8 inclusive");
+            return value;
         }
 
         #endregion

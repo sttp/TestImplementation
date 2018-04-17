@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace CTP
 {
+    /// <summary>
+    /// A user friendly means of writing a <see cref="CtpDocument"/>.
+    /// </summary>
     public class CtpDocumentWriter
     {
         /// <summary>
@@ -10,10 +13,6 @@ namespace CTP
         /// </summary>
         private class NameLookupCache
         {
-            /// <summary>
-            /// The name of the element/value. Must be less than 256 characters and 7-bit ASCII.
-            /// </summary>
-            public string Name;
             /// <summary>
             /// The index position of the next NameID. This defaults to the current index + 1, 
             /// and always matches the most recent name ID last time this name traversed to a new ID. (Can be the same)
@@ -25,9 +24,8 @@ namespace CTP
             /// </summary>
             public CtpTypeCode PrevValueTypeCode;
 
-            public NameLookupCache(string name, int nextNameID)
+            public NameLookupCache(int nextNameID)
             {
-                Name = name;
                 NextNameID = nextNameID;
                 PrevValueTypeCode = CtpTypeCode.Null;
             }
@@ -85,38 +83,14 @@ namespace CTP
         private bool m_disposed;
 
         /// <summary>
-        /// The root element
-        /// </summary>
-        private string m_rootElement;
-
-        /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>
         /// <param name="rootElement"></param>
         public CtpDocumentWriter(string rootElement)
         {
-            m_rootElement = rootElement;
             m_endElementHelper = new ElementEndElementHelper(this);
-            m_prevName = new NameLookupCache(string.Empty, 0);
-            m_stream.WriteAsciiShort(m_rootElement);
-        }
-
-        /// <summary>
-        /// The root element of this writer.
-        /// </summary>
-        public string RootElement => m_rootElement;
-
-        /// <summary>
-        /// The current element, can be the root element.
-        /// </summary>
-        public string CurrentElement
-        {
-            get
-            {
-                if (m_elementStack.Count == 0)
-                    return m_rootElement;
-                return m_elementStack.Peek();
-            }
+            m_prevName = new NameLookupCache(0);
+            m_stream.WriteAscii(rootElement);
         }
 
         /// <summary>
@@ -127,7 +101,7 @@ namespace CTP
         //Encoding Scheme: 
         //
         // First, determine the Node Type.
-        // 2 bits, SttpMarkupType
+        // 2 bits, CtpDocumentNodeType
         // If EndElement, then exit.
         //
         // Second, Determine the next NameIndex
@@ -143,9 +117,9 @@ namespace CTP
         public ElementEndElementHelper StartElement(string name)
         {
             if (m_disposed)
-                throw new ObjectDisposedException("Once ToSttpMarkup has been called, no more data can be written to this object.");
+                throw new ObjectDisposedException("Once ToCtpDocument has been called, no more data can be written to this object.");
 
-            if (name == null || name.Length == 0)
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
             m_elementStack.Push(name);
@@ -162,7 +136,7 @@ namespace CTP
         public void EndElement()
         {
             if (m_disposed)
-                throw new ObjectDisposedException("Once ToSttpMarkup has been called, no more data can be written to this object.");
+                throw new ObjectDisposedException("Once ToCtpDocument has been called, no more data can be written to this object.");
 
             m_elementStack.Pop();
             m_stream.WriteBits2((uint)CtpDocumentNodeType.EndElement);
@@ -177,9 +151,9 @@ namespace CTP
         public void WriteValue(string name, CtpObject value)
         {
             if (m_disposed)
-                throw new ObjectDisposedException("Once ToSttpMarkup has been called, no more data can be written to this object.");
+                throw new ObjectDisposedException("Once ToCtpDocument has been called, no more data can be written to this object.");
 
-            if (name == null || name.Length == 0)
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
             if ((object)value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -189,13 +163,47 @@ namespace CTP
             if (value.ValueTypeCode == m_prevName.PrevValueTypeCode)
             {
                 m_stream.WriteBits1(0);
-                SaveWO(m_stream, value);
             }
             else
             {
                 m_stream.WriteBits1(1);
-                Save(m_stream, value);
+                m_stream.WriteBits4((byte)value.ValueTypeCode);
                 m_prevName.PrevValueTypeCode = value.ValueTypeCode;
+            }
+
+            switch (value.ValueTypeCode)
+            {
+                case CtpTypeCode.Null:
+                    break;
+                case CtpTypeCode.Int64:
+                    m_stream.Write8BitSegments((ulong)PackSign(value.AsInt64));
+                    break;
+                case CtpTypeCode.Single:
+                    m_stream.Write(value.AsSingle);
+                    break;
+                case CtpTypeCode.Double:
+                    m_stream.Write(value.AsDouble);
+                    break;
+                case CtpTypeCode.CtpTime:
+                    m_stream.Write(value.AsCtpTime.Ticks);
+                    break;
+                case CtpTypeCode.Boolean:
+                    m_stream.WriteBits1(value.AsBoolean);
+                    break;
+                case CtpTypeCode.Guid:
+                    m_stream.Write(value.AsGuid);
+                    break;
+                case CtpTypeCode.String:
+                    m_stream.Write(value.AsString);
+                    break;
+                case CtpTypeCode.CtpBuffer:
+                    m_stream.Write(value.AsCtpBuffer.ToBuffer());
+                    break;
+                case CtpTypeCode.CtpDocument:
+                    m_stream.Write(value.AsDocument.ToBuffer());
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -204,11 +212,11 @@ namespace CTP
             if (!m_nameCache.TryGetValue(name, out int index))
             {
                 m_nameCache[name] = m_nameCache.Count;
-                m_namesList.Add(new NameLookupCache(name, m_nameCache.Count));
+                m_namesList.Add(new NameLookupCache(m_nameCache.Count));
                 index = m_nameCache.Count - 1;
                 m_stream.WriteBits1(1);
                 m_stream.WriteBits1(1);
-                m_stream.WriteAsciiShort(name);
+                m_stream.WriteAscii(name);
             }
             else if (m_prevName.NextNameID == index)
             {
@@ -239,19 +247,6 @@ namespace CTP
         }
 
         /// <summary>
-        /// Writes the provided value.
-        /// </summary>
-        /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
-        /// <param name="value">the value itself as a byte buffer.</param>
-        public void WriteValue(string name, byte[] value, int offset, int length)
-        {
-            value.ValidateParameters(offset, length);
-            byte[] data2 = new byte[length];
-            Array.Copy(value, offset, data2, 0, length);
-            WriteValue(name, data2);
-        }
-
-        /// <summary>
         /// Completes the writing to an <see cref="CtpDocument"/> and returns the completed buffer. This may be called multiple times.
         /// </summary>
         /// <returns></returns>
@@ -264,61 +259,6 @@ namespace CTP
             }
             return new CtpDocument(m_stream.ToArray());
         }
-
-
-
-        private static void Save(DocumentBitWriter wr, CtpObject value)
-        {
-            if (value == null)
-                value = CtpObject.Null;
-
-            var typeCode = value.ValueTypeCode;
-            wr.WriteBits4((byte)typeCode);
-            SaveWO(wr,value);
-        }
-
-        private static void SaveWO(DocumentBitWriter wr, CtpObject value)
-        {
-            if (value == null)
-                value = CtpObject.Null;
-
-            var typeCode = value.ValueTypeCode;
-            switch (typeCode)
-            {
-                case CtpTypeCode.Null:
-                    break;
-                case CtpTypeCode.Int64:
-                    wr.Write8BitSegments((ulong)PackSign(value.AsInt64));
-                    break;
-                case CtpTypeCode.Single:
-                    wr.Write(value.AsSingle);
-                    break;
-                case CtpTypeCode.Double:
-                    wr.Write(value.AsDouble);
-                    break;
-                case CtpTypeCode.CtpTime:
-                    wr.Write(value.AsCtpTime);
-                    break;
-                case CtpTypeCode.Boolean:
-                    wr.WriteBits1(value.AsBoolean);
-                    break;
-                case CtpTypeCode.Guid:
-                    wr.Write(value.AsGuid);
-                    break;
-                case CtpTypeCode.String:
-                    wr.Write(value.AsString);
-                    break;
-                case CtpTypeCode.CtpBuffer:
-                    wr.Write(value.AsCtpBuffer);
-                    break;
-                case CtpTypeCode.CtpDocument:
-                    wr.Write(value.AsDocument);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
 
         private static long PackSign(long value)
         {
