@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using System.Xml.Schema;
 
 namespace CTP
 {
@@ -21,7 +20,7 @@ namespace CTP
         /// Creates an CtpDocument from a input stream.
         /// </summary>
         /// <param name="rd">where to read the data from</param>
-        internal CtpDocument(SpecialByteReader rd)
+        internal CtpDocument(DocumentBitReader rd)
         {
             m_contents = rd.ReadBytes();
         }
@@ -48,7 +47,7 @@ namespace CTP
         /// Writes the CtpDocument data to a byte array.
         /// </summary>
         /// <param name="wr"></param>
-        internal void Write(SpecialByteWriter wr)
+        internal void Write(DocumentBitWriter wr)
         {
             wr.Write(m_contents);
         }

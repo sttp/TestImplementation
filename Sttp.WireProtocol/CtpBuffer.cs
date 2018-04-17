@@ -14,7 +14,7 @@ namespace CTP
             m_data = (byte[])data.Clone();
         }
 
-        internal CtpBuffer(SpecialByteReader reader)
+        internal CtpBuffer(DocumentBitReader reader)
         {
             m_data = reader.ReadBytes();
         }
@@ -24,7 +24,7 @@ namespace CTP
             return (byte[])m_data.Clone();
         }
 
-        internal void Write(SpecialByteWriter writer)
+        internal void Write(DocumentBitWriter writer)
         {
             writer.Write(m_data);
         }

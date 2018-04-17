@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CTP
 {
     internal static class CtpValueEncodingNative
     {
-        internal static void Save(SpecialByteWriter wr, CtpObject value)
+        internal static void Save(DocumentBitWriter wr, CtpObject value)
         {
             if (value == null)
                 value = CtpObject.Null;
@@ -50,37 +47,7 @@ namespace CTP
             }
         }
 
-        internal static CtpObject Load(SpecialByteReader rd)
-        {
-            CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
-            switch (value)
-            {
-                case CtpTypeCode.Null:
-                    return CtpObject.Null;
-                case CtpTypeCode.Int64:
-                    return (CtpObject)UnPackSign((long)rd.Read8BitSegments());
-                case CtpTypeCode.Single:
-                    return (CtpObject)rd.ReadSingle();
-                case CtpTypeCode.Double:
-                    return (CtpObject)rd.ReadDouble();
-                case CtpTypeCode.CtpTime:
-                    return (CtpObject)rd.ReadSttpTime();
-                case CtpTypeCode.Boolean:
-                    return (CtpObject)(rd.ReadBits1() == 1);
-                case CtpTypeCode.Guid:
-                    return (CtpObject)rd.ReadGuid();
-                case CtpTypeCode.String:
-                    return (CtpObject)rd.ReadString();
-                case CtpTypeCode.CtpBuffer:
-                    return (CtpObject)rd.ReadSttpBuffer();
-                case CtpTypeCode.CtpDocument:
-                    return (CtpObject)rd.ReadSttpMarkup();
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        internal static void Load(SpecialByteReader rd, CtpObject output)
+        internal static void Load(DocumentBitReader rd, CtpObject output)
         {
             CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             switch (value)

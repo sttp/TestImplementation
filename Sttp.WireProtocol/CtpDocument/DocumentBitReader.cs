@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CTP
 {
-    internal unsafe class SpecialByteReader
+    internal unsafe class DocumentBitReader
     {
         private static readonly byte[] Empty = new byte[0];
 
@@ -20,42 +20,9 @@ namespace CTP
         private uint m_bitStreamCache;
         private byte m_usedBitsForLastBitWord;
 
-        public SpecialByteReader()
-        {
-            m_buffer = Empty;
-        }
-
-        public SpecialByteReader(byte[] data)
-        {
-            SetBuffer(data, 0, data.Length);
-        }
-
-        public SpecialByteReader(byte[] data, int position, int length)
+        public DocumentBitReader(byte[] data, int position, int length)
         {
             SetBuffer(data, position, length);
-        }
-
-        public bool IsEmpty
-        {
-            get
-            {
-                if (m_currentBitPosition != m_currentBytePosition)
-                    return false;
-                if (m_bitStreamCacheBitCount == 0)
-                    return true;
-
-                if (m_bitStreamCacheBitCount >= 8 - m_usedBitsForLastBitWord)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        public void SetBuffer(byte[] data)
-        {
-            SetBuffer(data, 0, data.Length);
         }
 
         public void SetBuffer(byte[] data, int position, int length)
@@ -85,47 +52,11 @@ namespace CTP
             }
         }
 
-        #region [ Read Methods ]
-
-        #region [ 1 byte values ]
-
-        public byte ReadByte()
-        {
-            return (byte)ReadBits8();
-        }
-
-        #endregion
-
-        #region [ 2-byte values ]
-
-        public short ReadInt16()
-        {
-            return (short)(ushort)ReadBits16();
-        }
-
-        #endregion
-
-        #region [ 4-byte values ]
-
-        public int ReadInt32()
-        {
-            return (int)ReadBits32();
-        }
-
-        public uint ReadUInt32()
-        {
-            return ReadBits32();
-        }
-
         public float ReadSingle()
         {
             var value = ReadBits32();
             return *(float*)&value;
         }
-
-        #endregion
-
-        #region [ 8-byte values ]
 
         public long ReadInt64()
         {
@@ -138,15 +69,6 @@ namespace CTP
             return *(double*)&value;
         }
 
-        public ulong ReadUInt64()
-        {
-            return ReadBits64();
-        }
-
-        #endregion
-
-        #region [ 16-byte values ]
-
         public Guid ReadGuid()
         {
             if (m_currentBytePosition + 16 > m_currentBitPosition)
@@ -157,10 +79,6 @@ namespace CTP
             m_currentBytePosition += 16;
             return rv;
         }
-
-        #endregion
-
-        #region [ Variable Length ]
 
         public byte[] ReadBytes()
         {
@@ -208,11 +126,6 @@ namespace CTP
             return new string(data);
         }
 
-
-        #endregion
-
-        #endregion
-
         public CtpDocument ReadSttpMarkup()
         {
             return new CtpDocument(this);
@@ -229,11 +142,6 @@ namespace CTP
         }
 
         #region [ Read Bits ]
-
-        public uint ReadBits0()
-        {
-            return 0;
-        }
 
         public uint ReadBits1()
         {

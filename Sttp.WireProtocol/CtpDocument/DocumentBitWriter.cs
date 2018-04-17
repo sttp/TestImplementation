@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CTP
 {
-    internal unsafe class SpecialByteWriter
+    internal unsafe class DocumentBitWriter
     {
         private byte[] m_byteBuffer;
         private byte[] m_bitBuffer;
@@ -15,7 +15,7 @@ namespace CTP
         private int m_bitLength;
         private bool m_hasReservedUnusedBitsHeader;
 
-        public SpecialByteWriter()
+        public DocumentBitWriter()
         {
             m_byteBuffer = new byte[64];
             m_bitBuffer = new byte[8];
@@ -112,53 +112,14 @@ namespace CTP
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
 
-        #region [ 1 byte values ]
-
-        public void Write(byte value)
-        {
-            WriteBits8(value);
-        }
-
-        #endregion
-
-        #region [ 2-byte values ]
-
-        public void Write(short value)
-        {
-            WriteBits16((ushort)value);
-        }
-
-        #endregion
-
-        #region [ 4-byte values ]
-
-        public void Write(int value)
-        {
-            WriteBits32((uint)value);
-        }
-
-        public void Write(uint value)
-        {
-            WriteBits32(value);
-        }
-
         public void Write(float value)
         {
             WriteBits32(*(uint*)&value);
         }
 
-        #endregion
-
-        #region [ 8-byte values ]
-
         public void Write(long value)
         {
             WriteBits64((ulong)value);
-        }
-
-        public void Write(ulong value)
-        {
-            WriteBits64(value);
         }
 
         public void Write(double value)
@@ -166,9 +127,6 @@ namespace CTP
             WriteBits64(*(ulong*)&value);
         }
 
-        #endregion
-
-        #region [ 16-byte values ]
 
         public void Write(Guid value)
         {
@@ -176,10 +134,6 @@ namespace CTP
             Array.Copy(value.ToRfcBytes(), 0, m_byteBuffer, m_byteLength, 16);
             m_byteLength += 16;
         }
-
-        #endregion
-
-        #region [ Variable Length Types ]
 
         public void Write(byte[] value, int start, int length)
         {
@@ -234,8 +188,6 @@ namespace CTP
 
             m_byteLength += 1 + value.Length;
         }
-
-        #endregion
 
         public void Write(CtpTime value)
         {
@@ -355,11 +307,6 @@ namespace CTP
                     WriteBits64(value);
                     return;
             }
-        }
-
-        public void WriteBits0(uint value)
-        {
-
         }
 
         public void WriteBits1(bool value)

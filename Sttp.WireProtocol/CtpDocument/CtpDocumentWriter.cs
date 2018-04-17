@@ -34,7 +34,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// A helper class so calls to <see cref="CtpDocumentWriter.EndElement"/> can be wrapped in a using clause.
+        /// A helper class so calls to <see cref="EndElement"/> can be wrapped in a using clause.
         /// Note: this class is a single instance class and does not protect against multiple calls to Dispose. Therefore,
         /// it's not intended to be used outside of making it easier to section out code.
         /// </summary>
@@ -66,7 +66,7 @@ namespace CTP
         /// <summary>
         /// Where to write the data.
         /// </summary>
-        private SpecialByteWriter m_stream = new SpecialByteWriter();
+        private DocumentBitWriter m_stream = new DocumentBitWriter();
         /// <summary>
         /// A reusable class to ease in calling the <see cref="EndElement"/> method.
         /// </summary>
