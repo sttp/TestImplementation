@@ -88,7 +88,7 @@ namespace CTP
         /// <summary>
         /// The approximate current size of the writer. It's not exact until <see cref="ToCtpDocument"/> has been called.
         /// </summary>
-        public int CurrentSize => m_stream.Length + m_prefixLength;
+        public int Length => m_stream.Length + m_prefixLength;
 
         /// <summary>
         /// Resets a document writer so it can be reused.
@@ -226,23 +226,36 @@ namespace CTP
             if (m_elementStack.Count != 0)
                 throw new InvalidOperationException("The element stack does not return to the root. Be sure enough calls to EndElement exist.");
 
-            byte[] rv = new byte[m_prefixLength + m_stream.Length];
+            byte[] rv = new byte[Length];
+            CopyTo(rv,0);
+            return new CtpDocument(rv);
+        }
 
-            int index = 0;
-            WriteAscii(rv, ref index, m_rootElement);
-            WriteSize(rv, ref index, (ushort)m_elementNames.Count);
-            WriteSize(rv, ref index, (ushort)m_valueNames.Count);
+        /// <summary>
+        /// Copies the contest of the current document writer to the specified stream.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        public void CopyTo(byte[] buffer, int offset)
+        {
+            if (m_elementStack.Count != 0)
+                throw new InvalidOperationException("The element stack does not return to the root. Be sure enough calls to EndElement exist.");
+
+            buffer.ValidateParameters(offset, Length);
+
+            WriteAscii(buffer, ref offset, m_rootElement);
+            WriteSize(buffer, ref offset, (ushort)m_elementNames.Count);
+            WriteSize(buffer, ref offset, (ushort)m_valueNames.Count);
             foreach (var item in m_elementNames)
             {
-                WriteAscii(rv, ref index, item);
+                WriteAscii(buffer, ref offset, item);
             }
             foreach (var item in m_valueNames)
             {
-                WriteAscii(rv, ref index, item);
+                WriteAscii(buffer, ref offset, item);
             }
 
-            m_stream.CopyTo(rv, index);
-            return new CtpDocument(rv);
+            m_stream.CopyTo(buffer, offset);
         }
 
         private static long PackSign(long value)

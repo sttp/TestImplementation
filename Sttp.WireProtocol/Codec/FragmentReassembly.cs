@@ -8,7 +8,7 @@ namespace CTP
     /// <summary>
     /// This class assists in the reassembly of fragmented data.
     /// </summary>
-    public class FragmentReassembly
+    internal class FragmentReassembly
     {
         /// <summary>
         /// A buffer for building fragmented packets.

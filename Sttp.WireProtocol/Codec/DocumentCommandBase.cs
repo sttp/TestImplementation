@@ -53,14 +53,14 @@ namespace CTP
         /// Creates a command object from the supplied <see pref="reader"/>. If the command has not been registered, 
         /// an <see cref="CommandUnknown"/> object will be returned.
         /// </summary>
+        /// <param name="commandName"></param>
         /// <param name="reader">the serialized data to extract from this reader.</param>
         /// <returns></returns>
-        public static DocumentCommandBase Create(CtpDocument reader)
+        public static DocumentCommandBase Create(string commandName, CtpDocument reader)
         {
-            string rootElement = reader.MakeReader().RootElement;
-            if (!CommandsInitializers.TryGetValue(rootElement, out Func<CtpDocumentReader, DocumentCommandBase> command))
+            if (!CommandsInitializers.TryGetValue(commandName, out Func<CtpDocumentReader, DocumentCommandBase> command))
             {
-                return new CommandUnknown(rootElement, reader);
+                return new CommandUnknown(commandName, reader);
             }
             return command(reader.MakeReader());
         }

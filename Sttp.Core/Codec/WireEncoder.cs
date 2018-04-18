@@ -90,11 +90,6 @@ namespace Sttp.Codec
             m_encoder.SendDocumentCommands(command);
         }
 
-        public void SendCustomCommand(CtpDocumentWriter command)
-        {
-            m_encoder.SendDocumentCommands(command);
-        }
-
         public void Raw(int rawCommandCode, byte[] payload)
         {
             m_encoder.SendBinaryCommand(rawCommandCode, payload, 0, payload.Length);

@@ -32,8 +32,7 @@ namespace CTP
         /// </summary>
         public int Length => m_data.Length;
 
-        //ToDo: These methods will eventually be removed. This is just to compare compression sizes of data.
-        public int CompressedSize => DeflateHelper.Compress(m_data).Length;
+        public string RootElement => Encoding.ASCII.GetString(m_data, 1, m_data[0]);
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.

@@ -19,11 +19,13 @@ namespace CTP
         public event Action<byte[], int, int> NewPacket;
         private EncoderOptions m_encoderOptions;
         private int m_fragmentID = 0;
+        private CtpDocumentWriter m_writerCache = new CtpDocumentWriter(string.Empty);
 
         /// <summary>
         /// A buffer to use to for all of the packets.
         /// </summary>
         private byte[] m_buffer;
+        private MemoryStream m_compressionStream = new MemoryStream();
 
         private const int BufferOffset = 35;
 
@@ -71,7 +73,7 @@ namespace CTP
             }
             else
             {
-                header = CtpHeader.CommandRawInt32;
+                header = CtpHeader.CommandBinaryInt32;
                 m_buffer[BufferOffset - 4] = (byte)(rawCode >> 24);
                 m_buffer[BufferOffset - 3] = (byte)(rawCode >> 16);
                 m_buffer[BufferOffset - 2] = (byte)(rawCode >> 8);
@@ -82,15 +84,16 @@ namespace CTP
             EncodeAndSend(header, m_buffer, headerOffset, length);
         }
 
+
         /// <summary>
         /// Encodes and sends the supplied command to the client.
         /// </summary>
         /// <param name="command">The command to send.</param>
         public void SendDocumentCommands(DocumentCommandBase command)
         {
-            var writer = new CtpDocumentWriter(command.CommandName);
-            command.Save(writer);
-            SendDocumentCommands(writer);
+            m_writerCache.Reset(command.CommandName);
+            command.Save(m_writerCache);
+            SendDocumentCommands(m_writerCache);
         }
 
         /// <summary>
@@ -98,13 +101,11 @@ namespace CTP
         /// the other overload that contains <see cref="DocumentCommandBase"/> if one exists.
         /// </summary>
         /// <param name="writer">The data to send.</param>
-        public void SendDocumentCommands(CtpDocumentWriter writer)
+        private void SendDocumentCommands(CtpDocumentWriter writer)
         {
-            CtpDocument data = writer.ToCtpDocument();
-            EnsureCapacity(BufferOffset + data.Length);
-            data.CopyTo(m_buffer, BufferOffset);
-
-            EncodeAndSend(CtpHeader.CommandDocument, m_buffer, BufferOffset, data.Length);
+            EnsureCapacity(BufferOffset + writer.Length);
+            writer.CopyTo(m_buffer, BufferOffset);
+            EncodeAndSend(CtpHeader.CommandDocument, m_buffer, BufferOffset, writer.Length);
         }
 
         /// <summary>
@@ -258,27 +259,25 @@ namespace CTP
         /// <returns></returns>
         private bool TryCompressPayload(byte[] buffer, int offset, int length, out int newLength, out uint checksum)
         {
-            using (var ms = new MemoryStream())
+            m_compressionStream.SetLength(0);
+            using (var deflate = new DeflateStream(m_compressionStream, CompressionMode.Compress, true))
             {
-                using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
-                {
-                    deflate.Write(buffer, offset, length);
-                }
-
-                //Verifies that there was a size reduction with compression.
-                if (ms.Position + 8 >= length)
-                {
-                    newLength = -1;
-                    checksum = 0;
-                    return false;
-                }
-
-                checksum = Crc32.Compute(buffer, offset, length);
-                newLength = (int)ms.Position;
-                ms.Position = 0;
-                ms.Read(buffer, offset, newLength);
-                return true;
+                deflate.Write(buffer, offset, length);
             }
+
+            //Verifies that there was a size reduction with compression.
+            if (m_compressionStream.Position + 8 >= length)
+            {
+                newLength = -1;
+                checksum = 0;
+                return false;
+            }
+
+            checksum = Crc32.Compute(buffer, offset, length);
+            newLength = (int)m_compressionStream.Position;
+            m_compressionStream.Position = 0;
+            m_compressionStream.ReadAll(buffer, offset, newLength);
+            return true;
         }
     }
 }

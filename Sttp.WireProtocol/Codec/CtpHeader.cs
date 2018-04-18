@@ -3,7 +3,7 @@ using System;
 namespace CTP
 {
     [Flags]
-    public enum CtpHeader : ushort
+    internal enum CtpHeader : ushort
     {
         /// <summary>
         /// Indicates if this packet is compressed. 
@@ -20,7 +20,7 @@ namespace CTP
         CommandMask = CommandDocument,
         CommandBinary0 = 0 << 12,
         CommandBinary1 = 1 << 12,
-        CommandRawInt32 = 2 << 12,
+        CommandBinaryInt32 = 2 << 12,
         CommandDocument = 3 << 12,
         PacketLengthMask = (1 << 12) - 1,
 

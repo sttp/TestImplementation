@@ -79,7 +79,6 @@ namespace Sttp.Tests
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
             var s2 = s.ToCtpDocument();
             Console.WriteLine(s2.Length);
-            Console.WriteLine(s2.CompressedSize);
             //Console.WriteLine(s2.ToXML());
 
             writer.SendCustomCommand(s);
@@ -109,9 +108,6 @@ namespace Sttp.Tests
             Stopwatch sw = new Stopwatch();
             sw.Restart();
             Console.WriteLine(cmd.Document.Length);
-            Console.WriteLine(sw.Elapsed.TotalMilliseconds);
-            sw.Restart();
-            Console.WriteLine(cmd.Document.CompressedSize);
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
 

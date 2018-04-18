@@ -34,8 +34,8 @@ namespace Sttp.Codec
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
                 case CommandCode.Document:
                     m_document = decoder.DocumentPayload;
-                    CommandName = m_document.MakeReader().RootElement;
-                    m_decoder = DocumentCommandBase.Create(decoder.DocumentPayload);
+                    CommandName = m_document.RootElement;
+                    m_decoder = DocumentCommandBase.Create(CommandName, decoder.DocumentPayload);
                     break;
                 case CommandCode.Binary:
                     m_document = null;
