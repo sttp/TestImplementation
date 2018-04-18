@@ -24,6 +24,6 @@
     <Folder Include="Codec\CommandObjects\Negotiate Session\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sttp.WireProtocol\CTP.csproj" />
+    <ProjectReference Include="..\CTP\CTP.csproj" />
   </ItemGroup>
 </Project>

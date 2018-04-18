@@ -1,9 +1,8 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CTP", "Sttp.WireProtocol\CTP.csproj", "{8048242F-DEBD-43B2-8673-BEA2EC461EE3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CTP", "CTP\CTP.csproj", "{8048242F-DEBD-43B2-8673-BEA2EC461EE3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Publisher", "Sttp.Publisher\Sttp.Publisher.csproj", "{3C414D02-3971-47A5-9CB0-C4E56879EB59}"
 EndProject
@@ -14,8 +13,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Core", "Sttp.Core\Sttp.Core.csproj", "{8546536C-FC21-4C1D-9E16-6B3E4BAA4C0D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Tests", "Sttp.Tests\Sttp.Tests.csproj", "{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sttp.WireProtocol2", "Sttp.WireProtocol2\Sttp.WireProtocol2.csproj", "{6E3B76C3-ABA3-4FDB-B062-EB34EC271FAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +44,6 @@ Global
 		{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E3B76C3-ABA3-4FDB-B062-EB34EC271FAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E3B76C3-ABA3-4FDB-B062-EB34EC271FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E3B76C3-ABA3-4FDB-B062-EB34EC271FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E3B76C3-ABA3-4FDB-B062-EB34EC271FAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

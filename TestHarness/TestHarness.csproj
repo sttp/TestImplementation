@@ -15,8 +15,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sttp.Core\Sttp.Core.csproj" />
-    <ProjectReference Include="..\Sttp.WireProtocol\Sttp.WireProtocol.csproj" />
+    <ProjectReference Include="..\CTP\CTP.csproj" />
 	<ProjectReference Include="..\Sttp.Publisher\Sttp.Publisher.csproj" />
 	<ProjectReference Include="..\Sttp.Subscriber\Sttp.Subscriber.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Codec\Metadata\" />
   </ItemGroup>
 </Project>
