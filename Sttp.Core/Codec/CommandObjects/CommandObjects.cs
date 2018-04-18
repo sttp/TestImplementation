@@ -24,11 +24,11 @@ namespace Sttp.Codec
             DocumentCommandBase.Register("EndMetadataResponse", x => new CommandEndMetadataResponse(x));
         }
 
-        internal CommandObjects(CommandDecoder decoder)
+        internal CommandObjects(CtpDecoder decoder)
         {
-            CommandCode = decoder.Command;
+            CommandCode = decoder.CommandCode;
 
-            switch (decoder.Command)
+            switch (decoder.CommandCode)
             {
                 case CommandCode.Invalid:
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");

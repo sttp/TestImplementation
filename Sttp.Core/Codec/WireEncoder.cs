@@ -17,7 +17,7 @@ namespace Sttp.Codec
         public event Action<byte[], int, int> NewPacket;
 
         //private DataPointEncoder m_dataPoint;
-        private CommandEncoder m_encoder;
+        private CtpEncoder m_encoder;
         private int m_rawChannelID;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Sttp.Codec
         /// </summary>
         public WireEncoder()
         {
-            m_encoder = new CommandEncoder();
+            m_encoder = new CtpEncoder();
             m_encoder.NewPacket += EncoderOnNewPacket;
         }
 

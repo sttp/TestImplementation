@@ -15,17 +15,12 @@ namespace CTP
 
         public CtpDocumentBitReader(byte[] data, int position, int length)
         {
-            SetBuffer(data, position, length);
-        }
-
-        public bool IsEos => m_position == m_length;
-
-        public void SetBuffer(byte[] data, int position, int length)
-        {
             m_buffer = data;
             m_length = length + position;
             m_position = position;
         }
+
+        public bool IsEos => m_position == m_length;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowEndOfStreamException()
@@ -140,7 +135,7 @@ namespace CTP
             return rv;
         }
 
-        public uint ReadBits32()
+        private uint ReadBits32()
         {
             if (m_position + 4 > m_length)
             {
@@ -154,7 +149,7 @@ namespace CTP
             return rv;
         }
 
-        public ulong ReadBits64()
+        private ulong ReadBits64()
         {
             if (m_position + 8 > m_length)
             {

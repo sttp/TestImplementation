@@ -63,7 +63,6 @@ namespace CTP
         /// A temporary value so this class can support setting from an object type.
         /// </summary>
         private CtpObject m_tmpValue;
-
         private int m_prefixLength;
         private string m_rootElement;
 

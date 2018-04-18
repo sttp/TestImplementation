@@ -7,7 +7,7 @@ namespace CTP
     /// <summary>
     /// Decodes an incoming byte stream into a series of command objects. This class will align packets, reassemble fragments, and decompress packets. 
     /// </summary>
-    public class CommandDecoder
+    public class CtpDecoder
     {
         /// <summary>
         /// raw unprocessed data received from the client
@@ -27,37 +27,30 @@ namespace CTP
         /// </summary>
         private byte[] m_compressionBuffer;
 
-        /// <summary>
-        /// Constraints on the inbound data.
-        /// </summary>
-        private SessionDetails m_sessionDetails;
-
         private FragmentReassembly m_fragmentReassembly = new FragmentReassembly();
 
-        private CommandCode m_command;
+        private CommandCode m_commandCode;
         private CtpDocument m_documentPayload;
         private byte[] m_binaryCommandPayload;
         private int m_binaryChannelCode;
+
+        public CtpDecoder()
+        {
+            m_compressionBuffer = new byte[512];
+            m_inboundBuffer = new byte[512];
+        }
 
         /// <summary>
         /// Indicates if a command has successfully been decoded. 
         /// This is equal to the return value of the most recent 
         /// <see cref="NextCommand"/> method call.
         /// </summary>
-        public bool IsValid => m_command != CommandCode.Invalid;
+        public bool IsValid => m_commandCode != CommandCode.Invalid;
 
         /// <summary>
-        /// If valid, This is the command that was decoded.
+        /// Indicates what kind of commmand was decoded.
         /// </summary>
-        public CommandCode Command
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                return m_command;
-            }
-        }
+        public CommandCode CommandCode => m_commandCode;
 
         /// <summary>
         /// Valid if <see cref="NextCommand"/> returned true. And the command 
@@ -69,7 +62,7 @@ namespace CTP
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.Document)
+                if (m_commandCode != CommandCode.Document)
                     throw new InvalidOperationException("Command is not a Document Command.");
                 return m_documentPayload;
             }
@@ -85,7 +78,7 @@ namespace CTP
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.Binary)
+                if (m_commandCode != CommandCode.Binary)
                     throw new InvalidOperationException("Command is not a Binary Command.");
                 return m_binaryCommandPayload;
             }
@@ -101,17 +94,10 @@ namespace CTP
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_command != CommandCode.Binary)
+                if (m_commandCode != CommandCode.Binary)
                     throw new InvalidOperationException("Command is not a Binary Command.");
                 return m_binaryChannelCode;
             }
-        }
-
-        public CommandDecoder()
-        {
-            m_sessionDetails = new SessionDetails();
-            m_compressionBuffer = new byte[512];
-            m_inboundBuffer = new byte[512];
         }
 
         /// <summary>
@@ -154,7 +140,7 @@ namespace CTP
         /// </summary>
         public bool NextCommand()
         {
-            m_command = CommandCode.Invalid;
+            m_commandCode = CommandCode.Invalid;
             m_documentPayload = null;
             m_binaryCommandPayload = null;
             m_binaryChannelCode = 0;
@@ -226,7 +212,7 @@ namespace CTP
             byte[] results;
             if ((header & CtpHeader.CommandMask) == CtpHeader.CommandDocument)
             {
-                m_command = CommandCode.Document;
+                m_commandCode = CommandCode.Document;
                 int markupLength = length;
                 int markupStart = position;
                 results = new byte[markupLength];
@@ -235,7 +221,7 @@ namespace CTP
             }
             else
             {
-                m_command = CommandCode.Binary;
+                m_commandCode = CommandCode.Binary;
 
                 if ((header & CtpHeader.CommandMask) == CtpHeader.CommandBinary0)
                 {

@@ -10,14 +10,14 @@ namespace CTP
     /// Responsible for encoding each command into bytes that can be sent on the socket. 
     /// This class will fragment and compress packets to ensure that all packets fit inside the desired maximum fragment size.
     /// </summary>
-    public class CommandEncoder
+    public class CtpEncoder
     {
         /// <summary>
         /// Occurs when a packet of data must be sent on the wire. This is called immediately
         /// after completing each packet or fragment;
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
-        private SessionDetails m_sessionDetails;
+        private EncoderOptions m_encoderOptions;
         private int m_fragmentID = 0;
 
         /// <summary>
@@ -30,11 +30,16 @@ namespace CTP
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
-        public CommandEncoder()
+        public CtpEncoder()
         {
-            m_sessionDetails = new SessionDetails();
+            m_encoderOptions = new EncoderOptions();
             m_buffer = new byte[64];
         }
+
+        /// <summary>
+        /// Modify certain serialization options.
+        /// </summary>
+        public EncoderOptions Options => m_encoderOptions;
 
         private void SendNewPacket(byte[] buffer, int position, int length)
         {
@@ -127,13 +132,12 @@ namespace CTP
         /// <param name="length">The length of the data to send</param>
         private void EncodeAndSend(CtpHeader header, byte[] buffer, int offset, int length)
         {
-            if (length > m_sessionDetails.MaximumCommandSize)
+            if (length > m_encoderOptions.MaximumCommandSize)
             {
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
             }
 
-
-            if (m_sessionDetails.SupportsDeflate && length >= m_sessionDetails.DeflateThreshold)
+            if (m_encoderOptions.SupportsDeflate && length >= m_encoderOptions.DeflateThreshold)
             {
                 if (TryCompressPayload(buffer, offset, length, out int newSize, out uint checksum))
                 {
@@ -154,7 +158,7 @@ namespace CTP
 
             int packetLength = 2 + length;
 
-            if (packetLength <= m_sessionDetails.MaximumPacketSize)
+            if (packetLength <= m_encoderOptions.MaximumPacketSize)
             {
                 //This packet doesn't have to be fragmented.
                 offset -= 2;
@@ -186,7 +190,7 @@ namespace CTP
 
         private void SendFragment(CtpHeader header, byte[] buffer, int offset, int length)
         {
-            int bytesSentPerFragment = m_sessionDetails.MaximumPacketSize - 10;
+            int bytesSentPerFragment = m_encoderOptions.MaximumPacketSize - 10;
             int bytesToSendThisFragment = Math.Min(bytesSentPerFragment, length);
             int packetLength = bytesToSendThisFragment + 10;
 

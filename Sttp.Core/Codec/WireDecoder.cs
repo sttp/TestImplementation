@@ -9,12 +9,12 @@ namespace Sttp.Codec
     public class WireDecoder
     {
         //private DataPointDecoder m_dataPointDecoder;
-        private CommandDecoder m_packetDecoder;
+        private CtpDecoder m_packetDecoder;
 
         public WireDecoder()
         {
             // m_dataPointDecoder = new DataPointDecoder();
-            m_packetDecoder = new CommandDecoder();
+            m_packetDecoder = new CtpDecoder();
         }
 
         /// <summary>

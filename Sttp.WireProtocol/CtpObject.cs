@@ -36,24 +36,112 @@ namespace CTP
         [FieldOffset(0)]
         private long m_raw0;
         [FieldOffset(8)]
-        private long m_raw1; 
+        private long m_raw1;
 
         #endregion
 
         #region [ Properties ]
 
         /// <summary>
-        /// The type code of the raw value.
+        /// The type code of the value.
         /// </summary>
-        public CtpTypeCode ValueTypeCode
+        public CtpTypeCode ValueTypeCode => m_valueTypeCode;
+
+        public long IsInt64
         {
             get
             {
-                return m_valueTypeCode;
+                if (m_valueTypeCode != CtpTypeCode.Int64)
+                    ThrowHelper(CtpTypeCode.Int64);
+                return m_valueInt64;
             }
         }
 
-       
+        public float IsSingle
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.Single)
+                    ThrowHelper(CtpTypeCode.Single);
+                return m_valueSingle;
+            }
+        }
+
+        public double IsDouble
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.Double)
+                    ThrowHelper(CtpTypeCode.Double);
+                return m_valueDouble;
+            }
+        }
+
+        public CtpTime IsCtpTime
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.CtpTime)
+                    ThrowHelper(CtpTypeCode.CtpTime);
+                return m_valueCtpTime;
+            }
+        }
+
+        public bool IsBoolean
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.Boolean)
+                    ThrowHelper(CtpTypeCode.Boolean);
+                return m_valueBoolean;
+            }
+        }
+
+        public Guid IsGuid
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.Guid)
+                    ThrowHelper(CtpTypeCode.Guid);
+                return m_valueGuid;
+            }
+        }
+
+        public string IsString
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.String)
+                    ThrowHelper(CtpTypeCode.String);
+                return (string)m_valueObject;
+            }
+        }
+
+        public CtpBuffer IsCtpBuffer
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.CtpBuffer)
+                    ThrowHelper(CtpTypeCode.CtpBuffer);
+                return (CtpBuffer)m_valueObject;
+            }
+        }
+
+        public CtpDocument IsCtpDocument
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.CtpDocument)
+                    ThrowHelper(CtpTypeCode.CtpDocument);
+                return (CtpDocument)m_valueObject;
+            }
+        }
+
+        private void ThrowHelper(CtpTypeCode code)
+        {
+            throw new InvalidOperationException($"The internal value is {m_valueTypeCode}, not {code}");
+        }
+
         /// <summary>
         /// Gets if this class has a value. Clear this by setting a value.
         /// </summary>

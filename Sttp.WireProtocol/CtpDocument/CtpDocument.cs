@@ -14,24 +14,26 @@ namespace CTP
     /// </summary>
     public class CtpDocument : IEquatable<CtpDocument>
     {
-        private readonly byte[] m_contents;
+        private readonly byte[] m_data;
 
         /// <summary>
         /// Creates an CtpDocument from a byte array.
         /// </summary>
-        /// <param name="contents"></param>
-        public CtpDocument(byte[] contents)
+        /// <param name="data"></param>
+        public CtpDocument(byte[] data)
         {
-            m_contents = contents;
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            m_data = (byte[])data.Clone();
         }
 
         /// <summary>
         /// The size of the data block.
         /// </summary>
-        public int Length => m_contents.Length;
+        public int Length => m_data.Length;
 
         //ToDo: These methods will eventually be removed. This is just to compare compression sizes of data.
-        public int CompressedSize => DeflateHelper.Compress(m_contents).Length;
+        public int CompressedSize => DeflateHelper.Compress(m_data).Length;
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.
@@ -39,7 +41,7 @@ namespace CTP
         /// <returns></returns>
         public CtpDocumentReader MakeReader()
         {
-            return new CtpDocumentReader(m_contents);
+            return new CtpDocumentReader(m_data);
         }
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace CTP
         /// <param name="offset">the offset position of <see pref="buffer"/></param>
         public void CopyTo(byte[] buffer, int offset)
         {
-            Array.Copy(m_contents, 0, buffer, offset, m_contents.Length); // write data
+            Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
         }
 
         /// <summary>
@@ -199,11 +201,7 @@ namespace CTP
         /// <returns></returns>
         public bool Equals(CtpDocument other)
         {
-            if (ReferenceEquals(null, other))
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-            return m_contents.SequenceEqual(other.m_contents);
+            return this == other;
         }
 
         /// <summary>
@@ -228,29 +226,47 @@ namespace CTP
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return (m_contents != null ? m_contents.GetHashCode() : 0);
+            int hashCode = 27;
+            for (int x = 0; x < m_data.Length; x++)
+            {
+                hashCode = hashCode * 13 + m_data[x];
+            }
+
+            return hashCode;
         }
 
         /// <summary>
         /// Compares two object for equality.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
         /// <returns></returns>
-        public static bool operator ==(CtpDocument left, CtpDocument right)
+        public static bool operator ==(CtpDocument a, CtpDocument b)
         {
-            return Equals(left, right);
+            if (ReferenceEquals(a, b))
+                return true;
+            if ((object)a == null || (object)b == null)
+                return false;
+            if (a.m_data.Length != b.m_data.Length)
+                return false;
+
+            for (int x = 0; x < a.m_data.Length; x++)
+            {
+                if (a.m_data[x] != b.m_data[x])
+                    return false;
+            }
+            return true;
         }
 
         /// <summary>
         /// Compares two object for inequality.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
         /// <
-        public static bool operator !=(CtpDocument left, CtpDocument right)
+        public static bool operator !=(CtpDocument a, CtpDocument b)
         {
-            return !Equals(left, right);
+            return !Equals(a, b);
         }
     }
 

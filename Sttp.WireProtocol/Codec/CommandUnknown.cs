@@ -16,7 +16,6 @@ namespace CTP
         /// </summary>
         public readonly CtpDocument Document;
 
-
         public CommandUnknown(string commandName, CtpDocument document)
             : base(commandName)
         {
