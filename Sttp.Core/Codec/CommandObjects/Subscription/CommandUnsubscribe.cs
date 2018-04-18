@@ -5,7 +5,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandUnsubscribe : CommandBase
+    public class CommandUnsubscribe : DocumentCommandBase
     {
         public CommandUnsubscribe()
             : base("Unsubscribe")

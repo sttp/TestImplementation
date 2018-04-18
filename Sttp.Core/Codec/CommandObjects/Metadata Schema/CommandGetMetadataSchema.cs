@@ -13,7 +13,7 @@ namespace Sttp.Codec
     /// Responds with <see cref="CommandMetadataSchemaUpdate"/> if the version numbers do not match.
     /// Responds with <see cref="CommandMetadataSchemaVersion"/> if there are no changes in the metadata.
     /// </summary>
-    public class CommandGetMetadataSchema : CommandBase
+    public class CommandGetMetadataSchema : DocumentCommandBase
     {
         public readonly Guid? LastKnownRuntimeID;
         public readonly long? LastKnownVersionNumber;

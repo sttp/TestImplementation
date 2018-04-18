@@ -6,7 +6,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandKeepAlive : CommandBase
+    public class CommandKeepAlive : DocumentCommandBase
     {
         public CommandKeepAlive()
             : base("KeepAlive")

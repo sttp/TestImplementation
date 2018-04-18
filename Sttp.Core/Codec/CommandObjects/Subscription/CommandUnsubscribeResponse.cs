@@ -6,7 +6,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandUnsubscribeResponse : CommandBase
+    public class CommandUnsubscribeResponse : DocumentCommandBase
     {
         public readonly int RawChannelID;
 

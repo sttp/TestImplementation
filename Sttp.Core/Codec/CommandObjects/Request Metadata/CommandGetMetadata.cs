@@ -14,7 +14,7 @@ namespace Sttp.Codec
     ///     <see cref="CommandRaw"/> - The rows.
     ///     <see cref="CommandEndMetadataResponse"/> - Closing the raw channel.
     /// </summary>
-    public class CommandGetMetadata : CommandBase
+    public class CommandGetMetadata : DocumentCommandBase
     {
         public string Table;
         public List<string> Columns = new List<string>();

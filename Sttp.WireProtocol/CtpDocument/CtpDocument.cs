@@ -25,14 +25,13 @@ namespace CTP
             m_contents = contents;
         }
 
-        //ToDo: These methods will eventually be removed. This is just to compare compression sizes of data.
-        public int EncodedSize => m_contents.Length;
-        public int CompressedSize => DeflateHelper.Compress(m_contents).Length;
-
         /// <summary>
         /// The size of the data block.
         /// </summary>
         public int Length => m_contents.Length;
+
+        //ToDo: These methods will eventually be removed. This is just to compare compression sizes of data.
+        public int CompressedSize => DeflateHelper.Compress(m_contents).Length;
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.
@@ -53,11 +52,6 @@ namespace CTP
         public void CopyTo(byte[] buffer, int offset)
         {
             Array.Copy(m_contents, 0, buffer, offset, m_contents.Length); // write data
-        }
-
-        public byte[] ToBuffer()
-        {
-            return (byte[])m_contents.Clone();
         }
 
         /// <summary>

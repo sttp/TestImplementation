@@ -30,10 +30,9 @@ namespace CTP
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
         /// </summary>
-        /// <param name="sessionDetails">Details concerning the maximum command size and the maximum packet size.</param>
-        public CommandEncoder(SessionDetails sessionDetails = null)
+        public CommandEncoder()
         {
-            m_sessionDetails = sessionDetails ?? new SessionDetails();
+            m_sessionDetails = new SessionDetails();
             m_buffer = new byte[64];
         }
 
@@ -49,7 +48,7 @@ namespace CTP
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="position">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void SendRawCommand(int rawCode, byte[] payload, int position, int length)
+        public void SendBinaryCommand(int rawCode, byte[] payload, int position, int length)
         {
             payload.ValidateParameters(position, length);
             EnsureCapacity(BufferOffset + 1 + length);
@@ -59,11 +58,11 @@ namespace CTP
             int headerOffset = BufferOffset;
             if (rawCode == 0)
             {
-                header = CtpHeader.CommandRaw0;
+                header = CtpHeader.CommandBinary0;
             }
             else if (rawCode == 1)
             {
-                header = CtpHeader.CommandRaw1;
+                header = CtpHeader.CommandBinary1;
             }
             else
             {
@@ -82,26 +81,25 @@ namespace CTP
         /// Encodes and sends the supplied command to the client.
         /// </summary>
         /// <param name="command">The command to send.</param>
-        public void SendMarkupCommand(CommandBase command)
+        public void SendDocumentCommands(DocumentCommandBase command)
         {
             var writer = new CtpDocumentWriter(command.CommandName);
             command.Save(writer);
-            SendMarkupCommand(writer);
+            SendDocumentCommands(writer);
         }
 
         /// <summary>
-        /// Encodes and sends the data specified in <see cref="markup"/>. It's recommended to use
-        /// the other overload that contains <see cref="CommandBase"/> if one exists.
+        /// Encodes and sends the data specified in <see cref="writer"/>. It's recommended to use
+        /// the other overload that contains <see cref="DocumentCommandBase"/> if one exists.
         /// </summary>
-        /// <param name="markup">The data to send.</param>
-        public void SendMarkupCommand(CtpDocumentWriter markup)
+        /// <param name="writer">The data to send.</param>
+        public void SendDocumentCommands(CtpDocumentWriter writer)
         {
-            //ToDo: Consider changing the MarkupCommand to split the RootElement and the other payload.
-            CtpDocument data = markup.ToCtpDocument();
+            CtpDocument data = writer.ToCtpDocument();
             EnsureCapacity(BufferOffset + data.Length);
             data.CopyTo(m_buffer, BufferOffset);
 
-            EncodeAndSend(CtpHeader.CommandMarkup, m_buffer, BufferOffset, data.Length);
+            EncodeAndSend(CtpHeader.CommandDocument, m_buffer, BufferOffset, data.Length);
         }
 
         /// <summary>

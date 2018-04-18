@@ -1,24 +1,21 @@
 ﻿
 namespace CTP
 {
-
-
     /// <summary>
-    /// The lowest level command codes supported by the protocol. Nearly all commands exposed to higher level APIs will be in the form of a MarkupCommand.
+    /// The lowest level command codes supported by the protocol. Nearly all commands exposed to higher level APIs will be in the form of a document command.
     /// </summary>
     public enum CommandCode : byte
     {
         /// <summary>
         /// An invalid command to indicate that nothing is assigned.
-        /// This cannot be sent over the wire.
+        /// This cannot be serialized.
         /// </summary>
-        Invalid = 0x00,
+        Invalid,
 
         /// <summary>
-        /// While most commands should be markup commands, it's necessary for some commands to be encoded in a raw binary format. 
-        /// One example is a measurement stream. 
+        /// While most commands should be document commands, it's necessary for some commands to be encoded in a binary format. 
         /// </summary>
-        Raw,
+        Binary,
 
         /// <summary>
         /// All other commands fall under the classification of Document commands. These use the CtpDocument Object
@@ -29,7 +26,7 @@ namespace CTP
         /// recognized. It also greatly simplifies the wire protocol level and keeps the lowest level from changing when additional commands are added in the future.
         /// 
         /// </summary>
-        DocumentCommand,
+        Document,
 
     }
 }

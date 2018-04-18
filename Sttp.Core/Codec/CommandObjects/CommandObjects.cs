@@ -13,15 +13,15 @@ namespace Sttp.Codec
 
         static CommandObjects()
         {
-            CommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
-            CommandBase.Register("MetadataSchema", x => new CommandMetadataSchema(x));
-            CommandBase.Register("MetadataSchemaUpdate", x => new CommandMetadataSchemaUpdate(x));
-            CommandBase.Register("MetadataSchemaVersion", x => new CommandMetadataSchemaVersion(x));
+            DocumentCommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
+            DocumentCommandBase.Register("MetadataSchema", x => new CommandMetadataSchema(x));
+            DocumentCommandBase.Register("MetadataSchemaUpdate", x => new CommandMetadataSchemaUpdate(x));
+            DocumentCommandBase.Register("MetadataSchemaVersion", x => new CommandMetadataSchemaVersion(x));
 
-            CommandBase.Register("GetMetadata", x => new CommandGetMetadata(x));
-            CommandBase.Register("MetadataRequestFailed", x => new CommandMetadataRequestFailed(x));
-            CommandBase.Register("BeginMetadataResponse", x => new CommandBeginMetadataResponse(x));
-            CommandBase.Register("EndMetadataResponse", x => new CommandEndMetadataResponse(x));
+            DocumentCommandBase.Register("GetMetadata", x => new CommandGetMetadata(x));
+            DocumentCommandBase.Register("MetadataRequestFailed", x => new CommandMetadataRequestFailed(x));
+            DocumentCommandBase.Register("BeginMetadataResponse", x => new CommandBeginMetadataResponse(x));
+            DocumentCommandBase.Register("EndMetadataResponse", x => new CommandEndMetadataResponse(x));
         }
 
         internal CommandObjects(CommandDecoder decoder)
@@ -32,15 +32,15 @@ namespace Sttp.Codec
             {
                 case CommandCode.Invalid:
                     throw new ArgumentOutOfRangeException("Command code of 0 is not permitted");
-                case CommandCode.DocumentCommand:
+                case CommandCode.Document:
                     m_document = decoder.DocumentPayload;
                     CommandName = m_document.MakeReader().RootElement;
-                    m_decoder = CommandBase.Create(decoder.DocumentPayload);
+                    m_decoder = DocumentCommandBase.Create(decoder.DocumentPayload);
                     break;
-                case CommandCode.Raw:
+                case CommandCode.Binary:
                     m_document = null;
                     CommandName = "Raw";
-                    m_decoder = new CommandRaw(decoder.RawChannelID, decoder.RawPayload);
+                    m_decoder = new CommandRaw(decoder.BinaryChannelID, decoder.BinaryPayload);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

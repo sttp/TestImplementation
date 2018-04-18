@@ -17,11 +17,11 @@ namespace CTP
         /// 1: MarkupCommand
         /// </summary>
         IsFragmented = 1 << 14,
-        CommandMask = CommandMarkup,
-        CommandRaw0 = 0 << 12,
-        CommandRaw1 = 1 << 12,
+        CommandMask = CommandDocument,
+        CommandBinary0 = 0 << 12,
+        CommandBinary1 = 1 << 12,
         CommandRawInt32 = 2 << 12,
-        CommandMarkup = 3 << 12,
+        CommandDocument = 3 << 12,
         PacketLengthMask = (1 << 12) - 1,
 
         None = 0,

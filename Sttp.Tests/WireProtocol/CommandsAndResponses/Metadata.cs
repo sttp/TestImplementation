@@ -12,7 +12,7 @@ namespace Sttp.Tests.CommandsAndResponses
         [TestMethod]
         public void CommandGetMetadataSchema()
         {
-            CommandBase cmd = new CommandGetMetadataSchema(Guid.NewGuid(), 382);
+            DocumentCommandBase cmd = new CommandGetMetadataSchema(Guid.NewGuid(), 382);
             Console.WriteLine(cmd.ToString());
         }
 

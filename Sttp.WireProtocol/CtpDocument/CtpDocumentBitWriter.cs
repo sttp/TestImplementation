@@ -159,6 +159,23 @@ namespace CTP
             Array.Copy(m_buffer, 0, rv, index, m_length);
         }
 
+        internal void Write(CtpDocument value)
+        {
+            Write7BitInt((uint)value.Length);
+            EnsureCapacityBytes(value.Length);
+            value.CopyTo(m_buffer,m_length);
+            m_length += value.Length;
+        }
+
+        internal void Write(CtpBuffer value)
+        {
+            Write7BitInt((uint)value.Length);
+            EnsureCapacityBytes(value.Length);
+            value.CopyTo(m_buffer, m_length);
+            m_length += value.Length;
+        }
+
+
         #endregion
 
 

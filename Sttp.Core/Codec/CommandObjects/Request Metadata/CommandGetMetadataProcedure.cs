@@ -33,7 +33,7 @@ namespace Sttp.Codec
             sml.WriteValue("Value", Value);
         }
     }
-    public class CommandGetMetadataProcedure : CommandBase
+    public class CommandGetMetadataProcedure : DocumentCommandBase
     {
         public string Name;
         public List<MetadataProcedureParameters> Parameters;

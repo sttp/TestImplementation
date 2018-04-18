@@ -5,7 +5,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribeToSome : CommandBase
+    public class CommandSubscribeToSome : DocumentCommandBase
     {
         public readonly string InstanceName;
         public readonly CtpObject[] DataPointIDs;

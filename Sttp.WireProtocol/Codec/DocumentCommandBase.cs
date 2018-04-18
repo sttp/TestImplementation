@@ -4,17 +4,17 @@ using System.Collections.Concurrent;
 namespace CTP
 {
     /// <summary>
-    /// This base class assists in serializing <see cref="CommandCode.DocumentCommand"/> into 
+    /// This base class assists in serializing <see cref="CommandCode.Document"/> into 
     /// concrete objects from their corresponding <see cref="CtpDocument"/> data.
     /// </summary>
-    public abstract class CommandBase
+    public abstract class DocumentCommandBase
     {
         /// <summary>
         /// The name of the command, this corresponds to the CtpDocument's Root Element.
         /// </summary>
         public readonly string CommandName;
 
-        protected CommandBase(string commandName)
+        protected DocumentCommandBase(string commandName)
         {
             CommandName = commandName;
         }
@@ -24,7 +24,6 @@ namespace CTP
         /// </summary>
         /// <param name="writer">The writer to save the command to.</param>
         public abstract void Save(CtpDocumentWriter writer);
-
 
         public CtpDocument ToCtpDocument()
         {
@@ -43,11 +42,11 @@ namespace CTP
         /// <summary>
         /// Contains all commands and their corresponding initializers.
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Func<CtpDocumentReader, CommandBase>> CommandsInitializers;
+        private static readonly ConcurrentDictionary<string, Func<CtpDocumentReader, DocumentCommandBase>> CommandsInitializers;
 
-        static CommandBase()
+        static DocumentCommandBase()
         {
-            CommandsInitializers = new ConcurrentDictionary<string, Func<CtpDocumentReader, CommandBase>>();
+            CommandsInitializers = new ConcurrentDictionary<string, Func<CtpDocumentReader, DocumentCommandBase>>();
         }
 
         /// <summary>
@@ -56,10 +55,10 @@ namespace CTP
         /// </summary>
         /// <param name="reader">the serialized data to extract from this reader.</param>
         /// <returns></returns>
-        public static CommandBase Create(CtpDocument reader)
+        public static DocumentCommandBase Create(CtpDocument reader)
         {
             string rootElement = reader.MakeReader().RootElement;
-            if (!CommandsInitializers.TryGetValue(rootElement, out Func<CtpDocumentReader, CommandBase> command))
+            if (!CommandsInitializers.TryGetValue(rootElement, out Func<CtpDocumentReader, DocumentCommandBase> command))
             {
                 return new CommandUnknown(rootElement, reader);
             }
@@ -72,7 +71,7 @@ namespace CTP
         /// </summary>
         /// <param name="commandName">The name of the command</param>
         /// <param name="initializer">The initializer</param>
-        public static void Register(string commandName, Func<CtpDocumentReader, CommandBase> initializer)
+        public static void Register(string commandName, Func<CtpDocumentReader, DocumentCommandBase> initializer)
         {
             CommandsInitializers[commandName] = initializer;
         }

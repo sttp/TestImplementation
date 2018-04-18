@@ -4,7 +4,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribeResponse : CommandBase
+    public class CommandSubscribeResponse : DocumentCommandBase
     {
         public readonly int RawChannelID;
         public readonly Guid EncodingMethod;

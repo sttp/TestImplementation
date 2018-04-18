@@ -3,7 +3,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandMetadataSchemaVersion : CommandBase
+    public class CommandMetadataSchemaVersion : DocumentCommandBase
     {
         public readonly Guid RuntimeID;
         public readonly long VersionNumber;

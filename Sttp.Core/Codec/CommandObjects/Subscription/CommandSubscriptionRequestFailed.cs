@@ -6,7 +6,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscriptionRequestFailed : CommandBase
+    public class CommandSubscriptionRequestFailed : DocumentCommandBase
     {
         public readonly string Reason;
         public readonly string Details;

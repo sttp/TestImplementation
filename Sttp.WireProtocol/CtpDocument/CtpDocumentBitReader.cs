@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -11,36 +10,27 @@ namespace CTP
         private static readonly byte[] Empty = new byte[0];
 
         private byte[] m_buffer;
-        private int m_lastPosition;
-
-        private int m_currentPosition;
+        private int m_length;
+        private int m_position;
 
         public CtpDocumentBitReader(byte[] data, int position, int length)
         {
             SetBuffer(data, position, length);
         }
 
-        public bool IsEos => m_currentPosition == m_lastPosition;
+        public bool IsEos => m_position == m_length;
 
         public void SetBuffer(byte[] data, int position, int length)
         {
             m_buffer = data;
-            m_lastPosition = length + position;
-            m_currentPosition = position;
+            m_length = length + position;
+            m_position = position;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowEndOfStreamException()
         {
             throw new EndOfStreamException();
-        }
-
-        private void EnsureCapacity(int length)
-        {
-            if (m_currentPosition + length > m_lastPosition)
-            {
-                ThrowEndOfStreamException();
-            }
         }
 
         public bool ReadBoolean()
@@ -67,12 +57,12 @@ namespace CTP
 
         public Guid ReadGuid()
         {
-            if (m_currentPosition + 16 > m_lastPosition)
+            if (m_position + 16 > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            Guid rv = m_buffer.ToRfcGuid(m_currentPosition);
-            m_currentPosition += 16;
+            Guid rv = m_buffer.ToRfcGuid(m_position);
+            m_position += 16;
             return rv;
         }
 
@@ -84,11 +74,14 @@ namespace CTP
                 return Empty;
             }
 
-            EnsureCapacity(length);
+            if (m_position + length > m_length)
+            {
+                ThrowEndOfStreamException();
+            }
 
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_currentPosition, rv, 0, length);
-            m_currentPosition += length;
+            Array.Copy(m_buffer, m_position, rv, 0, length);
+            m_position += length;
             return rv;
         }
 
@@ -103,22 +96,22 @@ namespace CTP
 
         public string ReadAscii()
         {
-            if (m_currentPosition + 1 > m_lastPosition)
+            if (m_position + 1 > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            if (m_currentPosition + 1 + m_buffer[m_currentPosition] > m_lastPosition)
+            if (m_position + 1 + m_buffer[m_position] > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            char[] data = new char[m_buffer[m_currentPosition]];
+            char[] data = new char[m_buffer[m_position]];
             for (int x = 0; x < data.Length; x++)
             {
-                data[x] = (char)m_buffer[m_currentPosition + 1 + x];
+                data[x] = (char)m_buffer[m_position + 1 + x];
                 if (data[x] > 127)
                     throw new Exception("Not an ASCII string");
             }
-            m_currentPosition += 1 + data.Length;
+            m_position += 1 + data.Length;
             return new string(data);
         }
 
@@ -126,56 +119,56 @@ namespace CTP
 
         public uint ReadBits8()
         {
-            if (m_currentPosition + 1 > m_lastPosition)
+            if (m_position + 1 > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            byte rv = m_buffer[m_currentPosition];
-            m_currentPosition++;
+            byte rv = m_buffer[m_position];
+            m_position++;
             return rv;
         }
 
         public uint ReadBits16()
         {
-            if (m_currentPosition + 2 > m_lastPosition)
+            if (m_position + 2 > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            uint rv = (uint)m_buffer[m_currentPosition] << 8
-                    | (uint)m_buffer[m_currentPosition + 1];
-            m_currentPosition += 2;
+            uint rv = (uint)m_buffer[m_position] << 8
+                    | (uint)m_buffer[m_position + 1];
+            m_position += 2;
             return rv;
         }
 
         public uint ReadBits32()
         {
-            if (m_currentPosition + 4 > m_lastPosition)
+            if (m_position + 4 > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            uint rv = (uint)m_buffer[m_currentPosition] << 24
-                      | (uint)m_buffer[m_currentPosition + 1] << 16
-                      | (uint)m_buffer[m_currentPosition + 2] << 8
-                      | (uint)m_buffer[m_currentPosition + 3];
-            m_currentPosition += 4;
+            uint rv = (uint)m_buffer[m_position] << 24
+                      | (uint)m_buffer[m_position + 1] << 16
+                      | (uint)m_buffer[m_position + 2] << 8
+                      | (uint)m_buffer[m_position + 3];
+            m_position += 4;
             return rv;
         }
 
         public ulong ReadBits64()
         {
-            if (m_currentPosition + 8 > m_lastPosition)
+            if (m_position + 8 > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            ulong rv = (ulong)m_buffer[m_currentPosition + 0] << 56 |
-                      (ulong)m_buffer[m_currentPosition + 1] << 48 |
-                      (ulong)m_buffer[m_currentPosition + 2] << 40 |
-                      (ulong)m_buffer[m_currentPosition + 3] << 32 |
-                      (ulong)m_buffer[m_currentPosition + 4] << 24 |
-                      (ulong)m_buffer[m_currentPosition + 5] << 16 |
-                      (ulong)m_buffer[m_currentPosition + 6] << 8 |
-                      (ulong)m_buffer[m_currentPosition + 7];
-            m_currentPosition += 8;
+            ulong rv = (ulong)m_buffer[m_position + 0] << 56 |
+                      (ulong)m_buffer[m_position + 1] << 48 |
+                      (ulong)m_buffer[m_position + 2] << 40 |
+                      (ulong)m_buffer[m_position + 3] << 32 |
+                      (ulong)m_buffer[m_position + 4] << 24 |
+                      (ulong)m_buffer[m_position + 5] << 16 |
+                      (ulong)m_buffer[m_position + 6] << 8 |
+                      (ulong)m_buffer[m_position + 7];
+            m_position += 8;
             return rv;
         }
 

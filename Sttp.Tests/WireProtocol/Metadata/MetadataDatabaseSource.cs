@@ -78,7 +78,7 @@ namespace Sttp.Tests
             //statements.Add(BuildRequest("Vendor", "ID", "Acronym", "Name"));
             var s = BuildRequest("Measurement", db["Measurement"].Columns.Select(x => x.Name).ToArray());
             var s2 = s.ToCtpDocument();
-            Console.WriteLine(s2.EncodedSize);
+            Console.WriteLine(s2.Length);
             Console.WriteLine(s2.CompressedSize);
             //Console.WriteLine(s2.ToXML());
 
@@ -108,7 +108,7 @@ namespace Sttp.Tests
 
             Stopwatch sw = new Stopwatch();
             sw.Restart();
-            Console.WriteLine(cmd.Document.EncodedSize);
+            Console.WriteLine(cmd.Document.Length);
             Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             sw.Restart();
             Console.WriteLine(cmd.Document.CompressedSize);
@@ -126,7 +126,7 @@ namespace Sttp.Tests
             }
             while ((cmd = reader.NextCommand()) != null)
             {
-                if (cmd.CommandCode == CommandCode.Raw)
+                if (cmd.CommandCode == CommandCode.Binary)
                 {
                     decoder.Load(cmd.Raw.Payload);
                     while (decoder.Read(values))
@@ -134,7 +134,7 @@ namespace Sttp.Tests
                         tbl.AddRow(values);
                     }
                 }
-                else if (cmd.CommandCode == CommandCode.DocumentCommand)
+                else if (cmd.CommandCode == CommandCode.Document)
                 {
                     break;
                 }

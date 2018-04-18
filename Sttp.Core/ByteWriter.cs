@@ -245,12 +245,24 @@ namespace Sttp
 
         public void Write(CtpBuffer value)
         {
-            Write(value.ToBuffer());
+            Write4BitSegments((uint)value.Length);
+            if (value.Length == 0)
+                return;
+
+            EnsureCapacityBytes(value.Length);
+            value.CopyTo(m_byteBuffer, m_byteLength);
+            m_byteLength += value.Length;
         }
 
         public void Write(CtpDocument value)
         {
-            Write(value.ToBuffer());
+            Write4BitSegments((uint)value.Length);
+            if (value.Length == 0)
+                return;
+
+            EnsureCapacityBytes(value.Length);
+            value.CopyTo(m_byteBuffer, m_byteLength);
+            m_byteLength += value.Length;
         }
 
         #region [ Writing Bits ]

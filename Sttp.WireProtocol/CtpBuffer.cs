@@ -11,12 +11,21 @@ namespace CTP
 
         public CtpBuffer(byte[] data)
         {
-            m_data = (byte[])data.Clone();
+            m_data = data;
         }
 
-        public byte[] ToBuffer()
+        public int Length => m_data.Length;
+
+        /// <summary>
+        /// Copies the internal buffer to the provided byte array.
+        /// Be sure to call <see cref="Length"/> to ensure that the destination buffer
+        /// has enough space to receive the copy.
+        /// </summary>
+        /// <param name="buffer">the buffer to copy to.</param>
+        /// <param name="offset">the offset position of <see pref="buffer"/></param>
+        public void CopyTo(byte[] buffer, int offset)
         {
-            return (byte[])m_data.Clone();
+            Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
         }
 
         public static bool operator ==(CtpBuffer a, CtpBuffer b)
@@ -27,6 +36,11 @@ namespace CTP
         public static bool operator !=(CtpBuffer a, CtpBuffer b)
         {
             return !(a == b);
+        }
+
+        public byte[] ToBuffer()
+        {
+            return (byte[])m_data.Clone();
         }
     }
 }

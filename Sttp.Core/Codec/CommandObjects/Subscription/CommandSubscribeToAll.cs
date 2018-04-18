@@ -5,7 +5,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribeToAll : CommandBase
+    public class CommandSubscribeToAll : DocumentCommandBase
     {
         public CommandSubscribeToAll()
             : base("SubscribeToAll")

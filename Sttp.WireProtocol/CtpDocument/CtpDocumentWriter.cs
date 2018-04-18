@@ -173,10 +173,10 @@ namespace CTP
                     m_stream.Write(value.AsString);
                     break;
                 case CtpTypeCode.CtpBuffer:
-                    m_stream.Write(value.AsCtpBuffer.ToBuffer());
+                    m_stream.Write(value.AsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpDocument:
-                    m_stream.Write(value.AsCtpDocument.ToBuffer());
+                    m_stream.Write(value.AsCtpDocument);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

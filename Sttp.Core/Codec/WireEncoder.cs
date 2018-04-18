@@ -17,7 +17,6 @@ namespace Sttp.Codec
         public event Action<byte[], int, int> NewPacket;
 
         //private DataPointEncoder m_dataPoint;
-        private SessionDetails m_sessionDetails;
         private CommandEncoder m_encoder;
         private int m_rawChannelID;
 
@@ -26,7 +25,6 @@ namespace Sttp.Codec
         /// </summary>
         public WireEncoder()
         {
-            m_sessionDetails = new SessionDetails();
             m_encoder = new CommandEncoder();
             m_encoder.NewPacket += EncoderOnNewPacket;
         }
@@ -49,57 +47,57 @@ namespace Sttp.Codec
 
         public void GetMetadataSchema(Guid? lastKnownRuntimeID = null, long? lastKnownVersionNumber = null)
         {
-            m_encoder.SendMarkupCommand(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
+            m_encoder.SendDocumentCommands(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
         }
 
         public void MetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchema(runtimeID, versionNumber, tables));
+            m_encoder.SendDocumentCommands(new CommandMetadataSchema(runtimeID, versionNumber, tables));
         }
 
         public void MetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
+            m_encoder.SendDocumentCommands(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
         }
 
         public void MetadataSchemaVersion(Guid runtimeID, long versionNumber)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataSchemaVersion(runtimeID, versionNumber));
+            m_encoder.SendDocumentCommands(new CommandMetadataSchemaVersion(runtimeID, versionNumber));
         }
 
         public void GetMetadata(string table, IEnumerable<string> columns)
         {
-            m_encoder.SendMarkupCommand(new CommandGetMetadata(table, columns));
+            m_encoder.SendDocumentCommands(new CommandGetMetadata(table, columns));
         }
 
         public void MetadataRequestFailed(string reason, string details)
         {
-            m_encoder.SendMarkupCommand(new CommandMetadataRequestFailed(reason, details));
+            m_encoder.SendDocumentCommands(new CommandMetadataRequestFailed(reason, details));
         }
 
         public void BeginMetadataResponse(int rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
         {
-            m_encoder.SendMarkupCommand(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
+            m_encoder.SendDocumentCommands(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
         }
 
         public void EndMetadataResponse(int rawChannelID, int rowCount)
         {
-            m_encoder.SendMarkupCommand(new CommandEndMetadataResponse(rawChannelID, rowCount));
+            m_encoder.SendDocumentCommands(new CommandEndMetadataResponse(rawChannelID, rowCount));
         }
 
-        public void SendCustomCommand(CommandBase command)
+        public void SendCustomCommand(DocumentCommandBase command)
         {
-            m_encoder.SendMarkupCommand(command);
+            m_encoder.SendDocumentCommands(command);
         }
 
         public void SendCustomCommand(CtpDocumentWriter command)
         {
-            m_encoder.SendMarkupCommand(command);
+            m_encoder.SendDocumentCommands(command);
         }
 
         public void Raw(int rawCommandCode, byte[] payload)
         {
-            m_encoder.SendRawCommand(rawCommandCode, payload, 0, payload.Length);
+            m_encoder.SendBinaryCommand(rawCommandCode, payload, 0, payload.Length);
         }
 
     }

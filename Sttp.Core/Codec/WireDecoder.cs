@@ -10,13 +10,11 @@ namespace Sttp.Codec
     {
         //private DataPointDecoder m_dataPointDecoder;
         private CommandDecoder m_packetDecoder;
-        private SessionDetails m_sessionDetails;
 
         public WireDecoder()
         {
             // m_dataPointDecoder = new DataPointDecoder();
-            m_sessionDetails = new SessionDetails();
-            m_packetDecoder = new CommandDecoder(m_sessionDetails);
+            m_packetDecoder = new CommandDecoder();
         }
 
         /// <summary>

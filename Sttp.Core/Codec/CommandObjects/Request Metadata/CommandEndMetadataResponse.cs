@@ -5,7 +5,7 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class CommandEndMetadataResponse : CommandBase
+    public class CommandEndMetadataResponse : DocumentCommandBase
     {
         public readonly int RawChannelID;
         public readonly int RowCount;

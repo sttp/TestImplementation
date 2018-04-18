@@ -9,7 +9,7 @@ namespace CTP
     /// Limits are in place to prevent misuse of the protocol. It also limits the exposure to a server
     /// whose clients are abusing the server's resources. 
     /// </summary>
-    public class SessionDetails
+    internal class SessionDetails
     {
         private int m_maximumCommandSize = 10_000_000;
         private int m_deflateThreshold = 1000;
