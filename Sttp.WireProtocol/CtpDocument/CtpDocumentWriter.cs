@@ -89,7 +89,7 @@ namespace CTP
         /// <summary>
         /// The approximate current size of the writer. It's not exact until <see cref="ToCtpDocument"/> has been called.
         /// </summary>
-        public int CurrentSize => m_stream.Length + m_prefixLength + 1;
+        public int CurrentSize => m_stream.Length + m_prefixLength;
 
         /// <summary>
         /// Resets a document writer so it can be reused.

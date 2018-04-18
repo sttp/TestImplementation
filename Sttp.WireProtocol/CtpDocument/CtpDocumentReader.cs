@@ -9,49 +9,18 @@ namespace CTP
     public class CtpDocumentReader
     {
         /// <summary>
-        /// Helper class that contains the state data to assist in decompressing the data.
-        /// </summary>
-        private class NameLookupCache
-        {
-            /// <summary>
-            /// The name of the element/value. Must be less than 256 characters and 7-bit ASCII.
-            /// </summary>
-            public string Name;
-            /// <summary>
-            /// The index position of the next NameID. This defaults to the current index + 1, 
-            /// and always matches the most recent name ID last time this name traversed to a new ID. (Can be the same)
-            /// </summary>
-            public int NextNameID;
-            /// <summary>
-            /// The value type code used to encode this value. Defaults to null, and is assigned every time a value is
-            /// saved using this name. If elements are saved, the value is unchanged.
-            /// </summary>
-            public CtpTypeCode PrevValueTypeCode;
-
-            public NameLookupCache(string name, int nextNameID)
-            {
-                Name = name;
-                NextNameID = nextNameID;
-                PrevValueTypeCode = CtpTypeCode.Null;
-            }
-        }
-
-        /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
         private CtpDocumentBitReader m_stream;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
-        private List<NameLookupCache> m_namesList = new List<NameLookupCache>();
+        private string[] m_elementNamesList;
+        private string[] m_valueNamesList;
         /// <summary>
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
-        private Stack<NameLookupCache> m_elementStack = new Stack<NameLookupCache>();
-        /// <summary>
-        /// The most recent name that was encountered
-        /// </summary>
-        private NameLookupCache m_prevName;
+        private Stack<string> m_elementStack = new Stack<string>();
         /// <summary>
         /// The root element.
         /// </summary>
@@ -65,9 +34,20 @@ namespace CTP
         {
             m_stream = new CtpDocumentBitReader(data, 0, data.Length);
             Value = new CtpObject();
-            m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = CtpDocumentNodeType.StartOfDocument;
             m_rootElement = m_stream.ReadAscii();
+            int elementCount = (int)m_stream.ReadBits16();
+            int valueCount = (int)m_stream.ReadBits16();
+            m_elementNamesList = new string[elementCount];
+            m_valueNamesList = new string[valueCount];
+            for (int x = 0; x < elementCount; x++)
+            {
+                m_elementNamesList[x] = m_stream.ReadAscii();
+            }
+            for (int x = 0; x < valueCount; x++)
+            {
+                m_valueNamesList[x] = m_stream.ReadAscii();
+            }
             ElementName = GetCurrentElement();
         }
 
@@ -91,7 +71,7 @@ namespace CTP
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
-        /// contents, be sure to call <see cref="CtpValue.Clone"/>
+        /// contents, be sure to call <see cref="CtpObject.Clone"/>
         /// </summary>
         public CtpObject Value { get; private set; }
 
@@ -110,62 +90,76 @@ namespace CTP
                 return false;
 
             if (NodeType == CtpDocumentNodeType.EndElement)
-            {
                 ElementName = GetCurrentElement();
+
+            if (m_stream.IsEos)
+            {
+                NodeType = CtpDocumentNodeType.EndOfDocument;
+                return false;
             }
 
-            NodeType = (CtpDocumentNodeType)m_stream.ReadBits2();
-            switch (NodeType)
+            uint code = (uint)m_stream.Read7BitInt();
+            CtpDocumentHeader header = (CtpDocumentHeader)(code & 15);
+            if (header < CtpDocumentHeader.StartElement)
             {
-                case CtpDocumentNodeType.StartElement:
-                    Value.SetNull();
-                    ReadName();
-                    m_elementStack.Push(m_prevName);
-                    ElementName = m_prevName.Name;
-                    ValueName = null;
-                    break;
-                case CtpDocumentNodeType.Value:
-                    ReadName();
-                    if (m_stream.ReadBits1() == 0)
-                    {
-                        //Same type code;
-                        LoadWO(m_stream, m_prevName.PrevValueTypeCode, Value);
-                    }
-                    else
-                    {
-                        Load(m_stream, Value);
-                        m_prevName.PrevValueTypeCode = Value.ValueTypeCode;
-                    }
-                    ValueName = m_prevName.Name;
-                    break;
-                case CtpDocumentNodeType.EndElement:
-                    ElementName = GetCurrentElement();
-                    m_elementStack.Pop();
-                    break;
-                case CtpDocumentNodeType.EndOfDocument:
-                    return false;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                NodeType = CtpDocumentNodeType.Value;
+                ValueName = m_valueNamesList[code >> 4];
+                switch ((CtpTypeCode)header)
+                {
+                    case CtpTypeCode.Null:
+                        Value.SetNull();
+                        break;
+                    case CtpTypeCode.Int64:
+                        Value.SetValue(UnPackSign((long)m_stream.Read7BitInt()));
+                        break;
+                    case CtpTypeCode.Single:
+                        Value.SetValue(m_stream.ReadSingle());
+                        break;
+                    case CtpTypeCode.Double:
+                        Value.SetValue(m_stream.ReadDouble());
+                        break;
+                    case CtpTypeCode.CtpTime:
+                        Value.SetValue(new CtpTime(m_stream.ReadInt64()));
+                        break;
+                    case CtpTypeCode.Boolean:
+                        Value.SetValue(m_stream.ReadBoolean());
+                        break;
+                    case CtpTypeCode.Guid:
+                        Value.SetValue(m_stream.ReadGuid());
+                        break;
+                    case CtpTypeCode.String:
+                        Value.SetValue(m_stream.ReadString());
+                        break;
+                    case CtpTypeCode.CtpBuffer:
+                        Value.SetValue(new CtpBuffer(m_stream.ReadBytes()));
+                        break;
+                    case CtpTypeCode.CtpDocument:
+                        Value.SetValue(new CtpDocument(m_stream.ReadBytes()));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            else if (header == CtpDocumentHeader.StartElement)
+            {
+                NodeType = CtpDocumentNodeType.StartElement;
+                Value.SetNull();
+                ElementName = m_elementNamesList[code >> 4];
+                ValueName = null;
+                m_elementStack.Push(ElementName);
+            }
+            else if (header == CtpDocumentHeader.EndElement)
+            {
+                NodeType = CtpDocumentNodeType.EndElement;
+                ElementName = GetCurrentElement();
+                m_elementStack.Pop();
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException();
+
             }
             return true;
-        }
-
-        private void ReadName()
-        {
-            if (m_stream.ReadBits1() == 1)
-            {
-                if (m_stream.ReadBits1() == 1)
-                {
-                    m_namesList.Add(new NameLookupCache(m_stream.ReadAscii(), m_namesList.Count));
-                    m_prevName.NextNameID = m_namesList.Count - 1;
-                }
-                else
-                {
-                    int index = (int)m_stream.Read4BitSegments();
-                    m_prevName.NextNameID = index;
-                }
-            }
-            m_prevName = m_namesList[m_prevName.NextNameID];
         }
 
         /// <summary>
@@ -182,52 +176,7 @@ namespace CTP
         {
             if (m_elementStack.Count == 0)
                 return m_rootElement;
-            return m_elementStack.Peek().Name;
-        }
-
-        private static void Load(CtpDocumentBitReader rd, CtpObject output)
-        {
-            CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
-            LoadWO(rd, value, output);
-        }
-
-        private static void LoadWO(CtpDocumentBitReader rd, CtpTypeCode value, CtpObject output)
-        {
-            switch (value)
-            {
-                case CtpTypeCode.Null:
-                    output.SetNull();
-                    break;
-                case CtpTypeCode.Int64:
-                    output.SetValue(UnPackSign((long)rd.Read8BitSegments()));
-                    break;
-                case CtpTypeCode.Single:
-                    output.SetValue(rd.ReadSingle());
-                    break;
-                case CtpTypeCode.Double:
-                    output.SetValue(rd.ReadDouble());
-                    break;
-                case CtpTypeCode.CtpTime:
-                    output.SetValue(rd.ReadSttpTime());
-                    break;
-                case CtpTypeCode.Boolean:
-                    output.SetValue(rd.ReadBits1() == 1);
-                    break;
-                case CtpTypeCode.Guid:
-                    output.SetValue(rd.ReadGuid());
-                    break;
-                case CtpTypeCode.String:
-                    output.SetValue(rd.ReadString());
-                    break;
-                case CtpTypeCode.CtpBuffer:
-                    output.SetValue(rd.ReadCtpBufffer());
-                    break;
-                case CtpTypeCode.CtpDocument:
-                    output.SetValue(rd.ReadCtpDocument());
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            return m_elementStack.Peek();
         }
 
         private static long UnPackSign(long value)

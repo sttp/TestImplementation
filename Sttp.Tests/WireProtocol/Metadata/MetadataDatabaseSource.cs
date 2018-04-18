@@ -104,6 +104,7 @@ namespace Sttp.Tests
             }
 
             cmd = reader.NextCommand();
+            Console.WriteLine(cmd.ToXMLString());
 
             Stopwatch sw = new Stopwatch();
             sw.Restart();

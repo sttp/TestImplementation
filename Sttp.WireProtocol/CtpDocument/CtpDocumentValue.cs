@@ -29,7 +29,7 @@ namespace CTP
             if (reader.NodeType != CtpDocumentNodeType.Value)
                 throw new Exception("Expecting a Value type for the current node.");
             ValueName = reader.ValueName;
-            Value = reader.Value;
+            Value = reader.Value.Clone();
         }
 
         /// <summary>

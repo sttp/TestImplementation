@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace CTP
@@ -10,35 +11,25 @@ namespace CTP
         private static readonly byte[] Empty = new byte[0];
 
         private byte[] m_buffer;
-        private int m_startingPosition;
         private int m_lastPosition;
 
-        private int m_currentBytePosition;
-        private int m_currentBitPosition;
-
-        private int m_bitStreamCacheBitCount;
-        private uint m_bitStreamCache;
-        private byte m_usedBitsForLastBitWord;
+        private int m_currentPosition;
 
         public CtpDocumentBitReader(byte[] data, int position, int length)
         {
             SetBuffer(data, position, length);
         }
 
+        public bool IsEos => m_currentPosition == m_lastPosition;
+
         public void SetBuffer(byte[] data, int position, int length)
         {
             m_buffer = data;
-            m_startingPosition = position;
             m_lastPosition = length + position;
-
-            m_currentBytePosition = position;
-            m_currentBitPosition = m_lastPosition;
-
-            m_bitStreamCacheBitCount = 0;
-            m_bitStreamCache = 0;
-            m_usedBitsForLastBitWord = 0;
+            m_currentPosition = position;
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowEndOfStreamException()
         {
             throw new EndOfStreamException();
@@ -46,10 +37,15 @@ namespace CTP
 
         private void EnsureCapacity(int length)
         {
-            if (m_currentBytePosition + length > m_currentBitPosition)
+            if (m_currentPosition + length > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
+        }
+
+        public bool ReadBoolean()
+        {
+            return ReadBits8() != 0;
         }
 
         public float ReadSingle()
@@ -71,18 +67,18 @@ namespace CTP
 
         public Guid ReadGuid()
         {
-            if (m_currentBytePosition + 16 > m_currentBitPosition)
+            if (m_currentPosition + 16 > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            Guid rv = m_buffer.ToRfcGuid(m_currentBytePosition);
-            m_currentBytePosition += 16;
+            Guid rv = m_buffer.ToRfcGuid(m_currentPosition);
+            m_currentPosition += 16;
             return rv;
         }
 
         public byte[] ReadBytes()
         {
-            int length = (int)Read4BitSegments();
+            int length = (int)Read7BitInt();
             if (length == 0)
             {
                 return Empty;
@@ -91,8 +87,8 @@ namespace CTP
             EnsureCapacity(length);
 
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
-            m_currentBytePosition += length;
+            Array.Copy(m_buffer, m_currentPosition, rv, 0, length);
+            m_currentPosition += length;
             return rv;
         }
 
@@ -107,269 +103,99 @@ namespace CTP
 
         public string ReadAscii()
         {
-            if (m_currentBytePosition + 1 > m_currentBitPosition)
+            if (m_currentPosition + 1 > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            if (m_currentBytePosition + 1 + m_buffer[m_currentBytePosition] > m_currentBitPosition)
+            if (m_currentPosition + 1 + m_buffer[m_currentPosition] > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            char[] data = new char[m_buffer[m_currentBytePosition]];
+            char[] data = new char[m_buffer[m_currentPosition]];
             for (int x = 0; x < data.Length; x++)
             {
-                data[x] = (char)m_buffer[m_currentBytePosition + 1 + x];
+                data[x] = (char)m_buffer[m_currentPosition + 1 + x];
                 if (data[x] > 127)
                     throw new Exception("Not an ASCII string");
             }
-            m_currentBytePosition += 1 + data.Length;
+            m_currentPosition += 1 + data.Length;
             return new string(data);
-        }
-
-        public CtpDocument ReadCtpDocument()
-        {
-            return new CtpDocument(ReadBytes());
-        }
-
-        public CtpBuffer ReadCtpBufffer()
-        {
-            return new CtpBuffer(ReadBytes());
-        }
-
-        public CtpTime ReadSttpTime()
-        {
-            return new CtpTime(ReadInt64());
         }
 
         #region [ Read Bits ]
 
-        public uint ReadBits1()
-        {
-            const int bits = 1;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
-        public uint ReadBits2()
-        {
-            const int bits = 2;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
-
-        public uint ReadBits3()
-        {
-            const int bits = 3;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
-        public uint ReadBits4()
-        {
-            const int bits = 4;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
-        public uint ReadBits5()
-        {
-            const int bits = 5;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
-        public uint ReadBits6()
-        {
-            const int bits = 6;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
-        public uint ReadBits7()
-        {
-            const int bits = 7;
-            if (m_bitStreamCacheBitCount < bits)
-                ReadMoreBits(bits);
-            m_bitStreamCacheBitCount -= bits;
-            return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
-        }
         public uint ReadBits8()
         {
-            if (m_currentBytePosition + 1 > m_currentBitPosition)
+            if (m_currentPosition + 1 > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            byte rv = m_buffer[m_currentBytePosition];
-            m_currentBytePosition++;
+            byte rv = m_buffer[m_currentPosition];
+            m_currentPosition++;
             return rv;
         }
 
         public uint ReadBits16()
         {
-            if (m_currentBytePosition + 2 > m_currentBitPosition)
+            if (m_currentPosition + 2 > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            uint rv = (uint)m_buffer[m_currentBytePosition] << 8
-                    | (uint)m_buffer[m_currentBytePosition + 1];
-            m_currentBytePosition += 2;
-            return rv;
-        }
-
-        public uint ReadBits24()
-        {
-            if (m_currentBytePosition + 3 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            uint rv = (uint)m_buffer[m_currentBytePosition] << 16
-                      | (uint)m_buffer[m_currentBytePosition + 1] << 8
-                      | (uint)m_buffer[m_currentBytePosition + 2];
-            m_currentBytePosition += 3;
+            uint rv = (uint)m_buffer[m_currentPosition] << 8
+                    | (uint)m_buffer[m_currentPosition + 1];
+            m_currentPosition += 2;
             return rv;
         }
 
         public uint ReadBits32()
         {
-            if (m_currentBytePosition + 4 > m_currentBitPosition)
+            if (m_currentPosition + 4 > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            uint rv = (uint)m_buffer[m_currentBytePosition] << 24
-                      | (uint)m_buffer[m_currentBytePosition + 1] << 16
-                      | (uint)m_buffer[m_currentBytePosition + 2] << 8
-                      | (uint)m_buffer[m_currentBytePosition + 3];
-            m_currentBytePosition += 4;
-            return rv;
-        }
-
-        public ulong ReadBits40()
-        {
-            if (m_currentBytePosition + 5 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 32 |
-                       (ulong)m_buffer[m_currentBytePosition + 1] << 24 |
-                       (ulong)m_buffer[m_currentBytePosition + 2] << 16 |
-                       (ulong)m_buffer[m_currentBytePosition + 3] << 8 |
-                       (ulong)m_buffer[m_currentBytePosition + 4];
-            m_currentBytePosition += 5;
-            return rv;
-        }
-
-        public ulong ReadBits48()
-        {
-            if (m_currentBytePosition + 6 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 40 |
-                       (ulong)m_buffer[m_currentBytePosition + 1] << 32 |
-                       (ulong)m_buffer[m_currentBytePosition + 2] << 24 |
-                       (ulong)m_buffer[m_currentBytePosition + 3] << 16 |
-                       (ulong)m_buffer[m_currentBytePosition + 4] << 8 |
-                       (ulong)m_buffer[m_currentBytePosition + 5];
-            m_currentBytePosition += 6;
-            return rv;
-        }
-
-        public ulong ReadBits56()
-        {
-            if (m_currentBytePosition + 7 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 48 |
-                       (ulong)m_buffer[m_currentBytePosition + 1] << 40 |
-                       (ulong)m_buffer[m_currentBytePosition + 2] << 32 |
-                       (ulong)m_buffer[m_currentBytePosition + 3] << 24 |
-                       (ulong)m_buffer[m_currentBytePosition + 4] << 16 |
-                       (ulong)m_buffer[m_currentBytePosition + 5] << 8 |
-                       (ulong)m_buffer[m_currentBytePosition + 6];
-            m_currentBytePosition += 7;
+            uint rv = (uint)m_buffer[m_currentPosition] << 24
+                      | (uint)m_buffer[m_currentPosition + 1] << 16
+                      | (uint)m_buffer[m_currentPosition + 2] << 8
+                      | (uint)m_buffer[m_currentPosition + 3];
+            m_currentPosition += 4;
             return rv;
         }
 
         public ulong ReadBits64()
         {
-            if (m_currentBytePosition + 8 > m_currentBitPosition)
+            if (m_currentPosition + 8 > m_lastPosition)
             {
                 ThrowEndOfStreamException();
             }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 56 |
-                      (ulong)m_buffer[m_currentBytePosition + 1] << 48 |
-                      (ulong)m_buffer[m_currentBytePosition + 2] << 40 |
-                      (ulong)m_buffer[m_currentBytePosition + 3] << 32 |
-                      (ulong)m_buffer[m_currentBytePosition + 4] << 24 |
-                      (ulong)m_buffer[m_currentBytePosition + 5] << 16 |
-                      (ulong)m_buffer[m_currentBytePosition + 6] << 8 |
-                      (ulong)m_buffer[m_currentBytePosition + 7];
-            m_currentBytePosition += 8;
+            ulong rv = (ulong)m_buffer[m_currentPosition + 0] << 56 |
+                      (ulong)m_buffer[m_currentPosition + 1] << 48 |
+                      (ulong)m_buffer[m_currentPosition + 2] << 40 |
+                      (ulong)m_buffer[m_currentPosition + 3] << 32 |
+                      (ulong)m_buffer[m_currentPosition + 4] << 24 |
+                      (ulong)m_buffer[m_currentPosition + 5] << 16 |
+                      (ulong)m_buffer[m_currentPosition + 6] << 8 |
+                      (ulong)m_buffer[m_currentPosition + 7];
+            m_currentPosition += 8;
             return rv;
         }
 
-        private void ReadMoreBits(int len)
+        public ulong Read7BitInt()
         {
-            if (m_currentBitPosition - m_currentBytePosition < 1)
+            ulong value = 0;
+            int bitPosition = 0;
+            while (bitPosition < 64)
             {
-                ThrowEndOfStreamException();
-            }
-            if (m_currentBitPosition == m_lastPosition)
-            {
-                m_currentBitPosition--;
-                m_bitStreamCacheBitCount = 5;
-                m_bitStreamCache = m_buffer[m_currentBitPosition];
-                m_usedBitsForLastBitWord = (byte)(m_bitStreamCache >> 5);
-                if (len > 5)
+                byte code = (byte)ReadBits8();
+                value |= (ulong)(code & 127) << bitPosition;
+                bitPosition += 7;
+                if ((code & 128) == 0)
                 {
-                    ReadMoreBits(len - 5);
+                    return value;
                 }
             }
-            else
-            {
-                m_currentBitPosition--;
-                m_bitStreamCacheBitCount += 8;
-                m_bitStreamCache = (m_bitStreamCache << 8) | m_buffer[m_currentBitPosition];
-            }
-
+            throw new FormatException("Bad 7-bit int");
         }
 
-        public uint Read4BitSegments()
-        {
-            int bits = 0;
-            uint value = 0;
-            while (ReadBits1() == 1)
-            {
-                if (bits == 32)
-                    throw new InvalidOperationException("Improperly encoded 4-bit segment");
-                value |= (uint)ReadBits8() << bits;
-                bits += 8;
-            }
-            return value;
-        }
-
-        public ulong Read8BitSegments()
-        {
-            int bits = 0;
-            ulong value = 0;
-            while (ReadBits1() == 1)
-            {
-                if (bits == 64)
-                    throw new InvalidOperationException("Improperly encoded 8-bit segment");
-                value |= (ulong)ReadBits8() << bits;
-                bits += 8;
-            }
-
-            return value;
-        }
 
         #endregion
     }
