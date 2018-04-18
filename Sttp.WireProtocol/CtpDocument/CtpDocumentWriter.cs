@@ -8,33 +8,21 @@ namespace CTP
     /// </summary>
     public class CtpDocumentWriter
     {
-        /// <summary>
-        /// Helper class that contains the state data to assist in encoding the data.
-        /// </summary>
-        private class NameLookupCache
-        {
-            /// <summary>
-            /// The index position of the next NameID. This defaults to the current index + 1, 
-            /// and always matches the most recent name ID last time this name traversed to a new ID. (Can be the same as the current index id)
-            /// </summary>
-            public int NextNameID;
-            /// <summary>
-            /// The value type code used to encode this value. Defaults to null, and is assigned every time a value is
-            /// saved using this name. If elements are saved instead of values, this field is unchanged.
-            /// </summary>
-            public CtpTypeCode PrevValueTypeCode;
-
-            public NameLookupCache(int nextNameID)
-            {
-                NextNameID = nextNameID;
-                PrevValueTypeCode = CtpTypeCode.Null;
-            }
-        }
+        //Encoding Scheme: 
+        //
+        // First, determine the Node Type.
+        // 2 bits, CtpDocumentNodeType
+        // If EndElement, then exit.
+        //
+        // Second, Determine the next NameIndex
+        // 0: Next NameIndex is same as the last time it was encountered.
+        // 1: It's not, Next index is 8 bit encoded number.
+        // Third, If NodeType:Value, write the value.
 
         /// <summary>
         /// A helper class so calls to <see cref="EndElement"/> can be wrapped in a using clause.
-        /// Note: this class is a single instance class and does not protect against multiple calls to Dispose. Therefore,
-        /// it's not intended to be used outside of making it easier to section out code.
+        /// Note: this class is a single instance class and does not protect against multiple calls to Dispose. 
+        /// Therefore, it's not intended to be used outside of making it easier to section out code.
         /// </summary>
         private class ElementEndElementHelper : IDisposable
         {
@@ -52,11 +40,13 @@ namespace CTP
         /// <summary>
         /// A lookup of all names that have been registered.
         /// </summary>
-        private Dictionary<string, int> m_nameCache;
+        private Dictionary<string, int> m_elementNamesLookup;
+        private Dictionary<string, int> m_valueNamesLookup;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
-        private List<NameLookupCache> m_namesList;
+        private List<string> m_elementNames;
+        private List<string> m_valueNames;
         /// <summary>
         /// The list of elements so an error can occur when the element tree is invalid..
         /// </summary>
@@ -73,14 +63,9 @@ namespace CTP
         /// A temporary value so this class can support setting from an object type.
         /// </summary>
         private CtpObject m_tmpValue;
-        /// <summary>
-        /// The most recent name that was encountered
-        /// </summary>
-        private NameLookupCache m_prevName;
-        /// <summary>
-        /// Gets if ToCtpDocument has been called. 
-        /// </summary>
-        private bool m_hasEndedDocument;
+
+        private int m_prefixLength;
+        private string m_rootElement;
 
         /// <summary>
         /// Create a new writer with the provided root element.
@@ -88,32 +73,23 @@ namespace CTP
         /// <param name="rootElement"></param>
         public CtpDocumentWriter(string rootElement)
         {
+            m_prefixLength = 4;
             m_tmpValue = new CtpObject();
-            m_nameCache = new Dictionary<string, int>();
-            m_namesList = new List<NameLookupCache>();
+            m_elementNamesLookup = new Dictionary<string, int>();
+            m_valueNamesLookup = new Dictionary<string, int>();
+            m_elementNames = new List<string>();
+            m_valueNames = new List<string>();
             m_elementStack = new Stack<string>();
             m_stream = new CtpDocumentBitWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
-            m_prevName = new NameLookupCache(0);
-            m_stream.WriteAscii(rootElement);
-            m_hasEndedDocument = false;
+            m_rootElement = rootElement;
+            m_prefixLength += m_rootElement.Length + 1;
         }
 
         /// <summary>
         /// The approximate current size of the writer. It's not exact until <see cref="ToCtpDocument"/> has been called.
         /// </summary>
-        public int CurrentSize => m_stream.Length;
-
-        //Encoding Scheme: 
-        //
-        // First, determine the Node Type.
-        // 2 bits, CtpDocumentNodeType
-        // If EndElement, then exit.
-        //
-        // Second, Determine the next NameIndex
-        // 0: Next NameIndex is same as the last time it was encountered.
-        // 1: It's not, Next index is 8 bit encoded number.
-        // Third, If NodeType:Value, write the value.
+        public int CurrentSize => m_stream.Length + m_prefixLength + 1;
 
         /// <summary>
         /// Resets a document writer so it can be reused.
@@ -121,32 +97,27 @@ namespace CTP
         /// <param name="rootElement"></param>
         public void Reset(string rootElement)
         {
-            m_nameCache.Clear();
-            m_namesList.Clear();
+            m_prefixLength = 4;
+            m_elementNamesLookup.Clear();
+            m_elementNames.Clear();
             m_elementStack.Clear();
             m_stream.Clear();
-            m_prevName = new NameLookupCache(0);
-            m_stream.WriteAscii(rootElement);
-            m_hasEndedDocument = false;
+            m_rootElement = rootElement;
+            m_prefixLength += m_rootElement.Length + 1;
         }
 
         /// <summary>
         /// Starts a new element with the specified name. 
         /// </summary>
-        /// <param name="name">The name of the element. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
-        /// <returns>an object that can be used in a using block to make the code cleaner.</returns>
+        /// <param name="name">The name of the element. This name must conform to 7-bit ASCII and may not exceed 255 characters in length.</param>
+        /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
         public IDisposable StartElement(string name)
         {
-            if (m_hasEndedDocument)
-                throw new ObjectDisposedException("Once ToCtpDocument has been called, no more data can be written to this object.");
-
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
             m_elementStack.Push(name);
-            m_stream.WriteBits2((uint)CtpDocumentNodeType.Element);
-            WriteName(name);
-
+            m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartElement);
             return m_endElementHelper;
         }
 
@@ -159,48 +130,29 @@ namespace CTP
             if (m_elementStack.Count == 0)
                 throw new InvalidOperationException("Too many calls to EndElement has occurred. There are no elements to end.");
 
-            if (m_hasEndedDocument)
-                throw new ObjectDisposedException("Once ToCtpDocument has been called, no more data can be written to this object.");
-
             m_elementStack.Pop();
-            m_stream.WriteBits2((uint)CtpDocumentNodeType.EndElement);
+            m_stream.Write7BitInt((uint)CtpDocumentHeader.EndElement);
         }
-
 
         /// <summary>
         /// Writes the provided value.
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
-        /// <param name="value">the value itself.</param>
+        /// <param name="value">the value</param>
         public void WriteValue(string name, CtpObject value)
         {
-            if (m_hasEndedDocument)
-                throw new ObjectDisposedException("Once ToCtpDocument has been called, no more data can be written to this object.");
-
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
             if ((object)value == null)
-                throw new ArgumentNullException(nameof(value));
+                value = CtpObject.Null;
 
-            m_stream.WriteBits2((uint)CtpDocumentNodeType.Value);
-            WriteName(name);
-            if (value.ValueTypeCode == m_prevName.PrevValueTypeCode)
-            {
-                m_stream.WriteBits1(0);
-            }
-            else
-            {
-                m_stream.WriteBits1(1);
-                m_stream.WriteBits4((byte)value.ValueTypeCode);
-                m_prevName.PrevValueTypeCode = value.ValueTypeCode;
-            }
-
+            m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)value.ValueTypeCode);
             switch (value.ValueTypeCode)
             {
                 case CtpTypeCode.Null:
                     break;
                 case CtpTypeCode.Int64:
-                    m_stream.Write8BitSegments((ulong)PackSign(value.AsInt64));
+                    m_stream.Write7BitInt((ulong)PackSign(value.AsInt64));
                     break;
                 case CtpTypeCode.Single:
                     m_stream.Write(value.AsSingle);
@@ -212,7 +164,7 @@ namespace CTP
                     m_stream.Write(value.AsCtpTime.Ticks);
                     break;
                 case CtpTypeCode.Boolean:
-                    m_stream.WriteBits1(value.AsBoolean);
+                    m_stream.Write(value.AsBoolean);
                     break;
                 case CtpTypeCode.Guid:
                     m_stream.Write(value.AsGuid);
@@ -231,29 +183,28 @@ namespace CTP
             }
         }
 
-        private void WriteName(string name)
+        private uint GetElementNameIndex(string name)
         {
-            if (!m_nameCache.TryGetValue(name, out int index))
+            if (!m_elementNamesLookup.TryGetValue(name, out int index))
             {
-                m_nameCache[name] = m_nameCache.Count;
-                m_namesList.Add(new NameLookupCache(m_nameCache.Count));
-                index = m_nameCache.Count - 1;
-                m_stream.WriteBits1(1);
-                m_stream.WriteBits1(1);
-                m_stream.WriteAscii(name);
+                m_elementNamesLookup[name] = m_elementNamesLookup.Count;
+                m_elementNames.Add(name);
+                index = m_elementNamesLookup.Count - 1;
+                m_prefixLength += name.Length + 1;
             }
-            else if (m_prevName.NextNameID == index)
+            return (uint)index;
+        }
+
+        private uint GetValueNameIndex(string name)
+        {
+            if (!m_valueNamesLookup.TryGetValue(name, out int index))
             {
-                m_stream.WriteBits1(0);
+                m_valueNamesLookup[name] = m_valueNamesLookup.Count;
+                m_valueNames.Add(name);
+                index = m_valueNamesLookup.Count - 1;
+                m_prefixLength += name.Length + 1;
             }
-            else
-            {
-                m_stream.WriteBits1(1);
-                m_stream.WriteBits1(0);
-                m_stream.Write4BitSegments((uint)index);
-            }
-            m_prevName.NextNameID = index;
-            m_prevName = m_namesList[index];
+            return (uint)index;
         }
 
         /// <summary>
@@ -275,13 +226,24 @@ namespace CTP
         {
             if (m_elementStack.Count != 0)
                 throw new InvalidOperationException("The element stack does not return to the root. Be sure enough calls to EndElement exist.");
-            if (!m_hasEndedDocument)
+
+            byte[] rv = new byte[m_prefixLength + m_stream.Length];
+
+            int index = 0;
+            WriteAscii(rv, ref index, m_rootElement);
+            WriteSize(rv, ref index, (ushort)m_elementNames.Count);
+            WriteSize(rv, ref index, (ushort)m_valueNames.Count);
+            foreach (var item in m_elementNames)
             {
-                m_stream.WriteBits2((byte)CtpDocumentNodeType.EndOfDocument);
-                m_hasEndedDocument = true;
+                WriteAscii(rv, ref index, item);
+            }
+            foreach (var item in m_valueNames)
+            {
+                WriteAscii(rv, ref index, item);
             }
 
-            return new CtpDocument(m_stream.ToArray());
+            m_stream.CopyTo(rv, index);
+            return new CtpDocument(rv);
         }
 
         private static long PackSign(long value)
@@ -292,6 +254,32 @@ namespace CTP
             if (value >= 0)
                 return value << 1;
             return (~value << 1) + 1;
+        }
+
+        private void WriteSize(byte[] buffer, ref int length, ushort value)
+        {
+            buffer[length] = (byte)(value >> 8);
+            length++;
+            buffer[length] = (byte)(value);
+            length++;
+        }
+
+        private void WriteAscii(byte[] buffer, ref int length, string value)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+            if (value.Length > 255)
+                throw new Exception("Length of string cannot exceed 255 characters");
+
+            buffer[length] = (byte)value.Length;
+            length++;
+            for (var x = 0; x < value.Length; x++)
+            {
+                if ((ushort)value[x] > 127) //casting to ushort also takes care of negative numbers if they exist.
+                    throw new Exception("Not an ASCII string");
+                buffer[length] = (byte)value[x];
+                length++;
+            }
         }
 
     }

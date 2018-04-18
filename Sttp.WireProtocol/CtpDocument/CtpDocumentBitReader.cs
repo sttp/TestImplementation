@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CTP
 {
-    internal unsafe class DocumentBitReader
+    internal unsafe class CtpDocumentBitReader
     {
         private static readonly byte[] Empty = new byte[0];
 
@@ -20,7 +20,7 @@ namespace CTP
         private uint m_bitStreamCache;
         private byte m_usedBitsForLastBitWord;
 
-        public DocumentBitReader(byte[] data, int position, int length)
+        public CtpDocumentBitReader(byte[] data, int position, int length)
         {
             SetBuffer(data, position, length);
         }

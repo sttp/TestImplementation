@@ -78,7 +78,7 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpDocumentNodeType.Element:
+                    case CtpDocumentNodeType.StartElement:
                         xml.WriteStartElement(reader.ElementName);
                         break;
                     case CtpDocumentNodeType.Value:
@@ -122,7 +122,7 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpDocumentNodeType.Element:
+                    case CtpDocumentNodeType.StartElement:
                         sb.Append(prefix.Peek());
                         sb.Append('"');
                         sb.Append(reader.ElementName);
@@ -173,7 +173,7 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpDocumentNodeType.Element:
+                    case CtpDocumentNodeType.StartElement:
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ElementName);
                         sb.AppendLine(":");

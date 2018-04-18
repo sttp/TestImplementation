@@ -39,7 +39,7 @@ namespace CTP
         /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
-        private DocumentBitReader m_stream;
+        private CtpDocumentBitReader m_stream;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
@@ -63,7 +63,7 @@ namespace CTP
         /// <param name="data"></param>
         internal CtpDocumentReader(byte[] data)
         {
-            m_stream = new DocumentBitReader(data, 0, data.Length);
+            m_stream = new CtpDocumentBitReader(data, 0, data.Length);
             Value = new CtpObject();
             m_prevName = new NameLookupCache(string.Empty, 0);
             NodeType = CtpDocumentNodeType.StartOfDocument;
@@ -98,7 +98,7 @@ namespace CTP
         /// <summary>
         /// The type of the current node. To Advance the nodes calll <see cref="Read"/>
         /// </summary>
-        public CtpDocumentNodeType NodeType { get; private set; }
+        internal CtpDocumentNodeType NodeType { get; private set; }
 
         /// <summary>
         /// Reads to the next node. If the next node is the end of the document. False is returned. Otherwise true.
@@ -117,7 +117,7 @@ namespace CTP
             NodeType = (CtpDocumentNodeType)m_stream.ReadBits2();
             switch (NodeType)
             {
-                case CtpDocumentNodeType.Element:
+                case CtpDocumentNodeType.StartElement:
                     Value.SetNull();
                     ReadName();
                     m_elementStack.Push(m_prevName);
@@ -185,13 +185,13 @@ namespace CTP
             return m_elementStack.Peek().Name;
         }
 
-        private static void Load(DocumentBitReader rd, CtpObject output)
+        private static void Load(CtpDocumentBitReader rd, CtpObject output)
         {
             CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             LoadWO(rd, value, output);
         }
 
-        private static void LoadWO(DocumentBitReader rd, CtpTypeCode value, CtpObject output)
+        private static void LoadWO(CtpDocumentBitReader rd, CtpTypeCode value, CtpObject output)
         {
             switch (value)
             {

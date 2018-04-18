@@ -11,7 +11,7 @@
         Guid = 6,               // 16-bytes
         String = 7,             // A UTF-8 encoded string value. The size limit is not expressly stated, but is bound by the maximum fragmented packet size.
         CtpBuffer = 8,          // A raw byte block. The size limit is not expressly stated, but is bound by the maximum fragmented packet size.
-        CtpDocument = 9,          // A special markup language for fulfill the complex object mapping need of some data types. This also allows commands to be less structured.
+        CtpDocument = 9,        // A special markup language for fulfill the complex object mapping need of some data types. This also allows commands to be less structured.
                                 // Can easily be converted to/from JSON or XML or YAML.
     }
 

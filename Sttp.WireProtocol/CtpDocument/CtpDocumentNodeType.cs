@@ -3,27 +3,44 @@
     /// <summary>
     /// The valid node types of <see cref="CtpDocument"/>
     /// </summary>
-    public enum CtpDocumentNodeType
+    internal enum CtpDocumentNodeType : byte
     {
         /// <summary>
         /// Indicates that the node type is an element.
         /// </summary>
-        Element,
+        StartElement = 0,
         /// <summary>
         /// Indicates that the node type if a value.
         /// </summary>
-        Value,
+        Value = 1,
         /// <summary>
-        /// Specifies that the node type is the ending marker of a Element, Values don't have ending markers. Neither do root elements.
+        /// Specifies that the node type is the ending marker of a Element, Values don't have ending markers.
         /// </summary>
-        EndElement,
+        EndElement = 2,
         /// <summary>
         /// Specifies that the end of the document has occurred.
         /// </summary>
-        EndOfDocument,
+        EndOfDocument = 3,
         /// <summary>
-        /// Specifies that the current node is at the start of the document.
+        /// Specifies that the current node is at the start of the document. This value will never be serialized 
+        /// to the stream, but rather is a placeholder during the reading process.
         /// </summary>
-        StartOfDocument,
+        StartOfDocument = 255, 
+    }
+
+    internal enum CtpDocumentHeader
+    {
+        ValueNull = 0,
+        ValueInt64 = 1,
+        ValueSingle = 2,
+        ValueDouble = 3,
+        ValueCtpTime = 4,
+        ValueBoolean = 5,
+        ValueGuid = 6,
+        ValueString = 7,
+        ValueCtpBuffer = 8,
+        ValueCtpDocument = 9,
+        StartElement = 10,
+        EndElement = 11,
     }
 }

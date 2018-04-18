@@ -42,7 +42,7 @@ namespace CTP
             {
                 reader.Read();
             }
-            if (reader.NodeType != CtpDocumentNodeType.Element)
+            if (reader.NodeType != CtpDocumentNodeType.StartElement)
                 throw new Exception("Expecting an Element type for the current node.");
             ElementName = reader.ElementName;
 
@@ -59,7 +59,7 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpDocumentNodeType.Element:
+                    case CtpDocumentNodeType.StartElement:
                         ChildElements.Add(new CtpDocumentElement(reader));  //Recursion occurs here.
                         break;
                     case CtpDocumentNodeType.Value:
