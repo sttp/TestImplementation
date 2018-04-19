@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CTP;
+﻿using CTP;
 
 namespace Sttp.Codec
 {
     public class CommandUnsubscribeResponse : DocumentCommandBase
     {
-        public readonly int RawChannelID;
+        public readonly int BinaryChannelCode;
 
-        public CommandUnsubscribeResponse(int rawChannelID)
+        public CommandUnsubscribeResponse(int binaryChannelCode)
             : base("UnsubscribeResponse")
         {
-            RawChannelID = rawChannelID;
+            BinaryChannelCode = binaryChannelCode;
         }
 
         public CommandUnsubscribeResponse(CtpDocumentReader reader)
@@ -21,15 +17,14 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            RawChannelID = (int)element.GetValue("RawChannelID");
-
+            BinaryChannelCode = (int)element.GetValue("BinaryChannelCode");
 
             element.ErrorIfNotHandled();
         }
 
         public override void Save(CtpDocumentWriter writer)
         {
-            writer.WriteValue("RawChannelID", RawChannelID);
+            writer.WriteValue("BinaryChannelCode", BinaryChannelCode);
 
         }
     }

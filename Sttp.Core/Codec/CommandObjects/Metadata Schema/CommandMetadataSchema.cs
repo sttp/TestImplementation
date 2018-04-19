@@ -29,7 +29,7 @@ namespace Sttp.Codec
             RuntimeID = (Guid)element.GetValue("RuntimeID");
             VersionNumber = (long)element.GetValue("VersionNumber");
 
-            foreach (var query in element.GetElement("Tables").ChildElements)
+            foreach (var query in element.ForEachElement("Table"))
             {
                 Tables.Add(new MetadataSchemaTable(query));
             }
@@ -40,14 +40,11 @@ namespace Sttp.Codec
         {
             writer.WriteValue("RuntimeID", RuntimeID);
             writer.WriteValue("VersionNumber", VersionNumber);
-            using (writer.StartElement("Tables"))
+            foreach (var q in Tables)
             {
-                foreach (var q in Tables)
+                using (writer.StartElement("Table"))
                 {
-                    using (writer.StartElement("Table"))
-                    {
-                        q.Save(writer);
-                    }
+                    q.Save(writer);
                 }
             }
         }

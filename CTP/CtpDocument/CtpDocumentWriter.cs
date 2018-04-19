@@ -151,31 +151,31 @@ namespace CTP
                 case CtpTypeCode.Null:
                     break;
                 case CtpTypeCode.Int64:
-                    m_stream.Write7BitInt((ulong)PackSign(value.AsInt64));
+                    m_stream.Write7BitInt((ulong)PackSign(value.IsInt64));
                     break;
                 case CtpTypeCode.Single:
-                    m_stream.Write(value.AsSingle);
+                    m_stream.Write(value.IsSingle);
                     break;
                 case CtpTypeCode.Double:
-                    m_stream.Write(value.AsDouble);
+                    m_stream.Write(value.IsDouble);
                     break;
                 case CtpTypeCode.CtpTime:
-                    m_stream.Write(value.AsCtpTime.Ticks);
+                    m_stream.Write(value.IsCtpTime.Ticks);
                     break;
                 case CtpTypeCode.Boolean:
-                    m_stream.Write(value.AsBoolean);
+                    m_stream.Write(value.IsBoolean);
                     break;
                 case CtpTypeCode.Guid:
-                    m_stream.Write(value.AsGuid);
+                    m_stream.Write(value.IsGuid);
                     break;
                 case CtpTypeCode.String:
-                    m_stream.Write(value.AsString);
+                    m_stream.Write(value.IsString);
                     break;
                 case CtpTypeCode.CtpBuffer:
-                    m_stream.Write(value.AsCtpBuffer);
+                    m_stream.Write(value.IsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpDocument:
-                    m_stream.Write(value.AsCtpDocument);
+                    m_stream.Write(value.IsCtpDocument);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

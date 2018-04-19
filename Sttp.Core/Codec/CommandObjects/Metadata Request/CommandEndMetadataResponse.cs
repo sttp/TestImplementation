@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using CTP;
+﻿using CTP;
 
 namespace Sttp.Codec
 {
     public class CommandEndMetadataResponse : DocumentCommandBase
     {
-        public readonly int RawChannelID;
+        public readonly int BinaryChannelCode;
         public readonly int RowCount;
 
-        public CommandEndMetadataResponse(int rawChannelID, int rowCount)
+        public CommandEndMetadataResponse(int binaryChannelCode, int rowCount)
             : base("EndMetadataResponse")
         {
-            RawChannelID = rawChannelID;
+            BinaryChannelCode = binaryChannelCode;
             RowCount = rowCount;
         }
 
@@ -21,14 +18,14 @@ namespace Sttp.Codec
             : base("EndMetadataResponse")
         {
             var element = reader.ReadEntireElement();
-            RawChannelID = (int)element.GetValue("RawChannelID");
+            BinaryChannelCode = (int)element.GetValue("BinaryChannelCode");
             RowCount = (int)element.GetValue("RowCount");
             element.ErrorIfNotHandled();
         }
 
         public override void Save(CtpDocumentWriter writer)
         {
-            writer.WriteValue("RawChannelID", RawChannelID);
+            writer.WriteValue("BinaryChannelCode", BinaryChannelCode);
             writer.WriteValue("RowCount", RowCount);
         }
     }

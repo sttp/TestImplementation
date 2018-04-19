@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Linq;
 using CTP;
 
 namespace Sttp.Codec
 {
     public class CommandSubscribeResponse : DocumentCommandBase
     {
-        public readonly int RawChannelID;
+        public readonly int BinaryChannelCode;
         public readonly Guid EncodingMethod;
 
-        public CommandSubscribeResponse(int rawChannelID, Guid encodingMethod)
+        public CommandSubscribeResponse(int binaryChannelCode, Guid encodingMethod)
             : base("SubscribeResponse")
         {
-            RawChannelID = rawChannelID;
+            BinaryChannelCode = binaryChannelCode;
             EncodingMethod = encodingMethod;
         }
 
@@ -21,7 +20,7 @@ namespace Sttp.Codec
         {
             var element = reader.ReadEntireElement();
 
-            RawChannelID = (int)element.GetValue("RawChannelID");
+            BinaryChannelCode = (int)element.GetValue("BinaryChannelCode");
             EncodingMethod = (Guid)element.GetValue("EncodingMethod");
 
             element.ErrorIfNotHandled();
@@ -30,7 +29,7 @@ namespace Sttp.Codec
 
         public override void Save(CtpDocumentWriter writer)
         {
-            writer.WriteValue("RawChannelID", RawChannelID);
+            writer.WriteValue("BinaryChannelCode", BinaryChannelCode);
             writer.WriteValue("EncodingMethod", EncodingMethod);
         }
     }

@@ -5,34 +5,6 @@ using CTP;
 
 namespace Sttp.Codec
 {
-    public class MetadataProcedureParameters
-    {
-        public readonly string Name;
-        public readonly CtpObject Value;
-        public MetadataProcedureParameters(CtpDocumentElement documentElement)
-        {
-            Name = (string)documentElement.GetValue("Name");
-            Value = documentElement.GetValue("Value");
-            documentElement.ErrorIfNotHandled();
-        }
-
-        public MetadataProcedureParameters(string name, CtpObject value)
-        {
-            Name = name;
-            Value = value;
-        }
-
-        public override string ToString()
-        {
-            return $"{Name}: ({Value})";
-        }
-
-        public void Save(CtpDocumentWriter sml)
-        {
-            sml.WriteValue("Name", Name);
-            sml.WriteValue("Value", Value);
-        }
-    }
     public class CommandGetMetadataProcedure : DocumentCommandBase
     {
         public string Name;
@@ -52,7 +24,7 @@ namespace Sttp.Codec
 
             Name = (string)element.GetValue("Name");
             Parameters = new List<MetadataProcedureParameters>();
-            foreach (var e in element.GetElement("Parameters").ChildElements)
+            foreach (var e in element.ForEachElement("Parameters"))
             {
                 Parameters.Add(new MetadataProcedureParameters(e));
             }
@@ -64,14 +36,11 @@ namespace Sttp.Codec
         {
             writer.WriteValue("Name", Name);
 
-            using (writer.StartElement("Parameters"))
+            foreach (var c in Parameters)
             {
-                foreach (var c in Parameters)
+                using (writer.StartElement("Parameter"))
                 {
-                    using (writer.StartElement("Parameter"))
-                    {
-                        c.Save(writer);
-                    }
+                    c.Save(writer);
                 }
             }
         }

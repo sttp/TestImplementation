@@ -131,6 +131,22 @@ namespace CTP
         }
 
         /// <summary>
+        /// Iterates all elements with the provided name.
+        /// </summary>
+        /// <param name="elementName">The name of the value</param>
+        /// <returns></returns>
+        public IEnumerable<CtpDocumentElement> ForEachElement(string elementName)
+        {
+            foreach (var value in ChildElements)
+            {
+                if (value.ElementName == elementName)
+                {
+                    yield return value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Checks all children elements and children values to see if their values were read as part of the parsing. 
         /// This will throw an error for any CtpDocumentValue that exists but was not read. This assists in improperly interpreting all
         /// of the options present.

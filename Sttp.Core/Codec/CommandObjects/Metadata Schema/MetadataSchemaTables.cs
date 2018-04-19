@@ -22,7 +22,7 @@ namespace Sttp.Codec
             TableName = (string)documentElement.GetValue("TableName");
             LastModifiedVersionNumber = (long)documentElement.GetValue("LastModifiedVersionNumber");
 
-            foreach (var query in documentElement.GetElement("Columns").ChildElements)
+            foreach (var query in documentElement.ForEachElement("Column"))
             {
                 Columns.Add(new MetadataColumn(query));
             }
@@ -33,14 +33,11 @@ namespace Sttp.Codec
         {
             sml.WriteValue("TableName", TableName);
             sml.WriteValue("LastModifiedVersionNumber", LastModifiedVersionNumber);
-            using (sml.StartElement("Columns"))
+            foreach (var item in Columns)
             {
-                foreach (var item in Columns)
+                using (sml.StartElement("Column"))
                 {
-                    using (sml.StartElement("Column"))
-                    {
-                        item.Save(sml);
-                    }
+                    item.Save(sml);
                 }
             }
         }
