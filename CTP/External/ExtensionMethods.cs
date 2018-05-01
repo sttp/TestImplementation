@@ -49,6 +49,17 @@ namespace CTP
         /// Encodes a <see cref="Guid"/> following RFC 4122.
         /// </summary>
         /// <param name="guid">The <see cref="Guid"/> to serialize.</param>
+        public static byte[] ToRfcBytes(this Guid guid)
+        {
+            var rv = new byte[16];
+            guid.ToRfcBytes(rv, 0);
+            return rv;
+        }
+
+        /// <summary>
+        /// Encodes a <see cref="Guid"/> following RFC 4122.
+        /// </summary>
+        /// <param name="guid">The <see cref="Guid"/> to serialize.</param>
         /// <param name="buffer">Destination buffer to hold serialized <paramref name="guid"/>.</param>
         /// <param name="startingIndex">Starting index in <paramref name="buffer"/>.</param>
         public static int ToRfcBytes(this Guid guid, byte[] buffer, int startingIndex)

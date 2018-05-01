@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Core", "Sttp.Core\Sttp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sttp.Tests", "Sttp.Tests\Sttp.Tests.csproj", "{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sttp.Adapters", "Sttp.Adapters\Sttp.Adapters.csproj", "{60F613D1-0AF6-4BB1-9F22-5274554ABEA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7A50DA7-0E6F-4D45-AED9-C76E0993678D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60F613D1-0AF6-4BB1-9F22-5274554ABEA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60F613D1-0AF6-4BB1-9F22-5274554ABEA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60F613D1-0AF6-4BB1-9F22-5274554ABEA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60F613D1-0AF6-4BB1-9F22-5274554ABEA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
