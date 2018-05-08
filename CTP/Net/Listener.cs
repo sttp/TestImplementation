@@ -6,72 +6,29 @@ using System.Threading;
 
 namespace CTP.Net
 {
-    public delegate void NewClientEstablished(TcpClient client, ConnectionOptions options);
 
+    /// <summary>
+    /// Listens on a specific endpoint to accept connections.
+    /// </summary>
     public class Listener
     {
-        /// <summary>
-        /// Event Occurs when a new client has connected to this listener.
-        /// </summary>
-        public event NewClientEstablished NewClient;
         private readonly ManualResetEvent m_shutdownEvent = new ManualResetEvent(false);
         private TcpListener m_listener;
         private int m_pendingAccepts;
         private bool m_shutdown;
         private AsyncCallback m_onAccept;
         private IPEndPoint m_listenEndpoint;
-        private object m_syncRoot;
-        private List<IpMatchDefinition> m_list;
+
+        public UserCredentialServices Permissions;
 
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        public Listener(IPEndPoint listenEndpoint)
+        protected Listener(IPEndPoint listenEndpoint)
         {
-            m_listenEndpoint = listenEndpoint;
-            m_syncRoot = new object();
-            m_list = new List<IpMatchDefinition>();
+            m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
-        }
-
-        /// <summary>
-        /// Assigns behavior based on an access list.
-        /// </summary>
-        /// <param name="ip">the IP address to match</param>
-        /// <param name="maskBits">The bits of the subnet mask</param>
-        /// <param name="options">Options associated with the connection</param>
-        public void AssignOptions(IPAddress ip, int maskBits, ConnectionOptions options = null)
-        {
-            var client = new IpMatchDefinition(ip, maskBits, options);
-            lock (m_syncRoot)
-            {
-                if (!m_list.Contains(client))
-                {
-                    m_list.Add(client);
-                    m_list.Sort();
-                }
-            }
-        }
-
-        private bool HasAccess(IPAddress ipAddress, out ConnectionOptions options)
-        {
-            options = null;
-            var src = ipAddress.GetAddressBytes();
-            lock (m_syncRoot)
-            {
-                if (m_list.Count == 0)
-                    return true;
-
-                foreach (var remote in m_list)
-                {
-                    if (remote.IsMatch(src))
-                    {
-                        options = remote.Options;
-                        return true;
-                    }
-                }
-                return false;
-            }
+            Permissions = new UserCredentialServices();
         }
 
         /// <summary>
@@ -123,7 +80,6 @@ namespace CTP.Net
             m_listener = null;
         }
 
-
         /// <summary>
         /// Will try to accept connections one more time.
         /// </summary>
@@ -159,16 +115,8 @@ namespace CTP.Net
                 beginAcceptCalled = true;
 
                 TcpClient socket = m_listener.EndAcceptTcpClient(ar);
-
-
-                IPAddress ipAddress = ((IPEndPoint)socket.Client.RemoteEndPoint).Address;
-                ConnectionOptions options;
-                if (HasAccess(ipAddress, out options))
-                {
-                    NewClient?.Invoke(socket, options);
-                    return;
-                }
-                socket.Close();
+                var session = new SessionToken(socket);
+                Permissions.AuthenticateAsServer(session);
             }
             catch (Exception er)
             {
@@ -176,6 +124,5 @@ namespace CTP.Net
                     RetryBeginAccept();
             }
         }
-
     }
 }

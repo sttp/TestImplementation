@@ -12,10 +12,6 @@ namespace CTP.Net
     {
         public readonly IPAddress Ip;
         public readonly int MaskBits;
-        /// <summary>
-        /// Security identifiers associated with this IP match.
-        /// </summary>
-        public ConnectionOptions Options;
 
         private int m_maskBits;
         private byte[] m_ipBytes;
@@ -26,10 +22,8 @@ namespace CTP.Net
         /// </summary>
         /// <param name="address">The IP address to use.</param>
         /// <param name="maskBits">The number of bits to include in the mask</param>
-        /// <param name="options">Security identifiers associated with this mask</param>
-        public IpMatchDefinition(IPAddress address, int maskBits, ConnectionOptions options)
+        public IpMatchDefinition(IPAddress address, int maskBits)
         {
-            Options = options;
             Ip = address;
             MaskBits = maskBits;
             if (address == null)
