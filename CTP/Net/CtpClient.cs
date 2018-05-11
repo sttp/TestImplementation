@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CTP.IO;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,6 +8,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using CTP.SRP;
 
 namespace CTP.Net
 {
@@ -99,7 +101,7 @@ namespace CTP.Net
             m_networkStream = client.GetStream();
             if (m_useSSL)
             {
-                m_sslStream = new SslStream(m_networkStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
+                m_sslStream = new SslStream(m_networkStream, false, UserCertificateValidationCallback, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
                 X509CertificateCollection collection = null;
                 if (m_userCertificate != null)
                 {
@@ -135,9 +137,31 @@ namespace CTP.Net
             }
         }
 
+        private X509Certificate UserCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+        {
+            return localCertificates[0];
+        }
+
         private void AuthenticateSRP()
         {
-            throw new NotImplementedException();
+            Stream stream = (Stream)m_sslStream ?? m_networkStream;
+            stream.Write(m_srpUsername);
+            var strength = (SrpStrength)stream.ReadNextByte();
+            var salt = stream.ReadBytes();
+            var publicB = stream.ReadBytes();
+
+            var client = new Srp6aClient(strength, m_srpUsername, m_srpPassword);
+            client.Step1(out byte[] publicA);
+
+            stream.Write(publicA);
+
+            client.Step2(salt, publicB, out byte[] clientChallenge);
+
+            stream.Write(clientChallenge);
+
+            var serverChallenge = stream.ReadBytes();
+
+            client.Step3(serverChallenge);
         }
 
         private bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)

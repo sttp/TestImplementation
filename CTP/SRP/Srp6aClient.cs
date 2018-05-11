@@ -36,13 +36,12 @@ namespace CTP.SRP
             m_publicA = BigInteger.ModPow(m_generator, m_privateA, m_prime);
         }
 
-        public void GetStep1(out string identity, out string publicA)
+        public void Step1(out byte[] publicA)
         {
-            identity = m_identity;
-            publicA = m_publicA.ToString("X");
+            publicA = m_publicA.ToUnsignedByteArray();
         }
 
-        public void Step3(byte[] userSalt, byte[] publicB, out byte[] clientChallenge)
+        public void Step2(byte[] userSalt, byte[] publicB, out byte[] clientChallenge)
         {
             m_publicB = publicB.ToUnsignedBigInteger();
             m_u = ComputeHash(m_params.PaddedBytes, m_publicA, m_publicB).ToUnsignedBigInteger();
@@ -55,7 +54,7 @@ namespace CTP.SRP
             clientChallenge = m_challengeClient;
         }
 
-        public void Step5(byte[] serverChallenge)
+        public void Step3(byte[] serverChallenge)
         {
             if (!m_challengeServer.SequenceEqual(serverChallenge))
                 throw new Exception("Failed server challenge");

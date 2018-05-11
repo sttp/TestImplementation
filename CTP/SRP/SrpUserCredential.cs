@@ -36,13 +36,14 @@ namespace CTP.SRP
         /// </summary>
         /// <param name="username"></param>
         /// <param name="password"></param>
+        /// <param name="salt"></param>
         /// <param name="strength"></param>
         /// <returns></returns>
-        public SrpUserCredential(string username, string password, SrpStrength strength = SrpStrength.Bits1024)
+        public SrpUserCredential(string username, string password, byte[] salt = null, SrpStrength strength = SrpStrength.Bits1024)
         {
             UserName = username.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            Salt = RNG.CreateSalt(64);
-            Verification = ComputeVerifier(SrpConstants.Lookup(strength), RNG.CreateSalt(64), username, password.Normalize(NormalizationForm.FormKC));
+            Salt = salt ?? RNG.CreateSalt(64);
+            Verification = ComputeVerifier(SrpConstants.Lookup(strength), Salt, username, password.Normalize(NormalizationForm.FormKC));
             SrpStrength = strength;
         }
 

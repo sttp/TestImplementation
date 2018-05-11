@@ -19,26 +19,42 @@ namespace CTP.SRP
         private BigInteger m_verifier;
         private BigInteger m_u;
         private BigInteger m_sessionKey;
+        private int m_paddedBytes;
 
         private byte[] m_challengeServer;
         private byte[] m_challengeClient;
 
-        public Srp6aServer(SrpUserCredential user, byte[] publicA)
+        public Srp6aServer(SrpUserCredential user)
         {
             SrpConstants param = SrpConstants.Lookup(user.SrpStrength);
             m_user = user;
             m_generator = param.g;
             m_prime = param.N;
             m_k = param.k;
+            m_paddedBytes = param.PaddedBytes;
             m_verifier = user.Verification.ToUnsignedBigInteger();
 
             m_privateB = RNG.CreateSalt(32).ToUnsignedBigInteger(); //RFC says SHOULD be at least 256 bit.
-            m_publicA = publicA.ToUnsignedBigInteger();
             m_publicB = (m_k * m_verifier % m_prime + m_generator.ModPow(m_privateB, m_prime)) % m_prime;
-            m_u = ComputeHash(param.PaddedBytes, m_publicA, m_publicB).ToUnsignedBigInteger();
+        }
+
+        public void Step1(out byte[] userSalt, out byte[] publicB)
+        {
+            userSalt = m_user.Salt;
+            publicB = m_publicB.ToUnsignedByteArray();
+        }
+
+        public void Step2(byte[] publicA, byte[] clientChallenge, out byte[] serverChallenge)
+        {
+            m_publicA = publicA.ToUnsignedBigInteger();
+            m_u = ComputeHash(m_paddedBytes, m_publicA, m_publicB).ToUnsignedBigInteger();
             m_sessionKey = (m_publicA * m_verifier.ModPow(m_u, m_prime) % m_prime).ModPow(m_privateB, m_prime);
-            m_challengeServer = ComputeHash(param.PaddedBytes, 1, m_sessionKey);
-            m_challengeClient = ComputeHash(param.PaddedBytes, 2, m_sessionKey);
+            m_challengeServer = ComputeHash(m_paddedBytes, 1, m_sessionKey);
+            m_challengeClient = ComputeHash(m_paddedBytes, 2, m_sessionKey);
+
+            if (!m_challengeClient.SequenceEqual(clientChallenge))
+                throw new Exception("Failed client challenge");
+            serverChallenge = m_challengeServer;
         }
 
         private static byte[] ComputeHash(int padLength, BigInteger item1, BigInteger item2)
@@ -53,19 +69,5 @@ namespace CTP.SRP
                 return sha.ComputeHash(hash);
             }
         }
-
-        public void Step2(out byte[] userSalt, out byte[] publicB)
-        {
-            userSalt = m_user.Salt;
-            publicB = m_publicB.ToUnsignedByteArray();
-        }
-
-        public void Step4(byte[] clientChallenge, out byte[] serverChallenge)
-        {
-            if (!m_challengeClient.SequenceEqual(clientChallenge))
-                throw new Exception("Failed client challenge");
-            serverChallenge = m_challengeServer;
-        }
-
     }
 }

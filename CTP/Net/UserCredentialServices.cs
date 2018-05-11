@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
@@ -44,6 +45,7 @@ namespace CTP.Net
             {
                 if (certificate == null)
                     return true;
+
                 foreach (var item in Users.m_selfSignCertificateUsers)
                 {
                     if (item.UserCertificate.Equals(certificate))
@@ -155,8 +157,16 @@ namespace CTP.Net
         private SortedSet<WindowsGroupMapping> m_windowsGroupUsers = new SortedSet<WindowsGroupMapping>();
         private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
         private SortedSet<TrustedIPUserMapping> m_ipUsers = new SortedSet<TrustedIPUserMapping>();
+        private byte[] m_srpDefaultSalt = RNG.CreateSalt(64);
+        private SrpStrength m_srpStrength = SrpStrength.Bits1024;
 
         public event SessionCompletedEventHandler SessionCompleted;
+
+        public void SetSrpDefaults(byte[] salt, SrpStrength strength)
+        {
+            m_srpDefaultSalt = salt;
+            m_srpStrength = strength;
+        }
 
         public void AssignEncriptionOptions(IPAddress remoteIP, int bitmask, X509Certificate localCertificate)
         {
@@ -173,6 +183,27 @@ namespace CTP.Net
         public void AddSelfSignedCertificateUser(X509Certificate user, string loginName, params string[] roles)
         {
             m_selfSignCertificateUsers.Add(new SelfSignCertificateUserMapping(user, loginName, roles));
+        }
+
+        public void AddSrpUser(string username, string password, string loginName, params string[] roles)
+        {
+            using (var sha = SHA512.Create())
+            {
+                string un = username.Normalize(NormalizationForm.FormKC).Trim().ToLower();
+                byte[] data = Encoding.UTF8.GetBytes(un);
+                byte[] rv = new byte[data.Length + m_srpDefaultSalt.Length];
+                data.CopyTo(rv, 0);
+                m_srpDefaultSalt.CopyTo(rv, data.Length);
+                byte[] salt = sha.ComputeHash(m_srpDefaultSalt);
+                var credentials = new SrpUserCredential(username, password, salt, m_srpStrength);
+                m_srpUsers.Add(new SrpUserMapping(credentials, loginName, roles));
+            }
+        }
+
+        public void AddSrpUser(string username, byte[] verification, byte[] salt, SrpStrength strength, string loginName, params string[] roles)
+        {
+            var credentials = new SrpUserCredential(username, verification, salt, strength);
+            m_srpUsers.Add(new SrpUserMapping(credentials, loginName, roles));
         }
 
         public void AuthenticateAsServer(SessionToken session)
@@ -208,7 +239,7 @@ namespace CTP.Net
                     Finish(session);
                     break;
                 case AuthenticationProtocols.SRP:
-                    throw new NotSupportedException();
+                    SrpAsServer(session);
                     break;
                 case AuthenticationProtocols.NegotiateStream:
                     WinAsServer(session);
@@ -222,6 +253,43 @@ namespace CTP.Net
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+        }
+
+        private void SrpAsServer(SessionToken session)
+        {
+            string userName = session.FinalStream.ReadString();
+
+
+            userName = userName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
+            var user = m_srpUsers.FirstOrDefault(x => x.Credentials.UserName == userName);
+            if (user == null)
+            {
+                using (var sha = SHA512.Create())
+                {
+                    byte[] data = Encoding.UTF8.GetBytes(userName);
+                    byte[] rv = new byte[data.Length + m_srpDefaultSalt.Length];
+                    data.CopyTo(rv, 0);
+                    m_srpDefaultSalt.CopyTo(rv, data.Length);
+                    byte[] salt = sha.ComputeHash(m_srpDefaultSalt);
+                    var credentials = new SrpUserCredential(userName, Guid.NewGuid().ToString(), salt, m_srpStrength);
+                    user = new SrpUserMapping(credentials, null, new string[0]);
+                }
+            }
+
+            var server = new Srp6aServer(user.Credentials);
+            server.Step1(out byte[] userSalt, out byte[] publicB);
+
+            session.FinalStream.Write((byte)user.Credentials.SrpStrength);
+            session.FinalStream.Write(userSalt);
+            session.FinalStream.Write(publicB);
+
+            byte[] publicA = session.FinalStream.ReadBytes();
+            byte[] clientChallenge = session.FinalStream.ReadBytes();
+
+            server.Step2(publicA, clientChallenge, out byte[] serverChallenge);
+
+            session.FinalStream.Write(serverChallenge);
 
         }
 
@@ -387,6 +455,13 @@ namespace CTP.Net
         public SrpUserCredential Credentials;
         public string LoginName;
         public string[] Roles;
+
+        public SrpUserMapping(SrpUserCredential credentials, string loginName, string[] roles)
+        {
+            Credentials = credentials;
+            LoginName = loginName;
+            Roles = roles;
+        }
     }
 
     public class WindowsUserMapping

@@ -16,13 +16,12 @@ namespace Sttp.Tests.ClientServer
     public class TestSSL
     {
         [TestMethod]
-        public void TestMethod()
+        public void TestIPWithoutEncryption()
         {
             X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
             var cert = store.Certificates[0];
             store.Close();
-
 
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             listener.Permissions.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
@@ -31,14 +30,53 @@ namespace Sttp.Tests.ClientServer
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-
             var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             client.TurnOffSSL();
             client.Connect();
-
             Thread.Sleep(100);
+        }
 
+        [TestMethod]
+        public void TestIPWithEncryption()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var cert = store.Certificates[0];
+            store.Close();
+
+            var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
+            listener.Permissions.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
+            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
+            listener.SessionCompleted += Listener_SessionCompleted;
+            listener.Start();
+
+            var client = new CtpClient();
+            client.SetHost(IPAddress.Loopback, 29348);
+            client.Connect();
+            Thread.Sleep(100);
+        }
+
+        [TestMethod]
+        public void TestCertificateUser()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var cert = store.Certificates[0];
+            var cert2 = store.Certificates[0];
+            store.Close();
+
+            var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
+            listener.Permissions.AddSelfSignedCertificateUser(cert2, "Cert", "Perm1");
+            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
+            listener.SessionCompleted += Listener_SessionCompleted;
+            listener.Start();
+
+            var client = new CtpClient();
+            client.SetHost(IPAddress.Loopback, 29348);
+            client.SetUserCredentials(cert2);
+            client.Connect();
+            Thread.Sleep(100);
         }
 
         private void Listener_SessionCompleted(SessionToken token)
