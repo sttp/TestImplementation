@@ -76,6 +76,10 @@ namespace CTP.Net
             m_trustedRootCertificates = trustedRootCertificates;
         }
 
+        public void SetHost(IPAddress address, int port)
+        {
+            m_remoteEndpoint = new IPEndPoint(address, port);
+        }
         public void SetHost(IPEndPoint host)
         {
             m_remoteEndpoint = host;
@@ -96,18 +100,24 @@ namespace CTP.Net
             if (m_useSSL)
             {
                 m_sslStream = new SslStream(m_networkStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
-                m_sslStream.AuthenticateAsClient(m_hostName ?? string.Empty, new X509CertificateCollection(new[] { m_userCertificate }), SslProtocols.Tls12, false);
+                X509CertificateCollection collection = null;
+                if (m_userCertificate != null)
+                {
+                    collection = new X509CertificateCollection(new[] { m_userCertificate });
+                }
+                m_sslStream.AuthenticateAsClient(m_hostName ?? string.Empty, collection, SslProtocols.Tls12, false);
             }
             Stream stream = (Stream)m_sslStream ?? m_networkStream;
+
             if (m_srpUsername != null)
             {
-                stream.WriteByte(0);
+                stream.WriteByte((byte)AuthenticationProtocols.SRP);
                 stream.Flush();
                 AuthenticateSRP();
             }
             else if (m_credential != null)
             {
-                stream.WriteByte(1);
+                stream.WriteByte((byte)AuthenticationProtocols.NegotiateStream);
                 stream.Flush();
 
                 m_negotiateStream = new NegotiateStream(m_networkStream, true);
@@ -115,7 +125,12 @@ namespace CTP.Net
             }
             else if (m_ldapUsername != null)
             {
-                stream.WriteByte(2);
+                stream.WriteByte((byte)AuthenticationProtocols.LDAP);
+                stream.Flush();
+            }
+            else
+            {
+                stream.WriteByte((byte)AuthenticationProtocols.None);
                 stream.Flush();
             }
         }

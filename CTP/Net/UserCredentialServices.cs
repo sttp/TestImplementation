@@ -16,6 +16,15 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
+    public enum AuthenticationProtocols : byte
+    {
+        None = 0,
+        SRP = 1,
+        NegotiateStream = 2,
+        OAUTH = 3,
+        LDAP = 4,
+    }
+
     public delegate void SessionCompletedEventHandler(SessionToken token);
 
     public class UserCredentialServices
@@ -175,6 +184,7 @@ namespace CTP.Net
                 if (item.IP.IsMatch(ipBytes))
                 {
                     localCertificate = item.ServerCertificate;
+                    break;
                 }
             }
 
@@ -192,20 +202,27 @@ namespace CTP.Net
             {
                 SSLAsServer(localCertificate, session);
             }
-            switch (session.FinalStream.ReadNextByte())
+            switch ((AuthenticationProtocols)session.FinalStream.ReadNextByte())
             {
-                case 0: //None
+                case AuthenticationProtocols.None:
+                    Finish(session);
                     break;
-                case 1: //SRP
+                case AuthenticationProtocols.SRP:
+                    throw new NotSupportedException();
                     break;
-                case 2: //Negotiate Stream
+                case AuthenticationProtocols.NegotiateStream:
                     WinAsServer(session);
                     break;
-                case 3: //OAuth
+                case AuthenticationProtocols.OAUTH:
+                    throw new NotSupportedException();
+                    break;
+                case AuthenticationProtocols.LDAP:
+                    throw new NotSupportedException();
                     break;
                 default:
-                    throw new AuthenticationException();
+                    throw new ArgumentOutOfRangeException();
             }
+
         }
 
         private void SSLAsServer(X509Certificate certificate, SessionToken session)
@@ -255,10 +272,7 @@ namespace CTP.Net
         }
     }
 
-
-
-
-    public class EncryptionOptions
+    public class EncryptionOptions : IComparable<EncryptionOptions>, IComparable, IEquatable<EncryptionOptions>
     {
         public IpMatchDefinition IP;
         public X509Certificate ServerCertificate;
@@ -267,6 +281,81 @@ namespace CTP.Net
         {
             IP = ip;
             ServerCertificate = serverCertificate;
+        }
+
+        public int CompareTo(EncryptionOptions other)
+        {
+            if (ReferenceEquals(this, other))
+                return 0;
+            if (ReferenceEquals(null, other))
+                return 1;
+            return IP.CompareTo(other.IP);
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return 1;
+            if (ReferenceEquals(this, obj))
+                return 0;
+            if (!(obj is EncryptionOptions))
+                throw new ArgumentException($"Object must be of type {nameof(EncryptionOptions)}");
+            return CompareTo((EncryptionOptions)obj);
+        }
+
+        public static bool operator <(EncryptionOptions left, EncryptionOptions right)
+        {
+            return Comparer<EncryptionOptions>.Default.Compare(left, right) < 0;
+        }
+
+        public static bool operator >(EncryptionOptions left, EncryptionOptions right)
+        {
+            return Comparer<EncryptionOptions>.Default.Compare(left, right) > 0;
+        }
+
+        public static bool operator <=(EncryptionOptions left, EncryptionOptions right)
+        {
+            return Comparer<EncryptionOptions>.Default.Compare(left, right) <= 0;
+        }
+
+        public static bool operator >=(EncryptionOptions left, EncryptionOptions right)
+        {
+            return Comparer<EncryptionOptions>.Default.Compare(left, right) >= 0;
+        }
+
+        public bool Equals(EncryptionOptions other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return IP.Equals(other.IP);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != this.GetType())
+                return false;
+            return Equals((EncryptionOptions)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return IP.GetHashCode();
+        }
+
+        public static bool operator ==(EncryptionOptions left, EncryptionOptions right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(EncryptionOptions left, EncryptionOptions right)
+        {
+            return !Equals(left, right);
         }
     }
 

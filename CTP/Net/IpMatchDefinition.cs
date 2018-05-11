@@ -8,7 +8,7 @@ namespace CTP.Net
     /// This does a longest match comparison of an IP Address with a bit mask.
     /// </summary>
     public class IpMatchDefinition
-        : IComparable<IpMatchDefinition>
+        : IComparable<IpMatchDefinition>, IEquatable<IpMatchDefinition>
     {
         public readonly IPAddress Ip;
         public readonly int MaskBits;
@@ -117,6 +117,44 @@ namespace CTP.Net
 
                 return true;
             }
+        }
+
+        public bool Equals(IpMatchDefinition other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Ip.Equals(other.Ip) && MaskBits == other.MaskBits;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != this.GetType())
+                return false;
+            return Equals((IpMatchDefinition)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Ip.GetHashCode() * 397) ^ MaskBits;
+            }
+        }
+
+        public static bool operator ==(IpMatchDefinition left, IpMatchDefinition right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(IpMatchDefinition left, IpMatchDefinition right)
+        {
+            return !Equals(left, right);
         }
     }
 }

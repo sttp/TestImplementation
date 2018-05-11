@@ -18,6 +18,7 @@ namespace CTP.Net
         private IPEndPoint m_listenEndpoint;
 
         public UserCredentialServices Permissions;
+        public event SessionCompletedEventHandler SessionCompleted;
 
         /// <summary>
         /// Listen for a socket connection
@@ -27,6 +28,7 @@ namespace CTP.Net
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
             Permissions = new UserCredentialServices();
+            Permissions.SessionCompleted += OnSessionCompleted;
         }
 
         /// <summary>
@@ -119,6 +121,11 @@ namespace CTP.Net
             catch (Exception e)
             {
             }
+        }
+
+        protected virtual void OnSessionCompleted(SessionToken token)
+        {
+            SessionCompleted?.Invoke(token);
         }
     }
 }

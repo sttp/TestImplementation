@@ -15,7 +15,6 @@ namespace Sttp.Tests.ClientServer
     [TestClass]
     public class TestSSL
     {
-     
         [TestMethod]
         public void TestMethod()
         {
@@ -24,7 +23,30 @@ namespace Sttp.Tests.ClientServer
             var cert = store.Certificates[0];
             store.Close();
 
-          
+
+            var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
+            listener.Permissions.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
+            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
+            listener.Permissions.AssignEncriptionOptions(IPAddress.Loopback, 32, null);
+            listener.SessionCompleted += Listener_SessionCompleted;
+            listener.Start();
+
+
+            var client = new CtpClient();
+            client.SetHost(IPAddress.Loopback, 29348);
+            client.TurnOffSSL();
+            client.Connect();
+
+            Thread.Sleep(100);
+
+        }
+
+        private void Listener_SessionCompleted(SessionToken token)
+        {
+            Console.WriteLine(token.Client.Client.RemoteEndPoint.ToString());
+            Console.WriteLine(token.LoginName);
+            Console.WriteLine(string.Join(",", token.GrantedRoles));
+
         }
     }
 }
