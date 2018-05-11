@@ -11,11 +11,13 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CTP.IO;
 using CTP.SRP;
 
 namespace CTP.Net
 {
     public delegate void SessionCompletedEventHandler(SessionToken token);
+
     public class UserCredentialServices
     {
         private class SSLUserCertificateValidation
@@ -190,50 +192,14 @@ namespace CTP.Net
             {
                 SSLAsServer(localCertificate, session);
             }
-            else
-            {
-                Authenticate2(session);
-            }
-        }
-
-
-        private void SSLAsServer(X509Certificate certificate, SessionToken session)
-        {
-            var obj = new SSLUserCertificateValidation(this, session);
-            session.SSL = new SslStream(session.NetworkStream, false, obj.UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
-            session.SSL.BeginAuthenticateAsServer(certificate, true, SslProtocols.Tls12, false, EndAuthenticateAsServer, session);
-        }
-
-        private void EndAuthenticateAsServer(IAsyncResult ar)
-        {
-            SessionToken client = (SessionToken)ar.AsyncState;
-            try
-            {
-                client.SSL.EndAuthenticateAsServer(ar);
-                Authenticate2(client);
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-        }
-
-        private void Authenticate2(SessionToken session)
-        {
-            var asyncReading = new AsyncReading(session);
-            asyncReading.WaitForBytes(1, DetermineAuthMode);
-        }
-
-        private void DetermineAuthMode(AsyncReading reading)
-        {
-            switch (reading.ReadBuffer[0])
+            switch (session.FinalStream.ReadNextByte())
             {
                 case 0: //None
                     break;
                 case 1: //SRP
                     break;
                 case 2: //Negotiate Stream
-                    WinAsServer(reading.Session);
+                    WinAsServer(session);
                     break;
                 case 3: //OAuth
                     break;
@@ -242,19 +208,19 @@ namespace CTP.Net
             }
         }
 
+        private void SSLAsServer(X509Certificate certificate, SessionToken session)
+        {
+            var obj = new SSLUserCertificateValidation(this, session);
+            session.SSL = new SslStream(session.NetworkStream, false, obj.UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
+            session.SSL.AuthenticateAsServer(certificate, true, SslProtocols.Tls12, false);
+        }
 
         private void WinAsServer(SessionToken client)
         {
             client.Win = new NegotiateStream(client.FinalStream, true);
-            client.Win.BeginAuthenticateAsServer(CredentialCache.DefaultNetworkCredentials, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification, EndWinAsServer, client);
-        }
-
-        private void EndWinAsServer(IAsyncResult ar)
-        {
-            SessionToken client = (SessionToken)ar.AsyncState;
             try
             {
-                client.Win.EndAuthenticateAsServer(ar);
+                client.Win.AuthenticateAsServer(CredentialCache.DefaultNetworkCredentials, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
 
                 var identity = client.Win.RemoteIdentity as WindowsIdentity; //When called by the server, returns WindowsIdentity. 
                 //If it returns a GenericIdentity, this is because identifier information was not provided by the client. Therefore assigning null is sufficient.
@@ -269,6 +235,8 @@ namespace CTP.Net
                 {
                     var name = identity.Name;
 
+
+
                 }
 
                 Finish(client);
@@ -278,13 +246,13 @@ namespace CTP.Net
             {
                 throw;
             }
+
         }
 
         private void Finish(SessionToken client)
         {
             SessionCompleted?.Invoke(client);
         }
-
     }
 
 

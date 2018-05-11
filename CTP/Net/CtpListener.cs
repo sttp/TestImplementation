@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -10,11 +9,10 @@ namespace CTP.Net
     /// <summary>
     /// Listens on a specific endpoint to accept connections.
     /// </summary>
-    public class Listener
+    public class CtpListener
     {
         private readonly ManualResetEvent m_shutdownEvent = new ManualResetEvent(false);
         private TcpListener m_listener;
-        private int m_pendingAccepts;
         private bool m_shutdown;
         private AsyncCallback m_onAccept;
         private IPEndPoint m_listenEndpoint;
@@ -24,7 +22,7 @@ namespace CTP.Net
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        protected Listener(IPEndPoint listenEndpoint)
+        public CtpListener(IPEndPoint listenEndpoint)
         {
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
@@ -52,14 +50,12 @@ namespace CTP.Net
             m_listener.Server.ReceiveTimeout = 3000;
             m_listener.Start(5);
             m_shutdownEvent.Reset();
-            Interlocked.Increment(ref m_pendingAccepts);
             try
             {
                 m_listener.BeginAcceptTcpClient(m_onAccept, null);
             }
             catch (Exception)
             {
-                Interlocked.Decrement(ref m_pendingAccepts);
                 m_listener = null;
                 throw;
             }
@@ -80,48 +76,48 @@ namespace CTP.Net
             m_listener = null;
         }
 
-        /// <summary>
-        /// Will try to accept connections one more time.
-        /// </summary>
-        /// <exception cref="Exception">If any exceptions is thrown.</exception>
-        private void RetryBeginAccept()
-        {
-            try
-            {
-                m_listener.BeginAcceptTcpClient(m_onAccept, null);
-            }
-            catch (Exception)
-            {
-            }
-        }
-
         private void OnAccept(IAsyncResult ar)
         {
-            bool beginAcceptCalled = false;
             try
             {
-                int count = Interlocked.Decrement(ref m_pendingAccepts);
+                TcpClient socket = m_listener.EndAcceptTcpClient(ar);
                 if (m_shutdown)
                 {
-                    if (count == 0)
-                    {
-                        m_shutdownEvent.Set();
-                    }
+                    m_shutdownEvent.Set();
                     return;
                 }
-
-                Interlocked.Increment(ref m_pendingAccepts);
+                var thread = new Thread(ProcessClient);
+                thread.IsBackground = true;
+                thread.Start(socket);
                 m_listener.BeginAcceptTcpClient(OnAccept, null);
-                beginAcceptCalled = true;
-
-                TcpClient socket = m_listener.EndAcceptTcpClient(ar);
-                var session = new SessionToken(socket);
-                Permissions.AuthenticateAsServer(session);
             }
             catch (Exception er)
             {
-                if (!beginAcceptCalled)
-                    RetryBeginAccept();
+                if (m_shutdown)
+                {
+                    m_shutdownEvent.Set();
+                    return;
+                }
+                try
+                {
+                    m_listener.BeginAcceptTcpClient(OnAccept, null);
+                }
+                catch (Exception e)
+                {
+                }
+            }
+        }
+
+        private void ProcessClient(object tcpClient)
+        {
+            try
+            {
+                TcpClient socket = tcpClient as TcpClient;
+                var session = new SessionToken(socket);
+                Permissions.AuthenticateAsServer(session);
+            }
+            catch (Exception e)
+            {
             }
         }
     }

@@ -15,8 +15,10 @@ namespace CTP.Net
         private IPEndPoint m_remoteEndpoint;
         private string m_srpUsername;
         private string m_srpPassword;
+        private string m_ldapDomain;
         private string m_ldapUsername;
         private string m_ldapPassword;
+
         private X509Certificate m_userCertificate;
         private NetworkCredential m_credential;
         private X509CertificateCollection m_trustedCertificates;
@@ -45,9 +47,11 @@ namespace CTP.Net
             m_userCertificate = certificate;
         }
 
-        public void SetLDAPCredentials(string username, string password)
+        public void SetLDAPCredentials(string domain, string username, string password)
         {
-
+            m_ldapDomain = domain;
+            m_ldapUsername = username;
+            m_ldapPassword = password;
         }
 
         public void SetUserCredentials(string username, string password)
