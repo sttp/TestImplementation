@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using CTP.IO;
 
 namespace CTP.SRP
 {
@@ -24,20 +26,41 @@ namespace CTP.SRP
         private byte[] m_challengeServer;
         private byte[] m_challengeClient;
 
-        public Srp6aClient(SrpStrength strength, string identity, string password)
+        public Srp6aClient(string identity, string password)
+        {
+            m_identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
+            m_password = password.Normalize(NormalizationForm.FormKC);
+            m_privateA = RNG.CreateSalt(32).ToUnsignedBigInteger(); //RFC says SHOULD be at least 256 bit.
+        }
+
+        public void Authenticate(Stream stream)
+        {
+            stream.Write(m_identity);
+
+            var strength = (SrpStrength)stream.ReadNextByte();
+            var salt = stream.ReadBytes();
+            var publicB = stream.ReadBytes();
+
+            Step1(strength, out byte[] publicA);
+
+            stream.Write(publicA);
+
+            Step2(salt, publicB, out byte[] clientChallenge);
+
+            stream.Write(clientChallenge);
+
+            var serverChallenge = stream.ReadBytes();
+
+            Step3(serverChallenge);
+        }
+
+        public void Step1(SrpStrength strength, out byte[] publicA)
         {
             m_params = SrpConstants.Lookup(strength);
             m_generator = m_params.g;
             m_prime = m_params.N;
             m_k = m_params.k;
-            m_identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            m_password = password.Normalize(NormalizationForm.FormKC);
-            m_privateA = RNG.CreateSalt(32).ToUnsignedBigInteger(); //RFC says SHOULD be at least 256 bit.
             m_publicA = BigInteger.ModPow(m_generator, m_privateA, m_prime);
-        }
-
-        public void Step1(out byte[] publicA)
-        {
             publicA = m_publicA.ToUnsignedByteArray();
         }
 

@@ -115,7 +115,7 @@ namespace CTP.Net
             {
                 stream.WriteByte((byte)AuthenticationProtocols.SRP);
                 stream.Flush();
-                AuthenticateSRP();
+                SrpAsClient();
             }
             else if (m_credential != null)
             {
@@ -142,26 +142,11 @@ namespace CTP.Net
             return localCertificates[0];
         }
 
-        private void AuthenticateSRP()
+        private void SrpAsClient()
         {
             Stream stream = (Stream)m_sslStream ?? m_networkStream;
-            stream.Write(m_srpUsername);
-            var strength = (SrpStrength)stream.ReadNextByte();
-            var salt = stream.ReadBytes();
-            var publicB = stream.ReadBytes();
-
-            var client = new Srp6aClient(strength, m_srpUsername, m_srpPassword);
-            client.Step1(out byte[] publicA);
-
-            stream.Write(publicA);
-
-            client.Step2(salt, publicB, out byte[] clientChallenge);
-
-            stream.Write(clientChallenge);
-
-            var serverChallenge = stream.ReadBytes();
-
-            client.Step3(serverChallenge);
+            var srp = new Srp6aClient(m_srpUsername, m_srpPassword);
+            srp.Authenticate(stream);
         }
 
         private bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)

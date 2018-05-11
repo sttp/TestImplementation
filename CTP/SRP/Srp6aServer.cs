@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CTP.IO;
+using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -36,6 +38,22 @@ namespace CTP.SRP
 
             m_privateB = RNG.CreateSalt(32).ToUnsignedBigInteger(); //RFC says SHOULD be at least 256 bit.
             m_publicB = (m_k * m_verifier % m_prime + m_generator.ModPow(m_privateB, m_prime)) % m_prime;
+        }
+
+        public void AuthenticateAsServer(Stream stream)
+        {
+            Step1(out byte[] userSalt, out byte[] publicB);
+
+            stream.Write((byte)m_user.SrpStrength);
+            stream.Write(userSalt);
+            stream.Write(publicB);
+
+            byte[] publicA = stream.ReadBytes();
+            byte[] clientChallenge = stream.ReadBytes();
+
+            Step2(publicA, clientChallenge, out byte[] serverChallenge);
+
+            stream.Write(serverChallenge);
         }
 
         public void Step1(out byte[] userSalt, out byte[] publicB)

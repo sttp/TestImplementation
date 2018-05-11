@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -10,7 +9,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using CTP.IO;
 using CTP.SRP;
@@ -46,19 +44,16 @@ namespace CTP.Net
                 if (certificate == null)
                     return true;
 
-                foreach (var item in Users.m_selfSignCertificateUsers)
+                if (Users.m_selfSignCertificateUsers.TryGetValue(certificate, out SelfSignCertificateUserMapping user))
                 {
-                    if (item.UserCertificate.Equals(certificate))
-                    {
-                        Token.LoginName = item.LoginName;
-                        Token.GrantedRoles.UnionWith(item.Roles);
-                        return true;
-                    }
+                    Token.LoginName = user.LoginName;
+                    Token.GrantedRoles.UnionWith(user.Roles);
+                    return true;
                 }
 
                 foreach (var item in Users.m_certificateUsers)
                 {
-                    string[] subjects = certificate.Subject.Split('x');
+                    string[] subjects = certificate.Subject.Split(',');
                     foreach (var subject in subjects)
                     {
                         if (!item.NameRecord.Contains(subject.Trim(), StringComparer.OrdinalIgnoreCase))
@@ -84,79 +79,15 @@ namespace CTP.Net
             }
         }
 
-        private class AsyncReading
-        {
-            public SessionToken Session;
-            public byte[] ReadBuffer;
-            public int ValidBytes => m_bytesRead;
-            private int m_bytesRead;
-            private int m_waitingByteCount;
-            private Action<AsyncReading> m_callback;
-            private IAsyncResult m_async;
+        //Must be sorted because longest match is used to match an IP address
+        private SortedList<IpMatchDefinition, EncryptionOptions> m_encryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
+        private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
 
-            public AsyncReading(SessionToken session)
-            {
-                Session = session;
-                m_bytesRead = 0;
-
-            }
-
-            public void Reset()
-            {
-                m_bytesRead = 0;
-            }
-
-
-            public void WaitForBytes(int byteCount, Action<AsyncReading> callback)
-            {
-                if (ReadBuffer == null)
-                {
-                    ReadBuffer = new byte[byteCount];
-                }
-                else if (ReadBuffer.Length < byteCount)
-                {
-                    byte[] newBuffer = new byte[byteCount];
-                    ReadBuffer.CopyTo(newBuffer, 0);
-                    ReadBuffer = newBuffer;
-                }
-
-                m_waitingByteCount = byteCount;
-                m_callback = callback;
-
-                if (byteCount <= m_bytesRead)
-                {
-                    ThreadPool.QueueUserWorkItem(x => callback(this));
-                }
-                else
-                {
-                    m_async = Session.FinalStream.BeginRead(ReadBuffer, m_bytesRead, m_waitingByteCount - m_bytesRead, Callback, null);
-                }
-            }
-
-            private void Callback(IAsyncResult ar)
-            {
-                int bytesRead = Session.FinalStream.EndRead(ar);
-                if (bytesRead == 0)
-                    throw new EndOfStreamException();
-                m_bytesRead += bytesRead;
-                if (m_waitingByteCount < m_bytesRead)
-                {
-                    m_async = Session.FinalStream.BeginRead(ReadBuffer, m_bytesRead, m_waitingByteCount - m_bytesRead, Callback, null);
-                }
-                else
-                {
-                    m_callback(this);
-                }
-            }
-        }
-
-        private SortedSet<EncryptionOptions> m_encryptionOptions = new SortedSet<EncryptionOptions>();
-        private SortedSet<SelfSignCertificateUserMapping> m_selfSignCertificateUsers = new SortedSet<SelfSignCertificateUserMapping>();
+        private Dictionary<X509Certificate, SelfSignCertificateUserMapping> m_selfSignCertificateUsers = new Dictionary<X509Certificate, SelfSignCertificateUserMapping>();
+        private Dictionary<string, SrpUserMapping> m_srpUsers = new Dictionary<string, SrpUserMapping>();
         private SortedSet<CertificateUserMapping> m_certificateUsers = new SortedSet<CertificateUserMapping>();
-        private SortedSet<SrpUserMapping> m_srpUsers = new SortedSet<SrpUserMapping>();
         private SortedSet<WindowsGroupMapping> m_windowsGroupUsers = new SortedSet<WindowsGroupMapping>();
         private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
-        private SortedSet<TrustedIPUserMapping> m_ipUsers = new SortedSet<TrustedIPUserMapping>();
         private byte[] m_srpDefaultSalt = RNG.CreateSalt(64);
         private SrpStrength m_srpStrength = SrpStrength.Bits1024;
 
@@ -171,18 +102,18 @@ namespace CTP.Net
         public void AssignEncriptionOptions(IPAddress remoteIP, int bitmask, X509Certificate localCertificate)
         {
             var mask = new IpMatchDefinition(remoteIP, bitmask);
-            m_encryptionOptions.Add(new EncryptionOptions(mask, localCertificate));
+            m_encryptionOptions[mask] = new EncryptionOptions(mask, localCertificate);
         }
 
         public void AddIPUser(IPAddress ip, int bitmask, string loginName, params string[] roles)
         {
             var mask = new IpMatchDefinition(ip, bitmask);
-            m_ipUsers.Add(new TrustedIPUserMapping(mask, loginName, roles));
+            m_ipUsers[mask] = new TrustedIPUserMapping(mask, loginName, roles);
         }
 
         public void AddSelfSignedCertificateUser(X509Certificate user, string loginName, params string[] roles)
         {
-            m_selfSignCertificateUsers.Add(new SelfSignCertificateUserMapping(user, loginName, roles));
+            m_selfSignCertificateUsers[user] = new SelfSignCertificateUserMapping(user, loginName, roles);
         }
 
         public void AddSrpUser(string username, string password, string loginName, params string[] roles)
@@ -196,21 +127,21 @@ namespace CTP.Net
                 m_srpDefaultSalt.CopyTo(rv, data.Length);
                 byte[] salt = sha.ComputeHash(m_srpDefaultSalt);
                 var credentials = new SrpUserCredential(username, password, salt, m_srpStrength);
-                m_srpUsers.Add(new SrpUserMapping(credentials, loginName, roles));
+                m_srpUsers[credentials.UserName] = new SrpUserMapping(credentials, loginName, roles);
             }
         }
 
         public void AddSrpUser(string username, byte[] verification, byte[] salt, SrpStrength strength, string loginName, params string[] roles)
         {
             var credentials = new SrpUserCredential(username, verification, salt, strength);
-            m_srpUsers.Add(new SrpUserMapping(credentials, loginName, roles));
+            m_srpUsers[credentials.UserName] = new SrpUserMapping(credentials, loginName, roles);
         }
 
         public void AuthenticateAsServer(SessionToken session)
         {
             var ipBytes = session.RemoteEndpoint.Address.GetAddressBytes();
             X509Certificate localCertificate = null;
-            foreach (var item in m_encryptionOptions)
+            foreach (var item in m_encryptionOptions.Values)
             {
                 if (item.IP.IsMatch(ipBytes))
                 {
@@ -219,7 +150,7 @@ namespace CTP.Net
                 }
             }
 
-            foreach (var item in m_ipUsers)
+            foreach (var item in m_ipUsers.Values)
             {
                 if (item.IP.IsMatch(ipBytes))
                 {
@@ -259,11 +190,8 @@ namespace CTP.Net
         private void SrpAsServer(SessionToken session)
         {
             string userName = session.FinalStream.ReadString();
-
-
             userName = userName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            var user = m_srpUsers.FirstOrDefault(x => x.Credentials.UserName == userName);
-            if (user == null)
+            if (!m_srpUsers.TryGetValue(userName, out SrpUserMapping user))
             {
                 using (var sha = SHA512.Create())
                 {
@@ -278,19 +206,7 @@ namespace CTP.Net
             }
 
             var server = new Srp6aServer(user.Credentials);
-            server.Step1(out byte[] userSalt, out byte[] publicB);
-
-            session.FinalStream.Write((byte)user.Credentials.SrpStrength);
-            session.FinalStream.Write(userSalt);
-            session.FinalStream.Write(publicB);
-
-            byte[] publicA = session.FinalStream.ReadBytes();
-            byte[] clientChallenge = session.FinalStream.ReadBytes();
-
-            server.Step2(publicA, clientChallenge, out byte[] serverChallenge);
-
-            session.FinalStream.Write(serverChallenge);
-
+            server.AuthenticateAsServer(session.FinalStream);
         }
 
         private void SSLAsServer(X509Certificate certificate, SessionToken session)
