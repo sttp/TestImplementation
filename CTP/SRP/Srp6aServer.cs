@@ -40,24 +40,9 @@ namespace CTP.SRP
             m_publicB = (m_k * m_verifier % m_prime + m_generator.ModPow(m_privateB, m_prime)) % m_prime;
         }
 
-        public void AuthenticateAsServer(Stream stream)
+        public void Step1(out SrpStrength strength, out byte[] userSalt, out byte[] publicB)
         {
-            Step1(out byte[] userSalt, out byte[] publicB);
-
-            stream.Write((byte)m_user.SrpStrength);
-            stream.Write(userSalt);
-            stream.Write(publicB);
-
-            byte[] publicA = stream.ReadBytes();
-            byte[] clientChallenge = stream.ReadBytes();
-
-            Step2(publicA, clientChallenge, out byte[] serverChallenge);
-
-            stream.Write(serverChallenge);
-        }
-
-        public void Step1(out byte[] userSalt, out byte[] publicB)
-        {
+            strength = m_user.SrpStrength;
             userSalt = m_user.Salt;
             publicB = m_publicB.ToUnsignedByteArray();
         }
