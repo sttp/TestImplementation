@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CTP.Net;
+using CTP.SRP;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Sttp.Tests.ClientServer
@@ -75,6 +76,51 @@ namespace Sttp.Tests.ClientServer
             var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             client.SetUserCredentials(cert2);
+            client.Connect();
+            Thread.Sleep(100);
+        }
+
+        [TestMethod]
+        public void TestSrpUser()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var cert = store.Certificates[0];
+            var cert2 = store.Certificates[0];
+            store.Close();
+
+            var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
+            listener.Permissions.AddSrpUser("U", "Pass1", "User", "Role1");
+            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
+            listener.SessionCompleted += Listener_SessionCompleted;
+            listener.Start();
+
+            var client = new CtpClient();
+            client.SetHost(IPAddress.Loopback, 29348);
+            client.SetUserCredentials("U", "Pass1");
+            client.Connect();
+            Thread.Sleep(100);
+        }
+
+        [TestMethod]
+        public void TestSrp2User()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            var cert = store.Certificates[0];
+            var cert2 = store.Certificates[0];
+            store.Close();
+
+            var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
+            listener.Permissions.SetSrpDefaults(null, SrpStrength.Bits2048);
+            listener.Permissions.AddSrpUser("U", "Pass1", "User", "Role1");
+            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
+            listener.SessionCompleted += Listener_SessionCompleted;
+            listener.Start();
+
+            var client = new CtpClient();
+            client.SetHost(IPAddress.Loopback, 29348);
+            client.SetUserCredentials("U", "Pass1");
             client.Connect();
             Thread.Sleep(100);
         }

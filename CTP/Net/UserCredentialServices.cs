@@ -84,7 +84,7 @@ namespace CTP.Net
         private SortedSet<CertificateUserMapping> m_certificateUsers = new SortedSet<CertificateUserMapping>();
         private SortedSet<WindowsGroupMapping> m_windowsGroupUsers = new SortedSet<WindowsGroupMapping>();
         private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
-        private SrpUserDatabase<SrpUserMapping> m_srpUserDatabase = new SrpUserDatabase<SrpUserMapping>();
+        private Srp6aServer<SrpUserMapping> m_srpUserDatabase = new Srp6aServer<SrpUserMapping>();
         public event SessionCompletedEventHandler SessionCompleted;
 
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
@@ -155,6 +155,7 @@ namespace CTP.Net
                     break;
                 case AuthenticationProtocols.SRP:
                     SrpAsServer(session);
+                    Finish(session);
                     break;
                 case AuthenticationProtocols.NegotiateStream:
                     WinAsServer(session);
@@ -173,7 +174,7 @@ namespace CTP.Net
 
         private void SrpAsServer(SessionToken session)
         {
-            var user = m_srpUserDatabase.Authenticate(session.FinalStream);
+            var user = m_srpUserDatabase.Authenticate(session.FinalStream, session.SSL?.RemoteCertificate, session.SSL?.LocalCertificate);
             session.LoginName = user.LoginName;
             session.GrantedRoles.UnionWith(user.Roles);
         }

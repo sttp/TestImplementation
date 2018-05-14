@@ -58,8 +58,8 @@ namespace CTP.Net
 
         public void SetUserCredentials(string username, string password)
         {
-            m_ldapUsername = username;
-            m_ldapPassword = password;
+            m_srpUsername = username;
+            m_srpPassword = password;
         }
 
         public void SetUserCredentials(NetworkCredential credentials)
@@ -97,15 +97,22 @@ namespace CTP.Net
         public void Connect()
         {
             var client = new TcpClient();
+            client.SendTimeout = 3000;
+            client.ReceiveTimeout = 3000;
             client.Connect(m_remoteEndpoint);
+
             m_networkStream = client.GetStream();
             if (m_useSSL)
             {
-                m_sslStream = new SslStream(m_networkStream, false, UserCertificateValidationCallback, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
                 X509CertificateCollection collection = null;
                 if (m_userCertificate != null)
                 {
                     collection = new X509CertificateCollection(new[] { m_userCertificate });
+                    m_sslStream = new SslStream(m_networkStream, false, UserCertificateValidationCallback, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
+                }
+                else
+                {
+                    m_sslStream = new SslStream(m_networkStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
                 }
                 m_sslStream.AuthenticateAsClient(m_hostName ?? string.Empty, collection, SslProtocols.Tls12, false);
             }
@@ -145,8 +152,7 @@ namespace CTP.Net
         private void SrpAsClient()
         {
             Stream stream = (Stream)m_sslStream ?? m_networkStream;
-            var srp = new Srp6aClient(m_srpUsername, m_srpPassword);
-            srp.Authenticate(stream);
+            Srp6aClient.Authenticate(m_srpUsername, m_srpPassword, stream, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
         }
 
         private bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)

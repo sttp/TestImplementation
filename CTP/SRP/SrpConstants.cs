@@ -22,13 +22,11 @@
 //
 //******************************************************************************************************
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Numerics;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace CTP.SRP
 {
@@ -62,8 +60,8 @@ namespace CTP.SRP
         {
             using (var sha = SHA512.Create())
             {
-                byte[] nb = N.ToByteArray();
-                byte[] gb = g.ToByteArray();
+                byte[] nb = N.ToUnsignedByteArray();
+                byte[] gb = g.ToUnsignedByteArray();
                 byte[] hash = new byte[nb.Length * 2];
                 nb.CopyTo(hash, 0);
                 gb.CopyTo(hash, hash.Length - gb.Length);
@@ -80,7 +78,7 @@ namespace CTP.SRP
         static SrpConstants()
         {
             SrpConstants c;
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                 "EEAF0AB9ADB38DD69C33F80AFA8FC5E86072618775FF3C0B9EA2314C" +
                 "9C256576D674DF7496EA81D3383B4813D692C6E0E0D5D8E250B98BE4" +
                 "8E495C1D6089DAD15DC7D7B46154D6B6CE8EF4AD69B15D4982559B29" +
@@ -88,7 +86,7 @@ namespace CTP.SRP
                 "FD5138FE8376435B9FC61D2FC0EB06E3", 2);
             s_groupParameters.Add(1024, c);
 
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                 "9DEF3CAFB939277AB1F12A8617A47BBBDBA51DF499AC4C80BEEEA961" +
                 "4B19CC4D5F4F5F556E27CBDE51C6A94BE4607A291558903BA0D0F843" +
                 "80B655BB9A22E8DCDF028A7CEC67F0D08134B1C8B97989149B609E0B" +
@@ -98,7 +96,7 @@ namespace CTP.SRP
                 "8CE7A28C2442C6F315180F93499A234DCF76E3FED135F9BB", 2);
             s_groupParameters.Add(1536, c);
 
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                 "AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC319294" +
                 "3DB56050A37329CBB4A099ED8193E0757767A13DD52312AB4B03310D" +
                 "CD7F48A9DA04FD50E8083969EDB767B0CF6095179A163AB3661A05FB" +
@@ -111,7 +109,7 @@ namespace CTP.SRP
                 "9E4AFF73", 2);
             s_groupParameters.Add(2048, c);
 
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                 "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08" +
                 "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B" +
                 "302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9" +
@@ -128,7 +126,7 @@ namespace CTP.SRP
                 "E0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF", 5);
             s_groupParameters.Add(3072, c);
 
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                 "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08" +
                 "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B" +
                 "302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9" +
@@ -150,7 +148,7 @@ namespace CTP.SRP
                 "FFFFFFFFFFFFFFFF", 5);
             s_groupParameters.Add(4096, c);
 
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                 "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08" +
                 "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B" +
                 "302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9" +
@@ -181,7 +179,7 @@ namespace CTP.SRP
                 "6DCC4024FFFFFFFFFFFFFFFF", 5);
             s_groupParameters.Add(6144, c);
 
-            c = new SrpConstants(
+            c = new SrpConstants("0" + //Ensures the value is positive
                "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E08" +
                "8A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B" +
                "302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9" +

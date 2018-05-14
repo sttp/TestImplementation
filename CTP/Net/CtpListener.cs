@@ -83,6 +83,8 @@ namespace CTP.Net
             try
             {
                 TcpClient socket = m_listener.EndAcceptTcpClient(ar);
+                socket.SendTimeout = 3000;
+                socket.ReceiveTimeout = 3000;
                 if (m_shutdown)
                 {
                     m_shutdownEvent.Set();

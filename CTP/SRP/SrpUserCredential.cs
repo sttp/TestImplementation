@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Linq;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace CTP.SRP
 {
-    public class SrpUserCredential
+    public class SrpUserCredential<T>
     {
         public readonly string UserName;
 
@@ -16,6 +14,8 @@ namespace CTP.SRP
 
         public readonly SrpStrength SrpStrength;
 
+        public readonly T Token;
+
         /// <summary>
         /// Creates user credentials
         /// </summary>
@@ -23,12 +23,14 @@ namespace CTP.SRP
         /// <param name="salt"></param>
         /// <param name="verification"></param>
         /// <param name="srpStrength"></param>
-        public SrpUserCredential(string username, byte[] verification, byte[] salt, SrpStrength srpStrength)
+        /// <param name="token"></param>
+        public SrpUserCredential(string username, byte[] verification, byte[] salt, SrpStrength srpStrength, T token)
         {
             UserName = username.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             Salt = salt;
             Verification = verification;
             SrpStrength = srpStrength;
+            Token = token;
         }
 
         /// <summary>
@@ -38,36 +40,16 @@ namespace CTP.SRP
         /// <param name="password"></param>
         /// <param name="salt"></param>
         /// <param name="strength"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
-        public SrpUserCredential(string username, string password, byte[] salt = null, SrpStrength strength = SrpStrength.Bits1024)
+        public SrpUserCredential(string username, string password, byte[] salt, SrpStrength strength, T token)
         {
             UserName = username.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             Salt = salt ?? RNG.CreateSalt(64);
-            Verification = ComputeVerifier(SrpConstants.Lookup(strength), Salt, username, password.Normalize(NormalizationForm.FormKC));
+            byte[] x = SrpMethods.ComputeX(Salt, UserName, password.Normalize(NormalizationForm.FormKC));
+            Verification = SrpMethods.ComputeV(SrpConstants.Lookup(strength), x.ToUnsignedBigInteger()).ToUnsignedByteArray();
             SrpStrength = strength;
-        }
-
-        private static byte[] ComputeVerifier(SrpConstants param, byte[] salt, string identifier, string password)
-        {
-            int identifierUtfLen = Encoding.UTF8.GetByteCount(identifier);
-            int passwordUtfLen = Encoding.UTF8.GetByteCount(password);
-
-            byte[] inner = new byte[identifierUtfLen + 1 + passwordUtfLen];
-            byte[] outer = new byte[salt.Length + 512 / 8];
-
-            Encoding.UTF8.GetBytes(identifier, 0, identifier.Length, inner, 0);
-            inner[identifierUtfLen] = (byte)':';
-            Encoding.UTF8.GetBytes(password, 0, password.Length, inner, identifierUtfLen + 1);
-
-            byte[] x;
-            using (var sha = SHA512.Create())
-            {
-                sha.ComputeHash(inner).CopyTo(outer, salt.Length);
-                salt.CopyTo(outer, 0);
-                x = sha.ComputeHash(outer);
-            }
-
-            return param.g.ModPow(x.ToUnsignedBigInteger(), param.N).ToUnsignedByteArray();
+            Token = token;
         }
     }
 }

@@ -23,20 +23,46 @@
 //******************************************************************************************************
 
 using System;
-using System.Globalization;
 using System.Numerics;
-using System.Text;
 
 namespace CTP.SRP
 {
     public static class BigIntegerExtensions
     {
+        public static byte[] Concat(this byte[] value, params byte[][] additionalItems)
+        {
+            int finalLength = value?.Length ?? 0;
+            foreach (var item in additionalItems)
+            {
+                if (item != null)
+                    finalLength += item.Length;
+            }
+            byte[] rv = new byte[finalLength];
+            finalLength = 0;
+            if (value != null)
+            {
+                value.CopyTo(rv, 0);
+                finalLength += value.Length;
+            }
+            foreach (var item in additionalItems)
+            {
+                if (item != null)
+                {
+                    item.CopyTo(rv, finalLength);
+                    finalLength += item.Length;
+                }
+            }
+
+            return rv;
+        }
+
         public static BigInteger ToUnsignedBigInteger(this byte[] value)
         {
             if (value.Length == 0)
                 return BigInteger.Zero;
+            value = (byte[])value.Clone();
             Array.Reverse(value);
-            if (value[value.Length - 1] >= 128)
+            if (value[value.Length - 1] >= 128) //This ensures that the highest order bit is not set so the value is unsigned.
             {
                 var value2 = new byte[value.Length + 1];
                 value.CopyTo(value2, 0);
@@ -66,26 +92,48 @@ namespace CTP.SRP
             return new byte[0];
         }
 
-        public static BigInteger ToBigInteger(this string data)
+        public static byte[] ToUnsignedByteArray(this BigInteger value, int padLength)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var b in data)
+            if (value.Sign < 0)
+                throw new Exception("Value is negative");
+            byte[] data = value.ToByteArray();
+            byte[] rv = new byte[padLength];
+            for (int x = 0; x < data.Length; x++)
             {
-                sb.Append(GetChar(b >> 4));
-                sb.Append(GetChar(b & 15));
+                if (x < padLength)
+                {
+                    rv[padLength - x - 1] = data[x];
+                }
             }
-            return BigInteger.Parse(sb.ToString(), NumberStyles.AllowHexSpecifier);
-        }
-        private static char GetChar(int value)
-        {
-            if (value <= 9)
-                return (char)('0' + value);
-            return (char)('A' - 10 + value);
+            return rv;
         }
 
         public static BigInteger ModPow(this BigInteger value, BigInteger exponent, BigInteger mod)
         {
             return BigInteger.ModPow(value, exponent, mod);
+        }
+
+        public static BigInteger Mod(this BigInteger value, BigInteger modulo)
+        {
+            BigInteger rv = value % modulo;
+            if (value.Sign < 0)
+                return rv + modulo;
+            return rv;
+        }
+
+        public static BigInteger ModMul(this BigInteger value, BigInteger value2, BigInteger modulo)
+        {
+            return (value * value2).Mod(modulo);
+        }
+
+        public static BigInteger ModAdd(this BigInteger value, BigInteger value2, BigInteger modulo)
+        {
+            return (value + value2).Mod(modulo);
+        }
+
+        public static BigInteger ModSub(this BigInteger value, BigInteger value2, BigInteger modulo)
+        {
+            return (value - value2).Mod(modulo);
         }
 
     }

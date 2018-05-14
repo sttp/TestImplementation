@@ -28,7 +28,7 @@ namespace CTP.SRP
     /// Specifies the bit strength of the SRP algorithm.
     /// </summary>
     public enum SrpStrength
-        : int
+        : ushort
     {
         /// <summary>
         /// Bit strength takes 1x (approximately 20ms on a 3.4Ghz PC) to secure the channel.
