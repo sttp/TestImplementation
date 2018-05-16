@@ -13,6 +13,11 @@ namespace CTP.SRP
     {
         public static void Authenticate(string identity, string password, Stream stream, X509Certificate clientCertificate, X509Certificate serverCertificate)
         {
+            Authenticate(identity, password, stream, clientCertificate, serverCertificate, out byte[] privateSessionKey);
+        }
+
+        public static void Authenticate(string identity, string password, Stream stream, X509Certificate clientCertificate, X509Certificate serverCertificate, out byte[] privateSessionKey)
+        {
             identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             password = password.Normalize(NormalizationForm.FormKC);
             stream.Write(identity);
@@ -36,6 +41,7 @@ namespace CTP.SRP
             var sessionKey = base1.ModPow(exp1, param.N);
             var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, clientCertificate, serverCertificate);
             var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, clientCertificate, serverCertificate);
+            privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, clientCertificate, serverCertificate);
             byte[] clientChallenge = challengeClient;
 
             stream.WriteWithLength(clientChallenge);

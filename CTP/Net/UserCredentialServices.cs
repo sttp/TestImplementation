@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using System.Text;
 using CTP.IO;
 using CTP.SRP;
 
@@ -20,6 +19,8 @@ namespace CTP.Net
         NegotiateStream = 2,
         OAUTH = 3,
         LDAP = 4,
+        CertificatePairing = 5,
+        SessionPairing = 6,
     }
 
     public delegate void SessionCompletedEventHandler(SessionToken token);
@@ -164,13 +165,45 @@ namespace CTP.Net
                     throw new NotSupportedException();
                     break;
                 case AuthenticationProtocols.LDAP:
+                    //var connection = new LdapConnection(new LdapDirectoryIdentifier(serverIP, port, false, false));
+                    //connection.SessionOptions.Sealing = true;
+                    //connection.SessionOptions.Signing = true;
+                    //connection.Credential = new NetworkCredential(serverUser, serverPass);
+                    //connection.AuthType = AuthType.Digest;
+                    //connection.Bind();
                     throw new NotSupportedException();
+                    break;
+                case AuthenticationProtocols.CertificatePairing:
+                    CertificatePairing(session);
+                    break;
+                case AuthenticationProtocols.SessionPairing:
+                    SessionPairing(session);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
+
+        private void CertificatePairing(SessionToken session)
+        {
+            if (session.SSL == null)
+                throw new Exception("In order for certificate pairing to work, a SSL session must exist.");
+            if (session.SSL.RemoteCertificate != null)
+                throw new Exception("A remote certificate must be supplied.");
+            var user = m_srpUserDatabase.Pairing(session.FinalStream, session.SSL.RemoteCertificate, session.SSL.LocalCertificate, out byte[] privateSessionKey);
+            AddSelfSignedCertificateUser(session.SSL.RemoteCertificate, user.Token.LoginName, user.Token.Roles);
+            session.LoginName = user.Token.LoginName;
+            session.GrantedRoles.UnionWith(user.Token.Roles);
+        }
+
+        private void SessionPairing(SessionToken session)
+        {
+            var user = m_srpUserDatabase.Pairing(session.FinalStream, session.SSL?.RemoteCertificate, session.SSL?.LocalCertificate, out byte[] privateSessionKey);
+            session.LoginName = user.Token.LoginName;
+            session.GrantedRoles.UnionWith(user.Token.Roles);
+            AddSrpUser(user.AssignedUserName, Convert.ToBase64String(privateSessionKey), user.Token.LoginName, user.Token.Roles);
+        }
+
 
         private void SrpAsServer(SessionToken session)
         {
@@ -205,9 +238,6 @@ namespace CTP.Net
                 foreach (var user in m_windowsUsers)
                 {
                     var name = identity.Name;
-
-
-
                 }
 
                 Finish(client);
@@ -382,7 +412,6 @@ namespace CTP.Net
     {
         public string LoginName;
         public string[] Roles;
-
     }
 
 }
