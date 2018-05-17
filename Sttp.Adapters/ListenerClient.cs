@@ -17,7 +17,6 @@
 //    public class ListenerClient
 //    {
 //        private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(ListenerClient), MessageClass.Application);
-//        private ListenerConfig m_options;
 //        private TcpClient m_socket;
 //        private NetworkStream m_netStream;
 //        private SslStream m_sslStream;
@@ -31,12 +30,10 @@
 //        private ScheduledTask m_statusReport;
 //        public ShortTime TimeoutTime;
 
-//        public ListenerClient(TcpClient socket, ListenerConfig options)
+//        public ListenerClient(TcpClient socket)
 //        {
 //            if (socket == null)
 //                throw new ArgumentNullException(nameof(socket));
-//            if (options == null)
-//                throw new ArgumentNullException(nameof(options));
 
 //            m_disposing = false;
 //            m_measurementQueue = new ConcurrentQueue<IEnumerable<IMeasurement>>();
@@ -52,7 +49,6 @@
 //            try
 //            {
 //                m_socket = socket;
-//                m_options = options;
 //                m_netStream = m_socket.GetStream();
 //                m_sslStream = new SslStream(m_netStream, false);
 //                m_sslStream.AuthenticateAsServer(m_options.ServerCertificateX509, false, SslProtocols.Tls, false);

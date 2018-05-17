@@ -90,10 +90,19 @@ namespace CTP.Net
                     m_shutdownEvent.Set();
                     return;
                 }
+
                 var thread = new Thread(ProcessClient);
                 thread.IsBackground = true;
                 thread.Start(socket);
                 m_listener.BeginAcceptTcpClient(OnAccept, null);
+            }
+            catch (ObjectDisposedException)
+            {
+                if (m_shutdown)
+                {
+                    m_shutdownEvent.Set();
+                    return;
+                }
             }
             catch (Exception er)
             {

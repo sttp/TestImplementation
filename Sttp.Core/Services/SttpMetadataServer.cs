@@ -69,7 +69,7 @@ namespace Sttp.Services
             m_pendingRepository.FillData(tableName, data);
         }
 
-        public void ProcessCommand(CommandGetMetadata command, WireEncoder encoder)
+        public void ProcessCommand(CommandGetMetadata command, WireCodec encoder)
         {
             var repository = m_repository;
             if (repository.ContainsTable(command.Table))
@@ -149,7 +149,7 @@ namespace Sttp.Services
         //    var engine = new MetadataQueryExecutionEngine(repository, encoder, command);
         //}
 
-        public void ProcessCommand(CommandGetMetadataSchema command, WireEncoder encoder)
+        public void ProcessCommand(CommandGetMetadataSchema command, WireCodec encoder)
         {
             var repository = m_repository;
             if (!command.LastKnownRuntimeID.HasValue || command.LastKnownRuntimeID != repository.RuntimeID)
@@ -217,7 +217,7 @@ namespace Sttp.Services
             return lst;
         }
 
-        public void HandleCommand(CommandObjects command, WireEncoder encoder)
+        public void HandleCommand(CommandObjects command, WireCodec encoder)
         {
             switch (command.CommandName)
             {

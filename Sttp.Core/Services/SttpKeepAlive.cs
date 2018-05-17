@@ -16,7 +16,7 @@ namespace Sttp.Services
             return lst;
         }
 
-        public void HandleCommand(CommandObjects command, WireEncoder encoder)
+        public void HandleCommand(CommandObjects command, WireCodec encoder)
         {
             if (command.CommandName != "KeepAlive")
                 throw new Exception("This command is not supported");

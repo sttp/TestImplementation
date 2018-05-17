@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using CTP.Net;
+using GSF.Threading;
 using Sttp.Codec;
 using Sttp.Core;
 
@@ -11,30 +13,26 @@ namespace Sttp.Services
 {
     public class SttpServer
     {
-        private Stream m_stream;
-        private WireEncoder m_encoder;
-        private WireDecoder m_decoder;
-        private Thread m_processing;
+        public WireCodec Codec;
         private Dictionary<string, ISttpCommandHandler> m_handler;
+        private SyncWorker m_processReads;
 
-        public SttpMetadataServer MetadataServer;
-
-        public SttpServer(Stream networkStream)
+        public SttpServer(SessionToken session)
         {
             m_handler = new Dictionary<string, ISttpCommandHandler>();
-            m_stream = networkStream;
-            m_encoder = new WireEncoder();
-            m_encoder.NewPacket += M_encoder_NewPacket;
-            m_decoder = new WireDecoder();
-
-            MetadataServer = new SttpMetadataServer();
-            RegisterCommandHandler(MetadataServer);
-            RegisterCommandHandler(new SttpKeepAlive());
+            Codec = new WireCodec(session);
+            Codec.DataReceived += CodecDataReceived;
+            m_processReads = new SyncWorker(ProcessRequest);
         }
 
-        private void M_encoder_NewPacket(byte[] data, int offset, int length)
+        public void Start()
         {
-            m_stream.Write(data, offset, length);
+            m_processReads.Run();
+        }
+
+        private void CodecDataReceived()
+        {
+            m_processReads.Run();
         }
 
         public void RegisterCommandHandler(ISttpCommandHandler handler)
@@ -47,36 +45,19 @@ namespace Sttp.Services
 
         private void ProcessRequest()
         {
-            byte[] buffer = new byte[4096];
-            int length = 0;
-            while ((length = m_stream.Read(buffer, 0, buffer.Length)) > 0)
+            CommandObjects obj;
+            while ((obj = Codec.NextCommand()) != null)
             {
-                m_decoder.FillBuffer(buffer, 0, length);
-                CommandObjects obj;
-                while ((obj = m_decoder.NextCommand()) != null)
+                if (m_handler.TryGetValue(obj.CommandName, out ISttpCommandHandler handler))
                 {
-                    if (m_handler.TryGetValue(obj.CommandName, out ISttpCommandHandler handler))
-                    {
-                        handler.HandleCommand(obj, m_encoder);
-                    }
-                    else
-                    {
-                        //m_encoder.RequestFailed(obj.CommandName, false, "Command Handler does not exist", "");
-                    }
+                    handler.HandleCommand(obj, Codec);
+                }
+                else
+                {
+                    Codec.RequestFailed(obj.CommandName, "Command Unknown", "Specified command is either not recognized or the user does not have sufficient permissions to execute this command.");
                 }
             }
         }
-
-        public void Start()
-        {
-            m_processing = new Thread(ProcessRequest);
-            m_processing.IsBackground = true;
-            m_processing.Start();
-        }
-
-
-
-
 
     }
 }

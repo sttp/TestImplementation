@@ -23,6 +23,7 @@ namespace Sttp.Codec
 
         public override void Save(CtpDocumentWriter writer)
         {
+
         }
     }
 }

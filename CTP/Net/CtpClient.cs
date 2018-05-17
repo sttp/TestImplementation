@@ -82,6 +82,7 @@ namespace CTP.Net
         {
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
+
         public void SetHost(IPEndPoint host)
         {
             m_remoteEndpoint = host;

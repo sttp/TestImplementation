@@ -8,6 +8,6 @@ namespace Sttp.Core
     public interface ISttpCommandHandler
     {
         List<string> CommandsHandled();
-        void HandleCommand(CommandObjects command, WireEncoder encoder);
+        void HandleCommand(CommandObjects command, WireCodec codec);
     }
 }
