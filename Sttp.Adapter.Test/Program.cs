@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CTP.Net;
 using GSF.Diagnostics;
 using GSF.Threading;
 using GSF.TimeSeries.Transport;
@@ -56,11 +59,33 @@ namespace Sttp.Adapter.Test
             pub.Start();
             m_publisher = pub;
 
+            var net = new CtpClient();
+            net.SetHost(GetMyIPV4(), 48294);
+            net.SetUserCredentials("TrialUser", "P@$$w0rd");
+            net.TurnOffSSL();
+            net.Connect();
+            var sub = new SttpClient(net);
+            Console.WriteLine(string.Join(Environment.NewLine, sub.GetMetaDataTableList()));
+
             Console.ReadLine();
             pub.Stop();
             subscriber.Unsubscribe();
             subscriber.Stop();
             Console.ReadLine();
+        }
+
+        public static IPAddress GetMyIPV4()
+        {
+            String strHostName = Dns.GetHostName();
+            IPHostEntry iphostentry = Dns.GetHostByName(strHostName);
+            foreach (IPAddress ipaddress in iphostentry.AddressList)
+            {
+                if (ipaddress.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ipaddress;
+                }
+            }
+            return IPAddress.Loopback;
         }
 
         private static void Subscriber_ConnectionEstablished(object sender, EventArgs e)

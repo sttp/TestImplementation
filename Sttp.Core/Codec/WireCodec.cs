@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using CTP;
@@ -19,22 +20,21 @@ namespace Sttp.Codec
         private CtpDecoder m_packetDecoder;
         private CtpEncoder m_encoder;
         private int m_rawChannelID;
-        private SessionToken m_session;
         private Stream m_stream;
         private bool m_isReading;
         private object m_syncReceive = new object();
         private byte[] m_inBuffer = new byte[3000];
         private AsyncCallback m_readCallback;
         private WaitCallback m_onDataReceived;
-        public WireCodec(SessionToken session)
+        private ManualResetEvent m_waitForDataEvent = new ManualResetEvent(false);
+        public WireCodec(Stream session)
         {
             m_onDataReceived = OnDataReceived;
             m_readCallback = AsyncReadCallback;
             m_packetDecoder = new CtpDecoder();
             m_encoder = new CtpEncoder();
             m_encoder.NewPacket += EncoderOnNewPacket;
-            m_session = session;
-            m_stream = session.FinalStream;
+            m_stream = session;
         }
 
         private void EncoderOnNewPacket(byte[] data, int position, int length)
@@ -57,9 +57,12 @@ namespace Sttp.Codec
         /// Gets the next data packet. This method should be in a while loop. Once all commands have been read, an async read
         /// will occur
         /// </summary>
+        /// <param name="timeout">The number of milliseconds to wait for a command before returning null. </param>
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
-        public CommandObjects NextCommand()
+        public CommandObjects NextCommand(int timeout = 0)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             tryAgain:
             if (!m_packetDecoder.NextCommand())
             {
@@ -67,7 +70,23 @@ namespace Sttp.Codec
                 {
                     goto tryAgain;
                 }
-                return null;
+
+                long timeToWait = timeout - sw.ElapsedMilliseconds;
+                if (timeout < 0)
+                {
+                    m_waitForDataEvent.WaitOne(-1);
+                }
+                else if (timeout == 0 || timeToWait <= 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    m_waitForDataEvent.WaitOne((int)timeToWait);
+                }
+                m_waitForDataEvent.Reset();
+                goto tryAgain;
+
             }
             return new CommandObjects(m_packetDecoder);
         }
@@ -95,6 +114,7 @@ namespace Sttp.Codec
                 m_isReading = false;
                 int length = m_stream.EndRead(ar);
                 m_packetDecoder.FillBuffer(m_inBuffer, 0, length);
+                m_waitForDataEvent.Set();
             }
             if (!ar.CompletedSynchronously)
             {

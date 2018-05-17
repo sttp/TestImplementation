@@ -20,7 +20,7 @@ namespace Sttp.Services
         public SttpServer(SessionToken session)
         {
             m_handler = new Dictionary<string, ISttpCommandHandler>();
-            Codec = new WireCodec(session);
+            Codec = new WireCodec(session.FinalStream);
             Codec.DataReceived += CodecDataReceived;
             m_processReads = new SyncWorker(ProcessRequest);
         }

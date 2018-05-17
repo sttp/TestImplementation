@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CTP.Net;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
 using Sttp.Data;
@@ -73,36 +74,27 @@ namespace Sttp.Services
         //        }
         //    }
         //}
-        private Stream m_stream;
-        private WireEncoder m_encoder;
-        private WireDecoder m_decoder;
-        private byte[] m_buffer = new byte[4096];
+        private CtpClient m_session;
+        private WireCodec m_codec;
         //private SttpDataPointResponse m_dataPointResponse;
 
-        public SttpClient(Stream networkStream)
+        public SttpClient(CtpClient session)
         {
-            m_stream = networkStream;
-            m_encoder = new WireEncoder();
-            m_decoder = new WireDecoder();
-            m_encoder.NewPacket += M_encoder_NewPacket;
-        }
-
-        private void M_encoder_NewPacket(byte[] data, int offset, int length)
-        {
-            m_stream.Write(data, offset, length);
+            m_session = session;
+            m_codec = new WireCodec(m_session.GetFinalStream);
         }
 
         public List<string> GetMetaDataTableList()
         {
-            m_encoder.GetMetadataSchema();
-            var cmd = GetNextCommand();
+            m_codec.GetMetadataSchema();
+            var cmd = m_codec.NextCommand(-1);
             return cmd.MetadataSchema.Tables.Select(x => x.TableName).ToList();
         }
 
         public List<string> GetMetaDataFieldList(string tableName)
         {
-            m_encoder.GetMetadataSchema();
-            var cmd = GetNextCommand();
+            m_codec.GetMetadataSchema();
+            var cmd = m_codec.NextCommand(-1);
             return cmd.MetadataSchema.Tables.First(x => x.TableName == tableName).Columns.Select(x => x.Name).ToList();
         }
 
@@ -168,7 +160,7 @@ namespace Sttp.Services
             if (columns.Length == 0)
                 throw new Exception("Not properly formatted select statement.");
 
-            m_encoder.GetMetadata(tables[0], columns);
+            m_codec.GetMetadata(tables[0], columns);
             return ParseDT();
         }
 
@@ -187,23 +179,6 @@ namespace Sttp.Services
         //    m_dataPointResponse = null;
         //    return false;
         //}
-
-        private CommandObjects GetNextCommand()
-        {
-            TryAgain:
-            CommandObjects obj = m_decoder.NextCommand();
-            if (obj != null)
-                return obj;
-            int length = 0;
-
-            if ((length = m_stream.Read(m_buffer, 0, m_buffer.Length)) > 0)
-            {
-                m_decoder.FillBuffer(m_buffer, 0, length);
-                goto TryAgain;
-            }
-
-            throw new EndOfStreamException();
-        }
 
     }
 }

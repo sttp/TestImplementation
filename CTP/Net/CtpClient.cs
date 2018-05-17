@@ -95,6 +95,8 @@ namespace CTP.Net
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
+        public Stream GetFinalStream => (Stream)m_sslStream ?? m_networkStream;
+
         public void Connect()
         {
             var client = new TcpClient();
