@@ -23,7 +23,6 @@
 //******************************************************************************************************
 
 using System;
-using System.Collections.Generic;
 
 // ReSharper disable InconsistentlySynchronizedField
 
@@ -34,20 +33,6 @@ namespace GSF.Diagnostics
     /// </summary>
     internal class LogSubscriberInternal
     {
-        private class SubscriptionInfo
-        {
-            public PublisherFilter PublisherFilter;
-            public MessageAttributeFilter AttributeFilter;
-            public bool IsIgnoreSubscription;
-
-            public SubscriptionInfo(PublisherFilter publisherFilter, MessageAttributeFilter attributeFilter, bool isIgnoreSubscription)
-            {
-                PublisherFilter = publisherFilter;
-                AttributeFilter = attributeFilter;
-                IsIgnoreSubscription = isIgnoreSubscription;
-            }
-        }
-
         /// <summary>
         /// Event handler for the logs that are raised.
         /// </summary>
@@ -62,7 +47,7 @@ namespace GSF.Diagnostics
 
         private bool m_disposed;
 
-        private List<SubscriptionInfo> m_allSubscriptions;
+        private MessageAttributeFilter m_allSubscriptions;
 
         /// <summary>
         /// Since weak references are linked to this class, this is a common one that everyone can use when storing this weak reference.
@@ -102,11 +87,8 @@ namespace GSF.Diagnostics
         /// <summary>
         /// Adds/Modify/Deletes an existing subscription
         /// </summary>
-        public void Subscribe(PublisherFilter publisherFilter, MessageAttributeFilter attributeFilter, bool isIgnoreSubscription)
+        public void Subscribe(MessageAttributeFilter attributeFilter)
         {
-            if (publisherFilter == null)
-                throw new ArgumentNullException(nameof(publisherFilter));
-
             if (m_disposed)
                 return;
 
@@ -115,35 +97,7 @@ namespace GSF.Diagnostics
                 if (m_disposed)
                     return;
 
-                if (m_allSubscriptions == null)
-                {
-                    if (attributeFilter == null)
-                        return;
-
-                    m_allSubscriptions = new List<SubscriptionInfo>();
-                    m_allSubscriptions.Add(new SubscriptionInfo(publisherFilter, attributeFilter, isIgnoreSubscription));
-                }
-                else
-                {
-                    for (int x = 0; x < m_allSubscriptions.Count; x++)
-                    {
-                        if (m_allSubscriptions[x].PublisherFilter.ContainsTheSameLogSearchCriteria(publisherFilter))
-                        {
-                            if (attributeFilter == null)
-                            {
-                                m_allSubscriptions.RemoveAt(x);
-                                return;
-                            }
-                            m_allSubscriptions[x].AttributeFilter = attributeFilter;
-                            m_allSubscriptions[x].IsIgnoreSubscription = isIgnoreSubscription;
-                            return;
-                        }
-                    }
-                    if (attributeFilter == null)
-                        return;
-
-                    m_allSubscriptions.Add(new SubscriptionInfo(publisherFilter, attributeFilter, isIgnoreSubscription));
-                }
+                m_allSubscriptions = attributeFilter;
             }
             m_recalculateRoutingTable();
         }
@@ -162,35 +116,24 @@ namespace GSF.Diagnostics
                 if (m_disposed)
                     return;
 
-                if (m_allSubscriptions == null || m_allSubscriptions.Count == 0)
+                if (m_allSubscriptions == null)
                     return;
 
                 OnLog(log);
             }
         }
 
-        public MessageAttributeFilter GetSubscription(LogPublisherInternal publisher)
+        public MessageAttributeFilter GetSubscription()
         {
             lock (m_syncRoot)
             {
-                if (m_allSubscriptions == null)
-                    m_allSubscriptions = new List<SubscriptionInfo>();
-
                 MessageAttributeFilter filter = new MessageAttributeFilter();
-                foreach (var subscription in m_allSubscriptions)
+
+                if (m_allSubscriptions != null)
                 {
-                    if (subscription.PublisherFilter.ContainsPublisher(publisher))
-                    {
-                        if (subscription.IsIgnoreSubscription)
-                        {
-                            filter.Remove(subscription.AttributeFilter);
-                        }
-                        else
-                        {
-                            filter.Append(subscription.AttributeFilter);
-                        }
-                    }
+                    filter.Append(m_allSubscriptions);
                 }
+
                 return filter;
             }
         }

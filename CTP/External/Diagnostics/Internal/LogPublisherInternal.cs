@@ -23,8 +23,6 @@
 //******************************************************************************************************
 
 using System;
-using System.Collections.Concurrent;
-using System.IO;
 using System.Reflection;
 
 namespace GSF.Diagnostics
@@ -47,7 +45,7 @@ namespace GSF.Diagnostics
 
         public readonly Assembly Assembly;
 
-        internal MessageAttributeFilterCollection SubscriptionFilterCollection;
+        internal MessageAttributeFilter SubscriptionFilterCollection;
 
         #endregion
 
@@ -66,7 +64,7 @@ namespace GSF.Diagnostics
             Assembly = type.Assembly;
             TypeData = new PublisherTypeDefinition(type);
             m_logger = logger;
-            SubscriptionFilterCollection = new MessageAttributeFilterCollection();
+            SubscriptionFilterCollection = new MessageAttributeFilter();
         }
 
         #endregion

@@ -206,25 +206,6 @@ namespace GSF.Diagnostics
             m_applicationFlags = m_applicationFlags | a.m_applicationFlags;
         }
 
-        /// <summary>
-        /// Removes subscription A from this subscription if possible.
-        /// </summary>
-        /// <returns></returns>
-        public void Remove(MessageAttributeFilter a)
-        {
-            m_componentMessageSuppression = m_componentMessageSuppression & ~a.m_componentMessageSuppression;
-            m_componentLevel = m_componentLevel & ~a.m_componentLevel;
-            m_componentFlags = m_componentFlags & ~a.m_componentFlags;
-
-            m_frameworkMessageSuppression = m_frameworkMessageSuppression & ~a.m_frameworkMessageSuppression;
-            m_frameworkLevel = m_frameworkLevel & ~a.m_frameworkLevel;
-            m_frameworkFlags = m_frameworkFlags & ~a.m_frameworkFlags;
-
-            m_applicationMessageSuppression = m_applicationMessageSuppression & ~a.m_applicationMessageSuppression;
-            m_applicationLevel = m_applicationLevel & ~a.m_applicationLevel;
-            m_applicationFlags = m_applicationFlags & ~a.m_applicationFlags;
-        }
-
         public static MessageAttributeFilter Create(VerboseLevel level)
         {
             if (level == VerboseLevel.None)

@@ -142,7 +142,7 @@ namespace GSF.Diagnostics
             }
 
             var logMessage = new LogMessage(m_owner, initialStackMessage, initialStackTrace, currentStackMessages, currentStackTrace, attributes, message, details, exception);
-            m_logger.OnNewMessage(logMessage, m_publisher);
+            m_logger.OnNewMessage(logMessage);
         }
 
     }

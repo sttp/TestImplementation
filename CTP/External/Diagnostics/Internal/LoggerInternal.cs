@@ -41,9 +41,11 @@ namespace GSF.Diagnostics
         private readonly Dictionary<Type, LogPublisherInternal> m_typeIndexCache;
         private readonly List<LogPublisherInternal> m_allPublishers;
         private readonly List<NullableWeakReference> m_subscribers;
-        private readonly ConcurrentQueue<Tuple<LogMessage, LogPublisherInternal>> m_messages;
+        private readonly ConcurrentQueue<LogMessage> m_messages;
         private readonly ScheduledTask m_routingTask;
         private readonly ScheduledTask m_calculateRoutingTable;
+        private MessageAttributeFilter m_filterCollection;
+
         public bool RoutingTablesValid { get; private set; }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace GSF.Diagnostics
             m_typeIndexCache = new Dictionary<Type, LogPublisherInternal>();
             m_allPublishers = new List<LogPublisherInternal>();
             m_subscribers = new List<NullableWeakReference>();
-            m_messages = new ConcurrentQueue<Tuple<LogMessage, LogPublisherInternal>>();
+            m_messages = new ConcurrentQueue<LogMessage>();
 
             // Since ScheduledTask calls ShutdownHandler, which calls Logger. This initialization method cannot occur
             // until after the Logger static class has finished initializing.
@@ -96,25 +98,20 @@ namespace GSF.Diagnostics
                         return true;
                     });
 
+
+                MessageAttributeFilter filterCollection = new MessageAttributeFilter();
+                foreach (var sub in subscribers)
+                {
+                    filterCollection.Append(sub.GetSubscription());
+                }
                 foreach (var pub in m_allPublishers)
                 {
-                    CalculateRoutingTableForPublisherSync(subscribers, pub);
+                    pub.SubscriptionFilterCollection = filterCollection;
                 }
+                m_filterCollection = filterCollection;
+              
                 RoutingTablesValid = true;
             }
-        }
-
-        /// <summary>
-        /// This method should be called with a lock on m_syncRoot
-        /// </summary>
-        private void CalculateRoutingTableForPublisherSync(List<LogSubscriberInternal> subscribers, LogPublisherInternal publisher)
-        {
-            MessageAttributeFilterCollection filterCollection = new MessageAttributeFilterCollection();
-            foreach (var sub in subscribers)
-            {
-                filterCollection.Add(sub.GetSubscription(publisher), sub);
-            }
-            publisher.SubscriptionFilterCollection = filterCollection;
         }
 
         private void RoutingTask(object sender, EventArgs<ScheduledTaskRunningReason> e)
@@ -126,16 +123,14 @@ namespace GSF.Diagnostics
                     CalculateRoutingTable(null, null);
                 }
 
-                Tuple<LogMessage, LogPublisherInternal> messageTuple;
-                while (m_messages.TryDequeue(out messageTuple))
+                LogMessage message;
+                while (m_messages.TryDequeue(out message))
                 {
-                    var publisher = messageTuple.Item2;
-                    var message = messageTuple.Item1;
+                    var filter = m_filterCollection;
 
-                    foreach (var route in publisher.SubscriptionFilterCollection.Routes)
+                    foreach (var route in m_subscribers)
                     {
-                        var filter = route.Item1;
-                        var subscriber = route.Item2.Target as LogSubscriberInternal;
+                        var subscriber = route.Target as LogSubscriberInternal;
 
                         if (subscriber == null)
                             RecalculateRoutingTable();
@@ -177,10 +172,9 @@ namespace GSF.Diagnostics
         /// Handles the routing of messages through the logging system.
         /// </summary>
         /// <param name="message">the message to route</param>
-        /// <param name="publisher">the publisher that is originating this message.</param>
-        public void OnNewMessage(LogMessage message, LogPublisherInternal publisher)
+        public void OnNewMessage(LogMessage message)
         {
-            m_messages.Enqueue(Tuple.Create(message, publisher));
+            m_messages.Enqueue(message);
             m_routingTask.Start(50); //Allow a 50ms delay for multiple logs to queue if in a burst period.
         }
 
@@ -204,16 +198,7 @@ namespace GSF.Diagnostics
                     if (!m_disposing)
                     {
                         m_allPublishers.Add(publisher);
-                        var lst = new List<LogSubscriberInternal>();
-                        foreach (var logSubscriberInternal in m_subscribers)
-                        {
-                            LogSubscriberInternal target = logSubscriberInternal.Target as LogSubscriberInternal;
-                            if (target != null)
-                            {
-                                lst.Add(target);
-                            }
-                        }
-                        CalculateRoutingTableForPublisherSync(lst, publisher);
+                        publisher.SubscriptionFilterCollection = m_filterCollection;
                     }
                 }
             }
