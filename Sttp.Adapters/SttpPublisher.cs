@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Net;
 using System.Net.Sockets;
-using CTP;
 using CTP.Net;
-using GSF;
-using GSF.Diagnostics;
-using GSF.Threading;
 using GSF.TimeSeries;
 using GSF.TimeSeries.Adapters;
-using Sttp.Codec;
 using Sttp.Codec.DataPoint;
-using Sttp.Data;
 using Sttp.Services;
 
 namespace Sttp.Adapters
@@ -67,7 +59,7 @@ namespace Sttp.Adapters
             }
         }
 
-        private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(SttpPublisher), MessageClass.Application);
+        //private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(SttpPublisher), MessageClass.Application);
 
         private List<CtpUser> Users = new List<CtpUser>();
         private CtpListener m_listener;
@@ -75,7 +67,7 @@ namespace Sttp.Adapters
 
         public override void Initialize()
         {
-            Log.Publish(MessageLevel.Info, MessageFlags.None, "Initializing");
+            //Log.Publish(MessageLevel.Info, MessageFlags.None, "Initializing");
 
             base.Initialize();
 
@@ -112,14 +104,14 @@ namespace Sttp.Adapters
 
         public override void Start()
         {
-            Log.Publish(MessageLevel.Info, MessageFlags.None, "Starting");
+            //Log.Publish(MessageLevel.Info, MessageFlags.None, "Starting");
             m_listener.Start();
             base.Start();
         }
 
         public override void Stop()
         {
-            Log.Publish(MessageLevel.Info, MessageFlags.None, "Stopping");
+            //Log.Publish(MessageLevel.Info, MessageFlags.None, "Stopping");
             m_listener.Stop();
             base.Stop();
         }
