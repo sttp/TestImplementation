@@ -31,9 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GSF.Core, Version=2.1.393.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Dependencies\GSF.Core.dll</HintPath>
+    <Reference Include="GSF.Core">
+      <HintPath>..\CTP\Dependencies\GSF.Core.dll</HintPath>
     </Reference>
     <Reference Include="GSF.TimeSeries, Version=2.1.393.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -55,14 +54,6 @@
     <Compile Include="SttpPublisher.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Dependencies\GSF.Communication.dll" />
-    <Content Include="Dependencies\GSF.Communication.xml" />
-    <Content Include="Dependencies\GSF.Core.dll" />
-    <Content Include="Dependencies\GSF.Core.xml" />
-    <Content Include="Dependencies\GSF.TimeSeries.dll" />
-    <Content Include="Dependencies\GSF.TimeSeries.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CTP\CTP.csproj">
       <Project>{8048242f-debd-43b2-8673-bea2ec461ee3}</Project>
       <Name>CTP</Name>
@@ -71,6 +62,12 @@
       <Project>{8546536c-fc21-4c1d-9e16-6b3e4baa4c0d}</Project>
       <Name>Sttp.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\GSF.Communication.dll" />
+    <Content Include="Dependencies\GSF.Communication.xml" />
+    <Content Include="Dependencies\GSF.TimeSeries.dll" />
+    <Content Include="Dependencies\GSF.TimeSeries.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

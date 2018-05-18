@@ -1,1 +1,0 @@
-﻿This folder contains external code that is copy and pasted into this project from GSF

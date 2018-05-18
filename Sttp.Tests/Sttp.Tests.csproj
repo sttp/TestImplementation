@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45;net46</TargetFrameworks>
+    <TargetFrameworks>net46</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

@@ -1,11 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45;net46</TargetFrameworks>
+    <TargetFrameworks>net46</TargetFrameworks>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<RootNamespace>CTP</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Dependencies\GSF.Core.dll" />
+    <None Remove="Dependencies\GSF.Core.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\GSF.Core.dll" />
+    <Content Include="Dependencies\GSF.Core.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="GSF.Core">
+      <HintPath>Dependencies\GSF.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />

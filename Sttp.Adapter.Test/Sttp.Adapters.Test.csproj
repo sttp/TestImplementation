@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GSF.Core">
-      <HintPath>..\Sttp.Adapters\Dependencies\GSF.Core.dll</HintPath>
+      <HintPath>..\CTP\Dependencies\GSF.Core.dll</HintPath>
     </Reference>
     <Reference Include="GSF.TimeSeries">
       <HintPath>..\Sttp.Adapters\Dependencies\GSF.TimeSeries.dll</HintPath>

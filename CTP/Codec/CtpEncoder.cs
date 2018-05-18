@@ -2,6 +2,9 @@
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
+using GSF;
+using GSF.IO;
+using GSF.IO.Checksums;
 
 namespace CTP
 {
