@@ -33,7 +33,7 @@ namespace Sttp.Tests.ClientServer
 
             var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
-            client.TurnOffSSL();
+            client.RequireSSL = false;
             client.Connect();
             Thread.Sleep(100);
         }

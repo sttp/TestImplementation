@@ -62,7 +62,6 @@ namespace Sttp.Adapter.Test
             var net = new CtpClient();
             net.SetHost(GetMyIPV4(), 48294);
             net.SetUserCredentials("TrialUser", "P@$$w0rd");
-            net.TurnOffSSL();
             net.Connect();
             var sub = new SttpClient(net);
             Console.WriteLine(string.Join(Environment.NewLine, sub.GetMetaDataTableList()));
