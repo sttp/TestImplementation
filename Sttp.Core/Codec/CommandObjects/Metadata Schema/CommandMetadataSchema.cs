@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
+    [CtpSerializable]
     public class CommandMetadataSchema : DocumentCommandBase
     {
-        public readonly Guid RuntimeID;
-        public readonly long VersionNumber;
-        public readonly List<MetadataSchemaTable> Tables;
+        [CtpSerializeField()]
+        public Guid RuntimeID { get; private set; }
+        [CtpSerializeField()]
+        public long VersionNumber { get; private set; }
+        [CtpSerializeField()]
+        public List<MetadataSchemaTable> Tables { get; private set; }
 
         public CommandMetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
             : base("MetadataSchema")
@@ -34,6 +39,12 @@ namespace Sttp.Codec
                 Tables.Add(new MetadataSchemaTable(query));
             }
             element.ErrorIfNotHandled();
+        }
+
+        private CommandMetadataSchema()
+            : base("MetadataSchema")
+        {
+
         }
 
         public override void Save(CtpDocumentWriter writer)

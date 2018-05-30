@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
@@ -13,10 +14,13 @@ namespace Sttp.Codec
     /// Responds with <see cref="CommandMetadataSchemaUpdate"/> if the version numbers do not match.
     /// Responds with <see cref="CommandMetadataSchemaVersion"/> if there are no changes in the metadata.
     /// </summary>
+    [CtpSerializable]
     public class CommandGetMetadataSchema : DocumentCommandBase
     {
-        public readonly Guid? LastKnownRuntimeID;
-        public readonly long? LastKnownVersionNumber;
+        [CtpSerializeField()]
+        public Guid? LastKnownRuntimeID { get; private set; }
+        [CtpSerializeField()]
+        public long? LastKnownVersionNumber { get; private set; }
 
         public CommandGetMetadataSchema()
             : base("GetMetadataSchema")

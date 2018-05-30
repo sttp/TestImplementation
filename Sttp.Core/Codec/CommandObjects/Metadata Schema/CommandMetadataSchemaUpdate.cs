@@ -2,15 +2,25 @@
 using System.Collections.Generic;
 using System.Text;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
+    [CtpSerializable]
     public class CommandMetadataSchemaUpdate : DocumentCommandBase
     {
-        public readonly Guid RuntimeID;
-        public readonly long VersionNumber;
-        public readonly List<MetadataSchemaTableUpdate> Tables;
+        [CtpSerializeField()]
+        public Guid RuntimeID { get; private set; }
+        [CtpSerializeField()]
+        public long VersionNumber { get; private set; }
+        [CtpSerializeField()]
+        public List<MetadataSchemaTableUpdate> Tables { get; private set; }
 
+        private CommandMetadataSchemaUpdate()
+            : base("MetadataSchemaUpdate")
+        {
+
+        }
         public CommandMetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
             : base("MetadataSchemaUpdate")
         {

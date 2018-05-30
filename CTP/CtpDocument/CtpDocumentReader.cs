@@ -183,7 +183,9 @@ namespace CTP
             {
                 NodeType = CtpDocumentNodeType.EndElement;
                 ElementName = GetCurrentElement();
+                IsElementArray = GetCurrentElementIsArray();
                 m_elementStack.Pop();
+                m_elementIsArrayStack.Pop();
             }
             else
             {

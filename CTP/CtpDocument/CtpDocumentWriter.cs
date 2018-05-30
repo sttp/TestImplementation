@@ -127,9 +127,9 @@ namespace CTP
                 if (string.IsNullOrEmpty(name))
                     throw new ArgumentNullException(nameof(name));
 
+                m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartArrayElement);
                 m_elementStack.Push(name);
                 m_elementIsArrayStack.Push(true);
-                m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartArrayElement);
                 return m_endElementHelper;
             }
             else
@@ -139,9 +139,9 @@ namespace CTP
                 if (string.IsNullOrEmpty(name))
                     throw new ArgumentNullException(nameof(name));
 
+                m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartElement);
                 m_elementStack.Push(name);
                 m_elementIsArrayStack.Push(false);
-                m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartElement);
                 return m_endElementHelper;
             }
 

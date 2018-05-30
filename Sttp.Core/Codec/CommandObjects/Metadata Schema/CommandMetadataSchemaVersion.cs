@@ -1,12 +1,22 @@
 ﻿using System;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
+    [CtpSerializable]
     public class CommandMetadataSchemaVersion : DocumentCommandBase
     {
-        public readonly Guid RuntimeID;
-        public readonly long VersionNumber;
+        [CtpSerializeField()]
+        public Guid RuntimeID { get; private set; }
+        [CtpSerializeField()]
+        public long VersionNumber { get; private set; }
+
+        private CommandMetadataSchemaVersion()
+            : base("MetadataSchemaVersion")
+        {
+
+        }
 
         public CommandMetadataSchemaVersion(Guid runtimeID, long versionNumber)
             : base("MetadataSchemaVersion")

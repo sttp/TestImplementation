@@ -45,7 +45,7 @@ namespace CTP.Serialization
             }
             else
             {
-                using (writer.StartElement(elementName))
+                using (writer.StartElement(elementName, m_method.IsArrayType))
                 {
                     m_method.Save(item, writer);
                 }
