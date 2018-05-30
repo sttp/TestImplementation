@@ -4,6 +4,14 @@ using System.Text;
 
 namespace CTP.SRP
 {
+    public enum SrpHashAlgorithms
+    {
+        SHA1,
+        SHA256,
+        SHA384,
+        SHA512,
+    }
+
     public class SrpUserCredential<T>
     {
         public readonly string UserName;
@@ -15,6 +23,10 @@ namespace CTP.SRP
         public readonly SrpStrength SrpStrength;
 
         public readonly T Token;
+
+        public readonly SrpHashAlgorithms PBKDF2Algorithm;
+
+        public readonly int IterationCount;
 
         /// <summary>
         /// Creates user credentials

@@ -19,15 +19,9 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestIPWithoutEncryption()
         {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-            var cert = store.Certificates[0];
-            store.Close();
-
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             listener.Permissions.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
-            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
-            listener.Permissions.AssignEncriptionOptions(IPAddress.Loopback, 32, null);
+            listener.Permissions.SetSpecificOptions(IPAddress.Loopback, 32, true, false);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
@@ -41,14 +35,8 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestIPWithEncryption()
         {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-            var cert = store.Certificates[0];
-            store.Close();
-
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             listener.Permissions.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
-            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
@@ -63,13 +51,11 @@ namespace Sttp.Tests.ClientServer
         {
             X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadOnly);
-            var cert = store.Certificates[0];
             var cert2 = store.Certificates[0];
             store.Close();
 
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             listener.Permissions.AddSelfSignedCertificateUser(cert2, "Cert", "Perm1");
-            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
@@ -83,15 +69,8 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestSrpUser()
         {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-            var cert = store.Certificates[0];
-            var cert2 = store.Certificates[0];
-            store.Close();
-
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             listener.Permissions.AddSrpUser("U", "Pass1", "User", "Role1");
-            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
@@ -105,16 +84,9 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestSrp2User()
         {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-            var cert = store.Certificates[0];
-            var cert2 = store.Certificates[0];
-            store.Close();
-
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             listener.Permissions.SetSrpDefaults(null, SrpStrength.Bits2048);
             listener.Permissions.AddSrpUser("U", "Pass1", "User", "Role1");
-            listener.Permissions.AssignEncriptionOptions(IPAddress.Any, 0, cert);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 

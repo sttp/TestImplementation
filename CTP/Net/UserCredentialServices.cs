@@ -7,26 +7,19 @@ using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Threading;
 using CTP.SRP;
 using GSF.IO;
+using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
-    public enum AuthenticationProtocols : byte
-    {
-        None = 0,
-        SRP = 1,
-        NegotiateStream = 2,
-        OAUTH = 3,
-        LDAP = 4,
-        CertificatePairing = 5,
-        SessionPairing = 6,
-    }
-
     public delegate void SessionCompletedEventHandler(SessionToken token);
 
     public class UserCredentialServices
     {
+        private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
+
         private class SSLUserCertificateValidation
         {
             public UserCredentialServices Users;
@@ -88,15 +81,26 @@ namespace CTP.Net
         private Srp6aServer<SrpUserMapping> m_srpUserDatabase = new Srp6aServer<SrpUserMapping>();
         public event SessionCompletedEventHandler SessionCompleted;
 
+        public X509Certificate2 DefaultCertificate { get; private set; } = null;
+        public bool DefaultRequireSSL { get; private set; } = true;
+        public bool DefaultHasAccess { get; private set; } = true;
+
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
         {
             m_srpUserDatabase.SetSrpDefaults(salt, strength);
         }
 
-        public void AssignEncriptionOptions(IPAddress remoteIP, int bitmask, X509Certificate localCertificate)
+        public void SetGlobalOptions(bool hasAccess, bool requireSSL = true, X509Certificate2 defaultCertificate = null)
+        {
+            DefaultCertificate = defaultCertificate;
+            DefaultRequireSSL = requireSSL;
+            DefaultHasAccess = hasAccess;
+        }
+
+        public void SetSpecificOptions(IPAddress remoteIP, int bitmask, bool hasAccess = true, bool requireSSL = true, X509Certificate localCertificate = null)
         {
             var mask = new IpMatchDefinition(remoteIP, bitmask);
-            m_encryptionOptions[mask] = new EncryptionOptions(mask, localCertificate);
+            m_encryptionOptions[mask] = new EncryptionOptions(mask, hasAccess, requireSSL, localCertificate);
         }
 
         public void AddIPUser(IPAddress ip, int bitmask, string loginName, params string[] roles)
@@ -124,15 +128,25 @@ namespace CTP.Net
 
         public void AuthenticateAsServer(SessionToken session)
         {
+            bool requireSSL = DefaultRequireSSL;
+            bool hasAccess = DefaultHasAccess;
+            X509Certificate certificate = DefaultCertificate;
+
             var ipBytes = session.RemoteEndpoint.Address.GetAddressBytes();
-            X509Certificate localCertificate = null;
             foreach (var item in m_encryptionOptions.Values)
             {
                 if (item.IP.IsMatch(ipBytes))
                 {
-                    localCertificate = item.ServerCertificate;
+                    requireSSL = item.RequireSSL;
+                    hasAccess = item.HasAccess;
+                    certificate = item.ServerCertificate;
                     break;
                 }
+            }
+
+            if (!hasAccess)
+            {
+                throw new Exception("Client does not have access");
             }
 
             foreach (var item in m_ipUsers.Values)
@@ -144,11 +158,28 @@ namespace CTP.Net
                     break;
                 }
             }
-
-            if (localCertificate != null)
+            char mode = (char)session.NetworkStream.ReadNextByte();
+            switch (mode)
             {
-                SSLAsServer(localCertificate, session);
+                case 'N':
+                    if (requireSSL)
+                        mode = 'S';
+                    break;
+                case 'S':
+                case 'M':
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
+            session.NetworkStream.WriteByte((byte)mode);
+            session.NetworkStream.Flush();
+
+            if (mode != 'N')
+            {
+                SSLAsServer(mode, certificate, session);
+            }
+
             switch ((AuthenticationProtocols)session.FinalStream.ReadNextByte())
             {
                 case AuthenticationProtocols.None:
@@ -204,7 +235,6 @@ namespace CTP.Net
             AddSrpUser(user.AssignedUserName, Convert.ToBase64String(privateSessionKey), user.Token.LoginName, user.Token.Roles);
         }
 
-
         private void SrpAsServer(SessionToken session)
         {
             var user = m_srpUserDatabase.Authenticate(session.FinalStream, session.SSL?.RemoteCertificate, session.SSL?.LocalCertificate);
@@ -212,11 +242,20 @@ namespace CTP.Net
             session.GrantedRoles.UnionWith(user.Roles);
         }
 
-        private void SSLAsServer(X509Certificate certificate, SessionToken session)
+        private void SSLAsServer(char mode, X509Certificate certificate, SessionToken session)
         {
             var obj = new SSLUserCertificateValidation(this, session);
-            session.SSL = new SslStream(session.NetworkStream, false, obj.UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
-            session.SSL.AuthenticateAsServer(certificate, true, SslProtocols.Tls12, false);
+
+            switch (mode)
+            {
+                case 'S':
+                case 'M':
+                    session.SSL = new SslStream(session.NetworkStream, false, obj.UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
+                    session.SSL.AuthenticateAsServer(certificate, mode == 'M', SslProtocols.Tls12, false);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private void WinAsServer(SessionToken client)
@@ -260,11 +299,15 @@ namespace CTP.Net
     {
         public IpMatchDefinition IP;
         public X509Certificate ServerCertificate;
+        public bool RequireSSL;
+        public bool HasAccess;
 
-        public EncryptionOptions(IpMatchDefinition ip, X509Certificate serverCertificate)
+        public EncryptionOptions(IpMatchDefinition ip, bool hasAccess, bool requireSSL, X509Certificate localCertificate)
         {
             IP = ip;
-            ServerCertificate = serverCertificate;
+            ServerCertificate = localCertificate;
+            RequireSSL = requireSSL;
+            HasAccess = hasAccess;
         }
 
         public int CompareTo(EncryptionOptions other)

@@ -14,5 +14,6 @@
         ValueCtpDocument = 9,
         StartElement = 10,
         EndElement = 11,
+        StartArrayElement = 12,
     }
 }

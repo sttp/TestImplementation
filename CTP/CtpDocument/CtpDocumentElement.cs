@@ -15,6 +15,10 @@ namespace CTP
         /// The name of the element.
         /// </summary>
         public readonly string ElementName;
+        /// <summary>
+        /// Gets if the current item is an array
+        /// </summary>
+        public readonly bool IsArray;
 
         /// <summary>
         /// The list of all of the child elements. Can be empty.
@@ -45,6 +49,7 @@ namespace CTP
             if (reader.NodeType != CtpDocumentNodeType.StartElement)
                 throw new Exception("Expecting an Element type for the current node.");
             ElementName = reader.ElementName;
+            IsArray = reader.IsElementArray;
 
             IterateNodes(reader);
         }

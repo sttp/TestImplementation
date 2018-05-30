@@ -21,7 +21,7 @@ namespace CTP.Net
     ///
     /// Escalation Order:
     /// None,
-    /// ServerCertificate, ClientOnlyCertificate (If both are specified, it promotes to Mutual)
+    /// ServerOnlyCertificate
     /// MutualCertificate
     /// 
     /// </summary>
@@ -41,16 +41,11 @@ namespace CTP.Net
         /// </summary>
         ServerCertificate = 1,
         /// <summary>
-        /// A TLS connection where the client executes the TLS handshake as the server. During initial negotiation, 
-        /// it's most probably that this kind of connection will be promoted to a Mutual Certificate Connection.
-        /// </summary>
-        ClientCertificate = 2,
-        /// <summary>
         /// A TLS connection with both a server and client supplied certificate. Man-in-the-middle protection
         /// can be established if either the server or the client trusts each ether's certificate, 
         /// or authenticating with a method that provides this protection.
         /// </summary>
-        MutualCertificate = 3,
+        MutualCertificate = 2,
     }
 
     /// <summary>
@@ -122,26 +117,22 @@ namespace CTP.Net
             get
             {
                 var mode = EncryptionMode.None;
-                if (ServerTrustMode != ServerTrustMode.None)
-                {
-                    mode = EncryptionMode.ServerCertificate;
-                }
-
                 if (m_userCertificate != null)
                 {
-                    mode |= EncryptionMode.ClientCertificate;
+                    mode = EncryptionMode.MutualCertificate;
                 }
-
-                if (RequireSSL && mode != EncryptionMode.None)
+                else if (ServerTrustMode != ServerTrustMode.None)
                 {
                     mode = EncryptionMode.ServerCertificate;
                 }
-
-                if (AuthenticationMode == AuthenticationMode.LDAP && mode != EncryptionMode.None)
+                else if (RequireSSL)
                 {
                     mode = EncryptionMode.ServerCertificate;
                 }
-
+                else if (AuthenticationMode == AuthenticationMode.LDAP)
+                {
+                    mode = EncryptionMode.ServerCertificate;
+                }
                 return mode;
             }
         }
@@ -271,9 +262,6 @@ namespace CTP.Net
                 case EncryptionMode.ServerCertificate:
                     m_networkStream.WriteByte((byte)'S');
                     break;
-                case EncryptionMode.ClientCertificate:
-                    m_networkStream.WriteByte((byte)'C');
-                    break;
                 case EncryptionMode.MutualCertificate:
                     m_networkStream.WriteByte((byte)'M');
                     break;
@@ -291,14 +279,9 @@ namespace CTP.Net
                     encMode = EncryptionMode.None;
                     break;
                 case 'S':
-                    if ((encMode & EncryptionMode.ClientCertificate) == EncryptionMode.ClientCertificate)
+                    if (encMode == EncryptionMode.MutualCertificate)
                         throw new InvalidOperationException("Server disallowed the client to specify a certificate.");
                     encMode = EncryptionMode.ServerCertificate;
-                    break;
-                case 'C':
-                    if ((encMode & EncryptionMode.ServerCertificate) == EncryptionMode.ServerCertificate)
-                        throw new InvalidOperationException("Server did not specify a certificate.");
-                    encMode = EncryptionMode.ClientCertificate;
                     break;
                 case 'M':
                     if (m_userCertificate != null)
@@ -308,6 +291,8 @@ namespace CTP.Net
                     }
                     encMode = EncryptionMode.MutualCertificate;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             if (encMode != EncryptionMode.None)

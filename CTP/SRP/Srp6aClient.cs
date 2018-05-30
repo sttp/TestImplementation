@@ -9,6 +9,36 @@ using GSF.IO;
 
 namespace CTP.SRP
 {
+    public class SrpIdentity
+    {
+        public readonly string UserName;
+
+        public SrpIdentity(string userName)
+        {
+            UserName = userName;
+        }
+
+        public SrpIdentity(byte[] load)
+        {
+            var mu = new CtpDocument(load);
+            if (mu.RootElement != "SrpIdentity")
+                throw new NotSupportedException("Unknown Command");
+            var reader = mu.MakeReader();
+            var elements = reader.ReadEntireElement();
+            UserName = elements.GetValue("UserName").AsString;
+            elements.ErrorIfNotHandled();
+        }
+
+        public byte[] Save()
+        {
+            var mu = new CtpDocumentWriter("SrpIdentity");
+            mu.WriteValue("UserName", UserName);
+            byte[] data = new byte[mu.Length];
+            mu.CopyTo(data, 0);
+            return data;
+        }
+    }
+
     public static class Srp6aClient
     {
         public static void Authenticate(string identity, string password, Stream stream, X509Certificate clientCertificate, X509Certificate serverCertificate)

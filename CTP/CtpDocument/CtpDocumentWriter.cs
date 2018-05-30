@@ -52,6 +52,7 @@ namespace CTP
         /// The list of elements so an error can occur when the element tree is invalid..
         /// </summary>
         private Stack<string> m_elementStack;
+        private Stack<bool> m_elementIsArrayStack;
         /// <summary>
         /// Where to write the data.
         /// </summary>
@@ -67,6 +68,7 @@ namespace CTP
         private int m_prefixLength;
         private string m_rootElement;
 
+
         /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>
@@ -80,6 +82,7 @@ namespace CTP
             m_elementNames = new List<string>();
             m_valueNames = new List<string>();
             m_elementStack = new Stack<string>();
+            m_elementIsArrayStack = new Stack<bool>();
             m_stream = new CtpDocumentBitWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
             m_rootElement = rootElement;
@@ -91,6 +94,8 @@ namespace CTP
         /// </summary>
         public int Length => m_stream.Length + m_prefixLength;
 
+        public bool IsArrayElement => m_elementIsArrayStack.Count > 0 && m_elementIsArrayStack.Peek();
+
         /// <summary>
         /// Resets a document writer so it can be reused.
         /// </summary>
@@ -101,6 +106,7 @@ namespace CTP
             m_elementNamesLookup.Clear();
             m_elementNames.Clear();
             m_elementStack.Clear();
+            m_elementIsArrayStack.Clear();
             m_stream.Clear();
             m_rootElement = rootElement;
             m_prefixLength += m_rootElement.Length + 1;
@@ -110,15 +116,35 @@ namespace CTP
         /// Starts a new element with the specified name. 
         /// </summary>
         /// <param name="name">The name of the element. This name must conform to 7-bit ASCII and may not exceed 255 characters in length.</param>
+        /// <param name="isArray">Indicates that this item is an array item.</param>
         /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
-        public IDisposable StartElement(string name)
+        public IDisposable StartElement(string name, bool isArray = false)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException(nameof(name));
+            if (isArray)
+            {
+                if (IsArrayElement)
+                    name = "Item";
+                if (string.IsNullOrEmpty(name))
+                    throw new ArgumentNullException(nameof(name));
 
-            m_elementStack.Push(name);
-            m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartElement);
-            return m_endElementHelper;
+                m_elementStack.Push(name);
+                m_elementIsArrayStack.Push(true);
+                m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartArrayElement);
+                return m_endElementHelper;
+            }
+            else
+            {
+                if (IsArrayElement)
+                    name = "Item";
+                if (string.IsNullOrEmpty(name))
+                    throw new ArgumentNullException(nameof(name));
+
+                m_elementStack.Push(name);
+                m_elementIsArrayStack.Push(false);
+                m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartElement);
+                return m_endElementHelper;
+            }
+
         }
 
         /// <summary>
@@ -131,6 +157,7 @@ namespace CTP
                 throw new InvalidOperationException("Too many calls to EndElement has occurred. There are no elements to end.");
 
             m_elementStack.Pop();
+            m_elementIsArrayStack.Pop();
             m_stream.Write7BitInt((uint)CtpDocumentHeader.EndElement);
         }
 
@@ -141,6 +168,8 @@ namespace CTP
         /// <param name="value">the value</param>
         public void WriteValue(string name, CtpObject value)
         {
+            if (IsArrayElement)
+                name = "Item";
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
             if ((object)value == null)
@@ -185,6 +214,8 @@ namespace CTP
 
         private uint GetElementNameIndex(string name)
         {
+            if (IsArrayElement)
+                return 0;
             if (!m_elementNamesLookup.TryGetValue(name, out int index))
             {
                 m_elementNamesLookup[name] = m_elementNamesLookup.Count;
@@ -197,6 +228,8 @@ namespace CTP
 
         private uint GetValueNameIndex(string name)
         {
+            if (IsArrayElement)
+                return 0;
             if (!m_valueNamesLookup.TryGetValue(name, out int index))
             {
                 m_valueNamesLookup[name] = m_valueNamesLookup.Count;
@@ -228,7 +261,7 @@ namespace CTP
                 throw new InvalidOperationException("The element stack does not return to the root. Be sure enough calls to EndElement exist.");
 
             byte[] rv = new byte[Length];
-            CopyTo(rv,0);
+            CopyTo(rv, 0);
             return new CtpDocument(rv);
         }
 

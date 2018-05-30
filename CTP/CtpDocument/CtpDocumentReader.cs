@@ -21,6 +21,7 @@ namespace CTP
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
         private Stack<string> m_elementStack = new Stack<string>();
+        private Stack<bool> m_elementIsArrayStack = new Stack<bool>();
         /// <summary>
         /// The root element.
         /// </summary>
@@ -68,6 +69,11 @@ namespace CTP
         /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the name of the value. Otherwise, null.
         /// </summary>
         public string ValueName { get; private set; }
+
+        /// <summary>
+        /// Gets if the current element is an array element.
+        /// </summary>
+        public bool IsElementArray { get; private set; }
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
@@ -90,7 +96,10 @@ namespace CTP
                 return false;
 
             if (NodeType == CtpDocumentNodeType.EndElement)
+            {
                 ElementName = GetCurrentElement();
+                IsElementArray = GetCurrentElementIsArray();
+            }
 
             if (m_stream.IsEos)
             {
@@ -103,7 +112,11 @@ namespace CTP
             if (header < CtpDocumentHeader.StartElement)
             {
                 NodeType = CtpDocumentNodeType.Value;
-                ValueName = m_valueNamesList[code >> 4];
+                if (IsElementArray)
+                    ValueName = "Item";
+                else
+                    ValueName = m_valueNamesList[code >> 4];
+
                 switch ((CtpTypeCode)header)
                 {
                     case CtpTypeCode.Null:
@@ -144,9 +157,27 @@ namespace CTP
             {
                 NodeType = CtpDocumentNodeType.StartElement;
                 Value.SetNull();
-                ElementName = m_elementNamesList[code >> 4];
+                if (IsElementArray)
+                    ElementName = "Item";
+                else
+                    ElementName = m_elementNamesList[code >> 4];
+                IsElementArray = false;
                 ValueName = null;
                 m_elementStack.Push(ElementName);
+                m_elementIsArrayStack.Push(false);
+            }
+            else if (header == CtpDocumentHeader.StartArrayElement)
+            {
+                NodeType = CtpDocumentNodeType.StartElement;
+                Value.SetNull();
+                if (IsElementArray)
+                    ElementName = "Item";
+                else
+                    ElementName = m_elementNamesList[code >> 4];
+                IsElementArray = true;
+                ValueName = null;
+                m_elementStack.Push(ElementName);
+                m_elementIsArrayStack.Push(true);
             }
             else if (header == CtpDocumentHeader.EndElement)
             {
@@ -157,7 +188,6 @@ namespace CTP
             else
             {
                 throw new ArgumentOutOfRangeException();
-
             }
             return true;
         }
@@ -177,6 +207,13 @@ namespace CTP
             if (m_elementStack.Count == 0)
                 return m_rootElement;
             return m_elementStack.Peek();
+        }
+
+        private bool GetCurrentElementIsArray()
+        {
+            if (m_elementIsArrayStack.Count == 0)
+                return false;
+            return m_elementIsArrayStack.Peek();
         }
 
         private static long UnPackSign(long value)
