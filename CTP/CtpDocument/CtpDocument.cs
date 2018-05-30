@@ -43,6 +43,12 @@ namespace CTP
             return new CtpDocumentReader(m_data);
         }
 
+        public byte[] ToArray()
+        {
+            return (byte[])m_data.Clone();
+        }
+
+
         /// <summary>
         /// Copies the internal buffer to the provided byte array.
         /// Be sure to call <see cref="Length"/> to ensure that the destination buffer

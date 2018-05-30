@@ -9,36 +9,6 @@ using GSF.IO;
 
 namespace CTP.SRP
 {
-    public class SrpIdentity
-    {
-        public readonly string UserName;
-
-        public SrpIdentity(string userName)
-        {
-            UserName = userName;
-        }
-
-        public SrpIdentity(byte[] load)
-        {
-            var mu = new CtpDocument(load);
-            if (mu.RootElement != "SrpIdentity")
-                throw new NotSupportedException("Unknown Command");
-            var reader = mu.MakeReader();
-            var elements = reader.ReadEntireElement();
-            UserName = elements.GetValue("UserName").AsString;
-            elements.ErrorIfNotHandled();
-        }
-
-        public byte[] Save()
-        {
-            var mu = new CtpDocumentWriter("SrpIdentity");
-            mu.WriteValue("UserName", UserName);
-            byte[] data = new byte[mu.Length];
-            mu.CopyTo(data, 0);
-            return data;
-        }
-    }
-
     public static class Srp6aClient
     {
         public static void Authenticate(string identity, string password, Stream stream, X509Certificate clientCertificate, X509Certificate serverCertificate)
@@ -50,18 +20,18 @@ namespace CTP.SRP
         {
             identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             password = password.Normalize(NormalizationForm.FormKC);
-            stream.Write(identity);
+
+            stream.WriteDocument(new SrpIdentity(identity),"SrpIdentity");
             stream.Flush();
+
+            var lookup = stream.ReadDocument<SrpIdentityLookup>("SrpIdentityLookup");
 
             var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
-            var strength = (SrpStrength)stream.ReadUInt16();
-            var salt = stream.ReadBytes();
-            var publicB = stream.ReadBytes().ToUnsignedBigInteger();
+            var strength = (SrpStrength)lookup.SrpStrength;
+            var salt = lookup.Salt;
+            var publicB = lookup.PublicB.ToUnsignedBigInteger();
             var param = SrpConstants.Lookup(strength);
             var publicA = BigInteger.ModPow(param.g, privateA, param.N);
-
-            stream.WriteWithLength(publicA.ToUnsignedByteArray());
-            stream.Flush();
             var x = SrpMethods.ComputeX(salt, identity, password).ToUnsignedBigInteger();
             var verifier = param.g.ModPow(x, param.N);
 
@@ -74,12 +44,11 @@ namespace CTP.SRP
             privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, clientCertificate, serverCertificate);
             byte[] clientChallenge = challengeClient;
 
-            stream.WriteWithLength(clientChallenge);
+            stream.WriteDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge), "SrpClientResponse");
             stream.Flush();
 
-            var serverChallenge = stream.ReadBytes();
-
-            if (!challengeServer.SequenceEqual(serverChallenge))
+            var cr = stream.ReadDocument<SrpServerResponse>("SrpServerResponse");
+            if (!challengeServer.SequenceEqual(cr.ServerChallenge))
                 throw new Exception("Failed server challenge");
         }
     }

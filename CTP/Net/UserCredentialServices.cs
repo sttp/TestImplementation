@@ -177,7 +177,7 @@ namespace CTP.Net
 
             if (mode != 'N')
             {
-                SSLAsServer(mode, certificate, session);
+                SSLAsServer(mode, certificate ?? EmphericalCertificate.Value, session);
             }
 
             switch ((AuthenticationProtocols)session.FinalStream.ReadNextByte())
