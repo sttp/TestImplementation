@@ -37,6 +37,7 @@ namespace Sttp.Tests.CommandsAndResponses
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
             Console.WriteLine(cmd.ToString());
             Console.WriteLine(CtpDocument.Serialize(cmd, cmd.CommandName).ToYAML());
+            Console.WriteLine(CtpDocument.Load<CommandMetadataSchema>(CtpDocument.Serialize(cmd, cmd.CommandName)));
 
         }
 

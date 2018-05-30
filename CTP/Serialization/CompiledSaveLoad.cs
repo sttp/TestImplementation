@@ -6,13 +6,13 @@ using GSF.Reflection;
 
 namespace CTP.Serialization
 {
-    public abstract class CompiledSaveLoad
+    internal abstract class CompiledSaveLoad
     {
         public abstract void Save(object obj, CtpDocumentWriter writer, string elementName);
         public abstract void Load(object obj, CtpDocumentElement reader, string elementName);
     }
 
-    public class CompiledSaveLoad<T>
+    internal class CompiledSaveLoad<T>
         : CompiledSaveLoad
     {
         private CtpSerializeFieldAttribute m_autoLoad;

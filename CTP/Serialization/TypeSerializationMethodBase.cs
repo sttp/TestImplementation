@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace CTP.Serialization
 {
-    public abstract class TypeSerializationMethodBase
+    internal abstract class TypeSerializationMethodBase
     {
         protected internal TypeSerializationMethodBase()
         {
@@ -31,7 +31,7 @@ namespace CTP.Serialization
         }
     }
 
-    public abstract class TypeSerializationMethodBase<T>
+    internal abstract class TypeSerializationMethodBase<T>
         : TypeSerializationMethodBase
     {
 
@@ -67,7 +67,8 @@ namespace CTP.Serialization
             return new CompiledSaveLoad<T>(this, field, autoLoad);
         }
     }
-    public abstract class TypeSerializationMethodBase2<T>
+
+    internal abstract class TypeSerializationMethodBase2<T>
         : TypeSerializationMethodBase<T>
     {
         public sealed override bool IsValueType => true;
