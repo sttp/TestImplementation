@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using CTP.Serialization;
 
 namespace CTP
 {
@@ -265,6 +266,19 @@ namespace CTP
         public static bool operator !=(CtpDocument a, CtpDocument b)
         {
             return !Equals(a, b);
+        }
+
+        public static CtpDocument Serialize(object item, string rootElementName)
+        {
+            var wr = new CtpDocumentWriter(rootElementName);
+            TypeSerialization.GetMethod(item.GetType()).SaveObject(item, wr);
+            return wr.ToCtpDocument();
+        }
+
+        public static T Load<T>(CtpDocument document)
+        {
+            var rdr = document.MakeReader();
+            return TypeSerialization<T>.Load(rdr.ReadEntireElement());
         }
     }
 

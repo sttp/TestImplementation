@@ -31,6 +31,8 @@ namespace GSF.Reflection
 
                 if (!fieldInfo.DeclaringType.IsClass)
                     throw new ArgumentException("Declaring type must be a class to assign a field", "fieldInfo");
+                if (fieldInfo.IsInitOnly)
+                    throw new ArgumentException("Field cannot be marked as readonly", nameof(fieldInfo));
 
                 //With 2 parameters of Object
                 ParameterExpression paramTargetObject = Expression.Parameter(typeof(object));
@@ -92,7 +94,9 @@ namespace GSF.Reflection
             private static Action<object, T> CompileSetter(FieldInfo fieldInfo)
             {
                 if (!fieldInfo.DeclaringType.IsClass)
-                    throw new ArgumentException("Declaring type must be a class to assign a field", "fieldInfo");
+                    throw new ArgumentException("Declaring type must be a class to assign a field", nameof(fieldInfo));
+                if (fieldInfo.IsInitOnly)
+                    throw new ArgumentException("Field cannot be marked as readonly", nameof(fieldInfo));
 
                 //Creates method
                 //void SetValue(object obj, object value)
@@ -132,8 +136,6 @@ namespace GSF.Reflection
                 Func<object, T> getter = Expression.Lambda<Func<object, T>>(castToT, paramTargetObject).Compile();
                 return getter;
             }
-
-
         }
 
         public static Action<object, object> CompileSetter(this FieldInfo fieldInfo)

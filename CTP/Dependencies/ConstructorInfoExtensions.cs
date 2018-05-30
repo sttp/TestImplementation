@@ -81,22 +81,22 @@ namespace GSF.Reflection
             }
         }
 
-        public static Func<R> CreateConstructor<R>(this ConstructorInfo constructor)
+        public static Func<R> Compile<R>(this ConstructorInfo constructor)
         {
             return Nested<R>.Constructor.Get(constructor);
         }
 
-        public static Func<T1, R> CreateConstructor<T1, R>(this ConstructorInfo constructor)
+        public static Func<T1, R> Compile<T1, R>(this ConstructorInfo constructor)
         {
             return Nested<T1, R>.Constructor.Get(constructor);
         }
 
-        public static Func<T1, T2, R> CreateConstructor<T1, T2, R>(this ConstructorInfo constructor)
+        public static Func<T1, T2, R> Compile<T1, T2, R>(this ConstructorInfo constructor)
         {
             return Nested<T1, T2, R>.Constructor.Get(constructor);
         }
 
-        public static Func<T1, T2, T3, R> CreateConstructor<T1, T2, T3, R>(this ConstructorInfo constructor)
+        public static Func<T1, T2, T3, R> Compile<T1, T2, T3, R>(this ConstructorInfo constructor)
         {
             return Nested<T1, T2, T3, R>.Constructor.Get(constructor);
 

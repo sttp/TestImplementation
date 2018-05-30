@@ -3,23 +3,24 @@ using System.Reflection;
 
 namespace CTP.Serialization
 {
-    internal class PropertyOptions
+    internal class FieldOptions
     {
         private CtpSerializeFieldAttribute m_autoLoad;
         private CompiledSaveLoad m_saveLoad;
-        private PropertyInfo m_info;
+        private FieldInfo m_info;
 
-        public PropertyOptions(PropertyInfo info)
+        public FieldOptions(FieldInfo info)
         {
             object[] attributes = info.GetCustomAttributes(true);
             m_autoLoad = attributes.OfType<CtpSerializeFieldAttribute>().FirstOrDefault();
             m_info = info;
             RecordName = m_autoLoad?.RecordName ?? info.Name;
+
         }
 
         public void InitializeSerializationMethod()
         {
-            m_saveLoad = TypeSerialization.GetMethod(m_info.PropertyType).CompiledSaveLoad(m_info, m_autoLoad);
+            m_saveLoad = TypeSerialization.GetMethod(m_info.FieldType).CompiledSaveLoad(m_info, m_autoLoad);
         }
 
         public bool IsValid

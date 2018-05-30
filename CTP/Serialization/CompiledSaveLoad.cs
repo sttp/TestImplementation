@@ -15,12 +15,12 @@ namespace CTP.Serialization
     public class CompiledSaveLoad<T>
         : CompiledSaveLoad
     {
-        private CtpSerializeField m_autoLoad;
+        private CtpSerializeFieldAttribute m_autoLoad;
         private TypeSerializationMethodBase<T> m_method;
         private Func<object, T> m_read;
         private Action<object, T> m_write;
 
-        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, PropertyInfo field, CtpSerializeField autoLoad)
+        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, PropertyInfo field, CtpSerializeFieldAttribute autoLoad)
         {
             m_autoLoad = autoLoad;
             m_method = method;
@@ -28,7 +28,7 @@ namespace CTP.Serialization
             m_write = field.CompileSetter<T>();
         }
 
-        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, FieldInfo field, CtpSerializeField autoLoad)
+        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, FieldInfo field, CtpSerializeFieldAttribute autoLoad)
         {
             m_autoLoad = autoLoad;
             m_method = method;

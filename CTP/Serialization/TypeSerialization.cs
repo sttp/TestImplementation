@@ -100,6 +100,18 @@ namespace CTP.Serialization
             Serialization = TypeSerialization.GetMethod<T>();
         }
 
+        public static T Load(CtpDocumentElement reader)
+        {
+            if (Serialization.IsValueType)
+            {
+                throw new NotSupportedException();
+            }
+            else
+            {
+                return Serialization.Load(reader);
+            }
+        }
+
         public static T Load(CtpDocumentElement reader, string elementName)
         {
             if (Serialization.IsValueType)

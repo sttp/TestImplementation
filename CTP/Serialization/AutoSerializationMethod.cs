@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using GSF.Reflection;
 
 namespace CTP.Serialization
 {
@@ -15,7 +16,7 @@ namespace CTP.Serialization
             method = null;
             if (type.IsClass)
             {
-                var attr = type.GetCustomAttributes(true).OfType<CtpSerializable>().FirstOrDefault();
+                var attr = type.GetCustomAttributes(true).OfType<CtpSerializableAttribute>().FirstOrDefault();
                 if (attr != null)
                 {
                     var genericMethod = Method.MakeGenericMethod(type);
@@ -28,7 +29,7 @@ namespace CTP.Serialization
 
         [MethodImpl(MethodImplOptions.NoOptimization)] //This method is called via reflection.
         // ReSharper disable once UnusedMember.Local
-        private static TypeSerializationMethodBase AutoSerializationMethod<T>(CtpSerializable attr)
+        private static TypeSerializationMethodBase AutoSerializationMethod<T>(CtpSerializableAttribute attr)
             where T : class
         {
             return new AutoSerializationMethod<T>(attr);
@@ -42,15 +43,18 @@ namespace CTP.Serialization
         public override bool IsArrayType => false;
         private readonly Type m_type;
         private readonly List<PropertyOptions> m_properties = new List<PropertyOptions>();
-        private readonly ConstructorInfo m_constructor;
+        private readonly List<FieldOptions> m_fields = new List<FieldOptions>();
+        private readonly Func<T> m_constructor;
 
-        public AutoSerializationMethod(CtpSerializable attr)
+        public AutoSerializationMethod(CtpSerializableAttribute attr)
         {
             m_type = typeof(T);
 
-            m_constructor = m_type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-            if (m_constructor == null)
+            var c = m_type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+            if (c == null)
                 throw new Exception("class does not contain a default constructor");
+            m_constructor = c.Compile<T>();
+
 
             foreach (var member in m_type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
@@ -58,6 +62,14 @@ namespace CTP.Serialization
                 if (f.IsValid)
                 {
                     m_properties.Add(f);
+                }
+            }
+            foreach (var member in m_type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
+            {
+                var f = new FieldOptions(member);
+                if (f.IsValid)
+                {
+                    m_fields.Add(f);
                 }
             }
 
@@ -68,11 +80,20 @@ namespace CTP.Serialization
                 if (!ids.Add(f.RecordName))
                     throw new Exception(string.Format("Duplicate Load IDs: {0} detected in class {1}.", f.RecordName, m_type.ToString()));
             }
+            foreach (var f in m_fields)
+            {
+                if (!ids.Add(f.RecordName))
+                    throw new Exception(string.Format("Duplicate Load IDs: {0} detected in class {1}.", f.RecordName, m_type.ToString()));
+            }
         }
 
         public override void InitializeSerializationMethod()
         {
             foreach (var property in m_properties)
+            {
+                property.InitializeSerializationMethod();
+            }
+            foreach (var property in m_fields)
             {
                 property.InitializeSerializationMethod();
             }
@@ -92,10 +113,14 @@ namespace CTP.Serialization
 
         public override T Load(CtpDocumentElement reader)
         {
-            var rv = (T)m_constructor.Invoke(new object[0]);
+            var rv = m_constructor();
             foreach (var item in m_properties)
             {
-                item.Load(this, reader);
+                item.Load(rv, reader);
+            }
+            foreach (var item in m_fields)
+            {
+                item.Load(rv, reader);
             }
             return rv;
         }
@@ -104,7 +129,11 @@ namespace CTP.Serialization
         {
             foreach (var item in m_properties)
             {
-                item.Save(this, writer);
+                item.Save(obj, writer);
+            }
+            foreach (var item in m_fields)
+            {
+                item.Save(obj, writer);
             }
         }
 
