@@ -31,4 +31,18 @@ namespace CTP.Serialization
         }
     }
 
+
+    internal class TypeSerializationCtpObject
+        : TypeSerializationMethodBase2<CtpObject>
+    {
+        public override CtpObject Load(CtpObject reader)
+        {
+            return (CtpObject)reader;
+        }
+
+        public override CtpObject Save(CtpObject obj)
+        {
+            return (CtpObject)obj;
+        }
+    }
 }

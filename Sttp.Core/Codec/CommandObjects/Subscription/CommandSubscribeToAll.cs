@@ -3,7 +3,7 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("SubscribeToAll")]
     public class CommandSubscribeToAll
     {
         public CommandSubscribeToAll()

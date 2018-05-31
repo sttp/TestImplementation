@@ -274,17 +274,14 @@ namespace CTP
             return !Equals(a, b);
         }
 
-        public static CtpDocument Serialize(object item, string rootElementName)
+        public static CtpDocument Serialize(object item)
         {
-            var wr = new CtpDocumentWriter(rootElementName);
-            TypeSerialization.GetMethod(item.GetType()).SaveObject(item, wr);
-            return wr.ToCtpDocument();
+            return TypeSerialization.GetMethod(item.GetType()).SaveObject(item);
         }
 
         public static T Load<T>(CtpDocument document)
         {
-            var rdr = document.MakeReader();
-            return TypeSerialization<T>.Load(rdr.ReadEntireElement());
+            return TypeSerialization<T>.Load(document);
         }
     }
 

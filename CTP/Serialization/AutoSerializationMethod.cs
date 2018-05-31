@@ -45,9 +45,11 @@ namespace CTP.Serialization
         private readonly List<PropertyOptions> m_properties = new List<PropertyOptions>();
         private readonly List<FieldOptions> m_fields = new List<FieldOptions>();
         private readonly Func<T> m_constructor;
+        public readonly CtpSerializableAttribute Attr;
 
         public AutoSerializationMethod(CtpSerializableAttribute attr)
         {
+            Attr = attr;
             m_type = typeof(T);
 
             var c = m_type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
@@ -85,6 +87,13 @@ namespace CTP.Serialization
                 if (!ids.Add(f.RecordName))
                     throw new Exception(string.Format("Duplicate Load IDs: {0} detected in class {1}.", f.RecordName, m_type.ToString()));
             }
+        }
+
+        public override CtpDocument SaveObject(object obj)
+        {
+            var wr = new CtpDocumentWriter(Attr.RootCommandName);
+            SaveObject(obj, wr);
+            return wr.ToCtpDocument();
         }
 
         public override void InitializeSerializationMethod()

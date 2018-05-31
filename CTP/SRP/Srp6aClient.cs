@@ -21,10 +21,10 @@ namespace CTP.SRP
             identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             password = password.Normalize(NormalizationForm.FormKC);
 
-            stream.WriteDocument(new SrpIdentity(identity),"SrpIdentity");
+            stream.WriteDocument(new SrpIdentity(identity));
             stream.Flush();
 
-            var lookup = stream.ReadDocument<SrpIdentityLookup>("SrpIdentityLookup");
+            var lookup = stream.ReadDocument<SrpIdentityLookup>();
 
             var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var strength = (SrpStrength)lookup.SrpStrength;
@@ -44,10 +44,10 @@ namespace CTP.SRP
             privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, clientCertificate, serverCertificate);
             byte[] clientChallenge = challengeClient;
 
-            stream.WriteDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge), "SrpClientResponse");
+            stream.WriteDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
             stream.Flush();
 
-            var cr = stream.ReadDocument<SrpServerResponse>("SrpServerResponse");
+            var cr = stream.ReadDocument<SrpServerResponse>();
             if (!challengeServer.SequenceEqual(cr.ServerChallenge))
                 throw new Exception("Failed server challenge");
         }

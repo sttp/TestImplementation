@@ -7,9 +7,9 @@ namespace CTP
 {
     public static class StreamExtensions
     {
-        public static void WriteDocument(this Stream stream, object document, string rootElementName)
+        public static void WriteDocument(this Stream stream, object document)
         {
-            WriteDocument(stream, CtpDocument.Serialize(document, rootElementName));
+            WriteDocument(stream, CtpDocument.Serialize(document));
         }
 
         public static void WriteDocument(this Stream stream, CtpDocument document)
@@ -28,11 +28,9 @@ namespace CTP
             return new CtpDocument(array);
         }
 
-        public static T ReadDocument<T>(this Stream stream, string rootElementName)
+        public static T ReadDocument<T>(this Stream stream)
         {
             var document = ReadDocument(stream);
-            if (document.RootElement != rootElementName)
-                throw new Exception("Document Mismatch");
             return CtpDocument.Load<T>(document);
         }
     }

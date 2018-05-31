@@ -3,7 +3,7 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("UnsubscribeResponse")]
     public class CommandUnsubscribeResponse
     {
         [CtpSerializeField()]

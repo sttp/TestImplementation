@@ -3,7 +3,7 @@ using CTP.Serialization;
 
 namespace CTP.SRP
 {
-    [CtpSerializable]
+    [CtpSerializable("SrpIdentity")]
     public class SrpIdentity
     {
         [CtpSerializeField()]
@@ -17,7 +17,7 @@ namespace CTP.SRP
         private SrpIdentity() { }
     }
 
-    [CtpSerializable]
+    [CtpSerializable("SrpIdentityLookup")]
     public class SrpIdentityLookup
     {
         [CtpSerializeField()] public int SrpStrength { get; private set; }
@@ -37,7 +37,7 @@ namespace CTP.SRP
         }
     }
 
-    [CtpSerializable]
+    [CtpSerializable("SrpClientResponse")]
     public class SrpClientResponse
     {
         [CtpSerializeField()] public byte[] PublicA { get; private set; }
@@ -54,7 +54,7 @@ namespace CTP.SRP
         }
     }
 
-    [CtpSerializable]
+    [CtpSerializable("SrpServerResponse")]
     public class SrpServerResponse
     {
         [CtpSerializeField()] public byte[] ServerChallenge { get; private set; }

@@ -10,7 +10,13 @@ namespace CTP.Serialization
 
         }
 
+        public virtual CtpDocument SaveObject(object obj)
+        {
+            throw new NotSupportedException();
+        }
+
         public abstract void SaveObject(object obj, CtpDocumentWriter writer);
+
         public abstract object LoadObject(CtpDocumentElement reader);
 
 

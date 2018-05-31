@@ -6,7 +6,7 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("SubscribeToSome")]
     public class CommandSubscribeToSome
     {
         [CtpSerializeField()]

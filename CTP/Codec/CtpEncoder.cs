@@ -92,9 +92,9 @@ namespace CTP
         /// </summary>
         /// <param name="command">The command to send.</param>
         /// <param name="commandName"></param>
-        public void SendDocumentCommands(object command, string commandName)
+        public void SendDocumentCommands(object command)
         {
-            SendDocumentCommands(CtpDocument.Serialize(command, commandName));
+            SendDocumentCommands(CtpDocument.Serialize(command));
         }
 
         /// <summary>

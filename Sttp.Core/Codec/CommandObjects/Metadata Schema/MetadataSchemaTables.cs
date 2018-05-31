@@ -7,7 +7,7 @@ using Sttp.Codec;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("MetadataSchemaTable")]
     public class MetadataSchemaTable
     {
         [CtpSerializeField()]

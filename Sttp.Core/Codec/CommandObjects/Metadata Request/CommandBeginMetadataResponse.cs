@@ -5,7 +5,7 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("BeginMetadataResponse")]
     public class CommandBeginMetadataResponse
     {
         [CtpSerializeField()]

@@ -7,7 +7,7 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("MetadataSchema")]
     public class CommandMetadataSchema
     {
         [CtpSerializeField()]

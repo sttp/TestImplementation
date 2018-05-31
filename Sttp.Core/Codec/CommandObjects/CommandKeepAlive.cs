@@ -7,7 +7,7 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable]
+    [CtpSerializable("KeepAlive")]
     public class CommandKeepAlive
     {
         public CommandKeepAlive()

@@ -14,7 +14,7 @@ namespace Sttp.Codec
     ///     <see cref="CommandRaw"/> - The rows.
     ///     <see cref="CommandEndMetadataResponse"/> - Closing the raw channel.
     /// </summary>
-    [CtpSerializable]
+    [CtpSerializable("GetMetadata")]
     public class CommandGetMetadata
     {
         [CtpSerializeField()]

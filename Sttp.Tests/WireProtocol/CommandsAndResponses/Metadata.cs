@@ -14,7 +14,7 @@ namespace Sttp.Tests.CommandsAndResponses
         {
             var cmd = new CommandGetMetadataSchema(Guid.NewGuid(), 382);
             Console.WriteLine(cmd.ToString());
-            Console.WriteLine(CtpDocument.Serialize(cmd, "GetMetadataSchema").ToYAML());
+            Console.WriteLine(CtpDocument.Serialize(cmd).ToYAML());
         }
 
         [TestMethod]
@@ -36,8 +36,8 @@ namespace Sttp.Tests.CommandsAndResponses
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
             Console.WriteLine(cmd.ToString());
-            Console.WriteLine(CtpDocument.Serialize(cmd, "MetadataSchema").ToYAML());
-            Console.WriteLine(CtpDocument.Load<CommandMetadataSchema>(CtpDocument.Serialize(cmd, "MetadataSchema")));
+            Console.WriteLine(CtpDocument.Serialize(cmd).ToYAML());
+            Console.WriteLine(CtpDocument.Load<CommandMetadataSchema>(CtpDocument.Serialize(cmd)));
 
         }
 
@@ -51,7 +51,7 @@ namespace Sttp.Tests.CommandsAndResponses
             tbl.Add(t);
             var cmd = new CommandMetadataSchemaUpdate(Guid.NewGuid(), 382, tbl);
             Console.WriteLine(cmd.ToString());
-            Console.WriteLine(CtpDocument.Serialize(cmd, "MetadataSchemaUpdate").ToYAML());
+            Console.WriteLine(CtpDocument.Serialize(cmd).ToYAML());
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@ namespace Sttp.Tests.CommandsAndResponses
         {
             var cmd = new CommandMetadataSchemaVersion(Guid.NewGuid(), 382);
             Console.WriteLine(cmd.ToString());
-            Console.WriteLine(CtpDocument.Serialize(cmd, "MetadataSchemaVersion").ToYAML());
+            Console.WriteLine(CtpDocument.Serialize(cmd).ToYAML());
         }
 
 

@@ -45,6 +45,7 @@ namespace CTP.Serialization
 
             Add(new TypeSerializationString());
             Add(new TypeSerializationByteArray());
+            Add(new TypeSerializationCtpObject());
         }
 
         static void Add(TypeSerializationMethodBase method)
@@ -116,6 +117,19 @@ namespace CTP.Serialization
         static TypeSerialization()
         {
             Serialization = TypeSerialization.GetMethod<T>();
+        }
+
+        public static T Load(CtpDocument document)
+        {
+            var item = Serialization as AutoSerializationMethod<T>;
+            if (item == null)
+                throw new NotSupportedException();
+            if (item.Attr.RootCommandName != document.RootElement)
+            {
+                throw new Exception("Document Mismatch");
+            }
+
+            return Load(document.MakeReader().ReadEntireElement());
         }
 
         public static T Load(CtpDocumentElement reader)
