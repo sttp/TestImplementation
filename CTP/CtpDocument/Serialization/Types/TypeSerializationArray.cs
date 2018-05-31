@@ -6,6 +6,11 @@ namespace CTP.Serialization
     internal class TypeSerializationArray<T>
         : TypeSerializationMethodBase<T[]>
     {
+        public TypeSerializationArray()
+        {
+            m_serializeT = TypeSerialization<T>.Serialization;
+        }
+
         public override CtpObject Save(T[] obj)
         {
             throw new NotSupportedException();
@@ -60,27 +65,7 @@ namespace CTP.Serialization
             }
         }
 
-        public TypeSerializationArray()
-        {
-            m_serializeT = TypeSerialization<T>.Serialization;
-        }
-
-        //public override T[] Load(CtpDocumentElement reader, string elementName)
-        //{
-        //    List<T> items = new List<T>();
-
-        //}
-
-        //public override void Save(T[] obj, CtpDocumentWriter writer, string elementName)
-        //{
-        //    foreach (var item in obj)
-        //    {
-        //        using (writer.StartElement(elementName))
-        //        {
-        //            m_serializeT.Save(item, writer);
-        //        }
-        //    }
-        //    throw new System.NotImplementedException();
-        //}
+      
+        
     }
 }

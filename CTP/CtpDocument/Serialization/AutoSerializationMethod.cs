@@ -34,7 +34,6 @@ namespace CTP.Serialization
         {
             return new AutoSerializationMethod<T>(attr);
         }
-
     }
 
     internal class AutoSerializationMethod<T>
@@ -42,7 +41,7 @@ namespace CTP.Serialization
     {
         public override bool IsArrayType => false;
         private readonly Type m_type;
-        private readonly List<FieldOptions<T>> m_records = new List<FieldOptions<T>>();
+        private readonly List<FieldOptions> m_records = new List<FieldOptions>();
         private readonly Func<T> m_constructor;
         public readonly CtpSerializableAttribute Attr;
 
@@ -56,22 +55,9 @@ namespace CTP.Serialization
                 throw new Exception("class does not contain a default constructor");
             m_constructor = c.Compile<T>();
 
-
-            foreach (var member in m_type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
+            foreach (var member in m_type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                var f = new FieldOptions<T>(member);
-                if (f.IsValid)
-                {
-                    m_records.Add(f);
-                }
-            }
-            foreach (var member in m_type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
-            {
-                var f = new FieldOptions<T>(member);
-                if (f.IsValid)
-                {
-                    m_records.Add(f);
-                }
+                TryCreateFieldOptions(member);
             }
 
             //Test for collisions
@@ -83,7 +69,24 @@ namespace CTP.Serialization
             }
         }
 
-      
+        private void TryCreateFieldOptions(MemberInfo member)
+        {
+            Type targetType;
+
+            if (member is FieldInfo)
+                targetType = ((FieldInfo)member).FieldType;
+            else if (member is PropertyInfo)
+                targetType = ((PropertyInfo)member).PropertyType;
+            else
+                return;
+
+            object[] attributes = member.GetCustomAttributes(true);
+            CtpSerializeFieldAttribute autoLoad = attributes.OfType<CtpSerializeFieldAttribute>().FirstOrDefault();
+            if (autoLoad != null)
+            {
+                m_records.Add(FieldOptions.CreateFieldOptions(member, targetType, autoLoad));
+            }
+        }
 
         public override void InitializeSerializationMethod()
         {

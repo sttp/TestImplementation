@@ -6,14 +6,7 @@ using GSF.Reflection;
 
 namespace CTP.Serialization
 {
-    internal abstract class CompiledSaveLoad
-    {
-        public abstract void Save(object obj, CtpDocumentWriter writer, string elementName);
-        public abstract void Load(object obj, CtpDocumentElement reader, string elementName);
-    }
-
     internal class CompiledSaveLoad<T>
-        : CompiledSaveLoad
     {
         private CtpSerializeFieldAttribute m_autoLoad;
         private TypeSerializationMethodBase<T> m_method;
@@ -36,10 +29,14 @@ namespace CTP.Serialization
                 m_read = ((FieldInfo)field).CompileGetter<T>();
                 m_write = ((FieldInfo)field).CompileSetter<T>();
             }
+            else
+            {
+                throw new NotSupportedException();
+            }
 
         }
-       
-        public override void Save(object obj, CtpDocumentWriter writer, string elementName)
+
+        public void Save(object obj, CtpDocumentWriter writer, string elementName)
         {
             var item = m_read(obj);
             if (m_method.IsValueType)
@@ -55,7 +52,7 @@ namespace CTP.Serialization
             }
         }
 
-        public override void Load(object obj, CtpDocumentElement reader, string elementName)
+        public void Load(object obj, CtpDocumentElement reader, string elementName)
         {
             T item;
             if (m_method.IsValueType)

@@ -4,56 +4,58 @@ using System.Reflection;
 
 namespace CTP.Serialization
 {
+    internal abstract class FieldOptions
+    {
+        public abstract void InitializeSerializationMethod();
+
+        public abstract string RecordName { get; }
+
+        public abstract void Load(object obj, CtpDocumentElement reader);
+
+        public abstract void Save(object obj, CtpDocumentWriter writer);
+
+        private static readonly MethodInfo Method2 = typeof(AutoInitialization).GetMethod("CreateFieldOptionsInternal", BindingFlags.Static | BindingFlags.NonPublic);
+
+        public static FieldOptions CreateFieldOptions(MemberInfo member, Type targetType, CtpSerializeFieldAttribute autoLoad)
+        {
+            var genericMethod = Method2.MakeGenericMethod(targetType);
+            return (FieldOptions)genericMethod.Invoke(null, new object[] { member, targetType, autoLoad });
+        }
+
+        private static FieldOptions CreateFieldOptionsInternal<TFieldType>(MemberInfo member, Type targetType, CtpSerializeFieldAttribute autoLoad)
+        {
+            return new FieldOptions<TFieldType>(member, targetType, autoLoad);
+        }
+    }
+
     internal class FieldOptions<T>
+        : FieldOptions
     {
         private CtpSerializeFieldAttribute m_autoLoad;
-        private CompiledSaveLoad m_saveLoad;
+        private CompiledSaveLoad<T> m_saveLoad;
         private MemberInfo m_info;
         private Type m_fieldType;
+        private string m_recordName;
 
-        public FieldOptions(MemberInfo info)
+        public FieldOptions(MemberInfo member, Type targetType, CtpSerializeFieldAttribute autoLoad)
         {
-            object[] attributes = info.GetCustomAttributes(true);
-            m_autoLoad = attributes.OfType<CtpSerializeFieldAttribute>().FirstOrDefault();
-            m_info = info;
-
-            if (m_info is FieldInfo)
-            {
-                m_fieldType = ((FieldInfo)m_info).FieldType;
-            }
-            else if (m_info is PropertyInfo)
-            {
-                m_fieldType = ((PropertyInfo)m_info).PropertyType;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            RecordName = m_autoLoad?.RecordName ?? info.Name;
-
+            m_autoLoad = autoLoad;
+            m_recordName = m_autoLoad?.RecordName ?? member.Name;
         }
 
-        public void InitializeSerializationMethod()
+        public override void InitializeSerializationMethod()
         {
-            m_saveLoad = TypeSerialization.GetMethod(m_fieldType).CompiledSaveLoad(m_info, m_autoLoad);
+            m_saveLoad = new CompiledSaveLoad<T>(TypeSerialization<T>.Serialization, m_info, m_autoLoad);
         }
 
-        public bool IsValid
-        {
-            get
-            {
-                return m_autoLoad != null;
-            }
-        }
+        public override string RecordName => m_recordName;
 
-        public string RecordName { get; private set; }
-
-        public void Load(object obj, CtpDocumentElement reader)
+        public override void Load(object obj, CtpDocumentElement reader)
         {
             m_saveLoad.Load(obj, reader, RecordName);
         }
 
-        public void Save(object obj, CtpDocumentWriter writer)
+        public override void Save(object obj, CtpDocumentWriter writer)
         {
             m_saveLoad.Save(obj, writer, RecordName);
         }

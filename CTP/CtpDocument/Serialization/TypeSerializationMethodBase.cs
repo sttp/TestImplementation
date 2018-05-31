@@ -10,14 +10,11 @@ namespace CTP.Serialization
         /// </summary>
         public abstract Type ObjectType { get; }
 
-        public abstract CompiledSaveLoad CompiledSaveLoad(MemberInfo property, CtpSerializeFieldAttribute autoLoad);
-
         /// <summary>
         /// Due to circular dependencies, this method may need to be called before assigning nested dependencies.
         /// </summary>
         public virtual void InitializeSerializationMethod()
         {
-
         }
     }
 
@@ -35,11 +32,6 @@ namespace CTP.Serialization
         public abstract CtpObject Save(T obj);
 
         public abstract void Save(T obj, CtpDocumentWriter writer);
-
-        public override CompiledSaveLoad CompiledSaveLoad(MemberInfo property, CtpSerializeFieldAttribute autoLoad)
-        {
-            return new CompiledSaveLoad<T>(this, property, autoLoad);
-        }
     }
 
     internal abstract class TypeSerializationMethodValueType<T>

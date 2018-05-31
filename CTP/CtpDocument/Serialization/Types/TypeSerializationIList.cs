@@ -7,10 +7,12 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<TList>
         where TList : IList<T>
     {
+
         public override bool IsArrayType => true;
         public override bool IsValueType => false;
         private TypeSerializationMethodBase<T> m_serializeT;
         private Func<int, TList> m_objConstructor;
+
         public TypeSerializationIList(Func<int, TList> objConstructor)
         {
             m_objConstructor = objConstructor;
