@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CTP;
 
 namespace CTP.Serialization
 {
@@ -25,7 +24,7 @@ namespace CTP.Serialization
             Add(new TypeSerializationUInt8());
             Add(new TypeSerializationInt8());
             Add(new TypeSerializationBool());
-           
+
 
             Add(new TypeSerializationDecimalNull());
             Add(new TypeSerializationGuidNull());
@@ -99,11 +98,6 @@ namespace CTP.Serialization
                 throw new Exception("Unknown Serialization Ability: " + type.ToString());
             }
         }
-
-        public static TypeSerializationMethodBase<T> GetMethod<T>()
-        {
-            return (TypeSerializationMethodBase<T>)GetMethod(typeof(T));
-        }
     }
 
     /// <summary>
@@ -112,11 +106,24 @@ namespace CTP.Serialization
     /// <typeparam name="T"></typeparam>
     public static class TypeSerialization<T>
     {
-        private static readonly TypeSerializationMethodBase<T> Serialization;
+        //ToDO: Make a getter so errors can be thrown if there was a static constructor error.
+        internal static readonly TypeSerializationMethodBase<T> Serialization;
 
         static TypeSerialization()
         {
-            Serialization = TypeSerialization.GetMethod<T>();
+            //ToDo: Do something if there is a static constructor error.
+            Serialization = (TypeSerializationMethodBase<T>)TypeSerialization.GetMethod(typeof(T));
+        }
+
+        public static CtpDocument Save(T obj)
+        {
+            var item = Serialization as AutoSerializationMethod<T>;
+            if (item == null)
+                throw new NotSupportedException();
+
+            var wr = new CtpDocumentWriter(item.Attr.RootCommandName);
+            Serialization.Save(obj, wr);
+            return wr.ToCtpDocument();
         }
 
         public static T Load(CtpDocument document)
@@ -125,51 +132,9 @@ namespace CTP.Serialization
             if (item == null)
                 throw new NotSupportedException();
             if (item.Attr.RootCommandName != document.RootElement)
-            {
                 throw new Exception("Document Mismatch");
-            }
 
-            return Load(document.MakeReader().ReadEntireElement());
+            return Serialization.Load(document.MakeReader().ReadEntireElement());
         }
-
-        public static T Load(CtpDocumentElement reader)
-        {
-            if (Serialization.IsValueType)
-            {
-                throw new NotSupportedException();
-            }
-            else
-            {
-                return Serialization.Load(reader);
-            }
-        }
-
-        public static T Load(CtpDocumentElement reader, string elementName)
-        {
-            if (Serialization.IsValueType)
-            {
-                return Serialization.Load(reader.GetValue(elementName));
-            }
-            else
-            {
-                return Serialization.Load(reader.GetElement(elementName));
-            }
-        }
-
-        public static void Save(T value, CtpDocumentWriter writer, string elementName)
-        {
-            if (Serialization.IsValueType)
-            {
-                writer.WriteValue(elementName, Serialization.Save(value));
-            }
-            else
-            {
-                using (writer.StartElement(elementName, Serialization.IsArrayType))
-                {
-                    Serialization.Save(value, writer);
-                }
-            }
-        }
-
     }
 }

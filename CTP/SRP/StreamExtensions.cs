@@ -7,9 +7,9 @@ namespace CTP
 {
     public static class StreamExtensions
     {
-        public static void WriteDocument(this Stream stream, object document)
+        public static void WriteDocument<T>(this Stream stream, T document)
         {
-            WriteDocument(stream, CtpDocument.Serialize(document));
+            WriteDocument(stream, CtpDocument.Save(document));
         }
 
         public static void WriteDocument(this Stream stream, CtpDocument document)

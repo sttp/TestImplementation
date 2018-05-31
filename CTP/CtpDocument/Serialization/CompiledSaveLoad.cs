@@ -20,22 +20,25 @@ namespace CTP.Serialization
         private Func<object, T> m_read;
         private Action<object, T> m_write;
 
-        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, PropertyInfo field, CtpSerializeFieldAttribute autoLoad)
+        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, MemberInfo field, CtpSerializeFieldAttribute autoLoad)
         {
-            m_autoLoad = autoLoad;
-            m_method = method;
-            m_read = field.CompileGetter<T>();
-            m_write = field.CompileSetter<T>();
-        }
+            if (field is PropertyInfo)
+            {
+                m_autoLoad = autoLoad;
+                m_method = method;
+                m_read = ((PropertyInfo)field).CompileGetter<T>();
+                m_write = ((PropertyInfo)field).CompileSetter<T>();
+            }
+            else if (field is FieldInfo)
+            {
+                m_autoLoad = autoLoad;
+                m_method = method;
+                m_read = ((FieldInfo)field).CompileGetter<T>();
+                m_write = ((FieldInfo)field).CompileSetter<T>();
+            }
 
-        public CompiledSaveLoad(TypeSerializationMethodBase<T> method, FieldInfo field, CtpSerializeFieldAttribute autoLoad)
-        {
-            m_autoLoad = autoLoad;
-            m_method = method;
-            m_read = field.CompileGetter<T>();
-            m_write = field.CompileSetter<T>();
         }
-
+       
         public override void Save(object obj, CtpDocumentWriter writer, string elementName)
         {
             var item = m_read(obj);

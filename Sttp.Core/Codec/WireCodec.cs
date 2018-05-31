@@ -177,7 +177,7 @@ namespace Sttp.Codec
             m_encoder.SendDocumentCommands(new CommandEndMetadataResponse(rawChannelID, rowCount));
         }
 
-        public void SendCustomCommand(object command)
+        public void SendCustomCommand<T>(T command)
         {
             m_encoder.SendDocumentCommands(command);
         }

@@ -62,7 +62,7 @@ namespace CTP.Serialization
 
         public TypeSerializationArray()
         {
-            m_serializeT = TypeSerialization.GetMethod<T>();
+            m_serializeT = TypeSerialization<T>.Serialization;
         }
 
         //public override T[] Load(CtpDocumentElement reader, string elementName)

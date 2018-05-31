@@ -3,7 +3,7 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationUInt16Null
-        : TypeSerializationMethodBase2<ushort?>
+        : TypeSerializationMethodValueType<ushort?>
     {
         public override ushort? Load(CtpObject reader)
         {
@@ -17,7 +17,7 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationInt16Null
-        : TypeSerializationMethodBase2<short?>
+        : TypeSerializationMethodValueType<short?>
     {
         public override short? Load(CtpObject reader)
         {
@@ -31,7 +31,7 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationCharNull
-        : TypeSerializationMethodBase2<char?>
+        : TypeSerializationMethodValueType<char?>
     {
         public override char? Load(CtpObject reader)
         {

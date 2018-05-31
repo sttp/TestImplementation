@@ -4,7 +4,7 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationString
-        : TypeSerializationMethodBase2<string>
+        : TypeSerializationMethodValueType<string>
     {
         public override string Load(CtpObject reader)
         {
@@ -18,7 +18,7 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationByteArray
-       : TypeSerializationMethodBase2<byte[]>
+       : TypeSerializationMethodValueType<byte[]>
     {
         public override byte[] Load(CtpObject reader)
         {
@@ -33,7 +33,7 @@ namespace CTP.Serialization
 
 
     internal class TypeSerializationCtpObject
-        : TypeSerializationMethodBase2<CtpObject>
+        : TypeSerializationMethodValueType<CtpObject>
     {
         public override CtpObject Load(CtpObject reader)
         {

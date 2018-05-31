@@ -4,7 +4,7 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationUInt64Null
-        : TypeSerializationMethodBase2<ulong?>
+        : TypeSerializationMethodValueType<ulong?>
     {
         public override ulong? Load(CtpObject reader)
         {
@@ -18,7 +18,7 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationInt64Null
-        : TypeSerializationMethodBase2<long?>
+        : TypeSerializationMethodValueType<long?>
     {
 
         public override long? Load(CtpObject reader)
@@ -33,7 +33,7 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationDoubleNull
-        : TypeSerializationMethodBase2<double?>
+        : TypeSerializationMethodValueType<double?>
     {
 
         public override double? Load(CtpObject reader)
@@ -48,7 +48,7 @@ namespace CTP.Serialization
     }
   
     internal class TypeSerializationDateTimeNull
-        : TypeSerializationMethodBase2<DateTime?>
+        : TypeSerializationMethodValueType<DateTime?>
     {
         public override DateTime? Load(CtpObject reader)
         {

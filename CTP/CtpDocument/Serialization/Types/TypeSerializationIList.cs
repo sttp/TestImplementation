@@ -14,7 +14,7 @@ namespace CTP.Serialization
         public TypeSerializationIList(Func<int, TList> objConstructor)
         {
             m_objConstructor = objConstructor;
-            m_serializeT = TypeSerialization.GetMethod<T>();
+            m_serializeT = TypeSerialization<T>.Serialization;
         }
 
         public override TList Load(CtpDocumentElement reader)

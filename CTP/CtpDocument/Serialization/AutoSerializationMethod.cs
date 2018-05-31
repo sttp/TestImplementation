@@ -42,8 +42,7 @@ namespace CTP.Serialization
     {
         public override bool IsArrayType => false;
         private readonly Type m_type;
-        private readonly List<PropertyOptions> m_properties = new List<PropertyOptions>();
-        private readonly List<FieldOptions> m_fields = new List<FieldOptions>();
+        private readonly List<FieldOptions<T>> m_records = new List<FieldOptions<T>>();
         private readonly Func<T> m_constructor;
         public readonly CtpSerializableAttribute Attr;
 
@@ -60,49 +59,35 @@ namespace CTP.Serialization
 
             foreach (var member in m_type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                var f = new PropertyOptions(member);
+                var f = new FieldOptions<T>(member);
                 if (f.IsValid)
                 {
-                    m_properties.Add(f);
+                    m_records.Add(f);
                 }
             }
             foreach (var member in m_type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                var f = new FieldOptions(member);
+                var f = new FieldOptions<T>(member);
                 if (f.IsValid)
                 {
-                    m_fields.Add(f);
+                    m_records.Add(f);
                 }
             }
 
             //Test for collisions
             HashSet<string> ids = new HashSet<string>();
-            foreach (var f in m_properties)
-            {
-                if (!ids.Add(f.RecordName))
-                    throw new Exception(string.Format("Duplicate Load IDs: {0} detected in class {1}.", f.RecordName, m_type.ToString()));
-            }
-            foreach (var f in m_fields)
+            foreach (var f in m_records)
             {
                 if (!ids.Add(f.RecordName))
                     throw new Exception(string.Format("Duplicate Load IDs: {0} detected in class {1}.", f.RecordName, m_type.ToString()));
             }
         }
 
-        public override CtpDocument SaveObject(object obj)
-        {
-            var wr = new CtpDocumentWriter(Attr.RootCommandName);
-            SaveObject(obj, wr);
-            return wr.ToCtpDocument();
-        }
+      
 
         public override void InitializeSerializationMethod()
         {
-            foreach (var property in m_properties)
-            {
-                property.InitializeSerializationMethod();
-            }
-            foreach (var property in m_fields)
+            foreach (var property in m_records)
             {
                 property.InitializeSerializationMethod();
             }
@@ -123,11 +108,7 @@ namespace CTP.Serialization
         public override T Load(CtpDocumentElement reader)
         {
             var rv = m_constructor();
-            foreach (var item in m_properties)
-            {
-                item.Load(rv, reader);
-            }
-            foreach (var item in m_fields)
+            foreach (var item in m_records)
             {
                 item.Load(rv, reader);
             }
@@ -136,11 +117,7 @@ namespace CTP.Serialization
 
         public override void Save(T obj, CtpDocumentWriter writer)
         {
-            foreach (var item in m_properties)
-            {
-                item.Save(obj, writer);
-            }
-            foreach (var item in m_fields)
+            foreach (var item in m_records)
             {
                 item.Save(obj, writer);
             }

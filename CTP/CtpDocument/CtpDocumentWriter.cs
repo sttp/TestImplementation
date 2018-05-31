@@ -68,7 +68,6 @@ namespace CTP
         private int m_prefixLength;
         private string m_rootElement;
 
-
         /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>

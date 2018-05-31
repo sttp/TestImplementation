@@ -274,9 +274,14 @@ namespace CTP
             return !Equals(a, b);
         }
 
-        public static CtpDocument Serialize(object item)
+        public static CtpDocument Save<T>(T item)
         {
-            return TypeSerialization.GetMethod(item.GetType()).SaveObject(item);
+            if (typeof(T) != item.GetType())
+            {
+                throw new ArgumentException("The supplied type must exactly match the generic type parameter",nameof(item));
+            }
+
+            return TypeSerialization<T>.Save(item);
         }
 
         public static T Load<T>(CtpDocument document)

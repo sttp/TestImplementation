@@ -91,10 +91,9 @@ namespace CTP
         /// Encodes and sends the supplied command to the client.
         /// </summary>
         /// <param name="command">The command to send.</param>
-        /// <param name="commandName"></param>
-        public void SendDocumentCommands(object command)
+        public void SendDocumentCommands<T>(T command)
         {
-            SendDocumentCommands(CtpDocument.Serialize(command));
+            SendDocumentCommands(CtpDocument.Save(command));
         }
 
         /// <summary>

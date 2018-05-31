@@ -5,7 +5,7 @@ using GSF;
 namespace CTP.Serialization
 {
     internal class TypeSerializationDecimalNull
-        : TypeSerializationMethodBase2<decimal?>
+        : TypeSerializationMethodValueType<decimal?>
     {
         public override decimal? Load(CtpObject reader)
         {
@@ -19,7 +19,7 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationGuidNull
-        : TypeSerializationMethodBase2<Guid?>
+        : TypeSerializationMethodValueType<Guid?>
     {
         public override Guid? Load(CtpObject reader)
         {
