@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
@@ -13,38 +14,22 @@ namespace Sttp.Codec
     ///     <see cref="CommandRaw"/> - The rows.
     ///     <see cref="CommandEndMetadataResponse"/> - Closing the raw channel.
     /// </summary>
-    public class CommandGetMetadata : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandGetMetadata
     {
-        public string Table;
-        public List<string> Columns = new List<string>();
+        [CtpSerializeField()]
+        public string Table { get; private set; }
+        [CtpSerializeField()]
+        public List<string> Columns { get; private set; } = new List<string>();
 
         public CommandGetMetadata(string table, IEnumerable<string> columns)
-            : base("GetMetadata")
         {
             Table = table;
             Columns.AddRange(columns);
         }
 
-        public CommandGetMetadata(CtpDocumentReader reader)
-            : base("GetMetadata")
-        {
-            var element = reader.ReadEntireElement();
+        //Exists to support CtpSerializable
+        private CommandGetMetadata() { }
 
-            Table = (string)element.GetValue("Table");
-            foreach (string c in element.ForEachValue("Column"))
-            {
-                Columns.Add(c);
-            }
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("Table", Table);
-            foreach (var column in Columns)
-            {
-                writer.WriteValue("Column", column);
-            }
-        }
     }
 }

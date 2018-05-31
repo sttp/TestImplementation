@@ -1,32 +1,23 @@
 ﻿using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandEndMetadataResponse : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandEndMetadataResponse
     {
-        public readonly int BinaryChannelCode;
-        public readonly int RowCount;
+        [CtpSerializeField()]
+        public int BinaryChannelCode { get; private set; }
+        [CtpSerializeField()]
+        public int RowCount { get; private set; }
 
         public CommandEndMetadataResponse(int binaryChannelCode, int rowCount)
-            : base("EndMetadataResponse")
         {
             BinaryChannelCode = binaryChannelCode;
             RowCount = rowCount;
         }
 
-        public CommandEndMetadataResponse(CtpDocumentReader reader)
-            : base("EndMetadataResponse")
-        {
-            var element = reader.ReadEntireElement();
-            BinaryChannelCode = (int)element.GetValue("BinaryChannelCode");
-            RowCount = (int)element.GetValue("RowCount");
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("BinaryChannelCode", BinaryChannelCode);
-            writer.WriteValue("RowCount", RowCount);
-        }
+        //Exists to support CtpSerializable
+        private CommandEndMetadataResponse() { }
     }
 }

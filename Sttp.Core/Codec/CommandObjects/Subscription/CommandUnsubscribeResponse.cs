@@ -1,31 +1,21 @@
 ﻿using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandUnsubscribeResponse : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandUnsubscribeResponse
     {
-        public readonly int BinaryChannelCode;
+        [CtpSerializeField()]
+        public int BinaryChannelCode;
 
         public CommandUnsubscribeResponse(int binaryChannelCode)
-            : base("UnsubscribeResponse")
         {
             BinaryChannelCode = binaryChannelCode;
         }
 
-        public CommandUnsubscribeResponse(CtpDocumentReader reader)
-            : base("UnsubscribeResponse")
-        {
-            var element = reader.ReadEntireElement();
+        //Exists to support CtpSerializable
+        private CommandUnsubscribeResponse() { }
 
-            BinaryChannelCode = (int)element.GetValue("BinaryChannelCode");
-
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("BinaryChannelCode", BinaryChannelCode);
-
-        }
     }
 }

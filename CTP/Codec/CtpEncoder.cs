@@ -87,16 +87,14 @@ namespace CTP
             EncodeAndSend(header, m_buffer, headerOffset, length);
         }
 
-
         /// <summary>
         /// Encodes and sends the supplied command to the client.
         /// </summary>
         /// <param name="command">The command to send.</param>
-        public void SendDocumentCommands(DocumentCommandBase command)
+        /// <param name="commandName"></param>
+        public void SendDocumentCommands(object command, string commandName)
         {
-            m_writerCache.Reset(command.CommandName);
-            command.Save(m_writerCache);
-            SendDocumentCommands(m_writerCache);
+            SendDocumentCommands(CtpDocument.Serialize(command, commandName));
         }
 
         /// <summary>
@@ -104,7 +102,7 @@ namespace CTP
         /// the other overload that contains <see cref="DocumentCommandBase"/> if one exists.
         /// </summary>
         /// <param name="writer">The data to send.</param>
-        private void SendDocumentCommands(CtpDocumentWriter writer)
+        private void SendDocumentCommands(CtpDocument writer)
         {
             EnsureCapacity(BufferOffset + writer.Length);
             writer.CopyTo(m_buffer, BufferOffset);

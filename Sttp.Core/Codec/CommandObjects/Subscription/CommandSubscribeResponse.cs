@@ -1,36 +1,25 @@
 ﻿using System;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribeResponse : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandSubscribeResponse 
     {
-        public readonly int BinaryChannelCode;
-        public readonly Guid EncodingMethod;
+        [CtpSerializeField()]
+        public int BinaryChannelCode { get; private set; }
+        [CtpSerializeField()]
+        public Guid EncodingMethod { get; private set; }
 
         public CommandSubscribeResponse(int binaryChannelCode, Guid encodingMethod)
-            : base("SubscribeResponse")
         {
             BinaryChannelCode = binaryChannelCode;
             EncodingMethod = encodingMethod;
         }
 
-        public CommandSubscribeResponse(CtpDocumentReader reader)
-            : base("SubscribeResponse")
-        {
-            var element = reader.ReadEntireElement();
-
-            BinaryChannelCode = (int)element.GetValue("BinaryChannelCode");
-            EncodingMethod = (Guid)element.GetValue("EncodingMethod");
-
-            element.ErrorIfNotHandled();
-        }
-
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("BinaryChannelCode", BinaryChannelCode);
-            writer.WriteValue("EncodingMethod", EncodingMethod);
-        }
+        //Exists to support CtpSerializable
+        private CommandSubscribeResponse() { }
+      
     }
 }

@@ -2,47 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribeToSome : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandSubscribeToSome
     {
-        public readonly string InstanceName;
-        public readonly CtpObject[] DataPointIDs;
-        public readonly double? SamplePerSecond;
+        [CtpSerializeField()]
+        public string InstanceName { get; private set; }
+        [CtpSerializeField()]
+        public CtpObject[] DataPointIDs { get; private set; }
+        [CtpSerializeField()]
+        public double? SamplePerSecond { get; private set; }
 
         public CommandSubscribeToSome(string instanceName, CtpObject[] dataPointIDs, double? samplesPerSecond)
-            : base("SubscribeToSome")
         {
             InstanceName = instanceName;
             DataPointIDs = dataPointIDs;
             SamplePerSecond = samplesPerSecond;
         }
 
-        public CommandSubscribeToSome(CtpDocumentReader reader)
-            : base("SubscribeToSome")
-        {
-            var element = reader.ReadEntireElement();
+        //Exists to support CtpSerializable
+        private CommandSubscribeToSome() { }
 
-            InstanceName = (string)element.GetValue("InstanceName");
-            DataPointIDs = element.GetElement("PointList").ForEachValue("ID").ToArray();
-            SamplePerSecond = (double?)element.GetValue("SamplePerSecond");
-
-            element.ErrorIfNotHandled();
-        }
-
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("InstanceName", InstanceName);
-            using (writer.StartElement("PointList"))
-            {
-                foreach (var id in DataPointIDs)
-                {
-                    writer.WriteValue("ID", id);
-                }
-            }
-            writer.WriteValue("SamplePerSecond", SamplePerSecond);
-        }
     }
 }

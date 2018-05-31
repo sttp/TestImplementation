@@ -2,47 +2,25 @@
 using System.Collections.Generic;
 using System.Text;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandGetMetadataProcedure : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandGetMetadataProcedure
     {
+        [CtpSerializeField()]
         public string Name;
+        [CtpSerializeField()]
         public List<MetadataProcedureParameters> Parameters;
 
         public CommandGetMetadataProcedure(string name, List<MetadataProcedureParameters> parameters)
-            : base("GetMetadataProcedure")
         {
             Name = name;
             Parameters = parameters;
         }
 
-        public CommandGetMetadataProcedure(CtpDocumentReader reader)
-            : base("GetMetadataProcedure")
-        {
-            var element = reader.ReadEntireElement();
-
-            Name = (string)element.GetValue("Name");
-            Parameters = new List<MetadataProcedureParameters>();
-            foreach (var e in element.ForEachElement("Parameters"))
-            {
-                Parameters.Add(new MetadataProcedureParameters(e));
-            }
-
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("Name", Name);
-
-            foreach (var c in Parameters)
-            {
-                using (writer.StartElement("Parameter"))
-                {
-                    c.Save(writer);
-                }
-            }
-        }
+        //Exists to support CtpSerializable
+        private CommandGetMetadataProcedure() { }
     }
 }

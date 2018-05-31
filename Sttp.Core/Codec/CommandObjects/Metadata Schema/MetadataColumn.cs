@@ -19,7 +19,7 @@ namespace Sttp.Codec
         /// </summary>
         public CtpTypeCode TypeCode { get; private set; }
 
-        [CtpSerializeField()]
+        [CtpSerializeField("TypeCode")]
         private string TypeCodeInternal
         {
             get
@@ -33,33 +33,14 @@ namespace Sttp.Codec
 
         }
 
-        public MetadataColumn(CtpDocumentElement documentElement)
-        {
-            Name = (string)documentElement.GetValue("Name");
-            TypeCode = (CtpTypeCode)Enum.Parse(typeof(CtpTypeCode), (string)documentElement.GetValue("TypeCode"));
-            documentElement.ErrorIfNotHandled();
-        }
-
         public MetadataColumn(string name, CtpTypeCode typeCode)
         {
             TypeCode = typeCode;
             Name = name;
         }
 
-        private MetadataColumn()
-        {
+        //Exists to support CtpSerializable
+        private MetadataColumn() { }
 
-        }
-
-        public override string ToString()
-        {
-            return $"{Name} ({TypeCode})";
-        }
-
-        public void Save(CtpDocumentWriter sml)
-        {
-            sml.WriteValue("Name", Name);
-            sml.WriteValue("TypeCode", TypeCode.ToString());
-        }
     }
 }

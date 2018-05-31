@@ -8,7 +8,7 @@ using CTP.Serialization;
 namespace Sttp.Codec
 {
     [CtpSerializable]
-    public class CommandMetadataSchema : DocumentCommandBase
+    public class CommandMetadataSchema
     {
         [CtpSerializeField()]
         public Guid RuntimeID { get; private set; }
@@ -18,47 +18,14 @@ namespace Sttp.Codec
         public List<MetadataSchemaTable> Tables { get; private set; }
 
         public CommandMetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
-            : base("MetadataSchema")
         {
             RuntimeID = runtimeID;
             VersionNumber = versionNumber;
             Tables = new List<MetadataSchemaTable>(tables);
         }
 
-        public CommandMetadataSchema(CtpDocumentReader reader)
-            : base("MetadataSchema")
-        {
-            Tables = new List<MetadataSchemaTable>();
-            var element = reader.ReadEntireElement();
-
-            RuntimeID = (Guid)element.GetValue("RuntimeID");
-            VersionNumber = (long)element.GetValue("VersionNumber");
-
-            foreach (var query in element.ForEachElement("Table"))
-            {
-                Tables.Add(new MetadataSchemaTable(query));
-            }
-            element.ErrorIfNotHandled();
-        }
-
-        private CommandMetadataSchema()
-            : base("MetadataSchema")
-        {
-
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("RuntimeID", RuntimeID);
-            writer.WriteValue("VersionNumber", VersionNumber);
-            foreach (var q in Tables)
-            {
-                using (writer.StartElement("Table"))
-                {
-                    q.Save(writer);
-                }
-            }
-        }
+        //Exists to support CtpSerializable
+        private CommandMetadataSchema() { }
 
         public CommandMetadataSchema Combine(CommandMetadataSchemaUpdate update)
         {

@@ -1,17 +1,15 @@
 ﻿using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
+    [CtpSerializable]
     public class MetadataProcedureParameters
     {
-        public readonly string Name;
-        public readonly CtpObject Value;
-        public MetadataProcedureParameters(CtpDocumentElement documentElement)
-        {
-            Name = (string)documentElement.GetValue("Name");
-            Value = documentElement.GetValue("Value");
-            documentElement.ErrorIfNotHandled();
-        }
+        [CtpSerializeField()]
+        public string Name { get; private set; }
+        [CtpSerializeField()]
+        public CtpObject Value { get; private set; }
 
         public MetadataProcedureParameters(string name, CtpObject value)
         {
@@ -19,15 +17,13 @@ namespace Sttp.Codec
             Value = value;
         }
 
+        //Exists to support CtpSerializable
+        private MetadataProcedureParameters() { }
+
         public override string ToString()
         {
             return $"{Name}: ({Value})";
         }
 
-        public void Save(CtpDocumentWriter sml)
-        {
-            sml.WriteValue("Name", Name);
-            sml.WriteValue("Value", Value);
-        }
     }
 }

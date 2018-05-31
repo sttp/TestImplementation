@@ -139,47 +139,47 @@ namespace Sttp.Codec
 
         public void GetMetadataSchema(Guid? lastKnownRuntimeID = null, long? lastKnownVersionNumber = null)
         {
-            m_encoder.SendDocumentCommands(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
+            m_encoder.SendDocumentCommands(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber), "GetMetadataSchema");
         }
 
         public void MetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchema(runtimeID, versionNumber, tables));
+            m_encoder.SendDocumentCommands(new CommandMetadataSchema(runtimeID, versionNumber, tables), "MetadataSchema");
         }
 
         public void MetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
+            m_encoder.SendDocumentCommands(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables), "MetadataSchemaUpdate");
         }
 
         public void MetadataSchemaVersion(Guid runtimeID, long versionNumber)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchemaVersion(runtimeID, versionNumber));
+            m_encoder.SendDocumentCommands(new CommandMetadataSchemaVersion(runtimeID, versionNumber), "MetadataSchemaVersion");
         }
 
         public void GetMetadata(string table, IEnumerable<string> columns)
         {
-            m_encoder.SendDocumentCommands(new CommandGetMetadata(table, columns));
+            m_encoder.SendDocumentCommands(new CommandGetMetadata(table, columns), "GetMetadata");
         }
 
         public void MetadataRequestFailed(string reason, string details)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataRequestFailed(reason, details));
+            m_encoder.SendDocumentCommands(new CommandMetadataRequestFailed(reason, details), "MetadataRequestFailed");
         }
 
         public void BeginMetadataResponse(int rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
         {
-            m_encoder.SendDocumentCommands(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
+            m_encoder.SendDocumentCommands(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns), "BeginMetadataResponse");
         }
 
         public void EndMetadataResponse(int rawChannelID, int rowCount)
         {
-            m_encoder.SendDocumentCommands(new CommandEndMetadataResponse(rawChannelID, rowCount));
+            m_encoder.SendDocumentCommands(new CommandEndMetadataResponse(rawChannelID, rowCount), "EndMetadataResponse");
         }
 
-        public void SendCustomCommand(DocumentCommandBase command)
+        public void SendCustomCommand(object command, string commandName)
         {
-            m_encoder.SendDocumentCommands(command);
+            m_encoder.SendDocumentCommands(command, commandName);
         }
 
         public void Raw(int rawCommandCode, byte[] payload)
@@ -189,7 +189,7 @@ namespace Sttp.Codec
 
         public void RequestFailed(string origionalCommand, string reason, string details)
         {
-            m_encoder.SendDocumentCommands(new CommandRequestFailed(origionalCommand, reason, details));
+            m_encoder.SendDocumentCommands(new CommandRequestFailed(origionalCommand, reason, details), "RequestFailed");
         }
 
 

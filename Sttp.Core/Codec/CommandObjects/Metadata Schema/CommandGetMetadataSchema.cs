@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using CTP;
 using CTP.Serialization;
 
@@ -15,39 +14,20 @@ namespace Sttp.Codec
     /// Responds with <see cref="CommandMetadataSchemaVersion"/> if there are no changes in the metadata.
     /// </summary>
     [CtpSerializable]
-    public class CommandGetMetadataSchema : DocumentCommandBase
+    public class CommandGetMetadataSchema
     {
         [CtpSerializeField()]
         public Guid? LastKnownRuntimeID { get; private set; }
         [CtpSerializeField()]
         public long? LastKnownVersionNumber { get; private set; }
 
-        public CommandGetMetadataSchema()
-            : base("GetMetadataSchema")
-        {
-
-        }
+        //Exists to support CtpSerializable
+        private CommandGetMetadataSchema() { }
 
         public CommandGetMetadataSchema(Guid? lastKnownRuntimeID, long? lastKnownVersionNumber)
-            : this()
         {
             LastKnownRuntimeID = lastKnownRuntimeID;
             LastKnownVersionNumber = lastKnownVersionNumber;
-        }
-
-        public CommandGetMetadataSchema(CtpDocumentReader reader)
-            : this()
-        {
-            var element = reader.ReadEntireElement();
-            LastKnownRuntimeID = (Guid?)element.GetValue("LastKnownRuntimeID");
-            LastKnownVersionNumber = (long?)element.GetValue("LastKnownVersionNumber");
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("LastKnownRuntimeID", LastKnownRuntimeID);
-            writer.WriteValue("LastKnownVersionNumber", LastKnownVersionNumber);
         }
     }
 }

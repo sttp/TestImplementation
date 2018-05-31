@@ -1,24 +1,16 @@
 ﻿using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscribeToAll : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandSubscribeToAll
     {
         public CommandSubscribeToAll()
-            : base("SubscribeToAll")
         {
+
         }
 
-        public CommandSubscribeToAll(CtpDocumentReader reader)
-            : base("SubscribeToAll")
-        {
-            var element = reader.ReadEntireElement();
-
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-        }
+       
     }
 }

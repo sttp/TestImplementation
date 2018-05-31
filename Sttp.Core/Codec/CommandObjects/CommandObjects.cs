@@ -13,15 +13,15 @@ namespace Sttp.Codec
 
         static CommandObjects()
         {
-            DocumentCommandBase.Register("GetMetadataSchema", x => new CommandGetMetadataSchema(x));
-            DocumentCommandBase.Register("MetadataSchema", x => new CommandMetadataSchema(x));
-            DocumentCommandBase.Register("MetadataSchemaUpdate", x => new CommandMetadataSchemaUpdate(x));
-            DocumentCommandBase.Register("MetadataSchemaVersion", x => new CommandMetadataSchemaVersion(x));
+            DocumentCommandBase.Register("GetMetadataSchema", CtpDocument.Load<CommandGetMetadataSchema>);
+            DocumentCommandBase.Register("MetadataSchema", CtpDocument.Load<CommandMetadataSchema>);
+            DocumentCommandBase.Register("MetadataSchemaUpdate", CtpDocument.Load<CommandMetadataSchemaUpdate>);
+            DocumentCommandBase.Register("MetadataSchemaVersion", CtpDocument.Load<CommandMetadataSchemaVersion>);
 
-            DocumentCommandBase.Register("GetMetadata", x => new CommandGetMetadata(x));
-            DocumentCommandBase.Register("MetadataRequestFailed", x => new CommandMetadataRequestFailed(x));
-            DocumentCommandBase.Register("BeginMetadataResponse", x => new CommandBeginMetadataResponse(x));
-            DocumentCommandBase.Register("EndMetadataResponse", x => new CommandEndMetadataResponse(x));
+            DocumentCommandBase.Register("GetMetadata", CtpDocument.Load<CommandGetMetadata>);
+            DocumentCommandBase.Register("MetadataRequestFailed", CtpDocument.Load<CommandMetadataRequestFailed>);
+            DocumentCommandBase.Register("BeginMetadataResponse", CtpDocument.Load<CommandBeginMetadataResponse>);
+            DocumentCommandBase.Register("EndMetadataResponse", CtpDocument.Load<CommandEndMetadataResponse>);
         }
 
         internal CommandObjects(CtpDecoder decoder)

@@ -16,9 +16,6 @@ namespace Sttp.Tests.Serialization
         public void Test1()
         {
             var cmd = new CommandMetadataRequestFailed("Failed", "True");
-            var doc1 = cmd.ToCtpDocument();
-            Console.WriteLine(doc1.ToYAML());
-
             var doc2 = CtpDocument.Serialize(cmd, "Root Element");
             Console.WriteLine(doc2.ToYAML());
         }
@@ -27,9 +24,6 @@ namespace Sttp.Tests.Serialization
         public void Test2()
         {
             var cmd = new CommandMetadataRequestFailed("Failed", "True");
-            var doc1 = cmd.ToCtpDocument();
-            Console.WriteLine(doc1.ToYAML());
-
             var doc2 = CtpDocument.Serialize(cmd, "Root Element");
             Console.WriteLine(doc2.ToYAML());
         }

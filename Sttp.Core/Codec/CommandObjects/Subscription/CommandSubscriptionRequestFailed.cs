@@ -1,35 +1,21 @@
 ﻿using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandSubscriptionRequestFailed : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandSubscriptionRequestFailed
     {
-        public readonly string Reason;
-        public readonly string Details;
+        [CtpSerializeField()]
+        public string Reason { get; private set; }
+        [CtpSerializeField()]
+        public string Details { get; private set; }
 
         public CommandSubscriptionRequestFailed(string reason, string details)
-            : base("SubscriptionRequestFailed")
         {
             Reason = reason;
             Details = details;
         }
-
-        public CommandSubscriptionRequestFailed(CtpDocumentReader reader)
-            : base("SubscriptionRequestFailed")
-        {
-            var element = reader.ReadEntireElement();
-
-            Reason = (string)element.GetValue("Reason");
-            Details = (string)element.GetValue("Details");
-
-
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-            writer.WriteValue("Reason", Reason);
-            writer.WriteValue("Details", Details);
-        }
+      
     }
 }

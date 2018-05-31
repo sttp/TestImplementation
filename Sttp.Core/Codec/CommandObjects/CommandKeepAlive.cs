@@ -3,27 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandKeepAlive : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandKeepAlive
     {
         public CommandKeepAlive()
-            : base("KeepAlive")
         {
-        }
-
-        public CommandKeepAlive(CtpDocumentReader reader)
-            : base("KeepAlive")
-        {
-            var element = reader.ReadEntireElement();
-
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-
         }
     }
 }

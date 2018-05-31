@@ -22,31 +22,6 @@ namespace Sttp.Codec
 
         }
 
-        public MetadataSchemaTable(CtpDocumentElement documentElement)
-        {
-            TableName = (string)documentElement.GetValue("TableName");
-            LastModifiedVersionNumber = (long)documentElement.GetValue("LastModifiedVersionNumber");
-
-            foreach (var query in documentElement.ForEachElement("Column"))
-            {
-                Columns.Add(new MetadataColumn(query));
-            }
-            documentElement.ErrorIfNotHandled();
-        }
-
-        public void Save(CtpDocumentWriter sml)
-        {
-            sml.WriteValue("TableName", TableName);
-            sml.WriteValue("LastModifiedVersionNumber", LastModifiedVersionNumber);
-            foreach (var item in Columns)
-            {
-                using (sml.StartElement("Column"))
-                {
-                    item.Save(sml);
-                }
-            }
-        }
-
         public MetadataSchemaTable Clone(long lastModifiedVersionNumber)
         {
             if (LastModifiedVersionNumber == lastModifiedVersionNumber)

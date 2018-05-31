@@ -1,24 +1,14 @@
 ﻿using CTP;
+using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    public class CommandUnsubscribe : DocumentCommandBase
+    [CtpSerializable]
+    public class CommandUnsubscribe
     {
         public CommandUnsubscribe()
-            : base("Unsubscribe")
         {
         }
-
-        public CommandUnsubscribe(CtpDocumentReader reader)
-            : base("Unsubscribe")
-        {
-            var element = reader.ReadEntireElement();
-
-            element.ErrorIfNotHandled();
-        }
-
-        public override void Save(CtpDocumentWriter writer)
-        {
-        }
+        
     }
 }
