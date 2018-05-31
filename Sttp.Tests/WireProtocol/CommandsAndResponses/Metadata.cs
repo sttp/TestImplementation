@@ -13,7 +13,6 @@ namespace Sttp.Tests.CommandsAndResponses
         public void CommandGetMetadataSchema()
         {
             var cmd = new CommandGetMetadataSchema(Guid.NewGuid(), 382);
-            Console.WriteLine(cmd.ToString());
             Console.WriteLine(CtpDocument.Save(cmd).ToYAML());
         }
 
@@ -35,9 +34,8 @@ namespace Sttp.Tests.CommandsAndResponses
             t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
-            Console.WriteLine(cmd.ToString());
             Console.WriteLine(CtpDocument.Save(cmd).ToYAML());
-            Console.WriteLine(CtpDocument.Load<CommandMetadataSchema>(CtpDocument.Save(cmd)));
+            Console.WriteLine(CtpDocument.Save(CtpDocument.Load<CommandMetadataSchema>(CtpDocument.Save(cmd))).ToYAML());
 
         }
 
@@ -50,7 +48,6 @@ namespace Sttp.Tests.CommandsAndResponses
             t = new MetadataSchemaTableUpdate("Device", 382);
             tbl.Add(t);
             var cmd = new CommandMetadataSchemaUpdate(Guid.NewGuid(), 382, tbl);
-            Console.WriteLine(cmd.ToString());
             Console.WriteLine(CtpDocument.Save(cmd).ToYAML());
         }
 
@@ -58,7 +55,6 @@ namespace Sttp.Tests.CommandsAndResponses
         public void CommandMetadataSchemaVersion()
         {
             var cmd = new CommandMetadataSchemaVersion(Guid.NewGuid(), 382);
-            Console.WriteLine(cmd.ToString());
             Console.WriteLine(CtpDocument.Save(cmd).ToYAML());
         }
 

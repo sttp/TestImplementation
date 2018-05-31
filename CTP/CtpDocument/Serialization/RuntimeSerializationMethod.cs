@@ -7,52 +7,19 @@ using GSF.Reflection;
 
 namespace CTP.Serialization
 {
-    internal static class AutoInitialization
-    {
-        private static readonly MethodInfo Method = typeof(AutoInitialization).GetMethod("AutoSerializationMethod", BindingFlags.Static | BindingFlags.NonPublic);
-
-        public static bool TryCreateMethod(Type type, out TypeSerializationMethodBase method)
-        {
-            method = null;
-            if (type.IsClass)
-            {
-                var attr = type.GetCustomAttributes(true).OfType<CtpSerializableAttribute>().FirstOrDefault();
-                if (attr != null)
-                {
-                    var genericMethod = Method.MakeGenericMethod(type);
-                    method = (TypeSerializationMethodBase)genericMethod.Invoke(null, new object[] { attr });
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        [MethodImpl(MethodImplOptions.NoOptimization)] //This method is called via reflection.
-        // ReSharper disable once UnusedMember.Local
-        private static TypeSerializationMethodBase AutoSerializationMethod<T>(CtpSerializableAttribute attr)
-            where T : class
-        {
-            return new AutoSerializationMethod<T>(attr);
-        }
-    }
-
-    internal class AutoSerializationMethod<T>
+    internal class RuntimeSerializationMethod<T>
        : TypeSerializationMethodBase<T>
     {
         public override bool IsArrayType => false;
         private readonly Type m_type;
-        private readonly List<FieldOptions> m_records = new List<FieldOptions>();
+        private readonly List<FieldSerialization> m_records = new List<FieldSerialization>();
         private readonly Func<T> m_constructor;
         public readonly CtpSerializableAttribute Attr;
 
-        public AutoSerializationMethod(CtpSerializableAttribute attr)
+        public RuntimeSerializationMethod(ConstructorInfo c, CtpSerializableAttribute attr)
         {
             Attr = attr;
             m_type = typeof(T);
-
-            var c = m_type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-            if (c == null)
-                throw new Exception("class does not contain a default constructor");
             m_constructor = c.Compile<T>();
 
             foreach (var member in m_type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
@@ -84,7 +51,7 @@ namespace CTP.Serialization
             CtpSerializeFieldAttribute autoLoad = attributes.OfType<CtpSerializeFieldAttribute>().FirstOrDefault();
             if (autoLoad != null)
             {
-                m_records.Add(FieldOptions.CreateFieldOptions(member, targetType, autoLoad));
+                m_records.Add(FieldSerialization.CreateFieldOptions(member, targetType, autoLoad));
             }
         }
 

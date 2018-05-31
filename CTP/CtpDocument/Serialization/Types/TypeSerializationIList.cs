@@ -7,23 +7,31 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<TList>
         where TList : IList<T>
     {
-
         public override bool IsArrayType => true;
         public override bool IsValueType => false;
         private TypeSerializationMethodBase<T> m_serializeT;
-        private Func<int, TList> m_objConstructor;
+        private Func<TList> m_objConstructor;
 
-        public TypeSerializationIList(Func<int, TList> objConstructor)
+        public TypeSerializationIList(Func<TList> objConstructor)
         {
             m_objConstructor = objConstructor;
-            m_serializeT = TypeSerialization<T>.Serialization;
+        }
+
+        public override CtpObject Save(TList obj)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override TList Load(CtpObject reader)
+        {
+            throw new NotSupportedException();
         }
 
         public override TList Load(CtpDocumentElement reader)
         {
             if (!reader.IsArray)
                 throw new Exception("Expecting an array type");
-            TList items = m_objConstructor(0);
+            TList items = m_objConstructor();
             foreach (var element in reader.ChildElements)
             {
                 items.Add(m_serializeT.Load(element));
@@ -33,16 +41,6 @@ namespace CTP.Serialization
                 items.Add(m_serializeT.Load(element.Value));
             }
             return items;
-        }
-
-        public override TList Load(CtpObject reader)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override CtpObject Save(TList obj)
-        {
-            throw new NotSupportedException();
         }
 
         public override void Save(TList obj, CtpDocumentWriter writer)
@@ -60,7 +58,7 @@ namespace CTP.Serialization
             {
                 foreach (var item in obj)
                 {
-                    using (writer.StartElement(null))
+                    using (writer.StartElement(null, m_serializeT.IsArrayType))
                     {
                         m_serializeT.Save(item, writer);
                     }
@@ -68,7 +66,11 @@ namespace CTP.Serialization
             }
         }
 
-       
-       
+        public override void InitializeSerializationMethod()
+        {
+            m_serializeT = TypeSerialization<T>.Serialization;
+        }
+
+
     }
 }

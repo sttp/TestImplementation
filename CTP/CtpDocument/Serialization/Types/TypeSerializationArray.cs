@@ -6,10 +6,9 @@ namespace CTP.Serialization
     internal class TypeSerializationArray<T>
         : TypeSerializationMethodBase<T[]>
     {
-        public TypeSerializationArray()
-        {
-            m_serializeT = TypeSerialization<T>.Serialization;
-        }
+        public override bool IsArrayType => true;
+        public override bool IsValueType => false;
+        private TypeSerializationMethodBase<T> m_serializeT;
 
         public override CtpObject Save(T[] obj)
         {
@@ -20,11 +19,6 @@ namespace CTP.Serialization
         {
             throw new NotSupportedException();
         }
-
-        private TypeSerializationMethodBase<T> m_serializeT;
-
-        public override bool IsArrayType => true;
-        public override bool IsValueType => false;
 
         public override T[] Load(CtpDocumentElement reader)
         {
@@ -57,7 +51,7 @@ namespace CTP.Serialization
             {
                 foreach (var item in obj)
                 {
-                    using (writer.StartElement(null))
+                    using (writer.StartElement(null, m_serializeT.IsArrayType))
                     {
                         m_serializeT.Save(item, writer);
                     }
@@ -65,7 +59,9 @@ namespace CTP.Serialization
             }
         }
 
-      
-        
+        public override void InitializeSerializationMethod()
+        {
+            m_serializeT = TypeSerialization<T>.Serialization;
+        }
     }
 }
