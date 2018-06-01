@@ -3,35 +3,27 @@ using System.Collections.Generic;
 
 namespace CTP.Serialization
 {
-    internal class TypeSerializationIList<TList, T>
-        : TypeSerializationMethodBase<TList>
-        where TList : IList<T>
+    internal class TypeSerializationEnumerable<TEnum, T>
+        : TypeSerializationMethodBase<TEnum>
+        where TEnum : IEnumerable<T>
     {
         public override bool IsArrayType => true;
         public override bool IsValueType => false;
         private TypeSerializationMethodBase<T> m_serializeT;
-        private Func<TList> m_objConstructor;
+        private Func<List<T>, TEnum> m_castToType;
 
-        public TypeSerializationIList(Func<TList> objConstructor)
+        public TypeSerializationEnumerable(Func<List<T>, TEnum> castToType)
         {
-            m_objConstructor = objConstructor;
+            DocumentSerializationHelper<TEnum>.Serialization = this; //This is required to fix circular reference issues.
+            m_castToType = castToType;
+            m_serializeT = DocumentSerializationHelper<T>.Serialization;
         }
 
-        public override CtpObject Save(TList obj)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override TList Load(CtpObject reader)
-        {
-            throw new NotSupportedException();
-        }
-
-        public override TList Load(CtpDocumentElement reader)
+        public override TEnum Load(CtpDocumentElement reader)
         {
             if (!reader.IsArray)
                 throw new Exception("Expecting an array type");
-            TList items = m_objConstructor();
+            List<T> items = new List<T>();
             foreach (var element in reader.ChildElements)
             {
                 items.Add(m_serializeT.Load(element));
@@ -40,10 +32,10 @@ namespace CTP.Serialization
             {
                 items.Add(m_serializeT.Load(element.Value));
             }
-            return items;
+            return m_castToType(items);
         }
 
-        public override void Save(TList obj, CtpDocumentWriter writer)
+        public override void Save(TEnum obj, CtpDocumentWriter writer)
         {
             if (!writer.IsArrayElement)
                 throw new Exception("Expecting an array type");
@@ -65,12 +57,6 @@ namespace CTP.Serialization
                 }
             }
         }
-
-        public override void InitializeSerializationMethod()
-        {
-            m_serializeT = DocumentSerializationHelper<T>.Serialization;
-        }
-
 
     }
 }

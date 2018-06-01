@@ -6,8 +6,6 @@ namespace CTP.Serialization
 {
     internal abstract class FieldSerialization
     {
-        public abstract void InitializeSerializationMethod();
-
         public abstract string RecordName { get; }
 
         public abstract void Load(object obj, CtpDocumentElement reader);
@@ -22,6 +20,7 @@ namespace CTP.Serialization
             return (FieldSerialization)genericMethod.Invoke(null, new object[] { member, autoLoad });
         }
 
+        // ReSharper disable once UnusedMember.Local
         private static FieldSerialization CreateFieldSerializationInternal<TFieldType>(MemberInfo member, CtpSerializeFieldAttribute autoLoad)
         {
             return new FieldSerialization<TFieldType>(member, autoLoad);
@@ -54,14 +53,11 @@ namespace CTP.Serialization
             {
                 throw new NotSupportedException();
             }
+            m_method = DocumentSerializationHelper<T>.Serialization;
+
         }
 
         public override string RecordName => m_recordName;
-
-        public override void InitializeSerializationMethod()
-        {
-            m_method = DocumentSerializationHelper<T>.Serialization;
-        }
 
         public override void Load(object obj, CtpDocumentElement reader)
         {
