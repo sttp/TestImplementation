@@ -46,7 +46,7 @@ namespace CTP.Serialization
                 return;
 
             object[] attributes = member.GetCustomAttributes(true);
-            CtpSerializeFieldAttribute autoLoad = attributes.OfType<CtpSerializeFieldAttribute>().FirstOrDefault();
+            DocumentFieldAttribute autoLoad = attributes.OfType<DocumentFieldAttribute>().FirstOrDefault();
             if (autoLoad != null)
             {
                 m_records.Add(FieldSerialization.CreateFieldOptions(member, targetType, autoLoad));

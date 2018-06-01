@@ -3,9 +3,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpCommand("SubscribeToAll")]
+    [DocumentName("SubscribeToAll")]
     public class CommandSubscribeToAll
-        : CtpDocumentObject<CommandSubscribeToAll>
+        : DocumentObject<CommandSubscribeToAll>
     {
         public CommandSubscribeToAll()
         {
@@ -14,7 +14,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandSubscribeToAll(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 }

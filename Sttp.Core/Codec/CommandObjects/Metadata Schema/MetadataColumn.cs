@@ -11,14 +11,14 @@ namespace Sttp.Codec
         /// <summary>
         /// The name of the column
         /// </summary>
-        [CtpSerializeField()]
+        [DocumentField()]
         public string Name { get; private set; }
         /// <summary>
         /// The type of this column
         /// </summary>
         public CtpTypeCode TypeCode { get; private set; }
 
-        [CtpSerializeField("TypeCode")]
+        [DocumentField("TypeCode")]
         private string TypeCodeInternal
         {
             get

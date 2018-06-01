@@ -24,9 +24,9 @@ namespace CTP
         }
 
         public static T ReadDocument<T>(this Stream stream)
-            where T : CtpDocumentObject<T>
+            where T : DocumentObject<T>
         {
-            return CtpDocumentObject<T>.ConvertFromDocument(ReadDocument(stream));
+            return DocumentObject<T>.FromDocument(ReadDocument(stream));
         }
     }
 }

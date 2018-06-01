@@ -3,9 +3,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpCommand("Unsubscribe")]
+    [DocumentName("Unsubscribe")]
     public class CommandUnsubscribe
-        : CtpDocumentObject<CommandUnsubscribe>
+        : DocumentObject<CommandUnsubscribe>
     {
         public CommandUnsubscribe()
         {
@@ -13,7 +13,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandUnsubscribe(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
 
     }

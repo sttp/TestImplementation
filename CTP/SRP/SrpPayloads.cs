@@ -3,11 +3,11 @@ using CTP.Serialization;
 
 namespace CTP.SRP
 {
-    [CtpCommand("SrpIdentity")]
+    [DocumentName("SrpIdentity")]
     public class SrpIdentity
-        : CtpDocumentObject<SrpIdentity>
+        : DocumentObject<SrpIdentity>
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public string UserName { get; private set; }
 
         public SrpIdentity(string userName)
@@ -20,17 +20,17 @@ namespace CTP.SRP
 
         public static explicit operator SrpIdentity(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 
-    [CtpCommand("SrpIdentityLookup")]
+    [DocumentName("SrpIdentityLookup")]
     public class SrpIdentityLookup
-        : CtpDocumentObject<SrpIdentityLookup>
+        : DocumentObject<SrpIdentityLookup>
     {
-        [CtpSerializeField()] public int SrpStrength { get; private set; }
-        [CtpSerializeField()] public byte[] Salt { get; private set; }
-        [CtpSerializeField()] public byte[] PublicB { get; private set; }
+        [DocumentField()] public int SrpStrength { get; private set; }
+        [DocumentField()] public byte[] Salt { get; private set; }
+        [DocumentField()] public byte[] PublicB { get; private set; }
 
         public SrpIdentityLookup(SrpStrength strength, byte[] salt, byte[] publicB)
         {
@@ -46,16 +46,16 @@ namespace CTP.SRP
 
         public static explicit operator SrpIdentityLookup(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 
-    [CtpCommand("SrpClientResponse")]
+    [DocumentName("SrpClientResponse")]
     public class SrpClientResponse
-        : CtpDocumentObject<SrpClientResponse>
+        : DocumentObject<SrpClientResponse>
     {
-        [CtpSerializeField()] public byte[] PublicA { get; private set; }
-        [CtpSerializeField()] public byte[] ClientChallenge { get; private set; }
+        [DocumentField()] public byte[] PublicA { get; private set; }
+        [DocumentField()] public byte[] ClientChallenge { get; private set; }
 
         public SrpClientResponse(byte[] publicA, byte[] clientChallenge)
         {
@@ -69,15 +69,15 @@ namespace CTP.SRP
 
         public static explicit operator SrpClientResponse(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 
-    [CtpCommand("SrpServerResponse")]
+    [DocumentName("SrpServerResponse")]
     public class SrpServerResponse
-        : CtpDocumentObject<SrpServerResponse>
+        : DocumentObject<SrpServerResponse>
     {
-        [CtpSerializeField()] public byte[] ServerChallenge { get; private set; }
+        [DocumentField()] public byte[] ServerChallenge { get; private set; }
 
         public SrpServerResponse(byte[] serverChallenge)
         {
@@ -90,7 +90,7 @@ namespace CTP.SRP
 
         public static explicit operator SrpServerResponse(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 }

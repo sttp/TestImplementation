@@ -3,16 +3,16 @@ using CTP.Serialization;
 
 namespace CTP
 {
-    public abstract class CtpDocumentObject
+    public abstract class DocumentObject
     {
-        internal CtpDocumentObject()
+        internal DocumentObject()
         {
 
         }
 
-        protected abstract CtpDocument ToDocument();
+        public abstract CtpDocument ToDocument();
 
-        public static implicit operator CtpDocument(CtpDocumentObject obj)
+        public static implicit operator CtpDocument(DocumentObject obj)
         {
             return obj.ToDocument();
         }
@@ -23,34 +23,38 @@ namespace CTP
         }
     }
 
-    public abstract class CtpDocumentObject<T>
-        : CtpDocumentObject
-        where T : CtpDocumentObject<T>
+    public abstract class DocumentObject<T>
+        : DocumentObject
+        where T : DocumentObject<T>
     {
         private static readonly string CommandName;
         private static Exception LoadError;
         private static readonly TypeSerializationMethodBase<T> Serialization;
 
-        static CtpDocumentObject()
+        static DocumentObject()
         {
-            Serialization = DocumentSerializationHelper<T>.Serialization;
             LoadError = DocumentSerializationHelper<T>.LoadError;
-        }
-
-        protected CtpDocumentObject()
-        {
-            if (typeof(T) != GetType())
+            if (LoadError == null)
             {
-                throw new ArgumentException("The supplied type must exactly match the generic type parameter");
+                Serialization = DocumentSerializationHelper<T>.Serialization;
+                CommandName = DocumentSerializationHelper<T>.CommandAttribute?.DocumentName ?? nameof(T);
             }
         }
 
-        protected override CtpDocument ToDocument()
+        protected DocumentObject()
+        {
+            if (LoadError != null)
+                throw LoadError;
+            if (typeof(T) != GetType())
+                throw new ArgumentException("The supplied type must exactly match the generic type parameter");
+        }
+
+        public override CtpDocument ToDocument()
         {
             return Save((T)this);
         }
 
-        public static T ConvertFromDocument(CtpDocument obj)
+        public static T FromDocument(CtpDocument obj)
         {
             return Load(obj);
         }
@@ -70,10 +74,9 @@ namespace CTP
                 throw LoadError;
             if (CommandName != document.RootElement)
                 throw new Exception("Document Mismatch");
-
             return Serialization.Load(document.MakeReader().ReadEntireElement());
         }
 
     }
-   
+
 }

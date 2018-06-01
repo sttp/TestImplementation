@@ -84,7 +84,7 @@ namespace CTP
             m_elementIsArrayStack = new Stack<bool>();
             m_stream = new CtpDocumentBitWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
-            m_rootElement = rootElement;
+            m_rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             m_prefixLength += m_rootElement.Length + 1;
         }
 

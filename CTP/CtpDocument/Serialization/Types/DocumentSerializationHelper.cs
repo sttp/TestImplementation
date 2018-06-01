@@ -6,14 +6,14 @@ namespace CTP.Serialization
 {
 
     /// <summary>
-    /// This class assists in the automatic serialization of <see cref="CtpDocumentObject"/>s to and from <see cref="CtpDocument"/>s.
+    /// This class assists in the automatic serialization of <see cref="DocumentObject"/>s to and from <see cref="CtpDocument"/>s.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal static class DocumentSerializationHelper<T>
     {
         private static TypeSerializationMethodBase<T> s_serialization;
         internal static readonly Exception LoadError;
-        internal static readonly CtpCommandAttribute CommandAttribute;
+        internal static readonly DocumentNameAttribute CommandAttribute;
         internal static TypeSerializationMethodBase<T> Serialization
         {
             get
@@ -39,7 +39,7 @@ namespace CTP.Serialization
                     return;
 
                 var type = typeof(T);
-                CommandAttribute = type.GetCustomAttributes(false).OfType<CtpCommandAttribute>().FirstOrDefault();
+                CommandAttribute = type.GetCustomAttributes(false).OfType<DocumentNameAttribute>().FirstOrDefault();
 
                 if (!type.IsClass)
                 {

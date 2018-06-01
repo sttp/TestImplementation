@@ -6,15 +6,15 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpCommand("SubscribeToSome")]
+    [DocumentName("SubscribeToSome")]
     public class CommandSubscribeToSome
-        : CtpDocumentObject<CommandSubscribeToSome>
+        : DocumentObject<CommandSubscribeToSome>
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public string InstanceName { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public CtpObject[] DataPointIDs { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public double? SamplePerSecond { get; private set; }
 
         public CommandSubscribeToSome(string instanceName, CtpObject[] dataPointIDs, double? samplesPerSecond)
@@ -30,7 +30,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandSubscribeToSome(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 }

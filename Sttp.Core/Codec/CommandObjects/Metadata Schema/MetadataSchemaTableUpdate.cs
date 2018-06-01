@@ -8,9 +8,9 @@ namespace Sttp.Codec
 {
     public class MetadataSchemaTableUpdate
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public string TableName;
-        [CtpSerializeField()]
+        [DocumentField()]
         public long LastModifiedVersionNumber;
 
         private MetadataSchemaTableUpdate()

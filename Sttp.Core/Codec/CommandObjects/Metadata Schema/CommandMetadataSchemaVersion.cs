@@ -4,13 +4,13 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpCommand("MetadataSchemaVersion")]
+    [DocumentName("MetadataSchemaVersion")]
     public class CommandMetadataSchemaVersion
-        : CtpDocumentObject<CommandMetadataSchemaVersion>
+        : DocumentObject<CommandMetadataSchemaVersion>
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public Guid RuntimeID { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public long VersionNumber { get; private set; }
 
         //Exists to support CtpSerializable
@@ -25,7 +25,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandMetadataSchemaVersion(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 }

@@ -4,13 +4,13 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpCommand("SubscribeResponse")]
+    [DocumentName("SubscribeResponse")]
     public class CommandSubscribeResponse
-        : CtpDocumentObject<CommandSubscribeResponse>
+        : DocumentObject<CommandSubscribeResponse>
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public int BinaryChannelCode { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public Guid EncodingMethod { get; private set; }
 
         public CommandSubscribeResponse(int binaryChannelCode, Guid encodingMethod)
@@ -25,7 +25,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandSubscribeResponse(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
 
     }

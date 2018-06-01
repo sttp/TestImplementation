@@ -5,9 +5,9 @@ namespace Sttp.Codec
 {
     public class MetadataProcedureParameters
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public string Name { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public CtpObject Value { get; private set; }
 
         public MetadataProcedureParameters(string name, CtpObject value)

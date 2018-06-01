@@ -9,11 +9,11 @@ namespace Sttp.Codec
 {
     public class MetadataSchemaTable
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public string TableName;
-        [CtpSerializeField()]
+        [DocumentField()]
         public long LastModifiedVersionNumber;
-        [CtpSerializeField()]
+        [DocumentField()]
         public List<MetadataColumn> Columns = new List<MetadataColumn>();
 
         public MetadataSchemaTable()

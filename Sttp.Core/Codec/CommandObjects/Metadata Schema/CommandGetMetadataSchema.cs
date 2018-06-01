@@ -13,13 +13,13 @@ namespace Sttp.Codec
     /// Responds with <see cref="CommandMetadataSchemaUpdate"/> if the version numbers do not match.
     /// Responds with <see cref="CommandMetadataSchemaVersion"/> if there are no changes in the metadata.
     /// </summary>
-    [CtpCommand("GetMetadataSchema")]
+    [DocumentName("GetMetadataSchema")]
     public class CommandGetMetadataSchema
-        : CtpDocumentObject<CommandGetMetadataSchema>
+        : DocumentObject<CommandGetMetadataSchema>
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public Guid? LastKnownRuntimeID { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public long? LastKnownVersionNumber { get; private set; }
 
         //Exists to support CtpSerializable
@@ -34,7 +34,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandGetMetadataSchema(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 }

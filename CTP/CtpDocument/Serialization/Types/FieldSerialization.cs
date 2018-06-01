@@ -14,14 +14,14 @@ namespace CTP.Serialization
 
         private static readonly MethodInfo Method2 = typeof(FieldSerialization).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
 
-        public static FieldSerialization CreateFieldOptions(MemberInfo member, Type targetType, CtpSerializeFieldAttribute autoLoad)
+        public static FieldSerialization CreateFieldOptions(MemberInfo member, Type targetType, DocumentFieldAttribute autoLoad)
         {
             var genericMethod = Method2.MakeGenericMethod(targetType);
             return (FieldSerialization)genericMethod.Invoke(null, new object[] { member, autoLoad });
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static FieldSerialization CreateFieldSerializationInternal<TFieldType>(MemberInfo member, CtpSerializeFieldAttribute autoLoad)
+        private static FieldSerialization CreateFieldSerializationInternal<TFieldType>(MemberInfo member, DocumentFieldAttribute autoLoad)
         {
             return new FieldSerialization<TFieldType>(member, autoLoad);
         }
@@ -35,7 +35,7 @@ namespace CTP.Serialization
         private Func<object, T> m_read;
         private Action<object, T> m_write;
 
-        public FieldSerialization(MemberInfo member, CtpSerializeFieldAttribute autoLoad)
+        public FieldSerialization(MemberInfo member, DocumentFieldAttribute autoLoad)
         {
             m_recordName = autoLoad.RecordName ?? member.Name;
 

@@ -3,13 +3,13 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpCommand("EndMetadataResponse")]
+    [DocumentName("EndMetadataResponse")]
     public class CommandEndMetadataResponse
-        : CtpDocumentObject<CommandEndMetadataResponse>
+        : DocumentObject<CommandEndMetadataResponse>
     {
-        [CtpSerializeField()]
+        [DocumentField()]
         public int BinaryChannelCode { get; private set; }
-        [CtpSerializeField()]
+        [DocumentField()]
         public int RowCount { get; private set; }
 
         public CommandEndMetadataResponse(int binaryChannelCode, int rowCount)
@@ -24,7 +24,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandEndMetadataResponse(CtpDocument obj)
         {
-            return ConvertFromDocument(obj);
+            return FromDocument(obj);
         }
     }
 }
