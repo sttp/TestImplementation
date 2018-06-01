@@ -14,11 +14,9 @@ namespace CTP.Serialization
         private readonly Type m_type;
         private readonly List<FieldSerialization> m_records = new List<FieldSerialization>();
         private readonly Func<T> m_constructor;
-        public readonly CtpSerializableAttribute Attr;
 
-        public RuntimeSerializationMethod(ConstructorInfo c, CtpSerializableAttribute attr)
+        public RuntimeSerializationMethod(ConstructorInfo c)
         {
-            Attr = attr;
             m_type = typeof(T);
             m_constructor = c.Compile<T>();
 

@@ -14,8 +14,9 @@ namespace Sttp.Codec
     ///     <see cref="CommandRaw"/> - The rows.
     ///     <see cref="CommandEndMetadataResponse"/> - Closing the raw channel.
     /// </summary>
-    [CtpSerializable("GetMetadata")]
+    [CtpCommand("GetMetadata")]
     public class CommandGetMetadata
+        : CtpDocumentObject<CommandGetMetadata>
     {
         [CtpSerializeField()]
         public string Table { get; private set; }
@@ -29,7 +30,13 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private CommandGetMetadata() { }
+        private CommandGetMetadata()
+        { }
+
+        public static explicit operator CommandGetMetadata(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
 
     }
 }

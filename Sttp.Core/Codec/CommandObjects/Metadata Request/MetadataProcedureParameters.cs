@@ -3,7 +3,6 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("ProcedureParameters")]
     public class MetadataProcedureParameters
     {
         [CtpSerializeField()]
@@ -18,7 +17,8 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private MetadataProcedureParameters() { }
+        private MetadataProcedureParameters()
+        { }
 
         public override string ToString()
         {

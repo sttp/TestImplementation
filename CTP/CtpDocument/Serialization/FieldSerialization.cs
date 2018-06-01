@@ -60,7 +60,7 @@ namespace CTP.Serialization
 
         public override void InitializeSerializationMethod()
         {
-            m_method = TypeSerialization<T>.Serialization;
+            m_method = DocumentSerializationHelper<T>.Serialization;
         }
 
         public override void Load(object obj, CtpDocumentElement reader)

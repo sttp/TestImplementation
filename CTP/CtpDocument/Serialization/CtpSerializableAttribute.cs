@@ -1,23 +1,20 @@
 ﻿using System;
+using CTP.Serialization;
 
 namespace CTP.Serialization
 {
     /// <summary>
-    /// An object that can be serialized into a CTPDocument.
+    /// Marks a field or property indicating this value may be serialized.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class CtpSerializableAttribute
+    public class CtpCommandAttribute
         : Attribute
     {
-        public readonly string RootCommandName;
+        public readonly string CommandName;
 
-        /// <summary>
-        /// Creates a <see cref="CtpSerializableAttribute"/>.
-        /// </summary>
-        /// <param name="rootCommandName">If this object is the root of a document, this name will be used. Otherwise, it will be ignored.</param>
-        public CtpSerializableAttribute(string rootCommandName)
+        public CtpCommandAttribute(string commandName = null)
         {
-            RootCommandName = rootCommandName;
+            CommandName = commandName;
         }
     }
 }

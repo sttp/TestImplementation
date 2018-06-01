@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using CTP;
-using CTP.Net;
 
-namespace Sttp.Codec
+namespace CTP.Net
 {
-    public class WireCodec
+    public class CtpCommandStream
     {
         /// <summary>
         /// Occurs when data has been received from the socket. 
@@ -27,7 +24,8 @@ namespace Sttp.Codec
         private AsyncCallback m_readCallback;
         private WaitCallback m_onDataReceived;
         private ManualResetEvent m_waitForDataEvent = new ManualResetEvent(false);
-        public WireCodec(Stream session)
+
+        public CtpCommandStream(Stream session)
         {
             m_onDataReceived = OnDataReceived;
             m_readCallback = AsyncReadCallback;
@@ -41,25 +39,14 @@ namespace Sttp.Codec
         {
             m_stream.Write(data, position, length);
         }
-
-        /// <summary>
-        /// Writes the wire protocol data to the decoder.
-        /// </summary>
-        /// <param name="data">the data to write</param>
-        /// <param name="position">the starting position</param>
-        /// <param name="length">the length</param>
-        public void FillBuffer(byte[] data, int position, int length)
-        {
-            m_packetDecoder.FillBuffer(data, position, length);
-        }
-
+        
         /// <summary>
         /// Gets the next data packet. This method should be in a while loop. Once all commands have been read, an async read
         /// will occur
         /// </summary>
         /// <param name="timeout">The number of milliseconds to wait for a command before returning null. </param>
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
-        public CommandObjects NextCommand(int timeout = 0)
+        public CommandObjects2 NextCommand(int timeout = 0)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -88,7 +75,8 @@ namespace Sttp.Codec
                 goto tryAgain;
 
             }
-            return new CommandObjects(m_packetDecoder);
+
+            return new CommandObjects2(m_packetDecoder);
         }
 
         private bool AsyncRead()
@@ -137,59 +125,14 @@ namespace Sttp.Codec
             return id;
         }
 
-        public void GetMetadataSchema(Guid? lastKnownRuntimeID = null, long? lastKnownVersionNumber = null)
-        {
-            m_encoder.SendDocumentCommands(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
-        }
-
-        public void MetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
-        {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchema(runtimeID, versionNumber, tables));
-        }
-
-        public void MetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
-        {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
-        }
-
-        public void MetadataSchemaVersion(Guid runtimeID, long versionNumber)
-        {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchemaVersion(runtimeID, versionNumber));
-        }
-
-        public void GetMetadata(string table, IEnumerable<string> columns)
-        {
-            m_encoder.SendDocumentCommands(new CommandGetMetadata(table, columns));
-        }
-
-        public void MetadataRequestFailed(string reason, string details)
-        {
-            m_encoder.SendDocumentCommands(new CommandMetadataRequestFailed(reason, details));
-        }
-
-        public void BeginMetadataResponse(int rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
-        {
-            m_encoder.SendDocumentCommands(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
-        }
-
-        public void EndMetadataResponse(int rawChannelID, int rowCount)
-        {
-            m_encoder.SendDocumentCommands(new CommandEndMetadataResponse(rawChannelID, rowCount));
-        }
-
-        public void SendCustomCommand(CtpDocument command)
+        public void SendDocumentCommand(CtpDocument command)
         {
             m_encoder.SendDocumentCommands(command);
         }
 
-        public void Raw(int rawCommandCode, byte[] payload)
+        public void SendRaw(int rawCommandCode, byte[] payload)
         {
             m_encoder.SendBinaryCommand(rawCommandCode, payload, 0, payload.Length);
-        }
-
-        public void RequestFailed(string origionalCommand, string reason, string details)
-        {
-            m_encoder.SendDocumentCommands(new CommandRequestFailed(origionalCommand, reason, details));
         }
 
 

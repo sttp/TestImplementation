@@ -6,7 +6,6 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("MetadataColumn")]
     public class MetadataColumn
     {
         /// <summary>
@@ -40,7 +39,8 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private MetadataColumn() { }
-
+        private MetadataColumn()
+        { }
+       
     }
 }

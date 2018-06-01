@@ -6,7 +6,6 @@ using Sttp.Codec;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("MetadataSchemaTableUpdate")]
     public class MetadataSchemaTableUpdate
     {
         [CtpSerializeField()]

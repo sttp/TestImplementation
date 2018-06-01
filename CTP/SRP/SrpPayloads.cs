@@ -3,8 +3,9 @@ using CTP.Serialization;
 
 namespace CTP.SRP
 {
-    [CtpSerializable("SrpIdentity")]
+    [CtpCommand("SrpIdentity")]
     public class SrpIdentity
+        : CtpDocumentObject<SrpIdentity>
     {
         [CtpSerializeField()]
         public string UserName { get; private set; }
@@ -14,11 +15,18 @@ namespace CTP.SRP
             UserName = userName;
         }
 
-        private SrpIdentity() { }
+        private SrpIdentity()
+        { }
+
+        public static explicit operator SrpIdentity(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 
-    [CtpSerializable("SrpIdentityLookup")]
+    [CtpCommand("SrpIdentityLookup")]
     public class SrpIdentityLookup
+        : CtpDocumentObject<SrpIdentityLookup>
     {
         [CtpSerializeField()] public int SrpStrength { get; private set; }
         [CtpSerializeField()] public byte[] Salt { get; private set; }
@@ -35,10 +43,16 @@ namespace CTP.SRP
         {
 
         }
+
+        public static explicit operator SrpIdentityLookup(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 
-    [CtpSerializable("SrpClientResponse")]
+    [CtpCommand("SrpClientResponse")]
     public class SrpClientResponse
+        : CtpDocumentObject<SrpClientResponse>
     {
         [CtpSerializeField()] public byte[] PublicA { get; private set; }
         [CtpSerializeField()] public byte[] ClientChallenge { get; private set; }
@@ -52,10 +66,16 @@ namespace CTP.SRP
         private SrpClientResponse()
         {
         }
+
+        public static explicit operator SrpClientResponse(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 
-    [CtpSerializable("SrpServerResponse")]
+    [CtpCommand("SrpServerResponse")]
     public class SrpServerResponse
+        : CtpDocumentObject<SrpServerResponse>
     {
         [CtpSerializeField()] public byte[] ServerChallenge { get; private set; }
 
@@ -66,6 +86,11 @@ namespace CTP.SRP
 
         private SrpServerResponse()
         {
+        }
+
+        public static explicit operator SrpServerResponse(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
         }
     }
 }

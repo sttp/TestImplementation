@@ -3,8 +3,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("UnsubscribeResponse")]
+    [CtpCommand("UnsubscribeResponse")]
     public class CommandUnsubscribeResponse
+        : CtpDocumentObject<CommandUnsubscribeResponse>
     {
         [CtpSerializeField()]
         public int BinaryChannelCode;
@@ -15,7 +16,14 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private CommandUnsubscribeResponse() { }
+        private CommandUnsubscribeResponse()
+        {
 
+        }
+
+        public static explicit operator CommandUnsubscribeResponse(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 }

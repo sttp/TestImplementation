@@ -7,8 +7,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("MetadataSchema")]
+    [CtpCommand("MetadataSchema")]
     public class CommandMetadataSchema
+        : CtpDocumentObject<CommandMetadataSchema>
     {
         [CtpSerializeField()]
         public Guid RuntimeID { get; private set; }
@@ -25,7 +26,8 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private CommandMetadataSchema() { }
+        private CommandMetadataSchema()
+        { }
 
         public CommandMetadataSchema Combine(CommandMetadataSchemaUpdate update)
         {
@@ -42,6 +44,11 @@ namespace Sttp.Codec
                 return new CommandMetadataSchema(update.RuntimeID, update.VersionNumber, newList);
             }
             return this;
+        }
+
+        public static explicit operator CommandMetadataSchema(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
         }
     }
 }

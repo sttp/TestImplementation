@@ -5,8 +5,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("BeginMetadataResponse")]
+    [CtpCommand("BeginMetadataResponse")]
     public class CommandBeginMetadataResponse
+        : CtpDocumentObject<CommandBeginMetadataResponse>
     {
         [CtpSerializeField()]
         public int BinaryChannelCode { get; private set; }
@@ -31,7 +32,12 @@ namespace Sttp.Codec
             Columns = columns;
         }
         //Exists to support CtpSerializable
-        private CommandBeginMetadataResponse() { }
+        private CommandBeginMetadataResponse()
+        { }
 
+        public static explicit operator CommandBeginMetadataResponse(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 }

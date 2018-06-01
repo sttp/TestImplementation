@@ -7,11 +7,6 @@ namespace CTP
 {
     public static class StreamExtensions
     {
-        public static void WriteDocument<T>(this Stream stream, T document)
-        {
-            WriteDocument(stream, CtpDocument.Save(document));
-        }
-
         public static void WriteDocument(this Stream stream, CtpDocument document)
         {
             byte[] data = document.ToArray();
@@ -29,9 +24,9 @@ namespace CTP
         }
 
         public static T ReadDocument<T>(this Stream stream)
+            where T : CtpDocumentObject<T>
         {
-            var document = ReadDocument(stream);
-            return CtpDocument.Load<T>(document);
+            return CtpDocumentObject<T>.ConvertFromDocument(ReadDocument(stream));
         }
     }
 }

@@ -68,7 +68,7 @@ namespace CTP.Serialization
 
         public override void InitializeSerializationMethod()
         {
-            m_serializeT = TypeSerialization<T>.Serialization;
+            m_serializeT = DocumentSerializationHelper<T>.Serialization;
         }
 
 

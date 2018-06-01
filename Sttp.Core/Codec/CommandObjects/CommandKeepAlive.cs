@@ -7,11 +7,18 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("KeepAlive")]
+    [CtpCommand("KeepAlive")]
     public class CommandKeepAlive
+        : CtpDocumentObject<CommandKeepAlive>
     {
         public CommandKeepAlive()
         {
         }
+
+        public static explicit operator CommandKeepAlive(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
+
 }

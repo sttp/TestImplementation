@@ -13,15 +13,15 @@ namespace Sttp.Codec
 
         static CommandObjects()
         {
-            DocumentCommandBase.Register("GetMetadataSchema", CtpDocument.Load<CommandGetMetadataSchema>);
-            DocumentCommandBase.Register("MetadataSchema", CtpDocument.Load<CommandMetadataSchema>);
-            DocumentCommandBase.Register("MetadataSchemaUpdate", CtpDocument.Load<CommandMetadataSchemaUpdate>);
-            DocumentCommandBase.Register("MetadataSchemaVersion", CtpDocument.Load<CommandMetadataSchemaVersion>);
+            DocumentCommandBase.Register("GetMetadataSchema", CtpDocumentObject<CommandGetMetadataSchema>.Load);
+            DocumentCommandBase.Register("MetadataSchema", CtpDocumentObject<CommandMetadataSchema>.Load);
+            DocumentCommandBase.Register("MetadataSchemaUpdate", CtpDocumentObject<CommandMetadataSchemaUpdate>.Load);
+            DocumentCommandBase.Register("MetadataSchemaVersion", CtpDocumentObject<CommandMetadataSchemaVersion>.Load);
 
-            DocumentCommandBase.Register("GetMetadata", CtpDocument.Load<CommandGetMetadata>);
-            DocumentCommandBase.Register("MetadataRequestFailed", CtpDocument.Load<CommandMetadataRequestFailed>);
-            DocumentCommandBase.Register("BeginMetadataResponse", CtpDocument.Load<CommandBeginMetadataResponse>);
-            DocumentCommandBase.Register("EndMetadataResponse", CtpDocument.Load<CommandEndMetadataResponse>);
+            DocumentCommandBase.Register("GetMetadata", CtpDocumentObject<CommandGetMetadata>.Load);
+            DocumentCommandBase.Register("MetadataRequestFailed", CtpDocumentObject<CommandMetadataRequestFailed>.Load);
+            DocumentCommandBase.Register("BeginMetadataResponse", CtpDocumentObject<CommandBeginMetadataResponse>.Load);
+            DocumentCommandBase.Register("EndMetadataResponse", CtpDocumentObject<CommandEndMetadataResponse>.Load);
         }
 
         internal CommandObjects(CtpDecoder decoder)
@@ -69,7 +69,5 @@ namespace Sttp.Codec
         }
 
         public CtpDocument Document => m_document;
-
-
     }
 }

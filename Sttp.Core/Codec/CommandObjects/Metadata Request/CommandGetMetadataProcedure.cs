@@ -6,8 +6,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("GetMetadataProcedure")]
+    [CtpCommand("GetMetadataProcedure")]
     public class CommandGetMetadataProcedure
+        : CtpDocumentObject<CommandGetMetadataProcedure>
     {
         [CtpSerializeField()]
         public string Name;
@@ -21,6 +22,12 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private CommandGetMetadataProcedure() { }
+        private CommandGetMetadataProcedure()
+        { }
+
+        public static explicit operator CommandGetMetadataProcedure(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 }

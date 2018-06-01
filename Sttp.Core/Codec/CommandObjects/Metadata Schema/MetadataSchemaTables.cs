@@ -7,7 +7,6 @@ using Sttp.Codec;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("MetadataSchemaTable")]
     public class MetadataSchemaTable
     {
         [CtpSerializeField()]
@@ -31,5 +30,7 @@ namespace Sttp.Codec
             item.LastModifiedVersionNumber = LastModifiedVersionNumber;
             return item;
         }
+       
     }
+
 }

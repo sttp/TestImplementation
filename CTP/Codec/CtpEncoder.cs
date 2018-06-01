@@ -88,20 +88,11 @@ namespace CTP
         }
 
         /// <summary>
-        /// Encodes and sends the supplied command to the client.
-        /// </summary>
-        /// <param name="command">The command to send.</param>
-        public void SendDocumentCommands<T>(T command)
-        {
-            SendDocumentCommands(CtpDocument.Save(command));
-        }
-
-        /// <summary>
         /// Encodes and sends the data specified in <see cref="writer"/>. It's recommended to use
         /// the other overload that contains <see cref="DocumentCommandBase"/> if one exists.
         /// </summary>
         /// <param name="writer">The data to send.</param>
-        private void SendDocumentCommands(CtpDocument writer)
+        public void SendDocumentCommands(CtpDocument writer)
         {
             EnsureCapacity(BufferOffset + writer.Length);
             writer.CopyTo(m_buffer, BufferOffset);

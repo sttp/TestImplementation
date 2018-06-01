@@ -6,8 +6,9 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [CtpSerializable("SubscribeToSome")]
+    [CtpCommand("SubscribeToSome")]
     public class CommandSubscribeToSome
+        : CtpDocumentObject<CommandSubscribeToSome>
     {
         [CtpSerializeField()]
         public string InstanceName { get; private set; }
@@ -24,7 +25,12 @@ namespace Sttp.Codec
         }
 
         //Exists to support CtpSerializable
-        private CommandSubscribeToSome() { }
+        private CommandSubscribeToSome()
+        { }
 
+        public static explicit operator CommandSubscribeToSome(CtpDocument obj)
+        {
+            return ConvertFromDocument(obj);
+        }
     }
 }
