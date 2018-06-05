@@ -26,7 +26,6 @@ namespace CTP.Net
             m_bytesRead = 0;
         }
 
-
         public void WaitForBytes(int byteCount, Action<AsyncReading> callback)
         {
             if (ReadBuffer == null)

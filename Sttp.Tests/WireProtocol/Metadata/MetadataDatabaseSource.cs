@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CTP;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Codec;
 using Sttp.Services;
@@ -14,6 +16,61 @@ namespace Sttp.Tests
     public class MetadataDatabaseSourceTest
     {
         [TestMethod]
+        public void BenchmarkBig()
+        {
+            var db = Load();
+            var schema = db.GetMetadataSchema();
+
+            schema = (CommandMetadataSchema)schema.ToDocument();
+            var sw = new Stopwatch();
+            sw.Restart();
+            sw.Restart();
+            const int cnt = 10000;
+            for (int x = 0; x < cnt; x++)
+            {
+                schema = (CommandMetadataSchema)schema.ToDocument();
+            }
+            Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
+        }
+        [TestMethod]
+        public void BenchmarkSmall()
+        {
+            var schema = new CommandLittle();
+            var sw = new Stopwatch();
+            sw.Restart();
+            sw.Restart();
+            const int cnt = 10000;
+            for (int x = 0; x < cnt; x++)
+            {
+                schema = (CommandLittle)schema.ToDocument();
+            }
+            Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
+        }
+
+        [DocumentName("GetMetadata")]
+        public class CommandLittle
+            : DocumentObject<CommandLittle>
+        {
+            [DocumentField()] public int Value1 { get; private set; }
+            [DocumentField()] public int Value2 { get; private set; }
+            [DocumentField()] public int Value3 { get; private set; }
+            [DocumentField()] public int Value4 { get; private set; }
+            [DocumentField()] public int Value5 { get; private set; }
+
+            //Exists to support CtpSerializable
+            public CommandLittle()
+            {
+
+            }
+
+            public static explicit operator CommandLittle(CtpDocument obj)
+            {
+                return FromDocument(obj);
+            }
+
+        }
+
+        [TestMethod]
         public void TestLoadFromDataset()
         {
             Load();
@@ -23,40 +80,43 @@ namespace Sttp.Tests
         [TestMethod]
         public void TestGetMetadataSchema()
         {
-            //var db = Load();
+            var db = Load();
 
-            //Queue<byte[]> packets = new Queue<byte[]>();
+            Queue<byte[]> packets = new Queue<byte[]>();
 
-            //var writer = new WireEncoder();
-            //var reader = new WireDecoder();
+            var ms = new MemoryStream();
+            var codec = new WireCodec(ms);
+            var writer = new CtpEncoder();
+            var reader = new CtpDecoder();
 
-            //writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
+            writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
+            writer.SendDocumentCommands(new CommandGetMetadataSchema(Guid.Empty, null));
 
-            //writer.GetMetadataSchema(Guid.Empty, null);
+            while (packets.Count > 0)
+            {
+                var data = packets.Dequeue();
+                reader.FillBuffer(data, 0, data.Length);
+            }
 
-            //while (packets.Count > 0)
-            //{
-            //    var data = packets.Dequeue();
-            //    reader.FillBuffer(data, 0, data.Length);
-            //}
 
-            //CommandObjects cmd = reader.NextCommand();
-            //Assert.AreEqual(cmd.CommandName, "GetMetadataSchema");
-            //Assert.AreEqual(cmd.GetMetadataSchema.LastKnownRuntimeID, Guid.Empty);
-            //Assert.AreEqual(cmd.GetMetadataSchema.LastKnownVersionNumber, (long?)null);
+            if (!reader.NextCommand()) throw new Exception();
+            if (reader.CommandCode != CommandCode.Document) throw new Exception();
+            var document = reader.DocumentPayload;
+            Assert.AreEqual(document.RootElement, "GetMetadataSchema");
+            var cmd = (CommandGetMetadataSchema)document;
+            Assert.AreEqual(cmd.LastKnownRuntimeID, Guid.Empty);
+            Assert.AreEqual(cmd.LastKnownVersionNumber, (long?)null);
 
-            //db.ProcessCommand(cmd.GetMetadataSchema, writer);
+            db.ProcessCommand(cmd, codec);
 
-            //while (packets.Count > 0)
-            //{
-            //    var data = packets.Dequeue();
-            //    reader.FillBuffer(data, 0, data.Length);
-            //}
+            reader.FillBuffer(ms.ToArray(), 0, (int)ms.Position);
 
-            //cmd = reader.NextCommand();
-            //Assert.AreEqual(cmd.CommandName, "MetadataSchema");
+            if (!reader.NextCommand()) throw new Exception();
+            if (reader.CommandCode != CommandCode.Document) throw new Exception();
+            document = reader.DocumentPayload;
+            Assert.AreEqual(document.RootElement, "MetadataSchema");
 
-            //Console.WriteLine(cmd.ToXMLString());
+            Console.WriteLine(document.ToYAML());
         }
 
         [TestMethod]

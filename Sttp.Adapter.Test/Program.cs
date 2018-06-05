@@ -59,18 +59,19 @@ namespace Sttp.Adapter.Test
             pub.Start();
             m_publisher = pub;
 
-            var net = new CtpClient();
-            net.SetHost(GetMyIPV4(), 48294);
-            net.SetUserCredentials("TrialUser", "P@$$w0rd");
-            net.Connect();
-            var sub = new SttpClient(net);
-            Console.WriteLine(string.Join(Environment.NewLine, sub.GetMetaDataTableList()));
+            throw new NotImplementedException();
+            //var net = new CtpClient();
+            //net.SetHost(GetMyIPV4(), 48294);
+            //net.SetUserCredentials("TrialUser", "P@$$w0rd");
+            //net.Connect();
+            //var sub = new SttpClient(net);
+            //Console.WriteLine(string.Join(Environment.NewLine, sub.GetMetaDataTableList()));
 
-            Console.ReadLine();
-            pub.Stop();
-            subscriber.Unsubscribe();
-            subscriber.Stop();
-            Console.ReadLine();
+            //Console.ReadLine();
+            //pub.Stop();
+            //subscriber.Unsubscribe();
+            //subscriber.Stop();
+            //Console.ReadLine();
         }
 
         public static IPAddress GetMyIPV4()

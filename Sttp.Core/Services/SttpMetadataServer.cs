@@ -171,6 +171,12 @@ namespace Sttp.Services
             }
         }
 
+        public CommandMetadataSchema GetMetadataSchema()
+        {
+            var repository = m_repository;
+            return new CommandMetadataSchema(repository.RuntimeID, repository.VersionNumber, repository.MetadataSchema);
+        }
+
         //public void ProcessCommand(CommandGetMetadataProcedure command, WireEncoder encoder)
         //{
         //    if (m_procedureHandlers.TryGetValue(command.ProcedureName, out IMetadataProcedureHandler handler))

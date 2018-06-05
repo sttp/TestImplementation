@@ -74,14 +74,14 @@ namespace Sttp.Services
         //        }
         //    }
         //}
-        private CtpClient m_session;
+        private CtpSession m_session;
         private WireCodec m_codec;
         //private SttpDataPointResponse m_dataPointResponse;
 
-        public SttpClient(CtpClient session)
+        public SttpClient(CtpSession session)
         {
             m_session = session;
-            m_codec = new WireCodec(m_session.GetFinalStream);
+            m_codec = new WireCodec(m_session.FinalStream);
         }
 
         public List<string> GetMetaDataTableList()

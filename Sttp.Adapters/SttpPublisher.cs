@@ -63,7 +63,9 @@ namespace Sttp.Adapters
 
         private List<CtpUser> Users = new List<CtpUser>();
         private CtpListener m_listener;
+        private ServerSessionAuthentication m_users;
         private SttpMetadataServer m_metadata;
+
 
         public override void Initialize()
         {
@@ -71,8 +73,9 @@ namespace Sttp.Adapters
 
             base.Initialize();
 
+            m_users = new ServerSessionAuthentication();
             m_listener = new CtpListener(new IPEndPoint(GetMyIPV4(), 48294));
-            m_listener.Permissions.AddSrpUser("TrialUser", "P@$$w0rd", "Demo User", "Can Read");
+            m_users.AddSrpUser("TrialUser", "P@$$w0rd", "Demo User", "Can Read");
             m_listener.SessionCompleted += M_listener_SessionCompleted;
             m_metadata = new SttpMetadataServer();
             m_metadata.DefineSchema(DataSource);
@@ -80,11 +83,12 @@ namespace Sttp.Adapters
             m_metadata.CommitData();
         }
 
-        private void M_listener_SessionCompleted(SessionToken token)
+        private void M_listener_SessionCompleted(CtpSession token)
         {
             lock (m_listener)
             {
-                Users.Add(new CtpUser(this, token));
+                throw new NotImplementedException();
+                //Users.Add(new CtpUser(this, token));
             }
         }
 
