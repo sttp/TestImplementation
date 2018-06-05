@@ -51,7 +51,7 @@ namespace GSF.Security.Cryptography
             byte[] results = new byte[keyBytes];
             using (var mac = HMAC.Create("HMAC" + algorithm.Name))
             {
-                mac.Key = password;
+                mac.Key = password; //Note: When disposing of HMAC, the key is cleared out.
                 int macSize = mac.HashSize >> 3;
                 int loopCount = (keyBytes + macSize - 1) / macSize; //Round up
 

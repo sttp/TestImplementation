@@ -31,11 +31,11 @@ namespace CTP.Net
             var lookup = (SrpIdentityLookup)stream.CommandStream.NextCommand(-1).Document;
             var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var strength = (SrpStrength)lookup.SrpStrength;
-            var salt = lookup.Salt;
             var publicB = lookup.PublicB.ToUnsignedBigInteger();
             var param = SrpConstants.Lookup(strength);
             var publicA = BigInteger.ModPow(param.g, privateA, param.N);
-            var x = SrpMethods.ComputeX(salt, identity, password).ToUnsignedBigInteger();
+
+            var x = lookup.ComputePassword(identity, password);
             var verifier = param.g.ModPow(x, param.N);
 
             var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);

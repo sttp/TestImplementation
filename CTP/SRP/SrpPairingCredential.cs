@@ -6,13 +6,7 @@ namespace CTP.SRP
 {
     public class SrpPairingCredential<T>
     {
-        public readonly string PairingID;
-
-        public readonly byte[] Verification;
-
-        public readonly byte[] Salt;
-
-        public readonly SrpStrength SrpStrength;
+        public readonly SrpVerifier Verifier;
 
         public readonly DateTime ExpireTime;
 
@@ -37,11 +31,7 @@ namespace CTP.SRP
         /// <returns></returns>
         public SrpPairingCredential(string pairingID, string paringPin, DateTime expireTime, string assignedUserName, bool allowCertificatePairing, bool allowSessionPairing, T token)
         {
-            PairingID = pairingID.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            Salt = RNG.CreateSalt(64);
-            byte[] x = SrpMethods.ComputeX(Salt, PairingID, paringPin.Normalize(NormalizationForm.FormKC));
-            Verification = SrpMethods.ComputeV(SrpConstants.Lookup(SrpStrength.Bits1024), x.ToUnsignedBigInteger()).ToUnsignedByteArray();
-            SrpStrength = SrpStrength.Bits1024;
+            Verifier = new SrpVerifier(pairingID, paringPin);
             ExpireTime = expireTime;
             AssignedUserName = assignedUserName;
             AllowCertificatePairing = allowCertificatePairing;

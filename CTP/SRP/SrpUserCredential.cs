@@ -4,29 +4,12 @@ using System.Text;
 
 namespace CTP.SRP
 {
-    public enum SrpHashAlgorithms
-    {
-        SHA1,
-        SHA256,
-        SHA384,
-        SHA512,
-    }
 
     public class SrpUserCredential<T>
     {
-        public readonly string UserName;
-
-        public readonly byte[] Verification;
-
-        public readonly byte[] Salt;
-
-        public readonly SrpStrength SrpStrength;
+        public readonly SrpVerifier Verifier;
 
         public readonly T Token;
-
-        public readonly SrpHashAlgorithms PBKDF2Algorithm;
-
-        public readonly int IterationCount;
 
         /// <summary>
         /// Creates user credentials
@@ -36,12 +19,9 @@ namespace CTP.SRP
         /// <param name="verification"></param>
         /// <param name="srpStrength"></param>
         /// <param name="token"></param>
-        public SrpUserCredential(string username, byte[] verification, byte[] salt, SrpStrength srpStrength, T token)
+        public SrpUserCredential(string username, byte[] verification, byte[] salt, SrpStrength srpStrength, int iterations, T token)
         {
-            UserName = username.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            Salt = salt;
-            Verification = verification;
-            SrpStrength = srpStrength;
+            Verifier = new SrpVerifier(username.Normalize(NormalizationForm.FormKC).Trim(), verification, salt, srpStrength, iterations);
             Token = token;
         }
 
@@ -54,13 +34,10 @@ namespace CTP.SRP
         /// <param name="strength"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public SrpUserCredential(string username, string password, byte[] salt, SrpStrength strength, T token)
+        public SrpUserCredential(string username, string password, byte[] salt, SrpStrength strength, int iterations, T token)
         {
-            UserName = username.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            Salt = salt ?? RNG.CreateSalt(64);
-            byte[] x = SrpMethods.ComputeX(Salt, UserName, password.Normalize(NormalizationForm.FormKC));
-            Verification = SrpMethods.ComputeV(SrpConstants.Lookup(strength), x.ToUnsignedBigInteger()).ToUnsignedByteArray();
-            SrpStrength = strength;
+            var pwd = new SrpPassword(salt, username, password, iterations);
+            Verifier = pwd.CreateVerifier(strength);
             Token = token;
         }
     }

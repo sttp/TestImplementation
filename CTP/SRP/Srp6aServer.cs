@@ -26,7 +26,7 @@ namespace CTP.SRP
         public void AddPairingUser(string pairingID, string paringPin, DateTime expireTime, string assignedUserName, bool allowCertificatePairing, bool allowSessionPairing, T token)
         {
             var credentials = new SrpPairingCredential<T>(pairingID, paringPin, expireTime, assignedUserName, allowCertificatePairing, allowSessionPairing, token);
-            m_pairing[credentials.PairingID] = credentials;
+            m_pairing[credentials.Verifier.Identifier] = credentials;
         }
 
         /// <summary>
@@ -38,8 +38,8 @@ namespace CTP.SRP
         /// <returns></returns>
         public void AddUser(string username, string password, T token)
         {
-            var credentials = new SrpUserCredential<T>(username, password, GenerateSalt(username), m_srpStrength, token);
-            m_users[credentials.UserName] = credentials;
+            var credentials = new SrpUserCredential<T>(username, password, GenerateSalt(username), m_srpStrength, 1000, token);
+            m_users[credentials.Verifier.Identifier] = credentials;
         }
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace CTP.SRP
         /// <param name="token"></param>
         public void AddUser(string username, byte[] verification, byte[] salt, SrpStrength srpStrength, T token)
         {
-            var credentials = new SrpUserCredential<T>(username, verification, salt, srpStrength, token);
-            m_users[credentials.UserName] = credentials;
+            var credentials = new SrpUserCredential<T>(username, verification, salt, srpStrength, 1000,token);
+            m_users[credentials.Verifier.Identifier] = credentials;
         }
 
         public void RemoveUser(string username)
@@ -89,12 +89,12 @@ namespace CTP.SRP
                 m_pairing.Remove(userName); //Pairing is only allowed once per session.
             }
 
-            var param = SrpConstants.Lookup(user.SrpStrength);
-            var verifier = user.Verification.ToUnsignedBigInteger();
+            var param = SrpConstants.Lookup(user.Verifier.SrpStrength);
+            var verifier = user.Verifier.Verification.ToUnsignedBigInteger();
             var privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
-            stream.Write((ushort)user.SrpStrength);
-            stream.WriteWithLength(user.Salt);
+            stream.Write((ushort)user.Verifier.SrpStrength);
+            stream.WriteWithLength(user.Verifier.Salt);
             stream.WriteWithLength(publicB.ToUnsignedByteArray());
             stream.Flush();
 
@@ -132,15 +132,15 @@ namespace CTP.SRP
             if (!m_users.TryGetValue(userName, out var user))
             {
                 Console.WriteLine("User Not Found, Generating erroneous data");
-                user = new SrpUserCredential<T>(userName, Guid.NewGuid().ToString(), GenerateSalt(userName), m_srpStrength, default(T));
+                user = new SrpUserCredential<T>(userName, Guid.NewGuid().ToString(), GenerateSalt(userName), m_srpStrength, 1000, default(T));
             }
 
-            var param = SrpConstants.Lookup(user.SrpStrength);
-            var verifier = user.Verification.ToUnsignedBigInteger();
+            var param = SrpConstants.Lookup(user.Verifier.SrpStrength);
+            var verifier = user.Verifier.Verification.ToUnsignedBigInteger();
             var privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
 
-            stream.WriteDocument(new SrpIdentityLookup(user.SrpStrength, user.Salt, publicB.ToUnsignedByteArray()));
+            stream.WriteDocument(new SrpIdentityLookup(user.Verifier.SrpStrength, user.Verifier.Salt, publicB.ToUnsignedByteArray(), user.Verifier.IterationCount));
             stream.Flush();
 
             var clientResponse = stream.ReadDocument<SrpClientResponse>();
