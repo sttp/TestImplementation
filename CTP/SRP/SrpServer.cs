@@ -5,11 +5,12 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using CTP.Net;
 using GSF.IO;
 
 namespace CTP.SRP
 {
-    public class Srp6aServer<T>
+    public class SrpServer<T>
     {
         private Dictionary<string, SrpUserCredential<T>> m_users = new Dictionary<string, SrpUserCredential<T>>();
         private Dictionary<string, SrpPairingCredential<T>> m_pairing = new Dictionary<string, SrpPairingCredential<T>>();
@@ -119,14 +120,14 @@ namespace CTP.SRP
         }
 
 
-        public T Authenticate(Stream stream, X509Certificate clientCertificate, X509Certificate serverCertificate)
+        public T Authenticate(CtpSession session, SrpIdentity command, X509Certificate clientCertificate, X509Certificate serverCertificate)
         {
-            return Authenticate(stream, clientCertificate, serverCertificate, out byte[] privateSessionKey);
+            return Authenticate(session, command, clientCertificate, serverCertificate, out byte[] privateSessionKey);
         }
 
-        public T Authenticate(Stream stream, X509Certificate clientCertificate, X509Certificate serverCertificate, out byte[] privateSessionKey)
+        public T Authenticate(CtpSession session, SrpIdentity command, X509Certificate clientCertificate, X509Certificate serverCertificate, out byte[] privateSessionKey)
         {
-            var identity = stream.ReadDocument<SrpIdentity>();
+            var identity = command;
             string userName = identity.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
 
             if (!m_users.TryGetValue(userName, out var user))
@@ -140,10 +141,9 @@ namespace CTP.SRP
             var privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
 
-            stream.WriteDocument(new SrpIdentityLookup(user.Verifier.SrpStrength, user.Verifier.Salt, publicB.ToUnsignedByteArray(), user.Verifier.IterationCount));
-            stream.Flush();
+            session.SendDocument(new SrpIdentityLookup(user.Verifier.SrpStrength, user.Verifier.Salt, publicB.ToUnsignedByteArray(), user.Verifier.IterationCount));
 
-            var clientResponse = stream.ReadDocument<SrpClientResponse>();
+            var clientResponse = session.ReadDocument<SrpClientResponse>();
 
             var publicA = clientResponse.PublicA.ToUnsignedBigInteger();
             byte[] clientChallenge = clientResponse.ClientChallenge;
@@ -159,8 +159,7 @@ namespace CTP.SRP
                 throw new Exception("Failed client challenge");
             byte[] serverChallenge = challengeServer;
 
-            stream.WriteDocument(new SrpServerResponse(serverChallenge));
-            stream.Flush();
+            session.SendDocument(new SrpServerResponse(serverChallenge));
 
             return user.Token;
         }

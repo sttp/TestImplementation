@@ -21,7 +21,7 @@ namespace CTP
 
         /// <summary>
         /// Creates a command object from the supplied <see pref="reader"/>. If the command has not been registered, 
-        /// an <see cref="CommandUnknown"/> object will be returned.
+        /// null will be returned.
         /// </summary>
         /// <param name="commandName"></param>
         /// <param name="reader">the serialized data to extract from this reader.</param>
@@ -30,14 +30,14 @@ namespace CTP
         {
             if (!CommandsInitializers.TryGetValue(commandName, out Func<CtpDocument, object> command))
             {
-                return new CommandUnknown(reader);
+                return null;
             }
             return command(reader);
         }
 
         /// <summary>
         /// Registers an initializer for a command. This will be used when receiving a command to attempt to turn it into an object.
-        /// If a command is received that is not registered, a <see cref="CommandUnknown"/> will be created in its place.
+        /// If a command is received that is not registered, null will be created in its place.
         /// </summary>
         /// <param name="commandName">The name of the command</param>
         /// <param name="initializer">The initializer</param>

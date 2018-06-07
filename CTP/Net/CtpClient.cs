@@ -68,18 +68,18 @@ namespace CTP.Net
         TrustedCertificate = 2,
     }
 
-    public class CtpSocket
+    public class CtpClient
     {
         private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
 
-        private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpSocket), MessageClass.Component);
+        private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpClient), MessageClass.Component);
 
         private IPEndPoint m_remoteEndpoint;
         private X509Certificate m_clientCertificate;
         private X509CertificateCollection m_trustedCertificates;
         private string m_hostName;
 
-        public CtpSocket()
+        public CtpClient()
         {
             RequireSSL = true;
             AllowNativeTrust = true;
@@ -250,6 +250,7 @@ namespace CTP.Net
                     throw new ArgumentOutOfRangeException();
             }
 
+            string hostname = m_hostName ?? m_remoteEndpoint.Address.ToString();
             SslStream m_sslStream = null;
             if (encMode != EncryptionMode.None)
             {
@@ -264,9 +265,9 @@ namespace CTP.Net
                 {
                     m_sslStream = new SslStream(m_networkStream, false, validateCertificate, null, EncryptionPolicy.RequireEncryption);
                 }
-                m_sslStream.AuthenticateAsClient(m_hostName ?? m_remoteEndpoint.Address.ToString(), collection, SslProtocols.Tls12, false);
+                m_sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
             }
-            return new CtpSession(encMode, server, m_client, m_networkStream, m_sslStream);
+            return new CtpSession(true, hostname, encMode, server, m_client, m_networkStream, m_sslStream);
         }
 
         private X509Certificate UserCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)

@@ -99,9 +99,9 @@ namespace Sttp.Tests
             }
 
 
-            if (!reader.NextCommand()) throw new Exception();
-            if (reader.CommandCode != CommandCode.Document) throw new Exception();
-            var document = reader.DocumentPayload;
+            if (!reader.ReadCommand()) throw new Exception();
+            if (reader.Results.CommandCode != CommandCode.Document) throw new Exception();
+            var document = reader.Results.DocumentPayload;
             Assert.AreEqual(document.RootElement, "GetMetadataSchema");
             var cmd = (CommandGetMetadataSchema)document;
             Assert.AreEqual(cmd.LastKnownRuntimeID, Guid.Empty);
@@ -111,9 +111,9 @@ namespace Sttp.Tests
 
             reader.FillBuffer(ms.ToArray(), 0, (int)ms.Position);
 
-            if (!reader.NextCommand()) throw new Exception();
-            if (reader.CommandCode != CommandCode.Document) throw new Exception();
-            document = reader.DocumentPayload;
+            if (!reader.ReadCommand()) throw new Exception();
+            if (reader.Results.CommandCode != CommandCode.Document) throw new Exception();
+            document = reader.Results.DocumentPayload;
             Assert.AreEqual(document.RootElement, "MetadataSchema");
 
             Console.WriteLine(document.ToYAML());

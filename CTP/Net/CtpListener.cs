@@ -225,7 +225,7 @@ namespace CTP.Net
                 }
 
 
-                var session = new CtpSession(encMode, ServerTrustMode.None, socket, netStream, ssl);
+                var session = new CtpSession(false, (socket.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), encMode, ServerTrustMode.None, socket, netStream, ssl);
 
                 OnSessionCompleted(session);
             }

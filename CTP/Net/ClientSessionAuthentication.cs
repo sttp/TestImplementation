@@ -26,9 +26,9 @@ namespace CTP.Net
             identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             //password = password.Normalize(NormalizationForm.FormKC);
 
-            stream.CommandStream.SendDocumentCommand(new SrpIdentity(identity));
+            stream.SendDocument(new SrpIdentity(identity));
 
-            var lookup = (SrpIdentityLookup)stream.CommandStream.NextCommand(-1).Document;
+            var lookup = stream.ReadDocument<SrpIdentityLookup>();
             var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var strength = (SrpStrength)lookup.SrpStrength;
             var publicB = lookup.PublicB.ToUnsignedBigInteger();
@@ -42,22 +42,26 @@ namespace CTP.Net
             var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
             var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
             var sessionKey = base1.ModPow(exp1, param.N);
-            var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, stream.Ssl?.LocalCertificate, stream.Ssl?.RemoteCertificate);
-            var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, stream.Ssl?.LocalCertificate, stream.Ssl?.RemoteCertificate);
-            privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, stream.Ssl?.LocalCertificate, stream.Ssl?.RemoteCertificate);
+            var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, stream.LocalCertificate, stream.RemoteCertificate);
+            var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, stream.LocalCertificate, stream.RemoteCertificate);
+            privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, stream.LocalCertificate, stream.RemoteCertificate);
             byte[] clientChallenge = challengeClient;
 
-            stream.CommandStream.SendDocumentCommand(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
+            stream.SendDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
 
-            var cr = (SrpServerResponse)stream.CommandStream.NextCommand(-1).Document;
+            var cr = stream.ReadDocument<SrpServerResponse>();
             if (!challengeServer.SequenceEqual(cr.ServerChallenge))
                 throw new Exception("Failed server challenge");
         }
 
-        private static void AuthenticateWithNegotiate(CtpSession session, NetworkCredential credentials)
+        public static void AuthenticateWithNegotiate(CtpSession session, NetworkCredential credentials)
         {
-            session.Win = new NegotiateStream(session.FinalStream, true);
-            session.Win.AuthenticateAsClient(credentials, session.HostName ?? string.Empty, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
+            using (var stream = session.CreateStream())
+            {
+                session.SendDocument(new AuthNegotiate(stream.StreamID));
+                session.Win = new NegotiateStream(stream, true);
+                session.Win.AuthenticateAsClient(credentials, session.HostName ?? string.Empty, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
+            }
         }
 
         public static void AuthenticateWithLDAP(CtpSession session, NetworkCredential credential)

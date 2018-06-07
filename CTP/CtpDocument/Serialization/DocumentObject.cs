@@ -27,7 +27,7 @@ namespace CTP
         : DocumentObject
         where T : DocumentObject<T>
     {
-        private static readonly string CommandName;
+        public static readonly string CommandName;
         private static Exception LoadError;
         private static readonly TypeSerializationMethodBase<T> Serialization;
 

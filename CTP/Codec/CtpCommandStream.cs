@@ -39,19 +39,23 @@ namespace CTP.Net
         {
             m_stream.Write(data, position, length);
         }
-        
+
         /// <summary>
         /// Gets the next data packet. This method should be in a while loop. Once all commands have been read, an async read
         /// will occur
         /// </summary>
-        /// <param name="timeout">The number of milliseconds to wait for a command before returning null. </param>
         /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
-        public CommandObjects2 NextCommand(int timeout = 0)
+        public CtpReadResults Read()
+        {
+            return TryRead(-1);
+        }
+
+        public CtpReadResults TryRead(int timeout)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
             tryAgain:
-            if (!m_packetDecoder.NextCommand())
+            if (!m_packetDecoder.ReadCommand())
             {
                 if (AsyncRead())
                 {
@@ -73,10 +77,8 @@ namespace CTP.Net
                 }
                 m_waitForDataEvent.Reset();
                 goto tryAgain;
-
             }
-
-            return new CommandObjects2(m_packetDecoder);
+            return m_packetDecoder.Results.Clone();
         }
 
         private bool AsyncRead()

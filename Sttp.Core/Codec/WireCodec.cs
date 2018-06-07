@@ -64,7 +64,7 @@ namespace Sttp.Codec
             Stopwatch sw = new Stopwatch();
             sw.Start();
             tryAgain:
-            if (!m_packetDecoder.NextCommand())
+            if (!m_packetDecoder.ReadCommand())
             {
                 if (AsyncRead())
                 {

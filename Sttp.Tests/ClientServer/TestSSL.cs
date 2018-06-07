@@ -27,7 +27,7 @@ namespace Sttp.Tests.ClientServer
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpSocket();
+            var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             client.RequireSSL = false;
             client.Connect();
@@ -42,7 +42,7 @@ namespace Sttp.Tests.ClientServer
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpSocket();
+            var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             client.Connect();
             Thread.Sleep(100);
@@ -61,7 +61,7 @@ namespace Sttp.Tests.ClientServer
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpSocket();
+            var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             client.SetClientCertificate(cert2);
             client.Connect();
@@ -76,7 +76,7 @@ namespace Sttp.Tests.ClientServer
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpSocket();
+            var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             var s = client.Connect();
             ClientSessionAuthentication.AuthenticateWithSRP(s, new NetworkCredential("U", "Pass1"));
@@ -92,7 +92,7 @@ namespace Sttp.Tests.ClientServer
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpSocket();
+            var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             var s = client.Connect();
             ClientSessionAuthentication.AuthenticateWithSRP(s, new NetworkCredential("U", "Pass1"));

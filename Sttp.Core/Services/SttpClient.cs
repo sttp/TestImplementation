@@ -81,7 +81,7 @@ namespace Sttp.Services
         public SttpClient(CtpSession session)
         {
             m_session = session;
-            m_codec = new WireCodec(m_session.FinalStream);
+           // m_codec = new WireCodec(m_session.FinalStream);
         }
 
         public List<string> GetMetaDataTableList()

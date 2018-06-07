@@ -32,75 +32,12 @@ namespace CTP
 
         private FragmentReassembly m_fragmentReassembly = new FragmentReassembly();
 
-        private CommandCode m_commandCode;
-        private CtpDocument m_documentPayload;
-        private byte[] m_binaryCommandPayload;
-        private int m_binaryChannelCode;
+        public CtpReadResults Results = new CtpReadResults();
 
         public CtpDecoder()
         {
             m_compressionBuffer = new byte[512];
             m_inboundBuffer = new byte[512];
-        }
-
-        /// <summary>
-        /// Indicates if a command has successfully been decoded. 
-        /// This is equal to the return value of the most recent 
-        /// <see cref="NextCommand"/> method call.
-        /// </summary>
-        public bool IsValid => m_commandCode != CommandCode.Invalid;
-
-        /// <summary>
-        /// Indicates what kind of commmand was decoded.
-        /// </summary>
-        public CommandCode CommandCode => m_commandCode;
-
-        /// <summary>
-        /// Valid if <see cref="NextCommand"/> returned true. And the command 
-        /// This is the command that was decoded.
-        /// </summary>
-        public CtpDocument DocumentPayload
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                if (m_commandCode != CommandCode.Document)
-                    throw new InvalidOperationException("Command is not a Document Command.");
-                return m_documentPayload;
-            }
-        }
-
-        /// <summary>
-        /// Valid if <see cref="NextCommand"/> returned true. 
-        /// This is the command that was decoded.
-        /// </summary>
-        public byte[] BinaryPayload
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                if (m_commandCode != CommandCode.Binary)
-                    throw new InvalidOperationException("Command is not a Binary Command.");
-                return m_binaryCommandPayload;
-            }
-        }
-
-        /// <summary>
-        /// Valid if <see cref="NextCommand"/> returned true. 
-        /// This is the command that was decoded.
-        /// </summary>
-        public int BinaryChannelID
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                if (m_commandCode != CommandCode.Binary)
-                    throw new InvalidOperationException("Command is not a Binary Command.");
-                return m_binaryChannelCode;
-            }
         }
 
         /// <summary>
@@ -141,12 +78,9 @@ namespace CTP
         /// Automatically decompresses and combines fragments and waits for the entire packet before
         /// responding as True.
         /// </summary>
-        public bool NextCommand()
+        public bool ReadCommand()
         {
-            m_commandCode = CommandCode.Invalid;
-            m_documentPayload = null;
-            m_binaryCommandPayload = null;
-            m_binaryChannelCode = 0;
+            Results.SetInvalid();
 
             TryAgain:
             if (m_inboundBufferLength < 2)
@@ -215,36 +149,33 @@ namespace CTP
             byte[] results;
             if ((header & CtpHeader.CommandMask) == CtpHeader.CommandDocument)
             {
-                m_commandCode = CommandCode.Document;
                 int markupLength = length;
                 int markupStart = position;
                 results = new byte[markupLength];
                 Array.Copy(buffer, markupStart, results, 0, markupLength);
-                m_documentPayload = new CtpDocument(results);
+                Results.SetDocument(new CtpDocument(results));
             }
             else
             {
-                m_commandCode = CommandCode.Binary;
-
+                int binaryChannelCode = 0;
                 if ((header & CtpHeader.CommandMask) == CtpHeader.CommandBinary0)
                 {
-                    m_binaryChannelCode = 0;
+                    binaryChannelCode = 0;
                 }
                 else if ((header & CtpHeader.CommandMask) == CtpHeader.CommandBinary1)
                 {
-                    m_binaryChannelCode = 1;
+                    binaryChannelCode = 1;
                 }
                 else
                 {
-                    m_binaryChannelCode = ToInt32(buffer, position);
+                    binaryChannelCode = ToInt32(buffer, position);
                     position += 4;
                     length -= 4;
                 }
 
                 results = new byte[length];
                 Array.Copy(buffer, position, results, 0, length);
-                m_binaryChannelCode = buffer[position];
-                m_binaryCommandPayload = results;
+                Results.SetRaw(binaryChannelCode, results);
             }
         }
 
