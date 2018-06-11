@@ -100,7 +100,7 @@ namespace Sttp.Services
                     }
                 }
 
-                int channelID = encoder.GetNextRawChannelID();
+                ulong channelID = encoder.GetNextRawChannelID();
                 int rowCount = 0;
 
                 var rowEncoder = new MetadataRowEncoder(columns);

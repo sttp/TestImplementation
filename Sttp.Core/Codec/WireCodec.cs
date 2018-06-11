@@ -19,7 +19,7 @@ namespace Sttp.Codec
 
         private CtpDecoder m_packetDecoder;
         private CtpEncoder m_encoder;
-        private int m_rawChannelID;
+        private long m_rawChannelID;
         private Stream m_stream;
         private bool m_isReading;
         private object m_syncReceive = new object();
@@ -127,69 +127,69 @@ namespace Sttp.Codec
             DataReceived?.Invoke(); //If this call was completed asynchronously, notify the client that it was fulfilled.
         }
 
-        public int GetNextRawChannelID()
+        public ulong GetNextRawChannelID()
         {
-            int id = 0;
-            while (id == 0 || id == 1)
+            ulong id = 0;
+            while (id < 16)
             {
-                id = Interlocked.Increment(ref m_rawChannelID);
+                id = (ulong)Interlocked.Increment(ref m_rawChannelID);
             }
             return id;
         }
 
         public void GetMetadataSchema(Guid? lastKnownRuntimeID = null, long? lastKnownVersionNumber = null)
         {
-            m_encoder.SendDocumentCommands(new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
+            m_encoder.Send(0, new CommandGetMetadataSchema(lastKnownRuntimeID, lastKnownVersionNumber));
         }
 
         public void MetadataSchema(Guid runtimeID, long versionNumber, List<MetadataSchemaTable> tables)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchema(runtimeID, versionNumber, tables));
+            m_encoder.Send(0, new CommandMetadataSchema(runtimeID, versionNumber, tables));
         }
 
         public void MetadataSchemaUpdate(Guid runtimeID, long versionNumber, List<MetadataSchemaTableUpdate> tables)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
+            m_encoder.Send(0, new CommandMetadataSchemaUpdate(runtimeID, versionNumber, tables));
         }
 
         public void MetadataSchemaVersion(Guid runtimeID, long versionNumber)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataSchemaVersion(runtimeID, versionNumber));
+            m_encoder.Send(0, new CommandMetadataSchemaVersion(runtimeID, versionNumber));
         }
 
         public void GetMetadata(string table, IEnumerable<string> columns)
         {
-            m_encoder.SendDocumentCommands(new CommandGetMetadata(table, columns));
+            m_encoder.Send(0, new CommandGetMetadata(table, columns));
         }
 
         public void MetadataRequestFailed(string reason, string details)
         {
-            m_encoder.SendDocumentCommands(new CommandMetadataRequestFailed(reason, details));
+            m_encoder.Send(0, new CommandMetadataRequestFailed(reason, details));
         }
 
-        public void BeginMetadataResponse(int rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
+        public void BeginMetadataResponse(ulong rawChannelID, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
         {
-            m_encoder.SendDocumentCommands(new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
+            m_encoder.Send(0, new CommandBeginMetadataResponse(rawChannelID, encodingMethod, runtimeID, versionNumber, tableName, columns));
         }
 
-        public void EndMetadataResponse(int rawChannelID, int rowCount)
+        public void EndMetadataResponse(ulong rawChannelID, int rowCount)
         {
-            m_encoder.SendDocumentCommands(new CommandEndMetadataResponse(rawChannelID, rowCount));
+            m_encoder.Send(0, new CommandEndMetadataResponse(rawChannelID, rowCount));
         }
 
         public void SendCustomCommand(CtpDocument command)
         {
-            m_encoder.SendDocumentCommands(command);
+            m_encoder.Send(0, command);
         }
 
-        public void Raw(int rawCommandCode, byte[] payload)
+        public void Raw(ulong rawCommandCode, byte[] payload)
         {
-            m_encoder.SendBinaryCommand(rawCommandCode, payload, 0, payload.Length);
+            m_encoder.Send(rawCommandCode, payload, 0, payload.Length);
         }
 
         public void RequestFailed(string origionalCommand, string reason, string details)
         {
-            m_encoder.SendDocumentCommands(new CommandRequestFailed(origionalCommand, reason, details));
+            m_encoder.Send(0, new CommandRequestFailed(origionalCommand, reason, details));
         }
 
 

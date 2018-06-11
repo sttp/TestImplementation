@@ -20,7 +20,7 @@ namespace Sttp.Adapters
             private SttpServer m_server;
             private byte[] m_subscribeList;
             private BasicEncoder m_encoder;
-            private int m_encoderID;
+            private ulong m_encoderID;
 
             public CtpUser(SttpPublisher home, SessionToken token)
             {

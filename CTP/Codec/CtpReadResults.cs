@@ -9,7 +9,7 @@ namespace CTP
         private CommandCode m_commandCode;
         private CtpDocument m_documentPayload;
         private byte[] m_binaryCommandPayload;
-        private int m_binaryChannelCode;
+        private ulong m_binaryChannelCode;
 
         public void SetInvalid()
         {
@@ -25,7 +25,7 @@ namespace CTP
             m_documentPayload = document;
         }
 
-        public void SetRaw(int channelCode, byte[] payload)
+        public void SetRaw(ulong channelCode, byte[] payload)
         {
             m_commandCode = CommandCode.Binary;
             m_binaryChannelCode = channelCode;
@@ -85,7 +85,7 @@ namespace CTP
         /// Valid if <see cref="CtpDecoder.ReadCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public int BinaryChannelID
+        public ulong BinaryChannelID
         {
             get
             {

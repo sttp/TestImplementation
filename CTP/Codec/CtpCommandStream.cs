@@ -16,7 +16,7 @@ namespace CTP.Net
 
         private CtpDecoder m_packetDecoder;
         private CtpEncoder m_encoder;
-        private int m_rawChannelID;
+        private long m_rawChannelID;
         private Stream m_stream;
         private bool m_isReading;
         private object m_syncReceive = new object();
@@ -117,24 +117,29 @@ namespace CTP.Net
             DataReceived?.Invoke(); //If this call was completed asynchronously, notify the client that it was fulfilled.
         }
 
-        public int GetNextRawChannelID()
+        public ulong GetNextRawChannelID()
         {
-            int id = 0;
-            while (id == 0 || id == 1)
+            ulong id = 0;
+            while (id < 16)
             {
-                id = Interlocked.Increment(ref m_rawChannelID);
+                id = (ulong)Interlocked.Increment(ref m_rawChannelID);
             }
-            return id;
+            return (ulong)id;
         }
 
-        public void SendDocumentCommand(CtpDocument command)
+        public void SendDocumentCommand(ulong channelNumber, CtpDocument command)
         {
-            m_encoder.SendDocumentCommands(command);
+            SendRaw(channelNumber, command.ToArray());
         }
 
-        public void SendRaw(int rawCommandCode, byte[] payload)
+        public void SendRaw(ulong channelNumber, byte[] payload)
         {
-            m_encoder.SendBinaryCommand(rawCommandCode, payload, 0, payload.Length);
+            m_encoder.Send(channelNumber, payload, 0, payload.Length);
+        }
+
+        public void SendRaw(ulong channelNumber, byte[] payload, int offset, int length)
+        {
+            m_encoder.Send(channelNumber, payload, offset, length);
         }
 
 

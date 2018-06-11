@@ -90,7 +90,7 @@ namespace Sttp.Tests
             var reader = new CtpDecoder();
 
             writer.NewPacket += (bytes, start, length) => packets.Enqueue(Clone(bytes, start, length));
-            writer.SendDocumentCommands(new CommandGetMetadataSchema(Guid.Empty, null));
+            writer.Send(0, new CommandGetMetadataSchema(Guid.Empty, null));
 
             while (packets.Count > 0)
             {

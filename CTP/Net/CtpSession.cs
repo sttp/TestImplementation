@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GSF.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -27,7 +28,8 @@ namespace CTP.Net
         public X509Certificate LocalCertificate => Ssl?.LocalCertificate;
         private readonly CtpCommandStream CommandStream;
 
-        public event Action<CtpReadResults> UnhandledCommands;
+        private Dictionary<string, ICtpCommandHandler> m_rootHandlers = new Dictionary<string, ICtpCommandHandler>();
+        private Dictionary<ulong, CtpStream> m_streamHandlers = new Dictionary<ulong, CtpStream>();
 
         public CtpSession(bool isClient, string hostName, EncryptionMode mode, ServerTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
@@ -41,63 +43,93 @@ namespace CTP.Net
             CommandStream = new CtpCommandStream((Stream)Ssl ?? NetStream);
         }
 
+        public void RegisterHandler(ICtpCommandHandler handler)
+        {
+            foreach (var command in handler.CommandsHandled())
+            {
+                m_rootHandlers.Add(command, handler);
+            }
+        }
+
+        /// <summary>
+        /// Automatically handle all commands on a callback thread. 
+        /// In general, this should only be called on the server component. When this occurs, all reads
+        /// will be occurring on it's own thread on a callback. 
+        /// </summary>
+        public void DoEvents()
+        {
+
+        }
+
+        public CtpWriteStream CreateWriteStream()
+        {
+            return new CtpWriteStream(CommandStream.GetNextRawChannelID(), this, Write);
+        }
+
+        private void Write(ulong streamID, byte[] buffer, int position, int length)
+        {
+            CommandStream.SendRaw(streamID, buffer, position, length);
+        }
+
+        public CtpReadStream OpenReadStream(ulong streamID)
+        {
+            return new CtpReadStream(streamID, this);
+        }
+
         public CtpStream CreateStream()
         {
+
             throw new NotImplementedException();
-            return new CtpStream();
+            return new CtpStream(null, null);
         }
         public CtpStream OpenStream(int streamID)
         {
             throw new NotImplementedException();
-            return new CtpStream();
+            return new CtpStream(null, null);
         }
 
         public void SendDocument(CtpDocument document)
         {
-            CommandStream.SendDocumentCommand(document);
+            CommandStream.SendDocumentCommand(0, document);
         }
 
         public T ReadDocument<T>()
             where T : DocumentObject<T>
         {
-            TryAgain:
-            var item = CommandStream.Read();
-            if (item.CommandCode != CommandCode.Document || item.DocumentPayload.RootElement != DocumentObject<T>.CommandName)
+            var document = ReadDocument();
+            if (document.RootElement != DocumentObject<T>.CommandName)
             {
-                if (UnhandledCommands == null)
-                {
-                    throw new Exception("Unhandled command");
-                }
-                else
-                {
-                    UnhandledCommands?.Invoke(item);
-                    goto TryAgain;
-                }
+                throw new Exception("Unhandled command");
             }
-            return DocumentObject<T>.FromDocument(item.DocumentPayload);
+            return DocumentObject<T>.FromDocument(document);
         }
 
         public CtpDocument ReadDocument()
         {
             TryAgain:
             var item = CommandStream.Read();
-            if (item.CommandCode != CommandCode.Document)
+            if (item.CommandCode == CommandCode.Binary)
             {
-                if (UnhandledCommands == null)
+                if (m_streamHandlers.TryGetValue(item.BinaryChannelID, out var stream))
                 {
-                    throw new Exception("Unhandled command");
+                    stream.Write(item.BinaryPayload);
                 }
-                else
-                {
-                    UnhandledCommands?.Invoke(item);
-                    goto TryAgain;
-                }
+                goto TryAgain;
             }
-            return item.DocumentPayload;
+            else
+            {
+                return item.DocumentPayload;
+            }
         }
 
+        public void StopWriteStream(ulong channelNumber)
+        {
+            throw new NotImplementedException();
+        }
 
-
-
+        public void StopReadStream(ulong channelNumber)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

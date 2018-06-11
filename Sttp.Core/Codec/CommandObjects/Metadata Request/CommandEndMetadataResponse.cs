@@ -8,11 +8,11 @@ namespace Sttp.Codec
         : DocumentObject<CommandEndMetadataResponse>
     {
         [DocumentField()]
-        public int BinaryChannelCode { get; private set; }
+        public ulong BinaryChannelCode { get; private set; }
         [DocumentField()]
         public int RowCount { get; private set; }
 
-        public CommandEndMetadataResponse(int binaryChannelCode, int rowCount)
+        public CommandEndMetadataResponse(ulong binaryChannelCode, int rowCount)
         {
             BinaryChannelCode = binaryChannelCode;
             RowCount = rowCount;

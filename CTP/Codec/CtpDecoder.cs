@@ -30,14 +30,15 @@ namespace CTP
         /// </summary>
         private byte[] m_compressionBuffer;
 
-        private FragmentReassembly m_fragmentReassembly = new FragmentReassembly();
-
         public CtpReadResults Results = new CtpReadResults();
+
+        private EncoderOptions m_encoderOptions;
 
         public CtpDecoder()
         {
-            m_compressionBuffer = new byte[512];
-            m_inboundBuffer = new byte[512];
+            m_encoderOptions = new EncoderOptions();
+            m_compressionBuffer = new byte[128];
+            m_inboundBuffer = new byte[128];
         }
 
         /// <summary>
@@ -82,40 +83,46 @@ namespace CTP
         {
             Results.SetInvalid();
 
-            TryAgain:
             if (m_inboundBufferLength < 2)
                 return false;
 
-            CtpHeader header = (CtpHeader)ToUInt16(m_inboundBuffer, m_inboundBufferCurrentPosition);
-            int packetLength = (int)(header & CtpHeader.PacketLengthMask);
-            if (m_inboundBufferLength < packetLength)
-                return false;
+            bool isCompressed;
+            ulong channelNumber;
+            int packetLength;
+            int overheadBytes;
 
-            if ((header & CtpHeader.IsFragmented) == CtpHeader.IsFragmented)
+            if (m_inboundBuffer[m_inboundBufferCurrentPosition] < 128) //This is header 0;
             {
-                m_fragmentReassembly.ProcessFragment(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 2, packetLength - 2);
-                m_inboundBufferCurrentPosition += packetLength;
-                m_inboundBufferLength -= packetLength;
-
-                if (m_fragmentReassembly.IsComplete)
-                {
-                    ProcessPacket(m_fragmentReassembly.Header, m_fragmentReassembly.Buffer, 0, m_fragmentReassembly.TotalSize);
-                    return true;
-                }
-                goto TryAgain;
+                CtpHeader0 header = (CtpHeader0)ToUInt16(m_inboundBuffer, m_inboundBufferCurrentPosition);
+                isCompressed = (header & CtpHeader0.IsCompressed) != 0;
+                channelNumber = (byte)((int)(header & CtpHeader0.ChannelNumberMask) >> (int)CtpHeader0.ChannelNumberShiftBits);
+                packetLength = (int)(header & CtpHeader0.PacketLengthMask);
+                overheadBytes = 2;
             }
             else
             {
-                ProcessPacket(header, m_inboundBuffer, m_inboundBufferCurrentPosition + 2, packetLength - 2);
-                m_inboundBufferCurrentPosition += packetLength;
-                m_inboundBufferLength -= packetLength;
-                return true;
+                CtpHeader1 header = (CtpHeader1)m_inboundBuffer[m_inboundBufferCurrentPosition];
+                isCompressed = (header & CtpHeader1.IsCompressed) != 0;
+                int packetLengthBytes = ((byte)(header & CtpHeader1.PacketLengthMask) >> 3) + 1;
+                int channelNumberByteLength = (byte)(header & CtpHeader1.ChannelNumberLengthMask) + 1;
+                if (m_inboundBufferLength < 1 + channelNumberByteLength + channelNumberByteLength)
+                    return false;
+                channelNumber = BigEndianReadInt(channelNumberByteLength, m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
+                packetLength = (int)BigEndianReadInt(packetLengthBytes, m_inboundBuffer, m_inboundBufferCurrentPosition + 1 + channelNumberByteLength);
+                overheadBytes = 1 + packetLengthBytes + channelNumberByteLength;
             }
-        }
 
-        private void ProcessPacket(CtpHeader header, byte[] buffer, int position, int length)
-        {
-            if ((header & CtpHeader.IsCompressed) == CtpHeader.IsCompressed)
+            if (packetLength > m_encoderOptions.MaximumCommandSize)
+                throw new Exception("Command size is too large");
+
+            //ToDo: Ensure that packet length isn't too large.
+            if (m_inboundBufferLength < packetLength)
+                return false;
+
+            byte[] buffer = m_inboundBuffer;
+            int position = m_inboundBufferCurrentPosition + overheadBytes;
+            int length = packetLength - overheadBytes;
+            if (isCompressed)
             {
                 //Decompresses the data.
                 int inflatedSize = ToInt32(buffer, position);
@@ -147,36 +154,28 @@ namespace CTP
             buffer.ValidateParameters(position, length);
 
             byte[] results;
-            if ((header & CtpHeader.CommandMask) == CtpHeader.CommandDocument)
-            {
-                int markupLength = length;
-                int markupStart = position;
-                results = new byte[markupLength];
-                Array.Copy(buffer, markupStart, results, 0, markupLength);
-                Results.SetDocument(new CtpDocument(results));
-            }
-            else
-            {
-                int binaryChannelCode = 0;
-                if ((header & CtpHeader.CommandMask) == CtpHeader.CommandBinary0)
-                {
-                    binaryChannelCode = 0;
-                }
-                else if ((header & CtpHeader.CommandMask) == CtpHeader.CommandBinary1)
-                {
-                    binaryChannelCode = 1;
-                }
-                else
-                {
-                    binaryChannelCode = ToInt32(buffer, position);
-                    position += 4;
-                    length -= 4;
-                }
+            results = new byte[length];
+            Array.Copy(buffer, position, results, 0, length);
+            Results.SetRaw(channelNumber, results);
+            m_inboundBufferCurrentPosition += packetLength;
+            m_inboundBufferLength -= packetLength;
+            return true;
+        }
 
-                results = new byte[length];
-                Array.Copy(buffer, position, results, 0, length);
-                Results.SetRaw(binaryChannelCode, results);
+        private static ulong BigEndianReadInt(int byteCount, byte[] buffer, int offset)
+        {
+            if (byteCount > 8)
+                throw new ArgumentException();
+            buffer.ValidateParameters(offset, byteCount);
+
+            ulong rv = 0;
+            for (int x = offset; x < offset + byteCount; x++)
+            {
+                rv <<= 8;
+                rv |= buffer[x];
             }
+
+            return rv;
         }
 
         private static ushort ToUInt16(byte[] buffer, int startIndex)

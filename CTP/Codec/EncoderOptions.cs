@@ -12,7 +12,6 @@ namespace CTP
     {
         private int m_maximumCommandSize = 10_000_000;
         private int m_deflateThreshold = 300;
-        private int m_maximumPacketSize = 1500;
 
         /// <summary>
         /// Indicate that the protocol supports deflate.
@@ -33,23 +32,6 @@ namespace CTP
             {
                 ValidateLimit(100, 100_000_000, value);
                 m_deflateThreshold = value;
-            }
-        }
-
-        /// <summary>
-        /// The maximum size of every atomic packet. After this threshold, the packet must be fragmented.
-        /// Must be between 300 and 4095 (Inclusive).
-        /// </summary>
-        public int MaximumPacketSize
-        {
-            get
-            {
-                return m_maximumPacketSize;
-            }
-            set
-            {
-                ValidateLimit(300, 4095, value);
-                m_maximumPacketSize = value;
             }
         }
 
