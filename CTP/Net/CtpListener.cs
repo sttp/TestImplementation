@@ -208,7 +208,6 @@ namespace CTP.Net
                 netStream.WriteByte((byte)mode);
                 netStream.Flush();
 
-
                 if (mode != 'N')
                 {
                     switch (mode)
@@ -224,13 +223,13 @@ namespace CTP.Net
                     }
                 }
 
-
-                var session = new CtpSession(false, (socket.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), encMode, ServerTrustMode.None, socket, netStream, ssl);
+                var session = new CtpSession(false, false, (socket.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), encMode, ServerTrustMode.None, socket, netStream, ssl);
 
                 OnSessionCompleted(session);
             }
             catch (Exception e)
             {
+
             }
         }
 

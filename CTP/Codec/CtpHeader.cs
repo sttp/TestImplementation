@@ -1,39 +1,45 @@
 using System;
+using System.CodeDom;
+using System.ComponentModel;
 
 namespace CTP
 {
-    /// <summary>
-    /// This header is only valid if the channel number is less than 16 and the packet length is less than 1024 bytes.
-    /// </summary>
     [Flags]
-    internal enum CtpHeader0 : ushort
+    internal enum CtpHeader : byte
     {
         /// <summary>
-        /// The header that is used. 
+        /// The header that is used. Must be 0
         /// </summary>
-        HeaderVersion = 1 << 15,
+        HeaderVersion = 1 << 7,
 
         /// <summary>
         /// Indicates if this packet is compressed. 
         /// 0: None
-        /// 1: Deflate
+        /// 1: Yes
         /// </summary>
-        IsCompressed = 1 << 14,
+        IsCompressed = 1 << 6,
 
         /// <summary>
-        /// The mask to decode the channel number
+        /// Indicates that this message is a document payload message
         /// </summary>
-        ChannelNumberMask = 1 << 13 | 1 << 12 | 1 << 11 | 1 << 10,
+        IsDocumentPayload = 1 << 5,
 
         /// <summary>
-        /// The number of bits to shift the channel number mask.
+        /// Indicates that this message must interrupt the existing flow of the command.
         /// </summary>
-        ChannelNumberShiftBits = 10,
+        IsException = 1 << 4,
 
         /// <summary>
-        /// The mask in the packet length
+        /// Indicates if this channel is owned by the server or the client.
+        /// 0=Client
+        /// 1=Server
         /// </summary>
-        PacketLengthMask = (1 << 10) - 1,
+        ChannelOwner = 1 << 3,
+
+        /// <summary>
+        /// Indicates the content type.
+        /// </summary>
+        ChannelFlags = 1 << 2 | 1 << 1 | 1 << 0,
 
         /// <summary>
         /// None of the flags are set. Note, this state is valid.
@@ -41,41 +47,22 @@ namespace CTP
         None = 0
     }
 
-    [Flags]
-    internal enum CtpHeader1 : byte
+    internal static class CtpHeaderExtensions
     {
-        /// <summary>
-        /// The header that is used. 
-        /// </summary>
-        HeaderVersion = 1 << 7,
+        public static CtpHeader SetChannelCode(this CtpHeader header, CtpChannelCode channelCode)
+        {
+            if ((header & CtpHeader.HeaderVersion) != 0)
+                throw new Exception("Header version not recognized");
+            if ((byte)channelCode > 4)
+                throw new InvalidEnumArgumentException(nameof(channelCode), (int)channelCode, typeof(CtpChannelCode));
+            return (header & ~CtpHeader.ChannelFlags) | (CtpHeader)(byte)channelCode;
+        }
 
-        /// <summary>
-        /// This bit is reserved for future use. It must be 0.
-        /// </summary>
-        ReservedBit = 1 << 6,
-
-        /// <summary>
-        /// Indicates if this packet is compressed. 
-        /// 0: None
-        /// 1: Deflate
-        /// </summary>
-        IsCompressed = 1 << 5,
-
-        /// <summary>
-        /// A mask indicating the number of bytes required for the Packet Length
-        /// Range is 1-8, not 0-7.
-        /// </summary>
-        PacketLengthMask = 1 << 4 | 1 << 3,
-
-        /// <summary>
-        /// A mask indicating the number of bytes required for the Channel Number
-        /// Range is 1-8, not 0-7.
-        /// </summary>
-        ChannelNumberLengthMask = 7,
-
-        /// <summary>
-        /// None of the flags are set.
-        /// </summary>
-        None = 0
+        public static CtpChannelCode GetChannelCode(this CtpHeader header)
+        {
+            if ((header & CtpHeader.HeaderVersion) != 0)
+                throw new Exception("Header version not recognized");
+            return (CtpChannelCode)(byte)(header & CtpHeader.ChannelFlags);
+        }
     }
 }

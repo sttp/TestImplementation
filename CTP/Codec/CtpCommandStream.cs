@@ -5,34 +5,102 @@ using System.Threading;
 
 namespace CTP.Net
 {
+    public class CtpSocket : IDisposable
+    {
+        public readonly byte ChannelID;
+        private CtpEncoder m_encoder;
+        private Action m_onDispose;
+
+        public event Action<CtpReadResults> NewData;
+
+        internal CtpSocket(Action onDispose, byte channelID, CtpEncoder encoder)
+        {
+            m_onDispose = onDispose;
+            ChannelID = channelID;
+            m_encoder = encoder;
+        }
+
+        internal void ProcessRead(CtpReadResults readResults)
+        {
+            NewData(readResults);
+        }
+
+        public void SendStream(byte[] data, int offset, int length)
+        {
+            m_encoder.Send(CtpChannelCode.Stream, ChannelID, data, offset, length);
+        }
+
+        public void SendPayload(byte[] payload)
+        {
+            SendPayload(payload, 0, payload.Length);
+        }
+
+        public void SendPayload(byte[] payload, int offset, int length)
+        {
+            m_encoder.Send(CtpChannelCode.Block, ChannelID, payload, offset, length);
+        }
+
+        public void SendDocument(CtpDocument command)
+        {
+            m_encoder.Send(CtpChannelCode.Document, ChannelID, command.ToArray());
+        }
+
+        public void Dispose()
+        {
+            m_onDispose?.Invoke();
+            m_onDispose = null;
+        }
+    }
+
     public class CtpCommandStream
     {
-        /// <summary>
-        /// Occurs when data has been received from the socket. 
-        /// This does not mean an entire command has been received and is ready for processing. Call NextCommand 
-        /// to determine if a command object is ready to be received.
-        /// </summary>
-        public event Action DataReceived;
-
         private CtpDecoder m_packetDecoder;
         private CtpEncoder m_encoder;
-        private long m_rawChannelID;
         private Stream m_stream;
         private bool m_isReading;
         private object m_syncReceive = new object();
         private byte[] m_inBuffer = new byte[3000];
-        private AsyncCallback m_readCallback;
-        private WaitCallback m_onDataReceived;
-        private ManualResetEvent m_waitForDataEvent = new ManualResetEvent(false);
+        private CtpSocket[] m_sockets = new CtpSocket[256];
+        private bool m_isClient;
+        private Action<CtpSocket> m_onNewInboundSession;
 
-        public CtpCommandStream(Stream session)
+        private WaitCallback m_asyncRead;
+        private AsyncCallback m_asyncReadCallback;
+
+        public CtpCommandStream(Stream session, bool isClient, Action<CtpSocket> onNewInboundSession)
         {
-            m_onDataReceived = OnDataReceived;
-            m_readCallback = AsyncReadCallback;
+            m_onNewInboundSession = onNewInboundSession;
+            m_isClient = isClient;
             m_packetDecoder = new CtpDecoder();
             m_encoder = new CtpEncoder();
             m_encoder.NewPacket += EncoderOnNewPacket;
             m_stream = session;
+            m_asyncRead = AsyncRead;
+            m_asyncReadCallback = AsyncReadCallback;
+        }
+
+        public void Start()
+        {
+            AsyncRead(null);
+        }
+
+        public CtpSocket StartNewSession()
+        {
+            int start = 2;
+            if (m_isClient)
+            {
+                start = 1;
+            }
+
+            for (int x = start; x < m_sockets.Length; x += 2)
+            {
+                if (m_sockets[x] == null)
+                {
+                    m_sockets[x] = new CtpSocket(() => m_sockets[x] = null, (byte)x, m_encoder);
+                    return m_sockets[x];
+                }
+            }
+            throw new Exception("Out of channels, too many simultaneous streams over a single socket.");
         }
 
         private void EncoderOnNewPacket(byte[] data, int position, int length)
@@ -40,61 +108,16 @@ namespace CTP.Net
             m_stream.Write(data, position, length);
         }
 
-        /// <summary>
-        /// Gets the next data packet. This method should be in a while loop. Once all commands have been read, an async read
-        /// will occur
-        /// </summary>
-        /// <returns>The decoder for this segment of data, null if there are no pending data packets. </returns>
-        public CtpReadResults Read()
+        private void AsyncRead(object obj)
         {
-            return TryRead(-1);
-        }
-
-        public CtpReadResults TryRead(int timeout)
-        {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            tryAgain:
-            if (!m_packetDecoder.ReadCommand())
+            lock (m_syncReceive)
             {
-                if (AsyncRead())
+                if (!m_isReading)
                 {
-                    goto tryAgain;
-                }
-
-                long timeToWait = timeout - sw.ElapsedMilliseconds;
-                if (timeout < 0)
-                {
-                    m_waitForDataEvent.WaitOne(-1);
-                }
-                else if (timeout == 0 || timeToWait <= 0)
-                {
-                    return null;
-                }
-                else
-                {
-                    m_waitForDataEvent.WaitOne((int)timeToWait);
-                }
-                m_waitForDataEvent.Reset();
-                goto tryAgain;
-            }
-            return m_packetDecoder.Results.Clone();
-        }
-
-        private bool AsyncRead()
-        {
-            if (!m_isReading)
-            {
-                lock (m_syncReceive)
-                {
-                    if (!m_isReading)
-                    {
-                        m_isReading = true;
-                        return m_stream.BeginRead(m_inBuffer, 0, m_inBuffer.Length, AsyncReadCallback, null).CompletedSynchronously;
-                    }
+                    m_isReading = true;
+                    m_stream.BeginRead(m_inBuffer, 0, m_inBuffer.Length, m_asyncReadCallback, null);
                 }
             }
-            return false;
         }
 
         private void AsyncReadCallback(IAsyncResult ar)
@@ -104,44 +127,41 @@ namespace CTP.Net
                 m_isReading = false;
                 int length = m_stream.EndRead(ar);
                 m_packetDecoder.FillBuffer(m_inBuffer, 0, length);
-                m_waitForDataEvent.Set();
             }
-            if (!ar.CompletedSynchronously)
+
+            while (m_packetDecoder.ReadCommand())
             {
-                ThreadPool.QueueUserWorkItem(m_onDataReceived);
+                if (m_packetDecoder.Results.ChannelNumber == 0)
+                {
+                    //Handle differently
+                }
+                else if (m_sockets[m_packetDecoder.Results.ChannelNumber] == null)
+                {
+                    int channelNumber = m_packetDecoder.Results.ChannelNumber;
+                    if (m_isClient)
+                    {
+                        if ((channelNumber & 1) == 0)
+                            throw new Exception("Invalid channel number");
+                    }
+                    else
+                    {
+                        if ((channelNumber & 1) == 1)
+                            throw new Exception("Invalid channel number");
+                    }
+                    m_sockets[m_packetDecoder.Results.ChannelNumber] = new CtpSocket(() => m_sockets[channelNumber] = null, m_packetDecoder.Results.ChannelNumber, m_encoder);
+                    m_onNewInboundSession(m_sockets[m_packetDecoder.Results.ChannelNumber]);
+                }
+                m_sockets[m_packetDecoder.Results.ChannelNumber].ProcessRead(m_packetDecoder.Results);
             }
-        }
 
-        private void OnDataReceived(object state)
-        {
-            DataReceived?.Invoke(); //If this call was completed asynchronously, notify the client that it was fulfilled.
-        }
-
-        public ulong GetNextRawChannelID()
-        {
-            ulong id = 0;
-            while (id < 16)
+            if (ar.CompletedSynchronously)
             {
-                id = (ulong)Interlocked.Increment(ref m_rawChannelID);
+                ThreadPool.QueueUserWorkItem(m_asyncRead);
             }
-            return (ulong)id;
+            else
+            {
+                AsyncRead(null);
+            }
         }
-
-        public void SendDocumentCommand(ulong channelNumber, CtpDocument command)
-        {
-            SendRaw(channelNumber, command.ToArray());
-        }
-
-        public void SendRaw(ulong channelNumber, byte[] payload)
-        {
-            m_encoder.Send(channelNumber, payload, 0, payload.Length);
-        }
-
-        public void SendRaw(ulong channelNumber, byte[] payload, int offset, int length)
-        {
-            m_encoder.Send(channelNumber, payload, offset, length);
-        }
-
-
     }
 }

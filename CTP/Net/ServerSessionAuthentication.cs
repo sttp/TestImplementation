@@ -136,8 +136,6 @@ namespace CTP.Net
 
         public void HandleCommand(CtpSession session, CtpReadResults readResults)
         {
-            if (readResults.CommandCode != CommandCode.Document)
-                throw new Exception("Command invalid");
             switch (readResults.DocumentPayload.RootElement)
             {
                 case "SrpIdentity":

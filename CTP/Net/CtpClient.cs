@@ -90,7 +90,11 @@ namespace CTP.Net
             get
             {
                 var mode = EncryptionMode.None;
-                if (m_clientCertificate != null)
+                if (!RequireSSL)
+                {
+                    mode = EncryptionMode.None;
+                }
+                else if (m_clientCertificate != null)
                 {
                     mode = EncryptionMode.MutualCertificate;
                 }
@@ -176,32 +180,34 @@ namespace CTP.Net
         public CtpSession Connect()
         {
             ServerTrustMode server = ServerTrustMode.None;
+            bool isTrusted = false;
 
             RemoteCertificateValidationCallback validateCertificate = (sender, certificate, chain, sslPolicyErrors) =>
-                          {
-                              if (AllowNativeTrust && sslPolicyErrors == SslPolicyErrors.None)
-                              {
-                                  server = ServerTrustMode.Native;
-                                  return true;
-                              }
+            {
+                if (AllowNativeTrust && sslPolicyErrors == SslPolicyErrors.None)
+                {
+                    server = ServerTrustMode.Native;
+                    isTrusted = true;
+                    return true;
+                }
 
-                              if (m_trustedCertificates != null)
-                              {
-                                  string certHash = certificate.GetCertHashString();
-                                  string publicKey = certificate.GetPublicKeyString();
-                                  foreach (var cert in m_trustedCertificates)
-                                  {
-                                      if (cert.GetCertHashString() == certHash && cert.GetPublicKeyString() == publicKey)
-                                      {
-                                          server = ServerTrustMode.TrustedCertificate;
-                                          return true;
-                                      }
-                                  }
-                              }
-                              return false;
-                          };
-
-
+                if (m_trustedCertificates != null)
+                {
+                    string certHash = certificate.GetCertHashString();
+                    string publicKey = certificate.GetPublicKeyString();
+                    foreach (var cert in m_trustedCertificates)
+                    {
+                        if (cert.GetCertHashString() == certHash && cert.GetPublicKeyString() == publicKey)
+                        {
+                            server = ServerTrustMode.TrustedCertificate;
+                            isTrusted = true;
+                            return true;
+                        }
+                    }
+                }
+                isTrusted = false;
+                return true;
+            };
 
             var m_client = new TcpClient();
             m_client.SendTimeout = 3000;
@@ -251,7 +257,7 @@ namespace CTP.Net
             }
 
             string hostname = m_hostName ?? m_remoteEndpoint.Address.ToString();
-            SslStream m_sslStream = null;
+            SslStream sslStream = null;
             if (encMode != EncryptionMode.None)
             {
                 Log.Publish(MessageLevel.Debug, "Connect", $"Connecting to {m_remoteEndpoint.ToString()} using SSL, Client Certificate: {m_clientCertificate?.ToString() ?? "None"}");
@@ -259,15 +265,15 @@ namespace CTP.Net
                 if (m_clientCertificate != null)
                 {
                     collection = new X509CertificateCollection(new[] { m_clientCertificate });
-                    m_sslStream = new SslStream(m_networkStream, false, validateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
+                    sslStream = new SslStream(m_networkStream, false, validateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
                 }
                 else
                 {
-                    m_sslStream = new SslStream(m_networkStream, false, validateCertificate, null, EncryptionPolicy.RequireEncryption);
+                    sslStream = new SslStream(m_networkStream, false, validateCertificate, null, EncryptionPolicy.RequireEncryption);
                 }
-                m_sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
+                sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
             }
-            return new CtpSession(true, hostname, encMode, server, m_client, m_networkStream, m_sslStream);
+            return new CtpSession(isTrusted, true, hostname, encMode, server, m_client, m_networkStream, sslStream);
         }
 
         private X509Certificate UserCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)

@@ -7,26 +7,37 @@ using GSF.IO.Checksums;
 
 namespace CTP
 {
-
     /// <summary>
     /// Responsible for encoding each command into bytes that can be sent on the socket. 
-    /// This class will fragment and compress packets to ensure that all packets fit inside the desired maximum fragment size.
+    /// This class will compress packets if needed.
     /// </summary>
     public class CtpEncoder
     {
         /// <summary>
         /// Occurs when a packet of data must be sent on the wire. This is called immediately
-        /// after completing each packet or fragment;
+        /// after completing each packet.
         /// </summary>
         public event Action<byte[], int, int> NewPacket;
+
+        /// <summary>
+        /// Options for how commands will be compressed.
+        /// </summary>
         private EncoderOptions m_encoderOptions;
 
         /// <summary>
-        /// A buffer to use to for all of the packets.
+        /// A buffer to use for all of the packets.
         /// </summary>
         private byte[] m_buffer;
+
+        /// <summary>
+        /// A stream for compressing data.
+        /// </summary>
         private MemoryStream m_compressionStream = new MemoryStream();
-        private const int BufferOffset = 55;
+
+        /// <summary>
+        /// A reserved amount of packet overhead
+        /// </summary>
+        private const int BufferOffset = 1 + 3 + 1 + 20; //20, extra space for compression overhead.
 
         /// <summary>
         /// The desired number of bytes before data is automatically flushed via <see cref="NewPacket"/>
@@ -47,51 +58,54 @@ namespace CTP
             NewPacket?.Invoke(buffer, position, length);
         }
 
-
         /// <summary>
         /// Sends a command.
         /// </summary>
-        /// <param name="channelNumber"></param>
+        /// <param name="channelCode">indicates the content type for this data.</param>
         /// <param name="payload"></param>
-        public void Send(ulong channelNumber, CtpDocument payload)
+        public void Send(CtpChannelCode channelCode, CtpDocument payload)
         {
-            Send(channelNumber, payload.ToArray());
+            Send(channelCode, payload.ToArray());
         }
 
         /// <summary>
         /// Sends a command.
         /// </summary>
-        /// <param name="channelNumber"></param>
+        /// <param name="channelCode">indicates the content type for this data.</param>
         /// <param name="payload"></param>
-        public void Send(ulong channelNumber, byte[] payload)
+        public void Send(CtpChannelCode channelCode, byte[] payload)
         {
-            Send(channelNumber, payload, 0, payload.Length);
+            Send(channelCode, payload, 0, payload.Length);
         }
 
         /// <summary>
-        /// Sends a command.
+        /// Sends data.
         /// </summary>
-        /// <param name="channelNumber">a user code for this raw stream</param>
+        /// <param name="channelCode">indicates the content type for this data.</param>
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="offset">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void Send(ulong channelNumber, byte[] payload, int offset, int length)
+        public void Send(CtpChannelCode channelCode, byte[] payload, int offset, int length)
         {
             payload.ValidateParameters(offset, length);
-            if (length + 1 + 8 + 4 + 8 > m_encoderOptions.MaximumCommandSize)
+
+            //In case of an overflow exception.
+            if (length > m_encoderOptions.MaximumCommandSize ||
+                1 + 3 + 1 + length > m_encoderOptions.MaximumCommandSize)
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
             EnsureCapacity(BufferOffset + length);
             Array.Copy(payload, offset, m_buffer, BufferOffset, length);
 
-            bool isCompressed = false;
+            CtpHeader header = CtpHeader.None;
+            header = header.SetChannelCode(channelCode);
 
             int headerOffset = BufferOffset;
             if (m_encoderOptions.SupportsDeflate && length >= m_encoderOptions.DeflateThreshold)
             {
                 if (TryCompressPayload(m_buffer, headerOffset, length, out int newSize, out uint uncompressedChecksum))
                 {
-                    isCompressed = true;
+                    header |= CtpHeader.IsCompressed;
                     headerOffset -= 8;
                     m_buffer[headerOffset + 0] = (byte)(length >> 24);
                     m_buffer[headerOffset + 1] = (byte)(length >> 16);
@@ -105,69 +119,29 @@ namespace CTP
                 }
             }
 
-            if (2 + length < 1024 && channelNumber < 16)
+            headerOffset--;
+            length++;
+            m_buffer[headerOffset] = (byte)header;
+
+            if (length + 1 <= 254)
             {
-                //Header 0 can be used.
-                CtpHeader0 header0 = (CtpHeader0)length;
-                if (isCompressed)
-                    header0 |= CtpHeader0.IsCompressed;
-                headerOffset -= 2;
-                length += 2;
-                m_buffer[headerOffset + 0] = (byte)((ushort)header0 >> 8);
-                m_buffer[headerOffset + 1] = (byte)(header0);
+                headerOffset--;
+                length++;
+                m_buffer[headerOffset] = (byte)length;
             }
             else
             {
-                //Header1 must be used.
-                CtpHeader1 header1 = CtpHeader1.HeaderVersion;
-                if (isCompressed)
-                    header1 |= CtpHeader1.IsCompressed;
+                length += 4;
+                headerOffset -= 4;
+                if ((length >> 24) != 0)
+                    throw new Exception("The compressed size of this packet exceeds the maximum command size.");
 
-
-                byte[] lengthBytes = ToBigEndianBytesTrimmed((uint)length);
-                byte[] channelNumberBytes = ToBigEndianBytesTrimmed(channelNumber);
-                header1 |= (CtpHeader1)Math.Max(0, channelNumberBytes.Length - 1);
-                header1 |= (CtpHeader1)(Math.Max(0, lengthBytes.Length - 1) << 3);
-
-                headerOffset -= lengthBytes.Length;
-                length += lengthBytes.Length;
-                lengthBytes.CopyTo(m_buffer, headerOffset);
-
-                headerOffset -= channelNumberBytes.Length;
-                length += channelNumberBytes.Length;
-                channelNumberBytes.CopyTo(m_buffer, headerOffset);
-
-                headerOffset--;
-                length++;
-                m_buffer[headerOffset + 1] = (byte)(header1);
+                m_buffer[headerOffset + 0] = 255;
+                m_buffer[headerOffset + 1] = (byte)(length >> 16);
+                m_buffer[headerOffset + 2] = (byte)(length >> 8);
+                m_buffer[headerOffset + 3] = (byte)(length);
             }
             SendNewPacket(m_buffer, headerOffset, length);
-
-        }
-
-        private static byte[] ToBigEndianBytesTrimmed(ulong value)
-        {
-            int requiredBytes = (64 - BitMath.CountLeadingZeros(value) + 7) >> 3;
-            byte[] rv = new byte[Math.Max(1, requiredBytes)];
-
-            for (int x = rv.Length - 1; x >= 0; x--)
-            {
-                rv[x] = (byte)value;
-                value >>= 8;
-            }
-            return rv;
-        }
-        private static byte[] ToBigEndianBytesTrimmed(uint value)
-        {
-            int requiredBytes = (32 - BitMath.CountLeadingZeros(value) + 7) >> 3;
-            byte[] rv = new byte[Math.Max(1, requiredBytes)];
-
-            for (int x = rv.Length - 1; x >= 0; x--)
-            {
-                rv[x] = (byte)value;
-                value >>= 8;
-            }
-            return rv;
         }
 
         /// <summary>

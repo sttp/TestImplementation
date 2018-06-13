@@ -7,7 +7,6 @@ namespace Sttp.Codec
     {
         private object m_decoder;
 
-        public CommandCode CommandCode { get; }
         public string CommandName { get; }
         private CtpDocument m_document;
 

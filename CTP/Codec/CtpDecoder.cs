@@ -83,45 +83,35 @@ namespace CTP
         {
             Results.SetInvalid();
 
-            if (m_inboundBufferLength < 2)
+            if (m_inboundBufferLength < 1)
                 return false;
 
             bool isCompressed;
-            ulong channelNumber;
             int packetLength;
-            int overheadBytes;
+            int position = m_inboundBufferCurrentPosition;
+            byte[] buffer = m_inboundBuffer;
 
-            if (m_inboundBuffer[m_inboundBufferCurrentPosition] < 128) //This is header 0;
+            packetLength = buffer[position];
+            position++;
+            if (packetLength == 255)
             {
-                CtpHeader0 header = (CtpHeader0)ToUInt16(m_inboundBuffer, m_inboundBufferCurrentPosition);
-                isCompressed = (header & CtpHeader0.IsCompressed) != 0;
-                channelNumber = (byte)((int)(header & CtpHeader0.ChannelNumberMask) >> (int)CtpHeader0.ChannelNumberShiftBits);
-                packetLength = (int)(header & CtpHeader0.PacketLengthMask);
-                overheadBytes = 2;
-            }
-            else
-            {
-                CtpHeader1 header = (CtpHeader1)m_inboundBuffer[m_inboundBufferCurrentPosition];
-                isCompressed = (header & CtpHeader1.IsCompressed) != 0;
-                int packetLengthBytes = ((byte)(header & CtpHeader1.PacketLengthMask) >> 3) + 1;
-                int channelNumberByteLength = (byte)(header & CtpHeader1.ChannelNumberLengthMask) + 1;
-                if (m_inboundBufferLength < 1 + channelNumberByteLength + channelNumberByteLength)
+                if (m_inboundBufferLength < 4)
                     return false;
-                channelNumber = BigEndianReadInt(channelNumberByteLength, m_inboundBuffer, m_inboundBufferCurrentPosition + 1);
-                packetLength = (int)BigEndianReadInt(packetLengthBytes, m_inboundBuffer, m_inboundBufferCurrentPosition + 1 + channelNumberByteLength);
-                overheadBytes = 1 + packetLengthBytes + channelNumberByteLength;
+                packetLength = buffer[position] << 16 | buffer[position + 1] << 8 | buffer[position + 2];
+                position += 3;
             }
 
             if (packetLength > m_encoderOptions.MaximumCommandSize)
                 throw new Exception("Command size is too large");
 
-            //ToDo: Ensure that packet length isn't too large.
             if (m_inboundBufferLength < packetLength)
                 return false;
 
-            byte[] buffer = m_inboundBuffer;
-            int position = m_inboundBufferCurrentPosition + overheadBytes;
-            int length = packetLength - overheadBytes;
+            CtpHeader header = (CtpHeader)buffer[position];
+            position++;
+            isCompressed = (header & CtpHeader.IsCompressed) != 0;
+
+            int length = packetLength - (position - m_inboundBufferCurrentPosition);
             if (isCompressed)
             {
                 //Decompresses the data.
@@ -150,37 +140,15 @@ namespace CTP
                 position = 0;
                 length = inflatedSize;
             }
-
             buffer.ValidateParameters(position, length);
 
             byte[] results;
             results = new byte[length];
             Array.Copy(buffer, position, results, 0, length);
-            Results.SetRaw(channelNumber, results);
+            Results.SetRaw(header.GetChannelCode(), results);
             m_inboundBufferCurrentPosition += packetLength;
             m_inboundBufferLength -= packetLength;
             return true;
-        }
-
-        private static ulong BigEndianReadInt(int byteCount, byte[] buffer, int offset)
-        {
-            if (byteCount > 8)
-                throw new ArgumentException();
-            buffer.ValidateParameters(offset, byteCount);
-
-            ulong rv = 0;
-            for (int x = offset; x < offset + byteCount; x++)
-            {
-                rv <<= 8;
-                rv |= buffer[x];
-            }
-
-            return rv;
-        }
-
-        private static ushort ToUInt16(byte[] buffer, int startIndex)
-        {
-            return (ushort)((uint)buffer[startIndex] << 8 | (uint)buffer[startIndex + 1]);
         }
 
         private static int ToInt32(byte[] buffer, int startIndex)

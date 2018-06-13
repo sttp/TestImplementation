@@ -27,7 +27,6 @@ namespace CTP.Net
             //password = password.Normalize(NormalizationForm.FormKC);
 
             stream.SendDocument(new SrpIdentity(identity));
-
             var lookup = stream.ReadDocument<SrpIdentityLookup>();
             var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var strength = (SrpStrength)lookup.SrpStrength;

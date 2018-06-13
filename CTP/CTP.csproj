@@ -6,6 +6,11 @@
 	<RootNamespace>CTP</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="LZ4\**" />
+    <EmbeddedResource Remove="LZ4\**" />
+    <None Remove="LZ4\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Dependencies\GSF.Core.dll" />
     <None Remove="Dependencies\GSF.Core.xml" />
   </ItemGroup>

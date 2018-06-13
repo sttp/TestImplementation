@@ -100,7 +100,6 @@ namespace Sttp.Tests
 
 
             if (!reader.ReadCommand()) throw new Exception();
-            if (reader.Results.CommandCode != CommandCode.Document) throw new Exception();
             var document = reader.Results.DocumentPayload;
             Assert.AreEqual(document.RootElement, "GetMetadataSchema");
             var cmd = (CommandGetMetadataSchema)document;
@@ -112,7 +111,6 @@ namespace Sttp.Tests
             reader.FillBuffer(ms.ToArray(), 0, (int)ms.Position);
 
             if (!reader.ReadCommand()) throw new Exception();
-            if (reader.Results.CommandCode != CommandCode.Document) throw new Exception();
             document = reader.Results.DocumentPayload;
             Assert.AreEqual(document.RootElement, "MetadataSchema");
 

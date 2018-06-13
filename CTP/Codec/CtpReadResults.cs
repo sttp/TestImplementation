@@ -1,35 +1,25 @@
 ﻿using System;
-using CTP;
-using CTP.Net;
 
 namespace CTP
 {
     public class CtpReadResults
     {
-        private CommandCode m_commandCode;
-        private CtpDocument m_documentPayload;
-        private byte[] m_binaryCommandPayload;
-        private ulong m_binaryChannelCode;
+        private bool m_isValid;
+        private byte[] m_payload;
+        private CtpChannelCode m_channelCode;
 
         public void SetInvalid()
         {
-            m_commandCode = CommandCode.Invalid;
-            m_documentPayload = null;
-            m_binaryCommandPayload = null;
-            m_binaryChannelCode = 0;
+            m_channelCode = CtpChannelCode.Protocol;
+            m_isValid = false;
+            m_payload = null;
         }
 
-        public void SetDocument(CtpDocument document)
+        internal void SetRaw(CtpChannelCode channelCode, byte[] payload)
         {
-            m_commandCode = CommandCode.Document;
-            m_documentPayload = document;
-        }
-
-        public void SetRaw(ulong channelCode, byte[] payload)
-        {
-            m_commandCode = CommandCode.Binary;
-            m_binaryChannelCode = channelCode;
-            m_binaryCommandPayload = payload;
+            m_channelCode = channelCode;
+            m_isValid = true;
+            m_payload = payload;
         }
 
         /// <summary>
@@ -37,12 +27,7 @@ namespace CTP
         /// This is equal to the return value of the most recent 
         /// <see cref="CtpDecoder.ReadCommand"/> method call.
         /// </summary>
-        public bool IsValid => m_commandCode != CommandCode.Invalid;
-
-        /// <summary>
-        /// Indicates what kind of commmand was decoded.
-        /// </summary>
-        public CommandCode CommandCode => m_commandCode;
+        public bool IsValid => m_isValid;
 
         public CtpReadResults Clone()
         {
@@ -59,9 +44,7 @@ namespace CTP
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_commandCode != CommandCode.Document)
-                    throw new InvalidOperationException("Command is not a Document Command.");
-                return m_documentPayload;
+                return new CtpDocument(m_payload);
             }
         }
 
@@ -69,33 +52,14 @@ namespace CTP
         /// Valid if <see cref="CtpDecoder.ReadCommand"/> returned true. 
         /// This is the command that was decoded.
         /// </summary>
-        public byte[] BinaryPayload
+        public byte[] Payload
         {
             get
             {
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
-                if (m_commandCode != CommandCode.Binary)
-                    throw new InvalidOperationException("Command is not a Binary Command.");
-                return m_binaryCommandPayload;
+                return m_payload;
             }
         }
-
-        /// <summary>
-        /// Valid if <see cref="CtpDecoder.ReadCommand"/> returned true. 
-        /// This is the command that was decoded.
-        /// </summary>
-        public ulong BinaryChannelID
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                if (m_commandCode != CommandCode.Binary)
-                    throw new InvalidOperationException("Command is not a Binary Command.");
-                return m_binaryChannelCode;
-            }
-        }
-
     }
 }
