@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -7,14 +8,19 @@ namespace CTP.Net
 {
     public class CtpSocket : IDisposable
     {
-        public readonly byte ChannelID;
+        public readonly uint ChannelID;
         private CtpEncoder m_encoder;
         private Action m_onDispose;
-
+        private CtpContentFlags m_flags;
         public event Action<CtpReadResults> NewData;
 
-        internal CtpSocket(Action onDispose, byte channelID, CtpEncoder encoder)
+        internal CtpSocket(bool isClientRequest, Action onDispose, uint channelID, CtpEncoder encoder)
         {
+            if (isClientRequest)
+                m_flags = CtpContentFlags.IsClientRequest;
+            else
+                m_flags = CtpContentFlags.IsServerRequest;
+
             m_onDispose = onDispose;
             ChannelID = channelID;
             m_encoder = encoder;
@@ -25,11 +31,6 @@ namespace CTP.Net
             NewData(readResults);
         }
 
-        public void SendStream(byte[] data, int offset, int length)
-        {
-            m_encoder.Send(CtpChannelCode.Stream, ChannelID, data, offset, length);
-        }
-
         public void SendPayload(byte[] payload)
         {
             SendPayload(payload, 0, payload.Length);
@@ -37,12 +38,12 @@ namespace CTP.Net
 
         public void SendPayload(byte[] payload, int offset, int length)
         {
-            m_encoder.Send(CtpChannelCode.Block, ChannelID, payload, offset, length);
+            m_encoder.Send(m_flags, ChannelID, payload, offset, length);
         }
 
         public void SendDocument(CtpDocument command)
         {
-            m_encoder.Send(CtpChannelCode.Document, ChannelID, command.ToArray());
+            m_encoder.Send(CtpContentFlags.IsDocument | m_flags, ChannelID, command.ToArray());
         }
 
         public void Dispose()
@@ -54,13 +55,15 @@ namespace CTP.Net
 
     public class CtpCommandStream
     {
+        private int m_sessionID;
         private CtpDecoder m_packetDecoder;
         private CtpEncoder m_encoder;
         private Stream m_stream;
         private bool m_isReading;
         private object m_syncReceive = new object();
         private byte[] m_inBuffer = new byte[3000];
-        private CtpSocket[] m_sockets = new CtpSocket[256];
+        private Dictionary<uint, CtpSocket> m_clientRequests = new Dictionary<uint, CtpSocket>();
+        private Dictionary<uint, CtpSocket> m_serverRequests = new Dictionary<uint, CtpSocket>();
         private bool m_isClient;
         private Action<CtpSocket> m_onNewInboundSession;
 
@@ -84,23 +87,18 @@ namespace CTP.Net
             AsyncRead(null);
         }
 
-        public CtpSocket StartNewSession()
+        public CtpSocket BeginRequest()
         {
-            int start = 2;
-            if (m_isClient)
-            {
-                start = 1;
-            }
+            var requests = m_isClient ? m_clientRequests : m_serverRequests;
 
-            for (int x = start; x < m_sockets.Length; x += 2)
-            {
-                if (m_sockets[x] == null)
-                {
-                    m_sockets[x] = new CtpSocket(() => m_sockets[x] = null, (byte)x, m_encoder);
-                    return m_sockets[x];
-                }
-            }
-            throw new Exception("Out of channels, too many simultaneous streams over a single socket.");
+            tryAgain:
+            var sessionID = (uint)Interlocked.Increment(ref m_sessionID);
+
+            if (requests.ContainsKey(sessionID))
+                goto tryAgain;
+            var request = new CtpSocket(m_isClient, () => requests.Remove(sessionID), sessionID, m_encoder);
+            requests[sessionID] = request;
+            return request;
         }
 
         private void EncoderOnNewPacket(byte[] data, int position, int length)
@@ -131,27 +129,42 @@ namespace CTP.Net
 
             while (m_packetDecoder.ReadCommand())
             {
-                if (m_packetDecoder.Results.ChannelNumber == 0)
+                uint sessionID = m_packetDecoder.Results.RequestID;
+                if ((m_packetDecoder.Results.ContentFlags & CtpContentFlags.IsClientRequest) != 0)
                 {
-                    //Handle differently
-                }
-                else if (m_sockets[m_packetDecoder.Results.ChannelNumber] == null)
-                {
-                    int channelNumber = m_packetDecoder.Results.ChannelNumber;
-                    if (m_isClient)
+                    if (m_clientRequests.TryGetValue(m_packetDecoder.Results.RequestID, out var socket))
                     {
-                        if ((channelNumber & 1) == 0)
-                            throw new Exception("Invalid channel number");
+                        socket.ProcessRead(m_packetDecoder.Results);
                     }
                     else
                     {
-                        if ((channelNumber & 1) == 1)
-                            throw new Exception("Invalid channel number");
+                        if (!m_isClient)
+                        {
+                            //If this request was made by the client, and I'm the server, begin a new request.
+                            socket = new CtpSocket(!m_isClient, () => m_clientRequests.Remove(sessionID), sessionID, m_encoder);
+                            m_clientRequests[sessionID] = socket;
+                            m_onNewInboundSession(socket);
+                        }
                     }
-                    m_sockets[m_packetDecoder.Results.ChannelNumber] = new CtpSocket(() => m_sockets[channelNumber] = null, m_packetDecoder.Results.ChannelNumber, m_encoder);
-                    m_onNewInboundSession(m_sockets[m_packetDecoder.Results.ChannelNumber]);
+
                 }
-                m_sockets[m_packetDecoder.Results.ChannelNumber].ProcessRead(m_packetDecoder.Results);
+                else if ((m_packetDecoder.Results.ContentFlags & CtpContentFlags.IsServerRequest) != 0)
+                {
+                    if (m_serverRequests.TryGetValue(m_packetDecoder.Results.RequestID, out var socket))
+                    {
+                        socket.ProcessRead(m_packetDecoder.Results);
+                    }
+                    else
+                    {
+                        if (m_isClient)
+                        {
+                            //If this request was made by the server, and I'm the client, begin a new request.
+                            socket = new CtpSocket(m_isClient, () => m_serverRequests.Remove(sessionID), sessionID, m_encoder);
+                            m_serverRequests[sessionID] = socket;
+                            m_onNewInboundSession(socket);
+                        }
+                    }
+                }
             }
 
             if (ar.CompletedSynchronously)

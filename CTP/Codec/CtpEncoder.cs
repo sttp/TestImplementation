@@ -61,31 +61,23 @@ namespace CTP
         /// <summary>
         /// Sends a command.
         /// </summary>
-        /// <param name="channelCode">indicates the content type for this data.</param>
+        /// <param name="contentFlags">indicates the content type for this data.</param>
+        /// <param name="requestID">a unique id for a specific request.</param>
         /// <param name="payload"></param>
-        public void Send(CtpChannelCode channelCode, CtpDocument payload)
+        public void Send(CtpContentFlags contentFlags, uint requestID, byte[] payload)
         {
-            Send(channelCode, payload.ToArray());
-        }
-
-        /// <summary>
-        /// Sends a command.
-        /// </summary>
-        /// <param name="channelCode">indicates the content type for this data.</param>
-        /// <param name="payload"></param>
-        public void Send(CtpChannelCode channelCode, byte[] payload)
-        {
-            Send(channelCode, payload, 0, payload.Length);
+            Send(contentFlags, requestID, payload, 0, payload.Length);
         }
 
         /// <summary>
         /// Sends data.
         /// </summary>
-        /// <param name="channelCode">indicates the content type for this data.</param>
+        /// <param name="contentFlags">indicates the content type for this data.</param>
+        /// <param name="requestID">a unique id for a specific request.</param>
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="offset">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void Send(CtpChannelCode channelCode, byte[] payload, int offset, int length)
+        public void Send(CtpContentFlags contentFlags, uint requestID, byte[] payload, int offset, int length)
         {
             payload.ValidateParameters(offset, length);
 
@@ -98,7 +90,7 @@ namespace CTP
             Array.Copy(payload, offset, m_buffer, BufferOffset, length);
 
             CtpHeader header = CtpHeader.None;
-            header = header.SetChannelCode(channelCode);
+            header = header.SetChannelCode(contentFlags);
 
             int headerOffset = BufferOffset;
             if (m_encoderOptions.SupportsDeflate && length >= m_encoderOptions.DeflateThreshold)
@@ -118,6 +110,13 @@ namespace CTP
                     length = newSize + 8;
                 }
             }
+
+            headerOffset -= 4;
+            length += 4;
+            m_buffer[headerOffset + 0] = (byte)(requestID >> 24);
+            m_buffer[headerOffset + 1] = (byte)(requestID >> 16);
+            m_buffer[headerOffset + 2] = (byte)(requestID >> 8);
+            m_buffer[headerOffset + 3] = (byte)(requestID >> 0);
 
             headerOffset--;
             length++;

@@ -49,20 +49,20 @@ namespace CTP
 
     internal static class CtpHeaderExtensions
     {
-        public static CtpHeader SetChannelCode(this CtpHeader header, CtpChannelCode channelCode)
+        public static CtpHeader SetChannelCode(this CtpHeader header, CtpContentFlags contentFlags)
         {
             if ((header & CtpHeader.HeaderVersion) != 0)
                 throw new Exception("Header version not recognized");
-            if ((byte)channelCode > 4)
-                throw new InvalidEnumArgumentException(nameof(channelCode), (int)channelCode, typeof(CtpChannelCode));
-            return (header & ~CtpHeader.ChannelFlags) | (CtpHeader)(byte)channelCode;
+            if ((byte)contentFlags > 4)
+                throw new InvalidEnumArgumentException(nameof(contentFlags), (int)contentFlags, typeof(CtpContentFlags));
+            return (header & ~CtpHeader.ChannelFlags) | (CtpHeader)(byte)contentFlags;
         }
 
-        public static CtpChannelCode GetChannelCode(this CtpHeader header)
+        public static CtpContentFlags GetChannelCode(this CtpHeader header)
         {
             if ((header & CtpHeader.HeaderVersion) != 0)
                 throw new Exception("Header version not recognized");
-            return (CtpChannelCode)(byte)(header & CtpHeader.ChannelFlags);
+            return (CtpContentFlags)(byte)(header & CtpHeader.ChannelFlags);
         }
     }
 }
