@@ -148,7 +148,7 @@ namespace CTP
             byte[] results;
             results = new byte[length];
             Array.Copy(buffer, position, results, 0, length);
-            Results.SetRaw(header.GetChannelCode(), requestID, results);
+            Results.SetRaw(results);
             m_inboundBufferCurrentPosition += packetLength;
             m_inboundBufferLength -= packetLength;
             return true;

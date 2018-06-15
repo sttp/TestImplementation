@@ -61,21 +61,19 @@ namespace CTP
         /// <summary>
         /// Sends a command.
         /// </summary>
-        /// <param name="contentFlags">indicates the content type for this data.</param>
         /// <param name="payload"></param>
-        public void Send(CtpContentFlags contentFlags, byte[] payload)
+        public void Send(byte[] payload)
         {
-            Send(contentFlags, payload, 0, payload.Length);
+            Send(payload, 0, payload.Length);
         }
 
         /// <summary>
         /// Sends data.
         /// </summary>
-        /// <param name="contentFlags">indicates the content type for this data.</param>
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="offset">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void Send(CtpContentFlags contentFlags, byte[] payload, int offset, int length)
+        public void Send(byte[] payload, int offset, int length)
         {
             payload.ValidateParameters(offset, length);
 
@@ -88,7 +86,6 @@ namespace CTP
             Array.Copy(payload, offset, m_buffer, BufferOffset, length);
 
             CtpHeader header = CtpHeader.None;
-            header = header.SetChannelCode(contentFlags);
 
             int headerOffset = BufferOffset;
             if (m_encoderOptions.SupportsDeflate && length >= m_encoderOptions.DeflateThreshold)

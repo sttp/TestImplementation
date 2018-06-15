@@ -5,22 +5,17 @@ namespace CTP
     public class CtpDecoderResults
     {
         private bool m_isValid;
-        private uint m_requestID;
         private byte[] m_payload;
-        private CtpContentFlags m_contentFlags;
 
         public void SetInvalid()
         {
-            m_contentFlags = CtpContentFlags.None;
             m_isValid = false;
             m_payload = null;
         }
 
-        internal void SetRaw(CtpContentFlags contentFlags, uint requestID, byte[] payload)
+        internal void SetRaw(byte[] payload)
         {
-            m_contentFlags = contentFlags;
             m_isValid = true;
-            m_requestID = requestID;
             m_payload = payload;
         }
 
@@ -42,26 +37,6 @@ namespace CTP
                 if (!IsValid)
                     throw new InvalidOperationException("IsValid is false.");
                 return m_payload;
-            }
-        }
-
-        public CtpContentFlags ContentFlags
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                return m_contentFlags;
-            }
-        }
-
-        public uint RequestID
-        {
-            get
-            {
-                if (!IsValid)
-                    throw new InvalidOperationException("IsValid is false.");
-                return m_requestID;
             }
         }
 
