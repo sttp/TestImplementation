@@ -27,10 +27,9 @@ namespace CTP.Net
         public IPEndPoint RemoteEndpoint => Socket.Client.RemoteEndPoint as IPEndPoint;
         public X509Certificate RemoteCertificate => Ssl?.RemoteCertificate;
         public X509Certificate LocalCertificate => Ssl?.LocalCertificate;
-        private readonly CtpCommandStream CommandStream;
+        public readonly CtpCommandStream CommandStream;
 
         private Dictionary<string, ICtpCommandHandler> m_rootHandlers = new Dictionary<string, ICtpCommandHandler>();
-        private Dictionary<ulong, CtpStream> m_streamHandlers = new Dictionary<ulong, CtpStream>();
 
         public CtpSession(bool isTrustedConnection, bool isClient, string hostName, EncryptionMode mode, ServerTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
@@ -45,7 +44,7 @@ namespace CTP.Net
             CommandStream = new CtpCommandStream((Stream)Ssl ?? NetStream, isClient, OnNewInboundSession);
         }
 
-        private void OnNewInboundSession(CtpSocket ctpSocket)
+        private void OnNewInboundSession(CtpRequestHandler ctpRequestHandler)
         {
             throw new NotImplementedException();
         }

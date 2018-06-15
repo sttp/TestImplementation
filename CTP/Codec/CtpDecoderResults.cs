@@ -2,7 +2,7 @@
 
 namespace CTP
 {
-    public class CtpReadResults
+    public class CtpDecoderResults
     {
         private bool m_isValid;
         private uint m_requestID;

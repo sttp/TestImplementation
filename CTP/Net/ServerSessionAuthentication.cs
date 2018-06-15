@@ -8,7 +8,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class ServerSessionAuthentication : ICtpCommandHandler
+    public class ServerSessionAuthentication : ICtpRootHandler
     {
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
@@ -128,15 +128,25 @@ namespace CTP.Net
 
         public List<string> CommandsHandled()
         {
+           
+        }
+
+        public void HandleCommand(CtpSession session, CtpDecoderResults decoderResults)
+        {
+            
+        }
+
+        public List<string> RootCommands()
+        {
             var commands = new List<string>();
             commands.Add("SrpIdentity");
             commands.Add("AuthNegotiate");
             return commands;
         }
 
-        public void HandleCommand(CtpSession session, CtpReadResults readResults)
+        public void HandleRequest(CtpRequest request, CtpDocument command)
         {
-            switch (readResults.DocumentPayload.RootElement)
+            switch (command.RootElement)
             {
                 case "SrpIdentity":
                     var user = m_srpUserDatabase.Authenticate(session, (SrpIdentity)readResults.DocumentPayload, session.RemoteCertificate, session.LocalCertificate);

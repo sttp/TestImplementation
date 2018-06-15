@@ -7,6 +7,6 @@ namespace CTP
     public interface ICtpCommandHandler
     {
         List<string> CommandsHandled();
-        void HandleCommand(CtpSession session, CtpReadResults readResults);
+        void HandleCommand(CtpSession session, CtpDecoderResults decoderResults);
     }
 }

@@ -13,34 +13,30 @@ namespace CTP
     public enum CtpContentFlags : byte
     {
         /// <summary>
-        /// Indicates that the channel should be reset to the root if it's not already.
+        /// Indicates that this message is the first of a new request. 
+        /// In response, the remote end will open a new handler for this request. 
+        /// If one already exists, the remote end will terminate the existing 
+        /// handler and open another one.
+        /// 
+        /// The initial request must be a Document command.
         /// </summary>
-        ResetChannel = 1 << 7,
+        InitialRequest = 1 << 0,
+
+        /// <summary>
+        /// Indicates that this requests is to be closed. This can be sent by either end. 
+        /// </summary>
+        CloseRequest = 1 << 1,
 
         /// <summary>
         /// Indicates that the payload is a CtpDocument type.
         /// </summary>
-        IsDocument = 1 << 6,
+        IsDocument = 1 << 2,
 
         /// <summary>
-        /// Indicates that the client initiated this request.
+        /// Marks this command as optional. If the receiver gets this command,
+        /// but cannot interpret it, it can be simply ignored.
         /// </summary>
-        IsClientRequest = 1 << 5,
-
-        /// <summary>
-        /// Indicates that this request was initiated by the server.
-        /// </summary>
-        IsServerRequest = 1 << 4,
-
-        /// <summary>
-        /// Indicates that this message is an exception 
-        /// </summary>
-        IsError = 1 << 3,
-
-        /// <summary>
-        /// Indicates that this message is an optional command.
-        /// </summary>
-        IsOptional = 1 << 2,
+        IsOptional = 1 << 4,
 
         None = 0,
     }

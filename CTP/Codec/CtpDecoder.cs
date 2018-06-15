@@ -10,7 +10,7 @@ namespace CTP
     /// <summary>
     /// Decodes an incoming byte stream into a series of command objects. This class will align packets, reassemble fragments, and decompress packets. 
     /// </summary>
-    public class CtpDecoder
+    internal class CtpDecoder
     {
         /// <summary>
         /// raw unprocessed data received from the client
@@ -30,7 +30,7 @@ namespace CTP
         /// </summary>
         private byte[] m_compressionBuffer;
 
-        public CtpReadResults Results = new CtpReadResults();
+        public CtpDecoderResults Results = new CtpDecoderResults();
 
         private EncoderOptions m_encoderOptions;
 

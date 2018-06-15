@@ -11,7 +11,7 @@ namespace CTP
     /// Responsible for encoding each command into bytes that can be sent on the socket. 
     /// This class will compress packets if needed.
     /// </summary>
-    public class CtpEncoder
+    internal class CtpEncoder
     {
         /// <summary>
         /// Occurs when a packet of data must be sent on the wire. This is called immediately
