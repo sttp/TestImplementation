@@ -1,6 +1,4 @@
-﻿using GSF.IO;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Security;
@@ -9,6 +7,24 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace CTP.Net
 {
+    public class CommandRootHandler
+    {
+        private Dictionary<string, CtpCommandHandlerBase> m_rootHandlers = new Dictionary<string, CtpCommandHandlerBase>();
+
+        public void RegisterCommandHandler(CtpCommandHandlerBase handler)
+        {
+            foreach (var command in handler.SupportedCommands)
+            {
+                m_rootHandlers.Add(command, handler);
+            }
+        }
+        public CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
+        {
+            return m_rootHandlers[command.RootElement].ProcessCommand(session, command);
+        }
+
+    }
+
     public class CtpSession
     {
         private readonly bool IsTrustedConnection;
@@ -29,7 +45,8 @@ namespace CTP.Net
         public X509Certificate LocalCertificate => Ssl?.LocalCertificate;
         public readonly CtpCommandStream CommandStream;
 
-        private Dictionary<string, ICtpCommandHandler> m_rootHandlers = new Dictionary<string, ICtpCommandHandler>();
+        private CommandRootHandler RootHandler;
+        private CtpCommandHandlerBase ActiveHandler;
 
         public CtpSession(bool isTrustedConnection, bool isClient, string hostName, EncryptionMode mode, ServerTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
@@ -41,64 +58,30 @@ namespace CTP.Net
             Socket = socket;
             NetStream = netStream;
             Ssl = ssl;
-            CommandStream = new CtpCommandStream((Stream)Ssl ?? NetStream, isClient, OnNewInboundSession);
+            CommandStream = new CtpCommandStream((Stream)Ssl ?? NetStream, OnNewInboundSession);
         }
 
-        private void OnNewInboundSession(CtpRequestHandler ctpRequestHandler)
+        private void OnNewInboundSession(CtpDocument command)
         {
-            throw new NotImplementedException();
-        }
-
-        public void RegisterHandler(ICtpCommandHandler handler)
-        {
-            foreach (var command in handler.CommandsHandled())
+            if (ActiveHandler != null)
             {
-                m_rootHandlers.Add(command, handler);
+                ActiveHandler = ActiveHandler.ProcessCommand(this, command);
+            }
+            else
+            {
+                ActiveHandler = RootHandler.ProcessCommand(this, command);
             }
         }
 
-        //public void SendDocument(CtpDocument document)
-        //{
-        //    CommandStream.SendDocumentCommand(0, document);
-        //}
+        public void RegisterCommandHandler(CtpCommandHandlerBase handler)
+        {
+            RootHandler.RegisterCommandHandler(handler);
+        }
 
-        //public T ReadDocument<T>()
-        //    where T : DocumentObject<T>
-        //{
-        //    var document = ReadDocument();
-        //    if (document.RootElement != DocumentObject<T>.CommandName)
-        //    {
-        //        throw new Exception("Unhandled command");
-        //    }
-        //    return DocumentObject<T>.FromDocument(document);
-        //}
+        public void SendCommand(CtpDocument document)
+        {
+            CommandStream.SendCommand(document.ToArray());
+        }
 
-        //public CtpDocument ReadDocument()
-        //{
-        //    TryAgain:
-        //    var item = CommandStream.Read();
-        //    if (false)
-        //    {
-        //        if (m_streamHandlers.TryGetValue(item.ChannelNumber, out var stream))
-        //        {
-        //            stream.Write(item.Payload);
-        //        }
-        //        goto TryAgain;
-        //    }
-        //    else
-        //    {
-        //        return item.DocumentPayload;
-        //    }
-        //}
-
-        //public void StopWriteStream(ulong channelNumber)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public void StopReadStream(ulong channelNumber)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

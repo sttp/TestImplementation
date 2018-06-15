@@ -62,22 +62,20 @@ namespace CTP
         /// Sends a command.
         /// </summary>
         /// <param name="contentFlags">indicates the content type for this data.</param>
-        /// <param name="requestID">a unique id for a specific request.</param>
         /// <param name="payload"></param>
-        public void Send(CtpContentFlags contentFlags, uint requestID, byte[] payload)
+        public void Send(CtpContentFlags contentFlags, byte[] payload)
         {
-            Send(contentFlags, requestID, payload, 0, payload.Length);
+            Send(contentFlags, payload, 0, payload.Length);
         }
 
         /// <summary>
         /// Sends data.
         /// </summary>
         /// <param name="contentFlags">indicates the content type for this data.</param>
-        /// <param name="requestID">a unique id for a specific request.</param>
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="offset">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void Send(CtpContentFlags contentFlags, uint requestID, byte[] payload, int offset, int length)
+        public void Send(CtpContentFlags contentFlags, byte[] payload, int offset, int length)
         {
             payload.ValidateParameters(offset, length);
 
@@ -110,13 +108,6 @@ namespace CTP
                     length = newSize + 8;
                 }
             }
-
-            headerOffset -= 4;
-            length += 4;
-            m_buffer[headerOffset + 0] = (byte)(requestID >> 24);
-            m_buffer[headerOffset + 1] = (byte)(requestID >> 16);
-            m_buffer[headerOffset + 2] = (byte)(requestID >> 8);
-            m_buffer[headerOffset + 3] = (byte)(requestID >> 0);
 
             headerOffset--;
             length++;

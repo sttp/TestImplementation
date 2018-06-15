@@ -8,7 +8,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class ServerSessionAuthentication : ICtpRootHandler
+    public class ServerSessionAuthentication : CtpCommandHandlerBase
     {
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
@@ -16,6 +16,12 @@ namespace CTP.Net
         private SortedSet<WindowsGroupMapping> m_windowsGroupUsers = new SortedSet<WindowsGroupMapping>();
         private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
         private SrpServer<SrpUserMapping> m_srpUserDatabase = new SrpServer<SrpUserMapping>();
+
+        public ServerSessionAuthentication()
+        {
+            SupportedCommands.Add("SrpIdentity");
+            SupportedCommands.Add("AuthNegotiate");
+        }
 
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
         {
@@ -97,68 +103,57 @@ namespace CTP.Net
 
         private void WinAsServer(CtpSession client, AuthNegotiate command)
         {
-            using (var stream = client.OpenStream(command.StreamID))
-            {
-                client.Win = new NegotiateStream(stream, true);
-                try
-                {
-                    client.Win.AuthenticateAsServer(CredentialCache.DefaultNetworkCredentials, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
+            //using (var stream = client.OpenStream(command.StreamID))
+            //{
+            //    client.Win = new NegotiateStream(stream, true);
+            //    try
+            //    {
+            //        client.Win.AuthenticateAsServer(CredentialCache.DefaultNetworkCredentials, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
 
-                    var identity = client.Win.RemoteIdentity as WindowsIdentity; //When called by the server, returns WindowsIdentity. 
-                    //If it returns a GenericIdentity, this is because identifier information was not provided by the client. Therefore assigning null is sufficient.
+            //        var identity = client.Win.RemoteIdentity as WindowsIdentity; //When called by the server, returns WindowsIdentity. 
+            //        //If it returns a GenericIdentity, this is because identifier information was not provided by the client. Therefore assigning null is sufficient.
 
-                    if (identity == null)
-                    {
-                        return;
-                    }
+            //        if (identity == null)
+            //        {
+            //            return;
+            //        }
 
-                    foreach (var user in m_windowsUsers)
-                    {
-                        var name = identity.Name;
-                    }
+            //        foreach (var user in m_windowsUsers)
+            //        {
+            //            var name = identity.Name;
+            //        }
 
-                    return;
-                }
-                catch (Exception e)
-                {
-                    throw;
-                }
-            }
+            //        return;
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        throw;
+            //    }
+            //}
         }
 
-        public List<string> CommandsHandled()
-        {
-           
-        }
-
-        public void HandleCommand(CtpSession session, CtpDecoderResults decoderResults)
-        {
-            
-        }
-
-        public List<string> RootCommands()
-        {
-            var commands = new List<string>();
-            commands.Add("SrpIdentity");
-            commands.Add("AuthNegotiate");
-            return commands;
-        }
-
-        public void HandleRequest(CtpRequest request, CtpDocument command)
+        public override CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
         {
             switch (command.RootElement)
             {
                 case "SrpIdentity":
-                    var user = m_srpUserDatabase.Authenticate(session, (SrpIdentity)readResults.DocumentPayload, session.RemoteCertificate, session.LocalCertificate);
-                    session.LoginName = user.LoginName;
-                    session.GrantedRoles.UnionWith(user.Roles);
+                    return m_srpUserDatabase.Authenticate(session, (SrpIdentity)command, session.RemoteCertificate, session.LocalCertificate, (x, user) =>
+                                                                                                                                              {
+                                                                                                                                                  session.LoginName = user.LoginName;
+                                                                                                                                                  session.GrantedRoles.UnionWith(user.Roles);
+                                                                                                                                              });
                     break;
                 case "AuthNegotiate":
-                    WinAsServer(session, (AuthNegotiate)readResults.DocumentPayload);
+                    throw new NotSupportedException();
+                    //WinAsServer(session, (AuthNegotiate)readResults.DocumentPayload);
                     break;
                 default:
                     throw new Exception("Command invalid");
             }
+        }
+
+        public override void Cancel()
+        {
         }
     }
 

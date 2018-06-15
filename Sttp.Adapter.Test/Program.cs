@@ -18,7 +18,7 @@ namespace Sttp.Adapter.Test
 {
     static class Program
     {
-        private static SttpPublisher m_publisher;
+        //private static SttpPublisher m_publisher;
         private static AutoResetEvent m_wait = new AutoResetEvent(false);
 
 
@@ -53,11 +53,11 @@ namespace Sttp.Adapter.Test
 
             m_wait.WaitOne();
 
-            var pub = new SttpPublisher();
-            pub.DataSource = m_metadata;
-            pub.Initialize();
-            pub.Start();
-            m_publisher = pub;
+            //var pub = new SttpPublisher();
+            //pub.DataSource = m_metadata;
+            //pub.Initialize();
+            //pub.Start();
+            //m_publisher = pub;
 
             throw new NotImplementedException();
             //var net = new CtpClient();
@@ -100,7 +100,7 @@ namespace Sttp.Adapter.Test
         {
             if (m_rate.TryTakeToken())
                 Console.WriteLine($"Measurements Received: " + e.Argument.Count);
-            m_publisher?.QueueMeasurementsForProcessing(e.Argument);
+            //m_publisher?.QueueMeasurementsForProcessing(e.Argument);
         }
 
         private static void SubscriberOnProcessException(object sender, GSF.EventArgs<Exception> eventArgs)

@@ -11,7 +11,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class AuthenticateSrpAsClient : IRequestHandler
+    public class AuthenticateSrpAsClient : CtpCommandHandlerBase
     {
         private int m_state = 0;
         private CtpSession m_stream;
@@ -28,18 +28,19 @@ namespace CTP.Net
             m_identity = identity.Normalize(NormalizationForm.FormKC).Trim().ToLower();
         }
 
-        public void OnNewPayload(CtpRequest request, byte[] payload)
+        public void Start()
         {
-            throw new NotSupportedException();
+            m_state = 1;
+            m_stream.SendCommand(new SrpIdentity(m_identity));
         }
 
-        public void OnDocument(CtpRequest request, CtpDocument payload)
+        public override CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
         {
             switch (m_state)
             {
                 case 1:
                     m_state++;
-                    SrpIdentityLookup lookup = (SrpIdentityLookup)payload;
+                    SrpIdentityLookup lookup = (SrpIdentityLookup)command;
 
 
                     var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
@@ -60,26 +61,24 @@ namespace CTP.Net
                     privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_stream.LocalCertificate, m_stream.RemoteCertificate);
                     byte[] clientChallenge = challengeClient;
 
-                    request.SendDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
-                    break;
+                    session.SendCommand(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
+                    return this;
                 case 2:
                     m_state++;
 
-                    SrpServerResponse cr = (SrpServerResponse)payload;
+                    SrpServerResponse cr = (SrpServerResponse)command;
                     if (!challengeServer.SequenceEqual(cr.ServerChallenge))
                         throw new Exception("Failed server challenge");
                     Wait.Set();
-                    break;
+                    return null;
                 default:
                     throw new NotSupportedException();
             }
-
         }
 
-        public void Start()
+        public override void Cancel()
         {
-            m_state = 1;
-            m_stream.CommandStream.BeginRequest(new SrpIdentity(m_identity), this, null);
+
         }
     }
 
@@ -103,12 +102,12 @@ namespace CTP.Net
 
         public static void AuthenticateWithNegotiate(CtpSession session, NetworkCredential credentials)
         {
-            using (var stream = session.CreateStream())
-            {
-                session.SendDocument(new AuthNegotiate(stream.StreamID));
-                session.Win = new NegotiateStream(stream, true);
-                session.Win.AuthenticateAsClient(credentials, session.HostName ?? string.Empty, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
-            }
+            //using (var stream = session.CreateStream())
+            //{
+            //    session.SendDocument(new AuthNegotiate(stream.StreamID));
+            //    session.Win = new NegotiateStream(stream, true);
+            //    session.Win.AuthenticateAsClient(credentials, session.HostName ?? string.Empty, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
+            //}
         }
 
         public static void AuthenticateWithLDAP(CtpSession session, NetworkCredential credential)

@@ -120,7 +120,7 @@ namespace CTP.SRP
             return user;
         }
 
-        public void Authenticate(CtpSession session, SrpIdentity command, X509Certificate clientCertificate, X509Certificate serverCertificate, Action<byte[], T> userAuthenticated)
+        public CtpCommandHandlerBase Authenticate(CtpSession session, SrpIdentity command, X509Certificate clientCertificate, X509Certificate serverCertificate, Action<byte[], T> userAuthenticated)
         {
             var identity = command;
             string userName = identity.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
@@ -133,10 +133,11 @@ namespace CTP.SRP
 
             var items = new SrpServerHandler<T>(session, user, userAuthenticated);
             items.Start();
+            return items;
         }
     }
 
-    public class SrpServerHandler<T> : IRequestHandler
+    public class SrpServerHandler<T> : CtpCommandHandlerBase
     {
         private Action<byte[], T> m_userAuthenticated;
         private int m_state = 0;
@@ -155,18 +156,23 @@ namespace CTP.SRP
             m_userAuthenticated = userAuthenticated;
         }
 
-        public void OnNewPayload(CtpRequest request, byte[] payload)
+        public void Start()
         {
-            throw new NotSupportedException();
+            m_state = 1;
+            param = SrpConstants.Lookup(m_user.Verifier.SrpStrength);
+            verifier = m_user.Verifier.Verification.ToUnsignedBigInteger();
+            privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
+            publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
+            m_stream.SendCommand(new SrpIdentityLookup(m_user.Verifier.SrpStrength, m_user.Verifier.Salt, publicB.ToUnsignedByteArray(), m_user.Verifier.IterationCount));
         }
 
-        public void OnDocument(CtpRequest request, CtpDocument payload)
+        public override CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
         {
             switch (m_state)
             {
                 case 1:
                     m_state++;
-                    var clientResponse = (SrpClientResponse)payload;
+                    var clientResponse = (SrpClientResponse)command;
 
                     var publicA = clientResponse.PublicA.ToUnsignedBigInteger();
                     byte[] clientChallenge = clientResponse.ClientChallenge;
@@ -183,21 +189,15 @@ namespace CTP.SRP
                     byte[] serverChallenge = challengeServer;
 
                     m_userAuthenticated(privateSessionKey, m_user.Token);
-                    request.SendDocument(new SrpServerResponse(serverChallenge));
-                    break;
+                    m_stream.SendCommand(new SrpServerResponse(serverChallenge));
+                    return null;
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        public void Start()
+        public override void Cancel()
         {
-            m_state = 1;
-            param = SrpConstants.Lookup(m_user.Verifier.SrpStrength);
-            verifier = m_user.Verifier.Verification.ToUnsignedBigInteger();
-            privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
-            publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
-            m_stream.CommandStream.BeginRequest(new SrpIdentityLookup(m_user.Verifier.SrpStrength, m_user.Verifier.Salt, publicB.ToUnsignedByteArray(), m_user.Verifier.IterationCount), this, null);
         }
     }
 
