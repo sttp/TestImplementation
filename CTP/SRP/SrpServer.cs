@@ -163,7 +163,7 @@ namespace CTP.SRP
             verifier = m_user.Verifier.Verification.ToUnsignedBigInteger();
             privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
             publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
-            m_stream.SendCommand(new SrpIdentityLookup(m_user.Verifier.SrpStrength, m_user.Verifier.Salt, publicB.ToUnsignedByteArray(), m_user.Verifier.IterationCount));
+            m_stream.SendCommand(0, new SrpIdentityLookup(m_user.Verifier.SrpStrength, m_user.Verifier.Salt, publicB.ToUnsignedByteArray(), m_user.Verifier.IterationCount));
         }
 
         public override CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
@@ -189,7 +189,7 @@ namespace CTP.SRP
                     byte[] serverChallenge = challengeServer;
 
                     m_userAuthenticated(privateSessionKey, m_user.Token);
-                    m_stream.SendCommand(new SrpServerResponse(serverChallenge));
+                    m_stream.SendCommand(0, new SrpServerResponse(serverChallenge));
                     return null;
                 default:
                     throw new NotSupportedException();

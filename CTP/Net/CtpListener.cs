@@ -36,23 +36,25 @@ namespace CTP.Net
             m_onAccept = OnAccept;
         }
 
-        public X509Certificate2 DefaultCertificate { get; private set; } = null;
-        public bool DefaultRequireSSL { get; private set; } = true;
-        public bool DefaultHasAccess { get; private set; } = true;
 
-        public void SetDefaultOptions(bool hasAccess, bool requireSSL = true, X509Certificate2 defaultCertificate = null)
+        public X509Certificate2 DefaultCertificate { get; private set; } = null;
+
+        public bool DefaultRequireSSL { get; private set; } = true;
+
+        public bool DefaultAllowConnections { get; private set; } = true;
+
+        public void SetDefaultOptions(bool allowConnections, bool requireSSL = true, X509Certificate2 defaultCertificate = null)
         {
             DefaultCertificate = defaultCertificate;
             DefaultRequireSSL = requireSSL;
-            DefaultHasAccess = hasAccess;
+            DefaultAllowConnections = allowConnections;
         }
 
-        public void SetSpecificOptions(IPAddress remoteIP, int bitmask, bool hasAccess = true, bool requireSSL = true, X509Certificate localCertificate = null)
+        public void SetIPSpecificOptions(IPAddress remoteIP, int bitmask, bool allowConnections = true, bool requireSSL = true, X509Certificate localCertificate = null)
         {
             var mask = new IpMatchDefinition(remoteIP, bitmask);
-            m_encryptionOptions[mask] = new EncryptionOptions(mask, hasAccess, requireSSL, localCertificate);
+            m_encryptionOptions[mask] = new EncryptionOptions(mask, allowConnections, requireSSL, localCertificate);
         }
-
 
         /// <summary>
         /// Start listen for new connections
@@ -146,10 +148,7 @@ namespace CTP.Net
 
         private SortedList<IpMatchDefinition, EncryptionOptions> m_encryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
 
-        private bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-        {
-            return true;
-        }
+
 
         private void ProcessClient(object tcpClient)
         {
@@ -159,7 +158,7 @@ namespace CTP.Net
                 NetworkStream netStream = socket.GetStream();
                 SslStream ssl = null;
                 bool requireSSL = DefaultRequireSSL;
-                bool hasAccess = DefaultHasAccess;
+                bool hasAccess = DefaultAllowConnections;
                 X509Certificate serverCertificate = DefaultCertificate;
 
                 var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
@@ -179,27 +178,21 @@ namespace CTP.Net
                     throw new Exception("Client does not have access");
                 }
 
-                EncryptionMode encMode = EncryptionMode.None;
-
                 char mode = (char)netStream.ReadNextByte();
                 switch (mode)
                 {
                     case 'N':
                         if (requireSSL)
                         {
-                            mode = 'S';
-                            encMode = EncryptionMode.ServerCertificate;
+                            mode = '1';
                         }
                         else
                         {
-                            encMode = EncryptionMode.None;
+                            mode = 'N';
                         }
                         break;
-                    case 'S':
-                        encMode = EncryptionMode.ServerCertificate;
-                        break;
-                    case 'M':
-                        encMode = EncryptionMode.MutualCertificate;
+                    case '1':
+                        requireSSL = true;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -208,22 +201,25 @@ namespace CTP.Net
                 netStream.WriteByte((byte)mode);
                 netStream.Flush();
 
-                if (mode != 'N')
+                CertificateTrustMode certificateTrust = CertificateTrustMode.None;
+
+                bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
                 {
-                    switch (mode)
+                    if (sslpolicyerrors == SslPolicyErrors.None || sslpolicyerrors == SslPolicyErrors.RemoteCertificateNotAvailable)
                     {
-                        case 'S':
-                        case 'M':
-                            serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
-                            ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
-                            ssl.AuthenticateAsServer(serverCertificate, mode == 'M', SslProtocols.Tls12, false);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        certificateTrust = CertificateTrustMode.Native;
                     }
+                    return true;
                 }
 
-                var session = new CtpSession(false, false, (socket.Client.RemoteEndPoint as IPEndPoint).Address.ToString(), encMode, ServerTrustMode.None, socket, netStream, ssl);
+                if (requireSSL)
+                {
+                    serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
+                    ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
+                    ssl.AuthenticateAsServer(serverCertificate, true, SslProtocols.Tls12, false);
+                }
+
+                var session = new CtpSession(false, certificateTrust, socket, netStream, ssl);
 
                 OnSessionCompleted(session);
             }

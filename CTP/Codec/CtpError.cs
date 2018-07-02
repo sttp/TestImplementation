@@ -20,7 +20,9 @@ namespace CTP
 
         //Exists to support CtpSerializable
         private CtpError()
-        { }
+        {
+
+        }
 
         public static explicit operator CtpError(CtpDocument obj)
         {

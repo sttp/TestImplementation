@@ -20,9 +20,14 @@ namespace CTP
         IsCompressed = 1 << 6,
 
         /// <summary>
-        /// Indicates that this message is a document payload message
+        /// Indicates the kind of payload. 
+        /// Examples include: 
+        /// Payload 0 is CtpDocument Commands. 
+        /// Payload 1 is a measurement stream
+        /// Payload 2 is a metadata stream
+        /// Payload 3 is an authentication stream, 
         /// </summary>
-        IsDocumentPayload = 1 << 5,
+        PayloadKind = (1 << 6) - 1,
 
         /// <summary>
         /// None of the flags are set. Note, this state is valid.

@@ -5,6 +5,7 @@ namespace CTP
     public class CtpDecoderResults
     {
         private bool m_isValid;
+        private byte m_payloadKind;
         private byte[] m_payload;
 
         public void SetInvalid()
@@ -13,9 +14,10 @@ namespace CTP
             m_payload = null;
         }
 
-        internal void SetRaw(byte[] payload)
+        internal void SetRaw(byte payloadKind, byte[] payload)
         {
             m_isValid = true;
+            m_payloadKind = payloadKind;
             m_payload = payload;
         }
 
@@ -39,6 +41,16 @@ namespace CTP
                 return m_payload;
             }
         }
+
+        public byte PayloadKind
+        {
+            get
+            {
+                if (!IsValid)
+                    throw new InvalidOperationException("IsValid is false.");
+                return m_payloadKind;
+            }
+        } 
 
     }
 }

@@ -1,58 +1,21 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using System.Threading;
-using CTP.SRP;
 using GSF.Diagnostics;
 using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
     /// <summary>
-    /// Specifies how the connection will ensure data protection.
-    /// 
-    /// During session negotiate, the client and server will default to the highest negotiated encryption mode supported.
-    ///
-    /// Escalation Order:
-    /// None,
-    /// ServerOnlyCertificate
-    /// MutualCertificate
-    /// 
-    /// </summary>
-    [Flags]
-    public enum EncryptionMode
-    {
-        /// <summary>
-        /// Specifies that this connection will not be encrypted. 
-        /// This should only be used when connecting to a loop-back interface or in a highly trusted environment. 
-        /// The session type is not negotiable, so both endpoints must have this explicitly turned on in order to use.
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// A TLS connection with only a server supplied certificate. Man-in-the-middle protection
-        /// can be established by trusting the certificate, or authenticating with a method that provides
-        /// this protection.
-        /// </summary>
-        ServerCertificate = 1,
-        /// <summary>
-        /// A TLS connection with both a server and client supplied certificate. Man-in-the-middle protection
-        /// can be established if either the server or the client trusts each ether's certificate, 
-        /// or authenticating with a method that provides this protection.
-        /// </summary>
-        MutualCertificate = 2,
-    }
-
-    /// <summary>
     /// Identifies how the client will trust the server
     /// </summary>
     [Flags]
-    public enum ServerTrustMode
+    public enum CertificateTrustMode
     {
         /// <summary>
         /// Trust is not required. This can still be ensured at a higher level.
@@ -70,8 +33,6 @@ namespace CTP.Net
 
     public class CtpClient
     {
-        private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
-
         private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpClient), MessageClass.Component);
 
         private IPEndPoint m_remoteEndpoint;
@@ -83,60 +44,26 @@ namespace CTP.Net
         {
             RequireSSL = true;
             AllowNativeTrust = true;
-        }
-
-        public EncryptionMode EncryptionMode
-        {
-            get
-            {
-                var mode = EncryptionMode.None;
-                if (!RequireSSL)
-                {
-                    mode = EncryptionMode.None;
-                }
-                else if (m_clientCertificate != null)
-                {
-                    mode = EncryptionMode.MutualCertificate;
-                }
-                else if (RemoteTrustMode != ServerTrustMode.None)
-                {
-                    mode = EncryptionMode.ServerCertificate;
-                }
-                else if (RequireSSL)
-                {
-                    mode = EncryptionMode.ServerCertificate;
-                }
-                return mode;
-            }
-        }
-
-        public ServerTrustMode RemoteTrustMode
-        {
-            get
-            {
-                ServerTrustMode mode = ServerTrustMode.None;
-                if (AllowNativeTrust)
-                {
-                    mode |= ServerTrustMode.Native;
-                }
-                if (m_trustedCertificates != null && m_trustedCertificates.Count > 0)
-                {
-                    mode |= ServerTrustMode.TrustedCertificate;
-                }
-                return mode;
-            }
+            RequireTrustedServers = true;
         }
 
         /// <summary>
-        /// Indicates if the client will require SSL authentication. True is the default mode. 
+        /// Indicates if the client will require SSL authentication. Defaults to True.
         /// This can only be disabled if the authentication mode is not certificate based and if
         /// both sides negotiate that a connection will be without SSL.
         /// </summary>
         public bool RequireSSL { get; set; }
 
         /// <summary>
+        /// Indicates if certificate trust is required. Defaults to True.
+        /// The connection will only succeed if the server provided certificate matches a locally trusted certificate, 
+        /// or if the OS trusts the certificate with the supplied host name.
+        /// </summary>
+        public bool RequireTrustedServers { get; set; }
+
+        /// <summary>
         /// Indicates that trust can be established through the OS by having a trusted root CA 
-        /// and a matching host name.
+        /// and a matching host name. Defaults to True.
         /// </summary>
         public bool AllowNativeTrust { get; set; }
 
@@ -155,18 +82,20 @@ namespace CTP.Net
         /// Specifies a collection of endpoint certificates that will be used to establish trust. 
         /// </summary>
         /// <param name="trustedCertificates"></param>
-        public void AddTrustedCertificates(X509CertificateCollection trustedCertificates)
+        public void SetTrustedCertificates(X509CertificateCollection trustedCertificates)
         {
             m_trustedCertificates = trustedCertificates;
         }
 
-        public void SetHost(IPAddress address, int port)
+        public void SetHost(IPAddress address, int port, string hostName = null)
         {
+            m_hostName = hostName;
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
-        public void SetHost(IPEndPoint host)
+        public void SetHost(IPEndPoint host, string hostName = null)
         {
+            m_hostName = hostName;
             m_remoteEndpoint = host;
         }
 
@@ -177,20 +106,19 @@ namespace CTP.Net
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
+     
+
         public CtpSession Connect()
         {
-            ServerTrustMode server = ServerTrustMode.None;
-            bool isTrusted = false;
-
-            RemoteCertificateValidationCallback validateCertificate = (sender, certificate, chain, sslPolicyErrors) =>
+            if (!RequireSSL && RequireTrustedServers)
             {
-                if (AllowNativeTrust && sslPolicyErrors == SslPolicyErrors.None)
-                {
-                    server = ServerTrustMode.Native;
-                    isTrusted = true;
-                    return true;
-                }
+                throw new InvalidOperationException("If RequireTrustedServers is true, RequireSSL must also be true");
+            }
 
+            CertificateTrustMode certificateTrust = CertificateTrustMode.None;
+
+            bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+            {
                 if (m_trustedCertificates != null)
                 {
                     string certHash = certificate.GetCertHashString();
@@ -199,58 +127,46 @@ namespace CTP.Net
                     {
                         if (cert.GetCertHashString() == certHash && cert.GetPublicKeyString() == publicKey)
                         {
-                            server = ServerTrustMode.TrustedCertificate;
-                            isTrusted = true;
-                            return true;
+                            certificateTrust = CertificateTrustMode.TrustedCertificate;
+                            break;
                         }
                     }
                 }
-                isTrusted = false;
-                return true;
-            };
 
-            var m_client = new TcpClient();
-            m_client.SendTimeout = 3000;
-            m_client.ReceiveTimeout = 3000;
-            m_client.Connect(m_remoteEndpoint);
-            var m_networkStream = m_client.GetStream();
-            var encMode = EncryptionMode;
-            switch (encMode)
-            {
-                case EncryptionMode.None:
-                    m_networkStream.WriteByte((byte)'N');
-                    break;
-                case EncryptionMode.ServerCertificate:
-                    m_networkStream.WriteByte((byte)'S');
-                    break;
-                case EncryptionMode.MutualCertificate:
-                    m_networkStream.WriteByte((byte)'M');
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                if (AllowNativeTrust && sslPolicyErrors == SslPolicyErrors.None)
+                {
+                    certificateTrust |= CertificateTrustMode.Native;
+                }
+
+                return !RequireTrustedServers || certificateTrust != CertificateTrustMode.None;
             }
-            m_networkStream.Flush();
 
-            char serverMode = (char)m_networkStream.ReadByte();
+            var socket = new TcpClient();
+            socket.SendTimeout = 3000;
+            socket.ReceiveTimeout = 3000;
+            socket.Connect(m_remoteEndpoint);
+            var netStream = socket.GetStream();
+            if (!RequireSSL)
+            {
+                netStream.WriteByte((byte)'N');
+            }
+            else
+            {
+                netStream.WriteByte((byte)'1');
+            }
+            netStream.Flush();
+
+            char serverMode = (char)netStream.ReadByte();
+            bool encrypt;
             switch (serverMode)
             {
                 case 'N':
-                    if (encMode != EncryptionMode.None)
+                    if (!RequireSSL)
                         throw new InvalidOperationException("Server requested No Encryption but the client requires encryption");
-                    encMode = EncryptionMode.None;
+                    encrypt = false;
                     break;
-                case 'S':
-                    if (encMode == EncryptionMode.MutualCertificate)
-                        throw new InvalidOperationException("Server disallowed the client to specify a certificate.");
-                    encMode = EncryptionMode.ServerCertificate;
-                    break;
-                case 'M':
-                    if (m_clientCertificate != null)
-                    {
-                        m_clientCertificate = EmphericalCertificate.Value;
-                        Log.Publish(MessageLevel.Info, "Authentication", "The server requested mutual certificates, but none was provided. Generating a certificate.");
-                    }
-                    encMode = EncryptionMode.MutualCertificate;
+                case '1':
+                    encrypt = true;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -258,22 +174,22 @@ namespace CTP.Net
 
             string hostname = m_hostName ?? m_remoteEndpoint.Address.ToString();
             SslStream sslStream = null;
-            if (encMode != EncryptionMode.None)
+            if (encrypt)
             {
                 Log.Publish(MessageLevel.Debug, "Connect", $"Connecting to {m_remoteEndpoint.ToString()} using SSL, Client Certificate: {m_clientCertificate?.ToString() ?? "None"}");
                 X509CertificateCollection collection = null;
                 if (m_clientCertificate != null)
                 {
                     collection = new X509CertificateCollection(new[] { m_clientCertificate });
-                    sslStream = new SslStream(m_networkStream, false, validateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
+                    sslStream = new SslStream(netStream, false, ValidateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
                 }
                 else
                 {
-                    sslStream = new SslStream(m_networkStream, false, validateCertificate, null, EncryptionPolicy.RequireEncryption);
+                    sslStream = new SslStream(netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
                 }
                 sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
             }
-            return new CtpSession(isTrusted, true, hostname, encMode, server, m_client, m_networkStream, sslStream);
+            return new CtpSession(true, certificateTrust, socket, netStream, sslStream);
         }
 
         private X509Certificate UserCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)

@@ -61,21 +61,25 @@ namespace CTP
         /// <summary>
         /// Sends a command.
         /// </summary>
+        /// <param name="payloadKind"></param>
         /// <param name="payload"></param>
-        public void Send(byte[] payload)
+        public void Send(byte payloadKind, byte[] payload)
         {
-            Send(payload, 0, payload.Length);
+            Send(payloadKind, payload, 0, payload.Length);
         }
 
         /// <summary>
         /// Sends data.
         /// </summary>
+        /// <param name="payloadKind"></param>
         /// <param name="payload">the byte payload to send.</param>
         /// <param name="offset">the offset in <see cref="payload"/></param>
         /// <param name="length">the length of the payload.</param>
-        public void Send(byte[] payload, int offset, int length)
+        public void Send(byte payloadKind, byte[] payload, int offset, int length)
         {
             payload.ValidateParameters(offset, length);
+            if (payloadKind > 63)
+                throw new ArgumentOutOfRangeException(nameof(payloadKind), "Cannot be greater than 63");
 
             //In case of an overflow exception.
             if (length > m_encoderOptions.MaximumCommandSize ||
@@ -85,7 +89,7 @@ namespace CTP
             EnsureCapacity(BufferOffset + length);
             Array.Copy(payload, offset, m_buffer, BufferOffset, length);
 
-            CtpHeader header = CtpHeader.None;
+            CtpHeader header = (CtpHeader)payloadKind;
 
             int headerOffset = BufferOffset;
             if (m_encoderOptions.SupportsDeflate && length >= m_encoderOptions.DeflateThreshold)
@@ -112,8 +116,8 @@ namespace CTP
 
             if (length + 1 <= 254)
             {
-                headerOffset--;
                 length++;
+                headerOffset--;
                 m_buffer[headerOffset] = (byte)length;
             }
             else
@@ -126,7 +130,7 @@ namespace CTP
                 m_buffer[headerOffset + 0] = 255;
                 m_buffer[headerOffset + 1] = (byte)(length >> 16);
                 m_buffer[headerOffset + 2] = (byte)(length >> 8);
-                m_buffer[headerOffset + 3] = (byte)(length);
+                m_buffer[headerOffset + 3] = (byte)length;
             }
             SendNewPacket(m_buffer, headerOffset, length);
         }

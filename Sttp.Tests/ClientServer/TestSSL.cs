@@ -23,7 +23,7 @@ namespace Sttp.Tests.ClientServer
         {
             var listener = new CtpListener(new IPEndPoint(IPAddress.Loopback, 29348));
             user.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
-            listener.SetSpecificOptions(IPAddress.Loopback, 32, true, false);
+            listener.SetIPSpecificOptions(IPAddress.Loopback, 32, true, false);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 

@@ -111,9 +111,6 @@ namespace CTP
             position++;
             isCompressed = (header & CtpHeader.IsCompressed) != 0;
 
-            uint requestID = (uint)ToInt32(buffer, position);
-            position += 4;
-
             int length = packetLength - (position - m_inboundBufferCurrentPosition);
             if (isCompressed)
             {
@@ -148,7 +145,7 @@ namespace CTP
             byte[] results;
             results = new byte[length];
             Array.Copy(buffer, position, results, 0, length);
-            Results.SetRaw(results);
+            Results.SetRaw((byte)((byte)header & 63), results);
             m_inboundBufferCurrentPosition += packetLength;
             m_inboundBufferLength -= packetLength;
             return true;

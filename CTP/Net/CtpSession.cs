@@ -53,24 +53,48 @@ namespace CTP.Net
 
     public class CtpSession
     {
-        private readonly bool IsTrustedConnection;
+        /// <summary>
+        /// Gets if this session began as the client or the server.
+        /// </summary>
+        public readonly bool IsClient;
+        /// <summary>
+        /// Gets how the remote endpoint is trusted.
+        /// </summary>
+        public CertificateTrustMode TrustMode;
+
+        /// <summary>
+        /// Gets the socket that this session is on.
+        /// </summary>
         private readonly TcpClient Socket;
+        /// <summary>
+        /// Gets the NetworkStream this session writes to.
+        /// </summary>
         private readonly NetworkStream NetStream;
+        /// <summary>
+        /// The SSL used to authenticate the connection if available.
+        /// </summary>
         private readonly SslStream Ssl;
+
+        /// <summary>
+        /// A windows negotiate stream.
+        /// </summary>
         public NegotiateStream Win;
 
-        public readonly ServerTrustMode TrustMode;
-        public readonly EncryptionMode Mode;
+        /// <summary>
+        /// The login name assigned to this session. Typically this will only be tracked by the server.
+        /// </summary>
         public string LoginName = string.Empty;
+
+        /// <summary>
+        /// The roles granted to this session. Typically this will only be tracked by the server.
+        /// </summary>
         public HashSet<string> GrantedRoles = new HashSet<string>();
 
-        public readonly string HostName;
-        public readonly bool IsClient;
         public IPEndPoint RemoteEndpoint => Socket.Client.RemoteEndPoint as IPEndPoint;
         public X509Certificate RemoteCertificate => Ssl?.RemoteCertificate;
         public X509Certificate LocalCertificate => Ssl?.LocalCertificate;
 
-        private CtpDecoder m_packetDecoder;
+        private CtpDecoder m_decoder;
         private CtpEncoder m_encoder;
         private Stream m_stream;
         private bool m_isReading;
@@ -87,17 +111,14 @@ namespace CTP.Net
         private CommandRootHandler RootHandler;
         private CtpCommandHandlerBase ActiveHandler;
 
-        public CtpSession(bool isTrustedConnection, bool isClient, string hostName, EncryptionMode mode, ServerTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
+        public CtpSession(bool isClient, CertificateTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
-            IsTrustedConnection = isTrustedConnection;
             IsClient = isClient;
-            HostName = hostName;
-            Mode = mode;
             TrustMode = trustMode;
             Socket = socket;
             NetStream = netStream;
             Ssl = ssl;
-            m_packetDecoder = new CtpDecoder();
+            m_decoder = new CtpDecoder();
             m_encoder = new CtpEncoder();
             m_encoder.NewPacket += EncoderOnNewPacket;
             m_stream = (Stream)ssl ?? netStream;
@@ -105,6 +126,9 @@ namespace CTP.Net
             m_asyncReadCallback = AsyncReadCallback;
         }
 
+        /// <summary>
+        /// Begins listening to and processing the incoming data.
+        /// </summary>
         public void Start()
         {
             AsyncRead(null);
@@ -125,21 +149,21 @@ namespace CTP.Net
             RootHandler.RegisterCommandHandler(handler);
         }
 
-        public void SendCommand(byte[] payload)
+        public void SendCommand(byte payloadKind, byte[] payload)
         {
-            m_encoder.Send(payload);
+            m_encoder.Send(payloadKind, payload);
             LastSentTime = ShortTime.Now;
         }
 
-        public void SendCommand(CtpDocument document)
+        public void SendCommand(byte payloadKind, CtpDocument document)
         {
-            m_encoder.Send(document.ToArray());
+            m_encoder.Send(payloadKind, document.ToArray());
             LastSentTime = ShortTime.Now;
         }
 
-        public void SendCommand(DocumentObject document)
+        public void SendCommand(byte payloadKind, DocumentObject document)
         {
-            m_encoder.Send(document.ToDocument().ToArray());
+            m_encoder.Send(payloadKind, document.ToDocument().ToArray());
             LastSentTime = ShortTime.Now;
         }
 
@@ -166,12 +190,12 @@ namespace CTP.Net
             {
                 m_isReading = false;
                 int length = m_stream.EndRead(ar);
-                m_packetDecoder.FillBuffer(m_inBuffer, 0, length);
+                m_decoder.FillBuffer(m_inBuffer, 0, length);
             }
             LastReceiveTime = ShortTime.Now;
-            while (m_packetDecoder.ReadCommand())
+            while (m_decoder.ReadCommand())
             {
-                var cmd = new CtpDocument(m_packetDecoder.Results.Payload);
+                var cmd = new CtpDocument(m_decoder.Results.Payload);
                 if (!ControlHandler.TryHandle(this, cmd))
                 {
                     if (ActiveHandler != null)

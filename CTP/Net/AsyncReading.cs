@@ -18,7 +18,6 @@ namespace CTP.Net
         {
             Session = session;
             m_bytesRead = 0;
-
         }
 
         public void Reset()
