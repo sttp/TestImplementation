@@ -13,6 +13,13 @@ namespace CTP.Net
                 m_rootCommands.Add(command, handler);
             }
         }
+        public void UnRegisterCommandHandler(ICtpCommandHandler handler)
+        {
+            foreach (var command in handler.SupportedCommands)
+            {
+                m_rootCommands.Remove(command);
+            }
+        }
 
         public bool TryHandle(CtpSession session, CtpDocument command)
         {

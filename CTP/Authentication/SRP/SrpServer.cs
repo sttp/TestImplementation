@@ -119,7 +119,7 @@ namespace CTP.SRP
             return user;
         }
 
-        public SrpServerHandler<T> Authenticate(CtpSession session, AuthSrp command, X509Certificate clientCertificate, X509Certificate serverCertificate, Action<byte[], T> userAuthenticated)
+        public SrpUserCredential<T> FindUser(AuthSrp command)
         {
             var identity = command;
             string userName = identity.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
@@ -130,9 +130,8 @@ namespace CTP.SRP
                 user = new SrpUserCredential<T>(userName, Guid.NewGuid().ToString(), GenerateSalt(userName), m_srpStrength, 1000, default(T));
             }
 
-            var items = new SrpServerHandler<T>(session, user, userAuthenticated);
-            items.Start();
-            return items;
+            return user;
         }
+
     }
 }

@@ -92,6 +92,10 @@ namespace CTP.Net
         {
             m_commandHandler.RegisterCommandHandler(handler);
         }
+        public void UnRegisterCommandChannelHandler(ICtpCommandHandler handler)
+        {
+            m_commandHandler.UnRegisterCommandHandler(handler);
+        }
 
         public void RegisterDataChannelHandler(byte channel, ICtpDataChannelHandler handler)
         {

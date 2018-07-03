@@ -8,54 +8,6 @@ namespace CTP.Net
 {
     public class ServerAuthentication
     {
-        private class ServerAuthenticationHandler : ICtpCommandHandler
-        {
-            private ServerAuthentication m_home;
-            private List<string> m_supportedCommands;
-            private SrpServerHandler<SrpUserMapping> m_authUser;
-
-            public ServerAuthenticationHandler(ServerAuthentication home)
-            {
-                m_home = home;
-                m_supportedCommands = new List<string>();
-                m_supportedCommands.Add("AuthSrp");
-                m_supportedCommands.Add("SrpClientResponse");
-
-                m_supportedCommands.Add("AuthNegotiate");
-                m_supportedCommands.Add("AuthOAuth");
-                m_supportedCommands.Add("AuthLDAP");
-                m_supportedCommands.Add("PairCertificates");
-                m_supportedCommands.Add("PairSession");
-            }
-
-            public IEnumerable<string> SupportedCommands => m_supportedCommands;
-
-            public void ProcessCommand(CtpSession session, CtpDocument command)
-            {
-                switch (command.RootElement)
-                {
-                    case "AuthSrp":
-                        var srpUser = (AuthSrp)command;
-                        m_authUser = m_home.m_srpUserDatabase.Authenticate(session, srpUser, session.RemoteCertificate, session.LocalCertificate, (x, user) =>
-                                                                                                                                          {
-                                                                                                                                              session.LoginName = user.LoginName;
-                                                                                                                                              session.GrantedRoles.UnionWith(user.Roles);
-                                                                                                                                          });
-                        return;
-                    case "SrpClientResponse":
-                        m_authUser.ProcessCommand(session, (SrpClientResponse)command);
-                        return;
-                    case "AuthNegotiate":
-                    case "AuthOAuth":
-                    case "AuthLDAP":
-                    case "PairCertificates":
-                    case "PairSession":
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-        }
-
 
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
@@ -66,6 +18,12 @@ namespace CTP.Net
 
         public ServerAuthentication()
         {
+
+        }
+
+        public SrpUserCredential<SrpUserMapping> FindSrpUser(AuthSrp user)
+        {
+            return m_srpUserDatabase.FindUser(user);
         }
 
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
@@ -141,11 +99,6 @@ namespace CTP.Net
         //    AddSrpUser(user.AssignedUserName, Convert.ToBase64String(privateSessionKey), user.Token.LoginName, user.Token.Roles);
         //}
 
-        private void SrpAsServer(CtpSession session)
-        {
-
-        }
-
         private void WinAsServer(CtpSession client, AuthNegotiate command)
         {
             //using (var stream = client.OpenStream(command.StreamID))
@@ -175,11 +128,6 @@ namespace CTP.Net
             //        throw;
             //    }
             //}
-        }
-
-        public ICtpCommandHandler CreateCommandHandler()
-        {
-            return new ServerAuthenticationHandler(this);
         }
     }
 }

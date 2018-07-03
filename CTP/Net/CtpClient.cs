@@ -4,10 +4,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Numerics;
+using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
+using CTP.SRP;
 using GSF.Diagnostics;
+using GSF.IO;
 
 namespace CTP.Net
 {
@@ -43,10 +48,12 @@ namespace CTP.Net
         private Exception m_processingException;
         private CtpSession m_clientSession;
         private CertificateTrustMode m_certificateTrust = CertificateTrustMode.None;
-        private byte[] m_asyncReadBuffer = new byte[1];
         private TcpClient m_socket;
         private NetworkStream m_netStream;
         private SslStream m_sslStream = null;
+        private AuthenticationProtocols m_authMode = AuthenticationProtocols.None;
+        private Stream m_finalStream;
+        private NetworkCredential m_credentials;
 
         public CtpClient()
         {
@@ -114,23 +121,16 @@ namespace CTP.Net
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
+        public void SetSrpCredentials(NetworkCredential credentials)
+        {
+            m_authMode = AuthenticationProtocols.SRP;
+            m_credentials = credentials;
+        }
+
         public CtpSession Connect()
         {
             m_authenticating = new ManualResetEvent(false);
-            BeginConnect();
-            if (!m_authenticating.WaitOne(5000))
-            {
-                throw new TimeoutException("Authentication took too long");
-            }
 
-            if (m_processingException != null)
-                throw m_processingException;
-
-            return m_clientSession;
-        }
-
-        public void BeginConnect()
-        {
             if (!RequireSSL && RequireTrustedServers)
             {
                 throw new InvalidOperationException("If RequireTrustedServers is true, RequireSSL must also be true");
@@ -152,21 +152,13 @@ namespace CTP.Net
                 m_netStream.WriteByte((byte)'1');
             }
             m_netStream.Flush();
-            m_netStream.BeginRead(m_asyncReadBuffer, 0, m_asyncReadBuffer.Length, ReadServerMode, null);
-        }
 
-        private void ReadServerMode(IAsyncResult ar)
-        {
-            int length = m_netStream.EndRead(ar);
-            if (length != 1)
-                throw new EndOfStreamException();
-
-            char serverMode = (char)m_asyncReadBuffer[0];
+            char serverMode = (char)m_netStream.ReadByte();
             bool encrypt;
             switch (serverMode)
             {
                 case 'N':
-                    if (!RequireSSL)
+                    if (RequireSSL)
                         throw new InvalidOperationException("Server requested No Encryption but the client requires encryption");
                     encrypt = false;
                     break;
@@ -192,20 +184,83 @@ namespace CTP.Net
                 {
                     m_sslStream = new SslStream(m_netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
                 }
-                m_sslStream.BeginAuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false, AuthAsClientCallback, null);
+                m_sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
+                m_finalStream = m_sslStream;
             }
             else
             {
-                m_clientSession = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
-                m_authenticating.Set();
+                m_finalStream = m_netStream;
             }
+
+            switch (m_authMode)
+            {
+                case AuthenticationProtocols.SRP:
+                    AuthSrp();
+                    break;
+                case AuthenticationProtocols.None:
+                    WriteDocument(new AuthNone());
+                    break;
+                default:
+                    throw new Exception();
+            }
+
+            m_clientSession = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
+            return m_clientSession;
         }
 
-        private void AuthAsClientCallback(IAsyncResult ar)
+        private void WriteDocument(DocumentObject command)
         {
-            m_sslStream.EndAuthenticateAsClient(ar);
-            m_clientSession = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
-            m_authenticating.Set();
+            var document = command.ToDocument();
+            byte[] data = new byte[document.Length + 2];
+            if (document.Length > 60000)
+                throw new Exception();
+            data[0] = (byte)(document.Length >> 8);
+            data[1] = (byte)document.Length;
+            document.CopyTo(data, 2);
+            m_finalStream.Write(data, 0, data.Length);
+            m_finalStream.Flush();
+        }
+
+        private CtpDocument ReadDocument()
+        {
+            byte[] buffer = new byte[2];
+            m_finalStream.ReadAll(buffer, 0, 2);
+            int length = (buffer[0] << 8) + buffer[1];
+            buffer = new byte[length];
+            m_finalStream.ReadAll(buffer, 0, buffer.Length);
+            return new CtpDocument(buffer);
+        }
+
+        private void AuthSrp()
+        {
+            var identity = m_credentials.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
+            SecureString password = m_credentials.SecurePassword;
+
+            WriteDocument(new AuthSrp(identity));
+            SrpIdentityLookup lookup = (SrpIdentityLookup)ReadDocument();
+            var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
+            var strength = (SrpStrength)lookup.SrpStrength;
+            var publicB = lookup.PublicB.ToUnsignedBigInteger();
+            var param = SrpConstants.Lookup(strength);
+            var publicA = BigInteger.ModPow(param.g, privateA, param.N);
+
+            var x = lookup.ComputePassword(identity, password);
+            var verifier = param.g.ModPow(x, param.N);
+
+            var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
+            var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
+            var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
+            var sessionKey = base1.ModPow(exp1, param.N);
+            var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
+            var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
+            var privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
+            byte[] clientChallenge = challengeClient;
+
+            WriteDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
+            SrpServerResponse cr = (SrpServerResponse)ReadDocument();
+            if (!challengeServer.SequenceEqual(cr.ServerChallenge))
+                throw new Exception("Failed server challenge");
+
         }
 
         private bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)

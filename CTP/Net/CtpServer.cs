@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using CTP.SRP;
 using GSF.IO;
 using GSF.Security.Cryptography.X509;
 
@@ -18,6 +22,187 @@ namespace CTP.Net
     /// </summary>
     public class CtpServer
     {
+        private class ProcessClient
+        {
+            private readonly CtpServer m_server;
+            private readonly TcpClient m_client;
+            private Stream m_finalStream;
+            private SslStream m_ssl;
+            private CtpSession m_session;
+            public ProcessClient(CtpServer server, TcpClient client)
+            {
+                m_server = server;
+                m_client = client;
+
+                var thread = new Thread(Process);
+                thread.IsBackground = true;
+                thread.Start(null);
+            }
+
+            private void Process(object tcpClient)
+            {
+                try
+                {
+                    TcpClient socket = tcpClient as TcpClient;
+                    NetworkStream netStream = socket.GetStream();
+                    bool requireSSL = m_server.DefaultRequireSSL;
+                    bool hasAccess = m_server.DefaultAllowConnections;
+                    X509Certificate serverCertificate = m_server.DefaultCertificate;
+
+                    var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
+                    foreach (var item in m_server.m_encryptionOptions.Values)
+                    {
+                        if (item.IP.IsMatch(ipBytes))
+                        {
+                            requireSSL = item.RequireSSL;
+                            hasAccess = item.HasAccess;
+                            serverCertificate = item.ServerCertificate;
+                            break;
+                        }
+                    }
+
+                    if (!hasAccess)
+                    {
+                        throw new Exception("Client does not have access");
+                    }
+
+                    char mode = (char)netStream.ReadNextByte();
+                    switch (mode)
+                    {
+                        case 'N':
+                            if (requireSSL)
+                            {
+                                mode = '1';
+                            }
+                            else
+                            {
+                                mode = 'N';
+                            }
+                            break;
+                        case '1':
+                            requireSSL = true;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    netStream.WriteByte((byte)mode);
+                    netStream.Flush();
+
+                    CertificateTrustMode certificateTrust = CertificateTrustMode.None;
+
+                    bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+                    {
+                        if (sslpolicyerrors == SslPolicyErrors.None || sslpolicyerrors == SslPolicyErrors.RemoteCertificateNotAvailable)
+                        {
+                            certificateTrust = CertificateTrustMode.Native;
+                        }
+                        return true;
+                    }
+
+                    if (requireSSL)
+                    {
+                        serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
+                        m_ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
+                        m_ssl.AuthenticateAsServer(serverCertificate, true, SslProtocols.Tls12, false);
+                        m_finalStream = m_ssl;
+                    }
+                    else
+                    {
+                        m_finalStream = netStream;
+                    }
+
+                    m_session = new CtpSession(false, certificateTrust, socket, netStream, m_ssl);
+
+                    var doc = ReadDocument();
+                    switch (doc.RootElement)
+                    {
+                        case "AuthSrp":
+                            AuthSrp((AuthSrp)doc);
+                            break;
+                        case "AuthNone":
+                            break;
+                        default:
+                            throw new Exception();
+                    }
+
+
+                    m_server.OnSessionCompleted(m_session);
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+
+            private void AuthSrp(AuthSrp command)
+            {
+                var items = m_server.Authentication.FindSrpUser(command);
+
+                int m_state = 0;
+                SrpUserCredential<SrpUserMapping> m_user = items;
+                byte[] privateSessionKey;
+                SrpConstants param;
+                BigInteger verifier;
+                BigInteger privateB;
+                BigInteger publicB;
+
+                param = SrpConstants.Lookup(m_user.Verifier.SrpStrength);
+                verifier = m_user.Verifier.Verification.ToUnsignedBigInteger();
+                privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
+                publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
+
+                WriteDocument(new SrpIdentityLookup(m_user.Verifier.SrpStrength, m_user.Verifier.Salt, publicB.ToUnsignedByteArray(), m_user.Verifier.IterationCount));
+
+                var clientResponse = (SrpClientResponse)ReadDocument();
+
+                var publicA = clientResponse.PublicA.ToUnsignedBigInteger();
+                byte[] clientChallenge = clientResponse.ClientChallenge;
+
+                var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
+                var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
+
+                var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, m_ssl?.RemoteCertificate, m_ssl?.LocalCertificate);
+                var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, m_ssl?.RemoteCertificate, m_ssl?.LocalCertificate);
+                privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_ssl?.RemoteCertificate, m_ssl?.LocalCertificate);
+
+                if (!challengeClient.SequenceEqual(clientChallenge))
+                    throw new Exception("Failed client challenge");
+                byte[] serverChallenge = challengeServer;
+
+
+                m_session.LoginName = m_user.Token.LoginName;
+                m_session.GrantedRoles.UnionWith(m_user.Token.Roles);
+                WriteDocument(new SrpServerResponse(serverChallenge));
+            }
+
+            private void WriteDocument(DocumentObject command)
+            {
+                var document = command.ToDocument();
+                byte[] data = new byte[document.Length + 2];
+                if (document.Length > 60000)
+                    throw new Exception();
+                data[0] = (byte)(document.Length >> 8);
+                data[1] = (byte)document.Length;
+                document.CopyTo(data, 2);
+                m_finalStream.Write(data, 0, data.Length);
+                m_finalStream.Flush();
+            }
+
+            private CtpDocument ReadDocument()
+            {
+                byte[] buffer = new byte[2];
+                m_finalStream.ReadAll(buffer, 0, 2);
+                int length = (buffer[0] << 8) + buffer[1];
+                buffer = new byte[length];
+                m_finalStream.ReadAll(buffer, 0, buffer.Length);
+                return new CtpDocument(buffer);
+            }
+
+
+        }
+
+
         private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
 
         private readonly ManualResetEvent m_shutdownEvent = new ManualResetEvent(false);
@@ -119,9 +304,7 @@ namespace CTP.Net
                     return;
                 }
 
-                var thread = new Thread(ProcessClient);
-                thread.IsBackground = true;
-                thread.Start(socket);
+                new ProcessClient(this, socket);
                 m_listener.BeginAcceptTcpClient(OnAccept, null);
             }
             catch (ObjectDisposedException)
@@ -149,86 +332,8 @@ namespace CTP.Net
             }
         }
 
-        private void ProcessClient(object tcpClient)
-        {
-            try
-            {
-                TcpClient socket = tcpClient as TcpClient;
-                NetworkStream netStream = socket.GetStream();
-                SslStream ssl = null;
-                bool requireSSL = DefaultRequireSSL;
-                bool hasAccess = DefaultAllowConnections;
-                X509Certificate serverCertificate = DefaultCertificate;
 
-                var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
-                foreach (var item in m_encryptionOptions.Values)
-                {
-                    if (item.IP.IsMatch(ipBytes))
-                    {
-                        requireSSL = item.RequireSSL;
-                        hasAccess = item.HasAccess;
-                        serverCertificate = item.ServerCertificate;
-                        break;
-                    }
-                }
 
-                if (!hasAccess)
-                {
-                    throw new Exception("Client does not have access");
-                }
-
-                char mode = (char)netStream.ReadNextByte();
-                switch (mode)
-                {
-                    case 'N':
-                        if (requireSSL)
-                        {
-                            mode = '1';
-                        }
-                        else
-                        {
-                            mode = 'N';
-                        }
-                        break;
-                    case '1':
-                        requireSSL = true;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                netStream.WriteByte((byte)mode);
-                netStream.Flush();
-
-                CertificateTrustMode certificateTrust = CertificateTrustMode.None;
-
-                bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-                {
-                    if (sslpolicyerrors == SslPolicyErrors.None || sslpolicyerrors == SslPolicyErrors.RemoteCertificateNotAvailable)
-                    {
-                        certificateTrust = CertificateTrustMode.Native;
-                    }
-                    return true;
-                }
-
-                if (requireSSL)
-                {
-                    serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
-                    ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
-                    ssl.AuthenticateAsServer(serverCertificate, true, SslProtocols.Tls12, false);
-                }
-
-                var session = new CtpSession(false, certificateTrust, socket, netStream, ssl);
-                session.RegisterCommandChannelHandler(Authentication.CreateCommandHandler());
-                Authentication.AuthenticateSession(session);
-
-                OnSessionCompleted(session);
-            }
-            catch (Exception e)
-            {
-
-            }
-        }
 
         protected virtual void OnSessionCompleted(CtpSession token)
         {

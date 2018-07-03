@@ -16,13 +16,11 @@ namespace Sttp.Tests.ClientServer
     [TestClass]
     public class TestSSL
     {
-        ServerAuthentication user = new ServerAuthentication();
-
         [TestMethod]
         public void TestIPWithoutEncryption()
         {
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
-            user.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
+            listener.Authentication.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
             listener.SetIPSpecificOptions(IPAddress.Loopback, 32, true, false);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
@@ -30,6 +28,7 @@ namespace Sttp.Tests.ClientServer
             var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
             client.RequireSSL = false;
+            client.RequireTrustedServers = false;
             client.Connect();
             Thread.Sleep(100);
         }
@@ -38,11 +37,12 @@ namespace Sttp.Tests.ClientServer
         public void TestIPWithEncryption()
         {
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
-            user.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
+            listener.Authentication.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
             var client = new CtpClient();
+            client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
             client.Connect();
             Thread.Sleep(100);
@@ -57,11 +57,12 @@ namespace Sttp.Tests.ClientServer
             store.Close();
 
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
-            user.AddSelfSignedCertificateUser(cert2, "Cert", "Perm1");
+            listener.Authentication.AddSelfSignedCertificateUser(cert2, "Cert", "Perm1");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
             var client = new CtpClient();
+            client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
             client.SetClientCertificate(cert2);
             client.Connect();
@@ -72,14 +73,15 @@ namespace Sttp.Tests.ClientServer
         public void TestSrpUser()
         {
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
-            user.AddSrpUser("U", "Pass1", "User", "Role1");
+            listener.Authentication.AddSrpUser("U", "Pass1", "User", "Role1");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
             var client = new CtpClient();
+            client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
+            client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
             var s = client.Connect();
-            ClientAuthentication.AuthenticateWithSRP(s, new NetworkCredential("U", "Pass1"));
             Thread.Sleep(100);
         }
 
@@ -87,20 +89,21 @@ namespace Sttp.Tests.ClientServer
         public void TestSrp2User()
         {
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
-            user.SetSrpDefaults(null, SrpStrength.Bits2048);
-            user.AddSrpUser("U", "Pass1", "User", "Role1");
+            listener.Authentication.SetSrpDefaults(null, SrpStrength.Bits2048);
+            listener.Authentication.AddSrpUser("U", "Pass1", "User", "Role1");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
             var client = new CtpClient();
             client.SetHost(IPAddress.Loopback, 29348);
+            client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
             var s = client.Connect();
-            ClientAuthentication.AuthenticateWithSRP(s, new NetworkCredential("U", "Pass1"));
             Thread.Sleep(100);
         }
 
         private void Listener_SessionCompleted(CtpSession token)
         {
+            token.Start();
             Console.WriteLine(token.RemoteEndpoint.ToString());
             Console.WriteLine(token.LoginName);
             Console.WriteLine(string.Join(",", token.GrantedRoles));
