@@ -119,7 +119,7 @@ namespace CTP.SRP
             return user;
         }
 
-        public ICtpCommandHandlerBase Authenticate(CtpSession session, AuthSrp command, X509Certificate clientCertificate, X509Certificate serverCertificate, Action<byte[], T> userAuthenticated)
+        public SrpServerHandler<T> Authenticate(CtpSession session, AuthSrp command, X509Certificate clientCertificate, X509Certificate serverCertificate, Action<byte[], T> userAuthenticated)
         {
             var identity = command;
             string userName = identity.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();

@@ -1,15 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class ServerAuthentication : ICtpCommandHandlerBase
+    public class ServerAuthentication
     {
+        private class ServerAuthenticationHandler : ICtpCommandHandler
+        {
+            private ServerAuthentication m_home;
+            private List<string> m_supportedCommands;
+            private SrpServerHandler<SrpUserMapping> m_authUser;
+
+            public ServerAuthenticationHandler(ServerAuthentication home)
+            {
+                m_home = home;
+                m_supportedCommands = new List<string>();
+                m_supportedCommands.Add("AuthSrp");
+                m_supportedCommands.Add("SrpClientResponse");
+
+                m_supportedCommands.Add("AuthNegotiate");
+                m_supportedCommands.Add("AuthOAuth");
+                m_supportedCommands.Add("AuthLDAP");
+                m_supportedCommands.Add("PairCertificates");
+                m_supportedCommands.Add("PairSession");
+            }
+
+            public IEnumerable<string> SupportedCommands => m_supportedCommands;
+
+            public void ProcessCommand(CtpSession session, CtpDocument command)
+            {
+                switch (command.RootElement)
+                {
+                    case "AuthSrp":
+                        var srpUser = (AuthSrp)command;
+                        m_authUser = m_home.m_srpUserDatabase.Authenticate(session, srpUser, session.RemoteCertificate, session.LocalCertificate, (x, user) =>
+                                                                                                                                          {
+                                                                                                                                              session.LoginName = user.LoginName;
+                                                                                                                                              session.GrantedRoles.UnionWith(user.Roles);
+                                                                                                                                          });
+                        return;
+                    case "SrpClientResponse":
+                        m_authUser.ProcessCommand(session, (SrpClientResponse)command);
+                        return;
+                    case "AuthNegotiate":
+                    case "AuthOAuth":
+                    case "AuthLDAP":
+                    case "PairCertificates":
+                    case "PairSession":
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+        }
+
+
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
         private Dictionary<string, SelfSignCertificateUserMapping> m_selfSignCertificateUsers = new Dictionary<string, SelfSignCertificateUserMapping>();
@@ -130,27 +177,9 @@ namespace CTP.Net
             //}
         }
 
-        public IEnumerable<string> SupportedRootCommands => new string[] {"SrpIdentity", "AuthNegotiate"};
-
-        public ICtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
+        public ICtpCommandHandler CreateCommandHandler()
         {
-            switch (command.RootElement)
-            {
-                case "SrpIdentity":
-                    return m_srpUserDatabase.Authenticate(session, (AuthSrp)command, session.RemoteCertificate, session.LocalCertificate, (x, user) =>
-                                                                                                                                              {
-                                                                                                                                                  session.LoginName = user.LoginName;
-                                                                                                                                                  session.GrantedRoles.UnionWith(user.Roles);
-                                                                                                                                              });
-                    break;
-                case "AuthNegotiate":
-                    throw new NotSupportedException();
-                    //WinAsServer(session, (AuthNegotiate)readResults.DocumentPayload);
-                    break;
-                default:
-                    throw new Exception("Command invalid");
-            }
+            return new ServerAuthenticationHandler(this);
         }
-
     }
 }

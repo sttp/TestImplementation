@@ -219,7 +219,7 @@ namespace CTP.Net
                 }
 
                 var session = new CtpSession(false, certificateTrust, socket, netStream, ssl);
-                session.RegisterCommandChannelHandler(Authentication);
+                session.RegisterCommandChannelHandler(Authentication.CreateCommandHandler());
                 Authentication.AuthenticateSession(session);
 
                 OnSessionCompleted(session);

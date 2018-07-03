@@ -9,7 +9,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class AuthenticateSrpAsClient : ICtpCommandHandlerBase
+    public class AuthenticateSrpAsClient : ICtpCommandHandler
     {
         private int m_state = 0;
         private CtpSession m_stream;
@@ -32,9 +32,9 @@ namespace CTP.Net
             m_stream.SendCommand(new AuthSrp(m_identity));
         }
 
-        public IEnumerable<string> SupportedRootCommands => null;
+        public IEnumerable<string> SupportedCommands => null;
 
-        public ICtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
+        public void ProcessCommand(CtpSession session, CtpDocument command)
         {
             switch (m_state)
             {
@@ -61,7 +61,7 @@ namespace CTP.Net
                     byte[] clientChallenge = challengeClient;
 
                     session.SendCommand(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
-                    return this;
+                    return;
                 case 2:
                     m_state++;
 
@@ -69,11 +69,11 @@ namespace CTP.Net
                     if (!challengeServer.SequenceEqual(cr.ServerChallenge))
                         throw new Exception("Failed server challenge");
                     Wait.Set();
-                    return null;
+                    return;
                 default:
                     throw new NotSupportedException();
             }
         }
-
+        
     }
 }

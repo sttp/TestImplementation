@@ -10,6 +10,10 @@ using GSF;
 
 namespace CTP.Net
 {
+    public delegate void CommandReceivedEventHandler(CtpSession sender, CtpDocument command);
+
+    public delegate void DataReceivedEventHandler(CtpSession sender, byte channel, byte[] data);
+
     public class CtpSession
     {
         public readonly bool IsServer;
@@ -55,6 +59,10 @@ namespace CTP.Net
         public ShortTime LastSentTime { get; private set; }
         public ShortTime LastReceiveTime { get; private set; }
 
+        public event CommandReceivedEventHandler CommandReceived;
+
+        public event DataReceivedEventHandler DataReceived;
+
         public CtpSession(bool isServer, CertificateTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
             IsServer = isServer;
@@ -80,9 +88,7 @@ namespace CTP.Net
             AsyncRead(null);
         }
 
-        
-
-        public void RegisterCommandChannelHandler(ICtpCommandHandlerBase handler)
+        public void RegisterCommandChannelHandler(ICtpCommandHandler handler)
         {
             m_commandHandler.RegisterCommandHandler(handler);
         }
@@ -96,11 +102,6 @@ namespace CTP.Net
         {
             m_encoder.Send(channel, data);
             LastSentTime = ShortTime.Now;
-        }
-
-        public void SendCommand(ICtpCommandSequence command)
-        {
-
         }
 
         public void SendCommand(CtpDocument document)
@@ -148,12 +149,16 @@ namespace CTP.Net
                     var cmd = new CtpDocument(m_decoder.Results.Payload);
                     if (!m_commandHandler.TryHandle(this, cmd))
                     {
-                        SendCommand(new CtpError("Invalid Command", "It's not there"));
+                        CommandReceived?.Invoke(this, cmd);
                     }
                 }
                 else
                 {
-                    m_dataChannelHandler[m_decoder.Results.PayloadKind].ProcessData(this, m_decoder.Results.Payload);
+                    var dataHandler = m_dataChannelHandler[m_decoder.Results.PayloadKind];
+                    if (dataHandler != null)
+                        dataHandler.ProcessData(this, m_decoder.Results.Payload);
+                    else
+                        DataReceived?.Invoke(this, m_decoder.Results.PayloadKind, m_decoder.Results.Payload);
                 }
             }
 
