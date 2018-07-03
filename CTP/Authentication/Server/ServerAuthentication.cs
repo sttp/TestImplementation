@@ -8,7 +8,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class ServerAuthentication : CtpCommandHandlerBase
+    public class ServerAuthentication : ICtpCommandHandlerBase
     {
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
@@ -19,8 +19,6 @@ namespace CTP.Net
 
         public ServerAuthentication()
         {
-            SupportedCommands.Add("SrpIdentity");
-            SupportedCommands.Add("AuthNegotiate");
         }
 
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
@@ -132,12 +130,14 @@ namespace CTP.Net
             //}
         }
 
-        public override CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
+        public IEnumerable<string> SupportedRootCommands => new string[] {"SrpIdentity", "AuthNegotiate"};
+
+        public ICtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
         {
             switch (command.RootElement)
             {
                 case "SrpIdentity":
-                    return m_srpUserDatabase.Authenticate(session, (SrpIdentity)command, session.RemoteCertificate, session.LocalCertificate, (x, user) =>
+                    return m_srpUserDatabase.Authenticate(session, (AuthSrp)command, session.RemoteCertificate, session.LocalCertificate, (x, user) =>
                                                                                                                                               {
                                                                                                                                                   session.LoginName = user.LoginName;
                                                                                                                                                   session.GrantedRoles.UnionWith(user.Roles);
@@ -152,8 +152,5 @@ namespace CTP.Net
             }
         }
 
-        public override void Cancel()
-        {
-        }
     }
 }

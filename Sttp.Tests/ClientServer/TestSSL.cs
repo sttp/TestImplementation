@@ -101,7 +101,6 @@ namespace Sttp.Tests.ClientServer
 
         private void Listener_SessionCompleted(CtpSession token)
         {
-            user.AuthenticateSession(token);
             Console.WriteLine(token.RemoteEndpoint.ToString());
             Console.WriteLine(token.LoginName);
             Console.WriteLine(string.Join(",", token.GrantedRoles));

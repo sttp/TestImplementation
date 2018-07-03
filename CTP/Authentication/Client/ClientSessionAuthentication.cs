@@ -8,9 +8,9 @@ namespace CTP.Net
 {
     public static class ClientAuthentication
     {
-        public static void AuthenticateWithSRP(CtpSession session, NetworkCredential credential)
+        public static void AuthenticateWithSRP(CtpSession clientSession, NetworkCredential credential)
         {
-            AuthenticateSrp(session, credential.UserName, credential.SecurePassword, out byte[] privateSessionKey);
+            AuthenticateSrp(clientSession, credential.UserName, credential.SecurePassword, out byte[] privateSessionKey);
         }
 
         private static void AuthenticateSrp(CtpSession stream, string identity, SecureString password, out byte[] privateSessionKey)
@@ -24,7 +24,7 @@ namespace CTP.Net
             privateSessionKey = auth.privateSessionKey;
         }
 
-        public static void AuthenticateWithNegotiate(CtpSession session, NetworkCredential credentials)
+        public static void AuthenticateWithNegotiate(CtpSession clientSession, NetworkCredential credentials)
         {
             //using (var stream = session.CreateStream())
             //{
@@ -34,27 +34,27 @@ namespace CTP.Net
             //}
         }
 
-        public static void AuthenticateWithLDAP(CtpSession session, NetworkCredential credential)
+        public static void AuthenticateWithLDAP(CtpSession clientSession, NetworkCredential credential)
         {
 
         }
 
-        public static void AuthenticateWithOAUTH(CtpSession session, string ticket)
+        public static void AuthenticateWithOAUTH(CtpSession clientSession, string ticket)
         {
 
         }
 
-        public static void ResumeSession(CtpSession session, string ticket)
+        public static void ResumeSession(CtpSession clientSession, string ticket)
         {
 
         }
 
-        public static void PairCertificates(CtpSession session, string pairingUsername, string pairingPassword)
+        public static void PairCertificates(CtpSession clientSession, string pairingUsername, string pairingPassword)
         {
 
         }
 
-        public static void PairSession(CtpSession session, string pairingUsername, string pairingPassword)
+        public static void PairSession(CtpSession clientSession, string pairingUsername, string pairingPassword)
         {
 
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Security;
@@ -8,7 +9,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class AuthenticateSrpAsClient : CtpCommandHandlerBase
+    public class AuthenticateSrpAsClient : ICtpCommandHandlerBase
     {
         private int m_state = 0;
         private CtpSession m_stream;
@@ -28,10 +29,12 @@ namespace CTP.Net
         public void Start()
         {
             m_state = 1;
-            m_stream.SendCommand(0, new SrpIdentity(m_identity));
+            m_stream.SendCommand(new AuthSrp(m_identity));
         }
 
-        public override CtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
+        public IEnumerable<string> SupportedRootCommands => null;
+
+        public ICtpCommandHandlerBase ProcessCommand(CtpSession session, CtpDocument command)
         {
             switch (m_state)
             {
@@ -57,7 +60,7 @@ namespace CTP.Net
                     privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_stream.LocalCertificate, m_stream.RemoteCertificate);
                     byte[] clientChallenge = challengeClient;
 
-                    session.SendCommand(0, new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
+                    session.SendCommand(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
                     return this;
                 case 2:
                     m_state++;
@@ -72,9 +75,5 @@ namespace CTP.Net
             }
         }
 
-        public override void Cancel()
-        {
-
-        }
     }
 }

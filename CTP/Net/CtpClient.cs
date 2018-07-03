@@ -41,7 +41,7 @@ namespace CTP.Net
         private string m_hostName;
         private ManualResetEvent m_authenticating;
         private Exception m_processingException;
-        private CtpSession m_session;
+        private CtpSession m_clientSession;
         private CertificateTrustMode m_certificateTrust = CertificateTrustMode.None;
         private byte[] m_asyncReadBuffer = new byte[1];
         private TcpClient m_socket;
@@ -126,7 +126,7 @@ namespace CTP.Net
             if (m_processingException != null)
                 throw m_processingException;
 
-            return m_session;
+            return m_clientSession;
         }
 
         public void BeginConnect()
@@ -196,7 +196,7 @@ namespace CTP.Net
             }
             else
             {
-                m_session = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
+                m_clientSession = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
                 m_authenticating.Set();
             }
         }
@@ -204,7 +204,7 @@ namespace CTP.Net
         private void AuthAsClientCallback(IAsyncResult ar)
         {
             m_sslStream.EndAuthenticateAsClient(ar);
-            m_session = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
+            m_clientSession = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
             m_authenticating.Set();
         }
 
