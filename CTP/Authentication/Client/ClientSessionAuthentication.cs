@@ -6,7 +6,7 @@ using System.Security.Principal;
 
 namespace CTP.Net
 {
-    public static class ClientSessionAuthentication
+    public static class ClientAuthentication
     {
         public static void AuthenticateWithSRP(CtpSession session, NetworkCredential credential)
         {

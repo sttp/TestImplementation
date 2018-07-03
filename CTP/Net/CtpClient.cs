@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -7,7 +8,6 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using GSF.Diagnostics;
-using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
@@ -39,6 +39,14 @@ namespace CTP.Net
         private X509Certificate m_clientCertificate;
         private X509CertificateCollection m_trustedCertificates;
         private string m_hostName;
+        private ManualResetEvent m_authenticating;
+        private Exception m_processingException;
+        private CtpSession m_session;
+        private CertificateTrustMode m_certificateTrust = CertificateTrustMode.None;
+        private byte[] m_asyncReadBuffer = new byte[1];
+        private TcpClient m_socket;
+        private NetworkStream m_netStream;
+        private SslStream m_sslStream = null;
 
         public CtpClient()
         {
@@ -106,57 +114,54 @@ namespace CTP.Net
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
-     
-
         public CtpSession Connect()
+        {
+            m_authenticating = new ManualResetEvent(false);
+            BeginConnect();
+            if (!m_authenticating.WaitOne(5000))
+            {
+                throw new TimeoutException("Authentication took too long");
+            }
+
+            if (m_processingException != null)
+                throw m_processingException;
+
+            return m_session;
+        }
+
+        public void BeginConnect()
         {
             if (!RequireSSL && RequireTrustedServers)
             {
                 throw new InvalidOperationException("If RequireTrustedServers is true, RequireSSL must also be true");
             }
 
-            CertificateTrustMode certificateTrust = CertificateTrustMode.None;
+            m_certificateTrust = CertificateTrustMode.None;
 
-            bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-            {
-                if (m_trustedCertificates != null)
-                {
-                    string certHash = certificate.GetCertHashString();
-                    string publicKey = certificate.GetPublicKeyString();
-                    foreach (var cert in m_trustedCertificates)
-                    {
-                        if (cert.GetCertHashString() == certHash && cert.GetPublicKeyString() == publicKey)
-                        {
-                            certificateTrust = CertificateTrustMode.TrustedCertificate;
-                            break;
-                        }
-                    }
-                }
-
-                if (AllowNativeTrust && sslPolicyErrors == SslPolicyErrors.None)
-                {
-                    certificateTrust |= CertificateTrustMode.Native;
-                }
-
-                return !RequireTrustedServers || certificateTrust != CertificateTrustMode.None;
-            }
-
-            var socket = new TcpClient();
-            socket.SendTimeout = 3000;
-            socket.ReceiveTimeout = 3000;
-            socket.Connect(m_remoteEndpoint);
-            var netStream = socket.GetStream();
+            m_socket = new TcpClient();
+            m_socket.SendTimeout = 3000;
+            m_socket.ReceiveTimeout = 3000;
+            m_socket.Connect(m_remoteEndpoint);
+            m_netStream = m_socket.GetStream();
             if (!RequireSSL)
             {
-                netStream.WriteByte((byte)'N');
+                m_netStream.WriteByte((byte)'N');
             }
             else
             {
-                netStream.WriteByte((byte)'1');
+                m_netStream.WriteByte((byte)'1');
             }
-            netStream.Flush();
+            m_netStream.Flush();
+            m_netStream.BeginRead(m_asyncReadBuffer, 0, m_asyncReadBuffer.Length, ReadServerMode, null);
+        }
 
-            char serverMode = (char)netStream.ReadByte();
+        private void ReadServerMode(IAsyncResult ar)
+        {
+            int length = m_netStream.EndRead(ar);
+            if (length != 1)
+                throw new EndOfStreamException();
+
+            char serverMode = (char)m_asyncReadBuffer[0];
             bool encrypt;
             switch (serverMode)
             {
@@ -173,7 +178,7 @@ namespace CTP.Net
             }
 
             string hostname = m_hostName ?? m_remoteEndpoint.Address.ToString();
-            SslStream sslStream = null;
+            m_sslStream = null;
             if (encrypt)
             {
                 Log.Publish(MessageLevel.Debug, "Connect", $"Connecting to {m_remoteEndpoint.ToString()} using SSL, Client Certificate: {m_clientCertificate?.ToString() ?? "None"}");
@@ -181,15 +186,50 @@ namespace CTP.Net
                 if (m_clientCertificate != null)
                 {
                     collection = new X509CertificateCollection(new[] { m_clientCertificate });
-                    sslStream = new SslStream(netStream, false, ValidateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
+                    m_sslStream = new SslStream(m_netStream, false, ValidateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
                 }
                 else
                 {
-                    sslStream = new SslStream(netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
+                    m_sslStream = new SslStream(m_netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
                 }
-                sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
+                m_sslStream.BeginAuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false, AuthAsClientCallback, null);
             }
-            return new CtpSession(true, certificateTrust, socket, netStream, sslStream);
+            else
+            {
+                m_session = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
+                m_authenticating.Set();
+            }
+        }
+
+        private void AuthAsClientCallback(IAsyncResult ar)
+        {
+            m_sslStream.EndAuthenticateAsClient(ar);
+            m_session = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
+            m_authenticating.Set();
+        }
+
+        private bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (m_trustedCertificates != null)
+            {
+                string certHash = certificate.GetCertHashString();
+                string publicKey = certificate.GetPublicKeyString();
+                foreach (var cert in m_trustedCertificates)
+                {
+                    if (cert.GetCertHashString() == certHash && cert.GetPublicKeyString() == publicKey)
+                    {
+                        m_certificateTrust = CertificateTrustMode.TrustedCertificate;
+                        break;
+                    }
+                }
+            }
+
+            if (AllowNativeTrust && sslPolicyErrors == SslPolicyErrors.None)
+            {
+                m_certificateTrust |= CertificateTrustMode.Native;
+            }
+
+            return !RequireTrustedServers || m_certificateTrust != CertificateTrustMode.None;
         }
 
         private X509Certificate UserCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)

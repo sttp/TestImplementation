@@ -16,7 +16,7 @@ namespace CTP.Net
     /// <summary>
     /// Listens on a specific endpoint to accept connections.
     /// </summary>
-    public class CtpListener
+    public class CtpServer
     {
         private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -27,15 +27,18 @@ namespace CTP.Net
         private IPEndPoint m_listenEndpoint;
         public event SessionCompletedEventHandler SessionCompleted;
 
+        public ServerAuthentication Authentication = new ServerAuthentication();
+
+        private SortedList<IpMatchDefinition, EncryptionOptions> m_encryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
+
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        public CtpListener(IPEndPoint listenEndpoint)
+        public CtpServer(IPEndPoint listenEndpoint)
         {
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
         }
-
 
         public X509Certificate2 DefaultCertificate { get; private set; } = null;
 
@@ -145,10 +148,6 @@ namespace CTP.Net
                 }
             }
         }
-
-        private SortedList<IpMatchDefinition, EncryptionOptions> m_encryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
-
-
 
         private void ProcessClient(object tcpClient)
         {

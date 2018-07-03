@@ -8,7 +8,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
-    public class ServerSessionAuthentication : CtpCommandHandlerBase
+    public class ServerAuthentication : CtpCommandHandlerBase
     {
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
@@ -17,7 +17,7 @@ namespace CTP.Net
         private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
         private SrpServer<SrpUserMapping> m_srpUserDatabase = new SrpServer<SrpUserMapping>();
 
-        public ServerSessionAuthentication()
+        public ServerAuthentication()
         {
             SupportedCommands.Add("SrpIdentity");
             SupportedCommands.Add("AuthNegotiate");
@@ -156,76 +156,4 @@ namespace CTP.Net
         {
         }
     }
-
-    public class SelfSignCertificateUserMapping
-    {
-        public X509Certificate UserCertificate;
-        public string LoginName;
-        public string[] Roles;
-
-        public SelfSignCertificateUserMapping(X509Certificate userCertificate, string loginName, string[] roles)
-        {
-            UserCertificate = userCertificate;
-            LoginName = loginName;
-            Roles = roles;
-        }
-    }
-
-    public class CertificateUserMapping
-    {
-        public List<string> NameRecord;
-        public X509CertificateCollection TrustedRootCertificates;
-
-        public string LoginName;
-        public string[] Roles;
-    }
-
-    public class SrpUserMapping
-    {
-        public string LoginName;
-        public string[] Roles;
-
-        public SrpUserMapping(string loginName, string[] roles)
-        {
-            LoginName = loginName;
-            Roles = roles;
-        }
-    }
-
-    public class WindowsUserMapping
-    {
-        public string Domain;
-        public string Username;
-        public string LoginName;
-        public string[] Roles;
-    }
-
-    public class WindowsGroupMapping
-    {
-        public string Domain;
-        public string Group;
-        public string LoginName;
-        public string[] Roles;
-    }
-
-    public class TrustedIPUserMapping
-    {
-        public IpMatchDefinition IP;
-        public string LoginName;
-        public string[] Roles;
-
-        public TrustedIPUserMapping(IpMatchDefinition ip, string loginName, string[] roles)
-        {
-            IP = ip;
-            LoginName = loginName;
-            Roles = roles;
-        }
-    }
-
-    public class OAuthUserMapping
-    {
-        public string LoginName;
-        public string[] Roles;
-    }
-
 }
