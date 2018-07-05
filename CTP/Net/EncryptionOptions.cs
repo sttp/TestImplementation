@@ -8,14 +8,12 @@ namespace CTP.Net
     {
         public IpMatchDefinition IP;
         public X509Certificate ServerCertificate;
-        public bool RequireSSL;
         public bool HasAccess;
 
-        public EncryptionOptions(IpMatchDefinition ip, bool hasAccess, bool requireSSL, X509Certificate localCertificate)
+        public EncryptionOptions(IpMatchDefinition ip, bool hasAccess, X509Certificate localCertificate)
         {
             IP = ip;
             ServerCertificate = localCertificate;
-            RequireSSL = requireSSL;
             HasAccess = hasAccess;
         }
 

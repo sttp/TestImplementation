@@ -44,7 +44,7 @@ namespace CTP.Net
                 {
                     TcpClient socket = m_client;
                     NetworkStream netStream = socket.GetStream();
-                    bool requireSSL = m_server.DefaultRequireSSL;
+                    bool requireSSL = m_server.m_useSSL;
                     bool hasAccess = m_server.DefaultAllowConnections;
                     X509Certificate serverCertificate = m_server.DefaultCertificate;
 
@@ -53,7 +53,6 @@ namespace CTP.Net
                     {
                         if (item.IP.IsMatch(ipBytes))
                         {
-                            requireSSL = item.RequireSSL;
                             hasAccess = item.HasAccess;
                             serverCertificate = item.ServerCertificate;
                             break;
@@ -65,45 +64,11 @@ namespace CTP.Net
                         throw new Exception("Client does not have access");
                     }
 
-                    char mode = (char)netStream.ReadNextByte();
-                    switch (mode)
-                    {
-                        case 'N':
-                            if (requireSSL)
-                            {
-                                mode = '1';
-                            }
-                            else
-                            {
-                                mode = 'N';
-                            }
-                            break;
-                        case '1':
-                            requireSSL = true;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                    netStream.WriteByte((byte)mode);
-                    netStream.Flush();
-
-                    CertificateTrustMode certificateTrust = CertificateTrustMode.None;
-
-                    bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-                    {
-                        if (sslpolicyerrors == SslPolicyErrors.None || sslpolicyerrors == SslPolicyErrors.RemoteCertificateNotAvailable)
-                        {
-                            certificateTrust = CertificateTrustMode.Native;
-                        }
-                        return true;
-                    }
-
                     if (requireSSL)
                     {
                         serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
-                        m_ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
-                        m_ssl.AuthenticateAsServer(serverCertificate, true, SslProtocols.Tls12, false);
+                        m_ssl = new SslStream(netStream, false, null, null, EncryptionPolicy.RequireEncryption);
+                        m_ssl.AuthenticateAsServer(serverCertificate, false, SslProtocols.Tls12, false);
                         m_finalStream = m_ssl;
                     }
                     else
@@ -114,7 +79,7 @@ namespace CTP.Net
                     m_ctpStream = new CtpStream();
                     m_ctpStream.SetActiveStream(m_finalStream);
 
-                    m_session = new CtpSession(m_ctpStream, false, certificateTrust, socket, netStream, m_ssl);
+                    m_session = new CtpSession(m_ctpStream, false, CertificateTrustMode.None, socket, netStream, m_ssl);
                     m_server.Authentication.AuthenticateSession(m_session);
 
                     var doc = ReadDocument();

@@ -11,7 +11,6 @@ namespace CTP.Net
 
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
-        private Dictionary<string, SelfSignCertificateUserMapping> m_selfSignCertificateUsers = new Dictionary<string, SelfSignCertificateUserMapping>();
         private SortedSet<WindowsGroupMapping> m_windowsGroupUsers = new SortedSet<WindowsGroupMapping>();
         private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
         private SrpServer<SrpUserMapping> m_srpUserDatabase = new SrpServer<SrpUserMapping>();
@@ -35,11 +34,6 @@ namespace CTP.Net
         {
             var mask = new IpMatchDefinition(ip, bitmask);
             m_ipUsers[mask] = new TrustedIPUserMapping(mask, loginName, roles);
-        }
-
-        public void AddSelfSignedCertificateUser(X509Certificate user, string loginName, params string[] roles)
-        {
-            m_selfSignCertificateUsers[user.GetCertHashString()] = new SelfSignCertificateUserMapping(user, loginName, roles);
         }
 
         public void AddSrpUser(string username, string password, string loginName, params string[] roles)
@@ -68,17 +62,7 @@ namespace CTP.Net
                 }
             }
 
-            if (session.RemoteCertificate != null)
-            {
-                if (m_selfSignCertificateUsers.TryGetValue(session.RemoteCertificate.GetCertHashString(), out SelfSignCertificateUserMapping user))
-                {
-                    if (session.RemoteCertificate.GetPublicKeyString() == user.UserCertificate.GetPublicKeyString())
-                    {
-                        session.LoginName = user.LoginName;
-                        session.GrantedRoles.UnionWith(user.Roles);
-                    }
-                }
-            }
+            
         }
 
         //private void CertificatePairing(CtpSession session)

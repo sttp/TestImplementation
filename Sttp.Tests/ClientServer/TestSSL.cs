@@ -19,15 +19,14 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestIPWithoutEncryption()
         {
-            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
+            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348), false);
             listener.Authentication.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
-            listener.SetIPSpecificOptions(IPAddress.Loopback, 32, true, false);
+            listener.SetIPSpecificOptions(IPAddress.Loopback, 32);
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpClient();
+            var client = new CtpClient(false);
             client.SetHost(IPAddress.Loopback, 29348);
-            client.RequireSSL = false;
             client.RequireTrustedServers = false;
             client.Connect();
             Thread.Sleep(100);
@@ -36,35 +35,14 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestIPWithEncryption()
         {
-            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
+            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348), true);
             listener.Authentication.AddIPUser(IPAddress.Loopback, 32, "Myself", "CanRead", "CanWrite");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpClient();
+            var client = new CtpClient(true);
             client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
-            client.Connect();
-            Thread.Sleep(100);
-        }
-
-        [TestMethod]
-        public void TestCertificateUser()
-        {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
-            var cert2 = store.Certificates[0];
-            store.Close();
-
-            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
-            listener.Authentication.AddSelfSignedCertificateUser(cert2, "Cert", "Perm1");
-            listener.SessionCompleted += Listener_SessionCompleted;
-            listener.Start();
-
-            var client = new CtpClient();
-            client.RequireTrustedServers = false;
-            client.SetHost(IPAddress.Loopback, 29348);
-            client.SetClientCertificate(cert2);
             client.Connect();
             Thread.Sleep(100);
         }
@@ -72,12 +50,12 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestSrpUser()
         {
-            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29349));
+            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29349), true);
             listener.Authentication.AddSrpUser("U", "Pass1", "User", "Role1");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpClient();
+            var client = new CtpClient(true);
             client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29349);
             client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
@@ -88,13 +66,13 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestSrp2User()
         {
-            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
+            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348), true);
             listener.Authentication.SetSrpDefaults(null, SrpStrength.Bits2048);
             listener.Authentication.AddSrpUser("U", "Pass1", "User", "Role1");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
-            var client = new CtpClient();
+            var client = new CtpClient(true);
             client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
             client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));

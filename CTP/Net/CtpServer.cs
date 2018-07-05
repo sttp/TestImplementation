@@ -23,13 +23,13 @@ namespace CTP.Net
     public partial class CtpServer
     {
         private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
-
         private readonly ManualResetEvent m_shutdownEvent = new ManualResetEvent(false);
         private TcpListener m_listener;
         private bool m_shutdown;
         private AsyncCallback m_onAccept;
         private IPEndPoint m_listenEndpoint;
         public event SessionCompletedEventHandler SessionCompleted;
+        private bool m_useSSL;
 
         public ServerAuthentication Authentication = new ServerAuthentication();
 
@@ -38,29 +38,28 @@ namespace CTP.Net
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        public CtpServer(IPEndPoint listenEndpoint)
+        public CtpServer(IPEndPoint listenEndpoint, bool useSSL)
         {
+            m_useSSL = useSSL;
+
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
         }
 
         public X509Certificate2 DefaultCertificate { get; private set; } = null;
 
-        public bool DefaultRequireSSL { get; private set; } = true;
-
         public bool DefaultAllowConnections { get; private set; } = true;
 
-        public void SetDefaultOptions(bool allowConnections, bool requireSSL = true, X509Certificate2 defaultCertificate = null)
+        public void SetDefaultOptions(bool allowConnections, X509Certificate2 defaultCertificate = null)
         {
             DefaultCertificate = defaultCertificate;
-            DefaultRequireSSL = requireSSL;
             DefaultAllowConnections = allowConnections;
         }
 
-        public void SetIPSpecificOptions(IPAddress remoteIP, int bitmask, bool allowConnections = true, bool requireSSL = true, X509Certificate localCertificate = null)
+        public void SetIPSpecificOptions(IPAddress remoteIP, int bitmask, bool allowConnections = true, X509Certificate localCertificate = null)
         {
             var mask = new IpMatchDefinition(remoteIP, bitmask);
-            m_encryptionOptions[mask] = new EncryptionOptions(mask, allowConnections, requireSSL, localCertificate);
+            m_encryptionOptions[mask] = new EncryptionOptions(mask, allowConnections, localCertificate);
         }
 
         /// <summary>

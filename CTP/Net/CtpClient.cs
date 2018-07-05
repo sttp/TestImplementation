@@ -9,10 +9,8 @@ using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using CTP.SRP;
 using GSF.Diagnostics;
-using GSF.IO;
 
 namespace CTP.Net
 {
@@ -41,7 +39,7 @@ namespace CTP.Net
         private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpClient), MessageClass.Component);
 
         private IPEndPoint m_remoteEndpoint;
-        private X509Certificate m_clientCertificate;
+        private X509Certificate m_certificateCredentials;
         private X509CertificateCollection m_trustedCertificates;
         private string m_hostName;
         private CtpSession m_clientSession;
@@ -53,33 +51,48 @@ namespace CTP.Net
         private Stream m_finalStream;
         private NetworkCredential m_credentials;
         private CtpStream m_ctpStream;
+        private bool m_requireTrustedServers;
+        private bool m_allowNativeTrust;
 
-        public CtpClient()
+        public CtpClient(bool useSSL)
         {
-            RequireSSL = true;
-            AllowNativeTrust = true;
-            RequireTrustedServers = true;
+            UseSSL = useSSL;
+            AllowNativeTrust = useSSL;
+            RequireTrustedServers = useSSL;
         }
 
-        /// <summary>
-        /// Indicates if the client will require SSL authentication. Defaults to True.
-        /// This can only be disabled if the authentication mode is not certificate based and if
-        /// both sides negotiate that a connection will be without SSL.
-        /// </summary>
-        public bool RequireSSL { get; set; }
+        public bool UseSSL { get; }
 
         /// <summary>
         /// Indicates if certificate trust is required. Defaults to True.
         /// The connection will only succeed if the server provided certificate matches a locally trusted certificate, 
         /// or if the OS trusts the certificate with the supplied host name.
         /// </summary>
-        public bool RequireTrustedServers { get; set; }
+        public bool RequireTrustedServers
+        {
+            get => m_requireTrustedServers;
+            set
+            {
+                if (value && !UseSSL)
+                    throw new Exception("Trusted servers can only exist with an SSL connection");
+                m_requireTrustedServers = value;
+            }
+        }
 
         /// <summary>
         /// Indicates that trust can be established through the OS by having a trusted root CA 
         /// and a matching host name. Defaults to True.
         /// </summary>
-        public bool AllowNativeTrust { get; set; }
+        public bool AllowNativeTrust
+        {
+            get => m_allowNativeTrust;
+            set
+            {
+                if (value && !UseSSL)
+                    throw new Exception("Native trust can only exist with an SSL connection");
+                m_allowNativeTrust = value;
+            }
+        }
 
         /// <summary>
         /// Specifies a client certificate that will be used to authenticate this connection. 
@@ -87,9 +100,10 @@ namespace CTP.Net
         /// be automatically generated.
         /// </summary>
         /// <param name="certificate"></param>
-        public void SetClientCertificate(X509Certificate certificate)
+        public void SetCertificateCredentials(X509Certificate certificate)
         {
-            m_clientCertificate = certificate;
+            m_authMode = AuthenticationProtocols.UserCertificate;
+            m_certificateCredentials = certificate;
         }
 
         /// <summary>
@@ -98,6 +112,8 @@ namespace CTP.Net
         /// <param name="trustedCertificates"></param>
         public void SetTrustedCertificates(X509CertificateCollection trustedCertificates)
         {
+            if (!UseSSL && trustedCertificates != null)
+                throw new Exception("trusted certificates can only exist with an SSL connection");
             m_trustedCertificates = trustedCertificates;
         }
 
@@ -128,60 +144,19 @@ namespace CTP.Net
 
         public CtpSession Connect()
         {
-            if (!RequireSSL && RequireTrustedServers)
-            {
-                throw new InvalidOperationException("If RequireTrustedServers is true, RequireSSL must also be true");
-            }
-
             m_certificateTrust = CertificateTrustMode.None;
-
             m_socket = new TcpClient();
             m_socket.SendTimeout = 3000;
             m_socket.ReceiveTimeout = 3000;
             m_socket.Connect(m_remoteEndpoint);
             m_netStream = m_socket.GetStream();
-            if (!RequireSSL)
-            {
-                m_netStream.WriteByte((byte)'N');
-            }
-            else
-            {
-                m_netStream.WriteByte((byte)'1');
-            }
-            m_netStream.Flush();
-
-            char serverMode = (char)m_netStream.ReadByte();
-            bool encrypt;
-            switch (serverMode)
-            {
-                case 'N':
-                    if (RequireSSL)
-                        throw new InvalidOperationException("Server requested No Encryption but the client requires encryption");
-                    encrypt = false;
-                    break;
-                case '1':
-                    encrypt = true;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
 
             string hostname = m_hostName ?? m_remoteEndpoint.Address.ToString();
             m_sslStream = null;
-            if (encrypt)
+            if (UseSSL)
             {
-                Log.Publish(MessageLevel.Debug, "Connect", $"Connecting to {m_remoteEndpoint.ToString()} using SSL, Client Certificate: {m_clientCertificate?.ToString() ?? "None"}");
-                X509CertificateCollection collection = null;
-                if (m_clientCertificate != null)
-                {
-                    collection = new X509CertificateCollection(new[] { m_clientCertificate });
-                    m_sslStream = new SslStream(m_netStream, false, ValidateCertificate, UserCertificateSelectionCallback, EncryptionPolicy.RequireEncryption);
-                }
-                else
-                {
-                    m_sslStream = new SslStream(m_netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
-                }
-                m_sslStream.AuthenticateAsClient(hostname, collection, SslProtocols.Tls12, false);
+                m_sslStream = new SslStream(m_netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
+                m_sslStream.AuthenticateAsClient(hostname, null, SslProtocols.Tls12, false);
                 m_finalStream = m_sslStream;
             }
             else
@@ -194,11 +169,20 @@ namespace CTP.Net
 
             switch (m_authMode)
             {
+                case AuthenticationProtocols.None:
+                    WriteDocument(new AuthNone());
+                    break;
                 case AuthenticationProtocols.SRP:
                     AuthSrp();
                     break;
-                case AuthenticationProtocols.None:
-                    WriteDocument(new AuthNone());
+                case AuthenticationProtocols.UserCertificate:
+                    AuthCertificate();
+                    break;
+                case AuthenticationProtocols.Negotiate:
+                    AuthNegotiate();
+                    break;
+                case AuthenticationProtocols.LDAP:
+                    AuthLDAP();
                     break;
                 default:
                     throw new Exception();
@@ -217,6 +201,21 @@ namespace CTP.Net
         {
             m_ctpStream.Read(-1);
             return new CtpDocument(m_ctpStream.Results.Payload);
+        }
+
+        private void AuthLDAP()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void AuthNegotiate()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void AuthCertificate()
+        {
+            throw new NotImplementedException();
         }
 
         private void AuthSrp()
@@ -273,12 +272,6 @@ namespace CTP.Net
 
             return !RequireTrustedServers || m_certificateTrust != CertificateTrustMode.None;
         }
-
-        private X509Certificate UserCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
-        {
-            return localCertificates[0];
-        }
-
 
     }
 }
