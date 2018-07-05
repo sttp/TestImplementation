@@ -44,8 +44,6 @@ namespace CTP.Net
         private X509Certificate m_clientCertificate;
         private X509CertificateCollection m_trustedCertificates;
         private string m_hostName;
-        private ManualResetEvent m_authenticating;
-        private Exception m_processingException;
         private CtpSession m_clientSession;
         private CertificateTrustMode m_certificateTrust = CertificateTrustMode.None;
         private TcpClient m_socket;
@@ -54,6 +52,7 @@ namespace CTP.Net
         private AuthenticationProtocols m_authMode = AuthenticationProtocols.None;
         private Stream m_finalStream;
         private NetworkCredential m_credentials;
+        private CtpStream m_ctpStream;
 
         public CtpClient()
         {
@@ -129,8 +128,6 @@ namespace CTP.Net
 
         public CtpSession Connect()
         {
-            m_authenticating = new ManualResetEvent(false);
-
             if (!RequireSSL && RequireTrustedServers)
             {
                 throw new InvalidOperationException("If RequireTrustedServers is true, RequireSSL must also be true");
@@ -192,6 +189,9 @@ namespace CTP.Net
                 m_finalStream = m_netStream;
             }
 
+            m_ctpStream = new CtpStream();
+            m_ctpStream.SetActiveStream(m_finalStream);
+
             switch (m_authMode)
             {
                 case AuthenticationProtocols.SRP:
@@ -204,31 +204,19 @@ namespace CTP.Net
                     throw new Exception();
             }
 
-            m_clientSession = new CtpSession(true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
+            m_clientSession = new CtpSession(m_ctpStream, true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
             return m_clientSession;
         }
 
         private void WriteDocument(DocumentObject command)
         {
-            var document = command.ToDocument();
-            byte[] data = new byte[document.Length + 2];
-            if (document.Length > 60000)
-                throw new Exception();
-            data[0] = (byte)(document.Length >> 8);
-            data[1] = (byte)document.Length;
-            document.CopyTo(data, 2);
-            m_finalStream.Write(data, 0, data.Length);
-            m_finalStream.Flush();
+            m_ctpStream.Send(0, command.ToDocument().ToArray());
         }
 
         private CtpDocument ReadDocument()
         {
-            byte[] buffer = new byte[2];
-            m_finalStream.ReadAll(buffer, 0, 2);
-            int length = (buffer[0] << 8) + buffer[1];
-            buffer = new byte[length];
-            m_finalStream.ReadAll(buffer, 0, buffer.Length);
-            return new CtpDocument(buffer);
+            m_ctpStream.Read(-1);
+            return new CtpDocument(m_ctpStream.Results.Payload);
         }
 
         private void AuthSrp()
@@ -246,7 +234,6 @@ namespace CTP.Net
 
             var x = lookup.ComputePassword(identity, password);
             var verifier = param.g.ModPow(x, param.N);
-
             var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
             var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
             var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);

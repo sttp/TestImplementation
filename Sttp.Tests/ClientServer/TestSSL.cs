@@ -72,14 +72,14 @@ namespace Sttp.Tests.ClientServer
         [TestMethod]
         public void TestSrpUser()
         {
-            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348));
+            var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29349));
             listener.Authentication.AddSrpUser("U", "Pass1", "User", "Role1");
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
             var client = new CtpClient();
             client.RequireTrustedServers = false;
-            client.SetHost(IPAddress.Loopback, 29348);
+            client.SetHost(IPAddress.Loopback, 29349);
             client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
             var s = client.Connect();
             Thread.Sleep(100);
@@ -95,6 +95,7 @@ namespace Sttp.Tests.ClientServer
             listener.Start();
 
             var client = new CtpClient();
+            client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
             client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
             var s = client.Connect();

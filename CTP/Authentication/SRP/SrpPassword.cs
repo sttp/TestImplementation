@@ -21,6 +21,7 @@ namespace CTP.SRP
 
         public SrpPassword(byte[] salt, string identifier, SecureString password, int iterations)
         {
+            identifier = identifier.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             Identifier = identifier;
             Salt = (byte[])salt.Clone();
             X = ComputeX(salt, identifier, password, iterations);
@@ -29,6 +30,7 @@ namespace CTP.SRP
 
         public SrpPassword(byte[] salt, string identifier, string password, int iterations)
         {
+            identifier = identifier.Normalize(NormalizationForm.FormKC).Trim().ToLower();
             Identifier = identifier;
             Salt = (byte[])salt.Clone();
             X = ComputeX(salt, identifier, password, iterations);

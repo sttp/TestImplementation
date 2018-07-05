@@ -21,7 +21,7 @@ namespace CTP.SRP
         /// <param name="token"></param>
         public SrpUserCredential(string username, byte[] verification, byte[] salt, SrpStrength srpStrength, int iterations, T token)
         {
-            Verifier = new SrpVerifier(username.Normalize(NormalizationForm.FormKC).Trim(), verification, salt, srpStrength, iterations);
+            Verifier = new SrpVerifier(username.Normalize(NormalizationForm.FormKC).Trim().ToLower(), verification, salt, srpStrength, iterations);
             Token = token;
         }
 
