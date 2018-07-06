@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sttp.Adapters", "Sttp.Adapt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sttp.Adapters.Test", "Sttp.Adapter.Test\Sttp.Adapters.Test.csproj", "{8AB7DFF2-CC15-427F-987B-0A9D8C60FB86}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationServer", "AuthenticationServer\AuthenticationServer.csproj", "{E900AFF5-75E6-4883-86D5-D202E16EA8D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{8AB7DFF2-CC15-427F-987B-0A9D8C60FB86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8AB7DFF2-CC15-427F-987B-0A9D8C60FB86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8AB7DFF2-CC15-427F-987B-0A9D8C60FB86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

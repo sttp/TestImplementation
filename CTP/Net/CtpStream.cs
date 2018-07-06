@@ -410,11 +410,10 @@ namespace CTP.Net
                    (int)buffer[startIndex + 3];
         }
 
+        public void SkipTo(byte[] responseResyncBytes)
+        {
 
-
-
-
-
-
+            //throw new NotImplementedException();
+        }
     }
 }

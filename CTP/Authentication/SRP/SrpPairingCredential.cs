@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace CTP.SRP
 {
@@ -10,32 +8,24 @@ namespace CTP.SRP
 
         public readonly DateTime ExpireTime;
 
-        public readonly string AssignedUserName;
+        public readonly string AssignedCredentialName;
 
         public readonly T Token;
-
-        public readonly bool AllowCertificatePairing;
-
-        public readonly bool AllowSessionPairing;
 
         /// <summary>
         /// Creates a user credential from the provided data.
         /// </summary>
-        /// <param name="pairingID"></param>
+        /// <param name="pairingName"></param>
         /// <param name="paringPin"></param>
-        /// <param name="allowSessionPairing"></param>
         /// <param name="token"></param>
         /// <param name="expireTime"></param>
-        /// <param name="assignedUserName"></param>
-        /// <param name="allowCertificatePairing"></param>
+        /// <param name="assignedCredentialName"></param>
         /// <returns></returns>
-        public SrpPairingCredential(string pairingID, string paringPin, DateTime expireTime, string assignedUserName, bool allowCertificatePairing, bool allowSessionPairing, T token)
+        public SrpPairingCredential(string pairingName, string paringPin, DateTime expireTime, string assignedCredentialName, T token)
         {
-            Verifier = new SrpVerifier(pairingID, paringPin);
+            Verifier = new SrpVerifier(pairingName, paringPin);
             ExpireTime = expireTime;
-            AssignedUserName = assignedUserName;
-            AllowCertificatePairing = allowCertificatePairing;
-            AllowSessionPairing = allowSessionPairing;
+            AssignedCredentialName = assignedCredentialName;
             Token = token;
         }
     }

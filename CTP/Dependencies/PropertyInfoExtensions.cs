@@ -14,7 +14,7 @@ namespace GSF.Reflection
             private static Action<object, object> CompileSetter(PropertyInfo field)
             {
                 if (!field.DeclaringType.IsClass)
-                    throw new ArgumentException("Declaring type must be a class to assign a field", "field");
+                    throw new ArgumentException("Declaring type must be a class to assign a field", nameof(field));
 
                 ParameterExpression targetObject = Expression.Parameter(typeof(object));
                 UnaryExpression targetType = Expression.TypeAs(targetObject, field.DeclaringType);
@@ -63,7 +63,7 @@ namespace GSF.Reflection
             private static Action<object, T> CompileSetter(PropertyInfo field)
             {
                 if (!field.DeclaringType.IsClass)
-                    throw new ArgumentException("Declaring type must be a class to assign a field", "field");
+                    throw new ArgumentException("Declaring type must be a class to assign a field", nameof(field));
 
 
                 ParameterExpression targetObject = Expression.Parameter(typeof(object));

@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Numerics;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Threading;
 using CTP.SRP;
 using GSF.IO;
@@ -105,43 +106,35 @@ namespace CTP.Net
 
             private void AuthSrp(AuthSrp command)
             {
-                var items = m_server.Authentication.FindSrpUser(command);
-
-                int m_state = 0;
-                SrpUserCredential<SrpUserMapping> m_user = items;
-                byte[] privateSessionKey;
+                SrpCredential<SrpUserMapping> credential = m_server.Authentication.LookupCredential(command);
                 SrpConstants param;
                 BigInteger verifier;
                 BigInteger privateB;
                 BigInteger publicB;
 
-                param = SrpConstants.Lookup(m_user.Verifier.SrpStrength);
-                verifier = m_user.Verifier.Verification.ToUnsignedBigInteger();
+                param = SrpConstants.Lookup(credential.Verifier.SrpStrength);
+                verifier = credential.Verifier.VerifierCode.ToUnsignedBigInteger();
                 privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
                 publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
 
-                WriteDocument(new SrpIdentityLookup(m_user.Verifier.SrpStrength, m_user.Verifier.Salt, publicB.ToUnsignedByteArray(), m_user.Verifier.IterationCount));
+                WriteDocument(new SrpAuthResponse(credential.Verifier.SrpStrength, credential.Verifier.Salt, publicB.ToUnsignedByteArray()));
 
-                var clientResponse = (SrpClientResponse)ReadDocument();
+                var clientProof = (SrpClientProof)ReadDocument();
 
-                var publicA = clientResponse.PublicA.ToUnsignedBigInteger();
-                byte[] clientChallenge = clientResponse.ClientChallenge;
-
+                var publicA = clientProof.PublicA.ToUnsignedBigInteger();
                 var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
                 var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
+                var privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_ssl?.LocalCertificate);
 
-                var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, m_ssl?.RemoteCertificate, m_ssl?.LocalCertificate);
-                var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, m_ssl?.RemoteCertificate, m_ssl?.LocalCertificate);
-                privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_ssl?.RemoteCertificate, m_ssl?.LocalCertificate);
+                var proof = clientProof.Decrypt(privateSessionKey);
 
-                if (!challengeClient.SequenceEqual(clientChallenge))
-                    throw new Exception("Failed client challenge");
-                byte[] serverChallenge = challengeServer;
-
-
-                m_session.LoginName = m_user.Token.LoginName;
-                m_session.GrantedRoles.UnionWith(m_user.Token.Roles);
-                WriteDocument(new SrpServerResponse(serverChallenge));
+                m_session.LoginName = credential.Token.LoginName;
+                m_session.SessionToken = proof.UserToken;
+                if (m_session.GrantedRoles == null)
+                    m_session.GrantedRoles.UnionWith(credential.Token.Roles);
+                else
+                    m_session.GrantedRoles.UnionWith(credential.Token.Roles.Intersect(proof.RequestedAccess));
+                WriteDocument(new SrpServerProof(proof.ServerProof));
             }
 
             private void WriteDocument(DocumentObject command)

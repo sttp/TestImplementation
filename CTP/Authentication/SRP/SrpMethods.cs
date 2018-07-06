@@ -26,18 +26,15 @@ namespace CTP.SRP
         {
             using (var sha = SHA512.Create())
             {
-                return sha.ComputeHash(item1.ToUnsignedByteArray(padLength)
-                                            .Concat(item2.ToUnsignedByteArray(padLength))).ToUnsignedBigInteger();
+                return sha.ComputeHash(item1.ToUnsignedByteArray(padLength).Concat(item2.ToUnsignedByteArray(padLength))).ToUnsignedBigInteger();
             }
         }
 
-        internal static byte[] ComputeChallenge(byte challengeType, BigInteger sessionKey, X509Certificate clientCertificate, X509Certificate serverCertificate)
+        internal static byte[] ComputeChallenge(byte challengeType, BigInteger sessionKey, X509Certificate publicCertificate)
         {
             using (var sha = SHA512.Create())
             {
-                return sha.ComputeHash(new byte[] { challengeType }.Concat(sessionKey.ToUnsignedByteArray()
-                                            , clientCertificate?.GetSerialNumber()
-                                            , serverCertificate?.GetSerialNumber()));
+                return sha.ComputeHash(new byte[] { challengeType }.Concat(sessionKey.ToUnsignedByteArray(), publicCertificate?.GetPublicKey()));
             }
         }
 

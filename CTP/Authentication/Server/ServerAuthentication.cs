@@ -8,11 +8,9 @@ namespace CTP.Net
 {
     public class ServerAuthentication
     {
-
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
-        private SortedSet<WindowsGroupMapping> m_windowsGroupUsers = new SortedSet<WindowsGroupMapping>();
-        private SortedSet<WindowsUserMapping> m_windowsUsers = new SortedSet<WindowsUserMapping>();
+
         private SrpServer<SrpUserMapping> m_srpUserDatabase = new SrpServer<SrpUserMapping>();
 
         public ServerAuthentication()
@@ -20,9 +18,9 @@ namespace CTP.Net
 
         }
 
-        public SrpUserCredential<SrpUserMapping> FindSrpUser(AuthSrp user)
+        public SrpCredential<SrpUserMapping> LookupCredential(AuthSrp user)
         {
-            return m_srpUserDatabase.FindUser(user);
+            return m_srpUserDatabase.LookupCredential(user);
         }
 
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
@@ -39,13 +37,13 @@ namespace CTP.Net
         public void AddSrpUser(string username, string password, string loginName, params string[] roles)
         {
             var mapping = new SrpUserMapping(loginName, roles);
-            m_srpUserDatabase.AddUser(username, password, mapping);
+            m_srpUserDatabase.AddCredential(username, password, mapping);
         }
 
         public void AddSrpUser(string username, byte[] verification, byte[] salt, SrpStrength strength, string loginName, params string[] roles)
         {
             var mapping = new SrpUserMapping(loginName, roles);
-            m_srpUserDatabase.AddUser(username, verification, salt, strength, mapping);
+            m_srpUserDatabase.AddCredential(username, verification, salt, strength, mapping);
         }
 
         public void AuthenticateSession(CtpSession session)
@@ -61,19 +59,7 @@ namespace CTP.Net
                     break;
                 }
             }
-
-            
         }
-
-        //private void CertificatePairing(CtpSession session)
-        //{
-        //    if (session.RemoteCertificate != null)
-        //        throw new Exception("A remote certificate must be supplied.");
-        //    var user = m_srpUserDatabase.Pairing(session.FinalStream, session.RemoteCertificate, session.LocalCertificate, out byte[] privateSessionKey);
-        //    AddSelfSignedCertificateUser(session.Ssl.RemoteCertificate, user.Token.LoginName, user.Token.Roles);
-        //    session.LoginName = user.Token.LoginName;
-        //    session.GrantedRoles.UnionWith(user.Token.Roles);
-        //}
 
         //private void SessionPairing(CtpSession session)
         //{
@@ -82,36 +68,5 @@ namespace CTP.Net
         //    session.GrantedRoles.UnionWith(user.Token.Roles);
         //    AddSrpUser(user.AssignedUserName, Convert.ToBase64String(privateSessionKey), user.Token.LoginName, user.Token.Roles);
         //}
-
-        private void WinAsServer(CtpSession client, AuthNegotiate command)
-        {
-            //using (var stream = client.OpenStream(command.StreamID))
-            //{
-            //    client.Win = new NegotiateStream(stream, true);
-            //    try
-            //    {
-            //        client.Win.AuthenticateAsServer(CredentialCache.DefaultNetworkCredentials, ProtectionLevel.EncryptAndSign, TokenImpersonationLevel.Identification);
-
-            //        var identity = client.Win.RemoteIdentity as WindowsIdentity; //When called by the server, returns WindowsIdentity. 
-            //        //If it returns a GenericIdentity, this is because identifier information was not provided by the client. Therefore assigning null is sufficient.
-
-            //        if (identity == null)
-            //        {
-            //            return;
-            //        }
-
-            //        foreach (var user in m_windowsUsers)
-            //        {
-            //            var name = identity.Name;
-            //        }
-
-            //        return;
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        throw;
-            //    }
-            //}
-        }
     }
 }

@@ -5,15 +5,62 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
-using System.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using CTP.Authentication.SRP;
 using CTP.SRP;
 using GSF.Diagnostics;
 
 namespace CTP.Net
 {
+    public class SelfAuthProxy : IAuthProxy
+    {
+        private NetworkCredential m_credential;
+        private string m_credentialName;
+        public SelfAuthProxy(NetworkCredential credential)
+        {
+            m_credential = credential;
+            m_credentialName = m_credential.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
+        }
+
+        public string GetCredentialName()
+        {
+            return m_credentialName;
+        }
+
+        public SrpClientProof Authenticate(byte[] serverProof, SrpAuthResponse authResponse, X509Certificate publicCertificate)
+        {
+            var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
+            var strength = (SrpStrength)authResponse.SrpStrength;
+            var publicB = authResponse.PublicB.ToUnsignedBigInteger();
+            var param = SrpConstants.Lookup(strength);
+            var publicA = BigInteger.ModPow(param.g, privateA, param.N);
+            var x = authResponse.ComputeX(m_credentialName, m_credential.SecurePassword);
+            var verifier = param.g.ModPow(x, param.N);
+            var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
+            var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
+            var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
+            var sessionKey = base1.ModPow(exp1, param.N);
+            var privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, publicCertificate);
+            var clientProof = new ClientProof(null, null, serverProof);
+            return clientProof.Encrypt(publicA.ToUnsignedByteArray(), privateSessionKey);
+        }
+    }
+
+    public interface IAuthProxy
+    {
+        string GetCredentialName();
+        SrpClientProof Authenticate(byte[] serverProof, SrpAuthResponse authResponse, X509Certificate publicCertificate);
+    }
+
+    public enum AuthenticationMode
+    {
+        None,
+        SRP,
+        SessionPairing,
+    }
+
     /// <summary>
     /// Identifies how the client will trust the server
     /// </summary>
@@ -39,7 +86,6 @@ namespace CTP.Net
         private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpClient), MessageClass.Component);
 
         private IPEndPoint m_remoteEndpoint;
-        private X509Certificate m_certificateCredentials;
         private X509CertificateCollection m_trustedCertificates;
         private string m_hostName;
         private CtpSession m_clientSession;
@@ -47,15 +93,16 @@ namespace CTP.Net
         private TcpClient m_socket;
         private NetworkStream m_netStream;
         private SslStream m_sslStream = null;
-        private AuthenticationProtocols m_authMode = AuthenticationProtocols.None;
         private Stream m_finalStream;
-        private NetworkCredential m_credentials;
         private CtpStream m_ctpStream;
         private bool m_requireTrustedServers;
         private bool m_allowNativeTrust;
+        private AuthenticationMode m_authMode;
+        private IAuthProxy m_authProxy;
 
         public CtpClient(bool useSSL)
         {
+            m_authMode = AuthenticationMode.None;
             UseSSL = useSSL;
             AllowNativeTrust = useSSL;
             RequireTrustedServers = useSSL;
@@ -95,18 +142,6 @@ namespace CTP.Net
         }
 
         /// <summary>
-        /// Specifies a client certificate that will be used to authenticate this connection. 
-        /// If leaving this blank and a certificate is required, a self-signed certificate will
-        /// be automatically generated.
-        /// </summary>
-        /// <param name="certificate"></param>
-        public void SetCertificateCredentials(X509Certificate certificate)
-        {
-            m_authMode = AuthenticationProtocols.UserCertificate;
-            m_certificateCredentials = certificate;
-        }
-
-        /// <summary>
         /// Specifies a collection of endpoint certificates that will be used to establish trust. 
         /// </summary>
         /// <param name="trustedCertificates"></param>
@@ -136,10 +171,16 @@ namespace CTP.Net
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
+        public void SetSrpProxy(IAuthProxy authorizationServer)
+        {
+            m_authMode = AuthenticationMode.SRP;
+            m_authProxy = authorizationServer;
+        }
+
         public void SetSrpCredentials(NetworkCredential credentials)
         {
-            m_authMode = AuthenticationProtocols.SRP;
-            m_credentials = credentials;
+            m_authMode = AuthenticationMode.SRP;
+            m_authProxy = new SelfAuthProxy(credentials);
         }
 
         public CtpSession Connect()
@@ -169,20 +210,13 @@ namespace CTP.Net
 
             switch (m_authMode)
             {
-                case AuthenticationProtocols.None:
+                case AuthenticationMode.None:
                     WriteDocument(new AuthNone());
                     break;
-                case AuthenticationProtocols.SRP:
+                case AuthenticationMode.SRP:
                     AuthSrp();
                     break;
-                case AuthenticationProtocols.UserCertificate:
-                    AuthCertificate();
-                    break;
-                case AuthenticationProtocols.Negotiate:
-                    AuthNegotiate();
-                    break;
-                case AuthenticationProtocols.LDAP:
-                    AuthLDAP();
+                case AuthenticationMode.SessionPairing:
                     break;
                 default:
                     throw new Exception();
@@ -203,48 +237,16 @@ namespace CTP.Net
             return new CtpDocument(m_ctpStream.Results.Payload);
         }
 
-        private void AuthLDAP()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void AuthNegotiate()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void AuthCertificate()
-        {
-            throw new NotImplementedException();
-        }
-
         private void AuthSrp()
         {
-            var identity = m_credentials.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            SecureString password = m_credentials.SecurePassword;
-
+            var identity = m_authProxy.GetCredentialName();
             WriteDocument(new AuthSrp(identity));
-            SrpIdentityLookup lookup = (SrpIdentityLookup)ReadDocument();
-            var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
-            var strength = (SrpStrength)lookup.SrpStrength;
-            var publicB = lookup.PublicB.ToUnsignedBigInteger();
-            var param = SrpConstants.Lookup(strength);
-            var publicA = BigInteger.ModPow(param.g, privateA, param.N);
-
-            var x = lookup.ComputePassword(identity, password);
-            var verifier = param.g.ModPow(x, param.N);
-            var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
-            var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
-            var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
-            var sessionKey = base1.ModPow(exp1, param.N);
-            var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
-            var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
-            var privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_sslStream?.LocalCertificate, m_sslStream?.RemoteCertificate);
-            byte[] clientChallenge = challengeClient;
-
-            WriteDocument(new SrpClientResponse(publicA.ToUnsignedByteArray(), clientChallenge));
-            SrpServerResponse cr = (SrpServerResponse)ReadDocument();
-            if (!challengeServer.SequenceEqual(cr.ServerChallenge))
+            SrpAuthResponse authResponse = (SrpAuthResponse)ReadDocument();
+            byte[] serverProof = RNG.CreateSalt(64);
+            var proof = m_authProxy.Authenticate(serverProof, authResponse, m_sslStream?.RemoteCertificate);
+            WriteDocument(proof);
+            SrpServerProof cr = (SrpServerProof)ReadDocument();
+            if (!serverProof.SequenceEqual(cr.ServerProof))
                 throw new Exception("Failed server challenge");
 
         }

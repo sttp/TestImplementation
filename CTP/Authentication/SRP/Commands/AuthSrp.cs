@@ -5,11 +5,11 @@
         : DocumentObject<AuthSrp>
     {
         [DocumentField()]
-        public string UserName { get; private set; }
+        public string CredentialName { get; private set; }
 
-        public AuthSrp(string userName)
+        public AuthSrp(string credentialName)
         {
-            UserName = userName;
+            CredentialName = credentialName;
         }
 
         private AuthSrp()
