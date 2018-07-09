@@ -8,7 +8,6 @@ using System.Numerics;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using CTP.Authentication.SRP;
 using CTP.SRP;
 using GSF.Diagnostics;
 
@@ -29,7 +28,7 @@ namespace CTP.Net
             return m_credentialName;
         }
 
-        public SrpClientProof Authenticate(byte[] serverProof, SrpAuthResponse authResponse, X509Certificate publicCertificate)
+        public AuthClientProof Authenticate(byte[] serverProof, AuthResponse authResponse, X509Certificate publicCertificate)
         {
             var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
             var strength = (SrpStrength)authResponse.SrpStrength;
@@ -51,7 +50,7 @@ namespace CTP.Net
     public interface IAuthProxy
     {
         string GetCredentialName();
-        SrpClientProof Authenticate(byte[] serverProof, SrpAuthResponse authResponse, X509Certificate publicCertificate);
+        AuthClientProof Authenticate(byte[] serverProof, AuthResponse authResponse, X509Certificate publicCertificate);
     }
 
     public enum AuthenticationMode
@@ -240,12 +239,12 @@ namespace CTP.Net
         private void AuthSrp()
         {
             var identity = m_authProxy.GetCredentialName();
-            WriteDocument(new AuthSrp(identity));
-            SrpAuthResponse authResponse = (SrpAuthResponse)ReadDocument();
+            WriteDocument(new Auth(identity));
+            AuthResponse authResponse = (AuthResponse)ReadDocument();
             byte[] serverProof = RNG.CreateSalt(64);
             var proof = m_authProxy.Authenticate(serverProof, authResponse, m_sslStream?.RemoteCertificate);
             WriteDocument(proof);
-            SrpServerProof cr = (SrpServerProof)ReadDocument();
+            AuthServerProof cr = (AuthServerProof)ReadDocument();
             if (!serverProof.SequenceEqual(cr.ServerProof))
                 throw new Exception("Failed server challenge");
 

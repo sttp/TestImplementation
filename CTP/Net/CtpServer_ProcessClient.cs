@@ -87,7 +87,7 @@ namespace CTP.Net
                     switch (doc.RootElement)
                     {
                         case "AuthSrp":
-                            AuthSrp((AuthSrp)doc);
+                            AuthSrp((Auth)doc);
                             break;
                         case "AuthNone":
                             break;
@@ -104,7 +104,7 @@ namespace CTP.Net
                 }
             }
 
-            private void AuthSrp(AuthSrp command)
+            private void AuthSrp(Auth command)
             {
                 SrpCredential<SrpUserMapping> credential = m_server.Authentication.LookupCredential(command);
                 SrpConstants param;
@@ -117,10 +117,9 @@ namespace CTP.Net
                 privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
                 publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
 
-                WriteDocument(new SrpAuthResponse(credential.Verifier.SrpStrength, credential.Verifier.Salt, publicB.ToUnsignedByteArray()));
+                WriteDocument(new AuthResponse(credential.Verifier.SrpStrength, credential.Verifier.Salt, publicB.ToUnsignedByteArray()));
 
-                var clientProof = (SrpClientProof)ReadDocument();
-
+                var clientProof = (AuthClientProof)ReadDocument();
                 var publicA = clientProof.PublicA.ToUnsignedBigInteger();
                 var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
                 var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
@@ -134,7 +133,7 @@ namespace CTP.Net
                     m_session.GrantedRoles.UnionWith(credential.Token.Roles);
                 else
                     m_session.GrantedRoles.UnionWith(credential.Token.Roles.Intersect(proof.RequestedAccess));
-                WriteDocument(new SrpServerProof(proof.ServerProof));
+                WriteDocument(new AuthServerProof(proof.ServerProof));
             }
 
             private void WriteDocument(DocumentObject command)

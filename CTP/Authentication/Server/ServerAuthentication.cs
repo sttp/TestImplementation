@@ -18,7 +18,7 @@ namespace CTP.Net
 
         }
 
-        public SrpCredential<SrpUserMapping> LookupCredential(AuthSrp user)
+        public SrpCredential<SrpUserMapping> LookupCredential(Auth user)
         {
             return m_srpUserDatabase.LookupCredential(user);
         }

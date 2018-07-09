@@ -121,7 +121,7 @@ namespace CTP.SRP
         //    return user;
         //}
 
-        public SrpCredential<T> LookupCredential(AuthSrp command)
+        public SrpCredential<T> LookupCredential(Auth command)
         {
             var identity = command;
             string userName = identity.CredentialName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
