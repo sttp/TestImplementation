@@ -13,19 +13,19 @@ namespace CTP.SRP
         /// <summary>
         /// The bit strength of the SRP algorithm. 
         /// </summary>
-        [DocumentField()] public int SrpStrength { get; private set; }
+        [DocumentField()] public int BitStrength { get; private set; }
         /// <summary>
-        /// The salt to use to randomize the password.
+        /// The salt to use to randomize the credential.
         /// </summary>
         [DocumentField()] public byte[] Salt { get; private set; }
         /// <summary>
-        /// The public key for the key exchange algorithm.
+        /// Public-B for the key exchange algorithm. B = k*v + g^b
         /// </summary>
         [DocumentField()] public byte[] PublicB { get; private set; }
 
-        public AuthResponse(SrpStrength strength, byte[] salt, byte[] publicB)
+        public AuthResponse(SrpStrength bitStrength, byte[] salt, byte[] publicB)
         {
-            SrpStrength = (int)strength;
+            BitStrength = (int)bitStrength;
             Salt = salt;
             PublicB = publicB;
         }

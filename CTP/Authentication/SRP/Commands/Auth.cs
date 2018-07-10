@@ -16,10 +16,10 @@
         /// </summary>
         [DocumentField()] public bool IsPairingCredential { get; private set; }
 
-        public Auth(string credentialName, bool isPairingCrednetial)
+        public Auth(string credentialName, bool isPairingCredential)
         {
             CredentialName = credentialName;
-            IsPairingCredential = isPairingCrednetial;
+            IsPairingCredential = isPairingCredential;
         }
 
         private Auth()

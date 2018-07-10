@@ -13,12 +13,12 @@ namespace CTP.SRP
         : DocumentObject<AuthClientProof>
     {
         /// <summary>
-        /// The Public-A from the SRP algorithm.
+        /// The Public-A from the SRP algorithm. A = g^a
         /// </summary>
         [DocumentField()] public byte[] PublicA { get; private set; }
 
         /// <summary>
-        /// Client proof is Derived Key 1
+        /// Client proof is HMAC(K,'Client Proof')
         /// </summary>
         [DocumentField()] public byte[] ClientProof { get; private set; }
 

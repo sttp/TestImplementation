@@ -45,7 +45,6 @@ namespace CTP.Net
         /// </summary>
         public string LoginName = string.Empty;
 
-        public string SessionToken = string.Empty;
         /// <summary>
         /// The roles granted to this session. Typically this will only be tracked by the server.
         /// </summary>

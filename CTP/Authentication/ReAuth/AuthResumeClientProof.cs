@@ -5,7 +5,7 @@
         : DocumentObject<AuthResumeClientProof>
     {
         /// <summary>
-        /// HMAC(HMAC(Derived Key 4, Ticket Salt), Server Challenge || Client Challenge))
+        /// HMAC(HMAC(HMAC(K, 'Challenge Response Key'),Ticket Salt), Server Challenge || Client Challenge))
         /// </summary>
         [DocumentField()] public byte[] ClientProof { get; private set; }
 
@@ -14,10 +14,17 @@
         /// </summary>
         [DocumentField()] public byte[] ClientChallenge { get; private set; }
 
+        public AuthResumeClientProof(byte[] clientProof, byte[] clientChallenge)
+        {
+            ClientProof = clientProof;
+            ClientChallenge = clientChallenge;
+        }
+
         private AuthResumeClientProof()
         {
 
         }
+
 
         public static explicit operator AuthResumeClientProof(CtpDocument obj)
         {

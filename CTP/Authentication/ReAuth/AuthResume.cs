@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using GSF;
 
 namespace CTP.SRP
 {
@@ -11,39 +15,36 @@ namespace CTP.SRP
     {
         /// <summary>
         /// A ticket that must be presented to the server in order to resume a session.
+        /// This is a CtpDocument that corresponds to <see cref="SessionTicket"/>. 
         /// </summary>
         [DocumentField()] public byte[] SessionTicket { get; private set; }
 
         /// <summary>
-        /// The start time of the ticket or time granted by an authentication server.
+        /// The proof is the HMAC of the ticket contents. HMAC(K,'Ticket Signing')
         /// </summary>
-        [DocumentField()] public DateTime ValidAfter { get; private set; }
+        [DocumentField()] public byte[] SessionTicketHMAC { get; private set; }
 
-        /// <summary>
-        /// The end time of the ticket or time granted by an authentication server.
-        /// </summary>
-        [DocumentField()] public DateTime ValidBefore { get; private set; }
+        public AuthResume(byte[] sessionTicket, byte[] sessionTicketHMAC)
+        {
+            SessionTicket = sessionTicket;
+            SessionTicketHMAC = sessionTicketHMAC;
+        }
 
-        /// <summary>
-        /// The login name to associate with this session.
-        /// </summary>
-        [DocumentField()] public string LoginName { get; private set; }
+        public bool VerifySignature(byte[] ticketSigningKey)
+        {
+            using (var hmac = new HMACSHA256(ticketSigningKey))
+            {
+                return hmac.TransformFinalBlock(SessionTicket, 0, SessionTicket.Length).SequenceEqual(SessionTicketHMAC);
+            }
+        }
 
-        /// <summary>
-        /// The available roles for this ticket.
-        /// </summary>
-        [DocumentField()] public string[] Roles { get; private set; }
-
-        /// <summary>
-        /// Entropy to assign to the ticket. This salt supports an authentication server's 
-        /// ability to create derived session that all have different challenge/response secrets.
-        /// </summary>
-        [DocumentField()] public byte[] TicketSalt { get; private set; }
-
-        /// <summary>
-        /// Using derived key 3, the proof is the HMAC of the ticket contents.
-        /// </summary>
-        [DocumentField()] public byte[] TicketHMAC { get; private set; }
+        public void Sign(byte[] ticketSigningKey)
+        {
+            using (var hmac = new HMACSHA256(ticketSigningKey))
+            {
+                SessionTicketHMAC = hmac.TransformFinalBlock(SessionTicket, 0, SessionTicket.Length);
+            }
+        }
 
         private AuthResume()
         {

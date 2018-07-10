@@ -30,11 +30,11 @@ namespace CTP.SRP
             }
         }
 
-        internal static byte[] ComputeChallenge(byte challengeType, BigInteger sessionKey, X509Certificate publicCertificate)
+        internal static byte[] ComputeChallenge(BigInteger sessionKey, X509Certificate publicCertificate)
         {
             using (var sha = SHA512.Create())
             {
-                return sha.ComputeHash(new byte[] { challengeType }.Concat(sessionKey.ToUnsignedByteArray(), publicCertificate?.GetPublicKey()));
+                return sha.ComputeHash(sessionKey.ToUnsignedByteArray().Concat(publicCertificate?.GetPublicKey()));
             }
         }
 

@@ -31,17 +31,25 @@
             this.btnStart = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtLocalIP = new System.Windows.Forms.TextBox();
-            this.txtLocalPort = new System.Windows.Forms.TextBox();
+            this.txtNegotiatePort = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.txtUsername = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lstDevices = new System.Windows.Forms.ListBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.lstGroups = new System.Windows.Forms.ListBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.lstUsers = new System.Windows.Forms.ListBox();
+            this.btnAddDevice = new System.Windows.Forms.Button();
+            this.btnAddGroup = new System.Windows.Forms.Button();
+            this.btnAddUser = new System.Windows.Forms.Button();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(166, 110);
+            this.btnStart.Location = new System.Drawing.Point(250, 4);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
             this.btnStart.TabIndex = 0;
@@ -64,70 +72,127 @@
             this.txtLocalIP.Size = new System.Drawing.Size(146, 20);
             this.txtLocalIP.TabIndex = 2;
             // 
-            // txtLocalPort
+            // txtNegotiatePort
             // 
-            this.txtLocalPort.Location = new System.Drawing.Point(95, 32);
-            this.txtLocalPort.Name = "txtLocalPort";
-            this.txtLocalPort.Size = new System.Drawing.Size(146, 20);
-            this.txtLocalPort.TabIndex = 4;
+            this.txtNegotiatePort.Location = new System.Drawing.Point(95, 32);
+            this.txtNegotiatePort.Name = "txtNegotiatePort";
+            this.txtNegotiatePort.Size = new System.Drawing.Size(146, 20);
+            this.txtNegotiatePort.TabIndex = 4;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(12, 35);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(55, 13);
+            this.label2.Size = new System.Drawing.Size(75, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Local Port";
+            this.label2.Text = "Negotiate Port";
             // 
-            // txtUsername
+            // groupBox1
             // 
-            this.txtUsername.Location = new System.Drawing.Point(95, 58);
-            this.txtUsername.Name = "txtUsername";
-            this.txtUsername.Size = new System.Drawing.Size(146, 20);
-            this.txtUsername.TabIndex = 6;
+            this.groupBox1.Controls.Add(this.lstDevices);
+            this.groupBox1.Location = new System.Drawing.Point(12, 58);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(229, 254);
+            this.groupBox1.TabIndex = 5;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Devices";
             // 
-            // label3
+            // lstDevices
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 61);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(74, 13);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "Srp Username";
+            this.lstDevices.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstDevices.FormattingEnabled = true;
+            this.lstDevices.Location = new System.Drawing.Point(3, 16);
+            this.lstDevices.Name = "lstDevices";
+            this.lstDevices.Size = new System.Drawing.Size(223, 235);
+            this.lstDevices.TabIndex = 6;
             // 
-            // txtPassword
+            // groupBox2
             // 
-            this.txtPassword.Location = new System.Drawing.Point(95, 84);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(146, 20);
-            this.txtPassword.TabIndex = 8;
+            this.groupBox2.Controls.Add(this.lstGroups);
+            this.groupBox2.Location = new System.Drawing.Point(247, 58);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(174, 254);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Groups";
             // 
-            // label4
+            // lstGroups
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 87);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(72, 13);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "Srp Password";
+            this.lstGroups.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstGroups.FormattingEnabled = true;
+            this.lstGroups.Location = new System.Drawing.Point(3, 16);
+            this.lstGroups.Name = "lstGroups";
+            this.lstGroups.Size = new System.Drawing.Size(168, 235);
+            this.lstGroups.TabIndex = 0;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.lstUsers);
+            this.groupBox3.Location = new System.Drawing.Point(427, 58);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(174, 254);
+            this.groupBox3.TabIndex = 7;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Users";
+            // 
+            // lstUsers
+            // 
+            this.lstUsers.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstUsers.FormattingEnabled = true;
+            this.lstUsers.Location = new System.Drawing.Point(3, 16);
+            this.lstUsers.Name = "lstUsers";
+            this.lstUsers.Size = new System.Drawing.Size(168, 235);
+            this.lstUsers.TabIndex = 0;
+            // 
+            // btnAddDevice
+            // 
+            this.btnAddDevice.Location = new System.Drawing.Point(15, 315);
+            this.btnAddDevice.Name = "btnAddDevice";
+            this.btnAddDevice.Size = new System.Drawing.Size(75, 23);
+            this.btnAddDevice.TabIndex = 8;
+            this.btnAddDevice.Text = "Add";
+            this.btnAddDevice.UseVisualStyleBackColor = true;
+            // 
+            // btnAddGroup
+            // 
+            this.btnAddGroup.Location = new System.Drawing.Point(247, 315);
+            this.btnAddGroup.Name = "btnAddGroup";
+            this.btnAddGroup.Size = new System.Drawing.Size(75, 23);
+            this.btnAddGroup.TabIndex = 9;
+            this.btnAddGroup.Text = "Add";
+            this.btnAddGroup.UseVisualStyleBackColor = true;
+            // 
+            // btnAddUser
+            // 
+            this.btnAddUser.Location = new System.Drawing.Point(427, 315);
+            this.btnAddUser.Name = "btnAddUser";
+            this.btnAddUser.Size = new System.Drawing.Size(75, 23);
+            this.btnAddUser.TabIndex = 10;
+            this.btnAddUser.Text = "Add";
+            this.btnAddUser.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(253, 150);
-            this.Controls.Add(this.txtPassword);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.txtUsername);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.txtLocalPort);
+            this.ClientSize = new System.Drawing.Size(615, 354);
+            this.Controls.Add(this.btnAddUser);
+            this.Controls.Add(this.btnAddGroup);
+            this.Controls.Add(this.btnAddDevice);
+            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.txtNegotiatePort);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.txtLocalIP);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnStart);
             this.Name = "Form1";
             this.Text = "Authentication Server";
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -138,12 +203,17 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtLocalIP;
-        private System.Windows.Forms.TextBox txtLocalPort;
+        private System.Windows.Forms.TextBox txtNegotiatePort;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox txtUsername;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox txtPassword;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.ListBox lstDevices;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ListBox lstGroups;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.ListBox lstUsers;
+        private System.Windows.Forms.Button btnAddDevice;
+        private System.Windows.Forms.Button btnAddGroup;
+        private System.Windows.Forms.Button btnAddUser;
     }
 }
 

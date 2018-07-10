@@ -7,8 +7,10 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Security.Authentication;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Text;
 using System.Threading;
 using CTP.SRP;
 using GSF.IO;
@@ -123,18 +125,34 @@ namespace CTP.Net
                 var publicA = clientProof.PublicA.ToUnsignedBigInteger();
                 var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
                 var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
-                var privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, m_ssl?.LocalCertificate);
+                var privateSessionKey = SrpMethods.ComputeChallenge(sessionKey, m_ssl?.LocalCertificate);
 
-                var proof = clientProof.Decrypt(privateSessionKey);
+                var cproof = CreateKey(privateSessionKey, "Client Proof");
+                var sproof = CreateKey(privateSessionKey, "Server Proof");
+
+                if (!clientProof.ClientProof.SequenceEqual(cproof))
+                {
+                    throw new Exception("Authorization failed");
+                }
+
+                var serverProof = new AuthServerProof(sproof, null, null, null, null);
 
                 m_session.LoginName = credential.Token.LoginName;
-                m_session.SessionToken = proof.UserToken;
-                if (m_session.GrantedRoles == null)
-                    m_session.GrantedRoles.UnionWith(credential.Token.Roles);
-                else
-                    m_session.GrantedRoles.UnionWith(credential.Token.Roles.Intersect(proof.RequestedAccess));
-                WriteDocument(new AuthServerProof(proof.ServerProof));
+                m_session.GrantedRoles.UnionWith(credential.Token.Roles);
+
+                WriteDocument(serverProof);
             }
+
+
+            private byte[] CreateKey(byte[] privateSessionKey, string keyName)
+            {
+                using (var hmac = new HMACSHA256(privateSessionKey))
+                {
+                    byte[] name = Encoding.ASCII.GetBytes(keyName);
+                    return hmac.ComputeHash(name, 0, name.Length);
+                }
+            }
+
 
             private void WriteDocument(DocumentObject command)
             {

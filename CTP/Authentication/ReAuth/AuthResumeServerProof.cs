@@ -5,7 +5,7 @@
         : DocumentObject<AuthResumeServerProof>
     {
         /// <summary>
-        /// HMAC(HMAC(Derived Key 4, Ticket Salt), Client Challenge || Server Challenge))
+        /// HMAC(HMAC(HMAC(K, 'Challenge Response Key'),Ticket Salt), Client Challenge || Server Challenge))
         /// </summary>
         [DocumentField()] public byte[] ServerProof { get; private set; }
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using CTP.Authentication;
+using CTP.Net;
 using CTP.Serialization;
 
 namespace CTP.SRP
@@ -11,7 +13,7 @@ namespace CTP.SRP
         : DocumentObject<AuthServerProof>
     {
         /// <summary>
-        /// The server proof is Derived Key 2
+        /// The server proof is HMAC(K,'Client Proof')
         /// </summary>
         [DocumentField()] public byte[] ServerProof { get; private set; }
 
@@ -25,21 +27,25 @@ namespace CTP.SRP
         /// <summary>
         /// The approved start time of the ticket. The client may generate a derived ticket with a date after this date.
         /// </summary>
-        [DocumentField()] public DateTime ValidAfter { get; private set; }
+        [DocumentField()] public DateTime? ValidAfter { get; private set; }
 
         /// <summary>
         /// The approved end time of the ticket. The client may generate a derived ticket with a date before this date.
         /// </summary>
-        [DocumentField()] public DateTime ValidBefore { get; private set; }
+        [DocumentField()] public DateTime? ValidBefore { get; private set; }
 
         /// <summary>
         /// The available roles for this ticket. The client may specify null to grant all roles, or may select the roles is wishes to grant in a derived ticket.
         /// </summary>
         [DocumentField()] public string[] Roles { get; private set; }
 
-        public AuthServerProof(byte[] serverProof)
+        public AuthServerProof(byte[] serverProof, byte[] sessionTicket, DateTime? validAfter, DateTime? validBefore, string[] roles)
         {
             ServerProof = serverProof;
+            SessionTicket = sessionTicket;
+            ValidAfter = validAfter;
+            ValidBefore = validBefore;
+            Roles = roles;
         }
 
         private AuthServerProof()
@@ -50,6 +56,12 @@ namespace CTP.SRP
         public static explicit operator AuthServerProof(CtpDocument obj)
         {
             return FromDocument(obj);
+        }
+
+        public ClientResumeTicket CreateResumeTicket(string credentialName, byte[] ticketSigningKey, byte[] challengeResonseKey)
+        {
+            var st = new SessionTicket(SessionTicket, credentialName, RNG.CreateSalt(32), ValidAfter ?? DateTime.UtcNow.Date.AddDays(-1), ValidBefore ?? DateTime.UtcNow.Date.AddDays(2), Roles);
+            return st.CreateClientTicket(ticketSigningKey, challengeResonseKey);
         }
     }
 }
