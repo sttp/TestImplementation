@@ -11,6 +11,11 @@ namespace CTP.SRP
         /// </summary>
         [DocumentField()] public byte[] ServerChallenge { get; private set; }
 
+        public AuthResumeResponse(byte[] serverChallenge)
+        {
+            ServerChallenge = serverChallenge;
+        }
+
         private AuthResumeResponse()
         {
 

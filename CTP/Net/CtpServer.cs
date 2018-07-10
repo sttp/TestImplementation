@@ -49,6 +49,7 @@ namespace CTP.Net
         public X509Certificate2 DefaultCertificate { get; private set; } = null;
 
         public bool DefaultAllowConnections { get; private set; } = true;
+        public ResumeSessionKeys ResumeKeys { get; private set; } = new ResumeSessionKeys();
 
         public void SetDefaultOptions(bool allowConnections, X509Certificate2 defaultCertificate = null)
         {

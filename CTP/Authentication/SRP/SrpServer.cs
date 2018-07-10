@@ -75,52 +75,6 @@ namespace CTP.SRP
             }
         }
 
-
-
-        //public SrpPairingCredential<T> Pairing(Stream stream, X509Certificate serverCertificate, out byte[] privateSessionKey)
-        //{
-        //    string userName = stream.ReadString();
-        //    userName = userName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-
-        //    if (!m_pairingCredentials.TryGetValue(userName, out var user))
-        //    {
-        //        Console.WriteLine("User Not Found, Generating erroneous data");
-        //        user = new SrpPairingCredential<T>(userName, Guid.NewGuid().ToString(), DateTime.MinValue, "", default(T));
-        //    }
-        //    else
-        //    {
-        //        m_pairingCredentials.Remove(userName); //Pairing is only allowed once per session.
-        //    }
-
-        //    var param = SrpConstants.Lookup(user.Verifier.SrpStrength);
-        //    var verifier = user.Verifier.VerifierCode.ToUnsignedBigInteger();
-        //    var privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
-        //    var publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
-        //    stream.Write((ushort)user.Verifier.SrpStrength);
-        //    stream.WriteWithLength(user.Verifier.Salt);
-        //    stream.WriteWithLength(publicB.ToUnsignedByteArray());
-        //    stream.Flush();
-
-        //    var publicA = stream.ReadBytes().ToUnsignedBigInteger();
-        //    byte[] clientChallenge = stream.ReadBytes();
-
-        //    var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
-        //    var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
-
-        //    var challengeServer = SrpMethods.ComputeChallenge(1, sessionKey, serverCertificate);
-        //    var challengeClient = SrpMethods.ComputeChallenge(2, sessionKey, serverCertificate);
-        //    privateSessionKey = SrpMethods.ComputeChallenge(3, sessionKey, serverCertificate);
-
-        //    if (!challengeClient.SequenceEqual(clientChallenge))
-        //        throw new Exception("Failed client challenge");
-        //    byte[] serverChallenge = challengeServer;
-
-        //    stream.WriteWithLength(serverChallenge);
-        //    stream.Flush();
-
-        //    return user;
-        //}
-
         public SrpCredential<T> LookupCredential(Auth command)
         {
             var identity = command;

@@ -59,7 +59,7 @@ namespace Sttp.Tests.ClientServer
             var client = new CtpClient(true);
             client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29349);
-            client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
+            client.SetCredentials(new NetworkCredential("U", "Pass1"));
             var s = client.Connect();
             Thread.Sleep(100);
         }
@@ -76,7 +76,7 @@ namespace Sttp.Tests.ClientServer
             var client = new CtpClient(true);
             client.RequireTrustedServers = false;
             client.SetHost(IPAddress.Loopback, 29348);
-            client.SetSrpCredentials(new NetworkCredential("U", "Pass1"));
+            client.SetCredentials(new NetworkCredential("U", "Pass1"));
             var s = client.Connect();
             Thread.Sleep(100);
         }

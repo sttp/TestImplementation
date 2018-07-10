@@ -93,7 +93,7 @@ namespace CTP.Authentication
             return ms.ToArray();
         }
 
-        public static SessionTicket TryDecrypt(byte[] ticket, byte[] serverKeyLookup, byte[] serverCipherKey, byte[] serverMacKey)
+        public static EncryptedSessionTicketDetails TryDecrypt(byte[] ticket, byte[] serverKeyLookup, byte[] serverCipherKey, byte[] serverMacKey)
         {
             if (ticket[0] != serverKeyLookup.Length)
                 return null;
@@ -123,7 +123,7 @@ namespace CTP.Authentication
                 using (var enc = aes.CreateDecryptor())
                 {
                     var cipher = enc.TransformFinalBlock(ticket, 1 + serverKeyLookup.Length + 16, ticket.Length - 32 - 1 - serverKeyLookup.Length - 16);
-                    return (SessionTicket)new CtpDocument(cipher);
+                    return (EncryptedSessionTicketDetails)new CtpDocument(cipher);
                 }
             }
         }

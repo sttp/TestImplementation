@@ -1,127 +1,15 @@
 ﻿using System;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using CTP.SRP;
 using GSF.Diagnostics;
 
 namespace CTP.Net
 {
-    public class ClientResumeTicket
-    {
-        public byte[] Ticket;
-        public byte[] TicketHMAC;
-        public byte[] ChallengeResponseKey;
-
-        public ClientResumeTicket(byte[] ticket, byte[] ticketHmac, byte[] challengeResponseKey)
-        {
-            Ticket = ticket;
-            TicketHMAC = ticketHmac;
-            ChallengeResponseKey = challengeResponseKey;
-        }
-    }
-
-    public class LocalAuthorization : IAuthorizationService
-    {
-        private NetworkCredential m_credentials;
-        private ClientResumeTicket m_resumeCredentials;
-
-        public LocalAuthorization(NetworkCredential credentials)
-        {
-            m_credentials = credentials;
-        }
-
-        public void Authenticate(CtpStream stream, SslStream sslStream)
-        {
-            if (m_resumeCredentials == null)
-            {
-                WriteDocument(stream, new Auth(m_credentials.UserName, false));
-                AuthResponse authResponse = (AuthResponse)ReadDocument(stream);
-                var credentialName = m_credentials.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-                var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
-                var strength = (SrpStrength)authResponse.BitStrength;
-                var publicB = authResponse.PublicB.ToUnsignedBigInteger();
-                var param = SrpConstants.Lookup(strength);
-                var publicA = BigInteger.ModPow(param.g, privateA, param.N);
-                var x = authResponse.ComputeX(credentialName, m_credentials.SecurePassword);
-                var verifier = param.g.ModPow(x, param.N);
-                var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
-                var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
-                var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
-                var sessionKey = base1.ModPow(exp1, param.N);
-                var privateSessionKey = SrpMethods.ComputeChallenge(sessionKey, sslStream?.RemoteCertificate);
-                var proof = new AuthClientProof(publicA.ToByteArray(), CreateKey(privateSessionKey, "Client Proof"));
-                WriteDocument(stream, proof);
-                AuthServerProof cr = (AuthServerProof)ReadDocument(stream);
-
-                byte[] serverProof = CreateKey(privateSessionKey, "Server Proof");
-                if (!serverProof.SequenceEqual(cr.ServerProof))
-                    throw new Exception("Failed server challenge");
-
-                if ((cr.SessionTicket?.Length ?? 0) > 0)
-                {
-                    m_resumeCredentials = cr.CreateResumeTicket(m_credentials.UserName, CreateKey(privateSessionKey, "Ticket Signing"), CreateKey(privateSessionKey, "Challenge Response"));
-                }
-            }
-            else
-            {
-                var auth = new AuthResume(m_resumeCredentials.Ticket, m_resumeCredentials.TicketHMAC);
-                WriteDocument(stream, auth);
-                var authResponse = (AuthResumeResponse)ReadDocument(stream);
-
-                byte[] clientChallenge = RNG.CreateSalt(32);
-                byte[] cproof;
-                byte[] sproof;
-                using (var hmac = new HMACSHA256(m_resumeCredentials.ChallengeResponseKey))
-                {
-                    cproof = hmac.ComputeHash(authResponse.ServerChallenge.Concat(clientChallenge));
-                    sproof = hmac.ComputeHash(clientChallenge.Concat(authResponse.ServerChallenge));
-                }
-                var rcp = new AuthResumeClientProof(cproof, clientChallenge);
-                WriteDocument(stream, rcp);
-                var rsp = (AuthResumeServerProof)ReadDocument(stream);
-
-                if (!rsp.ServerProof.SequenceEqual(sproof))
-                {
-                    throw new Exception("Authorization Failed");
-                }
-            }
-        }
-
-        private byte[] CreateKey(byte[] privateSessionKey, string keyName)
-        {
-            using (var hmac = new HMACSHA256(privateSessionKey))
-            {
-                byte[] name = Encoding.ASCII.GetBytes(keyName);
-                return hmac.ComputeHash(name, 0, name.Length);
-            }
-        }
-
-        private void WriteDocument(CtpStream stream, DocumentObject command)
-        {
-            stream.Send(0, command.ToDocument().ToArray());
-        }
-
-        private CtpDocument ReadDocument(CtpStream stream)
-        {
-            stream.Read(-1);
-            return new CtpDocument(stream.Results.Payload);
-        }
-    }
-
-    public interface IAuthorizationService
-    {
-        void Authenticate(CtpStream stream, SslStream sslStream);
-    }
-
     public class CtpClient
     {
         private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpClient), MessageClass.Component);
@@ -138,8 +26,7 @@ namespace CTP.Net
         private CtpStream m_ctpStream;
         private bool m_requireTrustedServers;
         private bool m_allowNativeTrust;
-
-        private IAuthorizationService m_authorizationService;
+        private IAuthenticationService m_authenticationService;
 
         public CtpClient(bool useSSL)
         {
@@ -211,9 +98,9 @@ namespace CTP.Net
             m_remoteEndpoint = new IPEndPoint(address, port);
         }
 
-        public void SetSrpCredentials(NetworkCredential credentials)
+        public void SetCredentials(NetworkCredential credentials)
         {
-            m_authorizationService = new LocalAuthorization(credentials);
+            m_authenticationService = new LocalAuthentication(credentials);
         }
 
         public CtpSession Connect()
@@ -241,7 +128,7 @@ namespace CTP.Net
             m_ctpStream = new CtpStream();
             m_ctpStream.SetActiveStream(m_finalStream);
 
-            m_authorizationService.Authenticate(m_ctpStream, m_sslStream);
+            m_authenticationService.Authenticate(m_ctpStream, m_sslStream);
 
             m_clientSession = new CtpSession(m_ctpStream, true, m_certificateTrust, m_socket, m_netStream, m_sslStream);
             return m_clientSession;

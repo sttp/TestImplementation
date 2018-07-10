@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Cryptography;
-using GSF;
 
 namespace CTP.SRP
 {
@@ -30,6 +27,11 @@ namespace CTP.SRP
             SessionTicketHMAC = sessionTicketHMAC;
         }
 
+        private AuthResume()
+        {
+
+        }
+
         public bool VerifySignature(byte[] ticketSigningKey)
         {
             using (var hmac = new HMACSHA256(ticketSigningKey))
@@ -44,11 +46,6 @@ namespace CTP.SRP
             {
                 SessionTicketHMAC = hmac.TransformFinalBlock(SessionTicket, 0, SessionTicket.Length);
             }
-        }
-
-        private AuthResume()
-        {
-
         }
 
         public static explicit operator AuthResume(CtpDocument obj)

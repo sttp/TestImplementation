@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using CTP.SRP;
-using GSF.IO;
-using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
@@ -88,9 +80,13 @@ namespace CTP.Net
                     var doc = ReadDocument();
                     switch (doc.RootElement)
                     {
-                        case "AuthSrp":
-                            AuthSrp((Auth)doc);
+                        case "Auth":
+                            var user = SrpServerAuth.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (Auth)doc, m_ctpStream, m_ssl);
+                            m_session.LoginName = user.LoginName;
+                            m_session.GrantedRoles.UnionWith(user.Roles);
                             break;
+                        case "AuthResume":
+
                         case "AuthNone":
                             break;
                         default:
@@ -104,59 +100,6 @@ namespace CTP.Net
                 {
 
                 }
-            }
-
-            private void AuthSrp(Auth command)
-            {
-                SrpCredential<SrpUserMapping> credential = m_server.Authentication.LookupCredential(command);
-                SrpConstants param;
-                BigInteger verifier;
-                BigInteger privateB;
-                BigInteger publicB;
-
-                param = SrpConstants.Lookup(credential.Verifier.SrpStrength);
-                verifier = credential.Verifier.VerifierCode.ToUnsignedBigInteger();
-                privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
-                publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
-
-                WriteDocument(new AuthResponse(credential.Verifier.SrpStrength, credential.Verifier.Salt, publicB.ToUnsignedByteArray()));
-
-                var clientProof = (AuthClientProof)ReadDocument();
-                var publicA = clientProof.PublicA.ToUnsignedBigInteger();
-                var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
-                var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
-                var privateSessionKey = SrpMethods.ComputeChallenge(sessionKey, m_ssl?.LocalCertificate);
-
-                var cproof = CreateKey(privateSessionKey, "Client Proof");
-                var sproof = CreateKey(privateSessionKey, "Server Proof");
-
-                if (!clientProof.ClientProof.SequenceEqual(cproof))
-                {
-                    throw new Exception("Authorization failed");
-                }
-
-                var serverProof = new AuthServerProof(sproof, null, null, null, null);
-
-                m_session.LoginName = credential.Token.LoginName;
-                m_session.GrantedRoles.UnionWith(credential.Token.Roles);
-
-                WriteDocument(serverProof);
-            }
-
-
-            private byte[] CreateKey(byte[] privateSessionKey, string keyName)
-            {
-                using (var hmac = new HMACSHA256(privateSessionKey))
-                {
-                    byte[] name = Encoding.ASCII.GetBytes(keyName);
-                    return hmac.ComputeHash(name, 0, name.Length);
-                }
-            }
-
-
-            private void WriteDocument(DocumentObject command)
-            {
-                m_ctpStream.Send(0, command.ToDocument().ToArray());
             }
 
             private CtpDocument ReadDocument()

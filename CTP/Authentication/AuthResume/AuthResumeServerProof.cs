@@ -9,6 +9,11 @@
         /// </summary>
         [DocumentField()] public byte[] ServerProof { get; private set; }
 
+        public AuthResumeServerProof(byte[] serverProof)
+        {
+            ServerProof = serverProof;
+        }
+
         private AuthResumeServerProof()
         {
 
