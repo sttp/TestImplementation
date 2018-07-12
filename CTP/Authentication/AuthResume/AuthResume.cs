@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Security.Cryptography;
-
+﻿
 namespace CTP.SRP
 {
     /// <summary>
@@ -12,40 +10,18 @@ namespace CTP.SRP
     {
         /// <summary>
         /// A ticket that must be presented to the server in order to resume a session.
-        /// This is a CtpDocument that corresponds to <see cref="SessionTicket"/>. 
+        /// This is a CtpDocument that corresponds to <see cref="Ticket"/>. 
         /// </summary>
-        [DocumentField()] public byte[] SessionTicket { get; private set; }
+        [DocumentField()] public byte[] Ticket { get; private set; }
 
-        /// <summary>
-        /// The proof is the HMAC of the ticket contents. HMAC(K,'Ticket Signing')
-        /// </summary>
-        [DocumentField()] public byte[] SessionTicketHMAC { get; private set; }
-
-        public AuthResume(byte[] sessionTicket, byte[] sessionTicketHMAC)
+        public AuthResume(byte[] ticket)
         {
-            SessionTicket = sessionTicket;
-            SessionTicketHMAC = sessionTicketHMAC;
+            Ticket = ticket;
         }
 
         private AuthResume()
         {
 
-        }
-
-        public bool VerifySignature(byte[] ticketSigningKey)
-        {
-            using (var hmac = new HMACSHA256(ticketSigningKey))
-            {
-                return hmac.TransformFinalBlock(SessionTicket, 0, SessionTicket.Length).SequenceEqual(SessionTicketHMAC);
-            }
-        }
-
-        public void Sign(byte[] ticketSigningKey)
-        {
-            using (var hmac = new HMACSHA256(ticketSigningKey))
-            {
-                SessionTicketHMAC = hmac.TransformFinalBlock(SessionTicket, 0, SessionTicket.Length);
-            }
         }
 
         public static explicit operator AuthResume(CtpDocument obj)

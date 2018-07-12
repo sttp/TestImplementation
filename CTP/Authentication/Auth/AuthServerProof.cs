@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using CTP.Authentication;
 using CTP.Net;
-using CTP.Serialization;
 
 namespace CTP.SRP
 {
@@ -13,38 +13,51 @@ namespace CTP.SRP
         : DocumentObject<AuthServerProof>
     {
         /// <summary>
-        /// The server proof is HMAC(K,'Client Proof')
+        /// The server proof is HMAC(K,'Server Proof')
         /// </summary>
         [DocumentField()] public byte[] ServerProof { get; private set; }
 
         /// <summary>
-        /// A ticket that must be presented to the server in order to resume this session.
-        /// Tickets can be as simple as a 1 byte identifier, or as complicated as encrypting the session data. 
-        /// The session data for simple tickets must be stored on the server, complex tickets can offload this information to the client.
+        /// Identifies the master secret for the ticket.
         /// </summary>
-        [DocumentField()] public byte[] SessionTicket { get; private set; }
+        [DocumentField()] public uint MasterSecretID { get; private set; }
 
         /// <summary>
-        /// The approved start time of the ticket. The client may generate a derived ticket with a date after this date.
+        /// Gets the number of seconds that remain before this ticket expires. 
+        /// This field is used to shorten the expiration time if desired. This allows for
+        /// clocks to not be tightly time synchronized.
         /// </summary>
-        [DocumentField()] public DateTime? ValidAfter { get; private set; }
+        [DocumentField()] public uint RemainingSeconds { get; private set; }
 
         /// <summary>
-        /// The approved end time of the ticket. The client may generate a derived ticket with a date before this date.
+        /// Gets the number of minutes this ticket is valid.
         /// </summary>
-        [DocumentField()] public DateTime? ValidBefore { get; private set; }
+        [DocumentField()] public uint ExpireTimeMinutes { get; private set; }
 
         /// <summary>
-        /// The available roles for this ticket. The client may specify null to grant all roles, or may select the roles is wishes to grant in a derived ticket.
+        /// A sequence number that identifies which credential name created this ticket.
+        /// </summary>
+        [DocumentField()] public uint CredentialNameID { get; private set; }
+
+        /// <summary>
+        /// The key that can be used to sign session secrets. This field is XOR'd with 
+        /// HMAC(K,'Ticket Key')
+        /// </summary>
+        [DocumentField()] public byte[] EncryptedTicketSigningKey { get; private set; }
+
+        /// <summary>
+        /// String names for each of the roles this credential possesses.
         /// </summary>
         [DocumentField()] public string[] Roles { get; private set; }
 
-        public AuthServerProof(byte[] serverProof, byte[] sessionTicket, DateTime? validAfter, DateTime? validBefore, string[] roles)
+        public AuthServerProof(byte[] serverProof, uint masterSecretID, uint remainingSeconds, uint expireTimeMinutes, uint credentialNameID, byte[] encryptedTicketSigningKey, string[] roles)
         {
             ServerProof = serverProof;
-            SessionTicket = sessionTicket;
-            ValidAfter = validAfter;
-            ValidBefore = validBefore;
+            MasterSecretID = masterSecretID;
+            RemainingSeconds = remainingSeconds;
+            ExpireTimeMinutes = expireTimeMinutes;
+            CredentialNameID = credentialNameID;
+            EncryptedTicketSigningKey = encryptedTicketSigningKey;
             Roles = roles;
         }
 
@@ -58,10 +71,26 @@ namespace CTP.SRP
             return FromDocument(obj);
         }
 
-        public ClientResumeTicket CreateResumeTicket(string credentialName, byte[] ticketSigningKey, byte[] challengeResonseKey)
+        public ClientResumeTicket CreateResumeTicket(byte[] srpK, string loginName, string[] selectedRoles)
         {
-            var st = new SessionTicket(SessionTicket, credentialName, RNG.CreateSalt(32), ValidAfter ?? DateTime.UtcNow.Date.AddDays(-1), ValidBefore ?? DateTime.UtcNow.Date.AddDays(2), Roles);
-            return st.CreateClientTicket(ticketSigningKey, challengeResonseKey);
+            byte[] ticketKey = Security.ComputeHMAC(srpK, "Ticket Key");
+            byte[] signingKey = Security.XOR(ticketKey, EncryptedTicketSigningKey);
+            List<uint> roles = new List<uint>();
+            if (selectedRoles != null)
+            {
+                foreach (var role in selectedRoles)
+                {
+                    int id = Array.IndexOf(Roles, role);
+                    if (id < 0)
+                        throw new ArgumentException("Role is not granted by this ticket", nameof(selectedRoles));
+                    roles.Add((uint)id);
+                }
+            }
+
+            var t = new Ticket(MasterSecretID, RemainingSeconds, ExpireTimeMinutes, CredentialNameID, roles, loginName, null);
+            t.Sign(signingKey);
+            return new ClientResumeTicket(t.ToArray(), Security.ComputeHMAC(signingKey, t.Signature));
         }
+
     }
 }

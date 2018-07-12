@@ -1,16 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Numerics;
-using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using CTP.SRP;
-using GSF.IO;
 using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
@@ -49,7 +42,8 @@ namespace CTP.Net
         public X509Certificate2 DefaultCertificate { get; private set; } = null;
 
         public bool DefaultAllowConnections { get; private set; } = true;
-        public ResumeSessionKeys ResumeKeys { get; private set; } = new ResumeSessionKeys();
+
+        public MasterSecretDatabase ResumeKeys { get; private set; } = new MasterSecretDatabase();
 
         public void SetDefaultOptions(bool allowConnections, X509Certificate2 defaultCertificate = null)
         {

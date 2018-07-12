@@ -9,28 +9,22 @@ namespace CTP.Net
 {
     public static class ResumeServerAuth
     {
-        public static void Authenticate(ResumeSessionKeys keyLookup, AuthResume authResume, CtpStream stream, SslStream sslStream)
+        public static void Authenticate(MasterSecretDatabase keyLookup, AuthResume authResume, CtpStream stream, SslStream sslStream)
         {
-            if (keyLookup.TryDecryptTicket(authResume, out EncryptedSessionTicketDetails serverSession, out SessionTicket ticket))
+            var ticket = new Ticket(authResume.Ticket);
+            var key = keyLookup.TryGetKey(ticket.MasterSecretID);
+            byte[] ticketKey = key.GetSignatureKey(ticket.CredentialNameID);
+            if (ticket.VerifySignature(ticketKey))
             {
-                if (ticket.ValidAfter < serverSession.ValidAfter)
-                    throw new Exception("Bad Ticket");
-                if (ticket.ValidBefore > serverSession.ValidBefore)
-                    throw new Exception("Bad Ticket");
-
-                byte[] serverChallenge = RNG.CreateSalt(32);
+                byte[] serverChallenge = Security.CreateSalt(32);
                 AuthResumeResponse response = new AuthResumeResponse(serverChallenge);
                 WriteDocument(stream, response);
 
+                byte[] challengeKey = Security.ComputeHMAC(ticketKey, ticket.Signature);
+
                 var cp = (AuthResumeClientProof)ReadDocument(stream);
-                byte[] cproof;
-                byte[] sproof;
-                using (var hmac = new HMACSHA256(serverSession.ChallengeResponseKey))
-                {
-                    hmac.Key = hmac.ComputeHash(ticket.TicketSalt);
-                    cproof = hmac.ComputeHash(serverChallenge.Concat(cp.ClientChallenge, sslStream.RemoteCertificate.GetSerialNumber()));
-                    sproof = hmac.ComputeHash(cp.ClientChallenge.Concat(serverChallenge, sslStream.RemoteCertificate.GetSerialNumber()));
-                }
+                byte[] cproof = Security.ComputeHMAC(challengeKey, serverChallenge.Concat(cp.ClientChallenge, sslStream?.RemoteCertificate?.GetSerialNumber()));
+                byte[] sproof = Security.ComputeHMAC(challengeKey, cp.ClientChallenge.Concat(serverChallenge, sslStream?.RemoteCertificate?.GetSerialNumber()));
 
                 if (!cp.ClientProof.SequenceEqual(cproof))
                 {

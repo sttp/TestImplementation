@@ -10,9 +10,9 @@ namespace CTP.Net
 {
     public static class SrpServerAuth
     {
-        public static SrpUserMapping AuthSrp(ResumeSessionKeys resumeKeys, ServerAuthentication serverAuth, Auth command, CtpStream stream, SslStream ssl)
+        public static SrpCredential AuthSrp(MasterSecretDatabase resumeKeys, ServerAuthentication serverAuth, Auth command, CtpStream stream, SslStream ssl)
         {
-            SrpCredential<SrpUserMapping> credential = serverAuth.LookupCredential(command);
+            SrpCredential credential = serverAuth.LookupCredential(command);
             SrpConstants param;
             BigInteger verifier;
             BigInteger privateB;
@@ -20,7 +20,7 @@ namespace CTP.Net
 
             param = SrpConstants.Lookup(credential.Verifier.SrpStrength);
             verifier = credential.Verifier.VerifierCode.ToUnsignedBigInteger();
-            privateB = RNG.CreateSalt(32).ToUnsignedBigInteger();
+            privateB = Security.CreateSalt(32).ToUnsignedBigInteger();
             publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
 
             WriteDocument(stream, new AuthResponse(credential.Verifier.SrpStrength, credential.Verifier.Salt, publicB.ToUnsignedByteArray()));
@@ -31,32 +31,24 @@ namespace CTP.Net
             var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N);
             var privateSessionKey = SrpMethods.ComputeChallenge(sessionKey, ssl?.LocalCertificate);
 
-            var cproof = CreateKey(privateSessionKey, "Client Proof");
-            var sproof = CreateKey(privateSessionKey, "Server Proof");
+            var cproof = Security.ComputeHMAC(privateSessionKey, "Client Proof");
+            var sproof = Security.ComputeHMAC(privateSessionKey, "Server Proof");
 
             if (!clientProof.ClientProof.SequenceEqual(cproof))
             {
                 throw new Exception("Authorization failed");
             }
 
-            var tkey = CreateKey(privateSessionKey, "Ticket Signing");
-            var ckey = CreateKey(privateSessionKey, "Challenge Response Key");
-
-            var serverProof = resumeKeys.CreateServerProofAndTicket(sproof, command.CredentialName, credential.Token.Roles, tkey, ckey);
+            var key = resumeKeys.GetShortKey();
+            var signingKey = key.GetSignatureKey(credential.CredentialNameID);
+            signingKey = Security.XOR(signingKey, Security.ComputeHMAC(privateSessionKey, "Ticket Key"));
+            var serverProof = new AuthServerProof(sproof, key.ID, key.RemainingSeconds, (uint)key.ExpireMinutes, credential.CredentialNameID, signingKey, credential.Roles);
 
             WriteDocument(stream, serverProof);
 
-            return credential.Token;
+            return credential;
         }
 
-        private static byte[] CreateKey(byte[] privateSessionKey, string keyName)
-        {
-            using (var hmac = new HMACSHA256(privateSessionKey))
-            {
-                byte[] name = Encoding.ASCII.GetBytes(keyName);
-                return hmac.ComputeHash(name, 0, name.Length);
-            }
-        }
 
         private static void WriteDocument(CtpStream stream, DocumentObject command)
         {

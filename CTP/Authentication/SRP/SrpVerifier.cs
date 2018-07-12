@@ -50,7 +50,7 @@ namespace CTP.SRP
         public SrpVerifier(string credentialName, string secret)
         {
             CredentialName = credentialName.Normalize(NormalizationForm.FormKC).Trim();
-            Salt = RNG.CreateSalt(64);
+            Salt = Security.CreateSalt(64);
             SrpStrength = SrpStrength.Bits2048;
             var pwd = new SrpSecret(Salt, CredentialName, secret);
             VerifierCode = pwd.CreateVerifier(SrpStrength).VerifierCode;

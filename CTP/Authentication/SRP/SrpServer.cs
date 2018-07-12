@@ -5,28 +5,30 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using CTP.Net;
 using GSF.IO;
 
 namespace CTP.SRP
 {
-    public class SrpServer<T>
+    public class SrpServer
     {
-        private Dictionary<string, SrpCredential<T>> m_credentials = new Dictionary<string, SrpCredential<T>>();
-        private Dictionary<string, SrpPairingCredential<T>> m_pairingCredentials = new Dictionary<string, SrpPairingCredential<T>>();
+        private int m_credentialNameID;
+        private Dictionary<string, SrpCredential> m_credentials = new Dictionary<string, SrpCredential>();
+        private Dictionary<string, SrpPairingCredential> m_pairingCredentials = new Dictionary<string, SrpPairingCredential>();
 
-        private byte[] m_srpDefaultSalt = RNG.CreateSalt(64);
+        private byte[] m_srpDefaultSalt = Security.CreateSalt(64);
         private SrpStrength m_srpStrength = SrpStrength.Bits1024;
 
         public void SetSrpDefaults(byte[] salt, SrpStrength strength)
         {
-            m_srpDefaultSalt = salt ?? RNG.CreateSalt(64);
+            m_srpDefaultSalt = salt ?? Security.CreateSalt(64);
             m_srpStrength = strength;
         }
 
-        public void AddPairingUser(string pairingID, string paringPin, DateTime expireTime, string assignedCredentialName, T token)
+        public void AddPairingUser(string pairingID, string paringPin, DateTime expireTime, string assignedCredentialName, string loginName, string[] roles)
         {
-            var credentials = new SrpPairingCredential<T>(pairingID, paringPin, expireTime, assignedCredentialName, token);
+            var credentials = new SrpPairingCredential(pairingID, paringPin, expireTime, assignedCredentialName, loginName, roles);
             m_pairingCredentials[credentials.Verifier.CredentialName] = credentials;
         }
 
@@ -35,11 +37,12 @@ namespace CTP.SRP
         /// </summary>
         /// <param name="credentialName"></param>
         /// <param name="secret"></param>
-        /// <param name="token"></param>
+        /// <param name="loginName"></param>
+        /// <param name="roles"></param>
         /// <returns></returns>
-        public void AddCredential(string credentialName, string secret, T token)
+        public void AddCredential(string credentialName, string secret, string loginName, string[] roles)
         {
-            var credentials = new SrpCredential<T>(credentialName, secret, GenerateSalt(credentialName), m_srpStrength, token);
+            var credentials = new SrpCredential((uint)Interlocked.Increment(ref m_credentialNameID), credentialName, secret, GenerateSalt(credentialName), m_srpStrength, loginName, roles);
             m_credentials[credentials.Verifier.CredentialName.ToLower()] = credentials;
         }
 
@@ -50,10 +53,11 @@ namespace CTP.SRP
         /// <param name="salt"></param>
         /// <param name="verifierCode"></param>
         /// <param name="srpStrength"></param>
-        /// <param name="token"></param>
-        public void AddCredential(string credentialName, byte[] verifierCode, byte[] salt, SrpStrength srpStrength, T token)
+        /// <param name="loginName"></param>
+        /// <param name="roles"></param>
+        public void AddCredential(string credentialName, byte[] verifierCode, byte[] salt, SrpStrength srpStrength, string loginName, string[] roles)
         {
-            var credentials = new SrpCredential<T>(credentialName, verifierCode, salt, srpStrength, token);
+            var credentials = new SrpCredential((uint)Interlocked.Increment(ref m_credentialNameID), credentialName, verifierCode, salt, srpStrength, loginName, roles);
             m_credentials[credentials.Verifier.CredentialName.ToLower()] = credentials;
         }
 
@@ -75,7 +79,7 @@ namespace CTP.SRP
             }
         }
 
-        public SrpCredential<T> LookupCredential(Auth command)
+        public SrpCredential LookupCredential(Auth command)
         {
             var identity = command;
             string userName = identity.CredentialName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
@@ -83,7 +87,7 @@ namespace CTP.SRP
             if (!m_credentials.TryGetValue(userName, out var user))
             {
                 Console.WriteLine("User Not Found, Generating erroneous data");
-                user = new SrpCredential<T>(userName, Guid.NewGuid().ToString(), GenerateSalt(userName), m_srpStrength, default(T));
+                user = new SrpCredential(0, userName, Guid.NewGuid().ToString(), GenerateSalt(userName), m_srpStrength, null, null);
             }
 
             return user;

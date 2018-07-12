@@ -3,13 +3,11 @@
     public class ClientResumeTicket
     {
         public byte[] Ticket;
-        public byte[] TicketHMAC;
         public byte[] ChallengeResponseKey;
 
-        public ClientResumeTicket(byte[] ticket, byte[] ticketHmac, byte[] challengeResponseKey)
+        public ClientResumeTicket(byte[] ticket, byte[] challengeResponseKey)
         {
             Ticket = ticket;
-            TicketHMAC = ticketHmac;
             ChallengeResponseKey = challengeResponseKey;
         }
     }

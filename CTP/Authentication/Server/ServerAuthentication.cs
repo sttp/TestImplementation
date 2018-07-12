@@ -11,14 +11,14 @@ namespace CTP.Net
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
 
-        private SrpServer<SrpUserMapping> m_srpUserDatabase = new SrpServer<SrpUserMapping>();
+        private SrpServer m_srpUserDatabase = new SrpServer();
 
         public ServerAuthentication()
         {
 
         }
 
-        public SrpCredential<SrpUserMapping> LookupCredential(Auth user)
+        public SrpCredential LookupCredential(Auth user)
         {
             return m_srpUserDatabase.LookupCredential(user);
         }
@@ -36,14 +36,12 @@ namespace CTP.Net
 
         public void AddSrpUser(string username, string password, string loginName, params string[] roles)
         {
-            var mapping = new SrpUserMapping(loginName, roles);
-            m_srpUserDatabase.AddCredential(username, password, mapping);
+            m_srpUserDatabase.AddCredential(username, password, loginName, roles);
         }
 
         public void AddSrpUser(string username, byte[] verification, byte[] salt, SrpStrength strength, string loginName, params string[] roles)
         {
-            var mapping = new SrpUserMapping(loginName, roles);
-            m_srpUserDatabase.AddCredential(username, verification, salt, strength, mapping);
+            m_srpUserDatabase.AddCredential(username, verification, salt, strength, loginName, roles);
         }
 
         public void AuthenticateSession(CtpSession session)

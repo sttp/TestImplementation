@@ -10,11 +10,11 @@ namespace CTP.Net
     {
         public static void Authenticate(ClientResumeTicket resumeCredentials, CtpStream stream, SslStream sslStream)
         {
-            var auth = new AuthResume(resumeCredentials.Ticket, resumeCredentials.TicketHMAC);
+            var auth = new AuthResume(resumeCredentials.Ticket);
             WriteDocument(stream, auth);
             var authResponse = (AuthResumeResponse)ReadDocument(stream);
 
-            byte[] clientChallenge = RNG.CreateSalt(32);
+            byte[] clientChallenge = Security.CreateSalt(32);
             byte[] cproof;
             byte[] sproof;
             using (var hmac = new HMACSHA256(resumeCredentials.ChallengeResponseKey))

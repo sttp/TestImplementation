@@ -16,7 +16,7 @@ namespace CTP.Net
             WriteDocument(stream, new Auth(credentials.UserName, false));
             AuthResponse authResponse = (AuthResponse)ReadDocument(stream);
             var credentialName = credentials.UserName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
-            var privateA = RNG.CreateSalt(32).ToUnsignedBigInteger();
+            var privateA = Security.CreateSalt(32).ToUnsignedBigInteger();
             var strength = (SrpStrength)authResponse.BitStrength;
             var publicB = authResponse.PublicB.ToUnsignedBigInteger();
             var param = SrpConstants.Lookup(strength);
@@ -28,17 +28,17 @@ namespace CTP.Net
             var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
             var sessionKey = base1.ModPow(exp1, param.N);
             var privateSessionKey = SrpMethods.ComputeChallenge(sessionKey, sslStream?.RemoteCertificate);
-            var proof = new AuthClientProof(publicA.ToByteArray(), CreateKey(privateSessionKey, "Client Proof"));
+            var proof = new AuthClientProof(publicA.ToByteArray(), Security.ComputeHMAC(privateSessionKey, "Client Proof"));
             WriteDocument(stream, proof);
             AuthServerProof cr = (AuthServerProof)ReadDocument(stream);
 
-            byte[] serverProof = CreateKey(privateSessionKey, "Server Proof");
+            byte[] serverProof = Security.ComputeHMAC(privateSessionKey, "Server Proof");
             if (!serverProof.SequenceEqual(cr.ServerProof))
                 throw new Exception("Failed server challenge");
 
-            if ((cr.SessionTicket?.Length ?? 0) > 0)
+            if ((cr.EncryptedTicketSigningKey?.Length ?? 0) > 0)
             {
-                return cr.CreateResumeTicket(credentials.UserName, CreateKey(privateSessionKey, "Ticket Signing"), CreateKey(privateSessionKey, "Challenge Response"));
+                return cr.CreateResumeTicket(privateSessionKey, credentials.UserName, cr.Roles);
             }
 
             return null;
@@ -53,15 +53,6 @@ namespace CTP.Net
         {
             stream.Read(-1);
             return new CtpDocument(stream.Results.Payload);
-        }
-
-        private static byte[] CreateKey(byte[] privateSessionKey, string keyName)
-        {
-            using (var hmac = new HMACSHA256(privateSessionKey))
-            {
-                byte[] name = Encoding.ASCII.GetBytes(keyName);
-                return hmac.ComputeHash(name, 0, name.Length);
-            }
         }
 
     }
