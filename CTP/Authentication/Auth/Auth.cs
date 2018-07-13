@@ -11,15 +11,22 @@
         /// The name associated with the credential that will be used for authentication
         /// </summary>
         [DocumentField()] public string CredentialName { get; private set; }
-        /// <summary>
-        /// Indicates if this credential is a onetime use pairing credential.
-        /// </summary>
-        [DocumentField()] public bool IsPairingCredential { get; private set; }
 
-        public Auth(string credentialName, bool isPairingCredential)
+        /// <summary>
+        /// This will request that the stored key will be changed at the next authentication
+        /// </summary>
+        [DocumentField()] public bool RotateKey { get; private set; }
+
+        /// <summary>
+        /// This will request that the stored password will be changed at the next authentication.
+        /// </summary>
+        [DocumentField()] public bool ChangePassword { get; private set; }
+
+        public Auth(string credentialName, bool rotateKey, bool changePassword)
         {
             CredentialName = credentialName;
-            IsPairingCredential = isPairingCredential;
+            RotateKey = rotateKey;
+            ChangePassword = changePassword;
         }
 
         private Auth()

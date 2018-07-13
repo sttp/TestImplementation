@@ -9,16 +9,27 @@ namespace CTP
 {
     public static class Security
     {
-        public static byte[] ComputeHMAC(byte[] key, byte[] data)
+        public static byte[] ComputeHMAC(byte[] key, byte[] data, int length = 64)
         {
-            using (var hmac = new HMACSHA256(key))
-                return hmac.ComputeHash(data);
+            if (length < 0 || length > 64)
+                throw new ArgumentException("Invalid hmac length", nameof(length));
+
+            using (var hmac = new HMACSHA512(key))
+            {
+                byte[] mac = hmac.ComputeHash(data);
+                if (length < 64)
+                {
+                    byte[] rv = new byte[length];
+                    Array.Copy(mac,0,rv,0,rv.Length);
+                    return rv;
+                }
+                return mac;
+            }
         }
 
-        public static byte[] ComputeHMAC(byte[] key, string data)
+        public static byte[] ComputeHMAC(byte[] key, string data, int length = 64)
         {
-            using (var hmac = new HMACSHA256(key))
-                return hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+            return ComputeHMAC(key, Encoding.UTF8.GetBytes(data), length);
         }
 
         public static byte[] CreateSalt(int bytes)

@@ -19,8 +19,8 @@ namespace CTP.Net
             byte[] sproof;
             using (var hmac = new HMACSHA256(resumeCredentials.ChallengeResponseKey))
             {
-                cproof = hmac.ComputeHash(authResponse.ServerChallenge.Concat(clientChallenge, sslStream.RemoteCertificate.GetSerialNumber()));
-                sproof = hmac.ComputeHash(clientChallenge.Concat(authResponse.ServerChallenge, sslStream.RemoteCertificate.GetSerialNumber()));
+                cproof = hmac.ComputeHash(authResponse.ServerChallenge.Concat(clientChallenge, sslStream?.RemoteCertificate?.GetSerialNumber()));
+                sproof = hmac.ComputeHash(clientChallenge.Concat(authResponse.ServerChallenge, sslStream?.RemoteCertificate?.GetSerialNumber()));
             }
             var rcp = new AuthResumeClientProof(cproof, clientChallenge);
             WriteDocument(stream, rcp);

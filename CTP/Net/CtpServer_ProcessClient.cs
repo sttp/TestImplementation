@@ -75,13 +75,13 @@ namespace CTP.Net
                     m_ctpStream.SetActiveStream(m_finalStream);
 
                     m_session = new CtpSession(m_ctpStream, false, CertificateTrustMode.None, socket, netStream, m_ssl);
-                    m_server.Authentication.AuthenticateSession(m_session);
+                    m_server.Authentication.AuthenticateSessionByIP(m_session);
 
                     var doc = ReadDocument();
                     switch (doc.RootElement)
                     {
                         case "Auth":
-                            var user = SrpServerAuth.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (Auth)doc, m_ctpStream, m_ssl);
+                            var user = SrpAuthServer.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (Auth)doc, m_ctpStream, m_ssl);
                             m_session.LoginName = user.LoginName;
                             m_session.GrantedRoles.UnionWith(user.Roles);
                             break;

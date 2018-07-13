@@ -33,7 +33,6 @@ namespace CTP.Net
 
                 var sp = new AuthResumeServerProof(sproof);
                 WriteDocument(stream, sp);
-
             }
         }
 

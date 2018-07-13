@@ -19,7 +19,7 @@ namespace CTP.Net
         {
             if (m_resumeCredentials == null)
             {
-                m_resumeCredentials = SrpClientAuth.Authenticate(m_credentials, stream, sslStream);
+                m_resumeCredentials = SrpAuthClient.Authenticate(m_credentials, stream, sslStream);
             }
             else
             {
