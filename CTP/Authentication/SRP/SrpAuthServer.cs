@@ -22,7 +22,7 @@ namespace CTP.Net
             privateB = Security.CreateSalt(32).ToUnsignedBigInteger();
             publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
 
-            WriteDocument(stream, new AuthResponse(credential.SrpStrength, credential.Salt, publicB.ToUnsignedByteArray()));
+            WriteDocument(stream, new AuthResponse(credential.SrpStrength, credential.Salt, publicB.ToUnsignedByteArray(), false));
 
             var clientProof = (AuthClientProof)ReadDocument(stream);
             var publicA = clientProof.PublicA.ToUnsignedBigInteger();
@@ -51,7 +51,7 @@ namespace CTP.Net
                 byte[] x = Security.ComputeHMAC(privateSessionKey, "Private Key");
                 byte[] s = Security.ComputeHMAC(privateSessionKey, "Salt Key");
                 byte[] v = param.g.ModPow(x.ToUnsignedBigInteger(), param.N).ToUnsignedByteArray();
-                serverAuth.AddCredential(true, -1, credential.CredentialName, v, s, SrpStrength.Bits2048, credential.LoginName, credential.Roles);
+                serverAuth.AddCredential(new SrpCredential(credential.CredentialName, v, s, SrpStrength.Bits2048, credential.LoginName, credential.Roles));
             }
             return credential;
         }

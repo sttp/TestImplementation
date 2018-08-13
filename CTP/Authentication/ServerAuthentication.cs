@@ -9,6 +9,7 @@ using CTP.SRP;
 
 namespace CTP.Net
 {
+
     public class ServerAuthentication
     {
         //Must be sorted because longest match is used to match an IP address

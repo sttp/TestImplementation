@@ -48,58 +48,58 @@ namespace CTP.SRP
         /// <summary>
         /// Gets if the user is allowed to change their password.
         /// </summary>
-        public bool CannotChangePassword;
+        public bool CannotChangePassword { get; private set; }
 
         /// <summary>
         /// Gets if the user can rotate a key.
         /// </summary>
-        public bool CannotChangeKey;
+        public bool CannotChangeKey { get; private set; }
 
         /// <summary>
         /// Indicates that the user must change their credentials on the next login attempt. 
         /// </summary>
-        public bool MustChangeCredentials;
+        public bool MustChangeCredentials { get; private set; }
 
         /// <summary>
         /// Gets if the server will require that the password be provided so it can validate that it meets
         /// a specific password policy.
         /// </summary>
-        public bool MustValidatesPasswordComplexity;
+        public bool MustValidatesPasswordComplexity { get; private set; }
 
         /// <summary>
         /// Indicates if the stored credentials for this user are a specified password or a randomly generated key.
         /// </summary>
-        public bool IsPassword;
+        public bool IsPassword { get; private set; }
 
         /// <summary>
         /// Gets the date that the password was last modified.
         /// </summary>
-        public DateTime PasswordLastChangedDate;
+        public DateTime PasswordLastChangedDate { get; private set; }
 
         /// <summary>
         /// Gets if this account is enabled.
         /// </summary>
-        public bool IsEnabled;
+        public bool IsEnabled { get; private set; }
 
         /// <summary>
         /// Gets if this account is locked out.
         /// </summary>
-        public bool IsLockedOut;
+        public bool IsLockedOut { get; private set; }
 
         /// <summary>
         /// Gets the number of failed attempts before an account is locked out.
         /// </summary>
-        public int MaxInvalidAttempts;
+        public int MaxInvalidAttempts { get; private set; }
 
         /// <summary>
         /// Gets the time before resetting the failed attempts.
         /// </summary>
-        public int LockoutTimerSeconds;
+        public int LockoutTimerSeconds { get; private set; }
 
         /// <summary>
         /// Gets the time delay before an account is automatically unlocked.
         /// </summary>
-        public int ResetDurationSeconds;
+        public int ResetDurationSeconds { get; private set; }
 
 
         public SrpCredential Clone(uint id)
@@ -146,6 +146,6 @@ namespace CTP.SRP
             Roles = roles;
         }
 
-        
+
     }
 }
