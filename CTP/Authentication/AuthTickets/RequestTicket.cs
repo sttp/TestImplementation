@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace CTP.Authentication
 {
     /// <summary>
-    /// Requests a ticket from an authentication service
+    /// Requests a ticket from an authorization service
     /// </summary>
     [DocumentName("RequestTicket")]
     public class RequestTicket
