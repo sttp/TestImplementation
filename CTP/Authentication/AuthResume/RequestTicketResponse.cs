@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using CTP.Authentication;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using CTP.Net;
 
-namespace CTP.SRP
+namespace CTP.Authentication
 {
     /// <summary>
-    /// Proves to the client proof that the server is not an imposer, and specifies a ticket that can be used to resume this session at a later date.
+    /// Requests a ticket that can be used to resume a session.
     /// </summary>
-    [DocumentName("AuthServerProof")]
-    public class AuthServerProof
-        : DocumentObject<AuthServerProof>
+    [DocumentName("RequestTicketResponse")]
+    public class RequestTicketResponse
+        : DocumentObject<RequestTicketResponse>
     {
-        /// <summary>
-        /// The server proof is HMAC(K,'Server Proof')
-        /// </summary>
-        [DocumentField()] public byte[] ServerProof { get; private set; }
-
         /// <summary>
         /// Identifies the master secret for the ticket.
         /// </summary>
@@ -40,41 +37,38 @@ namespace CTP.SRP
         [DocumentField()] public uint CredentialNameID { get; private set; }
 
         /// <summary>
-        /// The key that can be used to sign session secrets. This field is XOR'd with 
-        /// HMAC(K,'Ticket Key')
+        /// The key that can be used to sign session secrets. 
         /// </summary>
-        [DocumentField()] public byte[] EncryptedTicketSigningKey { get; private set; }
+        [DocumentField()] public byte[] TicketSigningKey { get; private set; }
 
         /// <summary>
         /// String names for each of the roles this credential possesses.
         /// </summary>
         [DocumentField()] public string[] Roles { get; private set; }
 
-        public AuthServerProof(byte[] serverProof, uint masterSecretID, uint remainingSeconds, uint expireTimeMinutes, uint credentialNameID, byte[] encryptedTicketSigningKey, string[] roles)
+        public RequestTicketResponse(uint masterSecretID, uint remainingSeconds, uint expireTimeMinutes, uint credentialNameID, byte[] ticketSigningKey, string[] roles)
         {
-            ServerProof = serverProof;
             MasterSecretID = masterSecretID;
             RemainingSeconds = remainingSeconds;
             ExpireTimeMinutes = expireTimeMinutes;
             CredentialNameID = credentialNameID;
-            EncryptedTicketSigningKey = encryptedTicketSigningKey;
+            TicketSigningKey = ticketSigningKey;
             Roles = roles;
         }
 
-        private AuthServerProof()
+        private RequestTicketResponse()
         {
 
         }
-
-        public static explicit operator AuthServerProof(CtpDocument obj)
+        
+        public static explicit operator RequestTicketResponse(CtpDocument obj)
         {
             return FromDocument(obj);
         }
 
-        public ClientResumeTicket CreateResumeTicket(byte[] srpK, string loginName, string[] selectedRoles)
+
+        public ClientResumeTicket CreateResumeTicket(string loginName, string[] selectedRoles)
         {
-            byte[] ticketKey = Security.ComputeHMAC(srpK, "Ticket Key");
-            byte[] signingKey = Security.XOR(ticketKey, EncryptedTicketSigningKey);
             List<uint> roles = new List<uint>();
             if (selectedRoles != null)
             {
@@ -88,9 +82,10 @@ namespace CTP.SRP
             }
 
             var t = new Ticket(MasterSecretID, RemainingSeconds, ExpireTimeMinutes, CredentialNameID, roles, loginName, null);
-            t.Sign(signingKey);
-            return new ClientResumeTicket(t.ToArray(), Security.ComputeHMAC(signingKey, t.Signature));
+            t.Sign(TicketSigningKey);
+            return new ClientResumeTicket(t.ToArray(), Security.ComputeHMAC(TicketSigningKey, t.Signature));
         }
 
     }
+}
 }

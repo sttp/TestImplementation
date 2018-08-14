@@ -65,10 +65,10 @@ namespace CTP.Net
             m_credentials.Remove(credentialName.Normalize(NormalizationForm.FormKC).Trim().ToLower());
         }
 
-        public SrpCredential LookupCredential(Auth command)
+        public SrpCredential LookupCredential(CertExchange command)
         {
             var identity = command;
-            string userName = identity.CredentialName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
+            string userName = identity.AccountName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
 
             if (!m_credentials.TryGetValue(userName, out var user))
             {

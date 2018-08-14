@@ -33,7 +33,7 @@ namespace CTP.SRP
     /// <summary>
     /// Supplies the base constants of SRP (Secure Remote Password) as supplied in RFC 5054 Appendix A.
     /// </summary>
-    internal class SrpConstants
+    public class SrpConstants
     {
         /// <summary>
         /// Prime

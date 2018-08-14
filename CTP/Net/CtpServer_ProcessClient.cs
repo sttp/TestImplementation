@@ -81,7 +81,7 @@ namespace CTP.Net
                     switch (doc.RootElement)
                     {
                         case "Auth":
-                            var user = SrpAuthServer.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (Auth)doc, m_ctpStream, m_ssl);
+                            var user = SrpAuthServer.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (CertExchange)doc, m_ctpStream, m_ssl);
                             m_session.LoginName = user.LoginName;
                             m_session.GrantedRoles.UnionWith(user.Roles);
                             break;
@@ -92,7 +92,6 @@ namespace CTP.Net
                         default:
                             throw new Exception();
                     }
-
 
                     m_server.OnSessionCompleted(m_session);
                 }

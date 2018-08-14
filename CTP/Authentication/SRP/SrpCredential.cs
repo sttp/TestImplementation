@@ -101,7 +101,6 @@ namespace CTP.SRP
         /// </summary>
         public int ResetDurationSeconds { get; private set; }
 
-
         public SrpCredential Clone(uint id)
         {
             throw new NotImplementedException();
@@ -145,7 +144,6 @@ namespace CTP.SRP
             LoginName = loginName;
             Roles = roles;
         }
-
 
     }
 }

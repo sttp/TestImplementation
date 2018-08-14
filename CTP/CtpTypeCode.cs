@@ -6,7 +6,7 @@
         Int64 = 1,              // 8-bytes Signed Value (An unsigned value exceeding Int64.MaxValue will throw an overflow exception)
         Single = 2,             // 4-bytes
         Double = 3,             // 8-bytes
-        CtpTime = 4,            // 12-bytes Sends time in a number of different formats, adds flags for leap seconds.
+        CtpTime = 4,            // 8-bytes Sends time in a number of different formats, adds flags for leap seconds.
         Boolean = 5,            // 1-bit True or False
         Guid = 6,               // 16-bytes
         String = 7,             // A UTF-8 encoded string value. The size limit is not expressly stated, but is bound by the maximum fragmented packet size.

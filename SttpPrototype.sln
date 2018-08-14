@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sttp.Adapters.Test", "Sttp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationServer", "AuthenticationServer\AuthenticationServer.csproj", "{E900AFF5-75E6-4883-86D5-D202E16EA8D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountManager", "CredentialManager\AccountManager.csproj", "{1AA80417-5A71-441A-B02E-EB3677838C80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountManagerClient", "AccountManagerClient\AccountManagerClient.csproj", "{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +66,14 @@ Global
 		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E900AFF5-75E6-4883-86D5-D202E16EA8D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AA80417-5A71-441A-B02E-EB3677838C80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AA80417-5A71-441A-B02E-EB3677838C80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AA80417-5A71-441A-B02E-EB3677838C80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AA80417-5A71-441A-B02E-EB3677838C80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

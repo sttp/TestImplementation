@@ -20,7 +20,7 @@ namespace CTP.Net
         private TcpListener m_listener;
         private bool m_shutdown;
         private AsyncCallback m_onAccept;
-        private IPEndPoint m_listenEndpoint;
+        private IPEndPoint m_listenEndpoint; 
         public event SessionCompletedEventHandler SessionCompleted;
         private bool m_useSSL;
 

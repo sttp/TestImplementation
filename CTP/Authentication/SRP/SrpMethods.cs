@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CTP.SRP
 {
-    internal static class SrpMethods
+    public static class SrpMethods
     {
         public static byte[] ComputeV(SrpStrength strength, byte[] x)
         {
@@ -35,31 +35,24 @@ namespace CTP.SRP
             }
         }
 
-        public static byte[] ComputeX(byte[] salt, string identifier, string secret)
+        public static byte[] ComputeX(byte[] salt, string secret)
         {
-            return ComputeX(salt, identifier, Encoding.UTF8.GetBytes(secret));
+            return ComputeX(salt, Encoding.UTF8.GetBytes(secret));
         }
-        public static byte[] ComputeX(byte[] salt, string identifier, SecureString secret)
+        public static byte[] ComputeX(byte[] salt, SecureString secret)
         {
-            return ComputeX(salt, identifier, secret.ToUTF8());
+            return ComputeX(salt, secret.ToUTF8());
         }
 
-        private static byte[] ComputeX(byte[] salt, string identifier, byte[] secret)
+        private static byte[] ComputeX(byte[] salt, byte[] secret)
         {
-            byte[] inner = null;
             try
             {
                 using (var sha = SHA512.Create())
                 {
-                    byte[] idBytes = Encoding.UTF8.GetBytes(identifier);
-                    inner = new byte[idBytes.Length + 1 + secret.Length];
                     byte[] outer = new byte[salt.Length + 512 / 8];
-                    idBytes.CopyTo(inner, 0);
-                    inner[idBytes.Length] = (byte)':';
-                    secret.CopyTo(inner, idBytes.Length + 1);
-                    sha.ComputeHash(inner).CopyTo(outer, salt.Length);
+                    sha.ComputeHash(secret).CopyTo(outer, salt.Length);
                     salt.CopyTo(outer, 0);
-
                     return sha.ComputeHash(outer);
                 }
             }
@@ -67,8 +60,6 @@ namespace CTP.SRP
             {
                 if (secret != null)
                     Array.Clear(secret, 0, secret.Length);
-                if (inner != null)
-                    Array.Clear(inner, 0, inner.Length);
             }
         }
 
