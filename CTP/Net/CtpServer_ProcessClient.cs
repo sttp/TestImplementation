@@ -97,7 +97,7 @@ namespace CTP.Net
                 }
                 catch (Exception e)
                 {
-
+                    m_ssl.RemoteCertificate.GetCertHash()
                 }
             }
 

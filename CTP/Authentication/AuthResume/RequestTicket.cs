@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace CTP.Authentication
 {
     /// <summary>
-    /// Requests a ticket that can be used to resume a session.
+    /// Requests a ticket from an authentication service
     /// </summary>
     [DocumentName("RequestTicket")]
     public class RequestTicket

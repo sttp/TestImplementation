@@ -3,144 +3,193 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using GSF;
+using GSF.IO;
 
 namespace CTP.Authentication
 {
     public class Ticket
     {
         /// <summary>
-        /// Identifies the master secret the server uses to generate the crypto keys.
+        /// Gets the UTC time this ticket is valid from.
         /// </summary>
-        public uint MasterSecretID;
+        public readonly DateTime ValidFrom;
 
         /// <summary>
-        /// Gets the number of minutes that have already elapsed in this master key.
+        /// Gets the UTC time this ticket is valid until.
         /// </summary>
-        public uint RemainingSeconds;
-
-        /// <summary>
-        /// Gets the number of minutes this key is valid for.
-        /// </summary>
-        public uint ExpireTimeMinutes;
-
-        /// <summary>
-        /// A sequence number that identifies which credential name created this ticket.
-        /// </summary>
-        public uint CredentialNameID;
-
-        /// <summary>
-        /// IDs associated with the roles granted by this ticket.
-        /// </summary>
-        public List<uint> Roles;
+        public readonly DateTime ValidTo;
 
         /// <summary>
         /// A string that identifies the user of this ticket.
         /// </summary>
-        public string LoginName;
+        public readonly string LoginName;
 
         /// <summary>
-        /// The signature of this ticket
+        /// The list of roles granted by this ticket.
         /// </summary>
-        public byte[] Signature;
+        public readonly List<string> Roles;
 
-        public Ticket(uint masterSecretID, uint remainingSeconds, uint expireTimeMinutes, uint credentialNameID, List<uint> roles, string loginName, byte[] signature)
+        /// <summary>
+        /// The list of approved certificates that the remote resource may use. 
+        /// This is the SHA-256 hash of the public key.
+        /// </summary>
+        public readonly List<byte[]> ApprovedClientCertificates;
+
+        /// <summary>
+        /// The thumbprint of the authorization service's certificate.
+        /// </summary>
+        public byte[] AuthorizationThumbprint { get; private set; }
+
+        /// <summary>
+        /// The signature of the ticket.
+        /// </summary>
+        public byte[] AuthorizationSignature { get; private set; }
+
+        public Ticket(DateTime validFrom, DateTime validTo, string loginName, List<string> roles, List<byte[]> approvedClientCertificates)
         {
-            MasterSecretID = masterSecretID;
-            RemainingSeconds = remainingSeconds;
-            ExpireTimeMinutes = expireTimeMinutes;
-            CredentialNameID = credentialNameID;
-            Roles = roles;
+            ValidFrom = validFrom;
+            ValidTo = validTo;
             LoginName = loginName;
-            Signature = signature;
+            Roles = roles;
+            ApprovedClientCertificates = approvedClientCertificates;
         }
 
         public Ticket(byte[] data)
         {
-            int position = 0;
-            MasterSecretID = Encoding7Bit.ReadUInt32(data, ref position);
-            RemainingSeconds = Encoding7Bit.ReadUInt32(data, ref position);
-            ExpireTimeMinutes = Encoding7Bit.ReadUInt32(data, ref position);
-            CredentialNameID = Encoding7Bit.ReadUInt32(data, ref position);
-            Roles = new List<uint>();
-            uint roleCount = Encoding7Bit.ReadUInt32(data, ref position);
-            while (roleCount > 0)
+            var ms = new MemoryStream(data);
+            ValidFrom = new DateTime(BigEndian.ToInt64(ms.ReadBytes(8), 0));
+            ValidTo = new DateTime(BigEndian.ToInt64(ms.ReadBytes(8), 0));
+
+            LoginName = Encoding.UTF8.GetString(ms.ReadBytes((int)Encoding7Bit.ReadUInt32(ms.ReadNextByte)));
+
+            Roles = new List<string>();
+            uint cnt = Encoding7Bit.ReadUInt32(ms.ReadNextByte);
+            while (cnt > 0)
             {
-                Roles.Add(Encoding7Bit.ReadUInt32(data, ref position));
-                roleCount--;
+                Roles.Add(Encoding.UTF8.GetString(ms.ReadBytes((int)Encoding7Bit.ReadUInt32(ms.ReadNextByte))));
+                cnt--;
             }
-            uint stringLen = Encoding7Bit.ReadUInt32(data, ref position);
-            LoginName = Encoding.UTF8.GetString(data, position, (int)stringLen);
-            position += (int)stringLen;
-            Signature = new byte[data.Length - position];
-            Array.Copy(data, position, Signature, 0, Signature.Length);
+
+            cnt = Encoding7Bit.ReadUInt32(ms.ReadNextByte);
+            while (cnt > 0)
+            {
+                ApprovedClientCertificates.Add(ms.ReadBytes((int)Encoding7Bit.ReadUInt32(ms.ReadNextByte)));
+                cnt--;
+            }
+
+            AuthorizationSignature = ms.ReadBytes((int)Encoding7Bit.ReadUInt32(ms.ReadNextByte));
         }
 
         public byte[] ToArray()
         {
             var ms = new MemoryStream();
-            Encoding7Bit.Write(ms.WriteByte, MasterSecretID);
-            Encoding7Bit.Write(ms.WriteByte, RemainingSeconds);
-            Encoding7Bit.Write(ms.WriteByte, ExpireTimeMinutes);
-            Encoding7Bit.Write(ms.WriteByte, CredentialNameID);
+            ms.Write(BigEndian.GetBytes(ValidFrom.Ticks));
+            ms.Write(BigEndian.GetBytes(ValidTo.Ticks));
+
+            byte[] str = Encoding.UTF8.GetBytes(LoginName);
+            Encoding7Bit.Write(ms.WriteByte, (uint)str.Length);
+            ms.Write(str, 0, str.Length);
+
             Encoding7Bit.Write(ms.WriteByte, (uint)Roles.Count);
             foreach (var role in Roles)
             {
-                Encoding7Bit.Write(ms.WriteByte, role);
+                str = Encoding.UTF8.GetBytes(role);
+                Encoding7Bit.Write(ms.WriteByte, (uint)str.Length);
+                ms.Write(str, 0, str.Length);
             }
-            byte[] loginName = Encoding.UTF8.GetBytes(LoginName);
-            Encoding7Bit.Write(ms.WriteByte, (uint)loginName.Length);
-            ms.Write(loginName, 0, loginName.Length);
-            ms.Write(Signature, 0, Signature.Length);
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)ApprovedClientCertificates.Count);
+            foreach (var role in ApprovedClientCertificates)
+            {
+                Encoding7Bit.Write(ms.WriteByte, (uint)role.Length);
+                ms.Write(role, 0, role.Length);
+            }
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)AuthorizationThumbprint.Length);
+            ms.Write(AuthorizationThumbprint, 0, AuthorizationThumbprint.Length);
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)AuthorizationSignature.Length);
+            ms.Write(AuthorizationSignature, 0, AuthorizationSignature.Length);
             return ms.ToArray();
         }
 
-        public byte[] Sign(byte[] signatureKey)
+        public byte[] Sign(X509Certificate2 certificate)
         {
             var ms = new MemoryStream();
-            Encoding7Bit.Write(ms.WriteByte, MasterSecretID);
-            Encoding7Bit.Write(ms.WriteByte, RemainingSeconds);
-            Encoding7Bit.Write(ms.WriteByte, ExpireTimeMinutes);
-            Encoding7Bit.Write(ms.WriteByte, CredentialNameID);
+            ms.Write(BigEndian.GetBytes(ValidFrom.Ticks));
+            ms.Write(BigEndian.GetBytes(ValidTo.Ticks));
+
+            byte[] str = Encoding.UTF8.GetBytes(LoginName);
+            Encoding7Bit.Write(ms.WriteByte, (uint)str.Length);
+            ms.Write(str, 0, str.Length);
+
             Encoding7Bit.Write(ms.WriteByte, (uint)Roles.Count);
             foreach (var role in Roles)
             {
-                Encoding7Bit.Write(ms.WriteByte, role);
+                str = Encoding.UTF8.GetBytes(role);
+                Encoding7Bit.Write(ms.WriteByte, (uint)str.Length);
+                ms.Write(str, 0, str.Length);
             }
-            byte[] loginName = Encoding.UTF8.GetBytes(LoginName);
-            Encoding7Bit.Write(ms.WriteByte, (uint)loginName.Length);
-            ms.Write(loginName, 0, loginName.Length);
-            using (var mac = new HMACSHA256(signatureKey))
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)ApprovedClientCertificates.Count);
+            foreach (var role in ApprovedClientCertificates)
             {
-                byte[] data = ms.ToArray();
-                Signature = mac.ComputeHash(data, 0, data.Length);
+                Encoding7Bit.Write(ms.WriteByte, (uint)role.Length);
+                ms.Write(role, 0, role.Length);
             }
-            ms.Write(Signature, 0, Signature.Length);
+
+            AuthorizationThumbprint = certificate.GetPublicKey();
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)AuthorizationThumbprint.Length);
+            ms.Write(AuthorizationThumbprint, 0, AuthorizationThumbprint.Length);
+
+            using (var rsa = certificate.GetRSAPrivateKey())
+            {
+                AuthorizationSignature = rsa.SignData(ms.ToArray(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            }
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)AuthorizationSignature.Length);
+            ms.Write(AuthorizationSignature, 0, AuthorizationSignature.Length);
             return ms.ToArray();
         }
 
-        public bool VerifySignature(byte[] signatureKey)
+        public bool VerifySignature(X509Certificate2 certificate)
         {
+
             var ms = new MemoryStream();
-            Encoding7Bit.Write(ms.WriteByte, MasterSecretID);
-            Encoding7Bit.Write(ms.WriteByte, RemainingSeconds);
-            Encoding7Bit.Write(ms.WriteByte, ExpireTimeMinutes);
-            Encoding7Bit.Write(ms.WriteByte, CredentialNameID);
+            ms.Write(BigEndian.GetBytes(ValidFrom.Ticks));
+            ms.Write(BigEndian.GetBytes(ValidTo.Ticks));
+
+            byte[] str = Encoding.UTF8.GetBytes(LoginName);
+            Encoding7Bit.Write(ms.WriteByte, (uint)str.Length);
+            ms.Write(str, 0, str.Length);
+
             Encoding7Bit.Write(ms.WriteByte, (uint)Roles.Count);
             foreach (var role in Roles)
             {
-                Encoding7Bit.Write(ms.WriteByte, role);
+                str = Encoding.UTF8.GetBytes(role);
+                Encoding7Bit.Write(ms.WriteByte, (uint)str.Length);
+                ms.Write(str, 0, str.Length);
             }
-            byte[] loginName = Encoding.UTF8.GetBytes(LoginName);
-            Encoding7Bit.Write(ms.WriteByte, (uint)loginName.Length);
-            ms.Write(loginName, 0, loginName.Length);
-            using (var mac = new HMACSHA256(signatureKey))
-            {
-                byte[] data = ms.ToArray();
 
-                var signature = mac.ComputeHash(data, 0, data.Length);
-                return Signature.SequenceEqual(signature);
+            Encoding7Bit.Write(ms.WriteByte, (uint)ApprovedClientCertificates.Count);
+            foreach (var role in ApprovedClientCertificates)
+            {
+                Encoding7Bit.Write(ms.WriteByte, (uint)role.Length);
+                ms.Write(role, 0, role.Length);
+            }
+
+            AuthorizationThumbprint = certificate.GetPublicKey();
+
+            Encoding7Bit.Write(ms.WriteByte, (uint)AuthorizationThumbprint.Length);
+            ms.Write(AuthorizationThumbprint, 0, AuthorizationThumbprint.Length);
+
+            using (var rsa = certificate.GetRSAPublicKey())
+            {
+                return rsa.VerifyData(ms.ToArray(), AuthorizationSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             }
         }
     }
