@@ -52,7 +52,7 @@ namespace Sttp.Tests.ClientServer
         public void TestSrpUser()
         {
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29349), true);
-            listener.Authentication.AddCredential(new SrpCredential("U", "Pass1", SrpStrength.Bits1024, "User", new string[] { "Role1" }));
+            listener.Authentication.AddPairingPin(new SrpCredential("U", "Pass1", SrpStrength.Bits1024, "User", new string[] { "Role1" }));
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 
@@ -68,7 +68,7 @@ namespace Sttp.Tests.ClientServer
         public void TestSrp2User()
         {
             var listener = new CtpServer(new IPEndPoint(IPAddress.Loopback, 29348), true);
-            listener.Authentication.AddCredential(new SrpCredential("U", "Pass1", SrpStrength.Bits1024, "User", new string[] { "Role1" }));
+            listener.Authentication.AddPairingPin(new SrpCredential("U", "Pass1", SrpStrength.Bits1024, "User", new string[] { "Role1" }));
             listener.SessionCompleted += Listener_SessionCompleted;
             listener.Start();
 

@@ -13,17 +13,17 @@ namespace CTP.Net
             var param = SrpConstants.Lookup(SrpStrength.Bits4096);
             var privateA = Security.CreateSalt(32).ToUnsignedBigInteger();
             var publicA = BigInteger.ModPow(param.g, privateA, param.N);
+
             WriteDocument(stream, new CertExchange(accountName, publicA.ToUnsignedByteArray()));
 
             CertExchangeResponse certExchangeResponse = (CertExchangeResponse)ReadDocument(stream);
 
             var publicB = certExchangeResponse.PublicB.ToUnsignedBigInteger();
-            var x = certExchangeResponse.ComputeX(password, sslStream.LocalCertificate.GetPublicKey(), sslStream.RemoteCertificate.GetPublicKey());
+
+            var x = SrpMethods.ComputeX(sslStream.LocalCertificate.GetPublicKey(), sslStream.RemoteCertificate.GetPublicKey(), password);
             var verifier = param.g.ModPow(x, param.N);
             var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
-            var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
-            var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
-            var sessionKey = base1.ModPow(exp1, param.N).ToUnsignedByteArray();
+            var sessionKey = SrpMethods.ComputeSessionKey(param, u, x, publicB, privateA, verifier);
 
             var proof = new CertExchangeClientProof(Security.ComputeHMAC(sessionKey, "Client Proof"));
             WriteDocument(stream, proof);
@@ -44,16 +44,16 @@ namespace CTP.Net
 
             var publicA = request.PublicA.ToUnsignedBigInteger();
 
-            var X = SrpMethods.ComputeX(sslStream.RemoteCertificate.GetPublicKey().Concat(sslStream.LocalCertificate.GetPublicKey()), password);
-            verifier = SrpMethods.ComputeV(SrpStrength.Bits4096, X).ToUnsignedBigInteger();
+            verifier = SrpMethods.ComputeV(param, sslStream.RemoteCertificate.GetPublicKey(), sslStream.LocalCertificate.GetPublicKey(), password);
             privateB = Security.CreateSalt(32).ToUnsignedBigInteger();
-            publicB = param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
+            publicB = SrpMethods.ComputePublicB(param, privateB, verifier);
 
             WriteDocument(stream, new CertExchangeResponse(publicB.ToUnsignedByteArray()));
 
             var clientProof = (CertExchangeClientProof)ReadDocument(stream);
             var u = SrpMethods.ComputeU(param.PaddedBytes, publicA, publicB);
-            var sessionKey = publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N).ToUnsignedByteArray();
+
+            var sessionKey = SrpMethods.ComputeSessionKey(param, publicA, verifier, u, privateB);
 
             var cproof = Security.ComputeHMAC(sessionKey, "Client Proof");
             var sproof = Security.ComputeHMAC(sessionKey, "Server Proof");

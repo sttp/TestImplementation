@@ -26,11 +26,6 @@ namespace CTP.SRP
 
         }
 
-        public BigInteger ComputeX(string secret, byte[] clientPublicKey, byte[] serverPublicKey)
-        {
-            return SrpMethods.ComputeX(clientPublicKey.Concat(serverPublicKey), secret).ToUnsignedBigInteger();
-        }
-
         public static explicit operator CertExchangeResponse(CtpDocument obj)
         {
             return FromDocument(obj);

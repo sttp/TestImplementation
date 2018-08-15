@@ -9,13 +9,9 @@ namespace CTP.SRP
 {
     public static class SrpMethods
     {
-        public static byte[] ComputeV(SrpStrength strength, byte[] x)
+        public static BigInteger ComputeV(SrpConstants param, byte[] clientPublicKey, byte[] serverPublicKey, string secret)
         {
-            return ComputeV(SrpConstants.Lookup(strength), x.ToUnsignedBigInteger()).ToUnsignedByteArray();
-        }
-
-        public static BigInteger ComputeV(SrpConstants param, BigInteger x)
-        {
+            var x = ComputeX(clientPublicKey, serverPublicKey, secret);
             return param.g.ModPow(x, param.N);
         }
 
@@ -27,43 +23,35 @@ namespace CTP.SRP
             }
         }
 
-        public static byte[] ComputeChallenge(BigInteger sessionKey, X509Certificate publicCertificate)
+        public static BigInteger ComputePublicB(SrpConstants param, BigInteger privateB, BigInteger verifier)
         {
+            return param.k.ModMul(verifier, param.N).ModAdd(param.g.ModPow(privateB, param.N), param.N);
+        }
+
+        public static byte[] ComputeSessionKey(SrpConstants param, BigInteger publicA, BigInteger verifier, BigInteger u, BigInteger privateB)
+        {
+            return publicA.ModMul(verifier.ModPow(u, param.N), param.N).ModPow(privateB, param.N).ToUnsignedByteArray();
+        }
+
+        public static byte[] ComputeSessionKey(SrpConstants param, BigInteger u, BigInteger x, BigInteger publicB, BigInteger privateA, BigInteger verifier)
+        {
+            var exp1 = privateA.ModAdd(u.ModMul(x, param.N), param.N);
+            var base1 = publicB.ModSub(param.k.ModMul(verifier, param.N), param.N);
+            return base1.ModPow(exp1, param.N).ToUnsignedByteArray();
+        }
+
+        public static BigInteger ComputeX(byte[] clientPublicKey, byte[] serverPublicKey, string secret)
+        {
+            byte[] secB = Encoding.UTF8.GetBytes(secret);
             using (var sha = SHA512.Create())
             {
-                return sha.ComputeHash(sessionKey.ToUnsignedByteArray().Concat(publicCertificate?.GetPublicKey()));
+                byte[] outer = new byte[512 / 8 + clientPublicKey.Length + serverPublicKey.Length];
+                sha.ComputeHash(secB).CopyTo(outer, 0);
+                clientPublicKey.CopyTo(outer, 512 / 8);
+                serverPublicKey.CopyTo(outer, 512 / 8 + clientPublicKey.Length);
+                return sha.ComputeHash(outer).ToUnsignedBigInteger();
             }
         }
-
-        public static byte[] ComputeX(byte[] salt, string secret)
-        {
-            return ComputeX(salt, Encoding.UTF8.GetBytes(secret));
-        }
-        public static byte[] ComputeX(byte[] salt, SecureString secret)
-        {
-            return ComputeX(salt, secret.ToUTF8());
-        }
-
-        private static byte[] ComputeX(byte[] salt, byte[] secret)
-        {
-            try
-            {
-                using (var sha = SHA512.Create())
-                {
-                    byte[] outer = new byte[salt.Length + 512 / 8];
-                    sha.ComputeHash(secret).CopyTo(outer, salt.Length);
-                    salt.CopyTo(outer, 0);
-                    return sha.ComputeHash(outer);
-                }
-            }
-            finally
-            {
-                if (secret != null)
-                    Array.Clear(secret, 0, secret.Length);
-            }
-        }
-
-
 
     }
 }

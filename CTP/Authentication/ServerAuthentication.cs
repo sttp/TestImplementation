@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
 using CTP.SRP;
 
 namespace CTP.Net
 {
-
     public class ServerAuthentication
     {
         //Must be sorted because longest match is used to match an IP address
         private SortedList<IpMatchDefinition, TrustedIPUserMapping> m_ipUsers = new SortedList<IpMatchDefinition, TrustedIPUserMapping>();
-        private int m_credentialRuntimeID;
-        private Dictionary<string, SrpCredential> m_credentials = new Dictionary<string, SrpCredential>();
+        private Dictionary<string, string> m_pairingAccounts = new Dictionary<string, string>();
 
         public ServerAuthentication()
         {
@@ -50,29 +45,24 @@ namespace CTP.Net
             m_ipUsers[mask] = new TrustedIPUserMapping(mask, loginName, roles);
         }
 
-        /// <summary>
-        /// Creates a user credential from the provided data.
-        /// </summary>
-        /// <returns></returns>
-        public void AddCredential(SrpCredential user)
+        public void AddPairingPin(string accountName, string password)
         {
-            int id = Interlocked.Increment(ref m_credentialRuntimeID);
-            m_credentials[user.CredentialName.ToLower()] = user.Clone((uint)id);
+            m_pairingAccounts[accountName.Normalize(NormalizationForm.FormKC).Trim().ToLower()] = password.Normalize(NormalizationForm.FormKC);
         }
 
         public void RemoveCredential(string credentialName)
         {
-            m_credentials.Remove(credentialName.Normalize(NormalizationForm.FormKC).Trim().ToLower());
+            m_pairingAccounts.Remove(credentialName.Normalize(NormalizationForm.FormKC).Trim().ToLower());
         }
 
-        public SrpCredential LookupCredential(CertExchange command)
+        public string LookupCredential(CertExchange command)
         {
             var identity = command;
             string userName = identity.AccountName.Normalize(NormalizationForm.FormKC).Trim().ToLower();
 
-            if (!m_credentials.TryGetValue(userName, out var user))
+            if (!m_pairingAccounts.TryGetValue(userName, out var user))
             {
-                throw new Exception("User Not Found");
+                throw new Exception("Account Not Found");
             }
             return user;
         }

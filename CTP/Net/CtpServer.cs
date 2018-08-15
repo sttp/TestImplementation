@@ -15,7 +15,6 @@ namespace CTP.Net
     /// </summary>
     public partial class CtpServer
     {
-        private static readonly Lazy<X509Certificate2> EmphericalCertificate = new Lazy<X509Certificate2>(() => CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.RSA_2048_SHA2_256, Guid.NewGuid().ToString("N")), LazyThreadSafetyMode.ExecutionAndPublication);
         private readonly ManualResetEvent m_shutdownEvent = new ManualResetEvent(false);
         private TcpListener m_listener;
         private bool m_shutdown;
@@ -31,7 +30,7 @@ namespace CTP.Net
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        public CtpServer(IPEndPoint listenEndpoint, bool useSSL)
+        public CtpServer(IPEndPoint listenEndpoint, X509Certificate2 certificate)
         {
             m_useSSL = useSSL;
 
