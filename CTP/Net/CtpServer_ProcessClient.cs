@@ -61,7 +61,7 @@ namespace CTP.Net
 
                     if (requireSSL)
                     {
-                        serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
+                        //serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
                         m_ssl = new SslStream(netStream, false, null, null, EncryptionPolicy.RequireEncryption);
                         m_ssl.AuthenticateAsServer(serverCertificate, false, SslProtocols.Tls12, false);
                         m_finalStream = m_ssl;
@@ -81,9 +81,9 @@ namespace CTP.Net
                     switch (doc.RootElement)
                     {
                         case "Auth":
-                            var user = SrpAuthServer.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (CertExchange)doc, m_ctpStream, m_ssl);
-                            m_session.LoginName = user.LoginName;
-                            m_session.GrantedRoles.UnionWith(user.Roles);
+                            //var user = SrpAuthServer.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (CertExchange)doc, m_ctpStream, m_ssl);
+                            //m_session.LoginName = user.LoginName;
+                            //m_session.GrantedRoles.UnionWith(user.Roles);
                             break;
                         case "AuthResume":
 
@@ -97,7 +97,7 @@ namespace CTP.Net
                 }
                 catch (Exception e)
                 {
-                    m_ssl.RemoteCertificate.GetCertHash()
+                    m_ssl.RemoteCertificate.GetCertHash();
                 }
             }
 

@@ -8,7 +8,7 @@ namespace CTP.Net
     public class LocalAuthentication : IAuthenticationService
     {
         private NetworkCredential m_credentials;
-        private ClientResumeTicket m_resumeCredentials;
+        //private ClientResumeTicket m_resumeCredentials;
 
         public LocalAuthentication(NetworkCredential credentials)
         {
@@ -17,15 +17,15 @@ namespace CTP.Net
 
         public void Authenticate(CtpStream stream, SslStream sslStream)
         {
-            if (m_resumeCredentials == null)
-            {
-                m_resumeCredentials = KeyExchange.AuthenticateAsClient(m_credentials, stream, sslStream);
-            }
-            else
-            {
-                ResumeClientAuth.Authenticate(m_resumeCredentials, stream, sslStream);
+            //if (m_resumeCredentials == null)
+            //{
+            //    m_resumeCredentials = KeyExchange.AuthenticateAsClient(m_credentials, stream, sslStream);
+            //}
+            //else
+            //{
+            //    ResumeClientAuth.Authenticate(m_resumeCredentials, stream, sslStream);
 
-            }
+            //}
         }
 
     }

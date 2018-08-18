@@ -8,8 +8,10 @@ namespace CTP.Net
     {
         [DocumentField()]
         public bool IsEnabled { get; set; }
+
         [DocumentField()]
         public bool SupportsTickets { get; set; }
+
         [DocumentField()]
         public string CertificateName { get; set; }
         /// <summary>
@@ -20,8 +22,10 @@ namespace CTP.Net
         /// </summary>
         [DocumentField()]
         public string PairingPinPath { get; set; }
+
         [DocumentField()]
         public string CertificatePath { get; set; }
+
         [DocumentField()]
         public List<IpAndMask> AccessList { get; set; }
 
@@ -33,6 +37,14 @@ namespace CTP.Net
         public static explicit operator CtpClientCert(CtpDocument obj)
         {
             return FromDocument(obj);
+        }
+
+        public string DisplayMember
+        {
+            get
+            {
+                return $"{(IsEnabled ? "" : "(Disabled)")}{CertificateName}";
+            }
         }
     }
 }

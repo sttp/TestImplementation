@@ -9,8 +9,6 @@ namespace CTP.Net
         [DocumentField()]
         public List<CtpAccount> Accounts { get; set; }
 
-    
-
         [DocumentField()]
         public List<CtpInterfaceOptions> InterfaceOptions { get; set; }
 

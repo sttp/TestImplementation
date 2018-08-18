@@ -32,7 +32,7 @@ namespace CTP.Net
         /// </summary>
         public CtpServer(IPEndPoint listenEndpoint, X509Certificate2 certificate)
         {
-            m_useSSL = useSSL;
+           // m_useSSL = useSSL;
 
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
@@ -42,7 +42,7 @@ namespace CTP.Net
 
         public bool DefaultAllowConnections { get; private set; } = true;
 
-        public MasterSecretDatabase ResumeKeys { get; private set; } = new MasterSecretDatabase();
+       // public MasterSecretDatabase ResumeKeys { get; private set; } = new MasterSecretDatabase();
 
         public void SetDefaultOptions(bool allowConnections, X509Certificate2 defaultCertificate = null)
         {

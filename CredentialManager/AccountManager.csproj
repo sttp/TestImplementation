@@ -8,8 +8,9 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>CredentialManager</RootNamespace>
     <AssemblyName>CredentialManager</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,6 +32,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GSF.Core, Version=2.2.257.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CTP\Dependencies\GSF.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,25 +50,61 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EditAccessList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditAccessList.Designer.cs">
+      <DependentUpon>EditAccessList.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmAccountManager.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FrmAccountManager.Designer.cs">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmImportVerifier.cs">
+    <Compile Include="FrmClients.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmImportVerifier.Designer.cs">
-      <DependentUpon>FrmImportVerifier.cs</DependentUpon>
+    <Compile Include="FrmClients.Designer.cs">
+      <DependentUpon>FrmClients.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEditAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEditAccount.Designer.cs">
+      <DependentUpon>FrmEditAccount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmInterfaceOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmInterfaceOptions.Designer.cs">
+      <DependentUpon>FrmInterfaceOptions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmGenerateCertificate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmGenerateCertificate.Designer.cs">
+      <DependentUpon>FrmGenerateCertificate.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="EditAccessList.resx">
+      <DependentUpon>EditAccessList.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmAccountManager.resx">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmImportVerifier.resx">
-      <DependentUpon>FrmImportVerifier.cs</DependentUpon>
+    <EmbeddedResource Include="FrmClients.resx">
+      <DependentUpon>FrmClients.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEditAccount.resx">
+      <DependentUpon>FrmEditAccount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmInterfaceOptions.resx">
+      <DependentUpon>FrmInterfaceOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmGenerateCertificate.resx">
+      <DependentUpon>FrmGenerateCertificate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -72,6 +114,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -85,6 +128,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CTP\CTP.csproj">
+      <Project>{8048242f-debd-43b2-8673-bea2ec461ee3}</Project>
+      <Name>CTP</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

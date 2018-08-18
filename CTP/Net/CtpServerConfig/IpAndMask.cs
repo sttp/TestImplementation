@@ -18,5 +18,13 @@
         {
             return FromDocument(obj);
         }
+
+        public string DisplayMember
+        {
+            get
+            {
+                return $"{IpAddress}/{MaskBits}";
+            }
+        }
     }
 }
