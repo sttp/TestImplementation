@@ -62,11 +62,11 @@
     <Compile Include="FrmAccountManager.Designer.cs">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmClients.cs">
+    <Compile Include="FrmClientCertificates.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmClients.Designer.cs">
-      <DependentUpon>FrmClients.cs</DependentUpon>
+    <Compile Include="FrmClientCertificates.Designer.cs">
+      <DependentUpon>FrmClientCertificates.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmEditAccount.cs">
       <SubType>Form</SubType>
@@ -94,8 +94,8 @@
     <EmbeddedResource Include="FrmAccountManager.resx">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmClients.resx">
-      <DependentUpon>FrmClients.cs</DependentUpon>
+    <EmbeddedResource Include="FrmClientCertificates.resx">
+      <DependentUpon>FrmClientCertificates.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmEditAccount.resx">
       <DependentUpon>FrmEditAccount.cs</DependentUpon>

@@ -1,6 +1,6 @@
 ﻿namespace CredentialManager
 {
-    partial class FrmClients
+    partial class FrmClientCertificates
     {
         /// <summary>
         /// Required designer variable.

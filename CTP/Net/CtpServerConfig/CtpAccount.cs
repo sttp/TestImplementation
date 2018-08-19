@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace CTP.Net
 {
@@ -41,7 +44,23 @@ namespace CTP.Net
         {
             get
             {
-                return $"{(IsEnabled ? "" : "(Disabled)")}{Name}";
+                var sb = new StringBuilder();
+                if (!IsEnabled)
+                    sb.Append("(Disabled) ");
+                if (!string.IsNullOrWhiteSpace(Name))
+                    sb.Append("Name: " + Name + "; ");
+                sb.Append($"Clients: {ClientCerts?.Count ?? 0}; ");
+                if (TrustedIPs != null && TrustedIPs.Count > 0)
+                {
+                    sb.Append($"Trusted IPs: {string.Join(", ", TrustedIPs.Select(x => x.DisplayMember))}; ");
+                }
+
+                if (Roles != null)
+                {
+                    sb.Append("Roles: " + string.Join(", ", Roles) + "; ");
+                }
+
+                return sb.ToString();
             }
         }
     }

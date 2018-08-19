@@ -1,4 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using GSF;
 
 namespace CTP.Net
 {
@@ -31,7 +35,31 @@ namespace CTP.Net
         {
             get
             {
-                return $"{(IsEnabled ? "" : "(Disabled)")} {Name} {CertificatePath ?? "(Missing Certificate)"}";
+                var sb = new StringBuilder();
+                if (!IsEnabled)
+                    sb.Append("(Disabled) ");
+                if (!string.IsNullOrWhiteSpace(Name))
+                    sb.Append("Name: " + Name + "; ");
+                if (DisableSSL)
+                {
+                    sb.Append("SSL: OFF; ");
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(CertificatePath))
+                    {
+                        sb.Append("Missing Certificate; ");
+                    }
+                    else
+                    {
+                        sb.Append("Cert: " + Path.GetFileName(CertificatePath) + "; ");
+                    }
+                }
+                if (AccessList != null && AccessList.Count > 0)
+                {
+                    sb.Append($"AccessList: {string.Join(", ", AccessList.Select(x=>x.DisplayMember))}; ");
+                }
+                return sb.ToString();
             }
         }
     }

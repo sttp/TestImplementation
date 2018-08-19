@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using CTP.Net;
 
 namespace CredentialManager
 {
-    public partial class FrmClients : Form
+    public partial class FrmClientCertificates : Form
     {
-        public FrmClients(CtpClientCert data)
+        public FrmClientCertificates(CtpClientCert data)
         {
             InitializeComponent();
 
@@ -116,7 +111,7 @@ namespace CredentialManager
 
             StringBuilder pin = new StringBuilder();
 
-            while (pin.Length < 10)
+            while (pin.Length < 6)
             {
                 byte[] code = new byte[100];
                 using (var rng = RandomNumberGenerator.Create())
@@ -127,14 +122,16 @@ namespace CredentialManager
                         if (c < validSymbols.Length)
                         {
                             pin.Append(validSymbols[c]);
-                            if (pin.Length == 10)
+                            if (pin.Length == 6)
                                 break;
                         }
                     }
                 }
             }
 
-            lblPin.Text = "PIN: " + pin.ToString() + Environment.NewLine + "Valid for 5 minutes";
+            lblPin.Text = "PIN: " + pin.ToString() + Environment.NewLine
+                          + "Valid for 5 minutes" + Environment.NewLine
+                          + "PIN Entropy: " + Math.Log(Math.Pow(validSymbols.Length, pin.Length), 2).ToString("N0") + "bits";
         }
 
         private void btnOK_Click(object sender, EventArgs e)

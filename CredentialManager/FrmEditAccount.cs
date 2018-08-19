@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using CTP.Net;
 using Microsoft.VisualBasic;
@@ -75,7 +70,27 @@ namespace CredentialManager
 
         }
 
-        private void btnEditTrustedIP_Click(object sender, EventArgs e)
+        private void lstTrustedIPs_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstTrustedIPs.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstTrustedIPs_MouseDoubleClick(null, null);
+            }
+        }
+
+        private void lstTrustedIPs_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstTrustedIPs.SelectedItem == null)
             {
@@ -92,24 +107,14 @@ namespace CredentialManager
             }
         }
 
-        private void btnRemoveTrustedIPs_Click(object sender, EventArgs e)
-        {
-            if (lstTrustedIPs.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-            lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
-        }
-
-        private void btnAddRoles_Click(object sender, EventArgs e)
+      private void btnAddRoles_Click(object sender, EventArgs e)
         {
             string data = Interaction.InputBox("Role Name", "Role");
             if (data.Length > 0)
                 lstRoles.Items.Add(data);
         }
 
-        private void btnEditRoles_Click(object sender, EventArgs e)
+        private void lstRoles_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstRoles.SelectedItem == null)
             {
@@ -121,14 +126,24 @@ namespace CredentialManager
                 lstRoles.Items[lstRoles.SelectedIndex] = data;
         }
 
-        private void btnRemoveRoles_Click(object sender, EventArgs e)
+        private void lstRoles_KeyUp(object sender, KeyEventArgs e)
         {
-            if (lstRoles.SelectedItem == null)
+            if (e.KeyCode == Keys.Delete)
             {
-                MessageBox.Show("Select and item");
-                return;
+                e.Handled = true;
+                if (lstRoles.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstRoles.Items.Remove(lstRoles.SelectedItem);
+
             }
-            lstRoles.Items.Remove(lstRoles.SelectedItem);
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstRoles_MouseDoubleClick(null, null);
+            }
         }
 
         private void btnAddCertificates_Click(object sender, EventArgs e)
@@ -136,7 +151,27 @@ namespace CredentialManager
             lstCertificates.Items.Add(new CtpClientCert());
         }
 
-        private void btnEditCertificates_Click(object sender, EventArgs e)
+        private void lstCertificates_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstCertificates.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstCertificates.Items.Remove(lstCertificates.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstCertificates_MouseDoubleClick(null, null);
+            }
+        }
+
+        private void lstCertificates_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstCertificates.SelectedItem == null)
             {
@@ -144,7 +179,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var dlg = new FrmClients((CtpClientCert)lstCertificates.SelectedItem))
+            using (var dlg = new FrmClientCertificates((CtpClientCert)lstCertificates.SelectedItem))
             {
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -154,15 +189,10 @@ namespace CredentialManager
 
         }
 
-        private void btnRemoveCertificates_Click(object sender, EventArgs e)
-        {
-            if (lstCertificates.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-            lstCertificates.Items.Remove(lstCertificates.SelectedItem);
-        }
+     
+
+       
+       
     }
 }
 

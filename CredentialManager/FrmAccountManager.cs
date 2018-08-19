@@ -80,7 +80,26 @@ namespace CredentialManager
             lstAccounts.Items.Add(new CtpAccount() { Name = "New Account" });
         }
 
-        private void btnEditAccounts_Click(object sender, EventArgs e)
+        private void lstAccounts_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstAccounts.SelectedItem == null)
+                {
+                    MessageBox.Show("Select an item to remove");
+                    return;
+                }
+                lstAccounts.Items.Remove(lstAccounts.SelectedItem);
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstAccounts_MouseDoubleClick(null, null);
+            }
+        }
+
+        private void lstAccounts_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstAccounts.SelectedItem == null)
             {
@@ -97,24 +116,12 @@ namespace CredentialManager
             }
         }
 
-        private void btnRemoveAccounts_Click(object sender, EventArgs e)
-        {
-            if (lstAccounts.SelectedItem == null)
-            {
-                MessageBox.Show("Select an item to remove");
-                return;
-            }
-            lstAccounts.Items.Remove(lstAccounts.SelectedItem);
-        }
-
-
         private void btnInterfaceOptions_Click(object sender, EventArgs e)
         {
             lstInterfaceOptions.Items.Add(new CtpInterfaceOptions());
-
         }
-
-        private void btnEdit_Click(object sender, EventArgs e)
+       
+        private void lstInterfaceOptions_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstInterfaceOptions.SelectedItem == null)
             {
@@ -131,16 +138,26 @@ namespace CredentialManager
             }
         }
 
-        private void btnRemove_Click(object sender, EventArgs e)
+        private void lstInterfaceOptions_KeyUp(object sender, KeyEventArgs e)
         {
-            if (lstInterfaceOptions.SelectedItem == null)
+            if (e.KeyCode == Keys.Delete)
             {
-                MessageBox.Show("Select an item to remove");
-                return;
+                e.Handled = true;
+                if (lstInterfaceOptions.SelectedItem == null)
+                {
+                    MessageBox.Show("Select an item to remove");
+                    return;
+                }
+                lstInterfaceOptions.Items.Remove(lstInterfaceOptions.SelectedItem);
             }
-            lstInterfaceOptions.Items.Remove(lstInterfaceOptions.SelectedItem);
-        }
 
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstInterfaceOptions_MouseDoubleClick(null, null);
+            }
+
+        }
 
     }
 }

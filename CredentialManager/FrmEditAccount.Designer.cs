@@ -37,19 +37,13 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btnRemoveTrustedIPs = new System.Windows.Forms.Button();
-            this.btnEditTrustedIP = new System.Windows.Forms.Button();
             this.btnAddTrustedIP = new System.Windows.Forms.Button();
             this.lstTrustedIPs = new System.Windows.Forms.ListBox();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.btnRemoveRoles = new System.Windows.Forms.Button();
-            this.btnEditRoles = new System.Windows.Forms.Button();
             this.lstRoles = new System.Windows.Forms.ListBox();
             this.btnAddRoles = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.btnRemoveCertificates = new System.Windows.Forms.Button();
-            this.btnEditCertificates = new System.Windows.Forms.Button();
             this.btnAddCertificates = new System.Windows.Forms.Button();
             this.lstCertificates = new System.Windows.Forms.ListBox();
             this.BtnOK = new System.Windows.Forms.Button();
@@ -174,8 +168,6 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.btnRemoveTrustedIPs);
-            this.groupBox2.Controls.Add(this.btnEditTrustedIP);
             this.groupBox2.Controls.Add(this.btnAddTrustedIP);
             this.groupBox2.Controls.Add(this.lstTrustedIPs);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -186,36 +178,15 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Trusted IPs";
             // 
-            // btnRemoveTrustedIPs
-            // 
-            this.btnRemoveTrustedIPs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRemoveTrustedIPs.Location = new System.Drawing.Point(136, 161);
-            this.btnRemoveTrustedIPs.Name = "btnRemoveTrustedIPs";
-            this.btnRemoveTrustedIPs.Size = new System.Drawing.Size(59, 23);
-            this.btnRemoveTrustedIPs.TabIndex = 20;
-            this.btnRemoveTrustedIPs.Text = "Remove";
-            this.btnRemoveTrustedIPs.UseVisualStyleBackColor = true;
-            this.btnRemoveTrustedIPs.Click += new System.EventHandler(this.btnRemoveTrustedIPs_Click);
-            // 
-            // btnEditTrustedIP
-            // 
-            this.btnEditTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnEditTrustedIP.Location = new System.Drawing.Point(71, 161);
-            this.btnEditTrustedIP.Name = "btnEditTrustedIP";
-            this.btnEditTrustedIP.Size = new System.Drawing.Size(59, 23);
-            this.btnEditTrustedIP.TabIndex = 19;
-            this.btnEditTrustedIP.Text = "Edit";
-            this.btnEditTrustedIP.UseVisualStyleBackColor = true;
-            this.btnEditTrustedIP.Click += new System.EventHandler(this.btnEditTrustedIP_Click);
-            // 
             // btnAddTrustedIP
             // 
-            this.btnAddTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnAddTrustedIP.Location = new System.Drawing.Point(6, 161);
+            this.btnAddTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddTrustedIP.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
+            this.btnAddTrustedIP.Location = new System.Drawing.Point(222, 17);
             this.btnAddTrustedIP.Name = "btnAddTrustedIP";
-            this.btnAddTrustedIP.Size = new System.Drawing.Size(59, 23);
+            this.btnAddTrustedIP.Size = new System.Drawing.Size(28, 23);
             this.btnAddTrustedIP.TabIndex = 18;
-            this.btnAddTrustedIP.Text = "Add";
+            this.btnAddTrustedIP.Text = "+";
             this.btnAddTrustedIP.UseVisualStyleBackColor = true;
             this.btnAddTrustedIP.Click += new System.EventHandler(this.btnAddTrustedIP_Click);
             // 
@@ -229,8 +200,10 @@
             this.lstTrustedIPs.Location = new System.Drawing.Point(6, 19);
             this.lstTrustedIPs.Name = "lstTrustedIPs";
             this.lstTrustedIPs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lstTrustedIPs.Size = new System.Drawing.Size(244, 134);
+            this.lstTrustedIPs.Size = new System.Drawing.Size(210, 160);
             this.lstTrustedIPs.TabIndex = 1;
+            this.lstTrustedIPs.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstTrustedIPs_KeyUp);
+            this.lstTrustedIPs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstTrustedIPs_MouseDoubleClick);
             // 
             // splitContainer3
             // 
@@ -252,8 +225,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.btnRemoveRoles);
-            this.groupBox1.Controls.Add(this.btnEditRoles);
             this.groupBox1.Controls.Add(this.lstRoles);
             this.groupBox1.Controls.Add(this.btnAddRoles);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -264,28 +235,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Granted Roles";
             // 
-            // btnRemoveRoles
-            // 
-            this.btnRemoveRoles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRemoveRoles.Location = new System.Drawing.Point(139, 283);
-            this.btnRemoveRoles.Name = "btnRemoveRoles";
-            this.btnRemoveRoles.Size = new System.Drawing.Size(59, 23);
-            this.btnRemoveRoles.TabIndex = 17;
-            this.btnRemoveRoles.Text = "Remove";
-            this.btnRemoveRoles.UseVisualStyleBackColor = true;
-            this.btnRemoveRoles.Click += new System.EventHandler(this.btnRemoveRoles_Click);
-            // 
-            // btnEditRoles
-            // 
-            this.btnEditRoles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnEditRoles.Location = new System.Drawing.Point(74, 283);
-            this.btnEditRoles.Name = "btnEditRoles";
-            this.btnEditRoles.Size = new System.Drawing.Size(59, 23);
-            this.btnEditRoles.TabIndex = 16;
-            this.btnEditRoles.Text = "Edit";
-            this.btnEditRoles.UseVisualStyleBackColor = true;
-            this.btnEditRoles.Click += new System.EventHandler(this.btnEditRoles_Click);
-            // 
             // lstRoles
             // 
             this.lstRoles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -295,24 +244,25 @@
             this.lstRoles.Location = new System.Drawing.Point(8, 16);
             this.lstRoles.Name = "lstRoles";
             this.lstRoles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lstRoles.Size = new System.Drawing.Size(220, 251);
+            this.lstRoles.Size = new System.Drawing.Size(186, 290);
             this.lstRoles.TabIndex = 1;
+            this.lstRoles.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstRoles_KeyUp);
+            this.lstRoles.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstRoles_MouseDoubleClick);
             // 
             // btnAddRoles
             // 
-            this.btnAddRoles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnAddRoles.Location = new System.Drawing.Point(9, 283);
+            this.btnAddRoles.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddRoles.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
+            this.btnAddRoles.Location = new System.Drawing.Point(200, 16);
             this.btnAddRoles.Name = "btnAddRoles";
-            this.btnAddRoles.Size = new System.Drawing.Size(59, 23);
+            this.btnAddRoles.Size = new System.Drawing.Size(28, 23);
             this.btnAddRoles.TabIndex = 15;
-            this.btnAddRoles.Text = "Add";
+            this.btnAddRoles.Text = "+";
             this.btnAddRoles.UseVisualStyleBackColor = true;
             this.btnAddRoles.Click += new System.EventHandler(this.btnAddRoles_Click);
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.btnRemoveCertificates);
-            this.groupBox4.Controls.Add(this.btnEditCertificates);
             this.groupBox4.Controls.Add(this.btnAddCertificates);
             this.groupBox4.Controls.Add(this.lstCertificates);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -323,36 +273,15 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Client Certificates";
             // 
-            // btnRemoveCertificates
-            // 
-            this.btnRemoveCertificates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRemoveCertificates.Location = new System.Drawing.Point(136, 283);
-            this.btnRemoveCertificates.Name = "btnRemoveCertificates";
-            this.btnRemoveCertificates.Size = new System.Drawing.Size(59, 23);
-            this.btnRemoveCertificates.TabIndex = 20;
-            this.btnRemoveCertificates.Text = "Remove";
-            this.btnRemoveCertificates.UseVisualStyleBackColor = true;
-            this.btnRemoveCertificates.Click += new System.EventHandler(this.btnRemoveCertificates_Click);
-            // 
-            // btnEditCertificates
-            // 
-            this.btnEditCertificates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnEditCertificates.Location = new System.Drawing.Point(71, 283);
-            this.btnEditCertificates.Name = "btnEditCertificates";
-            this.btnEditCertificates.Size = new System.Drawing.Size(59, 23);
-            this.btnEditCertificates.TabIndex = 19;
-            this.btnEditCertificates.Text = "Edit";
-            this.btnEditCertificates.UseVisualStyleBackColor = true;
-            this.btnEditCertificates.Click += new System.EventHandler(this.btnEditCertificates_Click);
-            // 
             // btnAddCertificates
             // 
-            this.btnAddCertificates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnAddCertificates.Location = new System.Drawing.Point(6, 283);
+            this.btnAddCertificates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddCertificates.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
+            this.btnAddCertificates.Location = new System.Drawing.Point(486, 16);
             this.btnAddCertificates.Name = "btnAddCertificates";
-            this.btnAddCertificates.Size = new System.Drawing.Size(59, 23);
+            this.btnAddCertificates.Size = new System.Drawing.Size(28, 23);
             this.btnAddCertificates.TabIndex = 18;
-            this.btnAddCertificates.Text = "Add";
+            this.btnAddCertificates.Text = "+";
             this.btnAddCertificates.UseVisualStyleBackColor = true;
             this.btnAddCertificates.Click += new System.EventHandler(this.btnAddCertificates_Click);
             // 
@@ -366,8 +295,10 @@
             this.lstCertificates.Location = new System.Drawing.Point(9, 16);
             this.lstCertificates.Name = "lstCertificates";
             this.lstCertificates.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lstCertificates.Size = new System.Drawing.Size(504, 251);
+            this.lstCertificates.Size = new System.Drawing.Size(471, 290);
             this.lstCertificates.TabIndex = 1;
+            this.lstCertificates.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstCertificates_KeyUp);
+            this.lstCertificates.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstCertificates_MouseDoubleClick);
             // 
             // BtnOK
             // 
@@ -421,19 +352,13 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.SplitContainer splitContainer4;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Button btnRemoveTrustedIPs;
-        private System.Windows.Forms.Button btnEditTrustedIP;
         private System.Windows.Forms.Button btnAddTrustedIP;
         private System.Windows.Forms.ListBox lstTrustedIPs;
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button btnRemoveRoles;
-        private System.Windows.Forms.Button btnEditRoles;
         private System.Windows.Forms.ListBox lstRoles;
         private System.Windows.Forms.Button btnAddRoles;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.Button btnRemoveCertificates;
-        private System.Windows.Forms.Button btnEditCertificates;
         private System.Windows.Forms.Button btnAddCertificates;
         private System.Windows.Forms.ListBox lstCertificates;
         private System.Windows.Forms.Button BtnOK;
