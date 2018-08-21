@@ -28,13 +28,7 @@ namespace CredentialManager
             {
                 lblPin.Text = "PIN: Missing";
             }
-            if (data.AccessList != null)
-            {
-                foreach (var item in data.AccessList)
-                {
-                    lstTrustedIPs.Items.Add(item);
-                }
-            }
+        
         }
 
         public CtpClientCert SaveData()
@@ -45,40 +39,7 @@ namespace CredentialManager
             data.CertificateName = txtName.Text;
             data.CertificatePath = txtCertPath.Text;
             data.PairingPinPath = TxtPairingPinPath.Text;
-            data.AccessList = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
             return data;
-        }
-
-        private void btnAddTrustedIP_Click(object sender, EventArgs e)
-        {
-            lstTrustedIPs.Items.Add(new IpAndMask() { IpAddress = "0.0.0.0", MaskBits = 0 });
-        }
-
-        private void btnEditTrustedIP_Click(object sender, EventArgs e)
-        {
-            if (lstTrustedIPs.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-
-            using (var frm = new EditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
-            {
-                if (frm.ShowDialog() == DialogResult.OK)
-                {
-                    lstTrustedIPs.Items[lstTrustedIPs.SelectedIndex] = frm.SaveData();
-                }
-            }
-        }
-
-        private void btnRemoveTrustedIPs_Click(object sender, EventArgs e)
-        {
-            if (lstTrustedIPs.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-            lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
         }
 
         private void btnBrowseCertificate_Click(object sender, EventArgs e)
@@ -138,5 +99,7 @@ namespace CredentialManager
         {
             DialogResult = DialogResult.OK;
         }
+
+
     }
 }

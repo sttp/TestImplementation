@@ -6,6 +6,7 @@
     {
         [DocumentField()]
         public string IpAddress { get; set; }
+
         [DocumentField()]
         public int MaskBits { get; set; }
 

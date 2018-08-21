@@ -25,14 +25,15 @@ namespace CTP.Net
         public List<string> Roles { get; set; }
 
         [DocumentField()]
-        public List<IpAndMask> TrustedIPs { get; set; }
+        public List<IpAndMask> AllowedRemoteIPs { get; set; }
 
         [DocumentField()]
         public List<CtpClientCert> ClientCerts { get; set; }
 
         public CtpAccount()
         {
-
+            AllowedRemoteIPs = new List<IpAndMask>();
+            ClientCerts = new List<CtpClientCert>();
         }
 
         public static explicit operator CtpAccount(CtpDocument obj)
@@ -50,9 +51,9 @@ namespace CTP.Net
                 if (!string.IsNullOrWhiteSpace(Name))
                     sb.Append("Name: " + Name + "; ");
                 sb.Append($"Clients: {ClientCerts?.Count ?? 0}; ");
-                if (TrustedIPs != null && TrustedIPs.Count > 0)
+                if (AllowedRemoteIPs != null && AllowedRemoteIPs.Count > 0)
                 {
-                    sb.Append($"Trusted IPs: {string.Join(", ", TrustedIPs.Select(x => x.DisplayMember))}; ");
+                    sb.Append($"Allowed IPs: {string.Join(", ", AllowedRemoteIPs.Select(x => x.DisplayMember))}; ");
                 }
 
                 if (Roles != null)

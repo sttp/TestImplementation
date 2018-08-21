@@ -12,14 +12,14 @@ using CTP.Net;
 
 namespace CredentialManager
 {
-    public partial class EditAccessList : Form
+    public partial class FrmEditAccessList : Form
     {
 
-        public EditAccessList(IpAndMask ip)
+        public FrmEditAccessList(IpAndMask ip)
         {
             InitializeComponent();
 
-            txtAddress.Text = ip.MaskBits.ToString();
+            txtAddress.Text = ip.IpAddress.ToString();
             numMask.Value = ip.MaskBits;
 
         }

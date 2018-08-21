@@ -50,11 +50,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EditAccessList.cs">
+    <Compile Include="FrmEditAnonymousMapping.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EditAccessList.Designer.cs">
-      <DependentUpon>EditAccessList.cs</DependentUpon>
+    <Compile Include="FrmEditAnonymousMapping.Designer.cs">
+      <DependentUpon>FrmEditAnonymousMapping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEditAccessList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEditAccessList.Designer.cs">
+      <DependentUpon>FrmEditAccessList.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmAccountManager.cs">
       <SubType>Form</SubType>
@@ -88,8 +94,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="EditAccessList.resx">
-      <DependentUpon>EditAccessList.cs</DependentUpon>
+    <EmbeddedResource Include="FrmEditAnonymousMapping.resx">
+      <DependentUpon>FrmEditAnonymousMapping.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEditAccessList.resx">
+      <DependentUpon>FrmEditAccessList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAccountManager.resx">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>

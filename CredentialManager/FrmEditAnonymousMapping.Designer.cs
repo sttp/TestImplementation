@@ -1,6 +1,6 @@
 ﻿namespace CredentialManager
 {
-    partial class EditAccessList
+    partial class FrmEditAnonymousMapping
     {
         /// <summary>
         /// Required designer variable.
@@ -36,21 +36,23 @@
             this.txtAddress = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.txtAccount = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numMask)).BeginInit();
             this.SuspendLayout();
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(11, 40);
+            this.label2.Location = new System.Drawing.Point(11, 72);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(33, 13);
             this.label2.TabIndex = 30;
             this.label2.Text = "Mask";
             // 
-            // numericUpDown1
+            // numMask
             // 
-            this.numMask.Location = new System.Drawing.Point(46, 38);
+            this.numMask.Location = new System.Drawing.Point(46, 70);
             this.numMask.Maximum = new decimal(new int[] {
             32,
             0,
@@ -72,7 +74,7 @@
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(106, 37);
+            this.buttonCancel.Location = new System.Drawing.Point(106, 70);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(73, 23);
             this.buttonCancel.TabIndex = 27;
@@ -83,7 +85,7 @@
             // buttonOk
             // 
             this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonOk.Location = new System.Drawing.Point(185, 37);
+            this.buttonOk.Location = new System.Drawing.Point(185, 70);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(73, 23);
             this.buttonOk.TabIndex = 28;
@@ -91,36 +93,55 @@
             this.buttonOk.UseVisualStyleBackColor = true;
             this.buttonOk.Click += new System.EventHandler(this.buttonOk_Click);
             // 
-            // textBoxAddressMask
+            // txtAddress
             // 
-            this.txtAddress.Location = new System.Drawing.Point(46, 12);
+            this.txtAddress.Location = new System.Drawing.Point(64, 44);
             this.txtAddress.Name = "txtAddress";
-            this.txtAddress.Size = new System.Drawing.Size(212, 20);
+            this.txtAddress.Size = new System.Drawing.Size(194, 20);
             this.txtAddress.TabIndex = 25;
             this.toolTip1.SetToolTip(this.txtAddress, "The network address to allow.\r\nExample:\r\n0.0.0.0\r\n167.161.0.0\r\n192.168.5.0");
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 15);
+            this.label1.Location = new System.Drawing.Point(11, 47);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(17, 13);
             this.label1.TabIndex = 29;
             this.label1.Text = "IP";
             // 
-            // EditAccessList
+            // txtAccount
+            // 
+            this.txtAccount.Location = new System.Drawing.Point(64, 18);
+            this.txtAccount.Name = "txtAccount";
+            this.txtAccount.Size = new System.Drawing.Size(194, 20);
+            this.txtAccount.TabIndex = 31;
+            this.toolTip1.SetToolTip(this.txtAccount, "The network address to allow.\r\nExample:\r\n0.0.0.0\r\n167.161.0.0\r\n192.168.5.0");
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 21);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(47, 13);
+            this.label3.TabIndex = 32;
+            this.label3.Text = "Account";
+            // 
+            // EditAnonymousMapping
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(280, 72);
+            this.ClientSize = new System.Drawing.Size(280, 105);
+            this.Controls.Add(this.txtAccount);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.numMask);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
             this.Controls.Add(this.txtAddress);
             this.Controls.Add(this.label1);
-            this.Name = "EditAccessList";
-            this.Text = "EditAccessList";
+            this.Name = "EditAnonymousMapping";
+            this.Text = "Anonymous Mapping";
             ((System.ComponentModel.ISupportInitialize)(this.numMask)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -136,5 +157,7 @@
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.TextBox txtAddress;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtAccount;
+        private System.Windows.Forms.Label label3;
     }
 }

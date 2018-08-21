@@ -41,7 +41,27 @@ namespace CredentialManager
             return rv;
         }
 
-        private void btnEditTrustedIP_Click(object sender, EventArgs e)
+        private void lstTrustedIPs_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstTrustedIPs.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstTrustedIPs_MouseDoubleClick(null, null);
+            }
+        }
+
+        private void lstTrustedIPs_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstTrustedIPs.SelectedItem == null)
             {
@@ -49,23 +69,13 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new EditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
+            using (var frm = new FrmEditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
                     lstTrustedIPs.Items[lstTrustedIPs.SelectedIndex] = frm.SaveData();
                 }
             }
-        }
-
-        private void btnRemoveTrustedIPs_Click(object sender, EventArgs e)
-        {
-            if (lstTrustedIPs.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-            lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
         }
 
         private void btnAddTrustedIP_Click(object sender, EventArgs e)
@@ -101,5 +111,7 @@ namespace CredentialManager
         {
             DialogResult = DialogResult.OK;
         }
+
+       
     }
 }

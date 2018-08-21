@@ -32,8 +32,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.txtName = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btnRemoveTrustedIPs = new System.Windows.Forms.Button();
-            this.btnEditTrustedIP = new System.Windows.Forms.Button();
             this.btnAddTrustedIP = new System.Windows.Forms.Button();
             this.lstTrustedIPs = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -77,47 +75,24 @@
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.groupBox2.Controls.Add(this.btnRemoveTrustedIPs);
-            this.groupBox2.Controls.Add(this.btnEditTrustedIP);
             this.groupBox2.Controls.Add(this.btnAddTrustedIP);
             this.groupBox2.Controls.Add(this.lstTrustedIPs);
             this.groupBox2.Location = new System.Drawing.Point(15, 98);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(256, 203);
+            this.groupBox2.Size = new System.Drawing.Size(256, 213);
             this.groupBox2.TabIndex = 38;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Trusted IPs";
-            // 
-            // btnRemoveTrustedIPs
-            // 
-            this.btnRemoveTrustedIPs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRemoveTrustedIPs.Location = new System.Drawing.Point(136, 174);
-            this.btnRemoveTrustedIPs.Name = "btnRemoveTrustedIPs";
-            this.btnRemoveTrustedIPs.Size = new System.Drawing.Size(59, 23);
-            this.btnRemoveTrustedIPs.TabIndex = 20;
-            this.btnRemoveTrustedIPs.Text = "Remove";
-            this.btnRemoveTrustedIPs.UseVisualStyleBackColor = true;
-            this.btnRemoveTrustedIPs.Click += new System.EventHandler(this.btnRemoveTrustedIPs_Click);
-            // 
-            // btnEditTrustedIP
-            // 
-            this.btnEditTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnEditTrustedIP.Location = new System.Drawing.Point(71, 174);
-            this.btnEditTrustedIP.Name = "btnEditTrustedIP";
-            this.btnEditTrustedIP.Size = new System.Drawing.Size(59, 23);
-            this.btnEditTrustedIP.TabIndex = 19;
-            this.btnEditTrustedIP.Text = "Edit";
-            this.btnEditTrustedIP.UseVisualStyleBackColor = true;
-            this.btnEditTrustedIP.Click += new System.EventHandler(this.btnEditTrustedIP_Click);
+            this.groupBox2.Text = "Allowed Remote IPs";
             // 
             // btnAddTrustedIP
             // 
-            this.btnAddTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnAddTrustedIP.Location = new System.Drawing.Point(6, 174);
+            this.btnAddTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAddTrustedIP.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
+            this.btnAddTrustedIP.Location = new System.Drawing.Point(222, 19);
             this.btnAddTrustedIP.Name = "btnAddTrustedIP";
-            this.btnAddTrustedIP.Size = new System.Drawing.Size(59, 23);
+            this.btnAddTrustedIP.Size = new System.Drawing.Size(28, 23);
             this.btnAddTrustedIP.TabIndex = 18;
-            this.btnAddTrustedIP.Text = "Add";
+            this.btnAddTrustedIP.Text = "+";
             this.btnAddTrustedIP.UseVisualStyleBackColor = true;
             this.btnAddTrustedIP.Click += new System.EventHandler(this.btnAddTrustedIP_Click);
             // 
@@ -131,8 +106,10 @@
             this.lstTrustedIPs.Location = new System.Drawing.Point(6, 19);
             this.lstTrustedIPs.Name = "lstTrustedIPs";
             this.lstTrustedIPs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lstTrustedIPs.Size = new System.Drawing.Size(242, 147);
+            this.lstTrustedIPs.Size = new System.Drawing.Size(210, 173);
             this.lstTrustedIPs.TabIndex = 1;
+            this.lstTrustedIPs.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstTrustedIPs_KeyUp);
+            this.lstTrustedIPs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstTrustedIPs_MouseDoubleClick);
             // 
             // label1
             // 
@@ -190,9 +167,9 @@
             this.chkDisableSSL.AutoSize = true;
             this.chkDisableSSL.Location = new System.Drawing.Point(117, 12);
             this.chkDisableSSL.Name = "chkDisableSSL";
-            this.chkDisableSSL.Size = new System.Drawing.Size(84, 17);
+            this.chkDisableSSL.Size = new System.Drawing.Size(82, 17);
             this.chkDisableSSL.TabIndex = 44;
-            this.chkDisableSSL.Text = "Disable SSL";
+            this.chkDisableSSL.Text = "Enable SSL";
             this.chkDisableSSL.UseVisualStyleBackColor = true;
             // 
             // FrmInterfaceOptions
@@ -211,7 +188,7 @@
             this.Controls.Add(this.txtName);
             this.Controls.Add(this.chkIsEnabled);
             this.Name = "FrmInterfaceOptions";
-            this.Text = "FrmInterfaceOptions";
+            this.Text = "Installed Certificates";
             this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -224,8 +201,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Button btnRemoveTrustedIPs;
-        private System.Windows.Forms.Button btnEditTrustedIP;
         private System.Windows.Forms.Button btnAddTrustedIP;
         private System.Windows.Forms.ListBox lstTrustedIPs;
         private System.Windows.Forms.Label label1;

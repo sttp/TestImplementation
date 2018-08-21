@@ -176,7 +176,7 @@
             this.groupBox2.Size = new System.Drawing.Size(258, 190);
             this.groupBox2.TabIndex = 34;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Trusted IPs";
+            this.groupBox2.Text = "Allowed Remote IPs";
             // 
             // btnAddTrustedIP
             // 

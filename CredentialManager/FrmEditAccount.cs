@@ -15,16 +15,15 @@ namespace CredentialManager
             LoadData(account);
         }
 
-
         private void LoadData(CtpAccount account)
         {
             chkIsEnabled.Checked = account.IsEnabled;
             txtName.Text = account.Name;
             txtDescription.Text = account.Description;
             lstTrustedIPs.Items.Clear();
-            if (account.TrustedIPs != null)
+            if (account.AllowedRemoteIPs != null)
             {
-                foreach (var item in account.TrustedIPs)
+                foreach (var item in account.AllowedRemoteIPs)
                 {
                     lstTrustedIPs.Items.Add(item);
                 }
@@ -53,7 +52,7 @@ namespace CredentialManager
             rv.IsEnabled = chkIsEnabled.Checked;
             rv.Name = txtName.Text;
             rv.Description = txtDescription.Text;
-            rv.TrustedIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
+            rv.AllowedRemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
             rv.Roles = new List<string>(lstRoles.Items.Cast<string>());
             rv.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
             return rv;
@@ -98,7 +97,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new EditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
+            using (var frm = new FrmEditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
@@ -189,9 +188,6 @@ namespace CredentialManager
 
         }
 
-     
-
-       
        
     }
 }

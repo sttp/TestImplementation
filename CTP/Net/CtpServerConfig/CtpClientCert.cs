@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace CTP.Net
 {
@@ -26,9 +29,6 @@ namespace CTP.Net
         [DocumentField()]
         public string CertificatePath { get; set; }
 
-        [DocumentField()]
-        public List<IpAndMask> AccessList { get; set; }
-
         public CtpClientCert()
         {
 
@@ -43,7 +43,22 @@ namespace CTP.Net
         {
             get
             {
-                return $"{(IsEnabled ? "" : "(Disabled)")}{CertificateName}";
+                var sb = new StringBuilder();
+                if (!IsEnabled)
+                    sb.Append("(Disabled) ");
+
+                if (!string.IsNullOrWhiteSpace(CertificateName))
+                    sb.Append("Name: " + CertificateName + "; ");
+
+                if (string.IsNullOrWhiteSpace(CertificatePath))
+                {
+                    sb.Append("Missing Certificate; ");
+                }
+                else
+                {
+                    sb.Append("Cert: " + Path.GetFileName(CertificatePath) + "; ");
+                }
+                return sb.ToString();
             }
         }
     }

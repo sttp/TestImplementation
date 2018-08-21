@@ -65,6 +65,14 @@ namespace CredentialManager
                     lstInterfaceOptions.Items.Add(option);
                 }
             }
+            lstAnonymousAccountMapping.Items.Clear();
+            if (config.AnonymousMappings != null)
+            {
+                foreach (var option in config.AnonymousMappings)
+                {
+                    lstAnonymousAccountMapping.Items.Add(option);
+                }
+            }
         }
 
         private CtpServerConfig SaveData()
@@ -72,6 +80,7 @@ namespace CredentialManager
             var cfg = new CtpServerConfig();
             cfg.Accounts = new List<CtpAccount>(lstAccounts.Items.Cast<CtpAccount>());
             cfg.InterfaceOptions = new List<CtpInterfaceOptions>(lstInterfaceOptions.Items.Cast<CtpInterfaceOptions>());
+            cfg.AnonymousMappings = new List<CtpAnonymousMapping>(lstAnonymousAccountMapping.Items.Cast<CtpAnonymousMapping>());
             return cfg;
         }
 
@@ -159,5 +168,48 @@ namespace CredentialManager
 
         }
 
+        private void btnAddAnonomousAccountMapping_Click(object sender, EventArgs e)
+        {
+            lstAnonymousAccountMapping.Items.Add(new CtpAnonymousMapping());
+
+        }
+
+        private void lstAnonymousAccountMapping_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstAnonymousAccountMapping.SelectedItem == null)
+            {
+                MessageBox.Show("Select an item to edit");
+                return;
+            }
+
+            using (var frm = new FrmEditAnonymousMapping((CtpAnonymousMapping)lstAnonymousAccountMapping.SelectedItem))
+            {
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    lstAnonymousAccountMapping.Items[lstAnonymousAccountMapping.SelectedIndex] = frm.SaveData();
+                }
+            }
+        }
+
+        private void lstAnonymousAccountMapping_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstAnonymousAccountMapping.SelectedItem == null)
+                {
+                    MessageBox.Show("Select an item to remove");
+                    return;
+                }
+                lstAnonymousAccountMapping.Items.Remove(lstAnonymousAccountMapping.SelectedItem);
+            }
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstAnonymousAccountMapping_MouseDoubleClick(null, null);
+            }
+        }
+        
     }
 }

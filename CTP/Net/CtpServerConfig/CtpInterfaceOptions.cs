@@ -23,7 +23,7 @@ namespace CTP.Net
 
         public CtpInterfaceOptions()
         {
-
+            AccessList = new List<IpAndMask>();
         }
 
         public static explicit operator CtpInterfaceOptions(CtpDocument obj)

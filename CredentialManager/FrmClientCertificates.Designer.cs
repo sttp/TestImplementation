@@ -32,11 +32,6 @@
             this.btnBrowseCertificate = new System.Windows.Forms.Button();
             this.txtCertPath = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btnRemoveTrustedIPs = new System.Windows.Forms.Button();
-            this.btnEditTrustedIP = new System.Windows.Forms.Button();
-            this.btnAddTrustedIP = new System.Windows.Forms.Button();
-            this.lstTrustedIPs = new System.Windows.Forms.ListBox();
             this.label3 = new System.Windows.Forms.Label();
             this.txtName = new System.Windows.Forms.TextBox();
             this.chkIsEnabled = new System.Windows.Forms.CheckBox();
@@ -46,7 +41,6 @@
             this.btnGeneratePin = new System.Windows.Forms.Button();
             this.lblPin = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
-            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // chkSupportsTickets
@@ -54,9 +48,9 @@
             this.chkSupportsTickets.AutoSize = true;
             this.chkSupportsTickets.Location = new System.Drawing.Point(117, 12);
             this.chkSupportsTickets.Name = "chkSupportsTickets";
-            this.chkSupportsTickets.Size = new System.Drawing.Size(106, 17);
+            this.chkSupportsTickets.Size = new System.Drawing.Size(155, 17);
             this.chkSupportsTickets.TabIndex = 52;
-            this.chkSupportsTickets.Text = "Supports Tickets";
+            this.chkSupportsTickets.Text = "Permit Proxy Authentication";
             this.chkSupportsTickets.UseVisualStyleBackColor = true;
             // 
             // btnBrowseCertificate
@@ -84,65 +78,6 @@
             this.label1.Size = new System.Drawing.Size(79, 13);
             this.label1.TabIndex = 49;
             this.label1.Text = "Certificate Path";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.btnRemoveTrustedIPs);
-            this.groupBox2.Controls.Add(this.btnEditTrustedIP);
-            this.groupBox2.Controls.Add(this.btnAddTrustedIP);
-            this.groupBox2.Controls.Add(this.lstTrustedIPs);
-            this.groupBox2.Location = new System.Drawing.Point(12, 130);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(256, 182);
-            this.groupBox2.TabIndex = 48;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Access List";
-            // 
-            // btnRemoveTrustedIPs
-            // 
-            this.btnRemoveTrustedIPs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRemoveTrustedIPs.Location = new System.Drawing.Point(136, 153);
-            this.btnRemoveTrustedIPs.Name = "btnRemoveTrustedIPs";
-            this.btnRemoveTrustedIPs.Size = new System.Drawing.Size(59, 23);
-            this.btnRemoveTrustedIPs.TabIndex = 20;
-            this.btnRemoveTrustedIPs.Text = "Remove";
-            this.btnRemoveTrustedIPs.UseVisualStyleBackColor = true;
-            this.btnRemoveTrustedIPs.Click += new System.EventHandler(this.btnRemoveTrustedIPs_Click);
-            // 
-            // btnEditTrustedIP
-            // 
-            this.btnEditTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnEditTrustedIP.Location = new System.Drawing.Point(71, 153);
-            this.btnEditTrustedIP.Name = "btnEditTrustedIP";
-            this.btnEditTrustedIP.Size = new System.Drawing.Size(59, 23);
-            this.btnEditTrustedIP.TabIndex = 19;
-            this.btnEditTrustedIP.Text = "Edit";
-            this.btnEditTrustedIP.UseVisualStyleBackColor = true;
-            this.btnEditTrustedIP.Click += new System.EventHandler(this.btnEditTrustedIP_Click);
-            // 
-            // btnAddTrustedIP
-            // 
-            this.btnAddTrustedIP.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnAddTrustedIP.Location = new System.Drawing.Point(6, 153);
-            this.btnAddTrustedIP.Name = "btnAddTrustedIP";
-            this.btnAddTrustedIP.Size = new System.Drawing.Size(59, 23);
-            this.btnAddTrustedIP.TabIndex = 18;
-            this.btnAddTrustedIP.Text = "Add";
-            this.btnAddTrustedIP.UseVisualStyleBackColor = true;
-            this.btnAddTrustedIP.Click += new System.EventHandler(this.btnAddTrustedIP_Click);
-            // 
-            // lstTrustedIPs
-            // 
-            this.lstTrustedIPs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstTrustedIPs.DisplayMember = "DisplayMember";
-            this.lstTrustedIPs.FormattingEnabled = true;
-            this.lstTrustedIPs.Location = new System.Drawing.Point(6, 19);
-            this.lstTrustedIPs.Name = "lstTrustedIPs";
-            this.lstTrustedIPs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lstTrustedIPs.Size = new System.Drawing.Size(242, 121);
-            this.lstTrustedIPs.TabIndex = 1;
             // 
             // label3
             // 
@@ -209,9 +144,9 @@
             // lblPin
             // 
             this.lblPin.Font = new System.Drawing.Font("Consolas", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPin.Location = new System.Drawing.Point(274, 130);
+            this.lblPin.Location = new System.Drawing.Point(12, 130);
             this.lblPin.Name = "lblPin";
-            this.lblPin.Size = new System.Drawing.Size(259, 156);
+            this.lblPin.Size = new System.Drawing.Size(521, 156);
             this.lblPin.TabIndex = 57;
             this.lblPin.Text = "PIN: Missing";
             // 
@@ -225,7 +160,7 @@
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
-            // FrmClients
+            // FrmClientCertificates
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -240,13 +175,11 @@
             this.Controls.Add(this.btnBrowseCertificate);
             this.Controls.Add(this.txtCertPath);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.txtName);
             this.Controls.Add(this.chkIsEnabled);
-            this.Name = "FrmClients";
+            this.Name = "FrmClientCertificates";
             this.Text = "Client Certificate";
-            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -258,11 +191,6 @@
         private System.Windows.Forms.Button btnBrowseCertificate;
         private System.Windows.Forms.TextBox txtCertPath;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Button btnRemoveTrustedIPs;
-        private System.Windows.Forms.Button btnEditTrustedIP;
-        private System.Windows.Forms.Button btnAddTrustedIP;
-        private System.Windows.Forms.ListBox lstTrustedIPs;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtName;
         private System.Windows.Forms.CheckBox chkIsEnabled;
