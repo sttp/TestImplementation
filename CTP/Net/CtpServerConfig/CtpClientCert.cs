@@ -29,9 +29,15 @@ namespace CTP.Net
         [DocumentField()]
         public string CertificatePath { get; set; }
 
+        [DocumentField()]
+        public string MappedAccount { get; set; }
+
+        [DocumentField()]
+        public List<IpAndMask> AllowedRemoteIPs { get; set; }
+
         public CtpClientCert()
         {
-
+            AllowedRemoteIPs = new List<IpAndMask>();
         }
 
         public static explicit operator CtpClientCert(CtpDocument obj)
@@ -48,7 +54,10 @@ namespace CTP.Net
                     sb.Append("(Disabled) ");
 
                 if (!string.IsNullOrWhiteSpace(CertificateName))
-                    sb.Append("Name: " + CertificateName + "; ");
+                    sb.Append("Name: " + CertificateName + " ");
+
+                if (!string.IsNullOrWhiteSpace(MappedAccount))
+                    sb.Append("=> " + MappedAccount + "; ");
 
                 if (string.IsNullOrWhiteSpace(CertificatePath))
                 {

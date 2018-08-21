@@ -57,7 +57,7 @@ namespace CTP.Net
                 }
                 if (AccessList != null && AccessList.Count > 0)
                 {
-                    sb.Append($"AccessList: {string.Join(", ", AccessList.Select(x=>x.DisplayMember))}; ");
+                    sb.Append($"Remote IPs: {string.Join(", ", AccessList.Select(x=>x.DisplayMember))}; ");
                 }
                 return sb.ToString();
             }

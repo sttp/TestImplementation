@@ -15,8 +15,12 @@ namespace CTP.Net
         [DocumentField()]
         public List<CtpAnonymousMapping> AnonymousMappings { get; set; }
 
+        [DocumentField()]
+        public List<CtpClientCert> ClientCerts { get; set; }
+
         public CtpServerConfig()
         {
+            ClientCerts = new List<CtpClientCert>();
             Accounts = new List<CtpAccount>();
             InterfaceOptions = new List<CtpInterfaceOptions>();
             AnonymousMappings = new List<CtpAnonymousMapping>();

@@ -28,7 +28,16 @@ namespace CredentialManager
             {
                 lblPin.Text = "PIN: Missing";
             }
-        
+            lstTrustedIPs.Items.Clear();
+            if (data.AllowedRemoteIPs != null)
+            {
+                foreach (var item in data.AllowedRemoteIPs)
+                {
+                    lstTrustedIPs.Items.Add(item);
+                }
+            }
+
+            txtMappedAccount.Text = data.MappedAccount;
         }
 
         public CtpClientCert SaveData()
@@ -39,6 +48,9 @@ namespace CredentialManager
             data.CertificateName = txtName.Text;
             data.CertificatePath = txtCertPath.Text;
             data.PairingPinPath = TxtPairingPinPath.Text;
+            data.AllowedRemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
+            data.MappedAccount = txtMappedAccount.Text;
+
             return data;
         }
 
@@ -100,6 +112,47 @@ namespace CredentialManager
             DialogResult = DialogResult.OK;
         }
 
+        private void btnAddTrustedIP_Click(object sender, EventArgs e)
+        {
+            lstTrustedIPs.Items.Add(new IpAndMask() { IpAddress = "127.0.0.1", MaskBits = 32 });
 
+        }
+
+        private void lstTrustedIPs_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstTrustedIPs.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstTrustedIPs_MouseDoubleClick(null, null);
+            }
+        }
+
+        private void lstTrustedIPs_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstTrustedIPs.SelectedItem == null)
+            {
+                MessageBox.Show("Select and item");
+                return;
+            }
+
+            using (var frm = new FrmEditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
+            {
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    lstTrustedIPs.Items[lstTrustedIPs.SelectedIndex] = frm.SaveData();
+                }
+            }
+        }
     }
 }

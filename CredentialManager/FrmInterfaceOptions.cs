@@ -18,7 +18,7 @@ namespace CredentialManager
             InitializeComponent();
 
             chkIsEnabled.Checked = option.IsEnabled;
-            chkDisableSSL.Checked = option.DisableSSL;
+            chkDisableSSL.Checked = !option.DisableSSL;
             txtName.Text = option.Name;
             txtCertPath.Text = option.CertificatePath;
             if (option.AccessList != null)
@@ -34,7 +34,7 @@ namespace CredentialManager
         {
             var rv = new CtpInterfaceOptions();
             rv.IsEnabled = chkIsEnabled.Checked;
-            rv.DisableSSL = chkDisableSSL.Checked;
+            rv.DisableSSL = !chkDisableSSL.Checked;
             rv.Name = txtName.Text;
             rv.CertificatePath = txtCertPath.Text;
             rv.AccessList = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());

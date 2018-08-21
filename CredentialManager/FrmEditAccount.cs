@@ -20,14 +20,7 @@ namespace CredentialManager
             chkIsEnabled.Checked = account.IsEnabled;
             txtName.Text = account.Name;
             txtDescription.Text = account.Description;
-            lstTrustedIPs.Items.Clear();
-            if (account.AllowedRemoteIPs != null)
-            {
-                foreach (var item in account.AllowedRemoteIPs)
-                {
-                    lstTrustedIPs.Items.Add(item);
-                }
-            }
+           
             lstRoles.Items.Clear();
             if (account.Roles != null)
             {
@@ -36,14 +29,7 @@ namespace CredentialManager
                     lstRoles.Items.Add(item);
                 }
             }
-            lstCertificates.Items.Clear();
-            if (account.ClientCerts != null)
-            {
-                foreach (var item in account.ClientCerts)
-                {
-                    lstCertificates.Items.Add(item);
-                }
-            }
+           
         }
 
         public CtpAccount SaveData()
@@ -52,9 +38,7 @@ namespace CredentialManager
             rv.IsEnabled = chkIsEnabled.Checked;
             rv.Name = txtName.Text;
             rv.Description = txtDescription.Text;
-            rv.AllowedRemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
             rv.Roles = new List<string>(lstRoles.Items.Cast<string>());
-            rv.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
             return rv;
         }
 
@@ -63,48 +47,7 @@ namespace CredentialManager
             DialogResult = DialogResult.OK;
         }
 
-        private void btnAddTrustedIP_Click(object sender, EventArgs e)
-        {
-            lstTrustedIPs.Items.Add(new IpAndMask() { IpAddress = "127.0.0.1", MaskBits = 32 });
-
-        }
-
-        private void lstTrustedIPs_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                e.Handled = true;
-                if (lstTrustedIPs.SelectedItem == null)
-                {
-                    MessageBox.Show("Select and item");
-                    return;
-                }
-                lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
-
-            }
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-                lstTrustedIPs_MouseDoubleClick(null, null);
-            }
-        }
-
-        private void lstTrustedIPs_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (lstTrustedIPs.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-
-            using (var frm = new FrmEditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
-            {
-                if (frm.ShowDialog() == DialogResult.OK)
-                {
-                    lstTrustedIPs.Items[lstTrustedIPs.SelectedIndex] = frm.SaveData();
-                }
-            }
-        }
+        
 
       private void btnAddRoles_Click(object sender, EventArgs e)
         {
@@ -145,48 +88,7 @@ namespace CredentialManager
             }
         }
 
-        private void btnAddCertificates_Click(object sender, EventArgs e)
-        {
-            lstCertificates.Items.Add(new CtpClientCert());
-        }
-
-        private void lstCertificates_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                e.Handled = true;
-                if (lstCertificates.SelectedItem == null)
-                {
-                    MessageBox.Show("Select and item");
-                    return;
-                }
-                lstCertificates.Items.Remove(lstCertificates.SelectedItem);
-
-            }
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-                lstCertificates_MouseDoubleClick(null, null);
-            }
-        }
-
-        private void lstCertificates_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (lstCertificates.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-
-            using (var dlg = new FrmClientCertificates((CtpClientCert)lstCertificates.SelectedItem))
-            {
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    lstCertificates.Items[lstCertificates.SelectedIndex] = dlg.SaveData();
-                }
-            }
-
-        }
+       
 
        
     }

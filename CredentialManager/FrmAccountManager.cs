@@ -73,6 +73,14 @@ namespace CredentialManager
                     lstAnonymousAccountMapping.Items.Add(option);
                 }
             }
+            lstCertificates.Items.Clear();
+            if (config.ClientCerts != null)
+            {
+                foreach (var item in config.ClientCerts)
+                {
+                    lstCertificates.Items.Add(item);
+                }
+            }
         }
 
         private CtpServerConfig SaveData()
@@ -81,6 +89,7 @@ namespace CredentialManager
             cfg.Accounts = new List<CtpAccount>(lstAccounts.Items.Cast<CtpAccount>());
             cfg.InterfaceOptions = new List<CtpInterfaceOptions>(lstInterfaceOptions.Items.Cast<CtpInterfaceOptions>());
             cfg.AnonymousMappings = new List<CtpAnonymousMapping>(lstAnonymousAccountMapping.Items.Cast<CtpAnonymousMapping>());
+            cfg.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
             return cfg;
         }
 
@@ -210,6 +219,48 @@ namespace CredentialManager
                 lstAnonymousAccountMapping_MouseDoubleClick(null, null);
             }
         }
-        
+
+        private void btnAddCertificates_Click(object sender, EventArgs e)
+        {
+            lstCertificates.Items.Add(new CtpClientCert());
+        }
+
+        private void lstCertificates_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstCertificates.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstCertificates.Items.Remove(lstCertificates.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstCertificates_MouseDoubleClick(null, null);
+            }
+        }
+
+        private void lstCertificates_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstCertificates.SelectedItem == null)
+            {
+                MessageBox.Show("Select and item");
+                return;
+            }
+
+            using (var dlg = new FrmClientCertificates((CtpClientCert)lstCertificates.SelectedItem))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    lstCertificates.Items[lstCertificates.SelectedIndex] = dlg.SaveData();
+                }
+            }
+
+        }
     }
 }
