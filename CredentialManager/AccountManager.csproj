@@ -50,17 +50,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FrmEditAnonymousMapping.cs">
+    <Compile Include="FrmAnonymousMapping.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmEditAnonymousMapping.Designer.cs">
-      <DependentUpon>FrmEditAnonymousMapping.cs</DependentUpon>
+    <Compile Include="FrmAnonymousMapping.Designer.cs">
+      <DependentUpon>FrmAnonymousMapping.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmEditAccessList.cs">
+    <Compile Include="FrmAccessList.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmEditAccessList.Designer.cs">
-      <DependentUpon>FrmEditAccessList.cs</DependentUpon>
+    <Compile Include="FrmAccessList.Designer.cs">
+      <DependentUpon>FrmAccessList.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmAccountManager.cs">
       <SubType>Form</SubType>
@@ -74,17 +74,17 @@
     <Compile Include="FrmClientCertificates.Designer.cs">
       <DependentUpon>FrmClientCertificates.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmEditAccount.cs">
+    <Compile Include="FrmAccount.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmEditAccount.Designer.cs">
-      <DependentUpon>FrmEditAccount.cs</DependentUpon>
+    <Compile Include="FrmAccount.Designer.cs">
+      <DependentUpon>FrmAccount.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmInterfaceOptions.cs">
+    <Compile Include="FrmInstalledCertificates.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmInterfaceOptions.Designer.cs">
-      <DependentUpon>FrmInterfaceOptions.cs</DependentUpon>
+    <Compile Include="FrmInstalledCertificates.Designer.cs">
+      <DependentUpon>FrmInstalledCertificates.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmGenerateCertificate.cs">
       <SubType>Form</SubType>
@@ -94,11 +94,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FrmEditAnonymousMapping.resx">
-      <DependentUpon>FrmEditAnonymousMapping.cs</DependentUpon>
+    <EmbeddedResource Include="FrmAnonymousMapping.resx">
+      <DependentUpon>FrmAnonymousMapping.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmEditAccessList.resx">
-      <DependentUpon>FrmEditAccessList.cs</DependentUpon>
+    <EmbeddedResource Include="FrmAccessList.resx">
+      <DependentUpon>FrmAccessList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAccountManager.resx">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
@@ -106,11 +106,11 @@
     <EmbeddedResource Include="FrmClientCertificates.resx">
       <DependentUpon>FrmClientCertificates.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmEditAccount.resx">
-      <DependentUpon>FrmEditAccount.cs</DependentUpon>
+    <EmbeddedResource Include="FrmAccount.resx">
+      <DependentUpon>FrmAccount.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FrmInterfaceOptions.resx">
-      <DependentUpon>FrmInterfaceOptions.cs</DependentUpon>
+    <EmbeddedResource Include="FrmInstalledCertificates.resx">
+      <DependentUpon>FrmInstalledCertificates.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmGenerateCertificate.resx">
       <DependentUpon>FrmGenerateCertificate.cs</DependentUpon>

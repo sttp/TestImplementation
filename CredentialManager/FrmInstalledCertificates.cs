@@ -11,33 +11,33 @@ using CTP.Net;
 
 namespace CredentialManager
 {
-    public partial class FrmInterfaceOptions : Form
+    public partial class FrmInstalledCertificates : Form
     {
-        public FrmInterfaceOptions(CtpInterfaceOptions option)
+        public FrmInstalledCertificates(CtpInstalledCertificates option)
         {
             InitializeComponent();
 
             chkIsEnabled.Checked = option.IsEnabled;
-            chkDisableSSL.Checked = !option.DisableSSL;
+            chkDisableSSL.Checked = option.EnableSSL;
             txtName.Text = option.Name;
             txtCertPath.Text = option.CertificatePath;
-            if (option.AccessList != null)
+            if (option.RemoteIPs != null)
             {
-                foreach (var ip in option.AccessList)
+                foreach (var ip in option.RemoteIPs)
                 {
                     lstTrustedIPs.Items.Add(ip);
                 }
             }
         }
 
-        public CtpInterfaceOptions SaveData()
+        public CtpInstalledCertificates SaveData()
         {
-            var rv = new CtpInterfaceOptions();
+            var rv = new CtpInstalledCertificates();
             rv.IsEnabled = chkIsEnabled.Checked;
-            rv.DisableSSL = !chkDisableSSL.Checked;
+            rv.EnableSSL = chkDisableSSL.Checked;
             rv.Name = txtName.Text;
             rv.CertificatePath = txtCertPath.Text;
-            rv.AccessList = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
+            rv.RemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
             return rv;
         }
 
@@ -69,7 +69,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new FrmEditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
+            using (var frm = new FrmAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {

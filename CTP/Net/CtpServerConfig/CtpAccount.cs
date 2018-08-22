@@ -24,13 +24,9 @@ namespace CTP.Net
         [DocumentField()]
         public List<string> Roles { get; set; }
 
-        [DocumentField()]
-        public List<IpAndMask> AllowedRemoteIPs { get; set; }
-
         public CtpAccount()
         {
             Roles = new List<string>();
-            AllowedRemoteIPs = new List<IpAndMask>();
         }
 
         public static explicit operator CtpAccount(CtpDocument obj)
@@ -47,11 +43,6 @@ namespace CTP.Net
                     sb.Append("(Disabled) ");
                 if (!string.IsNullOrWhiteSpace(Name))
                     sb.Append("Name: " + Name + "; ");
-                if (AllowedRemoteIPs != null && AllowedRemoteIPs.Count > 0)
-                {
-                    sb.Append($"Allowed IPs: {string.Join(", ", AllowedRemoteIPs.Select(x => x.DisplayMember))}; ");
-                }
-
                 if (Roles != null)
                 {
                     sb.Append("Roles: " + string.Join(", ", Roles) + "; ");

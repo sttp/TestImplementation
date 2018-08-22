@@ -7,9 +7,9 @@ using Microsoft.VisualBasic;
 
 namespace CredentialManager
 {
-    public partial class FrmEditAccount : Form
+    public partial class FrmAccount : Form
     {
-        public FrmEditAccount(CtpAccount account)
+        public FrmAccount(CtpAccount account)
         {
             InitializeComponent();
             LoadData(account);

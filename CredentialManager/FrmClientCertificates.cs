@@ -16,7 +16,7 @@ namespace CredentialManager
             InitializeComponent();
 
             chkIsEnabled.Checked = data.IsEnabled;
-            chkSupportsTickets.Checked = data.SupportsTickets;
+            chkSupportsTickets.Checked = data.PermitProxyAuthentication;
             txtName.Text = data.CertificateName;
             txtCertPath.Text = data.CertificatePath;
             TxtPairingPinPath.Text = data.PairingPinPath;
@@ -44,7 +44,7 @@ namespace CredentialManager
         {
             var data = new CtpClientCert();
             data.IsEnabled = chkIsEnabled.Checked;
-            data.SupportsTickets = chkSupportsTickets.Checked;
+            data.PermitProxyAuthentication = chkSupportsTickets.Checked;
             data.CertificateName = txtName.Text;
             data.CertificatePath = txtCertPath.Text;
             data.PairingPinPath = TxtPairingPinPath.Text;
@@ -146,7 +146,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new FrmEditAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
+            using (var frm = new FrmAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {

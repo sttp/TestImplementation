@@ -6,27 +6,27 @@ using GSF;
 
 namespace CTP.Net
 {
-    [DocumentName("CtpInterfaceOptions")]
-    public class CtpInterfaceOptions
-        : DocumentObject<CtpInterfaceOptions>
+    [DocumentName("CtpInstalledCertificates")]
+    public class CtpInstalledCertificates
+        : DocumentObject<CtpInstalledCertificates>
     {
         [DocumentField()]
         public bool IsEnabled { get; set; }
         [DocumentField()]
         public string Name { get; set; }
         [DocumentField()]
-        public bool DisableSSL { get; set; }
+        public bool EnableSSL { get; set; }
         [DocumentField()]
         public string CertificatePath { get; set; }
         [DocumentField()]
-        public List<IpAndMask> AccessList { get; set; }
+        public List<IpAndMask> RemoteIPs { get; set; }
 
-        public CtpInterfaceOptions()
+        public CtpInstalledCertificates()
         {
-            AccessList = new List<IpAndMask>();
+            RemoteIPs = new List<IpAndMask>();
         }
 
-        public static explicit operator CtpInterfaceOptions(CtpDocument obj)
+        public static explicit operator CtpInstalledCertificates(CtpDocument obj)
         {
             return FromDocument(obj);
         }
@@ -40,7 +40,7 @@ namespace CTP.Net
                     sb.Append("(Disabled) ");
                 if (!string.IsNullOrWhiteSpace(Name))
                     sb.Append("Name: " + Name + "; ");
-                if (DisableSSL)
+                if (!EnableSSL)
                 {
                     sb.Append("SSL: OFF; ");
                 }
@@ -55,9 +55,9 @@ namespace CTP.Net
                         sb.Append("Cert: " + Path.GetFileName(CertificatePath) + "; ");
                     }
                 }
-                if (AccessList != null && AccessList.Count > 0)
+                if (RemoteIPs != null && RemoteIPs.Count > 0)
                 {
-                    sb.Append($"Remote IPs: {string.Join(", ", AccessList.Select(x=>x.DisplayMember))}; ");
+                    sb.Append($"Remote IPs: {string.Join(", ", RemoteIPs.Select(x=>x.DisplayMember))}; ");
                 }
                 return sb.ToString();
             }

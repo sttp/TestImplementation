@@ -1,6 +1,6 @@
 ﻿namespace CredentialManager
 {
-    partial class FrmInterfaceOptions
+    partial class FrmInstalledCertificates
     {
         /// <summary>
         /// Required designer variable.

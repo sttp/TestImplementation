@@ -12,9 +12,9 @@ using CTP.Net;
 
 namespace CredentialManager
 {
-    public partial class FrmEditAnonymousMapping : Form
+    public partial class FrmAnonymousMapping : Form
     {
-        public FrmEditAnonymousMapping(CtpAnonymousMapping ip)
+        public FrmAnonymousMapping(CtpAnonymousMapping ip)
         {
             InitializeComponent();
 

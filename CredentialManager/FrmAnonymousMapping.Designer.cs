@@ -1,6 +1,6 @@
 ﻿namespace CredentialManager
 {
-    partial class FrmEditAnonymousMapping
+    partial class FrmAnonymousMapping
     {
         /// <summary>
         /// Required designer variable.

@@ -12,10 +12,10 @@ using CTP.Net;
 
 namespace CredentialManager
 {
-    public partial class FrmEditAccessList : Form
+    public partial class FrmAccessList : Form
     {
 
-        public FrmEditAccessList(IpAndMask ip)
+        public FrmAccessList(IpAndMask ip)
         {
             InitializeComponent();
 

@@ -10,7 +10,7 @@ namespace CTP.Net
         public List<CtpAccount> Accounts { get; set; }
 
         [DocumentField()]
-        public List<CtpInterfaceOptions> InterfaceOptions { get; set; }
+        public List<CtpInstalledCertificates> InstalledCertificates { get; set; }
 
         [DocumentField()]
         public List<CtpAnonymousMapping> AnonymousMappings { get; set; }
@@ -22,7 +22,7 @@ namespace CTP.Net
         {
             ClientCerts = new List<CtpClientCert>();
             Accounts = new List<CtpAccount>();
-            InterfaceOptions = new List<CtpInterfaceOptions>();
+            InstalledCertificates = new List<CtpInstalledCertificates>();
             AnonymousMappings = new List<CtpAnonymousMapping>();
         }
 

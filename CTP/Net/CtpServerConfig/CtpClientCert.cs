@@ -13,7 +13,7 @@ namespace CTP.Net
         public bool IsEnabled { get; set; }
 
         [DocumentField()]
-        public bool SupportsTickets { get; set; }
+        public bool PermitProxyAuthentication { get; set; }
 
         [DocumentField()]
         public string CertificateName { get; set; }

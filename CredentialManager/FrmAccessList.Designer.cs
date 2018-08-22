@@ -1,6 +1,6 @@
 ﻿namespace CredentialManager
 {
-    partial class FrmEditAccessList
+    partial class FrmAccessList
     {
         /// <summary>
         /// Required designer variable.

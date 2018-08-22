@@ -58,9 +58,9 @@ namespace CredentialManager
                 }
             }
             lstInterfaceOptions.Items.Clear();
-            if (config.InterfaceOptions != null)
+            if (config.InstalledCertificates != null)
             {
-                foreach (var option in config.InterfaceOptions)
+                foreach (var option in config.InstalledCertificates)
                 {
                     lstInterfaceOptions.Items.Add(option);
                 }
@@ -87,7 +87,7 @@ namespace CredentialManager
         {
             var cfg = new CtpServerConfig();
             cfg.Accounts = new List<CtpAccount>(lstAccounts.Items.Cast<CtpAccount>());
-            cfg.InterfaceOptions = new List<CtpInterfaceOptions>(lstInterfaceOptions.Items.Cast<CtpInterfaceOptions>());
+            cfg.InstalledCertificates = new List<CtpInstalledCertificates>(lstInterfaceOptions.Items.Cast<CtpInstalledCertificates>());
             cfg.AnonymousMappings = new List<CtpAnonymousMapping>(lstAnonymousAccountMapping.Items.Cast<CtpAnonymousMapping>());
             cfg.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
             return cfg;
@@ -125,7 +125,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new FrmEditAccount((CtpAccount)lstAccounts.SelectedItem))
+            using (var frm = new FrmAccount((CtpAccount)lstAccounts.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
@@ -136,7 +136,7 @@ namespace CredentialManager
 
         private void btnInterfaceOptions_Click(object sender, EventArgs e)
         {
-            lstInterfaceOptions.Items.Add(new CtpInterfaceOptions());
+            lstInterfaceOptions.Items.Add(new CtpInstalledCertificates());
         }
        
         private void lstInterfaceOptions_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -147,7 +147,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new FrmInterfaceOptions((CtpInterfaceOptions)lstInterfaceOptions.SelectedItem))
+            using (var frm = new FrmInstalledCertificates((CtpInstalledCertificates)lstInterfaceOptions.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
@@ -191,7 +191,7 @@ namespace CredentialManager
                 return;
             }
 
-            using (var frm = new FrmEditAnonymousMapping((CtpAnonymousMapping)lstAnonymousAccountMapping.SelectedItem))
+            using (var frm = new FrmAnonymousMapping((CtpAnonymousMapping)lstAnonymousAccountMapping.SelectedItem))
             {
                 if (frm.ShowDialog() == DialogResult.OK)
                 {
