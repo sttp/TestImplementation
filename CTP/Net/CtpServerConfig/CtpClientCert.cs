@@ -10,24 +10,10 @@ namespace CTP.Net
         : DocumentObject<CtpClientCert>
     {
         [DocumentField()]
-        public bool IsEnabled { get; set; }
-
-        [DocumentField()]
-        public bool PermitProxyAuthentication { get; set; }
-
-        [DocumentField()]
         public string CertificateName { get; set; }
-        /// <summary>
-        /// Note: The pairing PIN is only valid if there is a file in this path.
-        /// If pairing fails, the server will delete the file specified here since pairing
-        /// credential cannot be used more than once. Once pairing is complete, the certificate at CertificatePath will
-        /// be replaced with the paired certificate.
-        /// </summary>
-        [DocumentField()]
-        public string PairingPinPath { get; set; }
 
         [DocumentField()]
-        public string CertificatePath { get; set; }
+        public List<string> CertificatePaths { get; set; }
 
         [DocumentField()]
         public string MappedAccount { get; set; }
@@ -50,22 +36,19 @@ namespace CTP.Net
             get
             {
                 var sb = new StringBuilder();
-                if (!IsEnabled)
-                    sb.Append("(Disabled) ");
-
                 if (!string.IsNullOrWhiteSpace(CertificateName))
                     sb.Append("Name: " + CertificateName + " ");
 
                 if (!string.IsNullOrWhiteSpace(MappedAccount))
                     sb.Append("=> " + MappedAccount + "; ");
 
-                if (string.IsNullOrWhiteSpace(CertificatePath))
+                if (CertificatePaths == null || CertificatePaths.Count == 0)
                 {
-                    sb.Append("Missing Certificate; ");
+                    sb.Append("Missing Certificates; ");
                 }
                 else
                 {
-                    sb.Append("Cert: " + Path.GetFileName(CertificatePath) + "; ");
+                    sb.Append("Certs: " + string.Join(", ", CertificatePaths.Select(Path.GetFileName)) + "; ");
                 }
                 return sb.ToString();
             }

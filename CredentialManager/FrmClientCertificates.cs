@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows.Forms;
 using CTP.Net;
+using Microsoft.VisualBasic;
 
 namespace CredentialManager
 {
@@ -15,18 +13,14 @@ namespace CredentialManager
         {
             InitializeComponent();
 
-            chkIsEnabled.Checked = data.IsEnabled;
-            chkSupportsTickets.Checked = data.PermitProxyAuthentication;
             txtName.Text = data.CertificateName;
-            txtCertPath.Text = data.CertificatePath;
-            TxtPairingPinPath.Text = data.PairingPinPath;
-            if (File.Exists(TxtPairingPinPath.Text))
+            lstCertificates.Items.Clear();
+            if (data.AllowedRemoteIPs != null)
             {
-                lblPin.Text = "PIN: Valid";
-            }
-            else
-            {
-                lblPin.Text = "PIN: Missing";
+                foreach (var item in data.CertificatePaths)
+                {
+                    lstCertificates.Items.Add(item);
+                }
             }
             lstTrustedIPs.Items.Clear();
             if (data.AllowedRemoteIPs != null)
@@ -43,68 +37,12 @@ namespace CredentialManager
         public CtpClientCert SaveData()
         {
             var data = new CtpClientCert();
-            data.IsEnabled = chkIsEnabled.Checked;
-            data.PermitProxyAuthentication = chkSupportsTickets.Checked;
             data.CertificateName = txtName.Text;
-            data.CertificatePath = txtCertPath.Text;
-            data.PairingPinPath = TxtPairingPinPath.Text;
+            data.CertificatePaths = new List<string>(lstCertificates.Items.Cast<string>());
             data.AllowedRemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
             data.MappedAccount = txtMappedAccount.Text;
 
             return data;
-        }
-
-        private void btnBrowseCertificate_Click(object sender, EventArgs e)
-        {
-            using (var dlg = new OpenFileDialog())
-            {
-                dlg.Filter = "Certificate|*.cer";
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    txtCertPath.Text = dlg.FileName;
-                }
-            }
-        }
-
-        private void btnBrowsePin_Click(object sender, EventArgs e)
-        {
-            using (var dlg = new OpenFileDialog())
-            {
-                dlg.Filter = "STTP Pairing Pin|*.pin";
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    TxtPairingPinPath.Text = dlg.FileName;
-                }
-            }
-        }
-
-        private void btnGeneratePin_Click(object sender, EventArgs e)
-        {
-            string validSymbols = "FHILPQRSUWXY0123456789";
-
-            StringBuilder pin = new StringBuilder();
-
-            while (pin.Length < 6)
-            {
-                byte[] code = new byte[100];
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(code);
-                    foreach (var c in code)
-                    {
-                        if (c < validSymbols.Length)
-                        {
-                            pin.Append(validSymbols[c]);
-                            if (pin.Length == 6)
-                                break;
-                        }
-                    }
-                }
-            }
-
-            lblPin.Text = "PIN: " + pin.ToString() + Environment.NewLine
-                          + "Valid for 5 minutes" + Environment.NewLine
-                          + "PIN Entropy: " + Math.Log(Math.Pow(validSymbols.Length, pin.Length), 2).ToString("N0") + "bits";
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -115,7 +53,6 @@ namespace CredentialManager
         private void btnAddTrustedIP_Click(object sender, EventArgs e)
         {
             lstTrustedIPs.Items.Add(new IpAndMask() { IpAddress = "127.0.0.1", MaskBits = 32 });
-
         }
 
         private void lstTrustedIPs_KeyUp(object sender, KeyEventArgs e)
@@ -152,6 +89,50 @@ namespace CredentialManager
                 {
                     lstTrustedIPs.Items[lstTrustedIPs.SelectedIndex] = frm.SaveData();
                 }
+            }
+        }
+
+        private void btnCertificatesAdd_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "Certificate|*.cer";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    lstCertificates.Items.Add(dlg.FileName);
+                }
+            }
+        }
+
+        private void lstCertificates_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstCertificates.SelectedItem == null)
+            {
+                MessageBox.Show("Select and item");
+                return;
+            }
+            string data = Interaction.InputBox("Edit Certificate Location", "Location", (string)lstCertificates.SelectedItem);
+            if (data.Length > 0)
+                lstCertificates.Items[lstCertificates.SelectedIndex] = data;
+        }
+
+        private void lstCertificates_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstCertificates.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstCertificates.Items.Remove(lstCertificates.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstCertificates_MouseDoubleClick(null, null);
             }
         }
     }

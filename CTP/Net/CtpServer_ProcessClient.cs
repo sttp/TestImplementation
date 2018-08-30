@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using CTP.Authentication;
 using CTP.SRP;
 
 namespace CTP.Net
@@ -39,16 +42,17 @@ namespace CTP.Net
                 {
                     TcpClient socket = m_client;
                     NetworkStream netStream = socket.GetStream();
-                    bool requireSSL = m_server.m_useSSL;
-                    bool hasAccess = m_server.DefaultAllowConnections;
-                    X509Certificate serverCertificate = m_server.DefaultCertificate;
+                    bool enableSSL = false;
+                    bool hasAccess = false;
+                    X509Certificate serverCertificate = null;
 
                     var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
-                    foreach (var item in m_server.m_encryptionOptions.Values)
+                    foreach (var item in m_server.m_config.EncryptionOptions.Values)
                     {
                         if (item.IP.IsMatch(ipBytes))
                         {
-                            hasAccess = item.HasAccess;
+                            hasAccess = true;
+                            enableSSL = item.EnableSSL;
                             serverCertificate = item.ServerCertificate;
                             break;
                         }
@@ -56,12 +60,11 @@ namespace CTP.Net
 
                     if (!hasAccess)
                     {
-                        throw new Exception("Client does not have access");
+                        throw new Exception($"Client {socket.Client.RemoteEndPoint.ToString()} is not part of an installed certificate's access list.");
                     }
 
-                    if (requireSSL)
+                    if (enableSSL)
                     {
-                        //serverCertificate = serverCertificate ?? EmphericalCertificate.Value;
                         m_ssl = new SslStream(netStream, false, null, null, EncryptionPolicy.RequireEncryption);
                         m_ssl.AuthenticateAsServer(serverCertificate, false, SslProtocols.Tls12, false);
                         m_finalStream = m_ssl;
@@ -73,31 +76,53 @@ namespace CTP.Net
 
                     m_ctpStream = new CtpStream();
                     m_ctpStream.SetActiveStream(m_finalStream);
-
                     m_session = new CtpSession(m_ctpStream, false, CertificateTrustMode.None, socket, netStream, m_ssl);
-                    m_server.Authentication.AuthenticateSessionByIP(m_session);
 
                     var doc = ReadDocument();
+                    string loginName = null;
+                    string accountName = null;
+                    List<string> roles = null;
                     switch (doc.RootElement)
                     {
                         case "Auth":
-                            //var user = SrpAuthServer.AuthSrp(m_server.ResumeKeys, m_server.Authentication, (CertExchange)doc, m_ctpStream, m_ssl);
-                            //m_session.LoginName = user.LoginName;
-                            //m_session.GrantedRoles.UnionWith(user.Roles);
+                            var auth = (Auth)doc;
+                            if (m_server.m_config.CertificateClients.TryGetValue(auth.AuthorizationCertificate, out var clientCert))
+                            {
+                                if (auth.ValidateSignature(clientCert.Certificate))
+                                {
+                                    var ticket = (Ticket)auth.Ticket;
+                                    if (ticket.ValidFrom < DateTime.UtcNow && DateTime.UtcNow <= ticket.ValidTo)
+                                    {
+                                        accountName = clientCert.ClientCert.MappedAccount;
+                                        loginName = ticket.LoginName;
+                                        roles = m_server.m_config.Accounts[accountName].Union(ticket.Roles).ToList();
+                                    }
+                                    break;
+                                }
+                            }
                             break;
-                        case "AuthResume":
-
                         case "AuthNone":
+                            foreach (var item in m_server.m_config.AnonymousMappings)
+                            {
+                                if (item.Key.IsMatch(ipBytes))
+                                {
+                                    accountName = item.Value;
+                                    roles = m_server.m_config.Accounts[accountName];
+                                    break;
+                                }
+                            }
                             break;
                         default:
                             throw new Exception();
                     }
 
+                    m_session.GrantedRoles = new HashSet<string>(roles);
+                    m_session.LoginName = loginName;
                     m_server.OnSessionCompleted(m_session);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    m_ssl.RemoteCertificate.GetCertHash();
+
                 }
             }
 

@@ -1,13 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
+    public class ClientCerts
+    {
+        public X509Certificate2 Certificate;
+        public CtpClientCert ClientCert;
+
+        public ClientCerts(CtpClientCert clientCert, X509Certificate2 certificate)
+        {
+            ClientCert = clientCert;
+            Certificate = certificate;
+        }
+    }
+
+    public class CtpRuntimeConfig
+    {
+        public SortedList<IpMatchDefinition, EncryptionOptions> EncryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
+
+        public SortedList<IpMatchDefinition, string> AnonymousMappings = new SortedList<IpMatchDefinition, string>();
+
+        public Dictionary<string, List<string>> Accounts = new Dictionary<string, List<string>>();
+
+        public Dictionary<string, ClientCerts> CertificateClients = new Dictionary<string, ClientCerts>();
+
+        public CtpRuntimeConfig(CtpServerConfig config)
+        {
+            config.Validate();
+            foreach (var item in config.InstalledCertificates)
+            {
+                if (item.IsEnabled)
+                {
+                    X509Certificate2 cert = null;
+                    if (item.EnableSSL)
+                    {
+                        if (!File.Exists(item.CertificatePath))
+                            throw new Exception($"Missing certificate for {item.Name} at {item.CertificatePath}");
+                        cert = new X509Certificate2(item.CertificatePath);
+                    }
+
+                    foreach (var ip in item.RemoteIPs)
+                    {
+                        var def = new IpMatchDefinition(IPAddress.Parse(ip.IpAddress), ip.MaskBits);
+                        EncryptionOptions.Add(def, new EncryptionOptions(def, cert));
+                    }
+                }
+            }
+
+            foreach (var item in config.AnonymousMappings)
+            {
+                var def = new IpMatchDefinition(IPAddress.Parse(item.AccessList.IpAddress), item.AccessList.MaskBits);
+                AnonymousMappings.Add(def, item.AccountName);
+            }
+
+            foreach (var item in config.Accounts)
+            {
+                Accounts.Add(item.Name, item.Roles);
+            }
+
+            foreach (var item in config.ClientCerts)
+            {
+                foreach (var path in item.CertificatePaths)
+                {
+                    if (File.Exists(path))
+                    {
+                        X509Certificate2 certificate = new X509Certificate2(path);
+                        CertificateClients.Add(certificate.Thumbprint, new ClientCerts(item, certificate));
+                    }
+                }
+            }
+        }
+    }
+
     public delegate void SessionCompletedEventHandler(CtpSession token);
 
     /// <summary>
@@ -19,41 +89,18 @@ namespace CTP.Net
         private TcpListener m_listener;
         private bool m_shutdown;
         private AsyncCallback m_onAccept;
-        private IPEndPoint m_listenEndpoint; 
+        private IPEndPoint m_listenEndpoint;
+        private CtpRuntimeConfig m_config;
         public event SessionCompletedEventHandler SessionCompleted;
-        private bool m_useSSL;
-
-        public ServerAuthentication Authentication = new ServerAuthentication();
-
-        private SortedList<IpMatchDefinition, EncryptionOptions> m_encryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
 
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        public CtpServer(IPEndPoint listenEndpoint, X509Certificate2 certificate)
+        public CtpServer(IPEndPoint listenEndpoint, CtpServerConfig config)
         {
-           // m_useSSL = useSSL;
-
+            m_config = new CtpRuntimeConfig(config);
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
-        }
-
-        public X509Certificate2 DefaultCertificate { get; private set; } = null;
-
-        public bool DefaultAllowConnections { get; private set; } = true;
-
-       // public MasterSecretDatabase ResumeKeys { get; private set; } = new MasterSecretDatabase();
-
-        public void SetDefaultOptions(bool allowConnections, X509Certificate2 defaultCertificate = null)
-        {
-            DefaultCertificate = defaultCertificate;
-            DefaultAllowConnections = allowConnections;
-        }
-
-        public void SetIPSpecificOptions(IPAddress remoteIP, int bitmask, bool allowConnections = true, X509Certificate localCertificate = null)
-        {
-            var mask = new IpMatchDefinition(remoteIP, bitmask);
-            m_encryptionOptions[mask] = new EncryptionOptions(mask, allowConnections, localCertificate);
         }
 
         /// <summary>

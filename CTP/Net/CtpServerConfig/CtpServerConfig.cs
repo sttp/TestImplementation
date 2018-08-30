@@ -10,13 +10,13 @@ namespace CTP.Net
         public List<CtpAccount> Accounts { get; set; }
 
         [DocumentField()]
-        public List<CtpInstalledCertificates> InstalledCertificates { get; set; }
-
-        [DocumentField()]
         public List<CtpAnonymousMapping> AnonymousMappings { get; set; }
 
         [DocumentField()]
         public List<CtpClientCert> ClientCerts { get; set; }
+
+        [DocumentField()]
+        public List<CtpInstalledCertificates> InstalledCertificates { get; set; }
 
         public CtpServerConfig()
         {
@@ -29,6 +29,12 @@ namespace CTP.Net
         public static explicit operator CtpServerConfig(CtpDocument obj)
         {
             return FromDocument(obj);
+        }
+
+        public void Validate()
+        {
+
+
         }
     }
 }

@@ -8,9 +8,9 @@ namespace CTP.SRP
     /// <summary>
     /// Requests resuming an authentication session that was started in another session.
     /// </summary>
-    [DocumentName("AuthTicket")]
-    public class AuthTicket
-        : DocumentObject<AuthTicket>
+    [DocumentName("Auth")]
+    public class Auth
+        : DocumentObject<Auth>
     {
         /// <summary>
         /// This field is a CTPDocument of type <see cref="Ticket"/>.
@@ -19,15 +19,15 @@ namespace CTP.SRP
         public CtpDocument Ticket { get; private set; }
 
         [DocumentField()]
-        public byte[] AuthorizationCertificate;
+        public string AuthorizationCertificate;
 
         [DocumentField()]
         public byte[] Signature;
 
-        public AuthTicket(Ticket ticket, X509Certificate2 certificate)
+        public Auth(Ticket ticket, X509Certificate2 certificate)
         {
             Ticket = ticket.ToDocument();
-            AuthorizationCertificate = certificate.GetPublicKey();
+            AuthorizationCertificate = certificate.Thumbprint;
             using (var rsa = certificate.GetRSAPrivateKey())
             {
                 Signature = rsa.SignData(Ticket.ToArray(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
@@ -42,12 +42,12 @@ namespace CTP.SRP
             }
         }
 
-        private AuthTicket()
+        private Auth()
         {
 
         }
 
-        public static explicit operator AuthTicket(CtpDocument obj)
+        public static explicit operator Auth(CtpDocument obj)
         {
             return FromDocument(obj);
         }

@@ -27,4 +27,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.DirectoryServices.Protocols" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Authentication\AuthTickets\" />
+  </ItemGroup>
 </Project>
