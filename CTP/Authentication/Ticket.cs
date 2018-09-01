@@ -31,7 +31,7 @@ namespace CTP.Authentication
         /// The list of approved certificates that the remote resource may use. 
         /// This is the SHA-256 hash of the public key.
         /// </summary>
-        [DocumentField()] public List<byte[]> ApprovedClientCertificates { get; private set; }
+        [DocumentField()] public List<string> ApprovedClientCertificates { get; private set; }
 
         private Ticket()
         {
@@ -43,7 +43,7 @@ namespace CTP.Authentication
             return FromDocument(obj);
         }
 
-        public Ticket(DateTime validFrom, DateTime validTo, string loginName, List<string> roles, List<byte[]> approvedClientCertificates)
+        public Ticket(DateTime validFrom, DateTime validTo, string loginName, List<string> roles, List<string> approvedClientCertificates)
         {
             ValidFrom = validFrom;
             ValidTo = validTo;

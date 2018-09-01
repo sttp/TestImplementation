@@ -34,11 +34,6 @@ namespace CTP.Net
         private CtpStream m_ctpStream;
 
         /// <summary>
-        /// Gets how the remote endpoint is trusted.
-        /// </summary>
-        public readonly CertificateTrustMode TrustMode;
-
-        /// <summary>
         /// The login name assigned to this session. Typically this will only be tracked by the server.
         /// </summary>
         public string LoginName = string.Empty;
@@ -58,13 +53,12 @@ namespace CTP.Net
 
         public event DataReceivedEventHandler DataReceived;
 
-        public CtpSession(CtpStream stream, bool isServer, CertificateTrustMode trustMode, TcpClient socket, NetworkStream netStream, SslStream ssl)
+        public CtpSession(CtpStream stream, bool isServer, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
             m_ctpStream = stream;
             IsServer = isServer;
             m_commandHandler = new CommandHandler();
             m_dataChannelHandler = new ICtpDataChannelHandler[32];
-            TrustMode = trustMode;
             Socket = socket;
             NetStream = netStream;
             Ssl = ssl;

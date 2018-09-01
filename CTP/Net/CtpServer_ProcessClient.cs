@@ -76,7 +76,7 @@ namespace CTP.Net
 
                     m_ctpStream = new CtpStream();
                     m_ctpStream.SetActiveStream(m_finalStream);
-                    m_session = new CtpSession(m_ctpStream, false, CertificateTrustMode.None, socket, netStream, m_ssl);
+                    m_session = new CtpSession(m_ctpStream, false, socket, netStream, m_ssl);
 
                     var doc = ReadDocument();
                     string loginName = null;
