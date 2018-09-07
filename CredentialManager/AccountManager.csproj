@@ -80,12 +80,6 @@
     <Compile Include="FrmAccount.Designer.cs">
       <DependentUpon>FrmAccount.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrmInstalledCertificates.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmInstalledCertificates.Designer.cs">
-      <DependentUpon>FrmInstalledCertificates.cs</DependentUpon>
-    </Compile>
     <Compile Include="FrmGenerateCertificate.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -108,9 +102,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAccount.resx">
       <DependentUpon>FrmAccount.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmInstalledCertificates.resx">
-      <DependentUpon>FrmInstalledCertificates.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmGenerateCertificate.resx">
       <DependentUpon>FrmGenerateCertificate.cs</DependentUpon>

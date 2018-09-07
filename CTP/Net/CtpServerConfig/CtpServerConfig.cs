@@ -16,13 +16,15 @@ namespace CTP.Net
         public List<CtpClientCert> ClientCerts { get; set; }
 
         [DocumentField()]
-        public List<CtpInstalledCertificates> InstalledCertificates { get; set; }
+        public bool EnableSSL;
+
+        [DocumentField()]
+        public string ServerCertificatePath { get; set; }
 
         public CtpServerConfig()
         {
             ClientCerts = new List<CtpClientCert>();
             Accounts = new List<CtpAccount>();
-            InstalledCertificates = new List<CtpInstalledCertificates>();
             AnonymousMappings = new List<CtpAnonymousMapping>();
         }
 

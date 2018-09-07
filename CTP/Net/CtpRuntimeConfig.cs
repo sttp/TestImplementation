@@ -8,7 +8,8 @@ namespace CTP.Net
 {
     public class CtpRuntimeConfig
     {
-        public SortedList<IpMatchDefinition, EncryptionOptions> EncryptionOptions = new SortedList<IpMatchDefinition, EncryptionOptions>();
+
+        public EncryptionOptions EncryptionOptions;
 
         public SortedList<IpMatchDefinition, string> AnonymousMappings = new SortedList<IpMatchDefinition, string>();
 
@@ -19,30 +20,20 @@ namespace CTP.Net
         public CtpRuntimeConfig(CtpServerConfig config)
         {
             config.Validate();
-            foreach (var item in config.InstalledCertificates)
+            X509Certificate2 cert = null;
+            if (config.EnableSSL)
             {
-                if (item.IsEnabled)
-                {
-                    X509Certificate2 cert = null;
-                    if (item.EnableSSL)
-                    {
-                        if (!File.Exists(item.CertificatePath))
-                            throw new Exception($"Missing certificate for {item.Name} at {item.CertificatePath}");
-                        cert = new X509Certificate2(item.CertificatePath);
-                    }
-
-                    foreach (var ip in item.RemoteIPs)
-                    {
-                        var def = new IpMatchDefinition(IPAddress.Parse(ip.IpAddress), ip.MaskBits);
-                        EncryptionOptions.Add(def, new EncryptionOptions(def, cert));
-                    }
-                }
+                if (!File.Exists(config.ServerCertificatePath))
+                    throw new Exception($"Missing certificate at {config.ServerCertificatePath}");
+                cert = new X509Certificate2(config.ServerCertificatePath);
             }
+
+            EncryptionOptions = new EncryptionOptions(cert);
 
             foreach (var item in config.AnonymousMappings)
             {
                 var def = new IpMatchDefinition(IPAddress.Parse(item.AccessList.IpAddress), item.AccessList.MaskBits);
-                AnonymousMappings.Add(def, item.AccountName);
+                AnonymousMappings.Add(def, item.MappedAccount);
             }
 
             foreach (var item in config.Accounts)

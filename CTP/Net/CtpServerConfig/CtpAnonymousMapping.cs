@@ -11,7 +11,10 @@ namespace CTP.Net
         : DocumentObject<CtpAnonymousMapping>
     {
         [DocumentField()]
-        public string AccountName { get; set; }
+        public string Name { get; set; }
+
+        [DocumentField()]
+        public string MappedAccount { get; set; }
 
         [DocumentField()]
         public IpAndMask AccessList { get; set; }
@@ -31,11 +34,14 @@ namespace CTP.Net
             get
             {
                 var sb = new StringBuilder();
+                if (!string.IsNullOrWhiteSpace(Name))
+                    sb.Append(Name + ": ");
+
                 if (AccessList != null)
                     sb.Append(AccessList.DisplayMember + " => ");
 
-                if (!string.IsNullOrWhiteSpace(AccountName))
-                    sb.Append(AccountName);
+                if (!string.IsNullOrWhiteSpace(MappedAccount))
+                    sb.Append(MappedAccount);
              
                 return sb.ToString();
             }

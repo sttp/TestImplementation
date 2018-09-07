@@ -20,7 +20,8 @@ namespace CredentialManager
 
             txtAddress.Text = ip.AccessList.IpAddress.ToString();
             numMask.Value = ip.AccessList.MaskBits;
-            txtAccount.Text = ip.AccountName;
+            txtMappedAccount.Text = ip.MappedAccount;
+            txtName.Text = ip.Name;
 
         }
 
@@ -31,7 +32,8 @@ namespace CredentialManager
             ip.IpAddress = txtAddress.Text;
             var rv = new CtpAnonymousMapping();
             rv.AccessList = ip;
-            rv.AccountName = txtAccount.Text;
+            rv.MappedAccount = txtMappedAccount.Text;
+            rv.Name = txtName.Text;
             return rv;
         }
 

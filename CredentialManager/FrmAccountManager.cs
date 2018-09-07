@@ -57,14 +57,7 @@ namespace CredentialManager
                     lstAccounts.Items.Add(account);
                 }
             }
-            lstInterfaceOptions.Items.Clear();
-            if (config.InstalledCertificates != null)
-            {
-                foreach (var option in config.InstalledCertificates)
-                {
-                    lstInterfaceOptions.Items.Add(option);
-                }
-            }
+            
             lstAnonymousAccountMapping.Items.Clear();
             if (config.AnonymousMappings != null)
             {
@@ -87,7 +80,6 @@ namespace CredentialManager
         {
             var cfg = new CtpServerConfig();
             cfg.Accounts = new List<CtpAccount>(lstAccounts.Items.Cast<CtpAccount>());
-            cfg.InstalledCertificates = new List<CtpInstalledCertificates>(lstInterfaceOptions.Items.Cast<CtpInstalledCertificates>());
             cfg.AnonymousMappings = new List<CtpAnonymousMapping>(lstAnonymousAccountMapping.Items.Cast<CtpAnonymousMapping>());
             cfg.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
             return cfg;
@@ -132,49 +124,6 @@ namespace CredentialManager
                     lstAccounts.Items[lstAccounts.SelectedIndex] = frm.SaveData();
                 }
             }
-        }
-
-        private void btnInterfaceOptions_Click(object sender, EventArgs e)
-        {
-            lstInterfaceOptions.Items.Add(new CtpInstalledCertificates());
-        }
-       
-        private void lstInterfaceOptions_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (lstInterfaceOptions.SelectedItem == null)
-            {
-                MessageBox.Show("Select an item to edit");
-                return;
-            }
-
-            using (var frm = new FrmInstalledCertificates((CtpInstalledCertificates)lstInterfaceOptions.SelectedItem))
-            {
-                if (frm.ShowDialog() == DialogResult.OK)
-                {
-                    lstInterfaceOptions.Items[lstInterfaceOptions.SelectedIndex] = frm.SaveData();
-                }
-            }
-        }
-
-        private void lstInterfaceOptions_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                e.Handled = true;
-                if (lstInterfaceOptions.SelectedItem == null)
-                {
-                    MessageBox.Show("Select an item to remove");
-                    return;
-                }
-                lstInterfaceOptions.Items.Remove(lstInterfaceOptions.SelectedItem);
-            }
-
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-                lstInterfaceOptions_MouseDoubleClick(null, null);
-            }
-
         }
 
         private void btnAddAnonomousAccountMapping_Click(object sender, EventArgs e)

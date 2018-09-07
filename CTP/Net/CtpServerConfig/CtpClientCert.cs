@@ -24,6 +24,7 @@ namespace CTP.Net
         public CtpClientCert()
         {
             AllowedRemoteIPs = new List<IpAndMask>();
+            CertificatePaths = new List<string>();
         }
 
         public static explicit operator CtpClientCert(CtpDocument obj)
