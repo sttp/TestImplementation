@@ -13,8 +13,23 @@ namespace CTP.Net
 {
     public delegate void PacketReceivedEventHandler(CtpSession sender, CtpPacket packet);
 
-    public class CtpSession
+    public enum ReceiveMode
     {
+        Blocking,
+        Queueing,
+        Events
+    }
+
+    public enum SendMode
+    {
+        Blocking,
+        Queueing
+    }
+
+    public class CtpSession : IDisposable
+    {
+        public event Action OnDisposed;
+
         private ConcurrentQueue<CtpPacket> m_writeQueue = new ConcurrentQueue<CtpPacket>();
         private ConcurrentQueue<CtpPacket> m_readQueue = new ConcurrentQueue<CtpPacket>();
 
@@ -50,11 +65,17 @@ namespace CTP.Net
 
         public ScheduledTask m_processReads;
         public ScheduledTask m_processWrites;
+        private bool m_processReceivedPackets;
+        private bool m_started;
 
-        //public event PacketReceivedEventHandler PacketReceived;
+        public ReceiveMode ReceiveMode { get; private set; }
+        public SendMode SendMode { get; private set; }
+
+        public event PacketReceivedEventHandler PacketReceived;
 
         public CtpSession(CtpStream stream, bool isServer, TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
+            stream.OnDisposed += StreamOnOnDisposed;
             m_ctpStream = stream;
             IsServer = isServer;
             Socket = socket;
@@ -68,6 +89,33 @@ namespace CTP.Net
 
             m_processWrites = new ScheduledTask(ThreadingMode.DedicatedBackground);
             m_processWrites.Running += M_processWrites_Running;
+        }
+
+        public void Start(ReceiveMode receiveMode, SendMode sendMode)
+        {
+            if (m_started)
+                throw new Exception("Already Started");
+            m_started = true;
+            SendMode = sendMode;
+            ReceiveMode = receiveMode;
+            switch (receiveMode)
+            {
+                case ReceiveMode.Blocking:
+                    break;
+                case ReceiveMode.Queueing:
+                case ReceiveMode.Events:
+                    m_processReads.Start();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(receiveMode), receiveMode, null);
+            }
+
+        }
+
+        private void StreamOnOnDisposed()
+        {
+            Dispose();
+            OnDisposed?.Invoke();
         }
 
         private void M_processWrites_Running(object sender, EventArgs<ScheduledTaskRunningReason> e)
@@ -87,7 +135,19 @@ namespace CTP.Net
             while (true)
             {
                 var packet = m_ctpStream.Read();
-                m_readQueue.Enqueue(packet);
+                switch (ReceiveMode)
+                {
+                    case ReceiveMode.Queueing:
+                        m_readQueue.Enqueue(packet);
+                        break;
+                    case ReceiveMode.Events:
+                        PacketReceived?.Invoke(this, packet);
+                        break;
+                    case ReceiveMode.Blocking:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 //{
                 //    if (m_ctpStream.Results.Channel == 0)
                 //    {
@@ -120,24 +180,63 @@ namespace CTP.Net
 
         public bool TryRead(CtpPacket packet)
         {
-            return m_readQueue.TryDequeue(out packet);
+            switch (ReceiveMode)
+            {
+                case ReceiveMode.Blocking:
+                    packet = m_ctpStream.Read();
+                    return true;
+                case ReceiveMode.Queueing:
+                    return m_readQueue.TryDequeue(out packet);
+                case ReceiveMode.Events:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public void SendRaw(byte[] data, byte channel)
         {
-            m_writeQueue.Enqueue(new CtpPacket(channel, true, data));
-            m_processWrites.Start();
+            switch (SendMode)
+            {
+                case SendMode.Blocking:
+                    m_ctpStream.Write(new CtpPacket(channel, true, data));
+                    LastSentTime = ShortTime.Now;
+                    break;
+                case SendMode.Queueing:
+                    m_writeQueue.Enqueue(new CtpPacket(channel, true, data));
+                    m_processWrites.Start();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public void Send(DocumentObject document, byte channel = 0)
         {
-            m_writeQueue.Enqueue(new CtpPacket(channel, document));
-            m_processWrites.Start();
-            LastSentTime = ShortTime.Now;
+            switch (SendMode)
+            {
+                case SendMode.Blocking:
+                    m_ctpStream.Write(new CtpPacket(channel, document));
+                    LastSentTime = ShortTime.Now;
+                    break;
+                case SendMode.Queueing:
+                    m_writeQueue.Enqueue(new CtpPacket(channel, document));
+                    m_processWrites.Start();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
         }
 
-
-
-
+        public void Dispose()
+        {
+            m_ctpStream?.Dispose();
+            Ssl?.Dispose();
+            NetStream?.Dispose();
+            Socket?.Dispose();
+            m_stream?.Dispose();
+            m_processReads?.Dispose();
+            m_processWrites?.Dispose();
+        }
     }
 }

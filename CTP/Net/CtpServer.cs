@@ -10,7 +10,7 @@ namespace CTP.Net
     /// <summary>
     /// Listens on a specific endpoint to accept connections.
     /// </summary>
-    public partial class CtpServer
+    public partial class CtpServer : IDisposable
     {
         private readonly ManualResetEvent m_shutdownEvent = new ManualResetEvent(false);
         private TcpListener m_listener;
@@ -122,6 +122,12 @@ namespace CTP.Net
         protected virtual void OnSessionCompleted(CtpSession token)
         {
             SessionCompleted?.Invoke(token);
+        }
+
+        public void Dispose()
+        {
+            m_listener?.Stop();
+            m_listener = null;
         }
     }
 }

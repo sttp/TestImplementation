@@ -13,6 +13,8 @@ namespace CTP
     /// </summary>
     public class CtpStream : IDisposable
     {
+        public event Action OnDisposed;
+
         private object m_writeLock = new object();
 
         private object m_readLock = new object();
@@ -81,46 +83,54 @@ namespace CTP
         /// </summary>
         public void Write(CtpPacket packet)
         {
-            if (packet == null)
-                throw new ArgumentNullException(nameof(packet));
-
-            //In case of an overflow exception.
-            int payloadLengthBytes = LengthOfPayloadLength(packet.Payload.Length);
-            int totalSize = packet.Payload.Length + 1 + payloadLengthBytes;
-            if (totalSize > MaximumPacketSize)
-                throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
-
-            lock (m_writeLock)
+            try
             {
-                EnsureCapacity(totalSize);
-                Array.Copy(packet.Payload, 0, m_writeBuffer, 1 + payloadLengthBytes, packet.Payload.Length);
-                m_writeBuffer[0] = (byte)(packet.Channel + ((payloadLengthBytes - 1) << 4) + ((packet.IsRawData ? 1 : 0) << 6));
-                switch (payloadLengthBytes)
-                {
-                    case 1:
-                        m_writeBuffer[1] = (byte)packet.Payload.Length;
-                        break;
-                    case 2:
-                        m_writeBuffer[1] = (byte)(packet.Payload.Length >> 8);
-                        m_writeBuffer[2] = (byte)packet.Payload.Length;
-                        break;
-                    case 3:
-                        m_writeBuffer[1] = (byte)(packet.Payload.Length >> 16);
-                        m_writeBuffer[2] = (byte)(packet.Payload.Length >> 8);
-                        m_writeBuffer[3] = (byte)packet.Payload.Length;
-                        break;
-                    case 4:
-                        m_writeBuffer[1] = (byte)(packet.Payload.Length >> 24);
-                        m_writeBuffer[2] = (byte)(packet.Payload.Length >> 16);
-                        m_writeBuffer[3] = (byte)(packet.Payload.Length >> 8);
-                        m_writeBuffer[4] = (byte)packet.Payload.Length;
-                        break;
-                }
+                if (packet == null)
+                    throw new ArgumentNullException(nameof(packet));
 
-                var stream = m_stream;
-                if (stream == null)
-                    throw new ObjectDisposedException("Stream has been closed");
-                stream.Write(m_writeBuffer, 0, totalSize);
+                //In case of an overflow exception.
+                int payloadLengthBytes = LengthOfPayloadLength(packet.Payload.Length);
+                int totalSize = packet.Payload.Length + 1 + payloadLengthBytes;
+                if (totalSize > MaximumPacketSize)
+                    throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
+
+                lock (m_writeLock)
+                {
+                    EnsureCapacity(totalSize);
+                    Array.Copy(packet.Payload, 0, m_writeBuffer, 1 + payloadLengthBytes, packet.Payload.Length);
+                    m_writeBuffer[0] = (byte)(packet.Channel + ((payloadLengthBytes - 1) << 4) + ((packet.IsRawData ? 1 : 0) << 6));
+                    switch (payloadLengthBytes)
+                    {
+                        case 1:
+                            m_writeBuffer[1] = (byte)packet.Payload.Length;
+                            break;
+                        case 2:
+                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 8);
+                            m_writeBuffer[2] = (byte)packet.Payload.Length;
+                            break;
+                        case 3:
+                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 16);
+                            m_writeBuffer[2] = (byte)(packet.Payload.Length >> 8);
+                            m_writeBuffer[3] = (byte)packet.Payload.Length;
+                            break;
+                        case 4:
+                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 24);
+                            m_writeBuffer[2] = (byte)(packet.Payload.Length >> 16);
+                            m_writeBuffer[3] = (byte)(packet.Payload.Length >> 8);
+                            m_writeBuffer[4] = (byte)packet.Payload.Length;
+                            break;
+                    }
+
+                    var stream = m_stream;
+                    if (stream == null)
+                        throw new ObjectDisposedException("Stream has been closed");
+                    stream.Write(m_writeBuffer, 0, totalSize);
+                }
+            }
+            catch (Exception)
+            {
+                Dispose();
+                throw;
             }
         }
 
@@ -146,39 +156,48 @@ namespace CTP
         /// <returns></returns>
         public CtpPacket Read()
         {
-            lock (m_readLock)
+            try
             {
-                CtpPacket packet;
-                while (!InternalRead(out packet))
+                lock (m_readLock)
                 {
-                    var stream = m_stream;
-                    if (stream == null)
-                        throw new ObjectDisposedException("Stream has been closed");
-                    int length = stream.Read(m_readBuffer, 0, m_readBuffer.Length);
-                    if (length == 0)
-                        throw new EndOfStreamException("The stream has been shutdown");
-
-                    if (m_inboundBufferCurrentPosition > 0 && m_inboundBufferLength != 0)
+                    CtpPacket packet;
+                    while (!InternalRead(out packet))
                     {
-                        // Compact - trims all data before current position if position is in middle of stream
-                        Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, m_inboundBuffer, 0, m_inboundBufferLength);
-                    }
-                    m_inboundBufferCurrentPosition = 0;
+                        var stream = m_stream;
+                        if (stream == null)
+                            throw new ObjectDisposedException("Stream has been closed");
+                        int length = stream.Read(m_readBuffer, 0, m_readBuffer.Length);
+                        if (length == 0)
+                            throw new EndOfStreamException("The stream has been shutdown");
 
-                    int growSize = m_inboundBufferLength + length;
-                    if (m_inboundBuffer.Length < growSize)
-                    {
-                        //12% larger than the requested buffer size.
-                        byte[] newBuffer = new byte[growSize + (growSize >> 3)];
-                        m_inboundBuffer.CopyTo(newBuffer, 0);
-                        m_inboundBuffer = newBuffer;
-                    }
+                        if (m_inboundBufferCurrentPosition > 0 && m_inboundBufferLength != 0)
+                        {
+                            // Compact - trims all data before current position if position is in middle of stream
+                            Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, m_inboundBuffer, 0, m_inboundBufferLength);
+                        }
+                        m_inboundBufferCurrentPosition = 0;
 
-                    Array.Copy(m_readBuffer, 0, m_inboundBuffer, m_inboundBufferLength, length);
-                    m_inboundBufferLength += length;
+                        int growSize = m_inboundBufferLength + length;
+                        if (m_inboundBuffer.Length < growSize)
+                        {
+                            //12% larger than the requested buffer size.
+                            byte[] newBuffer = new byte[growSize + (growSize >> 3)];
+                            m_inboundBuffer.CopyTo(newBuffer, 0);
+                            m_inboundBuffer = newBuffer;
+                        }
+
+                        Array.Copy(m_readBuffer, 0, m_inboundBuffer, m_inboundBufferLength, length);
+                        m_inboundBufferLength += length;
+                    }
+                    return packet;
                 }
-                return packet;
             }
+            catch (Exception)
+            {
+                Dispose();
+                throw;
+            }
+
         }
 
         /// <summary>
@@ -251,7 +270,11 @@ namespace CTP
         public void Dispose()
         {
             var stream = Interlocked.Exchange(ref m_stream, null);
-            stream?.Dispose();
+            if (stream != null)
+            {
+                stream.Dispose();
+                ThreadPool.QueueUserWorkItem(x => OnDisposed?.Invoke());
+            }
         }
     }
 }
