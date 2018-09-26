@@ -89,27 +89,14 @@ namespace CTP
         }
 
         /// <summary>
-        /// The approximate current size of the writer. It's not exact until <see cref="ToCtpDocument"/> has been called.
+        /// The size of the writer if all elements were closed and the data was serialized.
         /// </summary>
-        public int Length => m_stream.Length + m_prefixLength;
-
-        public bool IsArrayElement => m_elementIsArrayStack.Count > 0 && m_elementIsArrayStack.Peek();
+        public int Length => m_stream.Length + m_prefixLength + m_elementStack.Count;
 
         /// <summary>
-        /// Resets a document writer so it can be reused.
+        /// Indicates that the current element is an array element.
         /// </summary>
-        /// <param name="rootElement"></param>
-        public void Reset(string rootElement)
-        {
-            m_prefixLength = 4;
-            m_elementNamesLookup.Clear();
-            m_elementNames.Clear();
-            m_elementStack.Clear();
-            m_elementIsArrayStack.Clear();
-            m_stream.Clear();
-            m_rootElement = rootElement;
-            m_prefixLength += m_rootElement.Length + 1;
-        }
+        public bool IsArrayElement => m_elementIsArrayStack.Count > 0 && m_elementIsArrayStack.Peek();
 
         /// <summary>
         /// Starts a new element with the specified name. 

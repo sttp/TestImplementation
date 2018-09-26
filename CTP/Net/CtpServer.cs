@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace CTP.Net
 {
-    public delegate void SessionCompletedEventHandler(CtpSession token);
+    public delegate void SessionCompletedEventHandler(CtpSession session);
 
     /// <summary>
     /// Listens on a specific endpoint to accept connections.
@@ -18,6 +18,7 @@ namespace CTP.Net
         private AsyncCallback m_onAccept;
         private IPEndPoint m_listenEndpoint;
         private CtpRuntimeConfig m_config;
+
         public event SessionCompletedEventHandler SessionCompleted;
 
         /// <summary>

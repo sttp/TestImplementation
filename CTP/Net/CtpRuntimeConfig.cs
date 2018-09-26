@@ -32,7 +32,7 @@ namespace CTP.Net
 
             foreach (var item in config.AnonymousMappings)
             {
-                var def = new IpMatchDefinition(IPAddress.Parse(item.AccessList.IpAddress), item.AccessList.MaskBits);
+                var def = new IpMatchDefinition(IPAddress.Parse(item.TrustedIPs.IpAddress), item.TrustedIPs.MaskBits);
                 AnonymousMappings.Add(def, item.MappedAccount);
             }
 

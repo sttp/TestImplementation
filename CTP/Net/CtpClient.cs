@@ -54,8 +54,7 @@ namespace CTP.Net
                 m_finalStream = m_netStream;
             }
 
-            m_ctpStream = new CtpStream();
-            m_ctpStream.SetActiveStream(m_finalStream);
+            m_ctpStream = new CtpStream(m_finalStream);
             m_clientSession = new CtpSession(m_ctpStream, true, m_socket, m_netStream, m_sslStream);
             if (m_auth == null)
             {

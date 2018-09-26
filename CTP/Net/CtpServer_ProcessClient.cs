@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using CTP.Authentication;
 using CTP.SRP;
@@ -30,6 +29,7 @@ namespace CTP.Net
             {
                 m_server = server;
                 m_client = client;
+
 
                 var thread = new Thread(Process);
                 thread.IsBackground = true;
@@ -56,8 +56,7 @@ namespace CTP.Net
                         m_finalStream = netStream;
                     }
 
-                    m_ctpStream = new CtpStream();
-                    m_ctpStream.SetActiveStream(m_finalStream);
+                    m_ctpStream = new CtpStream(m_finalStream);
                     m_session = new CtpSession(m_ctpStream, false, socket, netStream, m_ssl);
 
                     var doc = ReadDocument();
@@ -111,8 +110,8 @@ namespace CTP.Net
 
             private CtpDocument ReadDocument()
             {
-                m_ctpStream.Read(-1);
-                return new CtpDocument(m_ctpStream.Results.Payload);
+                var packet = m_ctpStream.Read();
+                return new CtpDocument(packet.Payload);
             }
 
 

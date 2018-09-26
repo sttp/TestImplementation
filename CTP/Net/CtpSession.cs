@@ -74,25 +74,25 @@ namespace CTP.Net
                 return;
 
             LastReceiveTime = ShortTime.Now;
-            while (m_ctpStream.Read())
-            {
-                if (m_ctpStream.Results.PayloadKind == 0)
-                {
-                    var cmd = new CtpDocument(m_ctpStream.Results.Payload);
-                    if (!m_commandHandler.TryHandle(this, cmd))
-                    {
-                        CommandReceived?.Invoke(this, cmd);
-                    }
-                }
-                else
-                {
-                    var dataHandler = m_dataChannelHandler[m_ctpStream.Results.PayloadKind];
-                    if (dataHandler != null)
-                        dataHandler.ProcessData(this, m_ctpStream.Results.Payload);
-                    else
-                        DataReceived?.Invoke(this, m_ctpStream.Results.PayloadKind, m_ctpStream.Results.Payload);
-                }
-            }
+            //while (m_ctpStream.Read())
+            //{
+            //    if (m_ctpStream.Results.Channel == 0)
+            //    {
+            //        var cmd = new CtpDocument(m_ctpStream.Results.Payload);
+            //        if (!m_commandHandler.TryHandle(this, cmd))
+            //        {
+            //            CommandReceived?.Invoke(this, cmd);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        var dataHandler = m_dataChannelHandler[m_ctpStream.Results.Channel];
+            //        if (dataHandler != null)
+            //            dataHandler.ProcessData(this, m_ctpStream.Results.Payload);
+            //        else
+            //            DataReceived?.Invoke(this, m_ctpStream.Results.Channel, m_ctpStream.Results.Payload);
+            //    }
+            //}
         }
 
         /// <summary>
@@ -100,7 +100,6 @@ namespace CTP.Net
         /// </summary>
         public void Start()
         {
-            m_ctpStream.DataReceived += Start;
             m_processReads.Start();
         }
 
@@ -120,19 +119,19 @@ namespace CTP.Net
 
         public void SendData(byte channel, byte[] data)
         {
-            m_ctpStream.Send(channel, data);
+            m_ctpStream.Write(channel, data);
             LastSentTime = ShortTime.Now;
         }
 
         public void SendCommand(CtpDocument document)
         {
-            m_ctpStream.Send(0, document.ToArray());
+            m_ctpStream.Write(0, document.ToArray());
             LastSentTime = ShortTime.Now;
         }
 
         public void SendCommand(DocumentObject document)
         {
-            m_ctpStream.Send(0, document.ToDocument().ToArray());
+            m_ctpStream.Write(0, document.ToDocument().ToArray());
             LastSentTime = ShortTime.Now;
         }
 

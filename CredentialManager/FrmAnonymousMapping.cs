@@ -18,8 +18,8 @@ namespace CredentialManager
         {
             InitializeComponent();
 
-            txtAddress.Text = ip.AccessList.IpAddress.ToString();
-            numMask.Value = ip.AccessList.MaskBits;
+            txtAddress.Text = ip.TrustedIPs.IpAddress.ToString();
+            numMask.Value = ip.TrustedIPs.MaskBits;
             txtMappedAccount.Text = ip.MappedAccount;
             txtName.Text = ip.Name;
 
@@ -31,7 +31,7 @@ namespace CredentialManager
             ip.MaskBits = (int)numMask.Value;
             ip.IpAddress = txtAddress.Text;
             var rv = new CtpAnonymousMapping();
-            rv.AccessList = ip;
+            rv.TrustedIPs = ip;
             rv.MappedAccount = txtMappedAccount.Text;
             rv.Name = txtName.Text;
             return rv;

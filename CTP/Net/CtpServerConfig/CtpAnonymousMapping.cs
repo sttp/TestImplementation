@@ -7,7 +7,7 @@ using GSF;
 namespace CTP.Net
 {
     [DocumentName("CtpAnonymousMapping")]
-    public class CtpAnonymousMapping
+    public class CtpAnonymousMapping 
         : DocumentObject<CtpAnonymousMapping>
     {
         [DocumentField()]
@@ -17,11 +17,11 @@ namespace CTP.Net
         public string MappedAccount { get; set; }
 
         [DocumentField()]
-        public IpAndMask AccessList { get; set; }
+        public IpAndMask TrustedIPs { get; set; }
 
         public CtpAnonymousMapping()
         {
-            AccessList = new IpAndMask() { IpAddress = "255.255.255.255", MaskBits = 32 };
+            TrustedIPs = new IpAndMask() { IpAddress = "255.255.255.255", MaskBits = 32 };
         }
 
         public static explicit operator CtpAnonymousMapping(CtpDocument obj)
@@ -37,8 +37,8 @@ namespace CTP.Net
                 if (!string.IsNullOrWhiteSpace(Name))
                     sb.Append(Name + ": ");
 
-                if (AccessList != null)
-                    sb.Append(AccessList.DisplayMember + " => ");
+                if (TrustedIPs != null)
+                    sb.Append(TrustedIPs.DisplayMember + " => ");
 
                 if (!string.IsNullOrWhiteSpace(MappedAccount))
                     sb.Append(MappedAccount);

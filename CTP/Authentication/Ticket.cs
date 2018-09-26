@@ -23,6 +23,11 @@ namespace CTP.Authentication
         [DocumentField()] public string LoginName { get; private set; }
 
         /// <summary>
+        /// A string that identifies the source IP address for this ticket. This prevents ticket sharing.
+        /// </summary>
+        [DocumentField()] public string ValidFor { get; private set; }
+
+        /// <summary>
         /// The list of roles granted by this ticket.
         /// </summary>
         [DocumentField()] public List<string> Roles { get; private set; }

@@ -14,28 +14,6 @@ namespace CTP
         private int m_deflateThreshold = 300;
 
         /// <summary>
-        /// Indicate that the protocol supports deflate.
-        /// </summary>
-        public bool SupportsDeflate = true;
-
-        /// <summary>
-        /// The number of bytes before deflate kicks in. 
-        /// Must be between 100 and 100,000,000 (Inclusive).
-        /// </summary>
-        public int DeflateThreshold
-        {
-            get
-            {
-                return m_deflateThreshold;
-            }
-            set
-            {
-                ValidateLimit(100, 100_000_000, value);
-                m_deflateThreshold = value;
-            }
-        }
-
-        /// <summary>
         /// The maximum size of any single command. This size is the uncompressed size.
         /// Must be between 10,000 and 100,000,000 (Inclusive)
         /// </summary>
