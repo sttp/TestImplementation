@@ -58,11 +58,11 @@ namespace CTP.Net
             m_clientSession = new CtpSession(m_ctpStream, true, m_socket, m_netStream, m_sslStream);
             if (m_auth == null)
             {
-                m_clientSession.SendCommand(new AuthNone());
+                m_clientSession.Send(new AuthNone());
             }
             else
             {
-                m_clientSession.SendCommand(m_auth);
+                m_clientSession.Send(m_auth);
             }
             return m_clientSession;
         }
