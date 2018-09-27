@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CTP.SRP
+namespace CTP
 {
     [DocumentName("AuthFailure")]
     public class AuthFailure

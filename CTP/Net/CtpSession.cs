@@ -109,7 +109,6 @@ namespace CTP.Net
                 default:
                     throw new ArgumentOutOfRangeException(nameof(receiveMode), receiveMode, null);
             }
-
         }
 
         private void StreamOnOnDisposed()
@@ -168,14 +167,6 @@ namespace CTP.Net
                 //}
             }
 
-        }
-
-        /// <summary>
-        /// Begins listening to and processing the incoming data.
-        /// </summary>
-        public void Start()
-        {
-            m_processReads.Start();
         }
 
         public bool TryRead(CtpPacket packet)

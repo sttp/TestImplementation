@@ -134,6 +134,8 @@ namespace CTP
             }
         }
 
+
+
         /// <summary>
         /// Ensures that <see cref="m_writeBuffer"/> has at least the supplied number of bytes
         /// before returning.

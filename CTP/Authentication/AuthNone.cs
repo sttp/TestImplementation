@@ -1,4 +1,4 @@
-﻿namespace CTP.SRP
+﻿namespace CTP
 {
     [DocumentName("AuthNone")]
     public class AuthNone

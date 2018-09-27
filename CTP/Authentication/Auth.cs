@@ -1,9 +1,8 @@
 ﻿
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using CTP.Authentication;
 
-namespace CTP.SRP
+namespace CTP
 {
     /// <summary>
     /// Requests resuming an authentication session that was started in another session.
