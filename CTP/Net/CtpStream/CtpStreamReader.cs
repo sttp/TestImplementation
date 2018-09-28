@@ -5,17 +5,12 @@ using System.Threading;
 namespace CTP
 {
     //ToDo: Final Review: Done
-
     /// <summary>
-    /// Serializes <see cref="CtpPacket"/> messages to/from a <see cref="Stream"/>.
-    /// Note: this class is thread safe, however, concurrent calls to either the Read or Write methods will block each other.
-    /// Read and Write will no block each other, and disposing of the stream will not block.
+    /// Serializes <see cref="CtpPacket"/> messages from a <see cref="Stream"/>.
     /// </summary>
-    public class CtpStream : IDisposable
+    internal class CtpStreamReader : IDisposable
     {
-        public event Action OnDisposed;
-
-        private object m_writeLock = new object();
+        public event Action<object, Exception> OnException;
 
         private object m_readLock = new object();
 
@@ -24,10 +19,6 @@ namespace CTP
         /// </summary>
         private Stream m_stream;
 
-        /// <summary>
-        /// The buffer used to write packets to the stream.
-        /// </summary>
-        private byte[] m_writeBuffer;
         /// <summary>
         /// Raw unprocessed data received from the client.
         /// </summary>
@@ -45,14 +36,15 @@ namespace CTP
         /// </summary>
         private byte[] m_readBuffer;
 
+        private int m_readTimeout = 0;
+
         /// <summary>
-        /// Creates a <see cref="CtpStream"/>
+        /// Creates a <see cref="CtpStreamReader"/>
         /// </summary>
         /// <param name="stream"></param>
-        public CtpStream(Stream stream)
+        public CtpStreamReader(Stream stream)
         {
             m_stream = stream;
-            m_writeBuffer = new byte[128];
             m_inboundBuffer = new byte[128];
             m_readBuffer = new byte[3000];
         }
@@ -63,100 +55,10 @@ namespace CTP
         public int MaximumPacketSize { get; set; } = 1_000_000;
 
         /// <summary>
-        /// The payload length field can consume anywhere from 1 to 4 bytes.
-        /// </summary>
-        /// <param name="payloadLength"></param>
-        /// <returns></returns>
-        private int LengthOfPayloadLength(int payloadLength)
-        {
-            if (payloadLength <= 0xFF)
-                return 1;
-            if (payloadLength <= 0xFFFF)
-                return 2;
-            if (payloadLength <= 0xFFFFFF)
-                return 3;
-            return 4;
-        }
-
-        /// <summary>
-        /// Writes a packet to the underlying stream. Note: this method blocks until a packet has sucessfully been sent.
-        /// </summary>
-        public void Write(CtpPacket packet)
-        {
-            try
-            {
-                if (packet == null)
-                    throw new ArgumentNullException(nameof(packet));
-
-                //In case of an overflow exception.
-                int payloadLengthBytes = LengthOfPayloadLength(packet.Payload.Length);
-                int totalSize = packet.Payload.Length + 1 + payloadLengthBytes;
-                if (totalSize > MaximumPacketSize)
-                    throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
-
-                lock (m_writeLock)
-                {
-                    EnsureCapacity(totalSize);
-                    Array.Copy(packet.Payload, 0, m_writeBuffer, 1 + payloadLengthBytes, packet.Payload.Length);
-                    m_writeBuffer[0] = (byte)(packet.Channel + ((payloadLengthBytes - 1) << 4) + ((packet.IsRawData ? 1 : 0) << 6));
-                    switch (payloadLengthBytes)
-                    {
-                        case 1:
-                            m_writeBuffer[1] = (byte)packet.Payload.Length;
-                            break;
-                        case 2:
-                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 8);
-                            m_writeBuffer[2] = (byte)packet.Payload.Length;
-                            break;
-                        case 3:
-                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 16);
-                            m_writeBuffer[2] = (byte)(packet.Payload.Length >> 8);
-                            m_writeBuffer[3] = (byte)packet.Payload.Length;
-                            break;
-                        case 4:
-                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 24);
-                            m_writeBuffer[2] = (byte)(packet.Payload.Length >> 16);
-                            m_writeBuffer[3] = (byte)(packet.Payload.Length >> 8);
-                            m_writeBuffer[4] = (byte)packet.Payload.Length;
-                            break;
-                    }
-
-                    var stream = m_stream;
-                    if (stream == null)
-                        throw new ObjectDisposedException("Stream has been closed");
-                    stream.Write(m_writeBuffer, 0, totalSize);
-                }
-            }
-            catch (Exception)
-            {
-                Dispose();
-                throw;
-            }
-        }
-
-
-
-        /// <summary>
-        /// Ensures that <see cref="m_writeBuffer"/> has at least the supplied number of bytes
-        /// before returning.
-        /// </summary>
-        /// <param name="bufferSize"></param>
-        private void EnsureCapacity(int bufferSize)
-        {
-            if (m_writeBuffer.Length < bufferSize)
-            {
-                //12% larger than the requested buffer size.
-                byte[] newBuffer = new byte[bufferSize + (bufferSize >> 3)];
-                m_writeBuffer.CopyTo(newBuffer, 0);
-                m_writeBuffer = newBuffer;
-            }
-        }
-
-        /// <summary>
         /// Reads the next packet from the stream. 
         /// </summary>
         /// <returns></returns>
-        public CtpPacket Read()
+        public CtpPacket Read(int timeout)
         {
             try
             {
@@ -168,6 +70,11 @@ namespace CTP
                         var stream = m_stream;
                         if (stream == null)
                             throw new ObjectDisposedException("Stream has been closed");
+                        if (m_readTimeout != timeout)
+                        {
+                            m_readTimeout = timeout;
+                            stream.ReadTimeout = timeout;
+                        }
                         int length = stream.Read(m_readBuffer, 0, m_readBuffer.Length);
                         if (length == 0)
                             throw new EndOfStreamException("The stream has been shutdown");
@@ -194,9 +101,9 @@ namespace CTP
                     return packet;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Dispose();
+                OnException?.Invoke(this, ex);
                 throw;
             }
 
@@ -266,17 +173,8 @@ namespace CTP
             return true;
         }
 
-        /// <summary>
-        /// Disposes the underlying stream, and throws exceptions at any writer/readers.
-        /// </summary>
         public void Dispose()
         {
-            var stream = Interlocked.Exchange(ref m_stream, null);
-            if (stream != null)
-            {
-                stream.Dispose();
-                ThreadPool.QueueUserWorkItem(x => OnDisposed?.Invoke());
-            }
         }
     }
 }
