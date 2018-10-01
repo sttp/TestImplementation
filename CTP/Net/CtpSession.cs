@@ -68,7 +68,10 @@ namespace CTP.Net
 
         public void Start(ReceiveMode receiveMode, int receiveTimeout, SendMode sendMode, int sendTimeout)
         {
-            m_ctpStream.Start(receiveMode, receiveTimeout, sendMode, sendTimeout);
+            m_ctpStream.ReceiveTimeout = receiveTimeout;
+            m_ctpStream.SendTimeout = sendTimeout;
+            m_ctpStream.ReceiveMode = receiveMode;
+            m_ctpStream.SendMode = sendMode;
         }
 
         private void StreamOnOnDisposed()

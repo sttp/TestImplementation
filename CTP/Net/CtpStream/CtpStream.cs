@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
-using GSF;
 
 namespace CTP
 {
@@ -36,93 +34,111 @@ namespace CTP
         /// </summary>
         public event Action<CtpPacket> PacketReceived;
 
-        public SendMode SendMode { get; private set; }
+        public SendMode SendMode
+        {
+            get => m_sendMode;
+            set
+            {
+                if (m_sendMode != value)
+                {
+                    switch (value)
+                    {
+                        case SendMode.Blocking:
+                            throw new InvalidOperationException("Cannot change from a Queuing based reading scheme back into a blocking one.");
+                        case SendMode.Queueing:
+                            m_writerAsync = new CtpStreamWriterAsync(m_stream, m_sendTimeout);
+                            m_writerAsync.OnException += OnException;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
 
-        public ReceiveMode ReceiveMode { get; private set; }
+                    m_sendMode = value;
+                }
+            }
+        }
+
+        public ReceiveMode ReceiveMode
+        {
+            get => m_receiveMode;
+            set
+            {
+                if (m_receiveMode != value)
+                {
+                    switch (value)
+                    {
+                        case ReceiveMode.Blocking:
+                            throw new InvalidOperationException("Cannot change from an event based reading scheme back into a blocking one.");
+                        case ReceiveMode.Event:
+                            m_readerAsync = new CtpStreamReaderAsync(m_stream);
+                            m_readerAsync.OnException += OnException;
+                            m_readerAsync.NewPacket += OnNewPacket;
+                            m_readerAsync.Start();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    m_receiveMode = value;
+                }
+            }
+        }
 
         private Stream m_stream;
-
-        private bool m_started;
 
         private int m_sendTimeout;
 
         private int m_receiveTimeout;
 
+        /// <summary>
+        /// Must be positive milliseconds
+        /// If SendMode = Blocking: The timeout permitted during each Send operation
+        /// If SendMode = Queuing: The depth of the queue permitted before the stream is deemed too far behind and is disposed.
+        /// </summary>
+        public int SendTimeout
+        {
+            get => m_sendTimeout;
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "SendTimeout cannot be infinite");
+                m_sendTimeout = value;
+            }
+        }
+
+        /// <summary>
+        /// May be 0.
+        /// If ReceiveMode = Blocking: The maximum time to block for a read command.
+        /// Otherwise Ignored.
+        /// </summary>
+        public int ReceiveTimeout
+        {
+            get => m_receiveTimeout;
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "ReceiveTimeout cannot be negative");
+                m_receiveTimeout = value;
+            }
+        }
+
         private volatile bool m_disposed;
 
         private object m_syncRoot = new object();
+        private SendMode m_sendMode;
+        private ReceiveMode m_receiveMode;
 
         public CtpStream(Stream stream)
         {
             m_stream = stream;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="receiveMode">The mode in which the receive function will operate</param>
-        /// <param name="sendMode">The mode in which the send function will operate</param>
-        /// <param name="receiveTimeout">
-        /// May be 0.
-        /// If ReceiveMode = Blocking: The maximum time to block for a read command.
-        /// Otherwise Ignored.
-        /// </param>
-        /// <param name="sendTimeout"> Must be positive milliseconds
-        /// If SendMode = Blocking: The timeout permitted during each Send operation
-        /// If SendMode = Queuing: The depth of the queue permitted before the stream is deemed too far behind and is disposed.</param>
-        public void Start(ReceiveMode receiveMode, int receiveTimeout, SendMode sendMode, int sendTimeout)
-        {
-            if (sendTimeout <= 0)
-                throw new ArgumentOutOfRangeException(nameof(sendTimeout), "SendTimeout cannot be infinite");
-            if (receiveTimeout < 0)
-                throw new ArgumentOutOfRangeException(nameof(receiveTimeout), "ReceiveTimeout cannot be infinite");
-
-            lock (m_syncRoot)
-            {
-                if (m_started)
-                    throw new Exception("Already Started");
-                try
-                {
-                    m_sendTimeout = sendTimeout;
-                    m_receiveTimeout = receiveTimeout;
-
-                    SendMode = sendMode;
-                    ReceiveMode = receiveMode;
-
-                    switch (SendMode)
-                    {
-                        case SendMode.Blocking:
-                            m_writer = new CtpStreamWriter(m_stream);
-                            m_writer.OnException += OnException;
-                            break;
-                        case SendMode.Queueing:
-                            m_writerAsync.OnException += OnException;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(receiveMode), receiveMode, null);
-                    }
-                    switch (ReceiveMode)
-                    {
-                        case ReceiveMode.Blocking:
-                            m_reader = new CtpStreamReader(m_stream);
-                            m_reader.OnException += OnException;
-                            break;
-                        case ReceiveMode.Event:
-                            m_readerAsync = new CtpStreamReaderAsync(m_stream);
-                            m_readerAsync.OnException += OnException;
-                            m_readerAsync.NewPacket += OnNewPacket;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(receiveMode), receiveMode, null);
-                    }
-
-                    m_readerAsync?.Start();
-                }
-                finally
-                {
-                    m_started = true;
-                }
-            }
+            m_sendTimeout = 5000;
+            m_receiveTimeout = 5000;
+            m_sendMode = SendMode.Blocking;
+            m_receiveMode = ReceiveMode.Blocking;
+            m_writer = new CtpStreamWriter(m_stream);
+            m_writer.OnException += OnException;
+            m_reader = new CtpStreamReader(m_stream);
+            m_reader.OnException += OnException;
         }
 
         private void OnException(object arg1, Exception arg2)
@@ -147,9 +163,6 @@ namespace CTP
         /// <returns></returns>
         public CtpPacket Read()
         {
-            if (!m_started)
-                throw new Exception("Call Start");
-
             switch (ReceiveMode)
             {
                 case ReceiveMode.Blocking:
@@ -162,15 +175,11 @@ namespace CTP
 
         public void SendRaw(byte[] data, byte channel)
         {
-            if (!m_started)
-                throw new Exception("Call Start");
             Send(new CtpPacket(channel, true, data));
         }
 
         public void Send(DocumentObject document, byte channel = 0)
         {
-            if (!m_started)
-                throw new Exception("Call Start");
             Send(new CtpPacket(channel, document));
         }
 
