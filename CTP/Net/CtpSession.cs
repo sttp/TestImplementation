@@ -10,8 +10,6 @@ namespace CTP.Net
 {
     public delegate void PacketReceivedEventHandler(CtpSession sender, CtpPacket packet);
 
-
-
     public class CtpSession : IDisposable
     {
         public event Action OnDisposed;

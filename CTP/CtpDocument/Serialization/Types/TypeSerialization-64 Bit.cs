@@ -60,4 +60,18 @@ namespace CTP.Serialization
             return (CtpObject)obj;
         }
     }
+
+    internal class TypeSerializationCtpTime
+        : TypeSerializationMethodValueType<CtpTime>
+    {
+        public override CtpTime Load(CtpObject reader)
+        {
+            return (CtpTime)reader;
+        }
+
+        public override CtpObject Save(CtpTime obj)
+        {
+            return (CtpObject)obj;
+        }
+    }
 }

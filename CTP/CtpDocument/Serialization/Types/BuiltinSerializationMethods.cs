@@ -21,6 +21,7 @@ namespace CTP.Serialization
             Add(new TypeSerializationInt64());
             Add(new TypeSerializationDouble());
             Add(new TypeSerializationDateTime());
+            Add(new TypeSerializationCtpTime());
             Add(new TypeSerializationUInt8());
             Add(new TypeSerializationInt8());
             Add(new TypeSerializationBool());
@@ -37,6 +38,7 @@ namespace CTP.Serialization
             Add(new TypeSerializationInt64Null());
             Add(new TypeSerializationDoubleNull());
             Add(new TypeSerializationDateTimeNull());
+            Add(new TypeSerializationCtpTimeNull());
             Add(new TypeSerializationUInt8Null());
             Add(new TypeSerializationInt8Null());
             Add(new TypeSerializationBoolNull());

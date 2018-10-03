@@ -21,6 +21,12 @@ namespace CTP.Net
         [DocumentField()]
         public string ServerCertificatePath { get; set; }
 
+        /// <summary>
+        /// If the ServerCertificatePath is a PFX file, this password will decrypt the certificate.
+        /// </summary>
+        [DocumentField()]
+        public string CertificatePassword { get; set; }
+
         public CtpServerConfig()
         {
             ClientCerts = new List<CtpClientCert>();

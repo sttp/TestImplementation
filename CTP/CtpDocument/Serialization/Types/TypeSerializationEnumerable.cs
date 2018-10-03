@@ -39,6 +39,8 @@ namespace CTP.Serialization
         {
             if (!writer.IsArrayElement)
                 throw new Exception("Expecting an array type");
+            if (obj == null)
+                return;
             if (m_serializeT.IsValueType)
             {
                 foreach (var item in obj)

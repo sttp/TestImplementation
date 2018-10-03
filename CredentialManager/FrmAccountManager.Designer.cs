@@ -42,9 +42,17 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.btnAddCertificates = new System.Windows.Forms.Button();
             this.lstCertificates = new System.Windows.Forms.ListBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtLocalCertPath = new System.Windows.Forms.TextBox();
+            this.btnBrowseLocalCertificate = new System.Windows.Forms.Button();
+            this.chkEnableSSL = new System.Windows.Forms.CheckBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.txtLocalCertPassword = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnAddAccount
@@ -195,11 +203,80 @@
             this.lstCertificates.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstCertificates_KeyUp);
             this.lstCertificates.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstCertificates_MouseDoubleClick);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(9, 52);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(108, 13);
+            this.label1.TabIndex = 39;
+            this.label1.Text = "Local Certificate Path";
+            // 
+            // txtLocalCertPath
+            // 
+            this.txtLocalCertPath.Location = new System.Drawing.Point(123, 49);
+            this.txtLocalCertPath.Name = "txtLocalCertPath";
+            this.txtLocalCertPath.Size = new System.Drawing.Size(477, 20);
+            this.txtLocalCertPath.TabIndex = 40;
+            // 
+            // btnBrowseLocalCertificate
+            // 
+            this.btnBrowseLocalCertificate.Location = new System.Drawing.Point(606, 47);
+            this.btnBrowseLocalCertificate.Name = "btnBrowseLocalCertificate";
+            this.btnBrowseLocalCertificate.Size = new System.Drawing.Size(75, 23);
+            this.btnBrowseLocalCertificate.TabIndex = 41;
+            this.btnBrowseLocalCertificate.Text = "Browse";
+            this.btnBrowseLocalCertificate.UseVisualStyleBackColor = true;
+            this.btnBrowseLocalCertificate.Click += new System.EventHandler(this.btnBrowseLocalCertificate_Click);
+            // 
+            // chkEnableSSL
+            // 
+            this.chkEnableSSL.AutoSize = true;
+            this.chkEnableSSL.Location = new System.Drawing.Point(12, 19);
+            this.chkEnableSSL.Name = "chkEnableSSL";
+            this.chkEnableSSL.Size = new System.Drawing.Size(82, 17);
+            this.chkEnableSSL.TabIndex = 42;
+            this.chkEnableSSL.Text = "Enable SSL";
+            this.chkEnableSSL.UseVisualStyleBackColor = true;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.txtLocalCertPassword);
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.chkEnableSSL);
+            this.groupBox2.Controls.Add(this.btnBrowseLocalCertificate);
+            this.groupBox2.Controls.Add(this.txtLocalCertPath);
+            this.groupBox2.Controls.Add(this.label1);
+            this.groupBox2.Location = new System.Drawing.Point(12, 467);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(690, 112);
+            this.groupBox2.TabIndex = 43;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Listener Options";
+            // 
+            // txtLocalCertPassword
+            // 
+            this.txtLocalCertPassword.Location = new System.Drawing.Point(153, 75);
+            this.txtLocalCertPassword.Name = "txtLocalCertPassword";
+            this.txtLocalCertPassword.Size = new System.Drawing.Size(200, 20);
+            this.txtLocalCertPassword.TabIndex = 44;
+            this.txtLocalCertPassword.UseSystemPasswordChar = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(9, 78);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(124, 13);
+            this.label2.TabIndex = 43;
+            this.label2.Text = "PFX Password (Optional)";
+            // 
             // FrmAccountManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(722, 476);
+            this.ClientSize = new System.Drawing.Size(722, 610);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnNew);
@@ -211,6 +288,8 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -230,6 +309,13 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button btnAddCertificates;
         private System.Windows.Forms.ListBox lstCertificates;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtLocalCertPath;
+        private System.Windows.Forms.Button btnBrowseLocalCertificate;
+        private System.Windows.Forms.CheckBox chkEnableSSL;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.TextBox txtLocalCertPassword;
+        private System.Windows.Forms.Label label2;
     }
 }
 

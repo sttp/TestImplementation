@@ -54,5 +54,15 @@ namespace CTP
             }
         }
 
+        public string CommandName
+        {
+            get
+            {
+                if (IsRawData)
+                    return "Raw";
+                return new CtpDocument(Payload).RootElement;
+            }
+        }
+
     }
 }

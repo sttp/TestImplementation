@@ -74,6 +74,11 @@ namespace CredentialManager
                     lstCertificates.Items.Add(item);
                 }
             }
+
+
+            chkEnableSSL.Checked = config.EnableSSL;
+            txtLocalCertPath.Text = config.ServerCertificatePath;
+            txtLocalCertPassword.Text = config.CertificatePassword;
         }
 
         private CtpServerConfig SaveData()
@@ -82,6 +87,9 @@ namespace CredentialManager
             cfg.Accounts = new List<CtpAccount>(lstAccounts.Items.Cast<CtpAccount>());
             cfg.AnonymousMappings = new List<CtpAnonymousMapping>(lstAnonymousAccountMapping.Items.Cast<CtpAnonymousMapping>());
             cfg.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
+            cfg.EnableSSL = chkEnableSSL.Checked;
+            cfg.ServerCertificatePath = txtLocalCertPath.Text;
+            cfg.CertificatePassword = txtLocalCertPassword.Text;
             return cfg;
         }
 
@@ -210,6 +218,18 @@ namespace CredentialManager
                 }
             }
 
+        }
+
+        private void btnBrowseLocalCertificate_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new OpenFileDialog())
+            {
+                dlg.Filter = "*.cer|Certificate|*.pfx|Certificate Container PFX";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    txtLocalCertPath.Text = dlg.FileName;
+                }
+            }
         }
     }
 }
