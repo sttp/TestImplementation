@@ -19,7 +19,7 @@ namespace CTP
                     case CtpTypeCode.Double:
                         return $"(double){m_valueDouble.ToString()}";
                     case CtpTypeCode.CtpTime:
-                        return $"(SttpTime){m_valueCtpTime.ToString()}";
+                        return $"(CtpTime){m_valueCtpTime.ToString()}";
                     case CtpTypeCode.Boolean:
                         return $"(bool){m_valueBoolean.ToString()}";
                     case CtpTypeCode.Guid:
@@ -27,7 +27,7 @@ namespace CTP
                     case CtpTypeCode.String:
                         return $"(String){(m_valueObject as string).ToString()}";
                     case CtpTypeCode.CtpBuffer:
-                        return $"(SttpBuffer){(m_valueObject as CtpBuffer).ToString()}";
+                        return $"(CtpBuffer){(m_valueObject as CtpBuffer).ToString()}";
                     case CtpTypeCode.CtpDocument:
                         return $"(CtpDocument){(m_valueObject as CtpDocument).ToString()}";
                     default:
@@ -123,26 +123,33 @@ namespace CTP
                 switch (m_valueTypeCode)
                 {
                     case CtpTypeCode.Int64:
-                    {
-                        checked
                         {
-                            return (long)m_valueInt64;
+                            checked
+                            {
+                                return (long)m_valueInt64;
+                            }
                         }
-                    }
                     case CtpTypeCode.Single:
-                    {
-                        checked
                         {
-                            return (long)m_valueSingle;
+                            checked
+                            {
+                                return (long)m_valueSingle;
+                            }
                         }
-                    }
                     case CtpTypeCode.Double:
-                    {
-                        checked
                         {
-                            return (long)m_valueDouble;
+                            checked
+                            {
+                                return (long)m_valueDouble;
+                            }
                         }
-                    }
+                    case CtpTypeCode.String:
+                        {
+                            checked
+                            {
+                                return (long)AsDecimal;
+                            }
+                        }
                     default:
                         throw new InvalidOperationException($"Cannot cast from {ToTypeString} to Int64");
                 }
@@ -214,6 +221,13 @@ namespace CTP
                         {
                             return (float)m_valueDouble;
                         }
+                    case CtpTypeCode.String:
+                    {
+                        checked
+                        {
+                            return (float)AsDecimal;
+                        }
+                    }
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to Single");
                 }
@@ -241,6 +255,13 @@ namespace CTP
                         {
                             return (double)m_valueDouble;
                         }
+                    case CtpTypeCode.String:
+                    {
+                        checked
+                        {
+                            return (double)AsDecimal;
+                        }
+                    }
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to Double");
                 }
@@ -269,6 +290,12 @@ namespace CTP
                         {
                             return (decimal)m_valueDouble;
                         }
+                    case CtpTypeCode.String:
+                        {
+                            if (decimal.TryParse((string)m_valueObject, out var result))
+                                return result;
+                            throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
+                        }
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
                 }
@@ -285,6 +312,12 @@ namespace CTP
                 {
                     case CtpTypeCode.CtpTime:
                         return m_valueCtpTime;
+                    case CtpTypeCode.String:
+                    {
+                        if (DateTime.TryParse((string)m_valueObject, out var result))
+                            return new CtpTime(result);
+                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to CtpTime");
+                    }
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to CtpTime");
                 }
@@ -410,7 +443,7 @@ namespace CTP
         }
 
 
-       
+
 
     }
 }

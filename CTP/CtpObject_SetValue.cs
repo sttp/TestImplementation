@@ -49,7 +49,7 @@ namespace CTP
         {
             if (value > long.MaxValue)
             {
-                SetValue((double)value);
+                SetValue(value.ToString());
             }
             else
             {
@@ -68,6 +68,16 @@ namespace CTP
         }
         public void SetValue(decimal value)
         {
+            var d = Decimal.Truncate(value);
+            if (d == value)
+            {
+                //Value is an integer;
+                if (long.MinValue <= d && d <= long.MaxValue)
+                {
+                    SetValue((long)d);
+                }
+                //ToDo: Consider if very large integers should be string represented.
+            }
             SetValue((double)value);
         }
         public void SetValue(DateTime value)
