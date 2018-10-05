@@ -45,7 +45,11 @@ namespace CTP.Serialization
 
             Add(new TypeSerializationString());
             Add(new TypeSerializationByteArray());
+            Add(new TypeSerializationCharArray());
+            Add(new TypeSerializationDocument());
+            Add(new TypeSerializationBuffer());
             Add(new TypeSerializationCtpObject());
+            Add(new TypeSerializationObject());
         }
 
         static void Add<T>(TypeSerializationMethodBase<T> method)

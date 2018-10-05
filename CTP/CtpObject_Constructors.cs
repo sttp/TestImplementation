@@ -98,6 +98,11 @@ namespace CTP
             SetValue(value);
         }
 
+        public CtpObject(char[] value)
+        {
+            SetValue(value);
+        }
+
         public CtpObject(string value)
         {
             SetValue(value);

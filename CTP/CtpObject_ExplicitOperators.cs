@@ -79,6 +79,10 @@ namespace CTP
         {
             return new CtpObject(value);
         }
+        public static explicit operator CtpObject(char[] value)
+        {
+            return new CtpObject(value);
+        }
         public static explicit operator CtpObject(CtpBuffer value)
         {
             return new CtpObject(value);
@@ -220,9 +224,13 @@ namespace CTP
         {
             return value.AsGuid;
         }
-        public static explicit operator Char(CtpObject value)
+        public static explicit operator char(CtpObject value)
         {
             return value.AsChar;
+        }
+        public static explicit operator char[](CtpObject value)
+        {
+            return value.AsString.ToCharArray();
         }
         public static explicit operator string(CtpObject value)
         {

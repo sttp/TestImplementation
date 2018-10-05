@@ -93,6 +93,10 @@ namespace CTP
         {
             SetValue(value.ToString());
         }
+        public void SetValue(char[] value)
+        {
+            SetValue(value.ToString());
+        }
         public void SetValue(string value)
         {
             if (value == null)
@@ -319,6 +323,10 @@ namespace CTP
             else if (type == typeof(char))
             {
                 SetValue((char)value);
+            }
+            else if (type == typeof(char[]))
+            {
+                SetValue((char[])value);
             }
             else if (type == typeof(string))
             {
