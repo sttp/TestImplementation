@@ -161,36 +161,59 @@ namespace CTP
             if ((object)value == null)
                 value = CtpObject.Null;
 
-            m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)value.ValueTypeCode);
             switch (value.ValueTypeCode)
             {
                 case CtpTypeCode.Null:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueNull);
                     break;
                 case CtpTypeCode.Int64:
-                    m_stream.Write7BitInt((ulong)PackSign(value.IsInt64));
+                    if (value.IsInt64 < 0)
+                    {
+                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueInvertedInt64);
+                        m_stream.Write7BitInt(~(ulong)value.IsInt64);
+                    }
+                    else
+                    {
+                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueInt64);
+                        m_stream.Write7BitInt((ulong)value.IsInt64);
+                    }
                     break;
                 case CtpTypeCode.Single:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueSingle);
                     m_stream.Write(value.IsSingle);
                     break;
                 case CtpTypeCode.Double:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueDouble);
                     m_stream.Write(value.IsDouble);
                     break;
                 case CtpTypeCode.CtpTime:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueCtpTime);
                     m_stream.Write(value.IsCtpTime.Ticks);
                     break;
                 case CtpTypeCode.Boolean:
-                    m_stream.Write(value.IsBoolean);
+                    if (value.IsBoolean)
+                    {
+                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueBooleanTrue);
+                    }
+                    else
+                    {
+                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueBooleanFalse);
+                    }
                     break;
                 case CtpTypeCode.Guid:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueGuid);
                     m_stream.Write(value.IsGuid);
                     break;
                 case CtpTypeCode.String:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueString);
                     m_stream.Write(value.IsString);
                     break;
                 case CtpTypeCode.CtpBuffer:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueCtpBuffer);
                     m_stream.Write(value.IsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpDocument:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueCtpDocument);
                     m_stream.Write(value.IsCtpDocument);
                     break;
                 default:
@@ -276,16 +299,6 @@ namespace CTP
             }
 
             m_stream.CopyTo(buffer, offset);
-        }
-
-        private static long PackSign(long value)
-        {
-            //since negative signed values have leading 1's and positive have leading 0's, 
-            //it's important to change it into a common format.
-            //Basically, we rotate left to move the leading sign bit to bit0, and if bit 0 is set, we invert bits 1-63.
-            if (value >= 0)
-                return value << 1;
-            return (~value << 1) + 1;
         }
 
         private void WriteSize(byte[] buffer, ref int length, ushort value)

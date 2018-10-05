@@ -22,6 +22,7 @@ namespace CTP
         /// </summary>
         private Stack<string> m_elementStack = new Stack<string>();
         private Stack<bool> m_elementIsArrayStack = new Stack<bool>();
+
         /// <summary>
         /// The root element.
         /// </summary>
@@ -82,7 +83,7 @@ namespace CTP
         public CtpObject Value { get; private set; }
 
         /// <summary>
-        /// The type of the current node. To Advance the nodes calll <see cref="Read"/>
+        /// The type of the current node. To Advance the nodes call <see cref="Read"/>
         /// </summary>
         internal CtpDocumentNodeType NodeType { get; private set; }
 
@@ -109,7 +110,8 @@ namespace CTP
 
             uint code = (uint)m_stream.Read7BitInt();
             CtpDocumentHeader header = (CtpDocumentHeader)(code & 15);
-            if (header < CtpDocumentHeader.StartElement)
+         
+            if (header >= CtpDocumentHeader.ValueNull)
             {
                 NodeType = CtpDocumentNodeType.Value;
                 if (IsElementArray)
@@ -117,36 +119,42 @@ namespace CTP
                 else
                     ValueName = m_valueNamesList[code >> 4];
 
-                switch ((CtpTypeCode)header)
+                switch (header)
                 {
-                    case CtpTypeCode.Null:
+                   case CtpDocumentHeader.ValueNull:
                         Value.SetNull();
                         break;
-                    case CtpTypeCode.Int64:
-                        Value.SetValue(UnPackSign((long)m_stream.Read7BitInt()));
+                    case CtpDocumentHeader.ValueInt64:
+                        Value.SetValue((long)m_stream.Read7BitInt());
                         break;
-                    case CtpTypeCode.Single:
+                    case CtpDocumentHeader.ValueInvertedInt64:
+                        Value.SetValue((long)~m_stream.Read7BitInt());
+                        break;
+                    case CtpDocumentHeader.ValueSingle:
                         Value.SetValue(m_stream.ReadSingle());
                         break;
-                    case CtpTypeCode.Double:
+                    case CtpDocumentHeader.ValueDouble:
                         Value.SetValue(m_stream.ReadDouble());
                         break;
-                    case CtpTypeCode.CtpTime:
+                    case CtpDocumentHeader.ValueCtpTime:
                         Value.SetValue(new CtpTime(m_stream.ReadInt64()));
                         break;
-                    case CtpTypeCode.Boolean:
-                        Value.SetValue(m_stream.ReadBoolean());
+                    case CtpDocumentHeader.ValueBooleanTrue:
+                        Value.SetValue(true);
                         break;
-                    case CtpTypeCode.Guid:
+                    case CtpDocumentHeader.ValueBooleanFalse:
+                        Value.SetValue(false);
+                        break;
+                    case CtpDocumentHeader.ValueGuid:
                         Value.SetValue(m_stream.ReadGuid());
                         break;
-                    case CtpTypeCode.String:
+                    case CtpDocumentHeader.ValueString:
                         Value.SetValue(m_stream.ReadString());
                         break;
-                    case CtpTypeCode.CtpBuffer:
+                    case CtpDocumentHeader.ValueCtpBuffer:
                         Value.SetValue(new CtpBuffer(m_stream.ReadBytes()));
                         break;
-                    case CtpTypeCode.CtpDocument:
+                    case CtpDocumentHeader.ValueCtpDocument:
                         Value.SetValue(new CtpDocument(m_stream.ReadBytes()));
                         break;
                     default:
@@ -216,13 +224,6 @@ namespace CTP
             if (m_elementIsArrayStack.Count == 0)
                 return false;
             return m_elementIsArrayStack.Peek();
-        }
-
-        private static long UnPackSign(long value)
-        {
-            if ((value & 1) == 0) //If it was positive
-                return (value >> 1) & long.MaxValue;  //Clear the upper bit since rightshift might assign a leading bit.
-            return (~value >> 1) | long.MinValue; //Set the upper bit.
         }
 
     }

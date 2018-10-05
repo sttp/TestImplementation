@@ -1,19 +1,21 @@
 ﻿namespace CTP
 {
-    internal enum CtpDocumentHeader
-    {
-        ValueNull = 0,
-        ValueInt64 = 1,
-        ValueSingle = 2,
-        ValueDouble = 3,
-        ValueCtpTime = 4,
-        ValueBoolean = 5,
-        ValueGuid = 6,
-        ValueString = 7,
-        ValueCtpBuffer = 8,
-        ValueCtpDocument = 9,
-        StartElement = 10,
-        EndElement = 11,
-        StartArrayElement = 12,
-    }
+internal enum CtpDocumentHeader
+{
+    StartElement = 0,
+    EndElement = 1,
+    StartArrayElement = 2,
+    ValueNull = 3,
+    ValueInt64 = 4,
+    ValueInvertedInt64 = 5,
+    ValueSingle = 6,
+    ValueDouble = 7,
+    ValueCtpTime = 8,
+    ValueBooleanTrue = 9,
+    ValueBooleanFalse = 10,
+    ValueGuid = 11,
+    ValueString = 12,
+    ValueCtpBuffer = 13,
+    ValueCtpDocument = 14,
+}
 }
