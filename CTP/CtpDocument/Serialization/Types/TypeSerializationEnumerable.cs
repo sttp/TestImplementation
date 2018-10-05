@@ -21,15 +21,17 @@ namespace CTP.Serialization
 
         public override TEnum Load(CtpDocumentElement reader)
         {
-            if (!reader.IsArray)
-                throw new Exception("Expecting an array type");
             List<T> items = new List<T>();
             foreach (var element in reader.ChildElements)
             {
+                if (element.ElementName != "Item")
+                    throw new Exception("Expecting An Array Type");
                 items.Add(m_serializeT.Load(element));
             }
             foreach (var element in reader.ChildValues)
             {
+                if (element.ValueName != "Item")
+                    throw new Exception("Expecting An Array Type");
                 items.Add(m_serializeT.Load(element.Value));
             }
             return m_castToType(items);
@@ -37,22 +39,20 @@ namespace CTP.Serialization
 
         public override void Save(TEnum obj, CtpDocumentWriter writer)
         {
-            if (!writer.IsArrayElement)
-                throw new Exception("Expecting an array type");
             if (obj == null)
                 return;
             if (m_serializeT.IsValueType)
             {
                 foreach (var item in obj)
                 {
-                    writer.WriteValue(null, m_serializeT.Save(item));
+                    writer.WriteValue("Item", m_serializeT.Save(item));
                 }
             }
             else
             {
                 foreach (var item in obj)
                 {
-                    using (writer.StartElement(null, m_serializeT.IsArrayType))
+                    using (writer.StartElement("Item"))
                     {
                         m_serializeT.Save(item, writer);
                     }

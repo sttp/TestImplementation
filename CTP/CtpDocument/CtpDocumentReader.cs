@@ -21,7 +21,6 @@ namespace CTP
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
         private Stack<string> m_elementStack = new Stack<string>();
-        private Stack<bool> m_elementIsArrayStack = new Stack<bool>();
 
         /// <summary>
         /// The root element.
@@ -72,10 +71,6 @@ namespace CTP
         public string ValueName { get; private set; }
 
         /// <summary>
-        /// Gets if the current element is an array element.
-        /// </summary>
-        public bool IsElementArray { get; private set; }
-        /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
         /// contents, be sure to call <see cref="CtpObject.Clone"/>
@@ -99,7 +94,6 @@ namespace CTP
             if (NodeType == CtpDocumentNodeType.EndElement)
             {
                 ElementName = GetCurrentElement();
-                IsElementArray = GetCurrentElementIsArray();
             }
 
             if (m_stream.IsEos)
@@ -110,18 +104,15 @@ namespace CTP
 
             uint code = (uint)m_stream.Read7BitInt();
             CtpDocumentHeader header = (CtpDocumentHeader)(code & 15);
-         
+
             if (header >= CtpDocumentHeader.ValueNull)
             {
                 NodeType = CtpDocumentNodeType.Value;
-                if (IsElementArray)
-                    ValueName = "Item";
-                else
-                    ValueName = m_valueNamesList[code >> 4];
+                ValueName = m_valueNamesList[code >> 4];
 
                 switch (header)
                 {
-                   case CtpDocumentHeader.ValueNull:
+                    case CtpDocumentHeader.ValueNull:
                         Value.SetNull();
                         break;
                     case CtpDocumentHeader.ValueInt64:
@@ -165,35 +156,15 @@ namespace CTP
             {
                 NodeType = CtpDocumentNodeType.StartElement;
                 Value.SetNull();
-                if (IsElementArray)
-                    ElementName = "Item";
-                else
-                    ElementName = m_elementNamesList[code >> 4];
-                IsElementArray = false;
+                ElementName = m_elementNamesList[code >> 4];
                 ValueName = null;
                 m_elementStack.Push(ElementName);
-                m_elementIsArrayStack.Push(false);
-            }
-            else if (header == CtpDocumentHeader.StartArrayElement)
-            {
-                NodeType = CtpDocumentNodeType.StartElement;
-                Value.SetNull();
-                if (IsElementArray)
-                    ElementName = "Item";
-                else
-                    ElementName = m_elementNamesList[code >> 4];
-                IsElementArray = true;
-                ValueName = null;
-                m_elementStack.Push(ElementName);
-                m_elementIsArrayStack.Push(true);
             }
             else if (header == CtpDocumentHeader.EndElement)
             {
                 NodeType = CtpDocumentNodeType.EndElement;
                 ElementName = GetCurrentElement();
-                IsElementArray = GetCurrentElementIsArray();
                 m_elementStack.Pop();
-                m_elementIsArrayStack.Pop();
             }
             else
             {
@@ -217,13 +188,6 @@ namespace CTP
             if (m_elementStack.Count == 0)
                 return m_rootElement;
             return m_elementStack.Peek();
-        }
-
-        private bool GetCurrentElementIsArray()
-        {
-            if (m_elementIsArrayStack.Count == 0)
-                return false;
-            return m_elementIsArrayStack.Peek();
         }
 
     }

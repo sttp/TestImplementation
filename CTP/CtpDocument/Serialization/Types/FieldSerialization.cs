@@ -82,7 +82,7 @@ namespace CTP.Serialization
             }
             else
             {
-                using (writer.StartElement(RecordName, m_method.IsArrayType))
+                using (writer.StartElement(RecordName))
                 {
                     m_method.Save(item, writer);
                 }
