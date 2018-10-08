@@ -3,6 +3,23 @@ using CTP.Serialization;
 
 namespace CTP
 {
+    public enum ParsingErrorCode
+    {
+        /// <summary>
+        /// This error will occur if null is specified in the document, but cannot be assigned to the required field.
+        /// </summary>
+        NullSuppliedForRequiredField,
+        /// <summary>
+        /// This will occur if a field does not have the required fields
+        /// </summary>
+        MissingValueForField,
+        /// <summary>
+        /// Occurs when an assignment is attempted, but an exception has occurred.
+        /// </summary>
+        AssignmentException,
+
+    }
+
     public abstract class DocumentObject
     {
         internal DocumentObject()
@@ -20,6 +37,21 @@ namespace CTP
         public override string ToString()
         {
             return ToDocument().ToYAML();
+        }
+
+        public virtual void BeforeLoad()
+        {
+
+        }
+
+        public virtual void ParsingException(ParsingErrorCode errorCode, string recordName, CtpObject value, Exception exception)
+        {
+
+        }
+
+        public virtual void AfterLoad()
+        {
+
         }
     }
 

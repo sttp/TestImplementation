@@ -4,8 +4,11 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationUInt64Null
-        : TypeSerializationMethodValueType<ulong?>
+        : TypeSerializationMethodBase<ulong?>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override ulong? Load(CtpObject reader)
         {
             return (ulong?)reader;
@@ -18,8 +21,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationInt64Null
-        : TypeSerializationMethodValueType<long?>
+        : TypeSerializationMethodBase<long?>
     {
+
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
 
         public override long? Load(CtpObject reader)
         {
@@ -33,8 +39,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationDoubleNull
-        : TypeSerializationMethodValueType<double?>
+        : TypeSerializationMethodBase<double?>
     {
+
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
 
         public override double? Load(CtpObject reader)
         {
@@ -48,8 +57,11 @@ namespace CTP.Serialization
     }
   
     internal class TypeSerializationDateTimeNull
-        : TypeSerializationMethodValueType<DateTime?>
+        : TypeSerializationMethodBase<DateTime?>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override DateTime? Load(CtpObject reader)
         {
             return (DateTime?)reader;
@@ -62,8 +74,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationCtpTimeNull
-        : TypeSerializationMethodValueType<CtpTime?>
+        : TypeSerializationMethodBase<CtpTime?>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override CtpTime? Load(CtpObject reader)
         {
             return (CtpTime?)reader;

@@ -9,7 +9,7 @@ namespace CTP.Serialization
     internal class RuntimeSerializationMethod<T>
        : TypeSerializationMethodBase<T>
     {
-        public override bool IsArrayType => false;
+
         private readonly List<FieldSerialization> m_records = new List<FieldSerialization>();
         private readonly Func<T> m_constructor;
 
@@ -30,7 +30,7 @@ namespace CTP.Serialization
             foreach (var f in m_records)
             {
                 if (!ids.Add(f.RecordName))
-                    throw new Exception(string.Format("Duplicate Load IDs: {0} detected in class {1}.", f.RecordName, type.ToString()));
+                    throw new Exception(string.Format("Duplicate Load Names: {0} detected in class {1}.", f.RecordName, type.ToString()));
             }
         }
 
@@ -53,10 +53,15 @@ namespace CTP.Serialization
             }
         }
 
-        public override bool IsValueType => false;
+        public override bool CanAcceptNulls => true;
+
+        public override bool IsValueRecord => false;
 
         public override T Load(CtpDocumentElement reader)
         {
+            if (reader == null)
+                return default(T);
+
             var rv = m_constructor();
             foreach (var item in m_records)
             {
@@ -67,6 +72,9 @@ namespace CTP.Serialization
 
         public override void Save(T obj, CtpDocumentWriter writer)
         {
+            if (obj == null)
+                return;
+
             foreach (var item in m_records)
             {
                 item.Save(obj, writer);

@@ -4,8 +4,11 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationString
-        : TypeSerializationMethodValueType<string>
+        : TypeSerializationMethodBase<string>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override string Load(CtpObject reader)
         {
             return (string)reader;
@@ -18,8 +21,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationByteArray
-       : TypeSerializationMethodValueType<byte[]>
+       : TypeSerializationMethodBase<byte[]>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override byte[] Load(CtpObject reader)
         {
             return (byte[])reader;
@@ -32,8 +38,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationCharArray
-        : TypeSerializationMethodValueType<char[]>
+        : TypeSerializationMethodBase<char[]>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override char[] Load(CtpObject reader)
         {
             return (char[])reader;
@@ -46,8 +55,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationDocument
-        : TypeSerializationMethodValueType<CtpDocument>
+        : TypeSerializationMethodBase<CtpDocument>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override CtpDocument Load(CtpObject reader)
         {
             return (CtpDocument)reader;
@@ -60,8 +72,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationBuffer
-        : TypeSerializationMethodValueType<CtpBuffer>
+        : TypeSerializationMethodBase<CtpBuffer>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override CtpBuffer Load(CtpObject reader)
         {
             return (CtpBuffer)reader;
@@ -75,8 +90,11 @@ namespace CTP.Serialization
 
 
     internal class TypeSerializationCtpObject
-        : TypeSerializationMethodValueType<CtpObject>
+        : TypeSerializationMethodBase<CtpObject>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override CtpObject Load(CtpObject reader)
         {
             return (CtpObject)reader;
@@ -89,8 +107,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationObject
-        : TypeSerializationMethodValueType<object>
+        : TypeSerializationMethodBase<object>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => true;
+
         public override object Load(CtpObject reader)
         {
             return reader.ToNativeType;

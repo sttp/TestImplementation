@@ -162,6 +162,8 @@ namespace CTP
 
         public static explicit operator DBNull(CtpObject value)
         {
+            if ((object)value == null || value.IsNull)
+                return DBNull.Value;
             return value.AsDBNull;
         }
         public static explicit operator sbyte(CtpObject value)
@@ -230,118 +232,128 @@ namespace CTP
         }
         public static explicit operator char[](CtpObject value)
         {
+            if ((object)value == null || value.IsNull)
+                return null;
             return value.AsString.ToCharArray();
         }
         public static explicit operator string(CtpObject value)
         {
+            if ((object)value == null || value.IsNull)
+                return null;
             return value.AsString;
         }
         public static explicit operator CtpBuffer(CtpObject value)
         {
+            if ((object)value == null || value.IsNull)
+                return null;
             return value.AsCtpBuffer;
         }
         public static explicit operator CtpDocument(CtpObject value)
         {
+            if ((object)value == null || value.IsNull)
+                return null;
             return value.AsCtpDocument;
         }
-        public static explicit operator byte[](CtpObject value)
+        public static explicit operator byte[] (CtpObject value)
         {
+            if ((object)value == null || value.IsNull)
+                return null;
             return value.AsCtpBuffer.ToBuffer();
         }
 
         public static explicit operator sbyte? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsSByte;
         }
         public static explicit operator short? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsInt16;
         }
         public static explicit operator int? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsInt32;
         }
         public static explicit operator long? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsInt64;
         }
         public static explicit operator byte? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsByte;
         }
         public static explicit operator ushort? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsUInt16;
         }
         public static explicit operator uint? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsUInt32;
         }
         public static explicit operator ulong? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsUInt64;
         }
         public static explicit operator float? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsSingle;
         }
         public static explicit operator double? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsDouble;
         }
         public static explicit operator decimal? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsDecimal;
         }
         public static explicit operator DateTime? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsDateTime;
         }
         public static explicit operator CtpTime? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsCtpTime;
         }
         public static explicit operator bool? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsBoolean;
         }
         public static explicit operator Guid? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsGuid;
         }
         public static explicit operator char? (CtpObject value)
         {
-            if (value.IsNull)
+            if ((object)value == null || value.IsNull)
                 return null;
             return value.AsChar;
         }

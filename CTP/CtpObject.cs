@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace CTP
 {
     /// <summary>
-    /// This class contains the fundamental value for STTP.
+    /// This class contains the fundamental value for CTP.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
     public partial class CtpObject : IEquatable<CtpObject>

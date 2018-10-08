@@ -1,1 +1,0 @@
-﻿This class library is expected to contain only functionality related to the STTP wire protocol.

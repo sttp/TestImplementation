@@ -5,6 +5,9 @@ using System.Reflection;
 
 namespace CTP.Serialization
 {
+    /// <summary>
+    /// Creates methods for serializing one of these types: Array, List, HashSet, SortedSet, or ReadOnlyCollection
+    /// </summary>
     internal static class EnumerableSerializationMethods
     {
         private static readonly MethodInfo Method;

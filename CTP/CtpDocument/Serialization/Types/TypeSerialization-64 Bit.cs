@@ -4,8 +4,11 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationUInt64
-        : TypeSerializationMethodValueType<ulong>
+        : TypeSerializationMethodBase<ulong>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override ulong Load(CtpObject reader)
         {
             return (ulong)reader;
@@ -18,8 +21,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationInt64
-        : TypeSerializationMethodValueType<long>
+        : TypeSerializationMethodBase<long>
     {
+
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
 
         public override long Load(CtpObject reader)
         {
@@ -33,8 +39,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationDouble
-        : TypeSerializationMethodValueType<double>
+        : TypeSerializationMethodBase<double>
     {
+
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
 
         public override double Load(CtpObject reader)
         {
@@ -48,8 +57,11 @@ namespace CTP.Serialization
     }
   
     internal class TypeSerializationDateTime
-        : TypeSerializationMethodValueType<DateTime>
+        : TypeSerializationMethodBase<DateTime>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override DateTime Load(CtpObject reader)
         {
             return (DateTime)reader;
@@ -62,8 +74,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationCtpTime
-        : TypeSerializationMethodValueType<CtpTime>
+        : TypeSerializationMethodBase<CtpTime>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override CtpTime Load(CtpObject reader)
         {
             return (CtpTime)reader;

@@ -4,12 +4,28 @@ using GSF.Reflection;
 
 namespace CTP.Serialization
 {
+    /// <summary>
+    /// Responsible for creating runtime lambda expressions to assign fields/properties. This is done without boxing. 
+    /// </summary>
     internal abstract class FieldSerialization
     {
+        /// <summary>
+        /// The name of the field/element to use in CtpDocument.
+        /// </summary>
         public abstract string RecordName { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj">The object that has the compiled filed.</param>
+        /// <param name="reader"></param>
         public abstract void Load(object obj, CtpDocumentElement reader);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj">The object that has the compiled filed.</param>
+        /// <param name="writer"></param>
         public abstract void Save(object obj, CtpDocumentWriter writer);
 
         private static readonly MethodInfo Method2 = typeof(FieldSerialization).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
@@ -27,6 +43,9 @@ namespace CTP.Serialization
         }
     }
 
+    /// <summary>
+    /// Responsible for creating runtime lambda expressions to assign fields/properties. This is done without boxing. 
+    /// </summary>
     internal class FieldSerialization<T>
         : FieldSerialization
     {
@@ -62,7 +81,7 @@ namespace CTP.Serialization
         public override void Load(object obj, CtpDocumentElement reader)
         {
             T item;
-            if (m_method.IsValueType)
+            if (m_method.IsValueRecord)
             {
                 item = m_method.Load(reader.GetValue(RecordName));
             }
@@ -76,7 +95,7 @@ namespace CTP.Serialization
         public override void Save(object obj, CtpDocumentWriter writer)
         {
             var item = m_read(obj);
-            if (m_method.IsValueType)
+            if (m_method.IsValueRecord)
             {
                 writer.WriteValue(RecordName, m_method.Save(item));
             }

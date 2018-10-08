@@ -5,8 +5,11 @@ using GSF;
 namespace CTP.Serialization
 {
     internal class TypeSerializationDecimal
-        : TypeSerializationMethodValueType<decimal>
+        : TypeSerializationMethodBase<decimal>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override decimal Load(CtpObject reader)
         {
             return (decimal)reader;
@@ -19,8 +22,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationGuid
-        : TypeSerializationMethodValueType<Guid>
+        : TypeSerializationMethodBase<Guid>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override Guid Load(CtpObject reader)
         {
             return (Guid)reader;

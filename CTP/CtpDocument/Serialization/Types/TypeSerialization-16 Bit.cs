@@ -3,8 +3,11 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationUInt16
-        : TypeSerializationMethodValueType<ushort>
+        : TypeSerializationMethodBase<ushort>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override ushort Load(CtpObject reader)
         {
             return (ushort)reader;
@@ -17,8 +20,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationInt16
-        : TypeSerializationMethodValueType<short>
+        : TypeSerializationMethodBase<short>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override short Load(CtpObject reader)
         {
             return (short)reader;
@@ -31,8 +37,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationChar
-        : TypeSerializationMethodValueType<char>
+        : TypeSerializationMethodBase<char>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override char Load(CtpObject reader)
         {
             return (char)reader;

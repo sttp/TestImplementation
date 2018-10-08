@@ -3,8 +3,11 @@ using CTP;
 namespace CTP.Serialization
 {
     internal class TypeSerializationUInt8
-        : TypeSerializationMethodValueType<byte>
+        : TypeSerializationMethodBase<byte>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override byte Load(CtpObject reader)
         {
             return (byte)reader;
@@ -17,8 +20,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationInt8
-        : TypeSerializationMethodValueType<sbyte>
+        : TypeSerializationMethodBase<sbyte>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override sbyte Load(CtpObject reader)
         {
             return (sbyte)reader;
@@ -31,8 +37,11 @@ namespace CTP.Serialization
     }
 
     internal class TypeSerializationBool
-        : TypeSerializationMethodValueType<bool>
+        : TypeSerializationMethodBase<bool>
     {
+        public override bool IsValueRecord => true;
+        public override bool CanAcceptNulls => false;
+
         public override bool Load(CtpObject reader)
         {
             return (bool)reader;

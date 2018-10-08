@@ -3,12 +3,19 @@ using System.Collections.Generic;
 
 namespace CTP.Serialization
 {
+    /// <summary>
+    /// Can serialize an array type.
+    /// </summary>
+    /// <typeparam name="TEnum"></typeparam>
+    /// <typeparam name="T"></typeparam>
     internal class TypeSerializationEnumerable<TEnum, T>
         : TypeSerializationMethodBase<TEnum>
         where TEnum : IEnumerable<T>
     {
-        public override bool IsArrayType => true;
-        public override bool IsValueType => false;
+        public override bool IsValueRecord => false;
+
+        public override bool CanAcceptNulls => true;
+
         private TypeSerializationMethodBase<T> m_serializeT;
         private Func<List<T>, TEnum> m_castToType;
 
@@ -21,6 +28,9 @@ namespace CTP.Serialization
 
         public override TEnum Load(CtpDocumentElement reader)
         {
+            if (reader == null)
+                return default(TEnum);
+
             List<T> items = new List<T>();
             foreach (var element in reader.ChildElements)
             {
@@ -41,7 +51,8 @@ namespace CTP.Serialization
         {
             if (obj == null)
                 return;
-            if (m_serializeT.IsValueType)
+
+            if (m_serializeT.IsValueRecord)
             {
                 foreach (var item in obj)
                 {
