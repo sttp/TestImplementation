@@ -18,7 +18,7 @@ namespace CTP.Serialization
         /// </summary>
         public abstract bool IsValueRecord { get; }
 
-        public virtual T Load(CtpDocumentElement reader)
+        public virtual T Load(CtpDocumentReader2 reader)
         {
             throw new NotSupportedException();
         }

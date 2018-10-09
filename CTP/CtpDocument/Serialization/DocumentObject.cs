@@ -49,12 +49,12 @@ namespace CTP
 
         }
 
-        internal virtual void MissingValue(CtpDocumentValue item)
+        internal virtual void MissingValue(string name, CtpObject value)
         {
             throw new NotSupportedException();
         }
 
-        internal virtual void MissingElement(CtpDocumentElement item)
+        internal virtual void MissingElement(string name)
         {
             throw new NotSupportedException();
 
@@ -112,7 +112,7 @@ namespace CTP
                 throw LoadError;
             if (CommandName != document.RootElement)
                 throw new Exception("Document Mismatch");
-            return Serialization.Load(document.MakeReader().ReadEntireElement());
+            return Serialization.Load(document.MakeReader2());
         }
 
     }

@@ -27,25 +27,37 @@ namespace CTP.Serialization
             m_serializeT = TypeSerialization<T>.Serialization;
         }
 
-        public override TEnum Load(CtpDocumentElement reader)
+        public override TEnum Load(CtpDocumentReader2 reader)
         {
             if (reader == null)
                 return default(TEnum);
 
             List<T> items = new List<T>();
-            foreach (var element in reader.ChildElements)
+
+            while (reader.Read())
             {
-                if (element.ElementName != "Item")
-                    throw new Exception("Expecting An Array Type");
-                items.Add(m_serializeT.Load(element));
+                switch (reader.NodeType)
+                {
+                    case CtpDocumentNodeType.StartElement:
+                        if (reader.ElementName != "Item")
+                            throw new Exception("Expecting An Array Type");
+                        items.Add(m_serializeT.Load(reader));
+                        break;
+                    case CtpDocumentNodeType.Value:
+                        if (reader.ValueName != "Item")
+                            throw new Exception("Expecting An Array Type");
+                        items.Add(m_serializeT.Load(reader.Value));
+                        break;
+                    case CtpDocumentNodeType.EndElement:
+                        return m_castToType(items);
+                    case CtpDocumentNodeType.EndOfDocument:
+                    case CtpDocumentNodeType.StartOfDocument:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
-            foreach (var element in reader.ChildValues)
-            {
-                if (element.ValueName != "Item")
-                    throw new Exception("Expecting An Array Type");
-                items.Add(m_serializeT.Load(element.Value));
-            }
-            return m_castToType(items);
+            throw new ArgumentOutOfRangeException();
+
         }
 
         public override void Save(TEnum obj, CtpDocumentWriter writer)

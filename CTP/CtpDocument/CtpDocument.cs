@@ -41,6 +41,14 @@ namespace CTP
         {
             return new CtpDocumentReader(m_data);
         }
+        /// <summary>
+        /// Create a means for reading the data from the CtpDocument.
+        /// </summary>
+        /// <returns></returns>
+        public CtpDocumentReader2 MakeReader2()
+        {
+            return new CtpDocumentReader2(m_data);
+        }
 
         public byte[] ToArray()
         {

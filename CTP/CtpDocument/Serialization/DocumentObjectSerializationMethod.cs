@@ -87,41 +87,52 @@ namespace CTP.Serialization
 
         public override bool IsValueRecord => false;
 
-        public override T Load(CtpDocumentElement reader)
+        public override T Load(CtpDocumentReader2 reader)
         {
-            if (reader == null)
-                return default(T);
-
             var rv = m_constructor();
             rv.BeforeLoad();
-            foreach (var item in reader.ChildValues)
-            {
-                if (item.Value != null)
-                {
-                    if (m_recordsLookupValues.TryGetValue(item.ValueName, out var serialization))
-                    {
-                        serialization.Load(rv, item.Value);
-                    }
-                    else
-                    {
-                        rv.MissingValue(item);
-                    }
-                }
-            }
+            FieldSerialization serialization;
 
-            foreach (var item in reader.ChildElements)
+            while (reader.Read())
             {
-                if (m_recordsLookupElements.TryGetValue(item.ElementName, out var serialization))
+                switch (reader.NodeType)
                 {
-                    serialization.Load(rv, item);
-                }
-                else
-                {
-                    rv.MissingElement(item);
+                    case CtpDocumentNodeType.StartElement:
+                        if (m_recordsLookupElements.TryGetValue(reader.ElementName, out serialization))
+                        {
+                            serialization.Load(rv, reader);
+                        }
+                        else
+                        {
+                            rv.MissingElement(reader.ElementName);
+                            reader.SkipElement();
+                        }
+                        break;
+                    case CtpDocumentNodeType.Value:
+                        if (reader.Value != null)
+                        {
+                            if (m_recordsLookupValues.TryGetValue(reader.ValueName, out serialization))
+                            {
+                                serialization.Load(rv, reader.Value);
+                            }
+                            else
+                            {
+                                rv.MissingValue(reader.ValueName, reader.Value);
+                            }
+                        }
+                        break;
+                    case CtpDocumentNodeType.EndElement:
+                        rv.AfterLoad();
+                        return rv;
+                    case CtpDocumentNodeType.EndOfDocument:
+                    case CtpDocumentNodeType.StartOfDocument:
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
             rv.AfterLoad();
             return rv;
+
         }
 
         public override void Save(T obj, CtpDocumentWriter writer)

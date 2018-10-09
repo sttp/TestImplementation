@@ -22,7 +22,7 @@ namespace CTP.Serialization
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="reader"></param>
-        public abstract void Load(DocumentObject obj, CtpDocumentElement reader);
+        public abstract void Load(DocumentObject obj, CtpDocumentReader2 reader);
 
         public abstract void Load(DocumentObject obj, CtpObject value);
 
@@ -97,7 +97,7 @@ namespace CTP.Serialization
             }
         }
 
-        public override void Load(DocumentObject obj, CtpDocumentElement reader)
+        public override void Load(DocumentObject obj, CtpDocumentReader2 reader)
         {
             if (m_method.IsValueRecord)
             {
