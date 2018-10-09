@@ -9,7 +9,7 @@ namespace CTP.Serialization
     /// This class assists in the automatic serialization of <see cref="DocumentObject"/>s to and from <see cref="CtpDocument"/>s.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal static class DocumentSerializationHelper<T>
+    internal static class TypeSerialization<T>
     {
         private static TypeSerializationMethodBase<T> s_serialization;
         internal static readonly Exception LoadError;
@@ -30,7 +30,7 @@ namespace CTP.Serialization
             }
         }
 
-        static DocumentSerializationHelper()
+        static TypeSerialization()
         {
             try
             {
@@ -67,7 +67,7 @@ namespace CTP.Serialization
                     LoadError = new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
                     return;
                 }
-                s_serialization = new RuntimeSerializationMethod<T>(c);
+                s_serialization =  DocumentObjectSerializationMethod.Create<T>(c);
             }
             catch (Exception e)
             {

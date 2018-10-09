@@ -8,6 +8,7 @@ using Sttp.Codec;
 namespace Sttp.Codec
 {
     public class MetadataSchemaTable
+        : DocumentObject<MetadataSchemaTable>
     {
         [DocumentField()]
         public string TableName;

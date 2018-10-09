@@ -4,6 +4,7 @@ using CTP.Serialization;
 namespace Sttp.Codec
 {
     public class MetadataProcedureParameters
+        : DocumentObject<MetadataProcedureParameters>
     {
         [DocumentField()]
         public string Name { get; private set; }

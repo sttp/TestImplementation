@@ -44,13 +44,19 @@ namespace CTP
 
         }
 
-        public virtual void ParsingException(ParsingErrorCode errorCode, string recordName, CtpObject value, Exception exception)
+        public virtual void AfterLoad()
         {
 
         }
 
-        public virtual void AfterLoad()
+        internal virtual void MissingValue(CtpDocumentValue item)
         {
+            throw new NotSupportedException();
+        }
+
+        internal virtual void MissingElement(CtpDocumentElement item)
+        {
+            throw new NotSupportedException();
 
         }
     }
@@ -60,16 +66,16 @@ namespace CTP
         where T : DocumentObject<T>
     {
         public static readonly string CommandName;
-        private static Exception LoadError;
+        private static readonly Exception LoadError;
         private static readonly TypeSerializationMethodBase<T> Serialization;
 
         static DocumentObject()
         {
-            LoadError = DocumentSerializationHelper<T>.LoadError;
+            LoadError = TypeSerialization<T>.LoadError;
             if (LoadError == null)
             {
-                Serialization = DocumentSerializationHelper<T>.Serialization;
-                CommandName = DocumentSerializationHelper<T>.CommandAttribute?.DocumentName ?? nameof(T);
+                Serialization = TypeSerialization<T>.Serialization;
+                CommandName = TypeSerialization<T>.CommandAttribute?.DocumentName ?? nameof(T);
             }
         }
 

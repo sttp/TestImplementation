@@ -7,6 +7,7 @@ using CTP.Serialization;
 namespace Sttp.Codec
 {
     public class MetadataColumn
+        : DocumentObject<MetadataColumn>
     {
         /// <summary>
         /// The name of the column

@@ -17,13 +17,14 @@ namespace CTP.Serialization
         public override bool CanAcceptNulls => true;
 
         private TypeSerializationMethodBase<T> m_serializeT;
+
         private Func<List<T>, TEnum> m_castToType;
 
         public TypeSerializationEnumerable(Func<List<T>, TEnum> castToType)
         {
-            DocumentSerializationHelper<TEnum>.Serialization = this; //This is required to fix circular reference issues.
+            TypeSerialization<TEnum>.Serialization = this; //This is required to fix circular reference issues.
             m_castToType = castToType;
-            m_serializeT = DocumentSerializationHelper<T>.Serialization;
+            m_serializeT = TypeSerialization<T>.Serialization;
         }
 
         public override TEnum Load(CtpDocumentElement reader)

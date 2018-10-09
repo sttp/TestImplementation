@@ -14,19 +14,24 @@ namespace CTP.Serialization
         /// </summary>
         public abstract string RecordName { get; }
 
+        public abstract bool IsValueRecord { get; }
+
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="reader"></param>
-        public abstract void Load(object obj, CtpDocumentElement reader);
+        public abstract void Load(DocumentObject obj, CtpDocumentElement reader);
+
+        public abstract void Load(DocumentObject obj, CtpObject value);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="writer"></param>
-        public abstract void Save(object obj, CtpDocumentWriter writer);
+        public abstract void Save(DocumentObject obj, CtpDocumentWriter writer);
 
         private static readonly MethodInfo Method2 = typeof(FieldSerialization).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -54,6 +59,8 @@ namespace CTP.Serialization
         private Func<object, T> m_read;
         private Action<object, T> m_write;
 
+        public override bool IsValueRecord => m_method.IsValueRecord;
+
         public FieldSerialization(MemberInfo member, DocumentFieldAttribute autoLoad)
         {
             m_recordName = autoLoad.RecordName ?? member.Name;
@@ -72,29 +79,42 @@ namespace CTP.Serialization
             {
                 throw new NotSupportedException();
             }
-            m_method = DocumentSerializationHelper<T>.Serialization;
-
+            m_method = TypeSerialization<T>.Serialization;
         }
 
         public override string RecordName => m_recordName;
 
-        public override void Load(object obj, CtpDocumentElement reader)
+        public override void Load(DocumentObject obj, CtpObject value)
         {
-            T item;
             if (m_method.IsValueRecord)
             {
-                item = m_method.Load(reader.GetValue(RecordName));
+                T item = m_method.Load(value);
+                m_write(obj, item);
             }
             else
             {
-                item = m_method.Load(reader.GetElement(RecordName));
+                throw new NotSupportedException();
             }
-            m_write(obj, item);
         }
 
-        public override void Save(object obj, CtpDocumentWriter writer)
+        public override void Load(DocumentObject obj, CtpDocumentElement reader)
+        {
+            if (m_method.IsValueRecord)
+            {
+                throw new NotSupportedException();
+            }
+            else
+            {
+                T item = m_method.Load(reader);
+                m_write(obj, item);
+            }
+        }
+
+        public override void Save(DocumentObject obj, CtpDocumentWriter writer)
         {
             var item = m_read(obj);
+            if (item == null)
+                return;
             if (m_method.IsValueRecord)
             {
                 writer.WriteValue(RecordName, m_method.Save(item));
