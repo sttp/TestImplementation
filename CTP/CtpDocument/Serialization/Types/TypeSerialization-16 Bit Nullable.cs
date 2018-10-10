@@ -1,3 +1,4 @@
+using System;
 using CTP;
 
 namespace CTP.Serialization
@@ -5,51 +6,54 @@ namespace CTP.Serialization
     internal class TypeSerializationUInt16Null
         : TypeSerializationMethodBase<ushort?>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => true;
 
-        public override ushort? Load(CtpObject reader)
+        public override ushort? Load(CtpDocumentReader reader)
         {
-            return (ushort?)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (ushort?)reader.Value;
         }
 
-        public override CtpObject Save(ushort? obj)
+        public override void Save(ushort? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 
     internal class TypeSerializationInt16Null
         : TypeSerializationMethodBase<short?>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => true;
 
-        public override short? Load(CtpObject reader)
+        public override short? Load(CtpDocumentReader reader)
         {
-            return (short?)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (short?)reader.Value;
         }
 
-        public override CtpObject Save(short? obj)
+        public override void Save(short? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 
     internal class TypeSerializationCharNull
         : TypeSerializationMethodBase<char?>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => true;
 
-        public override char? Load(CtpObject reader)
+        public override char? Load(CtpDocumentReader reader)
         {
-            return (char?)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (char?)reader.Value;
         }
 
-        public override CtpObject Save(char? obj)
+        public override void Save(char? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 }

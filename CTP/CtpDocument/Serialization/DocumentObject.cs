@@ -57,7 +57,6 @@ namespace CTP
         internal virtual void MissingElement(string name)
         {
             throw new NotSupportedException();
-
         }
     }
 
@@ -65,7 +64,7 @@ namespace CTP
         : DocumentObject
         where T : DocumentObject<T>
     {
-        public static readonly string CommandName;
+        public static readonly CtpDocumentNames CommandName;
         private static readonly Exception LoadError;
         private static readonly TypeSerializationMethodBase<T> Serialization;
 
@@ -75,7 +74,7 @@ namespace CTP
             if (LoadError == null)
             {
                 Serialization = TypeSerialization<T>.Serialization;
-                CommandName = TypeSerialization<T>.CommandAttribute?.DocumentName ?? nameof(T);
+                CommandName = CtpDocumentNames.Create(TypeSerialization<T>.CommandAttribute?.DocumentName ?? nameof(T));
             }
         }
 
@@ -102,7 +101,7 @@ namespace CTP
             if (LoadError != null)
                 throw LoadError;
             var wr = new CtpDocumentWriter(CommandName);
-            Serialization.Save(obj, wr);
+            Serialization.Save(obj, wr, null);
             return wr.ToCtpDocument();
         }
 
@@ -110,9 +109,11 @@ namespace CTP
         {
             if (LoadError != null)
                 throw LoadError;
-            if (CommandName != document.RootElement)
+            if (CommandName.Value != document.RootElement)
                 throw new Exception("Document Mismatch");
-            return Serialization.Load(document.MakeReader2());
+            var rdr = document.MakeReader();
+            rdr.Read();
+            return Serialization.Load(rdr);
         }
 
     }

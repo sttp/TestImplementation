@@ -48,11 +48,6 @@ namespace CTP
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
         }
 
-        public void Write(bool value)
-        {
-            WriteBits8(value ? 1u : 0u);
-        }
-
         public void Write(float value)
         {
             WriteBits32(*(uint*)&value);
@@ -105,7 +100,35 @@ namespace CTP
                 return;
             }
 
+            if (value.Length < 120)
+            {
+                if (TryWriteSmallASCII(value))
+                    return;
+            }
+
             Write(Encoding.UTF8.GetBytes(value));
+        }
+
+        private bool TryWriteSmallASCII(string value)
+        {
+            foreach (var c in value)
+            {
+                if (c > 127)
+                {
+                    return false;
+                }
+            }
+
+            EnsureCapacityBytes(value.Length + 1);
+            m_buffer[m_length] = (byte)value.Length;
+            for (int x = 0; x < value.Length; x++)
+            {
+                m_buffer[m_length + x + 1] = (byte)value[x];
+            }
+
+            m_length += value.Length + 1;
+
+            return true;
         }
 
         #region [ Writing Bits ]
@@ -164,7 +187,7 @@ namespace CTP
         {
             Write7BitInt((uint)value.Length);
             EnsureCapacityBytes(value.Length);
-            value.CopyTo(m_buffer,m_length);
+            value.CopyTo(m_buffer, m_length);
             m_length += value.Length;
         }
 

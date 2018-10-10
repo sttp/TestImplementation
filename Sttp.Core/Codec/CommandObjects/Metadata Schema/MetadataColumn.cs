@@ -24,11 +24,70 @@ namespace Sttp.Codec
         {
             get
             {
-                return TypeCode.ToString();
+                switch (TypeCode)
+                {
+                    case CtpTypeCode.Null:
+                        return "Null";
+                    case CtpTypeCode.Int64:
+                        return "Int64";
+                    case CtpTypeCode.Single:
+                        return "Single";
+                    case CtpTypeCode.Double:
+                        return "Double";
+                    case CtpTypeCode.CtpTime:
+                        return "CtpTime";
+                    case CtpTypeCode.Boolean:
+                        return "Boolean";
+                    case CtpTypeCode.Guid:
+                        return "Guid";
+                    case CtpTypeCode.String:
+                        return "String";
+                    case CtpTypeCode.CtpBuffer:
+                        return "CtpBuffer";
+                    case CtpTypeCode.CtpDocument:
+                        return "CtpDocument";
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
             set
             {
-                TypeCode = (CtpTypeCode)Enum.Parse(typeof(CtpTypeCode), value);
+                switch (value)
+                {
+                    case "Null":
+                        TypeCode = CtpTypeCode.Null;
+                        break;
+                    case "Int64":
+                        TypeCode = CtpTypeCode.Int64;
+                        break;
+                    case "Single":
+                        TypeCode = CtpTypeCode.Single;
+                        break;
+                    case "Double":
+                        TypeCode = CtpTypeCode.Double;
+                        break;
+                    case "CtpTime":
+                        TypeCode = CtpTypeCode.CtpTime;
+                        break;
+                    case "Boolean":
+                        TypeCode = CtpTypeCode.Boolean;
+                        break;
+                    case "Guid":
+                        TypeCode = CtpTypeCode.Guid;
+                        break;
+                    case "String":
+                        TypeCode = CtpTypeCode.String;
+                        break;
+                    case "CtpBuffer":
+                        TypeCode = CtpTypeCode.CtpBuffer;
+                        break;
+                    case "CtpDocument":
+                        TypeCode = CtpTypeCode.CtpDocument;
+                        break;
+                    default:
+                        TypeCode = (CtpTypeCode)Enum.Parse(typeof(CtpTypeCode), value);
+                        break;
+                }
             }
 
         }
@@ -42,6 +101,6 @@ namespace Sttp.Codec
         //Exists to support CtpSerializable
         private MetadataColumn()
         { }
-       
+
     }
 }

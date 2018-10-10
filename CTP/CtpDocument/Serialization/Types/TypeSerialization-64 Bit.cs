@@ -6,17 +6,18 @@ namespace CTP.Serialization
     internal class TypeSerializationUInt64
         : TypeSerializationMethodBase<ulong>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override ulong Load(CtpObject reader)
+        public override ulong Load(CtpDocumentReader reader)
         {
-            return (ulong)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (ulong)reader.Value;
         }
 
-        public override CtpObject Save(ulong obj)
+        public override void Save(ulong obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 
@@ -24,17 +25,18 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<long>
     {
 
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override long Load(CtpObject reader)
+        public override long Load(CtpDocumentReader reader)
         {
-            return (long)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (long)reader.Value;
         }
 
-        public override CtpObject Save(long obj)
+        public override void Save(long obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 
@@ -42,51 +44,54 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<double>
     {
 
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override double Load(CtpObject reader)
+        public override double Load(CtpDocumentReader reader)
         {
-            return (double)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (double)reader.Value;
         }
 
-        public override CtpObject Save(double obj)
+        public override void Save(double obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
   
     internal class TypeSerializationDateTime
         : TypeSerializationMethodBase<DateTime>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override DateTime Load(CtpObject reader)
+        public override DateTime Load(CtpDocumentReader reader)
         {
-            return (DateTime)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (DateTime)reader.Value;
         }
 
-        public override CtpObject Save(DateTime obj)
+        public override void Save(DateTime obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 
     internal class TypeSerializationCtpTime
         : TypeSerializationMethodBase<CtpTime>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override CtpTime Load(CtpObject reader)
+        public override CtpTime Load(CtpDocumentReader reader)
         {
-            return (CtpTime)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (CtpTime)reader.Value;
         }
 
-        public override CtpObject Save(CtpTime obj)
+        public override void Save(CtpTime obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 }

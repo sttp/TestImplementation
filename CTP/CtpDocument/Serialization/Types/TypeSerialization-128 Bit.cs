@@ -7,34 +7,36 @@ namespace CTP.Serialization
     internal class TypeSerializationDecimal
         : TypeSerializationMethodBase<decimal>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override decimal Load(CtpObject reader)
+        public override decimal Load(CtpDocumentReader reader)
         {
-            return (decimal)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (decimal)reader.Value;
         }
 
-        public override CtpObject Save(decimal obj)
+        public override void Save(decimal obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 
     internal class TypeSerializationGuid
         : TypeSerializationMethodBase<Guid>
     {
-        public override bool IsValueRecord => true;
         public override bool CanAcceptNulls => false;
 
-        public override Guid Load(CtpObject reader)
+        public override Guid Load(CtpDocumentReader reader)
         {
-            return (Guid)reader;
+            if (reader.NodeType != CtpDocumentNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (Guid)reader.Value;
         }
 
-        public override CtpObject Save(Guid obj)
+        public override void Save(Guid obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            return (CtpObject)obj;
+            writer.WriteValue(recordName, obj);
         }
     }
 }

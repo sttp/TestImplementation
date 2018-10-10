@@ -12,8 +12,7 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<TEnum>
         where TEnum : IEnumerable<T>
     {
-        public override bool IsValueRecord => false;
-
+        private static CtpDocumentNames Item = CtpDocumentNames.Create("Item");
         public override bool CanAcceptNulls => true;
 
         private TypeSerializationMethodBase<T> m_serializeT;
@@ -27,7 +26,7 @@ namespace CTP.Serialization
             m_serializeT = TypeSerialization<T>.Serialization;
         }
 
-        public override TEnum Load(CtpDocumentReader2 reader)
+        public override TEnum Load(CtpDocumentReader reader)
         {
             if (reader == null)
                 return default(TEnum);
@@ -39,14 +38,14 @@ namespace CTP.Serialization
                 switch (reader.NodeType)
                 {
                     case CtpDocumentNodeType.StartElement:
-                        if (reader.ElementName != "Item")
+                        if (reader.ElementName != Item)
                             throw new Exception("Expecting An Array Type");
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpDocumentNodeType.Value:
-                        if (reader.ValueName != "Item")
+                        if (reader.ValueName != Item)
                             throw new Exception("Expecting An Array Type");
-                        items.Add(m_serializeT.Load(reader.Value));
+                        items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpDocumentNodeType.EndElement:
                         return m_castToType(items);
@@ -60,27 +59,18 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(TEnum obj, CtpDocumentWriter writer)
+        public override void Save(TEnum obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
             if (obj == null)
                 return;
 
-            if (m_serializeT.IsValueRecord)
+            using (writer.StartElement(recordName))
             {
                 foreach (var item in obj)
                 {
-                    writer.WriteValue("Item", m_serializeT.Save(item));
+                    m_serializeT.Save(item, writer, Item);
                 }
-            }
-            else
-            {
-                foreach (var item in obj)
-                {
-                    using (writer.StartElement("Item"))
-                    {
-                        m_serializeT.Save(item, writer);
-                    }
-                }
+
             }
         }
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace CTP
 {
     /// <summary>
-    /// A class for reading SttpMarkup documents.
+    /// A class for reading CtpDocument documents.
     /// </summary>
     public class CtpDocumentReader
     {
@@ -15,17 +15,17 @@ namespace CTP
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
-        private string[] m_elementNamesList;
-        private string[] m_valueNamesList;
+        private CtpDocumentNames[] m_elementNamesList;
+        private CtpDocumentNames[] m_valueNamesList;
         /// <summary>
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
-        private Stack<string> m_elementStack = new Stack<string>();
+        private Stack<CtpDocumentNames> m_elementStack = new Stack<CtpDocumentNames>();
 
         /// <summary>
         /// The root element.
         /// </summary>
-        private string m_rootElement;
+        private CtpDocumentNames m_rootElement;
 
         /// <summary>
         /// Creates a markup reader from the specified byte array.
@@ -39,8 +39,8 @@ namespace CTP
             m_rootElement = m_stream.ReadAscii();
             int elementCount = (int)m_stream.ReadBits16();
             int valueCount = (int)m_stream.ReadBits16();
-            m_elementNamesList = new string[elementCount];
-            m_valueNamesList = new string[valueCount];
+            m_elementNamesList = new CtpDocumentNames[elementCount];
+            m_valueNamesList = new CtpDocumentNames[valueCount];
             for (int x = 0; x < elementCount; x++)
             {
                 m_elementNamesList[x] = m_stream.ReadAscii();
@@ -55,7 +55,7 @@ namespace CTP
         /// <summary>
         /// The name of the root element.
         /// </summary>
-        public string RootElement => m_rootElement;
+        public CtpDocumentNames RootElement => m_rootElement;
         /// <summary>
         /// The depth of the element stack. 0 means the depth is at the root element.
         /// </summary>
@@ -64,11 +64,11 @@ namespace CTP
         /// The current name of the current element. Can be the RootElement if ElementDepth is 0 and <see cref="NodeType"/> is not <see cref="CtpDocumentNodeType.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
-        public string ElementName { get; private set; }
+        public CtpDocumentNames ElementName { get; private set; }
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the name of the value. Otherwise, null.
         /// </summary>
-        public string ValueName { get; private set; }
+        public CtpDocumentNames ValueName { get; private set; }
 
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpDocumentNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
@@ -146,7 +146,7 @@ namespace CTP
                         Value.SetValue(new CtpBuffer(m_stream.ReadBytes()));
                         break;
                     case CtpDocumentHeader.ValueCtpDocument:
-                        Value.SetValue(new CtpDocument(m_stream.ReadBytes()));
+                        Value.SetValue(new CtpDocument(m_stream.ReadBytes(), false));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -173,22 +173,21 @@ namespace CTP
             return true;
         }
 
-        /// <summary>
-        /// Reads the entire element into an in-memory object, advancing to the end of this element. This is the most convenient method of reading
-        /// but is impractical for large elements. The intended mode of operation is to interweave calls to <see cref="Read"/> with <see cref="ReadEntireElement"/> to assist in parsing.
-        /// </summary>
-        /// <returns></returns>
-        public CtpDocumentElement ReadEntireElement()
-        {
-            return new CtpDocumentElement(this);
-        }
-
-        private string GetCurrentElement()
+        private CtpDocumentNames GetCurrentElement()
         {
             if (m_elementStack.Count == 0)
                 return m_rootElement;
             return m_elementStack.Peek();
         }
 
+        public void SkipElement()
+        {
+            int stack = m_elementStack.Count;
+            while (Read())
+            {
+                if (m_elementStack.Count < stack)
+                    return;
+            }
+        }
     }
 }

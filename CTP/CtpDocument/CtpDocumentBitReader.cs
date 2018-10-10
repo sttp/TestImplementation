@@ -29,11 +29,6 @@ namespace CTP
             throw new EndOfStreamException();
         }
 
-        public bool ReadBoolean()
-        {
-            return ReadBits8() != 0;
-        }
-
         public float ReadSingle()
         {
             var value = ReadBits32();
@@ -90,7 +85,7 @@ namespace CTP
             return Encoding.UTF8.GetString(rv);
         }
 
-        public string ReadAscii()
+        public CtpDocumentNames ReadAscii()
         {
             if (m_position + 1 > m_length)
             {
@@ -100,15 +95,9 @@ namespace CTP
             {
                 ThrowEndOfStreamException();
             }
-            char[] data = new char[m_buffer[m_position]];
-            for (int x = 0; x < data.Length; x++)
-            {
-                data[x] = (char)m_buffer[m_position + 1 + x];
-                if (data[x] > 127)
-                    throw new Exception("Not an ASCII string");
-            }
-            m_position += 1 + data.Length;
-            return new string(data);
+            var rv = CtpDocumentNames.Lookup(m_buffer, m_position);
+            m_position += m_buffer[m_position] + 1;
+            return rv;
         }
 
         #region [ Read Bits ]

@@ -15,7 +15,7 @@ namespace Sttp.Tests
         {
             DataSet ds = new DataSet("openPDC");
 
-            var con = new SqlConnection("Server=phasor\\sqlexpress;Database=openPDC;Trusted_Connection=True;");
+            var con = new SqlConnection("Server=phasor3\\sqlexpress;Database=openPDC;Trusted_Connection=True;");
             con.Open();
 
             FillData("Company", con, ds);

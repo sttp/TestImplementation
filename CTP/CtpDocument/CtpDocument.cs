@@ -26,6 +26,21 @@ namespace CTP
             m_data = (byte[])data.Clone();
         }
 
+        internal CtpDocument(byte[] data, bool unsafeShouldClone)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            if (unsafeShouldClone)
+            {
+                m_data = (byte[])data.Clone();
+            }
+            else
+            {
+                m_data = data;
+            }
+
+        }
+
         /// <summary>
         /// The size of the data block.
         /// </summary>
@@ -40,14 +55,6 @@ namespace CTP
         public CtpDocumentReader MakeReader()
         {
             return new CtpDocumentReader(m_data);
-        }
-        /// <summary>
-        /// Create a means for reading the data from the CtpDocument.
-        /// </summary>
-        /// <returns></returns>
-        public CtpDocumentReader2 MakeReader2()
-        {
-            return new CtpDocumentReader2(m_data);
         }
 
         public byte[] ToArray()
@@ -80,16 +87,16 @@ namespace CTP
             settings.Indent = true;
             var xml = XmlWriter.Create(sb, settings);
 
-            xml.WriteStartElement(reader.RootElement);
+            xml.WriteStartElement(reader.RootElement.Value);
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
                     case CtpDocumentNodeType.StartElement:
-                        xml.WriteStartElement(reader.ElementName);
+                        xml.WriteStartElement(reader.ElementName.Value);
                         break;
                     case CtpDocumentNodeType.Value:
-                        xml.WriteStartElement(reader.ValueName);
+                        xml.WriteStartElement(reader.ValueName.Value);
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
                         xml.WriteValue(reader.Value.AsString ?? string.Empty);
                         xml.WriteEndElement();

@@ -12,9 +12,7 @@ namespace CTP.Serialization
         /// <summary>
         /// The name of the field/element to use in CtpDocument.
         /// </summary>
-        public abstract string RecordName { get; }
-
-        public abstract bool IsValueRecord { get; }
+        public abstract CtpDocumentNames RecordName { get; }
 
 
         /// <summary>
@@ -22,9 +20,7 @@ namespace CTP.Serialization
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="reader"></param>
-        public abstract void Load(DocumentObject obj, CtpDocumentReader2 reader);
-
-        public abstract void Load(DocumentObject obj, CtpObject value);
+        public abstract void Load(DocumentObject obj, CtpDocumentReader reader);
 
         /// <summary>
         /// 
@@ -54,16 +50,15 @@ namespace CTP.Serialization
     internal class FieldSerialization<T>
         : FieldSerialization
     {
-        private string m_recordName;
+        private CtpDocumentNames m_recordName;
         private TypeSerializationMethodBase<T> m_method;
         private Func<object, T> m_read;
         private Action<object, T> m_write;
 
-        public override bool IsValueRecord => m_method.IsValueRecord;
 
         public FieldSerialization(MemberInfo member, DocumentFieldAttribute autoLoad)
         {
-            m_recordName = autoLoad.RecordName ?? member.Name;
+            m_recordName = CtpDocumentNames.Create(autoLoad.RecordName ?? member.Name);
 
             if (member is PropertyInfo)
             {
@@ -82,32 +77,12 @@ namespace CTP.Serialization
             m_method = TypeSerialization<T>.Serialization;
         }
 
-        public override string RecordName => m_recordName;
+        public override CtpDocumentNames RecordName => m_recordName;
 
-        public override void Load(DocumentObject obj, CtpObject value)
+        public override void Load(DocumentObject obj, CtpDocumentReader reader)
         {
-            if (m_method.IsValueRecord)
-            {
-                T item = m_method.Load(value);
-                m_write(obj, item);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        public override void Load(DocumentObject obj, CtpDocumentReader2 reader)
-        {
-            if (m_method.IsValueRecord)
-            {
-                throw new NotSupportedException();
-            }
-            else
-            {
-                T item = m_method.Load(reader);
-                m_write(obj, item);
-            }
+            T item = m_method.Load(reader);
+            m_write(obj, item);
         }
 
         public override void Save(DocumentObject obj, CtpDocumentWriter writer)
@@ -115,17 +90,8 @@ namespace CTP.Serialization
             var item = m_read(obj);
             if (item == null)
                 return;
-            if (m_method.IsValueRecord)
-            {
-                writer.WriteValue(RecordName, m_method.Save(item));
-            }
-            else
-            {
-                using (writer.StartElement(RecordName))
-                {
-                    m_method.Save(item, writer);
-                }
-            }
+
+            m_method.Save(item, writer, RecordName);
         }
     }
 }

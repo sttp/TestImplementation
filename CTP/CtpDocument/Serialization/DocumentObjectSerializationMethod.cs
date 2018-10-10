@@ -29,8 +29,7 @@ namespace CTP.Serialization
         where T : DocumentObject
     {
         private readonly List<FieldSerialization> m_records = new List<FieldSerialization>();
-        private readonly Dictionary<string, FieldSerialization> m_recordsLookupValues = new Dictionary<string, FieldSerialization>(StringComparer.CurrentCultureIgnoreCase);
-        private readonly Dictionary<string, FieldSerialization> m_recordsLookupElements = new Dictionary<string, FieldSerialization>(StringComparer.CurrentCultureIgnoreCase);
+        private readonly Dictionary<CtpDocumentNames, FieldSerialization> m_recordsLookup = new Dictionary<CtpDocumentNames, FieldSerialization>();
 
         private readonly Func<T> m_constructor;
 
@@ -47,7 +46,7 @@ namespace CTP.Serialization
             }
 
             //Test for collisions
-            HashSet<string> ids = new HashSet<string>();
+            HashSet<CtpDocumentNames> ids = new HashSet<CtpDocumentNames>();
             foreach (var f in m_records)
             {
                 if (!ids.Add(f.RecordName))
@@ -72,22 +71,13 @@ namespace CTP.Serialization
             {
                 var field = FieldSerialization.CreateFieldOptions(member, targetType, attribute);
                 m_records.Add(field);
-                if (field.IsValueRecord)
-                {
-                    m_recordsLookupValues.Add(field.RecordName, field);
-                }
-                else
-                {
-                    m_recordsLookupElements.Add(field.RecordName, field);
-                }
+                m_recordsLookup.Add(field.RecordName, field);
             }
         }
 
         public override bool CanAcceptNulls => true;
 
-        public override bool IsValueRecord => false;
-
-        public override T Load(CtpDocumentReader2 reader)
+        public override T Load(CtpDocumentReader reader)
         {
             var rv = m_constructor();
             rv.BeforeLoad();
@@ -98,27 +88,25 @@ namespace CTP.Serialization
                 switch (reader.NodeType)
                 {
                     case CtpDocumentNodeType.StartElement:
-                        if (m_recordsLookupElements.TryGetValue(reader.ElementName, out serialization))
+                        if (m_recordsLookup.TryGetValue(reader.ElementName, out serialization))
                         {
                             serialization.Load(rv, reader);
                         }
                         else
                         {
-                            rv.MissingElement(reader.ElementName);
+                            rv.MissingElement(reader.ElementName.Value);
                             reader.SkipElement();
                         }
                         break;
                     case CtpDocumentNodeType.Value:
-                        if (reader.Value != null)
+                        if (m_recordsLookup.TryGetValue(reader.ValueName, out serialization))
                         {
-                            if (m_recordsLookupValues.TryGetValue(reader.ValueName, out serialization))
-                            {
-                                serialization.Load(rv, reader.Value);
-                            }
-                            else
-                            {
-                                rv.MissingValue(reader.ValueName, reader.Value);
-                            }
+                            serialization.Load(rv, reader);
+                        }
+                        else
+                        {
+                            rv.MissingElement(reader.ElementName.Value);
+                            reader.SkipElement();
                         }
                         break;
                     case CtpDocumentNodeType.EndElement:
@@ -135,19 +123,26 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(T obj, CtpDocumentWriter writer)
+        public override void Save(T obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
         {
-            if (obj == null)
-                return;
-
-            foreach (var item in m_recordsLookupValues.Values)
+            if (recordName == null)
             {
-                item.Save(obj, writer);
+                foreach (var item in m_recordsLookup.Values)
+                {
+                    item.Save(obj, writer);
+                }
             }
-            foreach (var item in m_recordsLookupElements.Values)
+            else
             {
-                item.Save(obj, writer);
+                using (writer.StartElement(recordName))
+                {
+                    foreach (var item in m_recordsLookup.Values)
+                    {
+                        item.Save(obj, writer);
+                    }
+                }
             }
+           
         }
 
     }
