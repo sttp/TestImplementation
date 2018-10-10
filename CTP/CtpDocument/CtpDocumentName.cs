@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace CTP
 {
-    public class CtpDocumentNames : IEquatable<CtpDocumentNames>
+    public class CtpDocumentName : IEquatable<CtpDocumentName>
     {
-        private static int s_runtimeID = 0;
-        private static Dictionary<string, CtpDocumentNames> s_names = new Dictionary<string, CtpDocumentNames>();
+        private static int s_runtimeID = 1;
+        private static Dictionary<string, CtpDocumentName> s_names = new Dictionary<string, CtpDocumentName>();
 
-        public static CtpDocumentNames Lookup(byte[] buffer, int offset)
+        public static CtpDocumentName Lookup(byte[] buffer, int offset)
         {
             char[] data = new char[buffer[offset]];
             for (int x = 0; x < data.Length; x++)
@@ -19,24 +19,23 @@ namespace CTP
             }
 
             var str = new string(data);
-
             lock (s_names)
             {
                 if (!s_names.TryGetValue(str, out var name))
                 {
-                    return new CtpDocumentNames(str, -1);
+                    return new CtpDocumentName(str, -1);
                 }
                 return name;
             }
         }
 
-        public static CtpDocumentNames Create(string value)
+        public static CtpDocumentName Create(string value)
         {
             lock (s_names)
             {
                 if (!s_names.TryGetValue(value, out var name))
                 {
-                    name = new CtpDocumentNames(value, s_runtimeID);
+                    name = new CtpDocumentName(value, s_runtimeID);
                     s_runtimeID++;
                     s_names[value] = name;
                 }
@@ -49,7 +48,7 @@ namespace CTP
         public readonly string Value;
         public readonly int HashCode;
 
-        private CtpDocumentNames(string value, int runtimeID)
+        private CtpDocumentName(string value, int runtimeID)
         {
             RuntimeID = runtimeID;
             if (string.IsNullOrEmpty(value))
@@ -69,7 +68,7 @@ namespace CTP
             HashCode = value.GetHashCode();
         }
 
-        public bool Equals(CtpDocumentNames other)
+        public bool Equals(CtpDocumentName other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -97,7 +96,7 @@ namespace CTP
                 return true;
             if (obj.GetType() != this.GetType())
                 return false;
-            return Equals((CtpDocumentNames)obj);
+            return Equals((CtpDocumentName)obj);
         }
 
         public override int GetHashCode()
@@ -105,12 +104,12 @@ namespace CTP
             return HashCode;
         }
 
-        public static bool operator ==(CtpDocumentNames left, CtpDocumentNames right)
+        public static bool operator ==(CtpDocumentName left, CtpDocumentName right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(CtpDocumentNames left, CtpDocumentNames right)
+        public static bool operator !=(CtpDocumentName left, CtpDocumentName right)
         {
             return !Equals(left, right);
         }

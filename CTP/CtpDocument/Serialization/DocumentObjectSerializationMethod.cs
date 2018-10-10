@@ -29,7 +29,7 @@ namespace CTP.Serialization
         where T : DocumentObject
     {
         private readonly List<FieldSerialization> m_records = new List<FieldSerialization>();
-        private readonly Dictionary<CtpDocumentNames, FieldSerialization> m_recordsLookup = new Dictionary<CtpDocumentNames, FieldSerialization>();
+        private readonly Dictionary<CtpDocumentName, FieldSerialization> m_recordsLookup = new Dictionary<CtpDocumentName, FieldSerialization>();
 
         private readonly Func<T> m_constructor;
 
@@ -46,7 +46,7 @@ namespace CTP.Serialization
             }
 
             //Test for collisions
-            HashSet<CtpDocumentNames> ids = new HashSet<CtpDocumentNames>();
+            HashSet<CtpDocumentName> ids = new HashSet<CtpDocumentName>();
             foreach (var f in m_records)
             {
                 if (!ids.Add(f.RecordName))
@@ -123,7 +123,7 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(T obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(T obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             if (recordName == null)
             {

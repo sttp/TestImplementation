@@ -12,7 +12,7 @@ namespace CTP.Serialization
         /// <summary>
         /// The name of the field/element to use in CtpDocument.
         /// </summary>
-        public abstract CtpDocumentNames RecordName { get; }
+        public abstract CtpDocumentName RecordName { get; }
 
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace CTP.Serialization
     internal class FieldSerialization<T>
         : FieldSerialization
     {
-        private CtpDocumentNames m_recordName;
+        private CtpDocumentName m_recordName;
         private TypeSerializationMethodBase<T> m_method;
         private Func<object, T> m_read;
         private Action<object, T> m_write;
@@ -58,7 +58,7 @@ namespace CTP.Serialization
 
         public FieldSerialization(MemberInfo member, DocumentFieldAttribute autoLoad)
         {
-            m_recordName = CtpDocumentNames.Create(autoLoad.RecordName ?? member.Name);
+            m_recordName = CtpDocumentName.Create(autoLoad.RecordName ?? member.Name);
 
             if (member is PropertyInfo)
             {
@@ -77,7 +77,7 @@ namespace CTP.Serialization
             m_method = TypeSerialization<T>.Serialization;
         }
 
-        public override CtpDocumentNames RecordName => m_recordName;
+        public override CtpDocumentName RecordName => m_recordName;
 
         public override void Load(DocumentObject obj, CtpDocumentReader reader)
         {

@@ -85,7 +85,7 @@ namespace CTP
             return Encoding.UTF8.GetString(rv);
         }
 
-        public CtpDocumentNames ReadAscii()
+        public CtpDocumentName ReadAscii()
         {
             if (m_position + 1 > m_length)
             {
@@ -95,7 +95,7 @@ namespace CTP
             {
                 ThrowEndOfStreamException();
             }
-            var rv = CtpDocumentNames.Lookup(m_buffer, m_position);
+            var rv = CtpDocumentName.Lookup(m_buffer, m_position);
             m_position += m_buffer[m_position] + 1;
             return rv;
         }

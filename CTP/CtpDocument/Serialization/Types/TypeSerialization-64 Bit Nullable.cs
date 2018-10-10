@@ -13,7 +13,7 @@ namespace CTP.Serialization
             return (ulong?)reader.Value;
         }
 
-        public override void Save(ulong? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(ulong? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -30,7 +30,7 @@ namespace CTP.Serialization
             return (long?)reader.Value;
         }
 
-        public override void Save(long? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(long? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -47,7 +47,7 @@ namespace CTP.Serialization
             return (double?)reader.Value;
         }
 
-        public override void Save(double? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(double? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -65,7 +65,7 @@ namespace CTP.Serialization
             return (DateTime?)reader.Value;
         }
 
-        public override void Save(DateTime? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(DateTime? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -83,7 +83,7 @@ namespace CTP.Serialization
             return (CtpTime?)reader.Value;
         }
 
-        public override void Save(CtpTime? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(CtpTime? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }

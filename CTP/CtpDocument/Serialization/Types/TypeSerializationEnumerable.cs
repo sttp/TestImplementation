@@ -12,7 +12,7 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<TEnum>
         where TEnum : IEnumerable<T>
     {
-        private static CtpDocumentNames Item = CtpDocumentNames.Create("Item");
+        private static CtpDocumentName Item = CtpDocumentName.Create("Item");
         public override bool CanAcceptNulls => true;
 
         private TypeSerializationMethodBase<T> m_serializeT;
@@ -59,7 +59,7 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(TEnum obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(TEnum obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             if (obj == null)
                 return;

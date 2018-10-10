@@ -15,7 +15,7 @@ namespace CTP.Serialization
             return (byte?)reader.Value;
         }
 
-        public override void Save(byte? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(byte? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -33,7 +33,7 @@ namespace CTP.Serialization
             return (sbyte?)reader.Value;
         }
 
-        public override void Save(sbyte? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(sbyte? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -51,7 +51,7 @@ namespace CTP.Serialization
             return (bool?)reader.Value;
         }
 
-        public override void Save(bool? obj, CtpDocumentWriter writer, CtpDocumentNames recordName)
+        public override void Save(bool? obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             writer.WriteValue(recordName, obj);
         }

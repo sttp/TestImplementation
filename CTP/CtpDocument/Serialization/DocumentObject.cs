@@ -64,7 +64,7 @@ namespace CTP
         : DocumentObject
         where T : DocumentObject<T>
     {
-        public static readonly CtpDocumentNames CommandName;
+        public static readonly CtpDocumentName CommandName;
         private static readonly Exception LoadError;
         private static readonly TypeSerializationMethodBase<T> Serialization;
 
@@ -74,7 +74,7 @@ namespace CTP
             if (LoadError == null)
             {
                 Serialization = TypeSerialization<T>.Serialization;
-                CommandName = CtpDocumentNames.Create(TypeSerialization<T>.CommandAttribute?.DocumentName ?? nameof(T));
+                CommandName = CtpDocumentName.Create(TypeSerialization<T>.CommandAttribute?.DocumentName ?? nameof(T));
             }
         }
 

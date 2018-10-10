@@ -12,6 +12,6 @@ namespace CTP.Serialization
 
         public abstract T Load(CtpDocumentReader reader);
 
-        public abstract void Save(T obj, CtpDocumentWriter writer, CtpDocumentNames recordName);
+        public abstract void Save(T obj, CtpDocumentWriter writer, CtpDocumentName recordName);
     }
 }

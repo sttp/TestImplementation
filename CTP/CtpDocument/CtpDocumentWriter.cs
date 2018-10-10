@@ -41,13 +41,13 @@ namespace CTP
         /// <summary>
         /// A lookup of all names that have been registered.
         /// </summary>
-        private Dictionary<int, int> m_elementNamesLookup;
-        private Dictionary<int, int> m_valueNamesLookup;
+        private RuntimeMapping m_elementNamesLookup;
+        private RuntimeMapping m_valueNamesLookup;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
-        private List<CtpDocumentNames> m_elementNames;
-        private List<CtpDocumentNames> m_valueNames;
+        private List<CtpDocumentName> m_elementNames;
+        private List<CtpDocumentName> m_valueNames;
         /// <summary>
         /// The list of elements so an error can occur when the element tree is invalid..
         /// </summary>
@@ -65,20 +65,20 @@ namespace CTP
         /// </summary>
         private CtpObject m_tmpValue;
         private int m_prefixLength;
-        private CtpDocumentNames m_rootElement;
+        private CtpDocumentName m_rootElement;
 
         /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>
         /// <param name="rootElement"></param>
-        public CtpDocumentWriter(CtpDocumentNames rootElement)
+        public CtpDocumentWriter(CtpDocumentName rootElement)
         {
             m_prefixLength = 4;
             m_tmpValue = new CtpObject();
-            m_elementNamesLookup = new Dictionary<int, int>();
-            m_valueNamesLookup = new Dictionary<int, int>();
-            m_elementNames = new List<CtpDocumentNames>();
-            m_valueNames = new List<CtpDocumentNames>();
+            m_elementNamesLookup = new RuntimeMapping();
+            m_valueNamesLookup = new RuntimeMapping();
+            m_elementNames = new List<CtpDocumentName>();
+            m_valueNames = new List<CtpDocumentName>();
             m_elementStack = new Stack<string>();
             m_stream = new CtpDocumentBitWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
@@ -96,7 +96,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">The name of the element. This name must conform to 7-bit ASCII and may not exceed 255 characters in length.</param>
         /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
-        public IDisposable StartElement(CtpDocumentNames name)
+        public IDisposable StartElement(CtpDocumentName name)
         {
             m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpDocumentHeader.StartElement);
             m_elementStack.Push(name.Value);
@@ -121,7 +121,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value</param>
-        public void WriteValue(CtpDocumentNames name, CtpObject value)
+        public void WriteValue(CtpDocumentName name, CtpObject value)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -188,13 +188,13 @@ namespace CTP
             }
         }
 
-        private uint GetElementNameIndex(CtpDocumentNames name)
+        private uint GetElementNameIndex(CtpDocumentName name)
         {
-            if (name.RuntimeID<0)
+            if (name.RuntimeID < 0)
                 throw new ArgumentException();
             if (!m_elementNamesLookup.TryGetValue(name.RuntimeID, out int index))
             {
-                m_elementNamesLookup[name.RuntimeID] = m_elementNamesLookup.Count;
+                m_elementNamesLookup.Add(name.RuntimeID, m_elementNamesLookup.Count);
                 m_elementNames.Add(name);
                 index = m_elementNamesLookup.Count - 1;
                 m_prefixLength += name.TextWithPrefix.Length;
@@ -202,13 +202,13 @@ namespace CTP
             return (uint)index;
         }
 
-        private uint GetValueNameIndex(CtpDocumentNames name)
+        private uint GetValueNameIndex(CtpDocumentName name)
         {
             if (name.RuntimeID < 0)
                 throw new ArgumentException();
             if (!m_valueNamesLookup.TryGetValue(name.RuntimeID, out int index))
             {
-                m_valueNamesLookup[name.RuntimeID] = m_valueNamesLookup.Count;
+                m_valueNamesLookup.Add(name.RuntimeID, m_valueNamesLookup.Count);
                 m_valueNames.Add(name);
                 index = m_valueNamesLookup.Count - 1;
                 m_prefixLength += name.TextWithPrefix.Length;
@@ -221,7 +221,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, object value)
+        public void WriteValue(CtpDocumentName name, object value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -232,7 +232,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, DBNull value)
+        public void WriteValue(CtpDocumentName name, DBNull value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -243,7 +243,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, sbyte value)
+        public void WriteValue(CtpDocumentName name, sbyte value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -254,7 +254,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, short value)
+        public void WriteValue(CtpDocumentName name, short value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -265,7 +265,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, int value)
+        public void WriteValue(CtpDocumentName name, int value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -276,7 +276,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, long value)
+        public void WriteValue(CtpDocumentName name, long value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -287,7 +287,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, byte value)
+        public void WriteValue(CtpDocumentName name, byte value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -298,7 +298,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, ushort value)
+        public void WriteValue(CtpDocumentName name, ushort value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -309,7 +309,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, uint value)
+        public void WriteValue(CtpDocumentName name, uint value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -320,7 +320,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, ulong value)
+        public void WriteValue(CtpDocumentName name, ulong value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -331,7 +331,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, float value)
+        public void WriteValue(CtpDocumentName name, float value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -342,7 +342,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, double value)
+        public void WriteValue(CtpDocumentName name, double value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -353,7 +353,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, decimal value)
+        public void WriteValue(CtpDocumentName name, decimal value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -364,7 +364,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, DateTime value)
+        public void WriteValue(CtpDocumentName name, DateTime value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -375,7 +375,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, CtpTime value)
+        public void WriteValue(CtpDocumentName name, CtpTime value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -386,7 +386,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, bool value)
+        public void WriteValue(CtpDocumentName name, bool value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -397,7 +397,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, Guid value)
+        public void WriteValue(CtpDocumentName name, Guid value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -408,7 +408,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, char value)
+        public void WriteValue(CtpDocumentName name, char value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -419,7 +419,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, char[] value)
+        public void WriteValue(CtpDocumentName name, char[] value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -430,7 +430,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, string value)
+        public void WriteValue(CtpDocumentName name, string value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -441,7 +441,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, CtpBuffer value)
+        public void WriteValue(CtpDocumentName name, CtpBuffer value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -452,7 +452,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, CtpDocument value)
+        public void WriteValue(CtpDocumentName name, CtpDocument value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -463,7 +463,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, byte[] value)
+        public void WriteValue(CtpDocumentName name, byte[] value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -474,7 +474,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, sbyte? value)
+        public void WriteValue(CtpDocumentName name, sbyte? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -485,7 +485,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, short? value)
+        public void WriteValue(CtpDocumentName name, short? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -496,7 +496,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, int? value)
+        public void WriteValue(CtpDocumentName name, int? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -507,7 +507,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, long? value)
+        public void WriteValue(CtpDocumentName name, long? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -518,7 +518,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, byte? value)
+        public void WriteValue(CtpDocumentName name, byte? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -529,7 +529,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, ushort? value)
+        public void WriteValue(CtpDocumentName name, ushort? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -540,7 +540,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, uint? value)
+        public void WriteValue(CtpDocumentName name, uint? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -551,7 +551,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, ulong? value)
+        public void WriteValue(CtpDocumentName name, ulong? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -562,7 +562,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, float? value)
+        public void WriteValue(CtpDocumentName name, float? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -573,7 +573,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, double? value)
+        public void WriteValue(CtpDocumentName name, double? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -584,7 +584,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, decimal? value)
+        public void WriteValue(CtpDocumentName name, decimal? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -595,7 +595,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, DateTime? value)
+        public void WriteValue(CtpDocumentName name, DateTime? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -606,7 +606,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, CtpTime? value)
+        public void WriteValue(CtpDocumentName name, CtpTime? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -616,7 +616,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, bool? value)
+        public void WriteValue(CtpDocumentName name, bool? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -626,7 +626,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, Guid? value)
+        public void WriteValue(CtpDocumentName name, Guid? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -636,7 +636,7 @@ namespace CTP
         /// </summary>
         /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value itself.</param>
-        public void WriteValue(CtpDocumentNames name, char? value)
+        public void WriteValue(CtpDocumentName name, char? value)
         {
             m_tmpValue.SetValue(value);
             WriteValue(name, m_tmpValue);
@@ -692,7 +692,7 @@ namespace CTP
             length++;
         }
 
-        private void WriteAscii(byte[] buffer, ref int length, CtpDocumentNames value)
+        private void WriteAscii(byte[] buffer, ref int length, CtpDocumentName value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
