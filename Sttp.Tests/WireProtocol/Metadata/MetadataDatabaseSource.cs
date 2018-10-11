@@ -32,6 +32,8 @@ namespace Sttp.Tests
                 schema = (CommandMetadataSchema)schema.ToDocument();
             }
             Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
+            Console.WriteLine(schema.ToDocument().Length);
+            //File.WriteAllBytes("C:\\temp\\TestFile.bin", schema.ToDocument().ToArray());
         }
         [TestMethod]
         public void BenchmarkSmall()

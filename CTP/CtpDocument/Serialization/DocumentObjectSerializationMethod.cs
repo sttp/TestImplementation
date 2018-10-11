@@ -28,8 +28,9 @@ namespace CTP.Serialization
        : TypeSerializationMethodBase<T>
         where T : DocumentObject
     {
-        private readonly List<FieldSerialization> m_records = new List<FieldSerialization>();
-        private readonly Dictionary<CtpDocumentName, FieldSerialization> m_recordsLookup = new Dictionary<CtpDocumentName, FieldSerialization>();
+        private FieldSerialization[] m_records;
+
+        private readonly RuntimeMapping m_recordsLookup = new RuntimeMapping();
 
         private readonly Func<T> m_constructor;
 
@@ -40,10 +41,13 @@ namespace CTP.Serialization
             var type = typeof(T);
             m_constructor = c.Compile<T>();
 
+            var records = new List<FieldSerialization>();
             foreach (var member in type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                TryCreateFieldOptions(member);
+                TryCreateFieldOptions(member, records);
             }
+            m_records = records.ToArray();
+
 
             //Test for collisions
             HashSet<CtpDocumentName> ids = new HashSet<CtpDocumentName>();
@@ -54,7 +58,7 @@ namespace CTP.Serialization
             }
         }
 
-        private void TryCreateFieldOptions(MemberInfo member)
+        private void TryCreateFieldOptions(MemberInfo member, List<FieldSerialization> records)
         {
             Type targetType;
 
@@ -70,9 +74,11 @@ namespace CTP.Serialization
             if (attribute != null)
             {
                 var field = FieldSerialization.CreateFieldOptions(member, targetType, attribute);
-                m_records.Add(field);
-                m_recordsLookup.Add(field.RecordName, field);
+                m_recordsLookup.Add(field.RecordName.RuntimeID, records.Count);
+                records.Add(field);
             }
+
+
         }
 
         public override bool CanAcceptNulls => true;
@@ -82,14 +88,16 @@ namespace CTP.Serialization
             var rv = m_constructor();
             rv.BeforeLoad();
             FieldSerialization serialization;
+            int id;
 
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
                     case CtpDocumentNodeType.StartElement:
-                        if (m_recordsLookup.TryGetValue(reader.ElementName, out serialization))
+                        if (m_recordsLookup.TryGetValue(reader.ElementName.RuntimeID, out id))
                         {
+                            serialization = m_records[id];
                             serialization.Load(rv, reader);
                         }
                         else
@@ -99,8 +107,9 @@ namespace CTP.Serialization
                         }
                         break;
                     case CtpDocumentNodeType.Value:
-                        if (m_recordsLookup.TryGetValue(reader.ValueName, out serialization))
+                        if (m_recordsLookup.TryGetValue(reader.ValueName.RuntimeID, out id))
                         {
+                            serialization = m_records[id];
                             serialization.Load(rv, reader);
                         }
                         else
@@ -127,7 +136,7 @@ namespace CTP.Serialization
         {
             if (recordName == null)
             {
-                foreach (var item in m_recordsLookup.Values)
+                foreach (var item in m_records)
                 {
                     item.Save(obj, writer);
                 }
@@ -136,13 +145,13 @@ namespace CTP.Serialization
             {
                 using (writer.StartElement(recordName))
                 {
-                    foreach (var item in m_recordsLookup.Values)
+                    foreach (var item in m_records)
                     {
                         item.Save(obj, writer);
                     }
                 }
             }
-           
+
         }
 
     }

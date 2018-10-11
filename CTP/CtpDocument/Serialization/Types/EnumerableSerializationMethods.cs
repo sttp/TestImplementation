@@ -50,7 +50,7 @@ namespace CTP.Serialization
             }
             if (typeof(TEnum) == typeof(List<T>))
             {
-                return new TypeSerializationEnumerable<List<T>, T>(x => x);
+                return new TypeSerializationList<T>();
             }
             if (typeof(TEnum) == typeof(HashSet<T>))
             {

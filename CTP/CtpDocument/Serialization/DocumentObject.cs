@@ -1,5 +1,6 @@
 ﻿using System;
 using CTP.Serialization;
+using GSF.Collections;
 
 namespace CTP
 {
@@ -22,6 +23,8 @@ namespace CTP
 
     public abstract class DocumentObject
     {
+        protected static readonly DynamicObjectPool<CtpDocumentWriter> WriterPool = new DynamicObjectPool<CtpDocumentWriter>(() => new CtpDocumentWriter(), 10);
+
         internal DocumentObject()
         {
 
@@ -100,9 +103,12 @@ namespace CTP
         {
             if (LoadError != null)
                 throw LoadError;
-            var wr = new CtpDocumentWriter(CommandName);
+            var wr = WriterPool.Dequeue();
+            wr.Initialize(CommandName);
             Serialization.Save(obj, wr, null);
-            return wr.ToCtpDocument();
+            var rv = wr.ToCtpDocument();
+            WriterPool.Enqueue(wr);
+            return rv;
         }
 
         public static T Load(CtpDocument document)

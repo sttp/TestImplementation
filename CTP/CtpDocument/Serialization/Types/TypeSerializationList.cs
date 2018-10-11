@@ -6,11 +6,9 @@ namespace CTP.Serialization
     /// <summary>
     /// Can serialize an array type.
     /// </summary>
-    /// <typeparam name="TEnum"></typeparam>
     /// <typeparam name="T"></typeparam>
-    internal class TypeSerializationEnumerable<TEnum, T>
-        : TypeSerializationMethodBase<TEnum>
-        where TEnum : IEnumerable<T>
+    internal class TypeSerializationList<T>
+        : TypeSerializationMethodBase<List<T>>
     {
         private static CtpDocumentName Item = CtpDocumentName.Create("Item");
 
@@ -18,19 +16,16 @@ namespace CTP.Serialization
 
         private TypeSerializationMethodBase<T> m_serializeT;
 
-        private Func<List<T>, TEnum> m_castToType;
-
-        public TypeSerializationEnumerable(Func<List<T>, TEnum> castToType)
+        public TypeSerializationList()
         {
-            TypeSerialization<TEnum>.Serialization = this; //This is required to fix circular reference issues.
-            m_castToType = castToType;
+            TypeSerialization<List<T>>.Serialization = this; //This is required to fix circular reference issues.
             m_serializeT = TypeSerialization<T>.Serialization;
         }
 
-        public override TEnum Load(CtpDocumentReader reader)
+        public override List<T> Load(CtpDocumentReader reader)
         {
             if (reader == null)
-                return default(TEnum);
+                return default(List<T>);
 
             List<T> items = new List<T>();
 
@@ -49,7 +44,7 @@ namespace CTP.Serialization
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpDocumentNodeType.EndElement:
-                        return m_castToType(items);
+                        return items;
                     case CtpDocumentNodeType.EndOfDocument:
                     case CtpDocumentNodeType.StartOfDocument:
                     default:
@@ -60,16 +55,16 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(TEnum obj, CtpDocumentWriter writer, CtpDocumentName recordName)
+        public override void Save(List<T> obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
             if (obj == null)
                 return;
 
             using (writer.StartElement(recordName))
             {
-                foreach (var item in obj)
+                for (int i = 0; i < obj.Count; i++)
                 {
-                    m_serializeT.Save(item, writer, Item);
+                    m_serializeT.Save(obj[i], writer, Item);
                 }
 
             }

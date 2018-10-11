@@ -70,8 +70,7 @@ namespace CTP
         /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>
-        /// <param name="rootElement"></param>
-        public CtpDocumentWriter(CtpDocumentName rootElement)
+        public CtpDocumentWriter()
         {
             m_prefixLength = 4;
             m_tmpValue = new CtpObject();
@@ -82,6 +81,17 @@ namespace CTP
             m_elementStack = new Stack<string>();
             m_stream = new CtpDocumentBitWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
+        }
+
+        public void Initialize(CtpDocumentName rootElement)
+        {
+            m_prefixLength = 4;
+            m_elementNamesLookup.Clear();
+            m_valueNamesLookup.Clear();
+            m_elementNames.Clear();
+            m_valueNames.Clear();
+            m_elementStack.Clear();
+            m_stream.Clear();
             m_rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             m_prefixLength += m_rootElement.TextWithPrefix.Length;
         }
@@ -672,13 +682,14 @@ namespace CTP
             WriteAscii(buffer, ref offset, m_rootElement);
             WriteSize(buffer, ref offset, (ushort)m_elementNames.Count);
             WriteSize(buffer, ref offset, (ushort)m_valueNames.Count);
-            foreach (var item in m_elementNames)
+            for (var index = 0; index < m_elementNames.Count; index++)
             {
-                WriteAscii(buffer, ref offset, item);
+                WriteAscii(buffer, ref offset, m_elementNames[index]);
             }
-            foreach (var item in m_valueNames)
+
+            for (var index = 0; index < m_valueNames.Count; index++)
             {
-                WriteAscii(buffer, ref offset, item);
+                WriteAscii(buffer, ref offset, m_valueNames[index]);
             }
 
             m_stream.CopyTo(buffer, offset);

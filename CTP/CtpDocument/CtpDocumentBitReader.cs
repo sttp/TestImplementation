@@ -78,6 +78,26 @@ namespace CTP
 
         public string ReadString()
         {
+            if (m_position + 1 > m_length)
+            {
+                ThrowEndOfStreamException();
+            }
+            int len = m_buffer[m_position];
+            if (len < 100)
+            {
+                if (m_position + 1 + len > m_length)
+                {
+                    ThrowEndOfStreamException();
+                }
+                var str = Encoding.UTF8.GetString(m_buffer, m_position + 1, len);
+                m_position += 1 + len;
+                return str;
+            }
+            return ReadStringInternal();
+        }
+
+        private string ReadStringInternal()
+        {
             byte[] rv = ReadBytes();
             if (rv.Length == 0)
                 return string.Empty;

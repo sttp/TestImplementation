@@ -17,6 +17,12 @@ namespace CTP
         private int[] m_records;
         private int m_mask;
 
+        public void Clear()
+        {
+            Count = 0;
+            Array.Clear(m_records, 0, m_records.Length);
+        }
+
         public RuntimeMapping()
         {
             SetCapacity(32);

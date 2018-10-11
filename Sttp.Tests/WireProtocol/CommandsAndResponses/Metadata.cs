@@ -65,7 +65,34 @@ namespace Sttp.Tests.CommandsAndResponses
                 cmd.ToDocument();
             }
             Console.WriteLine(sw.Elapsed.TotalSeconds);
+        }
 
+        [TestMethod]
+        public void BenchmarkLoad()
+        {
+            var tbl = new List<MetadataSchemaTable>();
+            var t = new MetadataSchemaTable();
+            t.TableName = "Measurement";
+            t.LastModifiedVersionNumber = 382;
+            t.Columns.Add(new MetadataColumn("ID", CtpTypeCode.Int64));
+            t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
+            t.Columns.Add(new MetadataColumn("DeviceID", CtpTypeCode.Int64));
+            tbl.Add(t);
+            t = new MetadataSchemaTable();
+            t.TableName = "Device";
+            t.LastModifiedVersionNumber = 382;
+            t.Columns.Add(new MetadataColumn("ID", CtpTypeCode.Int64));
+            t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
+            tbl.Add(t);
+            var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
+           var doc = cmd.ToDocument();
+
+            Stopwatch sw = Stopwatch.StartNew();
+            for (int x = 0; x < 1_000_000; x++)
+            {
+                var obj = (CommandMetadataSchema)doc;
+            }
+            Console.WriteLine(sw.Elapsed.TotalSeconds);
         }
 
         [TestMethod]
