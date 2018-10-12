@@ -12,8 +12,6 @@ namespace CTP.Serialization
     {
         private static CtpDocumentName Item = CtpDocumentName.Create("Item");
 
-        public override bool CanAcceptNulls => true;
-
         private TypeSerializationMethodBase<T> m_serializeT;
 
         public TypeSerializationList()
@@ -24,9 +22,6 @@ namespace CTP.Serialization
 
         public override List<T> Load(CtpDocumentReader reader)
         {
-            if (reader == null)
-                return default(List<T>);
-
             List<T> items = new List<T>();
 
             while (reader.Read())
@@ -57,9 +52,6 @@ namespace CTP.Serialization
 
         public override void Save(List<T> obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
-            if (obj == null)
-                return;
-
             using (writer.StartElement(recordName))
             {
                 for (int i = 0; i < obj.Count; i++)

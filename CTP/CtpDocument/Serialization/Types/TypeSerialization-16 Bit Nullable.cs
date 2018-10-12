@@ -6,8 +6,6 @@ namespace CTP.Serialization
     internal class TypeSerializationUInt16Null
         : TypeSerializationMethodBase<ushort?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override ushort? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)
@@ -24,8 +22,6 @@ namespace CTP.Serialization
     internal class TypeSerializationInt16Null
         : TypeSerializationMethodBase<short?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override short? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)
@@ -42,8 +38,6 @@ namespace CTP.Serialization
     internal class TypeSerializationCharNull
         : TypeSerializationMethodBase<char?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override char? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)

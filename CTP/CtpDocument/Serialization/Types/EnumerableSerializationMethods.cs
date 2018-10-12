@@ -46,7 +46,7 @@ namespace CTP.Serialization
         {
             if (typeof(TEnum) == typeof(T[]))
             {
-                return new TypeSerializationEnumerable<T[], T>(x => x.ToArray());
+                return new TypeSerializationArray<T>();
             }
             if (typeof(TEnum) == typeof(List<T>))
             {

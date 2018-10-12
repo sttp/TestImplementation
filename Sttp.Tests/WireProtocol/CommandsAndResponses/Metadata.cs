@@ -85,12 +85,13 @@ namespace Sttp.Tests.CommandsAndResponses
             t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
-           var doc = cmd.ToDocument();
+            var doc = cmd.ToDocument();
+            var obj = (CommandMetadataSchema)doc;
 
             Stopwatch sw = Stopwatch.StartNew();
-            for (int x = 0; x < 1_000_000; x++)
+            for (int x = 0; x < 1_0_000; x++)
             {
-                var obj = (CommandMetadataSchema)doc;
+                obj = (CommandMetadataSchema)doc;
             }
             Console.WriteLine(sw.Elapsed.TotalSeconds);
         }

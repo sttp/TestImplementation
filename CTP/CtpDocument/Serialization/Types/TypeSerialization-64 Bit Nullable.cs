@@ -6,8 +6,6 @@ namespace CTP.Serialization
     internal class TypeSerializationUInt64Null
         : TypeSerializationMethodBase<ulong?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override ulong? Load(CtpDocumentReader reader)
         {
             return (ulong?)reader.Value;
@@ -22,8 +20,6 @@ namespace CTP.Serialization
     internal class TypeSerializationInt64Null
         : TypeSerializationMethodBase<long?>
     {
-
-        public override bool CanAcceptNulls => true;
 
         public override long? Load(CtpDocumentReader reader)
         {
@@ -40,8 +36,6 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<double?>
     {
 
-        public override bool CanAcceptNulls => true;
-
         public override double? Load(CtpDocumentReader reader)
         {
             return (double?)reader.Value;
@@ -56,8 +50,6 @@ namespace CTP.Serialization
     internal class TypeSerializationDateTimeNull
         : TypeSerializationMethodBase<DateTime?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override DateTime? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)
@@ -74,8 +66,6 @@ namespace CTP.Serialization
     internal class TypeSerializationCtpTimeNull
         : TypeSerializationMethodBase<CtpTime?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override CtpTime? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)

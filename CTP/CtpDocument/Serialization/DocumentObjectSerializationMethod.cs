@@ -77,11 +77,7 @@ namespace CTP.Serialization
                 m_recordsLookup.Add(field.RecordName.RuntimeID, records.Count);
                 records.Add(field);
             }
-
-
         }
-
-        public override bool CanAcceptNulls => true;
 
         public override T Load(CtpDocumentReader reader)
         {

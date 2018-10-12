@@ -8,8 +8,6 @@ namespace CTP.Serialization
     internal class TypeSerializationDecimalNull
         : TypeSerializationMethodBase<decimal?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override decimal? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)
@@ -26,8 +24,6 @@ namespace CTP.Serialization
     internal class TypeSerializationGuidNull
         : TypeSerializationMethodBase<Guid?>
     {
-        public override bool CanAcceptNulls => true;
-
         public override Guid? Load(CtpDocumentReader reader)
         {
             if (reader.NodeType != CtpDocumentNodeType.Value)
