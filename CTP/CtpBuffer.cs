@@ -20,6 +20,20 @@ namespace CTP
             m_data = (byte[])data.Clone();
         }
 
+        internal CtpBuffer(byte[] data, bool unsafeShouldClone)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            if (unsafeShouldClone)
+            {
+                m_data = (byte[])data.Clone();
+            }
+            else
+            {
+                m_data = data;
+            }
+        }
+
         /// <summary>
         /// Gets the size of the Buffer;
         /// </summary>

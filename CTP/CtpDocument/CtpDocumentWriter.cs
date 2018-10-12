@@ -7,7 +7,7 @@ namespace CTP
     /// <summary>
     /// A user friendly means of writing a <see cref="CtpDocument"/>.
     /// </summary>
-    public class CtpDocumentWriter
+    internal class CtpDocumentWriter
     {
         //Encoding Scheme: 
         //
@@ -165,7 +165,7 @@ namespace CTP
                     break;
                 case CtpTypeCode.CtpTime:
                     m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpDocumentHeader.ValueCtpTime);
-                    m_stream.Write(value.IsCtpTime.Ticks);
+                    m_stream.Write(value.IsCtpTime);
                     break;
                 case CtpTypeCode.Boolean:
                     if (value.IsBoolean)

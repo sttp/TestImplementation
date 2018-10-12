@@ -11,7 +11,7 @@ namespace CTP
     /// Effectively maps an Int32 runtime ID into another Int32 Runtime ID.
     /// This is much faster than Dictionary_Int_Int.
     /// </summary>
-    public class RuntimeMapping
+    internal class RuntimeMapping
     {
         public int Count { get; private set; }
         private int[] m_records;

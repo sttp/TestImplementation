@@ -130,7 +130,8 @@ namespace CTP.Serialization
 
         public override void Save(T obj, CtpDocumentWriter writer, CtpDocumentName recordName)
         {
-            if (recordName == null)
+            //Root elements have a record name == null. These do not need to start an element.
+            if ((object)recordName == null)
             {
                 foreach (var item in m_records)
                 {

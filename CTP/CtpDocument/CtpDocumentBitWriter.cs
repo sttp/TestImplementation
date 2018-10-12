@@ -53,11 +53,6 @@ namespace CTP
             WriteBits32(*(uint*)&value);
         }
 
-        public void Write(long value)
-        {
-            WriteBits64((ulong)value);
-        }
-
         public void Write(double value)
         {
             WriteBits64(*(ulong*)&value);
@@ -69,66 +64,20 @@ namespace CTP
             value.ToRfcBytes(m_buffer, m_length);
             m_length += 16;
         }
-
-        public void Write(byte[] value, int start, int length)
-        {
-            value.ValidateParameters(start, length);
-            Write7BitInt((uint)length);
-            if (length == 0)
-                return;
-
-            EnsureCapacityBytes(length);
-            Array.Copy(value, start, m_buffer, m_length, length); // write data
-            m_length += length;
-        }
-
-        public void Write(byte[] value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            Write(value, 0, value.Length);
-        }
-
+       
         public void Write(string value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
 
-            if (value.Length == 0)
-            {
-                Write7BitInt(0);
+            int length = Encoding.UTF8.GetByteCount(value);
+            Write7BitInt((uint)length);
+            if (length == 0)
                 return;
-            }
 
-            if (value.Length < 120)
-            {
-                if (TryWriteSmallASCII(value))
-                    return;
-            }
-
-            Write(Encoding.UTF8.GetBytes(value));
-        }
-
-        private bool TryWriteSmallASCII(string value)
-        {
-            foreach (var c in value)
-            {
-                if (c > 127)
-                {
-                    return false;
-                }
-            }
-
-            EnsureCapacityBytes(value.Length + 1);
-            m_buffer[m_length] = (byte)value.Length;
-            for (int x = 0; x < value.Length; x++)
-            {
-                m_buffer[m_length + x + 1] = (byte)value[x];
-            }
-
-            m_length += value.Length + 1;
-
-            return true;
+            EnsureCapacityBytes(length);
+            Encoding.UTF8.GetBytes(value, 0, value.Length, m_buffer, m_length);
+            m_length += length;
         }
 
         #region [ Writing Bits ]
@@ -197,6 +146,11 @@ namespace CTP
             EnsureCapacityBytes(value.Length);
             value.CopyTo(m_buffer, m_length);
             m_length += value.Length;
+        }
+
+        internal void Write(CtpTime isCtpTime)
+        {
+            WriteBits64((ulong)isCtpTime.Ticks);
         }
 
 

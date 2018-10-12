@@ -35,11 +35,6 @@ namespace CTP
             return *(float*)&value;
         }
 
-        public long ReadInt64()
-        {
-            return (long)ReadBits64();
-        }
-
         public double ReadDouble()
         {
             var value = ReadBits64();
@@ -57,7 +52,7 @@ namespace CTP
             return rv;
         }
 
-        public byte[] ReadBytes()
+        private byte[] ReadBytes()
         {
             int length = (int)Read7BitInt();
             if (length == 0)
@@ -76,36 +71,39 @@ namespace CTP
             return rv;
         }
 
+        public CtpTime ReadTime()
+        {
+            return new CtpTime((long)ReadBits64());
+        }
+
+        public CtpBuffer ReadBuffer()
+        {
+            return new CtpBuffer(ReadBytes(), false);
+        }
+
+        public CtpDocument ReadDocument()
+        {
+            return new CtpDocument(ReadBytes(), false);
+        }
+
         public string ReadString()
         {
-            if (m_position + 1 > m_length)
+            int length = (int)Read7BitInt();
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (m_position + length > m_length)
             {
                 ThrowEndOfStreamException();
             }
-            int len = m_buffer[m_position];
-            if (len < 100)
-            {
-                if (m_position + 1 + len > m_length)
-                {
-                    ThrowEndOfStreamException();
-                }
-                var str = Encoding.UTF8.GetString(m_buffer, m_position + 1, len);
-                m_position += 1 + len;
-                return str;
-            }
-            return ReadStringInternal();
+            var rv = Encoding.UTF8.GetString(m_buffer, m_position, length);
+            m_position += length;
+            return rv;
         }
 
-        private string ReadStringInternal()
-        {
-            byte[] rv = ReadBytes();
-            if (rv.Length == 0)
-                return string.Empty;
-
-            return Encoding.UTF8.GetString(rv);
-        }
-
-        public CtpDocumentName ReadAscii()
+        public CtpDocumentName ReadDocumentName()
         {
             if (m_position + 1 > m_length)
             {

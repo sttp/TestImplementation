@@ -6,7 +6,7 @@ namespace CTP
     /// <summary>
     /// A class for reading CtpDocument documents.
     /// </summary>
-    public class CtpDocumentReader
+    internal class CtpDocumentReader
     {
         /// <summary>
         /// The stream for reading the byte array.
@@ -36,18 +36,18 @@ namespace CTP
             m_stream = new CtpDocumentBitReader(data, 0, data.Length);
             Value = new CtpObject();
             NodeType = CtpDocumentNodeType.StartOfDocument;
-            m_rootElement = m_stream.ReadAscii();
+            m_rootElement = m_stream.ReadDocumentName();
             int elementCount = (int)m_stream.ReadBits16();
             int valueCount = (int)m_stream.ReadBits16();
             m_elementNamesList = new CtpDocumentName[elementCount];
             m_valueNamesList = new CtpDocumentName[valueCount];
             for (int x = 0; x < elementCount; x++)
             {
-                m_elementNamesList[x] = m_stream.ReadAscii();
+                m_elementNamesList[x] = m_stream.ReadDocumentName();
             }
             for (int x = 0; x < valueCount; x++)
             {
-                m_valueNamesList[x] = m_stream.ReadAscii();
+                m_valueNamesList[x] = m_stream.ReadDocumentName();
             }
             ElementName = GetCurrentElement();
         }
@@ -128,7 +128,7 @@ namespace CTP
                         Value.SetValue(m_stream.ReadDouble());
                         break;
                     case CtpDocumentHeader.ValueCtpTime:
-                        Value.SetValue(new CtpTime(m_stream.ReadInt64()));
+                        Value.SetValue(m_stream.ReadTime());
                         break;
                     case CtpDocumentHeader.ValueBooleanTrue:
                         Value.SetValue(true);
@@ -143,10 +143,10 @@ namespace CTP
                         Value.SetValue(m_stream.ReadString());
                         break;
                     case CtpDocumentHeader.ValueCtpBuffer:
-                        Value.SetValue(new CtpBuffer(m_stream.ReadBytes()));
+                        Value.SetValue(m_stream.ReadBuffer());
                         break;
                     case CtpDocumentHeader.ValueCtpDocument:
-                        Value.SetValue(new CtpDocument(m_stream.ReadBytes(), false));
+                        Value.SetValue(m_stream.ReadDocument());
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

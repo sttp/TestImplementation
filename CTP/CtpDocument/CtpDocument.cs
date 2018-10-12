@@ -38,7 +38,6 @@ namespace CTP
             {
                 m_data = data;
             }
-
         }
 
         /// <summary>
@@ -52,7 +51,7 @@ namespace CTP
         /// Create a means for reading the data from the CtpDocument.
         /// </summary>
         /// <returns></returns>
-        public CtpDocumentReader MakeReader()
+        internal CtpDocumentReader MakeReader()
         {
             return new CtpDocumentReader(m_data);
         }
@@ -281,7 +280,6 @@ namespace CTP
         /// </summary>
         /// <param name="a"></param>
         /// <param name="b"></param>
-        /// <
         public static bool operator !=(CtpDocument a, CtpDocument b)
         {
             return !Equals(a, b);

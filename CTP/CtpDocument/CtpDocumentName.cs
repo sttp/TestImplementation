@@ -4,9 +4,8 @@ using System.Security.Cryptography;
 
 namespace CTP
 {
-    public class CtpDocumentName : IEquatable<CtpDocumentName>
+    internal class CtpDocumentName : IEquatable<CtpDocumentName>
     {
-
         private static int s_runtimeID = 1;
         private static Dictionary<string, CtpDocumentName> s_names = new Dictionary<string, CtpDocumentName>();
         private static List<CtpDocumentName>[] m_names = new List<CtpDocumentName>[1024];
