@@ -196,7 +196,16 @@ namespace CTP
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ValueName);
                         sb.Append(": ");
-                        sb.Append(reader.Value.ToTypeString);
+                        if (reader.Value.ValueTypeCode == CtpTypeCode.CtpDocument)
+                        {
+                            sb.AppendLine("(CtpDocument)");
+                            string str = Environment.NewLine + prefix.Peek() + " ";
+                            sb.Append(prefix.Peek() + " " + reader.Value.AsString.Replace(Environment.NewLine, str));
+                        }
+                        else
+                        {
+                            sb.Append(reader.Value.ToTypeString);
+                        }
                         sb.AppendLine();
                         break;
                     case CtpDocumentNodeType.EndElement:
@@ -206,7 +215,14 @@ namespace CTP
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
+            sb.Length -= Environment.NewLine.Length;
             return sb.ToString();
+        }
+
+        public override string ToString()
+        {
+            return ToYAML();
         }
 
         /// <summary>

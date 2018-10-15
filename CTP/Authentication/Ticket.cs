@@ -54,11 +54,12 @@ namespace CTP
             return FromDocument(obj);
         }
 
-        public Ticket(DateTime validFrom, DateTime validTo, string loginName, List<string> roles, List<string> approvedClientCertificates)
+        public Ticket(DateTime validFrom, DateTime validTo, string loginName, string validFor, List<string> roles, List<string> approvedClientCertificates)
         {
             ValidFrom = validFrom;
             ValidTo = validTo;
             LoginName = loginName;
+            ValidFor = validFor;
             Roles = roles;
             ApprovedClientCertificates = approvedClientCertificates;
         }

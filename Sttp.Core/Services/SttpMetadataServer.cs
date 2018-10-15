@@ -214,35 +214,5 @@ namespace Sttp.Services
         //    }
         //}
 
-        public List<string> CommandsHandled()
-        {
-            var lst = new List<string>();
-            lst.Add("GetMetadataBasic");
-            //lst.Add("GetMetadataAdvance");
-            lst.Add("GetMetadataSchema");
-            //lst.Add("GetMetadataProcedure");
-            return lst;
-        }
-
-        public void HandleCommand(CommandObjects command, CtpSession encoder)
-        {
-            switch (command.CommandName)
-            {
-                case "GetMetadataBasic":
-                    ProcessCommand(command.GetMetadata, encoder);
-                    return;
-                //case "GetMetadataAdvance":
-                //    ProcessCommand(command.GetMetadataAdvance, encoder);
-                //    return;
-                case "GetMetadataSchema":
-                    ProcessCommand(command.GetMetadataSchema, encoder);
-                    return;
-                //case "GetMetadataProcedure":
-                //    ProcessCommand(command.GetMetadataProcedure, encoder);
-                //    return;
-                default:
-                    throw new Exception("This command is not supported");
-            }
-        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace CTP
 {
@@ -103,6 +104,15 @@ namespace CTP
             }
 
             return hashCode;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder(2 + m_data.Length * 2);
+            sb.Append("0x");
+            foreach (byte b in m_data)
+                sb.Append(b.ToString("X2"));
+            return sb.ToString();
         }
     }
 }

@@ -97,7 +97,6 @@ namespace CTP
             if (CommandName.Value != document.RootElement)
                 throw new Exception("Document Mismatch");
             var rdr = document.MakeReader();
-            rdr.Read();
             return Serialization.Load(rdr);
         }
 

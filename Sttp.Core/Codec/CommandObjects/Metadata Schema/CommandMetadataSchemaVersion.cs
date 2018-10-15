@@ -10,12 +10,15 @@ namespace Sttp.Codec
     {
         [DocumentField()]
         public Guid RuntimeID { get; private set; }
+
         [DocumentField()]
         public long VersionNumber { get; private set; }
 
         //Exists to support CtpSerializable
         private CommandMetadataSchemaVersion()
-        { }
+        {
+
+        }
 
         public CommandMetadataSchemaVersion(Guid runtimeID, long versionNumber)
         {
