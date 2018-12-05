@@ -64,5 +64,16 @@ namespace CTP
             }
         }
 
+        public CtpDocument Document
+        {
+            get
+            {
+                if (IsRawData)
+                    throw new ArgumentException();
+                return new CtpDocument(Payload);
+
+            }
+        }
+
     }
 }

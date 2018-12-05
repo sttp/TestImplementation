@@ -15,20 +15,29 @@ namespace CTP.Net
     /// </summary>
     public partial class CtpServer
     {
+        /// <summary>
+        /// Responsible for processing new client connections for the <see cref="CtpServer"/>. Use <see cref="AcceptAsync"/>. This method will
+        /// callback <see cref="CtpServer.OnSessionCompleted"/> once a connection has been successful.
+        /// </summary>
         private class ProcessClient
         {
+            //ToDo: For now, a new background thread is started that synchronously authenticates a new client.
+            //      There may be opportunity to make this async one day.
+
             private readonly CtpServer m_server;
             private readonly TcpClient m_client;
             private Stream m_finalStream;
             private SslStream m_ssl;
             private CtpSession m_session;
-            private CtpStream m_ctpStream;
-            public ProcessClient(CtpServer server, TcpClient client)
+
+            private ProcessClient(CtpServer server, TcpClient client)
             {
                 m_server = server;
                 m_client = client;
+            }
 
-
+            private void Start()
+            {
                 var thread = new Thread(Process);
                 thread.IsBackground = true;
                 thread.Start();
@@ -54,17 +63,16 @@ namespace CTP.Net
                         m_finalStream = netStream;
                     }
 
-                    m_ctpStream = new CtpStream(m_finalStream);
-                    m_session = new CtpSession(m_ctpStream, false, socket, netStream, m_ssl);
+                    m_session = new CtpSession(m_finalStream, false, socket, netStream, m_ssl);
 
-                    var doc = ReadDocument();
+                    var doc = m_session.Read();
                     string loginName = null;
                     string accountName = null;
                     List<string> roles = null;
-                    switch (doc.RootElement)
+                    switch (doc.CommandName)
                     {
                         case "Auth":
-                            var auth = (Auth)doc;
+                            var auth = (Auth)doc.Document;
                             if (m_server.m_config.CertificateClients.TryGetValue(auth.AuthorizationCertificate, out var clientCert))
                             {
                                 if (auth.ValidateSignature(clientCert.Certificate))
@@ -102,16 +110,15 @@ namespace CTP.Net
                 }
                 catch (Exception)
                 {
-
+                    //Swallow the exception since a failed connection attempt can safely be ignored by the server.
                 }
             }
 
-            private CtpDocument ReadDocument()
+            public static void AcceptAsync(CtpServer server, TcpClient client)
             {
-                var packet = m_ctpStream.Read();
-                return new CtpDocument(packet.Payload);
+                var pc = new ProcessClient(server, client);
+                pc.Start();
             }
-
 
         }
     }

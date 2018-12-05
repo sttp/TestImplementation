@@ -91,7 +91,7 @@ namespace CTP.Net
                     return;
                 }
 
-                new ProcessClient(this, socket);
+                ProcessClient.AcceptAsync(this, socket);
                 m_listener.BeginAcceptTcpClient(OnAccept, null);
             }
             catch (ObjectDisposedException)
@@ -115,6 +115,7 @@ namespace CTP.Net
                 }
                 catch (Exception e)
                 {
+                    
                 }
             }
         }
