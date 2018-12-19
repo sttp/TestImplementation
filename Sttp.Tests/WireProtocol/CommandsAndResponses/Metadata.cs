@@ -14,7 +14,7 @@ namespace Sttp.Tests.CommandsAndResponses
         public void CommandGetMetadataSchema()
         {
             var cmd = new CommandGetMetadataSchema(Guid.NewGuid(), 382);
-            Console.WriteLine(((CtpDocument)cmd).ToYAML());
+            Console.WriteLine(((CtpCommand)cmd).ToYAML());
         }
 
         [TestMethod]
@@ -35,8 +35,8 @@ namespace Sttp.Tests.CommandsAndResponses
             t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
-            Console.WriteLine(((CtpDocument)cmd).ToYAML());
-            Console.WriteLine(((CtpDocument)(CommandMetadataSchema)(CtpDocument)cmd).ToYAML());
+            Console.WriteLine(((CtpCommand)cmd).ToYAML());
+            Console.WriteLine(((CtpCommand)(CommandMetadataSchema)(CtpCommand)cmd).ToYAML());
         }
 
         [TestMethod]
@@ -105,14 +105,14 @@ namespace Sttp.Tests.CommandsAndResponses
             t = new MetadataSchemaTableUpdate("Device", 382);
             tbl.Add(t);
             var cmd = new CommandMetadataSchemaUpdate(Guid.NewGuid(), 382, tbl);
-            Console.WriteLine(((CtpDocument)cmd).ToYAML());
+            Console.WriteLine(((CtpCommand)cmd).ToYAML());
         }
 
         [TestMethod]
         public void CommandMetadataSchemaVersion()
         {
             var cmd = new CommandMetadataSchemaVersion(Guid.NewGuid(), 382);
-            Console.WriteLine(((CtpDocument)cmd).ToYAML());
+            Console.WriteLine(((CtpCommand)cmd).ToYAML());
         }
 
 

@@ -3,11 +3,11 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("UnsubscribeResponse")]
+    [CommandName("UnsubscribeResponse")]
     public class CommandUnsubscribeResponse
-        : DocumentObject<CommandUnsubscribeResponse>
+        : CommandObject<CommandUnsubscribeResponse>
     {
-        [DocumentField()]
+        [CommandField()]
         public int BinaryChannelCode;
 
         public CommandUnsubscribeResponse(int binaryChannelCode)
@@ -21,7 +21,7 @@ namespace Sttp.Codec
 
         }
 
-        public static explicit operator CommandUnsubscribeResponse(CtpDocument obj)
+        public static explicit operator CommandUnsubscribeResponse(CtpCommand obj)
         {
             return FromDocument(obj);
         }

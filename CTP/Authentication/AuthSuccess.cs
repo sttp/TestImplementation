@@ -2,15 +2,15 @@
 
 namespace CTP
 {
-    [DocumentName("AuthSuccess")]
+    [CommandName("AuthSuccess")]
     public class AuthSuccess
-        : DocumentObject<AuthSuccess>
+        : CommandObject<AuthSuccess>
     {
         public AuthSuccess()
         {
         }
 
-        public static explicit operator AuthSuccess(CtpDocument obj)
+        public static explicit operator AuthSuccess(CtpCommand obj)
         {
             return FromDocument(obj);
         }

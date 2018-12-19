@@ -61,7 +61,7 @@ namespace CTP
         /// <summary>
         /// Writes a packet to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        public void Write(CtpDocument packet, int timeout)
+        public void Write(CtpCommand packet, int timeout)
         {
             try
             {

@@ -9,6 +9,6 @@ namespace CTP.Net
         /// </summary>
         IEnumerable<string> SupportedCommands { get; }
 
-        void ProcessCommand(CtpSession session, CtpDocument command);
+        void ProcessCommand(CtpSession session, CtpCommand command);
     }
 }

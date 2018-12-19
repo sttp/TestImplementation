@@ -21,7 +21,7 @@ namespace Sttp.Tests.Commands
             catch (Exception e)
             {
                 var cmd = new CtpError("An error has occurred", e.ToString());
-                cmd = (CtpError)(CtpDocument)cmd;
+                cmd = (CtpError)(CtpCommand)cmd;
                 Console.WriteLine(cmd.ToString());
             }
         }
@@ -30,7 +30,7 @@ namespace Sttp.Tests.Commands
         public void Raw()
         {
             var cmd = new CtpRaw(Guid.NewGuid().ToByteArray());
-            cmd = (CtpRaw)(CtpDocument)cmd;
+            cmd = (CtpRaw)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -44,7 +44,7 @@ namespace Sttp.Tests.Commands
             catch (Exception e)
             {
                 var cmd = new CtpRequestFailed("GetMetadata", "An error has occurred", e.ToString());
-                cmd = (CtpRequestFailed)(CtpDocument)cmd;
+                cmd = (CtpRequestFailed)(CtpCommand)cmd;
                 Console.WriteLine(cmd.ToString());
             }
         }
@@ -53,7 +53,7 @@ namespace Sttp.Tests.Commands
         public void RequestSuccess()
         {
             var cmd = new CtpRequestSuccess("GetMetadata");
-            cmd = (CtpRequestSuccess)(CtpDocument)cmd;
+            cmd = (CtpRequestSuccess)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -61,7 +61,7 @@ namespace Sttp.Tests.Commands
         public void KeepAlive()
         {
             var cmd = new CtpKeepAlive(DateTime.Parse("1/12/2008 1:03 AM"), DateTime.Parse("1/12/2008 1:02 AM"));
-            cmd = (CtpKeepAlive)(CtpDocument)cmd;
+            cmd = (CtpKeepAlive)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
     }

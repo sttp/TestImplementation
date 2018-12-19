@@ -7,13 +7,13 @@ using CTP.Serialization;
 
 namespace CTP
 {
-    [DocumentName("KeepAlive")]
+    [CommandName("KeepAlive")]
     public class CtpKeepAlive
-        : DocumentObject<CtpKeepAlive>
+        : CommandObject<CtpKeepAlive>
     {
-        [DocumentField()]
+        [CommandField()]
         public DateTime CurrentTime;
-        [DocumentField()]
+        [CommandField()]
         public DateTime LastReceivedTime;
 
         public CtpKeepAlive(DateTime currentTime, DateTime lastReceivedTime)
@@ -26,7 +26,7 @@ namespace CTP
         {
         }
 
-        public static explicit operator CtpKeepAlive(CtpDocument obj)
+        public static explicit operator CtpKeepAlive(CtpCommand obj)
         {
             return FromDocument(obj);
         }

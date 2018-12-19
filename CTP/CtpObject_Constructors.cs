@@ -113,7 +113,7 @@ namespace CTP
             SetValue(value);
         }
 
-        public CtpObject(CtpDocument value)
+        public CtpObject(CtpCommand value)
         {
             SetValue(value);
         }

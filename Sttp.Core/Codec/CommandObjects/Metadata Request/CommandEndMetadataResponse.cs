@@ -3,13 +3,13 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("EndMetadataResponse")]
+    [CommandName("EndMetadataResponse")]
     public class CommandEndMetadataResponse
-        : DocumentObject<CommandEndMetadataResponse>
+        : CommandObject<CommandEndMetadataResponse>
     {
-        [DocumentField()]
+        [CommandField()]
         public ulong BinaryChannelCode { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public int RowCount { get; private set; }
 
         public CommandEndMetadataResponse(ulong binaryChannelCode, int rowCount)
@@ -22,7 +22,7 @@ namespace Sttp.Codec
         private CommandEndMetadataResponse()
         { }
 
-        public static explicit operator CommandEndMetadataResponse(CtpDocument obj)
+        public static explicit operator CommandEndMetadataResponse(CtpCommand obj)
         {
             return FromDocument(obj);
         }

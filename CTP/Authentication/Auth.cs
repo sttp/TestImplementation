@@ -7,20 +7,20 @@ namespace CTP
     /// <summary>
     /// Requests resuming an authentication session that was started in another session.
     /// </summary>
-    [DocumentName("Auth")]
+    [CommandName("Auth")]
     public class Auth
-        : DocumentObject<Auth>
+        : CommandObject<Auth>
     {
         /// <summary>
         /// This field is a CTPDocument of type <see cref="Ticket"/>.
         /// </summary>
-        [DocumentField()]
-        public CtpDocument Ticket { get; private set; }
+        [CommandField()]
+        public CtpCommand Ticket { get; private set; }
 
-        [DocumentField()]
+        [CommandField()]
         public string AuthorizationCertificate;
 
-        [DocumentField()]
+        [CommandField()]
         public byte[] Signature;
 
         public Auth(Ticket ticket, X509Certificate2 certificate)
@@ -46,7 +46,7 @@ namespace CTP
 
         }
 
-        public static explicit operator Auth(CtpDocument obj)
+        public static explicit operator Auth(CtpCommand obj)
         {
             return FromDocument(obj);
         }

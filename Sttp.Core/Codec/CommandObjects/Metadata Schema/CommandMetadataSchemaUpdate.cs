@@ -6,15 +6,15 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("MetadataSchemaUpdate")]
+    [CommandName("MetadataSchemaUpdate")]
     public class CommandMetadataSchemaUpdate
-        : DocumentObject<CommandMetadataSchemaUpdate>
+        : CommandObject<CommandMetadataSchemaUpdate>
     {
-        [DocumentField()]
+        [CommandField()]
         public Guid RuntimeID { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public long VersionNumber { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public List<MetadataSchemaTableUpdate> Tables { get; private set; }
 
         //Exists to support CtpSerializable
@@ -28,7 +28,7 @@ namespace Sttp.Codec
             Tables = new List<MetadataSchemaTableUpdate>(tables);
         }
 
-        public static explicit operator CommandMetadataSchemaUpdate(CtpDocument obj)
+        public static explicit operator CommandMetadataSchemaUpdate(CtpCommand obj)
         {
             return FromDocument(obj);
         }

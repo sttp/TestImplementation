@@ -3,13 +3,13 @@ using CTP.Serialization;
 
 namespace CTP
 {
-    [DocumentName("Error")]
+    [CommandName("Error")]
     public class CtpError
-        : DocumentObject<CtpError>
+        : CommandObject<CtpError>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Reason;
-        [DocumentField()]
+        [CommandField()]
         public string Details;
 
         public CtpError(string reason, string details)
@@ -24,7 +24,7 @@ namespace CTP
 
         }
 
-        public static explicit operator CtpError(CtpDocument obj)
+        public static explicit operator CtpError(CtpCommand obj)
         {
             return FromDocument(obj);
         }

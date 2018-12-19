@@ -254,7 +254,7 @@ namespace Sttp
             m_byteLength += value.Length;
         }
 
-        public void Write(CtpDocument value)
+        public void Write(CtpCommand value)
         {
             Write4BitSegments((uint)value.Length);
             if (value.Length == 0)

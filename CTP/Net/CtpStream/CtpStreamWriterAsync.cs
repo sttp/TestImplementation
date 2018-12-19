@@ -33,7 +33,7 @@ namespace CTP
 
         private WaitCallback m_processNextWrite;
 
-        private Queue<Tuple<ShortTime, CtpDocument>> m_queue;
+        private Queue<Tuple<ShortTime, CtpCommand>> m_queue;
 
         private ScheduledTask m_processTimeouts;
 
@@ -59,7 +59,7 @@ namespace CTP
             m_stream = stream;
             m_writeBuffer = new byte[128];
             m_endWrite = EndWrite;
-            m_queue = new Queue<Tuple<ShortTime, CtpDocument>>();
+            m_queue = new Queue<Tuple<ShortTime, CtpCommand>>();
 
             m_processTimeouts = new ScheduledTask();
             m_processTimeouts.Running += M_processTimeouts_Running;
@@ -95,7 +95,7 @@ namespace CTP
             if (m_disposed)
                 return;
 
-            CtpDocument packet;
+            CtpCommand packet;
             lock (m_syncLock)
             {
                 if (m_queue.Count > 0)
@@ -143,7 +143,7 @@ namespace CTP
         /// <summary>
         /// Writes a packet to the underlying stream. 
         /// </summary>
-        public void Write(CtpDocument packet)
+        public void Write(CtpCommand packet)
         {
             if ((object)packet == null)
                 throw new ArgumentNullException(nameof(packet));

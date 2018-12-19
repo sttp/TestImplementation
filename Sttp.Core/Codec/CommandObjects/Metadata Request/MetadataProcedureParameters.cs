@@ -4,11 +4,11 @@ using CTP.Serialization;
 namespace Sttp.Codec
 {
     public class MetadataProcedureParameters
-        : DocumentObject<MetadataProcedureParameters>
+        : CommandObject<MetadataProcedureParameters>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Name { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public CtpObject Value { get; private set; }
 
         public MetadataProcedureParameters(string name, CtpObject value)

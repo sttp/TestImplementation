@@ -3,14 +3,14 @@ using CTP.Serialization;
 
 namespace CTP
 {
-    [DocumentName("Raw")]
+    [CommandName("Raw")]
     public class CtpRaw
-        : DocumentObject<CtpRaw>
+        : CommandObject<CtpRaw>
     {
-        [DocumentField()]
+        [CommandField()]
         public byte Channel;
 
-        [DocumentField()]
+        [CommandField()]
         public byte[] Payload;
 
         public CtpRaw(byte[] payload)
@@ -24,7 +24,7 @@ namespace CTP
 
         }
 
-        public static explicit operator CtpRaw(CtpDocument obj)
+        public static explicit operator CtpRaw(CtpCommand obj)
         {
             return FromDocument(obj);
         }

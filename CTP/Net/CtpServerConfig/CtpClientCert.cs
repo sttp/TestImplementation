@@ -5,20 +5,20 @@ using System.Text;
 
 namespace CTP.Net
 {
-    [DocumentName("CtpClientCerts")]
+    [CommandName("CtpClientCerts")]
     public class CtpClientCert
-        : DocumentObject<CtpClientCert>
+        : CommandObject<CtpClientCert>
     {
-        [DocumentField()]
+        [CommandField()]
         public string CertificateName { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public List<string> CertificatePaths { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public string MappedAccount { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public List<IpAndMask> AllowedRemoteIPs { get; set; }
 
         public CtpClientCert()
@@ -27,7 +27,7 @@ namespace CTP.Net
             CertificatePaths = new List<string>();
         }
 
-        public static explicit operator CtpClientCert(CtpDocument obj)
+        public static explicit operator CtpClientCert(CtpCommand obj)
         {
             return FromDocument(obj);
         }

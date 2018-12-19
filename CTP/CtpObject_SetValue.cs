@@ -127,7 +127,7 @@ namespace CTP
             m_valueTypeCode = CtpTypeCode.CtpBuffer;
             m_valueObject = value;
         }
-        public void SetValue(CtpDocument value)
+        public void SetValue(CtpCommand value)
         {
             if (value == null)
             {
@@ -346,9 +346,9 @@ namespace CTP
             {
                 SetValue((CtpBuffer)value);
             }
-            else if (type == typeof(CtpDocument))
+            else if (type == typeof(CtpCommand))
             {
-                SetValue((CtpDocument)value);
+                SetValue((CtpCommand)value);
             }
             else if (type == typeof(byte[]))
             {

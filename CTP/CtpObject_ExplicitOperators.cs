@@ -87,7 +87,7 @@ namespace CTP
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(CtpDocument value)
+        public static explicit operator CtpObject(CtpCommand value)
         {
             return new CtpObject(value);
         }
@@ -248,11 +248,11 @@ namespace CTP
                 return null;
             return value.AsCtpBuffer;
         }
-        public static explicit operator CtpDocument(CtpObject value)
+        public static explicit operator CtpCommand(CtpObject value)
         {
             if ((object)value == null || value.IsNull)
                 return null;
-            return value.AsCtpDocument;
+            return value.AsCtpCommand;
         }
         public static explicit operator byte[] (CtpObject value)
         {

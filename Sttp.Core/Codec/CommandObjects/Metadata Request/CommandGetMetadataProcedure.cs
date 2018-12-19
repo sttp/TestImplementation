@@ -6,14 +6,14 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("GetMetadataProcedure")]
+    [CommandName("GetMetadataProcedure")]
     public class CommandGetMetadataProcedure
-        : DocumentObject<CommandGetMetadataProcedure>
+        : CommandObject<CommandGetMetadataProcedure>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Name;
 
-        [DocumentField()]
+        [CommandField()]
         public List<MetadataProcedureParameters> Parameters;
 
         public CommandGetMetadataProcedure(string name, List<MetadataProcedureParameters> parameters)
@@ -26,7 +26,7 @@ namespace Sttp.Codec
         private CommandGetMetadataProcedure()
         { }
 
-        public static explicit operator CommandGetMetadataProcedure(CtpDocument obj)
+        public static explicit operator CommandGetMetadataProcedure(CtpCommand obj)
         {
             return FromDocument(obj);
         }

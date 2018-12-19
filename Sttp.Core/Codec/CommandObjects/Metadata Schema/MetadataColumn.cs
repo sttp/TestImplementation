@@ -7,19 +7,19 @@ using CTP.Serialization;
 namespace Sttp.Codec
 {
     public class MetadataColumn
-        : DocumentObject<MetadataColumn>
+        : CommandObject<MetadataColumn>
     {
         /// <summary>
         /// The name of the column
         /// </summary>
-        [DocumentField()]
+        [CommandField()]
         public string Name { get; private set; }
         /// <summary>
         /// The type of this column
         /// </summary>
         public CtpTypeCode TypeCode { get; private set; }
 
-        [DocumentField("TypeCode")]
+        [CommandField("TypeCode")]
         private string TypeCodeInternal
         {
             get

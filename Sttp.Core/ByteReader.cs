@@ -214,9 +214,9 @@ namespace Sttp
 
         #endregion
 
-        public CtpDocument ReadSttpMarkup()
+        public CtpCommand ReadSttpMarkup()
         {
-            return new CtpDocument(ReadBytes());
+            return new CtpCommand(ReadBytes());
         }
 
         public CtpBuffer ReadSttpBuffer()

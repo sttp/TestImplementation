@@ -28,7 +28,7 @@ namespace CredentialManager
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     byte[] allData = File.ReadAllBytes(dlg.FileName);
-                    var cfg = DocumentObject<CtpServerConfig>.Load(new CtpDocument(allData));
+                    var cfg = CommandObject<CtpServerConfig>.Load(new CtpCommand(allData));
                     LoadData(cfg);
                 }
             }

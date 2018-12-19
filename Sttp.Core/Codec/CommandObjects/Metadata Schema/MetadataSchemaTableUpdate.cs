@@ -7,11 +7,11 @@ using Sttp.Codec;
 namespace Sttp.Codec
 {
     public class MetadataSchemaTableUpdate
-        : DocumentObject<MetadataSchemaTableUpdate>
+        : CommandObject<MetadataSchemaTableUpdate>
     {
-        [DocumentField()]
+        [CommandField()]
         public string TableName;
-        [DocumentField()]
+        [CommandField()]
         public long LastModifiedVersionNumber;
 
         private MetadataSchemaTableUpdate()

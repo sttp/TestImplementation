@@ -5,21 +5,21 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("BeginMetadataResponse")]
+    [CommandName("BeginMetadataResponse")]
     public class CommandBeginMetadataResponse
-        : DocumentObject<CommandBeginMetadataResponse>
+        : CommandObject<CommandBeginMetadataResponse>
     {
-        [DocumentField()]
+        [CommandField()]
         public ulong BinaryChannelCode { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public Guid EncodingMethod { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public Guid RuntimeID { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public long VersionNumber { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public string TableName { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public List<MetadataColumn> Columns { get; private set; }
 
         public CommandBeginMetadataResponse(ulong binaryChannelCode, Guid encodingMethod, Guid runtimeID, long versionNumber, string tableName, List<MetadataColumn> columns)
@@ -35,7 +35,7 @@ namespace Sttp.Codec
         private CommandBeginMetadataResponse()
         { }
 
-        public static explicit operator CommandBeginMetadataResponse(CtpDocument obj)
+        public static explicit operator CommandBeginMetadataResponse(CtpCommand obj)
         {
             return FromDocument(obj);
         }

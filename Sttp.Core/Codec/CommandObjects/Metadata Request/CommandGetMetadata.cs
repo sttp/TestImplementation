@@ -14,13 +14,13 @@ namespace Sttp.Codec
     ///     <see cref="CtpRaw"/> - The rows.
     ///     <see cref="CommandEndMetadataResponse"/> - Closing the raw channel.
     /// </summary>
-    [DocumentName("GetMetadata")]
+    [CommandName("GetMetadata")]
     public class CommandGetMetadata
-        : DocumentObject<CommandGetMetadata>
+        : CommandObject<CommandGetMetadata>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Table { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public List<string> Columns { get; private set; } = new List<string>();
 
         public CommandGetMetadata(string table, IEnumerable<string> columns)
@@ -33,7 +33,7 @@ namespace Sttp.Codec
         private CommandGetMetadata()
         { }
 
-        public static explicit operator CommandGetMetadata(CtpDocument obj)
+        public static explicit operator CommandGetMetadata(CtpCommand obj)
         {
             return FromDocument(obj);
         }

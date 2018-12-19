@@ -21,7 +21,7 @@ namespace CTP.Net
             }
         }
 
-        public bool TryHandle(CtpSession session, CtpDocument command)
+        public bool TryHandle(CtpSession session, CtpCommand command)
         {
             if (m_rootCommands.TryGetValue(command.RootElement, out var handler))
             {

@@ -16,7 +16,7 @@ namespace Sttp.Tests.Serialization
         public void Test1()
         {
             var cmd = new CommandMetadataRequestFailed("Failed", "True");
-            CtpDocument doc2 = cmd;
+            CtpCommand doc2 = cmd;
             Console.WriteLine(doc2.ToYAML());
         }
 
@@ -24,7 +24,7 @@ namespace Sttp.Tests.Serialization
         public void Test2()
         {
             var cmd = new CommandMetadataRequestFailed("Failed", "True");
-            CtpDocument doc2 = cmd;
+            CtpCommand doc2 = cmd;
             Console.WriteLine(doc2.ToYAML());
         }
     }

@@ -6,17 +6,17 @@ using GSF;
 
 namespace CTP.Net
 {
-    [DocumentName("CtpAnonymousMapping")]
+    [CommandName("CtpAnonymousMapping")]
     public class CtpAnonymousMapping 
-        : DocumentObject<CtpAnonymousMapping>
+        : CommandObject<CtpAnonymousMapping>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Name { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public string MappedAccount { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public IpAndMask TrustedIPs { get; set; }
 
         public CtpAnonymousMapping()
@@ -24,7 +24,7 @@ namespace CTP.Net
             TrustedIPs = new IpAndMask() { IpAddress = "255.255.255.255", MaskBits = 32 };
         }
 
-        public static explicit operator CtpAnonymousMapping(CtpDocument obj)
+        public static explicit operator CtpAnonymousMapping(CtpCommand obj)
         {
             return FromDocument(obj);
         }

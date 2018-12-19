@@ -3,15 +3,15 @@ using CTP.Serialization;
 
 namespace CTP
 {
-    [DocumentName("RequestFailed")]
+    [CommandName("RequestFailed")]
     public class CtpRequestFailed
-        : DocumentObject<CtpRequestFailed>
+        : CommandObject<CtpRequestFailed>
     {
-        [DocumentField()]
+        [CommandField()]
         public string OriginalCommand;
-        [DocumentField()]
+        [CommandField()]
         public string Reason;
-        [DocumentField()]
+        [CommandField()]
         public string Details;
 
         public CtpRequestFailed(string originalCommand, string reason, string details)
@@ -25,7 +25,7 @@ namespace CTP
         private CtpRequestFailed()
         { }
 
-        public static explicit operator CtpRequestFailed(CtpDocument obj)
+        public static explicit operator CtpRequestFailed(CtpCommand obj)
         {
             return FromDocument(obj);
         }

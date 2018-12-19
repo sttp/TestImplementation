@@ -3,13 +3,13 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("SubscriptionRequestFailed")]
+    [CommandName("SubscriptionRequestFailed")]
     public class CommandSubscriptionRequestFailed
-        : DocumentObject<CommandSubscriptionRequestFailed>
+        : CommandObject<CommandSubscriptionRequestFailed>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Reason { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public string Details { get; private set; }
 
         public CommandSubscriptionRequestFailed(string reason, string details)
@@ -23,7 +23,7 @@ namespace Sttp.Codec
 
         }
 
-        public static explicit operator CommandSubscriptionRequestFailed(CtpDocument obj)
+        public static explicit operator CommandSubscriptionRequestFailed(CtpCommand obj)
         {
             return FromDocument(obj);
         }

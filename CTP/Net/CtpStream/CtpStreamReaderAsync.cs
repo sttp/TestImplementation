@@ -7,13 +7,13 @@ namespace CTP
 {
     //ToDo: Final Review: Done
     /// <summary>
-    /// Serializes <see cref="CtpDocument"/> messages from a <see cref="Stream"/>.
+    /// Serializes <see cref="CtpCommand"/> messages from a <see cref="Stream"/>.
     /// </summary>
     internal class CtpStreamReaderAsync : IDisposable
     {
         public event Action<object, Exception> OnException;
 
-        public event Action<CtpDocument> NewPacket;
+        public event Action<CtpCommand> NewPacket;
 
         /// <summary>
         /// The underlying stream
@@ -139,7 +139,7 @@ namespace CTP
         /// Automatically decompresses and combines fragments and waits for the entire packet before
         /// responding as True.
         /// </summary>
-        private bool InternalRead(out CtpDocument packet)
+        private bool InternalRead(out CtpCommand packet)
         {
             packet = null;
             if (m_inboundBufferLength < 2)
@@ -173,7 +173,7 @@ namespace CTP
             payload = new byte[length];
             Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, payload, 0, length);
 
-            packet = new CtpDocument(payload, false);
+            packet = new CtpCommand(payload, false);
             m_inboundBufferCurrentPosition += length;
             m_inboundBufferLength -= length;
             return true;

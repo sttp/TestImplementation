@@ -29,7 +29,7 @@ namespace CTP
                     case CtpTypeCode.CtpBuffer:
                         return $"(CtpBuffer){(m_valueObject as CtpBuffer).ToString()}";
                     case CtpTypeCode.CtpDocument:
-                        return $"(CtpDocument){(m_valueObject as CtpDocument).ToString()}";
+                        return $"(CtpDocument){(m_valueObject as CtpCommand).ToString()}";
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -61,7 +61,7 @@ namespace CTP
                     case CtpTypeCode.CtpBuffer:
                         return m_valueObject as CtpBuffer;
                     case CtpTypeCode.CtpDocument:
-                        return m_valueObject as CtpDocument;
+                        return m_valueObject as CtpCommand;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -403,7 +403,7 @@ namespace CTP
                     case CtpTypeCode.CtpBuffer:
                         return (m_valueObject as CtpBuffer).ToString();
                     case CtpTypeCode.CtpDocument:
-                        return (m_valueObject as CtpDocument).ToString();
+                        return (m_valueObject as CtpCommand).ToString();
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -426,7 +426,7 @@ namespace CTP
             }
         }
 
-        public CtpDocument AsCtpDocument
+        public CtpCommand AsCtpCommand
         {
             get
             {
@@ -435,7 +435,7 @@ namespace CTP
                     case CtpTypeCode.Null:
                         return null;
                     case CtpTypeCode.CtpDocument:
-                        return m_valueObject as CtpDocument;
+                        return m_valueObject as CtpCommand;
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to CtpDocument");
                 }

@@ -16,7 +16,7 @@ namespace Sttp.Tests.Commands
         public void GetMetadataSchema()
         {
             var cmd = new CommandGetMetadataSchema(Guid.NewGuid(), 1);
-            cmd = (CommandGetMetadataSchema)(CtpDocument)cmd;
+            cmd = (CommandGetMetadataSchema)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -35,7 +35,7 @@ namespace Sttp.Tests.Commands
             tbls.Add(tbl);
 
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 1, tbls);
-            cmd = (CommandMetadataSchema)(CtpDocument)cmd;
+            cmd = (CommandMetadataSchema)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -43,7 +43,7 @@ namespace Sttp.Tests.Commands
         public void MetadataSchemaVersion()
         {
             var cmd = new CommandMetadataSchemaVersion(Guid.NewGuid(), 1);
-            cmd = (CommandMetadataSchemaVersion)(CtpDocument)cmd;
+            cmd = (CommandMetadataSchemaVersion)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -56,7 +56,7 @@ namespace Sttp.Tests.Commands
             tbls.Add(tbl);
 
             var cmd = new CommandMetadataSchemaUpdate(Guid.NewGuid(), 1, tbls);
-            cmd = (CommandMetadataSchemaUpdate)(CtpDocument)cmd;
+            cmd = (CommandMetadataSchemaUpdate)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 

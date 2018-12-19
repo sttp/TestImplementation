@@ -3,15 +3,15 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("Unsubscribe")]
+    [CommandName("Unsubscribe")]
     public class CommandUnsubscribe
-        : DocumentObject<CommandUnsubscribe>
+        : CommandObject<CommandUnsubscribe>
     {
         public CommandUnsubscribe()
         {
         }
 
-        public static explicit operator CommandUnsubscribe(CtpDocument obj)
+        public static explicit operator CommandUnsubscribe(CtpCommand obj)
         {
             return FromDocument(obj);
         }

@@ -1,14 +1,14 @@
 ﻿namespace CTP
 {
-    [DocumentName("AuthNone")]
+    [CommandName("AuthNone")]
     public class AuthNone
-        : DocumentObject<AuthNone>
+        : CommandObject<AuthNone>
     {
         public AuthNone()
         {
         }
 
-        public static explicit operator AuthNone(CtpDocument obj)
+        public static explicit operator AuthNone(CtpCommand obj)
         {
             return FromDocument(obj);
         }

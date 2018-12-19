@@ -8,13 +8,13 @@ using Sttp.Codec;
 namespace Sttp.Codec
 {
     public class MetadataSchemaTable
-        : DocumentObject<MetadataSchemaTable>
+        : CommandObject<MetadataSchemaTable>
     {
-        [DocumentField()]
+        [CommandField()]
         public string TableName;
-        [DocumentField()]
+        [CommandField()]
         public long LastModifiedVersionNumber;
-        [DocumentField()]
+        [CommandField()]
         public List<MetadataColumn> Columns = new List<MetadataColumn>();
 
         public MetadataSchemaTable()

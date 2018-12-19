@@ -2,11 +2,11 @@
 
 namespace CTP
 {
-    [DocumentName("AuthFailure")]
+    [CommandName("AuthFailure")]
     public class AuthFailure
-        : DocumentObject<AuthFailure>
+        : CommandObject<AuthFailure>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Reason { get; private set; }
 
         public AuthFailure(string reason)
@@ -19,7 +19,7 @@ namespace CTP
 
         }
 
-        public static explicit operator AuthFailure(CtpDocument obj)
+        public static explicit operator AuthFailure(CtpCommand obj)
         {
             return FromDocument(obj);
         }

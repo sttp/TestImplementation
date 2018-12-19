@@ -18,7 +18,7 @@ namespace Sttp.Tests.Commands
         public void AuthNone()
         {
             var cmd = new AuthNone();
-            cmd = (AuthNone)(CtpDocument)cmd;
+            cmd = (AuthNone)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -31,7 +31,7 @@ namespace Sttp.Tests.Commands
                                  "192.168.100.1",
                                  new List<string>(new string[] { "Admin", "User" }),
                                  new List<string>(new string[] { "Cert1", "Cert2" }));
-            cmd = (Ticket)(CtpDocument)cmd;
+            cmd = (Ticket)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -39,7 +39,7 @@ namespace Sttp.Tests.Commands
         public void AuthFailure()
         {
             var cmd = new AuthFailure("Access Denied");
-            cmd = (AuthFailure)(CtpDocument)cmd;
+            cmd = (AuthFailure)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -47,7 +47,7 @@ namespace Sttp.Tests.Commands
         public void AuthSuccess()
         {
             var cmd = new AuthSuccess();
-            cmd = (AuthSuccess)(CtpDocument)cmd;
+            cmd = (AuthSuccess)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 
@@ -64,7 +64,7 @@ namespace Sttp.Tests.Commands
                                  new List<string>(new string[] { "Cert1", "Cert2" }));
 
             var cmd = new Auth(ticket, Cert);
-            cmd = (Auth)(CtpDocument)cmd;
+            cmd = (Auth)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
 

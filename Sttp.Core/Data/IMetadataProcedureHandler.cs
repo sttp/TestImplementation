@@ -5,6 +5,6 @@ namespace Sttp.Core.Data
 {
     public interface IMetadataProcedureHandler
     {
-        DbDataReader ProcessRequest(CtpDocument options);
+        DbDataReader ProcessRequest(CtpCommand options);
     }
 }

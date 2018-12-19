@@ -5,23 +5,23 @@ using System.Text;
 
 namespace CTP.Net
 {
-    [DocumentName("CtpAccount")]
+    [CommandName("CtpAccount")]
     public class CtpAccount
-        : DocumentObject<CtpAccount>
+        : CommandObject<CtpAccount>
     {
-        [DocumentField()]
+        [CommandField()]
         public bool IsEnabled { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public string Name { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public string Description { get; set; }
 
         /// <summary>
         /// All of the roles granted with this account.
         /// </summary>
-        [DocumentField()]
+        [CommandField()]
         public List<string> Roles { get; set; }
 
         public CtpAccount()
@@ -29,7 +29,7 @@ namespace CTP.Net
             Roles = new List<string>();
         }
 
-        public static explicit operator CtpAccount(CtpDocument obj)
+        public static explicit operator CtpAccount(CtpCommand obj)
         {
             return FromDocument(obj);
         }

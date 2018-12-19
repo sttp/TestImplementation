@@ -50,15 +50,15 @@ namespace Sttp.Tests
             Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
         }
 
-        [DocumentName("GetMetadata")]
+        [CommandName("GetMetadata")]
         public class CommandLittle
-            : DocumentObject<CommandLittle>
+            : CommandObject<CommandLittle>
         {
-            [DocumentField()] public int Value1 { get; private set; }
-            [DocumentField()] public int Value2 { get; private set; }
-            [DocumentField()] public int Value3 { get; private set; }
-            [DocumentField()] public int Value4 { get; private set; }
-            [DocumentField()] public int Value5 { get; private set; }
+            [CommandField()] public int Value1 { get; private set; }
+            [CommandField()] public int Value2 { get; private set; }
+            [CommandField()] public int Value3 { get; private set; }
+            [CommandField()] public int Value4 { get; private set; }
+            [CommandField()] public int Value5 { get; private set; }
 
             //Exists to support CtpSerializable
             public CommandLittle()
@@ -66,7 +66,7 @@ namespace Sttp.Tests
 
             }
 
-            public static explicit operator CommandLittle(CtpDocument obj)
+            public static explicit operator CommandLittle(CtpCommand obj)
             {
                 return FromDocument(obj);
             }

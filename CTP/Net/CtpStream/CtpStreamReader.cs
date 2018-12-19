@@ -59,13 +59,13 @@ namespace CTP
         /// Reads the next packet from the stream. 
         /// </summary>
         /// <returns></returns>
-        public CtpDocument Read(int timeout)
+        public CtpCommand Read(int timeout)
         {
             try
             {
                 lock (m_readLock)
                 {
-                    CtpDocument packet;
+                    CtpCommand packet;
                     while (!InternalRead(out packet))
                     {
                         var stream = m_stream;
@@ -118,7 +118,7 @@ namespace CTP
         /// Automatically decompresses and combines fragments and waits for the entire packet before
         /// responding as True.
         /// </summary>
-        private bool InternalRead(out CtpDocument packet)
+        private bool InternalRead(out CtpCommand packet)
         {
             packet = null;
             if (m_inboundBufferLength < 2)
@@ -152,7 +152,7 @@ namespace CTP
             payload = new byte[length];
             Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, payload, 0, length);
 
-            packet = new CtpDocument(payload, false);
+            packet = new CtpCommand(payload, false);
             m_inboundBufferCurrentPosition += length;
             m_inboundBufferLength -= length;
             return true;

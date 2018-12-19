@@ -1,13 +1,13 @@
 ﻿namespace CTP.Net
 {
-    [DocumentName("IpAndMask")]
+    [CommandName("IpAndMask")]
     public class IpAndMask
-        : DocumentObject<IpAndMask>
+        : CommandObject<IpAndMask>
     {
-        [DocumentField()]
+        [CommandField()]
         public string IpAddress { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public int MaskBits { get; set; }
 
         public IpAndMask()
@@ -15,7 +15,7 @@
 
         }
 
-        public static explicit operator IpAndMask(CtpDocument obj)
+        public static explicit operator IpAndMask(CtpCommand obj)
         {
             return FromDocument(obj);
         }

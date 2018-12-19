@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace CTP.Net
 {
-    public delegate void PacketReceivedEventHandler(CtpSession sender, CtpDocument packet);
+    public delegate void PacketReceivedEventHandler(CtpSession sender, CtpCommand packet);
 
     public enum ReceiveMode
     {
@@ -187,7 +187,7 @@ namespace CTP.Net
             Dispose();
         }
 
-        private void OnNewPacket(CtpDocument obj)
+        private void OnNewPacket(CtpCommand obj)
         {
             if (m_disposed)
                 return;
@@ -214,7 +214,7 @@ namespace CTP.Net
         ///     this method will not block, nor raise an exception if the stream has been disposed.
         /// </summary>
         /// <returns></returns>
-        public CtpDocument Read()
+        public CtpCommand Read()
         {
             switch (ReceiveMode)
             {
@@ -231,12 +231,12 @@ namespace CTP.Net
             Send(packet.ToDocument());
         }
 
-        public void Send(DocumentObject document)
+        public void Send(CommandObject command)
         {
-            Send(document.ToDocument());
+            Send(command.ToDocument());
         }
 
-        private void Send(CtpDocument packet)
+        private void Send(CtpCommand packet)
         {
             switch (SendMode)
             {

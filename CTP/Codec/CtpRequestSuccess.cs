@@ -1,10 +1,10 @@
 ﻿namespace CTP
 {
-    [DocumentName("RequestSuccess")]
+    [CommandName("RequestSuccess")]
     public class CtpRequestSuccess
-        : DocumentObject<CtpRequestSuccess>
+        : CommandObject<CtpRequestSuccess>
     {
-        [DocumentField()]
+        [CommandField()]
         public string OriginalCommand;
 
         public CtpRequestSuccess(string originalCommand)
@@ -16,7 +16,7 @@
         private CtpRequestSuccess()
         { }
 
-        public static explicit operator CtpRequestSuccess(CtpDocument obj)
+        public static explicit operator CtpRequestSuccess(CtpCommand obj)
         {
             return FromDocument(obj);
         }

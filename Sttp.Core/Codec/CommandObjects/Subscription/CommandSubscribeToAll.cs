@@ -3,16 +3,16 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("SubscribeToAll")]
+    [CommandName("SubscribeToAll")]
     public class CommandSubscribeToAll
-        : DocumentObject<CommandSubscribeToAll>
+        : CommandObject<CommandSubscribeToAll>
     {
         public CommandSubscribeToAll()
         {
 
         }
 
-        public static explicit operator CommandSubscribeToAll(CtpDocument obj)
+        public static explicit operator CommandSubscribeToAll(CtpCommand obj)
         {
             return FromDocument(obj);
         }

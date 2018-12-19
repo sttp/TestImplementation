@@ -3,13 +3,13 @@ using CTP.Serialization;
 
 namespace Sttp.Codec
 {
-    [DocumentName("MetadataRequestFailed")]
+    [CommandName("MetadataRequestFailed")]
     public class CommandMetadataRequestFailed
-        : DocumentObject<CommandMetadataRequestFailed>
+        : CommandObject<CommandMetadataRequestFailed>
     {
-        [DocumentField()]
+        [CommandField()]
         public string Reason { get; private set; }
-        [DocumentField()]
+        [CommandField()]
         public string Details { get; private set; }
 
         //Exists to support CtpSerializable
@@ -24,7 +24,7 @@ namespace Sttp.Codec
             Details = details;
         }
 
-        public static explicit operator CommandMetadataRequestFailed(CtpDocument obj)
+        public static explicit operator CommandMetadataRequestFailed(CtpCommand obj)
         {
             return FromDocument(obj);
         }

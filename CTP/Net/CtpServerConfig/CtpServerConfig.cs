@@ -2,29 +2,29 @@
 
 namespace CTP.Net
 {
-    [DocumentName("CtpServerConfig")]
+    [CommandName("CtpServerConfig")]
     public class CtpServerConfig
-        : DocumentObject<CtpServerConfig>
+        : CommandObject<CtpServerConfig>
     {
-        [DocumentField()]
+        [CommandField()]
         public List<CtpAccount> Accounts { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public List<CtpAnonymousMapping> AnonymousMappings { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public List<CtpClientCert> ClientCerts { get; set; }
 
-        [DocumentField()]
+        [CommandField()]
         public bool EnableSSL;
 
-        [DocumentField()]
+        [CommandField()]
         public string ServerCertificatePath { get; set; }
 
         /// <summary>
         /// If the ServerCertificatePath is a PFX file, this password will decrypt the certificate.
         /// </summary>
-        [DocumentField()]
+        [CommandField()]
         public string CertificatePassword { get; set; }
 
         public CtpServerConfig()
@@ -34,7 +34,7 @@ namespace CTP.Net
             AnonymousMappings = new List<CtpAnonymousMapping>();
         }
 
-        public static explicit operator CtpServerConfig(CtpDocument obj)
+        public static explicit operator CtpServerConfig(CtpCommand obj)
         {
             return FromDocument(obj);
         }
