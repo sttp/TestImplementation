@@ -61,45 +61,20 @@ namespace CTP
         /// <summary>
         /// Writes a packet to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        public void Write(CtpPacket packet, int timeout)
+        public void Write(CtpDocument packet, int timeout)
         {
             try
             {
-                if (packet == null)
+                if ((object)packet == null)
                     throw new ArgumentNullException(nameof(packet));
 
-                //In case of an overflow exception.
-                int payloadLengthBytes = LengthOfPayloadLength(packet.Payload.Length);
-                int totalSize = packet.Payload.Length + 1 + payloadLengthBytes;
-                if (totalSize > MaximumPacketSize)
+                if (packet.Length > MaximumPacketSize)
                     throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
                 lock (m_writeLock)
                 {
-                    EnsureCapacity(totalSize);
-                    Array.Copy(packet.Payload, 0, m_writeBuffer, 1 + payloadLengthBytes, packet.Payload.Length);
-                    m_writeBuffer[0] = (byte)(packet.Channel + ((payloadLengthBytes - 1) << 4) + ((packet.IsRawData ? 1 : 0) << 6));
-                    switch (payloadLengthBytes)
-                    {
-                        case 1:
-                            m_writeBuffer[1] = (byte)packet.Payload.Length;
-                            break;
-                        case 2:
-                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 8);
-                            m_writeBuffer[2] = (byte)packet.Payload.Length;
-                            break;
-                        case 3:
-                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 16);
-                            m_writeBuffer[2] = (byte)(packet.Payload.Length >> 8);
-                            m_writeBuffer[3] = (byte)packet.Payload.Length;
-                            break;
-                        case 4:
-                            m_writeBuffer[1] = (byte)(packet.Payload.Length >> 24);
-                            m_writeBuffer[2] = (byte)(packet.Payload.Length >> 16);
-                            m_writeBuffer[3] = (byte)(packet.Payload.Length >> 8);
-                            m_writeBuffer[4] = (byte)packet.Payload.Length;
-                            break;
-                    }
+                    EnsureCapacity(packet.Length);
+                    packet.CopyTo(m_writeBuffer, 0);
 
                     var stream = m_stream;
                     if (stream == null)
@@ -109,7 +84,7 @@ namespace CTP
                         m_writeTimeout = timeout;
                         stream.WriteTimeout = timeout;
                     }
-                    stream.Write(m_writeBuffer, 0, totalSize);
+                    stream.Write(m_writeBuffer, 0, packet.Length);
                 }
             }
             catch (Exception ex)

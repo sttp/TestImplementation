@@ -1,18 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using GSF;
 
 namespace CTP
 {
     //ToDo: Final Review: Done
     /// <summary>
-    /// Serializes <see cref="CtpPacket"/> messages from a <see cref="Stream"/>.
+    /// Serializes <see cref="CtpDocument"/> messages from a <see cref="Stream"/>.
     /// </summary>
     internal class CtpStreamReaderAsync : IDisposable
     {
         public event Action<object, Exception> OnException;
 
-        public event Action<CtpPacket> NewPacket;
+        public event Action<CtpDocument> NewPacket;
 
         /// <summary>
         /// The underlying stream
@@ -138,59 +139,48 @@ namespace CTP
         /// Automatically decompresses and combines fragments and waits for the entire packet before
         /// responding as True.
         /// </summary>
-        private bool InternalRead(out CtpPacket packet)
+        private bool InternalRead(out CtpDocument packet)
         {
             packet = null;
             if (m_inboundBufferLength < 2)
                 return false;
 
             byte header = m_inboundBuffer[m_inboundBufferCurrentPosition];
-            if (header > 127)
+            if (header > 63)
                 throw new Exception("Unknown Packet Header Version");
-            bool isRawData = ((header >> 6) & 1) == 1;
-            int packetLengthBytes = ((header >> 4) & 3) + 1;
-            if (m_inboundBufferLength < packetLengthBytes + 1)
-                return false;
 
-            int payloadLength;
-            switch (packetLengthBytes)
+            bool isRawData = (header & 32) > 0;
+            bool longPayload = (header & 16) > 0;
+            int length = 1;
+            if (isRawData)
+                length++;
+
+            if (!longPayload)
             {
-                case 1:
-                    payloadLength = m_inboundBuffer[m_inboundBufferCurrentPosition + 1];
-                    break;
-                case 2:
-                    payloadLength = (m_inboundBuffer[m_inboundBufferCurrentPosition + 1] << 8)
-                                    + m_inboundBuffer[m_inboundBufferCurrentPosition + 2];
-                    break;
-                case 3:
-                    payloadLength = (m_inboundBuffer[m_inboundBufferCurrentPosition + 1] << 16)
-                                    + (m_inboundBuffer[m_inboundBufferCurrentPosition + 2] << 8)
-                                    + m_inboundBuffer[m_inboundBufferCurrentPosition + 3];
-                    break;
-                case 4:
-                    payloadLength = (m_inboundBuffer[m_inboundBufferCurrentPosition + 1] << 24)
-                                    + (m_inboundBuffer[m_inboundBufferCurrentPosition + 2] << 16)
-                                    + (m_inboundBuffer[m_inboundBufferCurrentPosition + 3] << 8)
-                                    + m_inboundBuffer[m_inboundBufferCurrentPosition + 4];
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                length += 1;
+                length += BigEndian.ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition) & ((1 << 12) - 1);
+            }
+            else
+            {
+                length += 3;
+                if (m_inboundBufferLength < length)
+                    return false;
+                length += BigEndian.ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition) & ((1 << 28) - 1);
             }
 
-            if (packetLengthBytes + 1 + payloadLength > MaximumPacketSize + 5)
+            if (length > MaximumPacketSize)
                 throw new Exception("Command size is too large");
 
-            if (m_inboundBufferLength < packetLengthBytes + 1 + payloadLength)
+            if (m_inboundBufferLength < length)
                 return false;
 
-            byte channel = (byte)(header & 15);
             byte[] payload;
-            payload = new byte[payloadLength];
-            Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition + 1 + packetLengthBytes, payload, 0, payloadLength);
+            payload = new byte[length];
+            Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, payload, 0, length);
 
-            packet = new CtpPacket(channel, isRawData, payload);
-            m_inboundBufferCurrentPosition += packetLengthBytes + 1 + payloadLength;
-            m_inboundBufferLength -= packetLengthBytes + 1 + payloadLength;
+            packet = new CtpDocument(payload);
+            m_inboundBufferCurrentPosition += length;
+            m_inboundBufferLength -= length;
             return true;
         }
 

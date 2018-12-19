@@ -8,6 +8,9 @@ namespace CTP
         : DocumentObject<CtpRaw>
     {
         [DocumentField()]
+        public byte Channel;
+
+        [DocumentField()]
         public byte[] Payload;
 
         public CtpRaw(byte[] payload)

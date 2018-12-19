@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using GSF;
 
 namespace CTP
 {
     /// <summary>
-    /// A container class around the byte array containing the Document data. To read data from this class, call <see cref="MakeReader"/>.
-    /// This class is Immutable.
-    /// 
-    /// To write an CtpDocument object use <see cref="CtpDocumentWriter"/>
+    /// A packet that can be serialized.
     /// </summary>
     public class CtpDocument : IEquatable<CtpDocument>
     {
         private readonly byte[] m_data;
+        private bool m_isRaw;
+        private string m_commandName;
+        private int m_payloadLength;
+        private int m_channelCode;
+        private int m_headerLength;
 
         /// <summary>
         /// Creates an CtpDocument from a byte array.
@@ -24,6 +27,7 @@ namespace CTP
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             m_data = (byte[])data.Clone();
+            ValidateData();
         }
 
         internal CtpDocument(byte[] data, bool unsafeShouldClone)
@@ -38,14 +42,63 @@ namespace CTP
             {
                 m_data = data;
             }
+            ValidateData();
         }
 
-        /// <summary>
-        /// The size of the data block.
-        /// </summary>
-        public int Length => m_data.Length;
+        private void ValidateData()
+        {
+            if (m_data.Length < 2)
+                throw new Exception("Payload wrong size");
+            if (m_data[0] >= 64)
+                throw new Exception("Wrong Version");
 
-        public string RootElement => Encoding.ASCII.GetString(m_data, 1, m_data[0]);
+            m_isRaw = (m_data[0] & 32) > 0;
+            bool longPayload = (m_data[0] & 16) > 0;
+            if (!longPayload)
+            {
+                m_headerLength = 2;
+                m_payloadLength = BigEndian.ToInt16(m_data, 0) & ((1 << 12) - 1);
+            }
+            else
+            {
+                m_headerLength = 4;
+                if (m_data.Length < 4)
+                    throw new Exception("Payload wrong size");
+                m_payloadLength = BigEndian.ToInt32(m_data, 0) & ((1 << 28) - 1);
+
+            }
+
+            if (m_isRaw)
+            {
+                m_headerLength++;
+                if (m_data.Length < m_payloadLength + m_headerLength)
+                    throw new Exception("Payload wrong size");
+                m_channelCode = m_data[longPayload ? 4 : 2];
+            }
+            else
+            {
+                if (m_data.Length < m_payloadLength + m_headerLength)
+                    throw new Exception("Payload wrong size");
+                m_channelCode = 0;
+            }
+        }
+
+        public string RootElement
+        {
+            get
+            {
+                if (m_commandName == null)
+                {
+                    if (m_isRaw)
+                        m_commandName = "Raw";
+                    else
+                        m_commandName = Encoding.ASCII.GetString(m_data, m_headerLength + 1, m_data[m_headerLength]);
+                }
+                return m_commandName;
+            }
+        }
+
+        public int Length => m_headerLength + m_payloadLength;
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.
@@ -198,7 +251,7 @@ namespace CTP
                         sb.Append(": ");
                         if (reader.Value.ValueTypeCode == CtpTypeCode.CtpDocument)
                         {
-                            sb.AppendLine("(CtpDocument)");
+                            sb.AppendLine("(CtpCommand)");
                             string str = Environment.NewLine + prefix.Peek() + " ";
                             sb.Append(prefix.Peek() + " " + reader.Value.AsString.Replace(Environment.NewLine, str));
                         }
@@ -301,7 +354,6 @@ namespace CTP
             return !Equals(a, b);
         }
 
+
     }
-
-
 }

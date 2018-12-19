@@ -69,10 +69,10 @@ namespace CTP.Net
                     string loginName = null;
                     string accountName = null;
                     List<string> roles = null;
-                    switch (doc.CommandName)
+                    switch (doc.RootElement)
                     {
                         case "Auth":
-                            var auth = (Auth)doc.Document;
+                            var auth = (Auth)doc;
                             if (m_server.m_config.CertificateClients.TryGetValue(auth.AuthorizationCertificate, out var clientCert))
                             {
                                 if (auth.ValidateSignature(clientCert.Certificate))

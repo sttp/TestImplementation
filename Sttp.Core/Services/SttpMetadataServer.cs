@@ -120,7 +120,8 @@ namespace Sttp.Services
                     rowEncoder.AddRow(values);
                     if (rowEncoder.Size > 30000)
                     {
-                        encoder.SendRaw(rowEncoder.ToArray(), channelID);
+                        throw new NotImplementedException();
+                        //encoder.SendRaw(rowEncoder.ToArray(), channelID);
                         rowEncoder.Clear();
                     }
 
@@ -128,7 +129,8 @@ namespace Sttp.Services
                 }
                 if (rowEncoder.Size > 0)
                 {
-                    encoder.SendRaw(rowEncoder.ToArray(), channelID);
+                    throw new NotImplementedException();
+                    //encoder.SendRaw(rowEncoder.ToArray(), channelID);
                     rowEncoder.Clear();
                 }
                 encoder.Send(new CommandEndMetadataResponse(channelID, rowCount));
