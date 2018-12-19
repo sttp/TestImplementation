@@ -31,9 +31,10 @@ namespace CTP
         /// Creates a markup reader from the specified byte array.
         /// </summary>
         /// <param name="data"></param>
-        internal CtpDocumentReader(byte[] data)
+        /// <param name="offset"></param>
+        internal CtpDocumentReader(byte[] data, int offset)
         {
-            m_stream = new CtpDocumentBitReader(data, 0, data.Length);
+            m_stream = new CtpDocumentBitReader(data, offset, data.Length - offset);
             Value = new CtpObject();
             NodeType = CtpDocumentNodeType.StartOfDocument;
             m_rootElement = m_stream.ReadDocumentName();

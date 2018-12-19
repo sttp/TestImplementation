@@ -14,7 +14,7 @@ namespace CTP
         private readonly byte[] m_data;
         private bool m_isRaw;
         private string m_commandName;
-        private int m_payloadLength;
+        private int m_length;
         private int m_channelCode;
         private int m_headerLength;
 
@@ -48,7 +48,7 @@ namespace CTP
         private void ValidateData()
         {
             if (m_data.Length < 2)
-                throw new Exception("Payload wrong size");
+                throw new Exception("Packet wrong size");
             if (m_data[0] >= 64)
                 throw new Exception("Wrong Version");
 
@@ -57,28 +57,26 @@ namespace CTP
             if (!longPayload)
             {
                 m_headerLength = 2;
-                m_payloadLength = BigEndian.ToInt16(m_data, 0) & ((1 << 12) - 1);
+                m_length = BigEndian.ToInt16(m_data, 0) & ((1 << 12) - 1);
             }
             else
             {
                 m_headerLength = 4;
                 if (m_data.Length < 4)
-                    throw new Exception("Payload wrong size");
-                m_payloadLength = BigEndian.ToInt32(m_data, 0) & ((1 << 28) - 1);
+                    throw new Exception("Packet wrong size");
+                m_length = BigEndian.ToInt32(m_data, 0) & ((1 << 28) - 1);
 
             }
+            if (m_data.Length < m_length)
+                throw new Exception("Packet wrong size");
 
             if (m_isRaw)
             {
+                m_channelCode = m_data[m_headerLength];
                 m_headerLength++;
-                if (m_data.Length < m_payloadLength + m_headerLength)
-                    throw new Exception("Payload wrong size");
-                m_channelCode = m_data[longPayload ? 4 : 2];
             }
             else
             {
-                if (m_data.Length < m_payloadLength + m_headerLength)
-                    throw new Exception("Payload wrong size");
                 m_channelCode = 0;
             }
         }
@@ -98,7 +96,9 @@ namespace CTP
             }
         }
 
-        public int Length => m_headerLength + m_payloadLength;
+        public bool IsRaw => m_isRaw;
+
+        public int Length => m_length;
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.
@@ -106,7 +106,7 @@ namespace CTP
         /// <returns></returns>
         internal CtpDocumentReader MakeReader()
         {
-            return new CtpDocumentReader(m_data);
+            return new CtpDocumentReader(m_data, m_headerLength);
         }
 
         public byte[] ToArray()
@@ -353,7 +353,5 @@ namespace CTP
         {
             return !Equals(a, b);
         }
-
-
     }
 }

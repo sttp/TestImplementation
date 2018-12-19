@@ -128,23 +128,18 @@ namespace CTP
             if (header > 63)
                 throw new Exception("Unknown Packet Header Version");
 
-            bool isRawData = (header & 32) > 0;
             bool longPayload = (header & 16) > 0;
-            int length = 1;
-            if (isRawData)
-                length++;
+            int length = 0;
 
             if (!longPayload)
             {
-                length += 1;
-                length += BigEndian.ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition) & ((1 << 12) - 1);
+                length = BigEndian.ToInt16(m_inboundBuffer, m_inboundBufferCurrentPosition) & ((1 << 12) - 1);
             }
             else
             {
-                length += 3;
-                if (m_inboundBufferLength < length)
+                if (m_inboundBufferLength < 4)
                     return false;
-                length += BigEndian.ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition) & ((1 << 28) - 1);
+                length = BigEndian.ToInt32(m_inboundBuffer, m_inboundBufferCurrentPosition) & ((1 << 28) - 1);
             }
 
             if (length > MaximumPacketSize)
@@ -157,7 +152,7 @@ namespace CTP
             payload = new byte[length];
             Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, payload, 0, length);
 
-            packet = new CtpDocument(payload);
+            packet = new CtpDocument(payload, false);
             m_inboundBufferCurrentPosition += length;
             m_inboundBufferLength -= length;
             return true;

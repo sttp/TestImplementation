@@ -64,7 +64,7 @@ namespace CTP
             value.ToRfcBytes(m_buffer, m_length);
             m_length += 16;
         }
-       
+
         public void Write(string value)
         {
             if (value == null)

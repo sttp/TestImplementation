@@ -72,7 +72,7 @@ namespace CTP
         /// </summary>
         public CtpDocumentWriter()
         {
-            m_prefixLength = 4;
+            m_prefixLength = 6;
             m_tmpValue = new CtpObject();
             m_elementNamesLookup = new RuntimeMapping();
             m_valueNamesLookup = new RuntimeMapping();
@@ -85,7 +85,7 @@ namespace CTP
 
         public void Initialize(CtpDocumentName rootElement)
         {
-            m_prefixLength = 4;
+            m_prefixLength = 6;
             m_elementNamesLookup.Clear();
             m_valueNamesLookup.Clear();
             m_elementNames.Clear();
@@ -99,7 +99,16 @@ namespace CTP
         /// <summary>
         /// The size of the writer if all elements were closed and the data was serialized.
         /// </summary>
-        public int Length => m_stream.Length + m_prefixLength + m_elementStack.Count;
+        public int Length
+        {
+            get
+            {
+                var innerLength = m_stream.Length + m_prefixLength + m_elementStack.Count;
+                if (innerLength > 4093)
+                    return innerLength + 2;
+                return innerLength;
+            }
+        }
 
         /// <summary>
         /// Starts a new element with the specified name. 
@@ -677,7 +686,19 @@ namespace CTP
             if (m_elementStack.Count != 0)
                 throw new InvalidOperationException("The element stack does not return to the root. Be sure enough calls to EndElement exist.");
 
-            buffer.ValidateParameters(offset, Length);
+            var length = Length;
+            buffer.ValidateParameters(offset, length);
+
+            if (length <= 4095)
+            {
+                //This is a 2 byte header;
+                WriteSize(buffer, ref offset, (ushort)length);
+            }
+            else
+            {
+                //This is a 4 byte header;
+                WriteSize(buffer, ref offset, (uint)(length + (1 << 28)));
+            }
 
             WriteAscii(buffer, ref offset, m_rootElement);
             WriteSize(buffer, ref offset, (ushort)m_elementNames.Count);
@@ -697,6 +718,18 @@ namespace CTP
 
         private void WriteSize(byte[] buffer, ref int length, ushort value)
         {
+            buffer[length] = (byte)(value >> 8);
+            length++;
+            buffer[length] = (byte)(value);
+            length++;
+        }
+
+        private void WriteSize(byte[] buffer, ref int length, uint value)
+        {
+            buffer[length] = (byte)(value >> 24);
+            length++;
+            buffer[length] = (byte)(value >> 16);
+            length++;
             buffer[length] = (byte)(value >> 8);
             length++;
             buffer[length] = (byte)(value);
