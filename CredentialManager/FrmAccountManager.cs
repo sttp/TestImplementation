@@ -42,7 +42,7 @@ namespace CredentialManager
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
                     var cfg = SaveData();
-                    File.WriteAllBytes(dlg.FileName, cfg.ToDocument().ToArray());
+                    File.WriteAllBytes(dlg.FileName, cfg.ToCommand().ToArray());
                 }
             }
         }

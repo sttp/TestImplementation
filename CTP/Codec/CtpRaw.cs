@@ -13,9 +13,10 @@ namespace CTP
         [CommandField()]
         public byte[] Payload;
 
-        public CtpRaw(byte[] payload)
+        public CtpRaw(byte[] payload, byte channel)
         {
             Payload = payload;
+            Channel = channel;
         }
 
         //Exists to support CtpSerializable

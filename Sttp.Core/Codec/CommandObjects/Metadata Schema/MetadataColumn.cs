@@ -44,7 +44,7 @@ namespace Sttp.Codec
                         return "String";
                     case CtpTypeCode.CtpBuffer:
                         return "CtpBuffer";
-                    case CtpTypeCode.CtpDocument:
+                    case CtpTypeCode.CtpCommand:
                         return "CtpDocument";
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -82,7 +82,7 @@ namespace Sttp.Codec
                         TypeCode = CtpTypeCode.CtpBuffer;
                         break;
                     case "CtpDocument":
-                        TypeCode = CtpTypeCode.CtpDocument;
+                        TypeCode = CtpTypeCode.CtpCommand;
                         break;
                     default:
                         TypeCode = (CtpTypeCode)Enum.Parse(typeof(CtpTypeCode), value);

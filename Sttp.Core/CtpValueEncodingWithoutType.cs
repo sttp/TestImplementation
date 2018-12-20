@@ -42,7 +42,7 @@ namespace Sttp
                 case CtpTypeCode.CtpBuffer:
                     wr.Write(value.AsCtpBuffer);
                     break;
-                case CtpTypeCode.CtpDocument:
+                case CtpTypeCode.CtpCommand:
                     wr.Write(value.AsCtpCommand);
                     break;
                 default:
@@ -72,7 +72,7 @@ namespace Sttp
                     return (CtpObject)rd.ReadString();
                 case CtpTypeCode.CtpBuffer:
                     return (CtpObject)rd.ReadSttpBuffer();
-                case CtpTypeCode.CtpDocument:
+                case CtpTypeCode.CtpCommand:
                     return (CtpObject)rd.ReadSttpMarkup();
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -110,7 +110,7 @@ namespace Sttp
                 case CtpTypeCode.CtpBuffer:
                     output.SetValue(rd.ReadSttpBuffer());
                     break;
-                case CtpTypeCode.CtpDocument:
+                case CtpTypeCode.CtpCommand:
                     output.SetValue(rd.ReadSttpMarkup());
                     break;
                 default:

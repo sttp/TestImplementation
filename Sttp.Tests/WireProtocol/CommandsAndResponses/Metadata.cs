@@ -57,12 +57,12 @@ namespace Sttp.Tests.CommandsAndResponses
             t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
-            cmd.ToDocument();
+            cmd.ToCommand();
 
             Stopwatch sw = Stopwatch.StartNew();
             for (int x = 0; x < 1_000_000; x++)
             {
-                cmd.ToDocument();
+                cmd.ToCommand();
             }
             Console.WriteLine(sw.Elapsed.TotalSeconds);
         }
@@ -85,7 +85,7 @@ namespace Sttp.Tests.CommandsAndResponses
             t.Columns.Add(new MetadataColumn("Name", CtpTypeCode.String));
             tbl.Add(t);
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
-            var doc = cmd.ToDocument();
+            var doc = cmd.ToCommand();
             var obj = (CommandMetadataSchema)doc;
 
             Stopwatch sw = Stopwatch.StartNew();

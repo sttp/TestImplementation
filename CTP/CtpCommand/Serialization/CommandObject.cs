@@ -11,16 +11,16 @@ namespace CTP
 
         }
 
-        public abstract CtpCommand ToDocument();
+        public abstract CtpCommand ToCommand();
 
         public static implicit operator CtpCommand(CommandObject obj)
         {
-            return obj.ToDocument();
+            return obj.ToCommand();
         }
 
         public override string ToString()
         {
-            return ToDocument().ToYAML();
+            return ToCommand().ToYAML();
         }
 
         public virtual void BeforeLoad()
@@ -70,7 +70,7 @@ namespace CTP
                 throw new ArgumentException("The supplied type must exactly match the generic type parameter");
         }
 
-        public override CtpCommand ToDocument()
+        public override CtpCommand ToCommand()
         {
             return Save((T)this);
         }
@@ -82,16 +82,25 @@ namespace CTP
 
         public static CtpCommand Save(T obj)
         {
+            var raw = obj as CtpRaw;
+            if (raw != null)
+            {
+                return new CtpCommand(raw.Payload, raw.Channel);
+            }
             if (LoadError != null)
                 throw LoadError;
             var wr = new CtpCommandWriter();
             wr.Initialize(CommandName);
             Serialization.Save(obj, wr, null);
-            return wr.ToCtpDocument();
+            return wr.ToCtpCommand();
         }
 
         public static T Load(CtpCommand command)
         {
+            if (typeof(T) == typeof(CtpRaw))
+            {
+                return (T)(object)command.ToCtpRaw();
+            }
             if (LoadError != null)
                 throw LoadError;
             if (CommandName.Value != command.RootElement)

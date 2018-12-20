@@ -134,7 +134,7 @@ namespace CTP
                 SetNull();
                 return;
             }
-            m_valueTypeCode = CtpTypeCode.CtpDocument;
+            m_valueTypeCode = CtpTypeCode.CtpCommand;
             m_valueObject = value;
         }
 

@@ -25,7 +25,7 @@ namespace CTP
 
         public Auth(Ticket ticket, X509Certificate2 certificate)
         {
-            Ticket = ticket.ToDocument();
+            Ticket = ticket.ToCommand();
             AuthorizationCertificate = certificate.Thumbprint;
             using (var rsa = certificate.GetRSAPrivateKey())
             {

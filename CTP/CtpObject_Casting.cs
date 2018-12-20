@@ -28,7 +28,7 @@ namespace CTP
                         return $"(String){(m_valueObject as string).ToString()}";
                     case CtpTypeCode.CtpBuffer:
                         return $"(CtpBuffer){(m_valueObject as CtpBuffer).ToString()}";
-                    case CtpTypeCode.CtpDocument:
+                    case CtpTypeCode.CtpCommand:
                         return $"(CtpDocument){(m_valueObject as CtpCommand).ToString()}";
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -60,7 +60,7 @@ namespace CTP
                         return m_valueObject as string;
                     case CtpTypeCode.CtpBuffer:
                         return m_valueObject as CtpBuffer;
-                    case CtpTypeCode.CtpDocument:
+                    case CtpTypeCode.CtpCommand:
                         return m_valueObject as CtpCommand;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -402,7 +402,7 @@ namespace CTP
                         return (m_valueObject as string).ToString();
                     case CtpTypeCode.CtpBuffer:
                         return (m_valueObject as CtpBuffer).ToString();
-                    case CtpTypeCode.CtpDocument:
+                    case CtpTypeCode.CtpCommand:
                         return (m_valueObject as CtpCommand).ToString();
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -434,7 +434,7 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return null;
-                    case CtpTypeCode.CtpDocument:
+                    case CtpTypeCode.CtpCommand:
                         return m_valueObject as CtpCommand;
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to CtpDocument");

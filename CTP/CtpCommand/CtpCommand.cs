@@ -15,7 +15,7 @@ namespace CTP
         private bool m_isRaw;
         private string m_commandName;
         private int m_length;
-        private int m_channelCode;
+        private byte m_channelCode;
         private int m_headerLength;
 
         /// <summary>
@@ -43,6 +43,28 @@ namespace CTP
                 m_data = data;
             }
             ValidateData();
+        }
+
+        internal CtpCommand(byte[] raw, byte channelCode)
+        {
+            if (raw.Length >= 4093)
+            {
+                byte[] data = new byte[raw.Length + 5];
+                raw.CopyTo(data, 5);
+                data[4] = channelCode;
+                BigEndian.CopyBytes(raw.Length + 5 + (1 << 28) + (1 << 29), data, 0);
+                m_data = data;
+                ValidateData();
+            }
+            else
+            {
+                byte[] data = new byte[raw.Length + 3];
+                raw.CopyTo(data, 3);
+                data[2] = channelCode;
+                BigEndian.CopyBytes((ushort)(raw.Length + 3 + (1 << 13)), data, 0);
+                m_data = data;
+                ValidateData();
+            }
         }
 
         private void ValidateData()
@@ -106,6 +128,8 @@ namespace CTP
         /// <returns></returns>
         internal CtpCommandReader MakeReader()
         {
+            if (m_isRaw)
+                throw new InvalidOperationException("A raw file cannot have a reader");
             return new CtpCommandReader(m_data, m_headerLength);
         }
 
@@ -222,55 +246,67 @@ namespace CTP
         /// <returns></returns>
         public string ToYAML()
         {
-            var reader = MakeReader();
-
-            var sb = new StringBuilder();
-
-            Stack<string> prefix = new Stack<string>();
-            prefix.Push(" ");
-
-            sb.Append("---");
-            sb.Append(reader.RootElement);
-            sb.AppendLine();
-
-            //Note: There's an issue with a trailing commas.
-
-            while (reader.Read())
+            if (m_isRaw)
             {
-                switch (reader.NodeType)
+                var sb = new StringBuilder();
+                sb.AppendLine("---Raw");
+                sb.AppendLine(" Channel: " + m_channelCode);
+                sb.AppendLine(" Channel: " + m_channelCode);
+                sb.Length -= Environment.NewLine.Length;
+                return sb.ToString();
+            }
+            else
+            {
+                var reader = MakeReader();
+
+                var sb = new StringBuilder();
+
+                Stack<string> prefix = new Stack<string>();
+                prefix.Push(" ");
+                sb.Append("---");
+                sb.Append(reader.RootElement);
+                sb.AppendLine();
+
+                //Note: There's an issue with a trailing commas.
+
+                while (reader.Read())
                 {
-                    case CtpCommandNodeType.StartElement:
-                        sb.Append(prefix.Peek());
-                        sb.Append(reader.ElementName);
-                        sb.AppendLine(":");
-                        prefix.Push(prefix.Peek() + " ");
-                        break;
-                    case CtpCommandNodeType.Value:
-                        sb.Append(prefix.Peek());
-                        sb.Append(reader.ValueName);
-                        sb.Append(": ");
-                        if (reader.Value.ValueTypeCode == CtpTypeCode.CtpDocument)
-                        {
-                            sb.AppendLine("(CtpCommand)");
-                            string str = Environment.NewLine + prefix.Peek() + " ";
-                            sb.Append(prefix.Peek() + " " + reader.Value.AsString.Replace(Environment.NewLine, str));
-                        }
-                        else
-                        {
-                            sb.Append(reader.Value.ToTypeString);
-                        }
-                        sb.AppendLine();
-                        break;
-                    case CtpCommandNodeType.EndElement:
-                        prefix.Pop();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    switch (reader.NodeType)
+                    {
+                        case CtpCommandNodeType.StartElement:
+                            sb.Append(prefix.Peek());
+                            sb.Append(reader.ElementName);
+                            sb.AppendLine(":");
+                            prefix.Push(prefix.Peek() + " ");
+                            break;
+                        case CtpCommandNodeType.Value:
+                            sb.Append(prefix.Peek());
+                            sb.Append(reader.ValueName);
+                            sb.Append(": ");
+                            if (reader.Value.ValueTypeCode == CtpTypeCode.CtpCommand)
+                            {
+                                sb.AppendLine("(CtpCommand)");
+                                string str = Environment.NewLine + prefix.Peek() + " ";
+                                sb.Append(prefix.Peek() + " " + reader.Value.AsString.Replace(Environment.NewLine, str));
+                            }
+                            else
+                            {
+                                sb.Append(reader.Value.ToTypeString);
+                            }
+                            sb.AppendLine();
+                            break;
+                        case CtpCommandNodeType.EndElement:
+                            prefix.Pop();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
+
+                sb.Length -= Environment.NewLine.Length;
+                return sb.ToString();
             }
 
-            sb.Length -= Environment.NewLine.Length;
-            return sb.ToString();
         }
 
         public override string ToString()
@@ -352,6 +388,17 @@ namespace CTP
         public static bool operator !=(CtpCommand a, CtpCommand b)
         {
             return !Equals(a, b);
+        }
+
+        public CtpRaw ToCtpRaw()
+        {
+            if (!m_isRaw)
+                throw new InvalidOperationException("Cannot convert a document to a CTPRaw with this method");
+            byte[] data = new byte[m_length - m_headerLength];
+            Array.Copy(m_data, m_headerLength, data, 0, data.Length);
+            return new CtpRaw(data, m_channelCode);
+
+
         }
     }
 }

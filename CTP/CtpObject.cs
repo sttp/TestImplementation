@@ -131,8 +131,8 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.CtpDocument)
-                    ThrowHelper(CtpTypeCode.CtpDocument);
+                if (m_valueTypeCode != CtpTypeCode.CtpCommand)
+                    ThrowHelper(CtpTypeCode.CtpCommand);
                 return (CtpCommand)m_valueObject;
             }
         }
@@ -190,7 +190,7 @@ namespace CTP
                         return AsString == other.AsString;
                     case CtpTypeCode.CtpBuffer:
                         return AsCtpBuffer == other.AsCtpBuffer;
-                    case CtpTypeCode.CtpDocument:
+                    case CtpTypeCode.CtpCommand:
                         return AsCtpCommand == other.AsCtpCommand;
                     default:
                         throw new ArgumentOutOfRangeException();

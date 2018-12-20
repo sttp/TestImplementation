@@ -198,7 +198,7 @@ namespace CTP
                     m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpBuffer);
                     m_stream.Write(value.IsCtpBuffer);
                     break;
-                case CtpTypeCode.CtpDocument:
+                case CtpTypeCode.CtpCommand:
                     m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpDocument);
                     m_stream.Write(value.IsCtpCommand);
                     break;
@@ -666,7 +666,7 @@ namespace CTP
         /// Completes the writing to an <see cref="CtpCommand"/> and returns the completed buffer. This may be called multiple times.
         /// </summary>
         /// <returns></returns>
-        public CtpCommand ToCtpDocument()
+        public CtpCommand ToCtpCommand()
         {
             if (m_elementStack.Count != 0)
                 throw new InvalidOperationException("The element stack does not return to the root. Be sure enough calls to EndElement exist.");

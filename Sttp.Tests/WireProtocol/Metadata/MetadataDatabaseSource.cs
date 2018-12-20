@@ -22,17 +22,17 @@ namespace Sttp.Tests
             var schema = db.GetMetadataSchema();
             Console.Write(schema.ToString());
 
-            schema = (CommandMetadataSchema)schema.ToDocument();
+            schema = (CommandMetadataSchema)schema.ToCommand();
             var sw = new Stopwatch();
             sw.Restart();
             sw.Restart();
             const int cnt = 10000;
             for (int x = 0; x < cnt; x++)
             {
-                schema = (CommandMetadataSchema)schema.ToDocument();
+                schema = (CommandMetadataSchema)schema.ToCommand();
             }
             Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
-            Console.WriteLine(schema.ToDocument().Length);
+            Console.WriteLine(schema.ToCommand().Length);
             //File.WriteAllBytes("C:\\temp\\TestFile.bin", schema.ToDocument().ToArray());
         }
         [TestMethod]
@@ -45,7 +45,7 @@ namespace Sttp.Tests
             const int cnt = 10000;
             for (int x = 0; x < cnt; x++)
             {
-                schema = (CommandLittle)schema.ToDocument();
+                schema = (CommandLittle)schema.ToCommand();
             }
             Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
         }

@@ -228,12 +228,12 @@ namespace CTP.Net
 
         public void SendRaw(CtpRaw packet)
         {
-            Send(packet.ToDocument());
+            Send(packet.ToCommand());
         }
 
         public void Send(CommandObject command)
         {
-            Send(command.ToDocument());
+            Send(command.ToCommand());
         }
 
         private void Send(CtpCommand packet)
