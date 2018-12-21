@@ -133,6 +133,17 @@ namespace CTP
             return new CtpCommandReader(m_data, m_headerLength);
         }
 
+        /// <summary>
+        /// Converts CtpObject to a <see cref="CommandObject"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T ToObject<T>()
+            where T : CommandObject<T>
+        {
+            return CommandObject<T>.FromDocument(this);
+        }
+
         public byte[] ToArray()
         {
             return (byte[])m_data.Clone();
@@ -156,9 +167,19 @@ namespace CTP
         /// <returns></returns>
         public string ToXML()
         {
+            var sb = new StringBuilder();
+
+            if (m_isRaw)
+            {
+                sb.AppendLine("---Raw");
+                sb.AppendLine(" Channel: " + m_channelCode);
+                sb.AppendLine(" Channel: " + m_channelCode);
+                sb.Length -= Environment.NewLine.Length;
+                return sb.ToString();
+            }
+
             var reader = MakeReader();
 
-            var sb = new StringBuilder();
             var settings = new XmlWriterSettings();
             settings.Indent = true;
             var xml = XmlWriter.Create(sb, settings);
@@ -195,9 +216,19 @@ namespace CTP
         /// <returns></returns>
         public string ToJSON()
         {
+            var sb = new StringBuilder();
+
+            if (m_isRaw)
+            {
+                sb.AppendLine("---Raw");
+                sb.AppendLine(" Channel: " + m_channelCode);
+                sb.AppendLine(" Channel: " + m_channelCode);
+                sb.Length -= Environment.NewLine.Length;
+                return sb.ToString();
+            }
+
             var reader = MakeReader();
 
-            var sb = new StringBuilder();
 
             Stack<string> prefix = new Stack<string>();
             prefix.Push("  ");
@@ -246,66 +277,63 @@ namespace CTP
         /// <returns></returns>
         public string ToYAML()
         {
+            var sb = new StringBuilder();
+
             if (m_isRaw)
             {
-                var sb = new StringBuilder();
                 sb.AppendLine("---Raw");
                 sb.AppendLine(" Channel: " + m_channelCode);
                 sb.AppendLine(" Channel: " + m_channelCode);
                 sb.Length -= Environment.NewLine.Length;
                 return sb.ToString();
             }
-            else
+
+            var reader = MakeReader();
+
+            Stack<string> prefix = new Stack<string>();
+            prefix.Push(" ");
+            sb.Append("---");
+            sb.Append(reader.RootElement);
+            sb.AppendLine();
+
+            //Note: There's an issue with a trailing commas.
+
+            while (reader.Read())
             {
-                var reader = MakeReader();
-
-                var sb = new StringBuilder();
-
-                Stack<string> prefix = new Stack<string>();
-                prefix.Push(" ");
-                sb.Append("---");
-                sb.Append(reader.RootElement);
-                sb.AppendLine();
-
-                //Note: There's an issue with a trailing commas.
-
-                while (reader.Read())
+                switch (reader.NodeType)
                 {
-                    switch (reader.NodeType)
-                    {
-                        case CtpCommandNodeType.StartElement:
-                            sb.Append(prefix.Peek());
-                            sb.Append(reader.ElementName);
-                            sb.AppendLine(":");
-                            prefix.Push(prefix.Peek() + " ");
-                            break;
-                        case CtpCommandNodeType.Value:
-                            sb.Append(prefix.Peek());
-                            sb.Append(reader.ValueName);
-                            sb.Append(": ");
-                            if (reader.Value.ValueTypeCode == CtpTypeCode.CtpCommand)
-                            {
-                                sb.AppendLine("(CtpCommand)");
-                                string str = Environment.NewLine + prefix.Peek() + " ";
-                                sb.Append(prefix.Peek() + " " + reader.Value.AsString.Replace(Environment.NewLine, str));
-                            }
-                            else
-                            {
-                                sb.Append(reader.Value.ToTypeString);
-                            }
-                            sb.AppendLine();
-                            break;
-                        case CtpCommandNodeType.EndElement:
-                            prefix.Pop();
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    case CtpCommandNodeType.StartElement:
+                        sb.Append(prefix.Peek());
+                        sb.Append(reader.ElementName);
+                        sb.AppendLine(":");
+                        prefix.Push(prefix.Peek() + " ");
+                        break;
+                    case CtpCommandNodeType.Value:
+                        sb.Append(prefix.Peek());
+                        sb.Append(reader.ValueName);
+                        sb.Append(": ");
+                        if (reader.Value.ValueTypeCode == CtpTypeCode.CtpCommand)
+                        {
+                            sb.AppendLine("(CtpCommand)");
+                            string str = Environment.NewLine + prefix.Peek() + " ";
+                            sb.Append(prefix.Peek() + " " + reader.Value.AsString.Replace(Environment.NewLine, str));
+                        }
+                        else
+                        {
+                            sb.Append(reader.Value.ToTypeString);
+                        }
+                        sb.AppendLine();
+                        break;
+                    case CtpCommandNodeType.EndElement:
+                        prefix.Pop();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-
-                sb.Length -= Environment.NewLine.Length;
-                return sb.ToString();
             }
+
+            sb.Length -= Environment.NewLine.Length;
+            return sb.ToString();
 
         }
 
@@ -397,8 +425,6 @@ namespace CTP
             byte[] data = new byte[m_length - m_headerLength];
             Array.Copy(m_data, m_headerLength, data, 0, data.Length);
             return new CtpRaw(data, m_channelCode);
-
-
         }
     }
 }

@@ -28,7 +28,7 @@ namespace CTP.Serialization
        : TypeSerializationMethodBase<T>
         where T : CommandObject
     {
-        private FieldSerialization[] m_records;
+        private readonly FieldSerialization[] m_records;
 
         private readonly RuntimeMapping m_recordsLookup = new RuntimeMapping();
 
@@ -36,7 +36,7 @@ namespace CTP.Serialization
 
         public CommandObjectSerializationMethod(ConstructorInfo c)
         {
-            TypeSerialization<T>.Serialization = this; //This is required to fix circular reference issues.
+            TypeSerialization<T>.Set(this); //This is required to fix circular reference issues.
 
             var type = typeof(T);
             m_constructor = c.Compile<T>();
@@ -47,7 +47,6 @@ namespace CTP.Serialization
                 TryCreateFieldOptions(member, records);
             }
             m_records = records.ToArray();
-
 
             //Test for collisions
             HashSet<CtpCommandKeyword> ids = new HashSet<CtpCommandKeyword>();
@@ -82,7 +81,7 @@ namespace CTP.Serialization
         public override T Load(CtpCommandReader reader)
         {
             var rv = m_constructor();
-            rv.BeforeLoad();
+            rv.OnBeforeLoad();
             FieldSerialization serialization;
             int id;
 
@@ -98,7 +97,7 @@ namespace CTP.Serialization
                         }
                         else
                         {
-                            rv.MissingElement(reader.ElementName.Value);
+                            rv.OnMissingElement(reader.ElementName.Value);
                             reader.SkipElement();
                         }
                         break;
@@ -110,12 +109,12 @@ namespace CTP.Serialization
                         }
                         else
                         {
-                            rv.MissingElement(reader.ElementName.Value);
+                            rv.OnMissingValue(reader.ValueName.Value, reader.Value);
                             reader.SkipElement();
                         }
                         break;
                     case CtpCommandNodeType.EndElement:
-                        rv.AfterLoad();
+                        rv.OnAfterLoad();
                         return rv;
                     case CtpCommandNodeType.EndOfCommand:
                     case CtpCommandNodeType.StartOfCommand:
@@ -123,7 +122,7 @@ namespace CTP.Serialization
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            rv.AfterLoad();
+            rv.OnAfterLoad();
             return rv;
 
         }

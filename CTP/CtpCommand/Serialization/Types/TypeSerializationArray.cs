@@ -16,8 +16,8 @@ namespace CTP.Serialization
 
         public TypeSerializationArray()
         {
-            TypeSerialization<T[]>.Serialization = this; //This is required to fix circular reference issues.
-            m_serializeT = TypeSerialization<T>.Serialization;
+            TypeSerialization<T[]>.Set(this); //This is required to fix circular reference issues.
+            m_serializeT = TypeSerialization<T>.Get();
         }
 
         public override T[] Load(CtpCommandReader reader)

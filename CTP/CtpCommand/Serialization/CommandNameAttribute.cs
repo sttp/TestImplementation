@@ -11,13 +11,17 @@ namespace CTP
         : Attribute
     {
         /// <summary>
-        /// An alternative name for a document.
+        /// An alternative name for a command.
         /// </summary>
-        public readonly string DocumentName;
+        public readonly string CommandName;
 
-        public CommandNameAttribute(string documentName = null)
+        /// <summary>
+        /// The name of this command.
+        /// </summary>
+        /// <param name="commandName"></param>
+        public CommandNameAttribute(string commandName = null)
         {
-            DocumentName = documentName;
+            CommandName = commandName;
         }
     }
 }

@@ -55,7 +55,6 @@ namespace CTP.Serialization
         private Func<object, T> m_read;
         private Action<object, T> m_write;
 
-
         public FieldSerialization(MemberInfo member, CommandFieldAttribute autoLoad)
         {
             m_recordName = CtpCommandKeyword.Create(autoLoad.RecordName ?? member.Name);
@@ -74,7 +73,7 @@ namespace CTP.Serialization
             {
                 throw new NotSupportedException();
             }
-            m_method = TypeSerialization<T>.Serialization;
+            m_method = TypeSerialization<T>.Get();
         }
 
         public override CtpCommandKeyword RecordName => m_recordName;

@@ -16,8 +16,8 @@ namespace CTP.Serialization
 
         public TypeSerializationList()
         {
-            TypeSerialization<List<T>>.Serialization = this; //This is required to fix circular reference issues.
-            m_serializeT = TypeSerialization<T>.Serialization;
+            TypeSerialization<List<T>>.Set(this); //This is required to fix circular reference issues.
+            m_serializeT = TypeSerialization<T>.Get();
         }
 
         public override List<T> Load(CtpCommandReader reader)

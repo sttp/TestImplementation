@@ -20,9 +20,9 @@ namespace CTP.Serialization
 
         public TypeSerializationEnumerable(Func<List<T>, TEnum> castToType)
         {
-            TypeSerialization<TEnum>.Serialization = this; //This is required to fix circular reference issues.
+            TypeSerialization<TEnum>.Set(this); //This is required to fix circular reference issues.
             m_castToType = castToType;
-            m_serializeT = TypeSerialization<T>.Serialization;
+            m_serializeT = TypeSerialization<T>.Get();
         }
 
         public override TEnum Load(CtpCommandReader reader)
