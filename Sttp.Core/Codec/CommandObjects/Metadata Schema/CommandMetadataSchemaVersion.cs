@@ -28,7 +28,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandMetadataSchemaVersion(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

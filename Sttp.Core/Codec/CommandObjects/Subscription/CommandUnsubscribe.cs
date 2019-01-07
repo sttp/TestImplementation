@@ -13,7 +13,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandUnsubscribe(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
     }

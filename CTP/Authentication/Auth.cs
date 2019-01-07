@@ -48,7 +48,7 @@ namespace CTP
 
         public static explicit operator Auth(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

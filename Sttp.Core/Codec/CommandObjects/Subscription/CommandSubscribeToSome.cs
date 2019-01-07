@@ -30,7 +30,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandSubscribeToSome(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

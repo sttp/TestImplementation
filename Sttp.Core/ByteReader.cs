@@ -214,17 +214,17 @@ namespace Sttp
 
         #endregion
 
-        public CtpCommand ReadSttpMarkup()
+        public CtpCommand ReadCtpCommand()
         {
-            return new CtpCommand(ReadBytes());
+            return CtpCommand.Load(ReadBytes(), false);
         }
 
-        public CtpBuffer ReadSttpBuffer()
+        public CtpBuffer ReadCtpBuffer()
         {
             return new CtpBuffer(ReadBytes());
         }
 
-        public CtpTime ReadSttpTime()
+        public CtpTime ReadCtpTime()
         {
             return new CtpTime(ReadInt64());
         }

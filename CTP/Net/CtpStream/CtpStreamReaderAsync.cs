@@ -173,7 +173,7 @@ namespace CTP
             payload = new byte[length];
             Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, payload, 0, length);
 
-            packet = new CtpCommand(payload, false);
+            packet = CtpCommand.Load(payload, false);
             m_inboundBufferCurrentPosition += length;
             m_inboundBufferLength -= length;
             return true;

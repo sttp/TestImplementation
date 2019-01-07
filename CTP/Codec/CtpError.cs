@@ -26,7 +26,7 @@ namespace CTP
 
         public static explicit operator CtpError(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

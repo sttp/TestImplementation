@@ -9,17 +9,6 @@ namespace CTP
     /// </summary>
     internal class CtpCommandWriter
     {
-        //Encoding Scheme: 
-        //
-        // First, determine the Node Type.
-        // 2 bits, CtpDocumentNodeType
-        // If EndElement, then exit.
-        //
-        // Second, Determine the next NameIndex
-        // 0: Next NameIndex is same as the last time it was encountered.
-        // 1: It's not, Next index is 8 bit encoded number.
-        // Third, If NodeType:Value, write the value.
-
         /// <summary>
         /// A helper class so calls to <see cref="EndElement"/> can be wrapped in a using clause.
         /// Note: this class is a single instance class and does not protect against multiple calls to Dispose. 
@@ -49,7 +38,7 @@ namespace CTP
         private List<CtpCommandKeyword> m_elementNames;
         private List<CtpCommandKeyword> m_valueNames;
         /// <summary>
-        /// The list of elements so an error can occur when the element tree is invalid..
+        /// The list of elements so an error can occur when the element tree is invalid.
         /// </summary>
         private Stack<string> m_elementStack;
         /// <summary>
@@ -72,6 +61,7 @@ namespace CTP
         /// </summary>
         public CtpCommandWriter()
         {
+            //2 byte header, 2 byte for ElementNamesCount, 2 byte for ValueNamesCount
             m_prefixLength = 6;
             m_tmpValue = new CtpObject();
             m_elementNamesLookup = new RuntimeMapping();
@@ -85,6 +75,7 @@ namespace CTP
 
         public void Initialize(CtpCommandKeyword rootElement)
         {
+            //2 byte header, 2 byte for ElementNamesCount, 2 byte for ValueNamesCount
             m_prefixLength = 6;
             m_elementNamesLookup.Clear();
             m_valueNamesLookup.Clear();
@@ -126,7 +117,7 @@ namespace CTP
         /// Ends the current element. This should not be called if <see cref="StartElement"/> is inside a using block, since 
         /// this will automatically be called when exiting the using block.
         /// </summary>
-        public void EndElement()
+        private void EndElement()
         {
             if (m_elementStack.Count == 0)
                 throw new InvalidOperationException("Too many calls to EndElement has occurred. There are no elements to end.");
@@ -199,7 +190,7 @@ namespace CTP
                     m_stream.Write(value.IsCtpBuffer);
                     break;
                 case CtpTypeCode.CtpCommand:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpDocument);
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpCommand);
                     m_stream.Write(value.IsCtpCommand);
                     break;
                 default:
@@ -673,7 +664,7 @@ namespace CTP
 
             byte[] rv = new byte[Length];
             CopyTo(rv, 0);
-            return new CtpCommand(rv, false);
+            return CtpCommand.Load(rv, false);
         }
 
         /// <summary>

@@ -63,7 +63,7 @@ namespace Sttp
                 case CtpTypeCode.Double:
                     return (CtpObject)rd.ReadDouble();
                 case CtpTypeCode.CtpTime:
-                    return (CtpObject)rd.ReadSttpTime();
+                    return (CtpObject)rd.ReadCtpTime();
                 case CtpTypeCode.Boolean:
                     return (CtpObject)(rd.ReadBits1() == 1);
                 case CtpTypeCode.Guid:
@@ -71,9 +71,9 @@ namespace Sttp
                 case CtpTypeCode.String:
                     return (CtpObject)rd.ReadString();
                 case CtpTypeCode.CtpBuffer:
-                    return (CtpObject)rd.ReadSttpBuffer();
+                    return (CtpObject)rd.ReadCtpBuffer();
                 case CtpTypeCode.CtpCommand:
-                    return (CtpObject)rd.ReadSttpMarkup();
+                    return (CtpObject)rd.ReadCtpCommand();
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -96,7 +96,7 @@ namespace Sttp
                     output.SetValue(rd.ReadDouble());
                     break;
                 case CtpTypeCode.CtpTime:
-                    output.SetValue(rd.ReadSttpTime());
+                    output.SetValue(rd.ReadCtpTime());
                     break;
                 case CtpTypeCode.Boolean:
                     output.SetValue(rd.ReadBits1() == 1);
@@ -108,10 +108,10 @@ namespace Sttp
                     output.SetValue(rd.ReadString());
                     break;
                 case CtpTypeCode.CtpBuffer:
-                    output.SetValue(rd.ReadSttpBuffer());
+                    output.SetValue(rd.ReadCtpBuffer());
                     break;
                 case CtpTypeCode.CtpCommand:
-                    output.SetValue(rd.ReadSttpMarkup());
+                    output.SetValue(rd.ReadCtpCommand());
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

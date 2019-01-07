@@ -30,7 +30,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandMetadataSchemaUpdate(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

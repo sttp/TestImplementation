@@ -21,7 +21,7 @@ namespace CTP
 
         public static explicit operator AuthFailure(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

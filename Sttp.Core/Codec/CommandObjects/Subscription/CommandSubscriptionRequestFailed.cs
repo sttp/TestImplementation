@@ -25,7 +25,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandSubscriptionRequestFailed(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

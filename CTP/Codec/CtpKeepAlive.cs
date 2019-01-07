@@ -28,7 +28,7 @@ namespace CTP
 
         public static explicit operator CtpKeepAlive(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 

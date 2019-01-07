@@ -18,11 +18,11 @@
         /// </summary>
         EndElement,
         /// <summary>
-        /// Specifies that the end of the document has occurred.
+        /// Specifies that the end of the command has occurred.
         /// </summary>
         EndOfCommand,
         /// <summary>
-        /// Specifies that the current node is at the start of the document. This value will never be serialized 
+        /// Specifies that the current node is at the start of the command. This value will never be serialized 
         /// to the stream, but rather is a placeholder during the reading process.
         /// </summary>
         StartOfCommand, 

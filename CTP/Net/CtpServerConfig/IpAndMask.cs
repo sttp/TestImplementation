@@ -17,7 +17,7 @@
 
         public static explicit operator IpAndMask(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
         public string DisplayMember

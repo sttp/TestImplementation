@@ -10,7 +10,7 @@
 
         public static explicit operator AuthNone(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

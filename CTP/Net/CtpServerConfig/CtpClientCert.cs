@@ -29,7 +29,7 @@ namespace CTP.Net
 
         public static explicit operator CtpClientCert(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
         public string DisplayMember

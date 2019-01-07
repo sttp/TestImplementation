@@ -35,7 +35,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandGetMetadata(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
     }

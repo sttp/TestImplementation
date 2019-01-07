@@ -117,7 +117,8 @@ namespace CTP
     }
 
     /// <summary>
-    /// When creating a new command object, the <see cref="T"/> parameter must be the type of the class itself. The base class then compiles the necessary serialization methods.
+    /// When creating a new command object, the <see cref="T"/> parameter must be the type of the class itself.
+    /// The base class then compiles the necessary serialization methods.
     /// Note: The defining type must have a parameterless constructor (it may be private)
     /// </summary>
     /// <typeparam name="T">Must be the value returned by <see cref="Object.GetType"/></typeparam>
@@ -125,15 +126,6 @@ namespace CTP
         : CommandObject
         where T : CommandObject<T>
     {
-        private static readonly CtpCommandKeyword CmdName;
-        private static readonly Exception LoadError;
-        private static readonly TypeSerializationMethodBase<T> Serialization;
-
-        static CommandObject()
-        {
-            TypeSerialization<T>.Get(out LoadError, out CmdName, out Serialization);
-        }
-
         protected CommandObject()
         {
             if (LoadError != null)
@@ -157,7 +149,7 @@ namespace CTP
             var raw = obj as CtpRaw;
             if (raw != null)
             {
-                return new CtpCommand(raw.Payload, raw.Channel);
+                return CtpCommand.CreateRaw(raw.Payload, raw.Channel);
             }
             if (LoadError != null)
                 throw LoadError;
@@ -172,7 +164,7 @@ namespace CTP
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        public static T FromDocument(CtpCommand command)
+        public static T FromCommand(CtpCommand command)
         {
             if (command.IsRaw)
             {
@@ -191,6 +183,15 @@ namespace CTP
                 throw new Exception("Document Mismatch");
             var rdr = command.MakeReader();
             return Serialization.Load(rdr);
+        }
+
+        private static readonly CtpCommandKeyword CmdName;
+        private static readonly Exception LoadError;
+        private static readonly TypeSerializationMethodBase<T> Serialization;
+
+        static CommandObject()
+        {
+            TypeSerialization<T>.Get(out LoadError, out CmdName, out Serialization);
         }
 
     }

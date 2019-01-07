@@ -31,7 +31,7 @@ namespace CTP.Net
 
         public static explicit operator CtpAccount(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
         public string DisplayMember

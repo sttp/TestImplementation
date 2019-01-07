@@ -12,7 +12,7 @@ namespace CTP
 
         public static explicit operator AuthSuccess(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

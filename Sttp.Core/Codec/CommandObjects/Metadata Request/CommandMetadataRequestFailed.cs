@@ -26,7 +26,7 @@ namespace Sttp.Codec
 
         public static explicit operator CommandMetadataRequestFailed(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

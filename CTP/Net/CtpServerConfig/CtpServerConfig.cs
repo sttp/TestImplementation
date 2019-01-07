@@ -36,7 +36,7 @@ namespace CTP.Net
 
         public static explicit operator CtpServerConfig(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
         public void Validate()

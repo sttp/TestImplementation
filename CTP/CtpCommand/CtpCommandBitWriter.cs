@@ -6,7 +6,7 @@ using GSF;
 namespace CTP
 {
     /// <summary>
-    /// This class is used to write a CtpDocument.
+    /// Used by <see cref="CtpCommandWriter"/> to create a command.
     /// </summary>
     internal unsafe class CtpCommandBitWriter
     {

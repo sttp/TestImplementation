@@ -18,7 +18,7 @@
 
         public static explicit operator CtpRequestSuccess(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
     }
 }

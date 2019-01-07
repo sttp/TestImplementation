@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace CTP
 {
     /// <summary>
-    /// A class for reading CtpDocument documents.
+    /// A class for reading <see cref="CtpCommand"/>s.
     /// </summary>
     internal class CtpCommandReader
     {
@@ -28,27 +28,27 @@ namespace CTP
         private CtpCommandKeyword m_rootElement;
 
         /// <summary>
-        /// Creates a markup reader from the specified byte array.
+        /// Creates a <see cref="CtpCommandReader"/> from the specified byte array.
         /// </summary>
         /// <param name="data"></param>
         /// <param name="offset"></param>
-        internal CtpCommandReader(byte[] data, int offset)
+        public CtpCommandReader(byte[] data, int offset)
         {
             m_stream = new CtpCommandBitReader(data, offset, data.Length - offset);
             Value = new CtpObject();
             NodeType = CtpCommandNodeType.StartOfCommand;
-            m_rootElement = m_stream.ReadDocumentName();
+            m_rootElement = m_stream.ReadCommandKeyword();
             int elementCount = (int)m_stream.ReadBits16();
             int valueCount = (int)m_stream.ReadBits16();
             m_elementNamesList = new CtpCommandKeyword[elementCount];
             m_valueNamesList = new CtpCommandKeyword[valueCount];
             for (int x = 0; x < elementCount; x++)
             {
-                m_elementNamesList[x] = m_stream.ReadDocumentName();
+                m_elementNamesList[x] = m_stream.ReadCommandKeyword();
             }
             for (int x = 0; x < valueCount; x++)
             {
-                m_valueNamesList[x] = m_stream.ReadDocumentName();
+                m_valueNamesList[x] = m_stream.ReadCommandKeyword();
             }
             ElementName = GetCurrentElement();
         }
@@ -62,7 +62,8 @@ namespace CTP
         /// </summary>
         public int ElementDepth => m_elementStack.Count;
         /// <summary>
-        /// The current name of the current element. Can be the RootElement if ElementDepth is 0 and <see cref="NodeType"/> is not <see cref="CtpCommandNodeType.EndElement"/>.
+        /// The current name of the current element. Can be the RootElement if ElementDepth is 0
+        /// and <see cref="NodeType"/> is not <see cref="CtpCommandNodeType.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
         public CtpCommandKeyword ElementName { get; private set; }
@@ -72,7 +73,7 @@ namespace CTP
         public CtpCommandKeyword ValueName { get; private set; }
 
         /// <summary>
-        /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the value. Otherwise, SttpValue.Null.
+        /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the value. Otherwise, CtpObject.Null.
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
         /// contents, be sure to call <see cref="CtpObject.Clone"/>
         /// </summary>
@@ -81,7 +82,7 @@ namespace CTP
         /// <summary>
         /// The type of the current node. To Advance the nodes call <see cref="Read"/>
         /// </summary>
-        internal CtpCommandNodeType NodeType { get; private set; }
+        public CtpCommandNodeType NodeType { get; private set; }
 
         /// <summary>
         /// Reads to the next node. If the next node is the end of the document. False is returned. Otherwise true.
@@ -146,8 +147,8 @@ namespace CTP
                     case CtpCommandHeader.ValueCtpBuffer:
                         Value.SetValue(m_stream.ReadBuffer());
                         break;
-                    case CtpCommandHeader.ValueCtpDocument:
-                        Value.SetValue(m_stream.ReadDocument());
+                    case CtpCommandHeader.ValueCtpCommand:
+                        Value.SetValue(m_stream.ReadCommand());
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

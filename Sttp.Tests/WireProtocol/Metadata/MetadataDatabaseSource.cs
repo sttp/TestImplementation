@@ -68,7 +68,7 @@ namespace Sttp.Tests
 
             public static explicit operator CommandLittle(CtpCommand obj)
             {
-                return FromDocument(obj);
+                return FromCommand(obj);
             }
 
         }

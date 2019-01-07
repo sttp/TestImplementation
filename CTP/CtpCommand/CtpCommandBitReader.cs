@@ -6,6 +6,9 @@ using GSF;
 
 namespace CTP
 {
+    /// <summary>
+    /// Used by <see cref="CtpCommandReader"/> to parse a command.
+    /// </summary>
     internal unsafe class CtpCommandBitReader
     {
         private static readonly byte[] Empty = new byte[0];
@@ -81,9 +84,9 @@ namespace CTP
             return new CtpBuffer(ReadBytes(), false);
         }
 
-        public CtpCommand ReadDocument()
+        public CtpCommand ReadCommand()
         {
-            return new CtpCommand(ReadBytes(), false);
+            return CtpCommand.Load(ReadBytes(), false);
         }
 
         public string ReadString()
@@ -103,7 +106,7 @@ namespace CTP
             return rv;
         }
 
-        public CtpCommandKeyword ReadDocumentName()
+        public CtpCommandKeyword ReadCommandKeyword()
         {
             if (m_position + 1 > m_length)
             {

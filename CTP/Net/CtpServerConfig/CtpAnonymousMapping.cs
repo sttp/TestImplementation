@@ -26,7 +26,7 @@ namespace CTP.Net
 
         public static explicit operator CtpAnonymousMapping(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
         public string DisplayMember

@@ -51,7 +51,7 @@ namespace CTP
 
         public static explicit operator Ticket(CtpCommand obj)
         {
-            return FromDocument(obj);
+            return FromCommand(obj);
         }
 
         public Ticket(DateTime validFrom, DateTime validTo, string loginName, string validFor, List<string> roles, List<string> approvedClientCertificates)
