@@ -28,9 +28,8 @@ namespace Sttp.Tests.Commands
             var cmd = new Ticket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
                                  DateTime.Parse("2/2/3456 7:08:09.1234567"),
                                  "Login",
-                                 "192.168.100.1",
                                  new List<string>(new string[] { "Admin", "User" }),
-                                 new List<string>(new string[] { "Cert1", "Cert2" }));
+                                 "Cert1");
             cmd = (Ticket)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
@@ -59,9 +58,8 @@ namespace Sttp.Tests.Commands
             var ticket = new Ticket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
                                  DateTime.Parse("2/2/3456 7:08:09.1234567"),
                                  "Login",
-                                 "192.168.100.1",
                                  new List<string>(new string[] { "Admin", "User" }),
-                                 new List<string>(new string[] { "Cert1", "Cert2" }));
+                                 "Cert1");
 
             var cmd = new Auth(ticket, Cert);
             cmd = (Auth)(CtpCommand)cmd;

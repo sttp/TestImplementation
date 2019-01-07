@@ -8,7 +8,7 @@ namespace CTP.Net
     public delegate void SessionCompletedEventHandler(CtpSession session);
 
     /// <summary>
-    /// Listens on a specific endpoint to accept connections.
+    /// Listens on a specific endpoint to accept connections and create <see cref="CtpSession"/>s.
     /// </summary>
     public partial class CtpServer : IDisposable
     {
@@ -19,6 +19,9 @@ namespace CTP.Net
         private IPEndPoint m_listenEndpoint;
         private CtpRuntimeConfig m_config;
 
+        /// <summary>
+        /// Raised when a client successfully 
+        /// </summary>
         public event SessionCompletedEventHandler SessionCompleted;
 
         /// <summary>
@@ -92,7 +95,7 @@ namespace CTP.Net
                 }
 
                 ProcessClient.AcceptAsync(this, socket);
-                m_listener.BeginAcceptTcpClient(OnAccept, null);
+                m_listener.BeginAcceptTcpClient(m_onAccept, null);
             }
             catch (ObjectDisposedException)
             {
@@ -111,7 +114,7 @@ namespace CTP.Net
                 }
                 try
                 {
-                    m_listener.BeginAcceptTcpClient(OnAccept, null);
+                    m_listener.BeginAcceptTcpClient(m_onAccept, null);
                 }
                 catch (Exception e)
                 {

@@ -26,23 +26,18 @@ namespace CTP
         public string LoginName { get; private set; }
 
         /// <summary>
-        /// A string that identifies the source IP address for this ticket. This prevents ticket sharing.
-        /// </summary>
-        [CommandField()]
-        public string ValidFor { get; private set; }
-
-        /// <summary>
-        /// The list of roles granted by this ticket.
+        /// The list of roles granted by this ticket. If blank, all roles will be assumed.
         /// </summary>
         [CommandField()]
         public List<string> Roles { get; private set; }
 
         /// <summary>
-        /// The list of approved certificates that the remote resource may use. 
-        /// This is the SHA-256 hash of the public key.
+        /// If specified, this is the public key that the client must be using.
+        /// If blank, the client does not have to supply a client side certificate.
+        /// This can be used to prevent hijacking credentials.
         /// </summary>
         [CommandField()]
-        public List<string> ApprovedClientCertificates { get; private set; }
+        public string ApprovedPublicKey { get; private set; }
 
         private Ticket()
         {
@@ -54,14 +49,13 @@ namespace CTP
             return FromCommand(obj);
         }
 
-        public Ticket(DateTime validFrom, DateTime validTo, string loginName, string validFor, List<string> roles, List<string> approvedClientCertificates)
+        public Ticket(DateTime validFrom, DateTime validTo, string loginName, List<string> roles, string approvedPublicKey)
         {
             ValidFrom = validFrom;
             ValidTo = validTo;
             LoginName = loginName;
-            ValidFor = validFor;
             Roles = roles;
-            ApprovedClientCertificates = approvedClientCertificates;
+            ApprovedPublicKey = approvedPublicKey;
         }
     }
 }

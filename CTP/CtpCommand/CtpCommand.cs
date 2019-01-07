@@ -26,8 +26,7 @@ namespace CTP
         {
             m_data = data;
         }
-
-
+        
         private void ValidateData()
         {
             if (m_data.Length < 2)

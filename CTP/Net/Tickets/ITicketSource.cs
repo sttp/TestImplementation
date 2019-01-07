@@ -3,6 +3,6 @@ namespace CTP.Net
 {
     public interface ITicketSource
     {
-        Auth GetTicket();
+        TicketDetails GetTicket();
     }
 }
