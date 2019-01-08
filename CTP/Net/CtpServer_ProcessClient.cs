@@ -26,9 +26,6 @@ namespace CTP.Net
 
             private readonly CtpServer m_server;
             private readonly TcpClient m_client;
-            private Stream m_finalStream;
-            private SslStream m_ssl;
-            private CtpSession m_session;
 
             private ProcessClient(CtpServer server, TcpClient client)
             {
@@ -51,23 +48,17 @@ namespace CTP.Net
                     NetworkStream netStream = socket.GetStream();
 
                     var config = m_server.m_config.EncryptionOptions;
-
+                    SslStream ssl = null;
                     if (config.EnableSSL)
                     {
-                        m_ssl = new SslStream(netStream, false, null, null, EncryptionPolicy.RequireEncryption);
-                        m_ssl.AuthenticateAsServer(config.ServerCertificate, true, SslProtocols.None, false);
-                        m_finalStream = m_ssl;
-                    }
-                    else
-                    {
-                        m_finalStream = netStream;
+                        ssl = new SslStream(netStream, false, null, null, EncryptionPolicy.RequireEncryption);
+                        ssl.AuthenticateAsServer(config.ServerCertificate, true, SslProtocols.None, false);
                     }
 
-                    m_session = new CtpSession(m_finalStream, false, socket, netStream, m_ssl);
-
-                    var command = m_session.Read();
+                    var session = new CtpStream(socket, netStream, ssl);
+                    var command = session.Read();
                     string accountName = null;
-                    m_session.GrantedRoles = new HashSet<string>();
+                    session.GrantedRoles = new HashSet<string>();
                     switch (command.RootElement)
                     {
                         case "Auth":
@@ -77,26 +68,26 @@ namespace CTP.Net
                                 if (auth.ValidateSignature(clientCert.Certificate))
                                 {
                                     var ticket = (Ticket)auth.Ticket;
-                                    if (string.IsNullOrEmpty(ticket.ApprovedPublicKey) || m_session.RemoteCertificate.GetPublicKeyString() != ticket.ApprovedPublicKey
+                                    if (string.IsNullOrEmpty(ticket.ApprovedPublicKey) || session.RemoteCertificate.GetPublicKeyString() != ticket.ApprovedPublicKey
                                         && (ticket.ValidFrom < DateTime.UtcNow && DateTime.UtcNow <= ticket.ValidTo))
                                     {
                                         accountName = clientCert.ClientCert.MappedAccount;
-                                        m_session.LoginName = ticket.LoginName;
-                                        m_session.GrantedRoles.UnionWith(m_server.m_config.Accounts[accountName].Union(ticket.Roles));
+                                        session.LoginName = ticket.LoginName;
+                                        session.GrantedRoles.UnionWith(m_server.m_config.Accounts[accountName].Union(ticket.Roles));
                                     }
                                     break;
                                 }
                             }
                             break;
                         case "AuthNone":
-                            m_session.LoginName = "";
+                            session.LoginName = "";
                             foreach (var item in m_server.m_config.AnonymousMappings)
                             {
                                 var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
                                 if (item.Key.IsMatch(ipBytes))
                                 {
                                     accountName = item.Value;
-                                    m_session.GrantedRoles.UnionWith(m_server.m_config.Accounts[accountName]);
+                                    session.GrantedRoles.UnionWith(m_server.m_config.Accounts[accountName]);
                                     break;
                                 }
                             }
@@ -104,7 +95,7 @@ namespace CTP.Net
                         default:
                             throw new Exception();
                     }
-                    m_server.OnSessionCompleted(m_session);
+                    m_server.OnSessionCompleted(session);
                 }
                 catch (Exception)
                 {

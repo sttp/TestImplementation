@@ -5,10 +5,12 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using GSF.Diagnostics;
 
 namespace CTP.Net
 {
-    public delegate void PacketReceivedEventHandler(CtpSession sender, CtpCommand packet);
+    public delegate void CommandReceivedEventHandler(CtpStream sender, CtpCommand command);
 
     public enum ReceiveMode
     {
@@ -22,11 +24,14 @@ namespace CTP.Net
         Queueing
     }
 
-    public class CtpSession : IDisposable
+    public class CtpStream : IDisposable
     {
-        public event Action OnDisposed;
+        public static LogPublisher Log = Logger.CreatePublisher(typeof(CtpStream), MessageClass.Component);
 
-        public readonly bool IsServer;
+        /// <summary>
+        /// Occurs when this class is disposed. This event is raised on a ThreadPool thread and will only be called once.
+        /// </summary>
+        public event Action OnDisposed;
         /// <summary>
         /// Gets the socket that this session is on.
         /// </summary>
@@ -58,7 +63,7 @@ namespace CTP.Net
         /// For Blocking Mode: This event will not be raised.
         /// For Queuing Mode: This event will be raised 
         /// </summary>
-        public event PacketReceivedEventHandler PacketReceived;
+        public event CommandReceivedEventHandler PacketReceived;
 
         private CtpStreamReader m_reader;
         private CtpStreamReaderAsync m_readerAsync;
@@ -68,12 +73,10 @@ namespace CTP.Net
         private int m_receiveTimeout;
         private SendMode m_sendMode;
         private ReceiveMode m_receiveMode;
-        private volatile bool m_disposed;
+        private int m_disposed = 0;
 
-        public CtpSession(Stream stream, bool isServer, TcpClient socket, NetworkStream netStream, SslStream ssl)
+        public CtpStream(TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
-
-            IsServer = isServer;
             m_socket = socket;
             m_netStream = netStream;
             m_ssl = ssl;
@@ -83,12 +86,14 @@ namespace CTP.Net
             m_receiveTimeout = 5000;
             m_sendMode = SendMode.Blocking;
             m_receiveMode = ReceiveMode.Blocking;
-            m_writer = new CtpStreamWriter(m_stream);
-            m_writer.OnException += OnException;
-            m_reader = new CtpStreamReader(m_stream);
-            m_reader.OnException += OnException;
+            m_writer = new CtpStreamWriter(m_stream, SendReceiveOnException);
+            m_reader = new CtpStreamReader(m_stream, SendReceiveOnException);
         }
 
+        /// <summary>
+        /// Changes the SendMode on the session. The session starts out in blocking mode, but can be changed to a queuing mode.
+        /// However, it cannot be changed back into a blocking mode at the present time.
+        /// </summary>
         public SendMode SendMode
         {
             get => m_sendMode;
@@ -101,8 +106,7 @@ namespace CTP.Net
                         case SendMode.Blocking:
                             throw new InvalidOperationException("Cannot change from a Queuing based reading scheme back into a blocking one.");
                         case SendMode.Queueing:
-                            m_writerAsync = new CtpStreamWriterAsync(m_stream, m_sendTimeout);
-                            m_writerAsync.OnException += OnException;
+                            m_writerAsync = new CtpStreamWriterAsync(m_stream, m_sendTimeout, SendReceiveOnException);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -113,8 +117,10 @@ namespace CTP.Net
             }
         }
 
-
-
+        /// <summary>
+        /// Changes the ReceiveMode of the session. It starts out in a blocking mode, and can be changed into an event mode.
+        /// However, it cannot be changed back into a blocking mode at the present time.
+        /// </summary>
         public ReceiveMode ReceiveMode
         {
             get => m_receiveMode;
@@ -127,8 +133,7 @@ namespace CTP.Net
                         case ReceiveMode.Blocking:
                             throw new InvalidOperationException("Cannot change from an event based reading scheme back into a blocking one.");
                         case ReceiveMode.Event:
-                            m_readerAsync = new CtpStreamReaderAsync(m_stream);
-                            m_readerAsync.OnException += OnException;
+                            m_readerAsync = new CtpStreamReaderAsync(m_stream, SendReceiveOnException);
                             m_readerAsync.NewPacket += OnNewPacket;
                             m_readerAsync.Start();
                             break;
@@ -154,6 +159,8 @@ namespace CTP.Net
                 if (value <= 0)
                     throw new ArgumentOutOfRangeException(nameof(value), "SendTimeout cannot be infinite");
                 m_sendTimeout = value;
+                if (m_writerAsync != null)
+                    m_writerAsync.Timeout = value;
             }
         }
 
@@ -173,7 +180,13 @@ namespace CTP.Net
             }
         }
 
-
+        /// <summary>
+        /// A helper method to specifies all of the modes and timeouts in one swoop. This method is not required before reading/writing from a socket.
+        /// </summary>
+        /// <param name="receiveMode"></param>
+        /// <param name="receiveTimeout"></param>
+        /// <param name="sendMode"></param>
+        /// <param name="sendTimeout"></param>
         public void Start(ReceiveMode receiveMode, int receiveTimeout, SendMode sendMode, int sendTimeout)
         {
             ReceiveTimeout = receiveTimeout;
@@ -182,27 +195,58 @@ namespace CTP.Net
             SendMode = sendMode;
         }
 
-        private void OnException(object arg1, Exception arg2)
+        /// <summary>
+        /// Event occurs when a send/receive operation has an exception.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="ex"></param>
+        private void SendReceiveOnException(object sender, Exception ex)
         {
-            Dispose();
+            Log.Publish(MessageLevel.Error, MessageFlags.None, "Send/Receive Error", "An error has occurred with sending or receiving from a socket. The socket will be disposed.", null, ex);
+            if (Interlocked.CompareExchange(ref m_disposed, 1, 0) == 0)
+            {
+                ThreadPool.QueueUserWorkItem(InternalDispose);
+            }
         }
 
         private void OnNewPacket(CtpCommand obj)
         {
-            if (m_disposed)
+            if (m_disposed == 1)
                 return;
             PacketReceived?.Invoke(this, obj);
         }
 
-        public void Dispose()
+        private void OnDisposedCallback(object state)
         {
-            if (!m_disposed)
+            OnDisposed?.Invoke();
+        }
+
+        private void InternalDispose(object state)
+        {
+            try
             {
-                m_disposed = true;
+                ThreadPool.QueueUserWorkItem(OnDisposedCallback);
                 m_ssl?.Dispose();
                 m_netStream?.Dispose();
                 m_socket?.Dispose();
                 m_stream?.Dispose();
+
+                m_reader?.Dispose();
+                m_readerAsync?.Dispose();
+                m_writer?.Dispose();
+                m_writerAsync?.Dispose();
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        public void Dispose()
+        {
+            if (Interlocked.CompareExchange(ref m_disposed, 1, 0) == 0)
+            {
+                InternalDispose(null);
             }
         }
 

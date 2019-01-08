@@ -5,10 +5,10 @@ using System.Threading;
 
 namespace CTP.Net
 {
-    public delegate void SessionCompletedEventHandler(CtpSession session);
+    public delegate void SessionCompletedEventHandler(CtpStream stream);
 
     /// <summary>
-    /// Listens on a specific endpoint to accept connections and create <see cref="CtpSession"/>s.
+    /// Listens on a specific endpoint to accept connections and create <see cref="CtpStream"/>s.
     /// </summary>
     public partial class CtpServer : IDisposable
     {
@@ -123,7 +123,7 @@ namespace CTP.Net
             }
         }
 
-        protected virtual void OnSessionCompleted(CtpSession token)
+        protected virtual void OnSessionCompleted(CtpStream token)
         {
             SessionCompleted?.Invoke(token);
         }

@@ -4,14 +4,12 @@ using System.Threading;
 
 namespace CTP
 {
-    //ToDo: Final Review: Done
-
     /// <summary>
-    /// Serializes <see cref="CtpPacket"/> messages to a <see cref="Stream"/> in a synchronous manner.
+    /// Serializes <see cref="CtpCommand"/> messages to a <see cref="Stream"/> in a synchronous manner.
     /// </summary>
     internal class CtpStreamWriter : IDisposable
     {
-        public event Action<object, Exception> OnException;
+        private Action<object, Exception> m_onException;
 
         private object m_writeLock = new object();
 
@@ -25,71 +23,60 @@ namespace CTP
         /// </summary>
         private byte[] m_writeBuffer;
 
-        private int m_writeTimeout = 0;
+        private int m_writeTimeout;
+
+        private bool m_disposed;
 
         /// <summary>
         /// Creates a <see cref="CtpStreamWriter"/>
         /// </summary>
         /// <param name="stream"></param>
-        public CtpStreamWriter(Stream stream)
+        /// <param name="onException"></param>
+        public CtpStreamWriter(Stream stream, Action<object, Exception> onException)
         {
+            m_onException = onException ?? throw new ArgumentNullException(nameof(onException));
             m_stream = stream;
+            m_writeTimeout = stream.WriteTimeout;
             m_writeBuffer = new byte[128];
         }
 
         /// <summary>
-        /// The maximum packet size before a protocol parsing exceptions are raised. This defaults to 1MB.
+        /// The maximum packet size before protocol parsing exceptions are raised. This defaults to 1MB.
         /// </summary>
         public int MaximumPacketSize { get; set; } = 1_000_000;
 
         /// <summary>
-        /// The payload length field can consume anywhere from 1 to 4 bytes.
+        /// Writes a command to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        /// <param name="payloadLength"></param>
-        /// <returns></returns>
-        private int LengthOfPayloadLength(int payloadLength)
-        {
-            if (payloadLength <= 0xFF)
-                return 1;
-            if (payloadLength <= 0xFFFF)
-                return 2;
-            if (payloadLength <= 0xFFFFFF)
-                return 3;
-            return 4;
-        }
-
-        /// <summary>
-        /// Writes a packet to the underlying stream. Note: this method blocks until a packet has successfully been sent.
-        /// </summary>
-        public void Write(CtpCommand packet, int timeout)
+        public void Write(CtpCommand command, int timeout)
         {
             try
             {
-                if ((object)packet == null)
-                    throw new ArgumentNullException(nameof(packet));
+                if ((object)command == null)
+                    throw new ArgumentNullException(nameof(command));
 
-                if (packet.Length > MaximumPacketSize)
-                    throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
+                if (command.Length > MaximumPacketSize)
+                    throw new Exception("This command is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
                 lock (m_writeLock)
                 {
-                    EnsureCapacity(packet.Length);
-                    packet.CopyTo(m_writeBuffer, 0);
+                    EnsureCapacity(command.Length);
+                    command.CopyTo(m_writeBuffer, 0);
 
-                    var stream = m_stream;
-                    if (stream == null)
+                    if (m_disposed)
                         throw new ObjectDisposedException("Stream has been closed");
                     if (m_writeTimeout != timeout)
                     {
                         m_writeTimeout = timeout;
-                        stream.WriteTimeout = timeout;
+                        m_stream.WriteTimeout = timeout;
                     }
-                    stream.Write(m_writeBuffer, 0, packet.Length);
+                    m_stream.Write(m_writeBuffer, 0, command.Length);
                 }
             }
             catch (Exception ex)
             {
-                OnException?.Invoke(this, ex);
+                m_disposed = true;
+                m_onException(this, ex);
                 throw;
             }
         }
@@ -112,6 +99,7 @@ namespace CTP
 
         public void Dispose()
         {
+            m_disposed = true;
         }
     }
 }

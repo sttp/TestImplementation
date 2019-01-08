@@ -70,7 +70,7 @@ namespace Sttp.Services
             m_pendingRepository.FillData(tableName, data);
         }
 
-        public void ProcessCommand(CommandGetMetadata command, CtpSession encoder)
+        public void ProcessCommand(CommandGetMetadata command, CtpStream encoder)
         {
             var repository = m_repository;
             if (repository.ContainsTable(command.Table))
@@ -152,7 +152,7 @@ namespace Sttp.Services
         //    var engine = new MetadataQueryExecutionEngine(repository, encoder, command);
         //}
 
-        public void ProcessCommand(CommandGetMetadataSchema command, CtpSession encoder)
+        public void ProcessCommand(CommandGetMetadataSchema command, CtpStream encoder)
         {
             var repository = m_repository;
             if (!command.LastKnownRuntimeID.HasValue || command.LastKnownRuntimeID != repository.RuntimeID)

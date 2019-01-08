@@ -8,14 +8,12 @@ using GSF.Threading;
 
 namespace CTP
 {
-    //ToDo: Final Review: Done
-
     /// <summary>
-    /// Serializes <see cref="CtpPacket"/> messages to a <see cref="Stream"/> in a synchronous manner.
+    /// Serializes <see cref="CtpCommand"/> messages to a <see cref="Stream"/> in a synchronous manner.
     /// </summary>
     internal class CtpStreamWriterAsync : IDisposable
     {
-        public event Action<object, Exception> OnException;
+        private Action<object, Exception> m_onException;
 
         private object m_syncLock = new object();
 
@@ -39,7 +37,7 @@ namespace CTP
 
         private int m_timeout;
 
-        private bool m_isWriting;
+        private bool m_isWritePumping;
 
         private volatile bool m_disposed;
 
@@ -53,8 +51,10 @@ namespace CTP
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="timeout"></param>
-        public CtpStreamWriterAsync(Stream stream, int timeout)
+        /// <param name="onException"></param>
+        public CtpStreamWriterAsync(Stream stream, int timeout, Action<object, Exception> onException)
         {
+            m_onException = onException ?? throw new ArgumentNullException(nameof(onException));
             m_timeout = timeout;
             m_stream = stream;
             m_writeBuffer = new byte[128];
@@ -64,8 +64,17 @@ namespace CTP
             m_processTimeouts = new ScheduledTask();
             m_processTimeouts.Running += M_processTimeouts_Running;
             m_processTimeouts.Start(100);
-
             m_processNextWrite = ProcessNextWrite;
+        }
+
+        public int Timeout
+        {
+            get => m_timeout;
+            set
+            {
+                m_timeout = value;
+                m_processTimeouts.Start();
+            }
         }
 
         private void M_processTimeouts_Running(object sender, EventArgs<ScheduledTaskRunningReason> e)
@@ -77,12 +86,21 @@ namespace CTP
 
             lock (m_syncLock)
             {
+                if (m_disposed)
+                {
+                    m_queue = null;
+                    m_processTimeouts.Dispose();
+                    return;
+                }
+
                 if (m_queue.Count > 0)
                 {
                     if (m_queue.Peek().Item1.ElapsedMilliseconds() > m_timeout)
                     {
+                        m_queue = null;
+                        m_processTimeouts.Dispose();
                         m_disposed = true;
-                        ThreadPool.QueueUserWorkItem(x => OnException?.Invoke(this, new TimeoutException()));
+                        m_onException(this, new TimeoutException());
                     }
                 }
             }
@@ -91,27 +109,31 @@ namespace CTP
         private void ProcessNextWrite(object state)
         {
             TryAgain:
-
             if (m_disposed)
                 return;
 
             CtpCommand packet;
             lock (m_syncLock)
             {
+                if (m_disposed)
+                {
+                    m_queue = null;
+                    return;
+                }
                 if (m_queue.Count > 0)
                 {
                     packet = m_queue.Dequeue().Item2;
                 }
                 else
                 {
-                    m_isWriting = false;
+                    m_isWritePumping = false;
                     return;
                 }
             }
             try
             {
                 EnsureCapacity(packet.Length);
-                packet.CopyTo(m_writeBuffer,0);
+                packet.CopyTo(m_writeBuffer, 0);
                 if (m_stream.BeginWrite(m_writeBuffer, 0, packet.Length, m_endWrite, null).CompletedSynchronously)
                     goto TryAgain;
                 //If this completed async, the EndWrite method will return control to this method.
@@ -119,7 +141,7 @@ namespace CTP
             catch (Exception e)
             {
                 m_disposed = true;
-                OnException?.Invoke(this, e);
+                m_onException(this, e);
             }
         }
 
@@ -136,7 +158,7 @@ namespace CTP
             catch (Exception e)
             {
                 m_disposed = true;
-                OnException?.Invoke(this, e);
+                m_onException(this, e);
             }
         }
 
@@ -154,10 +176,16 @@ namespace CTP
 
             lock (m_syncLock)
             {
-                m_queue.Enqueue(Tuple.Create(ShortTime.Now, packet));
-                if (!m_isWriting)
+                if (m_disposed)
                 {
-                    m_isWriting = true;
+                    m_queue = null;
+                    return;
+                }
+
+                m_queue.Enqueue(Tuple.Create(ShortTime.Now, packet));
+                if (!m_isWritePumping)
+                {
+                    m_isWritePumping = true;
                     ThreadPool.QueueUserWorkItem(m_processNextWrite);
                 }
             }
