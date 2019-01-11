@@ -27,10 +27,18 @@ namespace Sttp.Archive
         private CommandBeginDataStream m_dataStream;
         private SttpProducerMetadata m_metadata;
 
+        private Dictionary<CtpObject, SttpDataPointMetadata> m_metadataLookup;
+
         public SttpFileReader(Stream stream, bool ownsStream)
         {
             m_stream = new CtpFileStream(stream, ownsStream);
-            m_decoder = new BasicDecoder();
+            m_decoder = new BasicDecoder(Lookup);
+            m_metadataLookup = new Dictionary<CtpObject, SttpDataPointMetadata>();
+        }
+
+        private SttpDataPointMetadata Lookup(CtpObject dataPointID)
+        {
+            return null;
         }
 
         public FileReaderItem Next()
@@ -47,7 +55,7 @@ namespace Sttp.Archive
                 var raw = (CtpRaw)m_nextCommand;
                 if (raw.Channel == m_dataStream.ChannelCode)
                 {
-                    m_decoder.Load(raw.Payload);
+                    m_decoder.Load(raw.Payload, false);
                     return FileReaderItem.DataPoint;
                 }
                 throw new Exception("Data stream is not defined for the specified channel.");
@@ -63,6 +71,10 @@ namespace Sttp.Archive
             else if (m_nextCommand.RootElement == "ProducerMetadata")
             {
                 m_metadata = (SttpProducerMetadata)m_nextCommand;
+                foreach (var item in m_metadata.DataPoints)
+                {
+                    m_metadataLookup[item.DataPointID] = item;
+                }
                 return FileReaderItem.ProducerMetadata;
             }
             goto TryAgain;

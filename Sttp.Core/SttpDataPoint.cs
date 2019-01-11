@@ -12,26 +12,9 @@ namespace Sttp
     public class SttpDataPoint
     {
         /// <summary>
-        /// A token was defined by the API layer when the runtime ID was defined at the protocol level.
-        /// This is only present when <see cref="DataPointID"/> is a RuntimeID type. This field is only 
-        /// used on the receiving end. The source of the data point does not need to assign this field.
-        /// 
-        /// Suggestions for this token include the properly mapped point identifier and possibly routing information.
+        /// The metadata for a measurement
         /// </summary>
-        public object DataPointAPIToken;
-
-        /// <summary>
-        /// A runtime ID for the data point. A negative value designates that this runtime ID is not valid. 
-        /// 
-        /// Ideally, all measurements will be mapped to a runtime ID, however, for systems that 
-        /// contains millions or billions of measurements, this is not a practical expectation.
-        /// </summary>
-        public int DataPointRuntimeID = -1;
-
-        /// <summary>
-        /// The unique identifier for this PointID.
-        /// </summary>
-        public readonly CtpObject DataPointID = new CtpObject();
+        public SttpDataPointMetadata Metadata;
 
         /// <summary>
         /// A timestamp field. Virtually all instances will use CtpTime as the means of storing time, but it's not required.
@@ -64,9 +47,7 @@ namespace Sttp
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(DataPointRuntimeID.ToString());
-            sb.Append('\t');
-            sb.Append(DataPointID.ToString());
+            sb.Append(Metadata.DataPointID.ToString());
             sb.Append('\t');
             sb.Append(Time.ToString());
             sb.Append('\t');

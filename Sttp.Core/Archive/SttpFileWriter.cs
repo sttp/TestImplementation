@@ -22,7 +22,7 @@ namespace Sttp.Archive
         public SttpFileWriter(Stream stream, bool ownsStream)
         {
             m_stream = new CtpFileStream(stream, ownsStream);
-            m_encoder = new BasicEncoder(100_000);
+            m_encoder = new BasicEncoder();
         }
 
         public void ProducerMetadata(SttpProducerMetadata metadata)
@@ -30,7 +30,7 @@ namespace Sttp.Archive
             if (m_encoder.Length > 0)
             {
                 m_stream.Write(new CtpRaw(m_encoder.ToArray(), 0));
-                m_encoder.Clear();
+                m_encoder.Clear(false);
             }
             m_stream.Write(metadata);
         }
@@ -45,7 +45,7 @@ namespace Sttp.Archive
             if (m_encoder.Length > 1000)
             {
                 m_stream.Write(new CtpRaw(m_encoder.ToArray(), 0));
-                m_encoder.Clear();
+                m_encoder.Clear(false);
             }
         }
 
@@ -60,7 +60,7 @@ namespace Sttp.Archive
             if (m_encoder.Length > 0)
             {
                 m_stream.Write(new CtpRaw(m_encoder.ToArray(), 0));
-                m_encoder.Clear();
+                m_encoder.Clear(false);
             }
 
             m_stream?.Dispose();

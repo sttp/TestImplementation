@@ -6,26 +6,35 @@ using CTP;
 
 namespace Sttp.Codec.DataPoint
 {
+    public delegate SttpDataPointMetadata LookupMetadata(CtpObject dataPointID);
+
     public class BasicDecoder
     {
+        private LookupMetadata m_lookup;
+        private MetadataChannelMapDecoder m_channelMap;
         private ByteReader m_stream;
-        private int m_lastRuntimeID = 0;
+        private int m_lastChannelID = 0;
         private CtpObject m_lastTimestamp = new CtpObject();
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
 
-        public BasicDecoder()
+        public BasicDecoder(LookupMetadata lookup)
         {
+            m_lookup = lookup;
             m_stream = new ByteReader();
         }
 
-        public void Load(byte[] data)
+        public void Load(byte[] data, bool clearMapping)
         {
-            m_lastRuntimeID = 0;
+            m_lastChannelID = 0;
             m_lastTimestamp.SetNull();
             m_lastQuality = 0;
             m_lastValueCode = CtpTypeCode.Null;
             m_stream.SetBuffer(data, 0, data.Length);
+            if (clearMapping)
+            {
+                m_channelMap.Clear();
+            }
         }
 
         public bool Read(SttpDataPoint dataPoint)
@@ -36,7 +45,6 @@ namespace Sttp.Codec.DataPoint
                 return false;
             }
 
-            bool canUseRuntimeID = true;
             bool hasExtendedData = false;
             bool qualityChanged = false;
             bool timeChanged = false;
@@ -44,24 +52,15 @@ namespace Sttp.Codec.DataPoint
 
             if (m_stream.ReadBits1() == 0)
             {
-                canUseRuntimeID = m_stream.ReadBits1() == 1;
                 hasExtendedData = m_stream.ReadBits1() == 1;
                 qualityChanged = m_stream.ReadBits1() == 1;
                 timeChanged = m_stream.ReadBits1() == 1;
                 typeChanged = m_stream.ReadBits1() == 1;
             }
 
-            if (canUseRuntimeID)
-            {
-                m_lastRuntimeID ^= (int)(uint)m_stream.Read4BitSegments();
-                dataPoint.DataPointRuntimeID = m_lastRuntimeID;
-                dataPoint.DataPointID.SetNull();
-            }
-            else
-            {
-                dataPoint.DataPointRuntimeID = -1;
-                CtpValueEncodingNative.Load(m_stream, dataPoint.DataPointID);
-            }
+
+            m_lastChannelID ^= (int)(uint)m_stream.Read4BitSegments();
+            dataPoint.Metadata = m_channelMap.GetMetadata(m_lastChannelID);
 
             if (hasExtendedData)
             {
@@ -91,6 +90,14 @@ namespace Sttp.Codec.DataPoint
             }
 
             CtpValueEncodingWithoutType.Load(m_stream, m_lastValueCode, dataPoint.Value);
+
+            if (dataPoint.Metadata == null)
+            {
+                var obj = new CtpObject();
+                CtpValueEncodingNative.Load(m_stream, obj);
+                dataPoint.Metadata = m_lookup(obj);
+                m_channelMap.Assign(dataPoint.Metadata, m_lastChannelID);
+            }
             return true;
         }
 

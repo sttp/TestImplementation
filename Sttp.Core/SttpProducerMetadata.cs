@@ -37,6 +37,22 @@ namespace Sttp
 
         }
 
+        protected override void AfterLoad()
+        {
+            if (DataPoints == null)
+                DataPoints = new List<SttpDataPointMetadata>();
+            if (Attributes == null)
+                Attributes = new List<AttributeValues>();
+            if ((object)ProducerID == null)
+            {
+                ProducerID = CtpObject.Null;
+            }
+            foreach (var item in DataPoints)
+            {
+                item.AssignProducer(this);
+            }
+        }
+
         public static explicit operator SttpProducerMetadata(CtpCommand obj)
         {
             return FromCommand(obj);
