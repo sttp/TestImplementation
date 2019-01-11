@@ -24,6 +24,8 @@ namespace Sttp.Codec.DataPoint
             m_stream = new ByteWriter();
         }
 
+        public int Length => m_stream.Length;
+
         public void Clear()
         {
             m_lastRuntimeID = 0;

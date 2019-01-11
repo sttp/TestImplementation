@@ -34,7 +34,7 @@ namespace Sttp
         public readonly CtpObject DataPointID = new CtpObject();
 
         /// <summary>
-        /// A timestamp field. Virtually all instances will use SttpTime as the means of storing time, but it's not required.
+        /// A timestamp field. Virtually all instances will use CtpTime as the means of storing time, but it's not required.
         /// </summary>
         public readonly CtpObject Time = new CtpObject();
 
@@ -55,7 +55,7 @@ namespace Sttp
         ///   Some kind of sequence identifier.
         ///   Some kind of pivot field. 
         ///   Extra quality data or analysis.
-        ///   Metadata that must be transported with every measurement. (Caution, this will introduce substatital overhead)
+        ///   Metadata that must be transported with every measurement. (Caution, this will introduce substantial overhead)
         /// 
         /// Note: Since this field is considered ancillary assigning something other than null will introduce a penalty that may be considerable in some circumstances.
         /// </summary>

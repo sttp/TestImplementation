@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
 using GSF;
@@ -26,7 +27,7 @@ namespace CTP
         {
             m_data = data;
         }
-        
+
         private void ValidateData()
         {
             if (m_data.Length < 2)
@@ -129,6 +130,11 @@ namespace CTP
         public void CopyTo(byte[] buffer, int offset)
         {
             Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
+        }
+
+        public void CopyTo(Stream stream)
+        {
+            stream.Write(m_data, 0, m_data.Length);
         }
 
         /// <summary>
