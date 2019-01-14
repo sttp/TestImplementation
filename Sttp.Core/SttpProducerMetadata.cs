@@ -34,7 +34,8 @@ namespace Sttp
 
         public SttpProducerMetadata()
         {
-
+            Attributes = new List<AttributeValues>();
+            DataPoints = new List<SttpDataPointMetadata>();
         }
 
         protected override void AfterLoad()

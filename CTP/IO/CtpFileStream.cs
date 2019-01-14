@@ -54,6 +54,8 @@ namespace CTP.IO
                 if (m_disposed)
                     throw new ObjectDisposedException(GetType().FullName);
                 int length = m_stream.Read(m_tempBuffer, 0, m_tempBuffer.Length);
+                if (length == 0)
+                    return null;
                 AppendToBuffer(m_tempBuffer, length);
             }
             return command;

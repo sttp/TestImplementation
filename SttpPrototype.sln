@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountManager", "Credentia
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccountManagerClient", "AccountManagerClient\AccountManagerClient.csproj", "{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SttpArciveReader", "SttpArciveReader\SttpArciveReader.csproj", "{74180DB6-595F-49F6-BEA7-35863CC65DF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56F76A87-1D0A-4025-8702-B5F5D5F7BBD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74180DB6-595F-49F6-BEA7-35863CC65DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74180DB6-595F-49F6-BEA7-35863CC65DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74180DB6-595F-49F6-BEA7-35863CC65DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74180DB6-595F-49F6-BEA7-35863CC65DF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

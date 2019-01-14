@@ -19,6 +19,12 @@ namespace Sttp
 
         }
 
+        public AttributeValues(string name, CtpObject value)
+        {
+            Name = name;
+            Value = value;
+        }
+
         public static explicit operator AttributeValues(CtpCommand obj)
         {
             return FromCommand(obj);

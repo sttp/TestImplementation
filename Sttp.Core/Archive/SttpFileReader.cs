@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CTP;
 using CTP.IO;
 using Sttp.Codec;
@@ -38,7 +35,11 @@ namespace Sttp.Archive
 
         private SttpDataPointMetadata Lookup(CtpObject dataPointID)
         {
-            return null;
+            if (m_metadataLookup.TryGetValue(dataPointID, out var value))
+            {
+                return value;
+            }
+            return new SttpDataPointMetadata(null) { DataPointID = dataPointID.Clone() };
         }
 
         public FileReaderItem Next()

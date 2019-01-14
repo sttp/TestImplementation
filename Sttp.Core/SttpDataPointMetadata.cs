@@ -44,6 +44,7 @@ namespace Sttp
         public SttpDataPointMetadata(SttpProducerMetadata producer)
         {
             AssignProducer(producer);
+            Attributes = new List<AttributeValues>();
         }
 
         private SttpDataPointMetadata()
