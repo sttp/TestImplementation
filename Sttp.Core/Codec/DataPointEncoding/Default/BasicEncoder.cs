@@ -12,7 +12,7 @@ namespace Sttp.Codec.DataPoint
     {
         private ByteWriter m_stream;
         private int m_lastChannelID = 0;
-        private readonly CtpObject m_lastTimestamp = new CtpObject();
+        private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
         private MetadataChannelMapEncoder m_channelMap;
@@ -28,7 +28,7 @@ namespace Sttp.Codec.DataPoint
         public void Clear(bool clearMapping)
         {
             m_lastChannelID = 0;
-            m_lastTimestamp.SetNull();
+            m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;
             m_lastValueCode = CtpTypeCode.Null;
             m_stream.Clear();
@@ -75,8 +75,8 @@ namespace Sttp.Codec.DataPoint
 
             if (timeChanged)
             {
-                CtpValueEncodingNative.Save(m_stream, point.Time);
-                m_lastTimestamp.SetValue(point.Time);
+                m_stream.Write(point.Time);
+                m_lastTimestamp = point.Time;
             }
 
             if (typeChanged)

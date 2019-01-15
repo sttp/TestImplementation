@@ -17,9 +17,9 @@ namespace Sttp
         public SttpDataPointMetadata Metadata;
 
         /// <summary>
-        /// A timestamp field. Virtually all instances will use CtpTime as the means of storing time, but it's not required.
+        /// A timestamp field.
         /// </summary>
-        public readonly CtpObject Time = new CtpObject();
+        public CtpTime Time;
 
         /// <summary>
         /// The value for the data point.

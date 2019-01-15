@@ -14,7 +14,7 @@ namespace Sttp.Codec.DataPoint
         private MetadataChannelMapDecoder m_channelMap;
         private ByteReader m_stream;
         private int m_lastChannelID = 0;
-        private CtpObject m_lastTimestamp = new CtpObject();
+        private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
 
@@ -22,12 +22,13 @@ namespace Sttp.Codec.DataPoint
         {
             m_lookup = lookup;
             m_stream = new ByteReader();
+            m_channelMap = new MetadataChannelMapDecoder();
         }
 
         public void Load(byte[] data, bool clearMapping)
         {
             m_lastChannelID = 0;
-            m_lastTimestamp.SetNull();
+            m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;
             m_lastValueCode = CtpTypeCode.Null;
             m_stream.SetBuffer(data, 0, data.Length);
@@ -79,10 +80,10 @@ namespace Sttp.Codec.DataPoint
 
             if (timeChanged)
             {
-                CtpValueEncodingNative.Load(m_stream, m_lastTimestamp);
+                m_lastTimestamp = m_stream.ReadCtpTime();
             }
 
-            dataPoint.Time.SetValue(m_lastTimestamp);
+            dataPoint.Time = m_lastTimestamp;
 
             if (typeChanged)
             {
