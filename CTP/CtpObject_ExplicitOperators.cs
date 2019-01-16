@@ -7,39 +7,39 @@ namespace CTP
     /// </summary>
     public partial struct CtpObject
     {
-        public static explicit operator CtpObject(DBNull value)
+        public static implicit operator CtpObject(DBNull value)
         {
             return new CtpObject();
         }
-        public static explicit operator CtpObject(sbyte value)
+        public static implicit operator CtpObject(sbyte value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(short value)
+        public static implicit operator CtpObject(short value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(int value)
+        public static implicit operator CtpObject(int value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(long value)
+        public static implicit operator CtpObject(long value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(byte value)
+        public static implicit operator CtpObject(byte value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(ushort value)
+        public static implicit operator CtpObject(ushort value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(uint value)
+        public static implicit operator CtpObject(uint value)
         {
             return new CtpObject((long)value);
         }
-        public static explicit operator CtpObject(ulong value)
+        public static implicit operator CtpObject(ulong value)
         {
             if (value > long.MaxValue)
             {
@@ -50,15 +50,15 @@ namespace CTP
                 return new CtpObject((long)value);
             }
         }
-        public static explicit operator CtpObject(float value)
+        public static implicit operator CtpObject(float value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(double value)
+        public static implicit operator CtpObject(double value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(decimal value)
+        public static implicit operator CtpObject(decimal value)
         {
             var d = Decimal.Truncate(value);
             if (d == value)
@@ -73,144 +73,144 @@ namespace CTP
             return new CtpObject((double)value);
         }
 
-        public static explicit operator CtpObject(DateTime value)
+        public static implicit operator CtpObject(DateTime value)
         {
             return new CtpObject((CtpTime)value);
         }
-        public static explicit operator CtpObject(CtpTime value)
+        public static implicit operator CtpObject(CtpTime value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(bool value)
+        public static implicit operator CtpObject(bool value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(Guid value)
+        public static implicit operator CtpObject(Guid value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(char value)
+        public static implicit operator CtpObject(char value)
         {
             return new CtpObject(value.ToString());
         }
-        public static explicit operator CtpObject(string value)
+        public static implicit operator CtpObject(string value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(char[] value)
+        public static implicit operator CtpObject(char[] value)
         {
             return new CtpObject(value.ToString());
         }
-        public static explicit operator CtpObject(CtpBuffer value)
+        public static implicit operator CtpObject(CtpBuffer value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(CtpCommand value)
+        public static implicit operator CtpObject(CtpCommand value)
         {
             return new CtpObject(value);
         }
-        public static explicit operator CtpObject(byte[] value)
+        public static implicit operator CtpObject(byte[] value)
         {
             return new CtpObject(new CtpBuffer(value));
         }
-        public static explicit operator CtpObject(sbyte? value)
+        public static implicit operator CtpObject(sbyte? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(short? value)
+        public static implicit operator CtpObject(short? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(int? value)
+        public static implicit operator CtpObject(int? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(long? value)
+        public static implicit operator CtpObject(long? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(byte? value)
+        public static implicit operator CtpObject(byte? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(ushort? value)
+        public static implicit operator CtpObject(ushort? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(uint? value)
+        public static implicit operator CtpObject(uint? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(ulong? value)
+        public static implicit operator CtpObject(ulong? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(float? value)
+        public static implicit operator CtpObject(float? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(double? value)
+        public static implicit operator CtpObject(double? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(decimal? value)
+        public static implicit operator CtpObject(decimal? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(DateTime? value)
+        public static implicit operator CtpObject(DateTime? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(CtpTime? value)
+        public static implicit operator CtpObject(CtpTime? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(bool? value)
+        public static implicit operator CtpObject(bool? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(Guid? value)
+        public static implicit operator CtpObject(Guid? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
-        public static explicit operator CtpObject(char? value)
+        public static implicit operator CtpObject(char? value)
         {
             if (!value.HasValue)
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
 
-        public static explicit operator DBNull(CtpObject value)
+        public static implicit operator DBNull(CtpObject value)
         {
             if (value.IsNull)
                 return DBNull.Value;

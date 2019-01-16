@@ -9,7 +9,7 @@ namespace CTP
     [StructLayout(LayoutKind.Explicit)]
     public partial struct CtpObject : IEquatable<CtpObject>
     {
-        public static CtpObject Null => default(CtpObject);
+        public static readonly CtpObject Null = default(CtpObject);
 
         #region [ Members ]
 

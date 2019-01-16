@@ -15,44 +15,43 @@ namespace Sttp.Archive
     public class SttpFileWriter : IDisposable
     {
         private CtpFileStream m_stream;
-        private bool m_initializedDataStream;
 
         private BasicEncoder m_encoder;
+        private DefalteHelper m_comp;
 
         public SttpFileWriter(Stream stream, bool ownsStream)
         {
             m_stream = new CtpFileStream(stream, ownsStream);
             m_encoder = new BasicEncoder();
+            m_stream.Write(new CommandBeginDataStream(0, "Basic"));
+            m_stream.Write(new CommandBeginCompressionStream(1, "Deflate"));
+            m_comp = new DefalteHelper(new CommandBeginCompressionStream(1, "Deflate"));
         }
 
         public void ProducerMetadata(SttpProducerMetadata metadata)
         {
             if (m_encoder.Length > 0)
             {
-                m_stream.Write(new CtpRaw(m_encoder.ToArray(), 0));
+                WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
                 m_encoder.Clear(false);
             }
-            m_stream.Write(metadata);
+
+            WriteComp(metadata);
+        }
+
+        private void WriteComp(CtpCommand command)
+        {
+            m_stream.Write(m_comp.Deflate(command));
         }
 
         public void AddDataPoint(SttpDataPoint dataPoint)
         {
-            if (!m_initializedDataStream)
-            {
-                StartDataStream();
-            }
             m_encoder.AddDataPoint(dataPoint);
             if (m_encoder.Length > 1000)
             {
-                m_stream.Write(new CtpRaw(m_encoder.ToArray(), 0));
+                WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
                 m_encoder.Clear(false);
             }
-        }
-
-        private void StartDataStream()
-        {
-            m_initializedDataStream = true;
-            m_stream.Write(new CommandBeginDataStream(0, "Basic"));
         }
 
         public void Dispose()

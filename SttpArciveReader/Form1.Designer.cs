@@ -30,6 +30,7 @@
         {
             this.btnOpen = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.chkReadRaw = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,17 +55,29 @@
             this.dataGridView1.Size = new System.Drawing.Size(776, 397);
             this.dataGridView1.TabIndex = 1;
             // 
+            // chkReadRaw
+            // 
+            this.chkReadRaw.AutoSize = true;
+            this.chkReadRaw.Location = new System.Drawing.Point(93, 16);
+            this.chkReadRaw.Name = "chkReadRaw";
+            this.chkReadRaw.Size = new System.Drawing.Size(77, 17);
+            this.chkReadRaw.TabIndex = 2;
+            this.chkReadRaw.Text = "Read Raw";
+            this.chkReadRaw.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.chkReadRaw);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.btnOpen);
             this.Name = "Form1";
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -72,6 +85,7 @@
 
         private System.Windows.Forms.Button btnOpen;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.CheckBox chkReadRaw;
     }
 }
 

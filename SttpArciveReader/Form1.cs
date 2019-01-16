@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CTP.IO;
+using Sttp;
 
 namespace SttpArciveReader
 {
@@ -19,35 +20,92 @@ namespace SttpArciveReader
         {
             InitializeComponent();
 
-            typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance|BindingFlags.NonPublic).SetValue(dataGridView1, true);
+            typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(dataGridView1, true);
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
+        {
+
+            using (var dlg = new OpenFileDialog())
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    if (chkReadRaw.Checked)
+                    {
+                        NewMethod(dlg.FileName);
+                    }
+                    else
+                    {
+                        NewMethod2(dlg.FileName);
+
+                    }
+
+                }
+            }
+
+        }
+
+        private void NewMethod(string fileName)
         {
             DataTable dt = new DataTable();
             dt.Columns.Add("Command", typeof(string));
             dt.Columns.Add("Length", typeof(int));
             dt.Columns.Add("Record", typeof(string));
-            using (var dlg = new OpenFileDialog())
+
+            using (var fs = new FileStream(fileName, FileMode.Open))
+            using (var ctp = new CtpFileStream(fs, false))
             {
-                if (dlg.ShowDialog() == DialogResult.OK)
+                while (true)
                 {
-                    using (var fs = new FileStream(dlg.FileName, FileMode.Open))
-                    using (var ctp = new CtpFileStream(fs, false))
-                    {
-                        while (true)
-                        {
-                            var cmd = ctp.Read();
-                            if ((object) cmd == null)
-                                break;
-                            dt.Rows.Add(cmd.RootElement, cmd.Length, cmd);
-                        }
-                    }
-
-                    dataGridView1.DataSource = dt;
+                    var cmd = ctp.Read();
+                    if ((object)cmd == null)
+                        break;
+                    dt.Rows.Add(cmd.RootElement, cmd.Length, cmd);
                 }
-
             }
+
+            dataGridView1.DataSource = dt;
+        }
+
+        private void NewMethod2(string fileName)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Command", typeof(string));
+            dt.Columns.Add("Record", typeof(string));
+
+            using (var fs = new FileStream(fileName, FileMode.Open))
+            using (var ctp = new SttpFileReader(fs, false))
+            {
+                while (true)
+                {
+                    switch (ctp.Next())
+                    {
+                        case FileReaderItem.ProducerMetadata:
+                            var md = ctp.GetMetadata();
+                            dt.Rows.Add("Metadata", md.ToString());
+                            break;
+                        case FileReaderItem.DataPoint:
+                            var sb = new StringBuilder();
+                            var dp = new SttpDataPoint();
+                            int cnt = 0;
+                            while (ctp.ReadDataPoint(dp))
+                            {
+                                cnt++;
+                                sb.Append(dp.Value.AsString);
+                                sb.Append(" ");
+                            }
+                            sb.Insert(0, $"Cnt{cnt}: ");
+                            dt.Rows.Add("Points", sb.ToString());
+                            break;
+                        case FileReaderItem.EndOfStream:
+                            dataGridView1.DataSource = dt;
+                            return;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                }
+            }
+
         }
     }
 }

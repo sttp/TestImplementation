@@ -10,9 +10,6 @@ namespace Sttp
     {
         public static void Save(ByteWriter wr, CtpObject value)
         {
-            if (value == null)
-                value = CtpObject.Null;
-
             var typeCode = value.ValueTypeCode;
             switch (typeCode)
             {

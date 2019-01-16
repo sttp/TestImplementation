@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using CTP;
 using CTP.IO;
+using Sttp.Archive;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
 
@@ -21,8 +22,10 @@ namespace Sttp
         private BasicDecoder m_decoder;
         private CtpCommand m_nextCommand;
 
+        private CommandBeginCompressionStream m_compressionStream;
         private CommandBeginDataStream m_dataStream;
         private SttpProducerMetadata m_metadata;
+        private DefalteHelper m_comp;
 
         private Dictionary<CtpObject, SttpDataPointMetadata> m_metadataLookup;
 
@@ -50,9 +53,14 @@ namespace Sttp
             m_nextCommand = m_stream.Read();
             if ((object)m_nextCommand == null)
                 return FileReaderItem.EndOfStream;
+
+            TryAfterDecompress:
+
             if (m_nextCommand.IsRaw)
             {
                 if (m_dataStream == null)
+                    throw new Exception("Data stream is not defined for the specified channel.");
+                if (m_compressionStream == null)
                     throw new Exception("Data stream is not defined for the specified channel.");
 
                 var raw = (CtpRaw)m_nextCommand;
@@ -60,6 +68,13 @@ namespace Sttp
                 {
                     m_decoder.Load(raw.Payload, false);
                     return FileReaderItem.DataPoint;
+                }
+
+                if (raw.Channel == m_compressionStream.ChannelCode)
+                {
+                    m_nextCommand = m_comp.Inflate(raw);
+                    goto TryAfterDecompress;
+
                 }
                 throw new Exception("Data stream is not defined for the specified channel.");
             }
@@ -70,6 +85,16 @@ namespace Sttp
                 {
                     throw new Exception("Data stream encoding is not supported.");
                 }
+            }
+            else if (m_nextCommand.RootElement == "BeginCompressionStream")
+            {
+                m_compressionStream = (CommandBeginCompressionStream)m_nextCommand;
+                if (m_compressionStream.EncodingMechanism != "Deflate")
+                {
+                    throw new Exception("Data stream encoding is not supported.");
+                }
+                m_comp = new DefalteHelper(m_compressionStream);
+
             }
             else if (m_nextCommand.RootElement == "ProducerMetadata")
             {
