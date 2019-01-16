@@ -105,17 +105,13 @@ namespace Sttp.Services
                 int rowCount = 0;
 
                 var rowEncoder = new MetadataRowEncoder(columns);
-                CtpObjectMutable[] values = new CtpObjectMutable[columns.Count];
-                for (int x = 0; x < values.Length; x++)
-                {
-                    values[x] = new CtpObjectMutable();
-                }
+                CtpObject[] values = new CtpObject[columns.Count];
                 encoder.Send(new CommandBeginMetadataResponse(channelID, Guid.Empty, repository.RuntimeID, repository.VersionNumber, command.Table, columns));
                 foreach (var row in table.Rows)
                 {
                     for (int x = 0; x < values.Length; x++)
                     {
-                        values[x].SetValue(row.Fields[columnIndexes[x]]);
+                        values[x] = row.Fields[columnIndexes[x]];
                     }
                     rowEncoder.AddRow(values);
                     if (rowEncoder.Size > 30000)

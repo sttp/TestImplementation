@@ -35,7 +35,7 @@ namespace CTP
         public CtpCommandReader(byte[] data, int offset)
         {
             m_stream = new CtpCommandBitReader(data, offset, data.Length - offset);
-            Value = new CtpObjectMutable();
+            Value = CtpObject.Null;
             NodeType = CtpCommandNodeType.StartOfCommand;
             m_rootElement = m_stream.ReadCommandKeyword();
             int elementCount = (int)m_stream.ReadBits16();
@@ -77,7 +77,7 @@ namespace CTP
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
         /// contents, be sure to call <see cref="CtpObject.Clone"/>
         /// </summary>
-        public CtpObjectMutable Value { get; private set; }
+        public CtpObject Value { get; private set; }
 
         /// <summary>
         /// The type of the current node. To Advance the nodes call <see cref="Read"/>
@@ -115,40 +115,40 @@ namespace CTP
                 switch (header)
                 {
                     case CtpCommandHeader.ValueNull:
-                        Value.SetNull();
+                        Value = CtpObject.Null;
                         break;
                     case CtpCommandHeader.ValueInt64:
-                        Value.SetValue((long)m_stream.Read7BitInt());
+                        Value = (CtpObject)(long)m_stream.Read7BitInt();
                         break;
                     case CtpCommandHeader.ValueInvertedInt64:
-                        Value.SetValue((long)~m_stream.Read7BitInt());
+                        Value = (CtpObject)(long)~m_stream.Read7BitInt();
                         break;
                     case CtpCommandHeader.ValueSingle:
-                        Value.SetValue(m_stream.ReadSingle());
+                        Value = (CtpObject)m_stream.ReadSingle();
                         break;
                     case CtpCommandHeader.ValueDouble:
-                        Value.SetValue(m_stream.ReadDouble());
+                        Value = (CtpObject)m_stream.ReadDouble();
                         break;
                     case CtpCommandHeader.ValueCtpTime:
-                        Value.SetValue(m_stream.ReadTime());
+                        Value = (CtpObject)m_stream.ReadTime();
                         break;
                     case CtpCommandHeader.ValueBooleanTrue:
-                        Value.SetValue(true);
+                        Value = (CtpObject)true;
                         break;
                     case CtpCommandHeader.ValueBooleanFalse:
-                        Value.SetValue(false);
+                        Value = (CtpObject)false;
                         break;
                     case CtpCommandHeader.ValueGuid:
-                        Value.SetValue(m_stream.ReadGuid());
+                        Value = (CtpObject)m_stream.ReadGuid();
                         break;
                     case CtpCommandHeader.ValueString:
-                        Value.SetValue(m_stream.ReadString());
+                        Value = (CtpObject)m_stream.ReadString();
                         break;
                     case CtpCommandHeader.ValueCtpBuffer:
-                        Value.SetValue(m_stream.ReadBuffer());
+                        Value = (CtpObject)m_stream.ReadBuffer();
                         break;
                     case CtpCommandHeader.ValueCtpCommand:
-                        Value.SetValue(m_stream.ReadCommand());
+                        Value = (CtpObject)m_stream.ReadCommand();
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -157,7 +157,7 @@ namespace CTP
             else if (header == CtpCommandHeader.StartElement)
             {
                 NodeType = CtpCommandNodeType.StartElement;
-                Value.SetNull();
+                Value = CtpObject.Null;
                 ElementName = m_elementNamesList[code >> 4];
                 ValueName = null;
                 m_elementStack.Push(ElementName);

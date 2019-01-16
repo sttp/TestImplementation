@@ -5,7 +5,7 @@ namespace CTP
     /// <summary>
     /// This class contains the fundamental value for STTP.
     /// </summary>
-    public partial class CtpObject
+    public partial struct CtpObject
     {
         public static explicit operator CtpObject(DBNull value)
         {

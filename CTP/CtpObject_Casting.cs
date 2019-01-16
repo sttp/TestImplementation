@@ -2,7 +2,7 @@
 
 namespace CTP
 {
-    public partial class CtpObject
+    public partial struct CtpObject
     {
         public string ToTypeString
         {

@@ -24,7 +24,7 @@ namespace Sttp
         /// <summary>
         /// The value for the data point.
         /// </summary>
-        public readonly CtpObjectMutable Value = new CtpObjectMutable();
+        public CtpObject Value;
 
         /// <summary>
         /// A quality field.
@@ -42,7 +42,7 @@ namespace Sttp
         /// 
         /// Note: Since this field is considered ancillary assigning something other than null will introduce a penalty that may be considerable in some circumstances.
         /// </summary>
-        public readonly CtpObjectMutable ExtendedData = new CtpObjectMutable();
+        public CtpObject ExtendedData;
 
         public override string ToString()
         {

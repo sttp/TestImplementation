@@ -15,7 +15,7 @@ namespace CTP.Serialization
 
         public override void Save(uint obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
         {
-            writer.WriteValue(recordName, obj);
+            writer.WriteValue(recordName, (CtpObject)obj);
         }
     }
 
@@ -31,7 +31,7 @@ namespace CTP.Serialization
 
         public override void Save(int obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
         {
-            writer.WriteValue(recordName, obj);
+            writer.WriteValue(recordName, (CtpObject)obj);
         }
     }
 
@@ -47,7 +47,7 @@ namespace CTP.Serialization
 
         public override void Save(float obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
         {
-            writer.WriteValue(recordName, obj);
+            writer.WriteValue(recordName, (CtpObject)obj);
         }
     }
 }

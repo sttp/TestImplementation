@@ -65,11 +65,11 @@ namespace Sttp.Codec.DataPoint
 
             if (hasExtendedData)
             {
-                CtpValueEncodingNative.Load(m_stream, dataPoint.ExtendedData);
+                dataPoint.ExtendedData = CtpValueEncodingNative.Load(m_stream);
             }
             else
             {
-                dataPoint.ExtendedData.SetNull();
+                dataPoint.ExtendedData = CtpObject.Null;
             }
 
             if (qualityChanged)
@@ -90,7 +90,7 @@ namespace Sttp.Codec.DataPoint
                 m_lastValueCode = (CtpTypeCode)m_stream.ReadBits4();
             }
 
-            CtpValueEncodingWithoutType.Load(m_stream, m_lastValueCode, dataPoint.Value);
+            dataPoint.Value = CtpValueEncodingWithoutType.Load(m_stream, m_lastValueCode);
 
             if (dataPoint.Metadata == null)
             {

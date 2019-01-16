@@ -19,7 +19,7 @@ namespace Sttp
         /// The unique identifier for this Producer.
         /// </summary>
         [CommandField()]
-        public CtpObject ProducerID { get; private set; }
+        public CtpObject ProducerID { get; set; }
 
         /// <summary>
         /// A device record that has child records.
@@ -37,7 +37,7 @@ namespace Sttp
         {
             Attributes = new List<AttributeValues>();
             DataPoints = new List<SttpDataPointMetadata>();
-            ProducerID = new CtpObject();
+            ProducerID = CtpObject.Null;
         }
 
         protected override void AfterLoad()

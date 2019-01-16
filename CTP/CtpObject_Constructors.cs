@@ -6,214 +6,248 @@ namespace CTP
     /// <summary>
     /// This class contains the fundamental value for STTP.
     /// </summary>
-    public partial class CtpObject
+    public partial struct CtpObject
     {
-        public CtpObject()
+        private CtpObject(DBNull value)
+          : this()
         {
-            SetNull();
         }
 
-        public CtpObject(DBNull value)
-        {
-            SetValue(value);
-        }
-
-        public CtpObject(sbyte value)
+        private CtpObject(sbyte value)
+          : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(short value)
+        private CtpObject(short value)
+          : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(int value)
+        private CtpObject(int value)
+          : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(long value)
+        private CtpObject(long value)
+          : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(byte value)
+        private CtpObject(byte value)
+          : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(ushort value)
+        private CtpObject(ushort value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(uint value)
+        private CtpObject(uint value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(ulong value)
+        private CtpObject(ulong value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(float value)
+        private CtpObject(float value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(double value)
+        private CtpObject(double value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(decimal value)
+        private CtpObject(decimal value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(DateTime value)
+        private CtpObject(DateTime value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(CtpTime value)
+        private CtpObject(CtpTime value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(bool value)
+        private CtpObject(bool value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(Guid value)
+        private CtpObject(Guid value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(char value)
+        private CtpObject(char value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(char[] value)
+        private CtpObject(char[] value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(string value)
+        private CtpObject(string value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(CtpBuffer value)
+        private CtpObject(CtpBuffer value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(CtpCommand value)
+        private CtpObject(CtpCommand value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(byte[] value)
+        private CtpObject(byte[] value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(sbyte? value)
+        private CtpObject(sbyte? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(short? value)
+        private CtpObject(short? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(int? value)
+        private CtpObject(int? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(long? value)
+        private CtpObject(long? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(byte? value)
+        private CtpObject(byte? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(ushort? value)
+        private CtpObject(ushort? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(uint? value)
+        private CtpObject(uint? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(ulong? value)
+        private CtpObject(ulong? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(float? value)
+        private CtpObject(float? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(double? value)
+        private CtpObject(double? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(decimal? value)
+        private CtpObject(decimal? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(DateTime? value)
+        private CtpObject(DateTime? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(CtpTime? value)
+        private CtpObject(CtpTime? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(bool? value)
+        private CtpObject(bool? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(Guid? value)
+        private CtpObject(Guid? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(char? value)
+        private CtpObject(char? value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(object value)
+        private CtpObject(object value)
+        : this()
         {
             SetValue(value);
         }
 
-        public CtpObject(CtpObject value)
+        private CtpObject(CtpObject value)
+        : this()
         {
             SetValue(value);
         }
 
-        
+
 
     }
 }

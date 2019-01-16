@@ -18,7 +18,7 @@ namespace Sttp.Codec
             m_stream.SetBuffer(data, 0, data.Length);
         }
 
-        public bool Read(CtpObjectMutable[] row)
+        public bool Read(CtpObject[] row)
         {
             if (row.Length != m_response.Columns.Count)
                 throw new ArgumentException("The number of elements in array does not match the number of columns in the response", nameof(row));
@@ -31,7 +31,7 @@ namespace Sttp.Codec
 
             for (int x = 0; x < row.Length; x++)
             {
-                CtpValueEncodingNative.Load(m_stream, row[x]);
+                row[x] = CtpValueEncodingNative.Load(m_stream);
             }
 
             return true;

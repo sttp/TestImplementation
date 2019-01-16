@@ -22,7 +22,7 @@ namespace Sttp.Codec
 
         public int Size => m_stream.Length;
 
-        public void AddRow(CtpObjectMutable[] row)
+        public void AddRow(CtpObject[] row)
         {
             if (row.Length != m_columns.Count)
                 throw new ArgumentException("The number of elements in array does not match the number of columns in the response", nameof(row));

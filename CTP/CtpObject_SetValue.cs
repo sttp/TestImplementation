@@ -5,7 +5,7 @@ namespace CTP
     /// <summary>
     /// This class contains the fundamental value for CTP.
     /// </summary>
-    public partial class CtpObject
+    public partial struct CtpObject
     {
         private void SetNull()
         {
