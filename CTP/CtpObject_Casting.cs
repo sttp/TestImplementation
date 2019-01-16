@@ -70,7 +70,104 @@ namespace CTP
 
         public static CtpObject FromObject(object value)
         {
-            return new CtpObject(value);
+            if (value == null || value == DBNull.Value)
+            {
+                return CtpObject.Null;
+            }
+
+            var type = value.GetType();
+            if (type == typeof(sbyte))
+            {
+                return (CtpObject)((sbyte)value);
+            }
+            else if (type == typeof(short))
+            {
+                return (CtpObject)((short)value);
+            }
+            else if (type == typeof(int))
+            {
+                return (CtpObject)((int)value);
+            }
+            else if (type == typeof(long))
+            {
+                return (CtpObject)((long)value);
+            }
+            else if (type == typeof(byte))
+            {
+                return (CtpObject)((byte)value);
+            }
+            else if (type == typeof(ushort))
+            {
+                return (CtpObject)((ushort)value);
+            }
+            else if (type == typeof(uint))
+            {
+                return (CtpObject)((uint)value);
+            }
+            else if (type == typeof(ulong))
+            {
+                return (CtpObject)((ulong)value);
+            }
+            else if (type == typeof(float))
+            {
+                return (CtpObject)((float)value);
+            }
+            else if (type == typeof(double))
+            {
+                return (CtpObject)((double)value);
+            }
+            else if (type == typeof(decimal))
+            {
+                return (CtpObject)((decimal)value);
+            }
+            else if (type == typeof(DateTime))
+            {
+                return (CtpObject)((DateTime)value);
+            }
+            else if (type == typeof(CtpTime))
+            {
+                return (CtpObject)((CtpTime)value);
+            }
+            else if (type == typeof(bool))
+            {
+                return (CtpObject)((bool)value);
+            }
+            else if (type == typeof(Guid))
+            {
+                return (CtpObject)((Guid)value);
+            }
+            else if (type == typeof(char))
+            {
+                return (CtpObject)((char)value);
+            }
+            else if (type == typeof(char[]))
+            {
+                return (CtpObject)((char[])value);
+            }
+            else if (type == typeof(string))
+            {
+                return (CtpObject)((string)value);
+            }
+            else if (type == typeof(CtpBuffer))
+            {
+                return (CtpObject)((CtpBuffer)value);
+            }
+            else if (type == typeof(CtpCommand))
+            {
+                return (CtpObject)((CtpCommand)value);
+            }
+            else if (type == typeof(byte[]))
+            {
+                return (CtpObject)((byte[])value);
+            }
+            else if (value is CtpObject)
+            {
+                return (CtpObject)((CtpObject)value);
+            }
+            else
+            {
+                throw new NotSupportedException("Type is not a supported CtpValue type: " + type.ToString());
+            }
         }
 
         public DBNull AsDBNull

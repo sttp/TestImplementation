@@ -14,29 +14,23 @@ namespace CTP
         #region [ Members ]
 
         [FieldOffset(0)]
-        private long m_valueInt64;
+        private readonly long m_valueInt64;
         [FieldOffset(0)]
-        private double m_valueDouble;
-
+        private readonly double m_valueDouble;
         [FieldOffset(0)]
-        private float m_valueSingle;
+        private readonly float m_valueSingle;
         [FieldOffset(0)]
-        private bool m_valueBoolean;
+        private readonly bool m_valueBoolean;
         [FieldOffset(0)]
-        private CtpTime m_valueCtpTime;
+        private readonly CtpTime m_valueCtpTime;
         [FieldOffset(0)]
-        private Guid m_valueGuid;
+        private readonly Guid m_valueGuid;
 
         [FieldOffset(16)]
-        private object m_valueObject;
+        private readonly object m_valueObject;
 
         [FieldOffset(24)]
-        private CtpTypeCode m_valueTypeCode;
-
-        [FieldOffset(0)]
-        private long m_raw0;
-        [FieldOffset(8)]
-        private long m_raw1;
+        private readonly CtpTypeCode m_valueTypeCode;
 
         #endregion
 

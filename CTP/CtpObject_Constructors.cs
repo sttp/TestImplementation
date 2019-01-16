@@ -8,246 +8,68 @@ namespace CTP
     /// </summary>
     public partial struct CtpObject
     {
-        private CtpObject(DBNull value)
-          : this()
-        {
-        }
-
-        private CtpObject(sbyte value)
-          : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(short value)
-          : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(int value)
-          : this()
-        {
-            SetValue(value);
-        }
-
         private CtpObject(long value)
           : this()
         {
-            SetValue(value);
-        }
-
-        private CtpObject(byte value)
-          : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(ushort value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(uint value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(ulong value)
-        : this()
-        {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.Int64;
+            m_valueInt64 = value;
         }
 
         private CtpObject(float value)
-        : this()
+          : this()
         {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.Single;
+            m_valueSingle = value;
         }
 
         private CtpObject(double value)
-        : this()
+          : this()
         {
-            SetValue(value);
-        }
-
-        private CtpObject(decimal value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(DateTime value)
-        : this()
-        {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.Double;
+            m_valueDouble = value;
         }
 
         private CtpObject(CtpTime value)
-        : this()
+          : this()
         {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.CtpTime;
+            m_valueCtpTime = value;
         }
 
         private CtpObject(bool value)
-        : this()
+          : this()
         {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.Boolean;
+            m_valueBoolean = value;
         }
 
         private CtpObject(Guid value)
-        : this()
+          : this()
         {
-            SetValue(value);
-        }
-
-        private CtpObject(char value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(char[] value)
-        : this()
-        {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.Guid;
+            m_valueGuid = value;
         }
 
         private CtpObject(string value)
-        : this()
+          : this()
         {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.String;
+            m_valueObject = value;
         }
 
         private CtpObject(CtpBuffer value)
-        : this()
+          : this()
         {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.CtpBuffer;
+            m_valueObject = value;
         }
 
         private CtpObject(CtpCommand value)
-        : this()
+          : this()
         {
-            SetValue(value);
+            m_valueTypeCode = CtpTypeCode.CtpCommand;
+            m_valueObject = value;
         }
-
-        private CtpObject(byte[] value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(sbyte? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(short? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(int? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(long? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(byte? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(ushort? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(uint? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(ulong? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(float? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(double? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(decimal? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(DateTime? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(CtpTime? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(bool? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(Guid? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(char? value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(object value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-        private CtpObject(CtpObject value)
-        : this()
-        {
-            SetValue(value);
-        }
-
-
 
     }
 }
