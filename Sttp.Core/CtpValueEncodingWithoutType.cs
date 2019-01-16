@@ -8,6 +8,48 @@ namespace Sttp
 {
     public static class CtpValueEncodingWithoutType
     {
+        public static void Save(ByteWriter wr, CtpObjectMutable value)
+        {
+            if (value == null)
+                value = CtpObjectMutable.Null;
+
+            var typeCode = value.ValueTypeCode;
+            switch (typeCode)
+            {
+                case CtpTypeCode.Null:
+                    break;
+                case CtpTypeCode.Int64:
+                    wr.Write8BitSegments((ulong)PackSign(value.AsInt64));
+                    break;
+                case CtpTypeCode.Single:
+                    wr.Write(value.AsSingle);
+                    break;
+                case CtpTypeCode.Double:
+                    wr.Write(value.AsDouble);
+                    break;
+                case CtpTypeCode.CtpTime:
+                    wr.Write(value.AsCtpTime);
+                    break;
+                case CtpTypeCode.Boolean:
+                    wr.WriteBits1(value.AsBoolean);
+                    break;
+                case CtpTypeCode.Guid:
+                    wr.Write(value.AsGuid);
+                    break;
+                case CtpTypeCode.String:
+                    wr.Write(value.AsString);
+                    break;
+                case CtpTypeCode.CtpBuffer:
+                    wr.Write(value.AsCtpBuffer);
+                    break;
+                case CtpTypeCode.CtpCommand:
+                    wr.Write(value.AsCtpCommand);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         public static void Save(ByteWriter wr, CtpObject value)
         {
             if (value == null)
@@ -79,7 +121,7 @@ namespace Sttp
             }
         }
 
-        public static void Load(ByteReader rd, CtpTypeCode value, CtpObject output)
+        public static void Load(ByteReader rd, CtpTypeCode value, CtpObjectMutable output)
         {
             switch (value)
             {

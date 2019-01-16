@@ -94,8 +94,7 @@ namespace Sttp.Codec.DataPoint
 
             if (dataPoint.Metadata == null)
             {
-                var obj = new CtpObject();
-                CtpValueEncodingNative.Load(m_stream, obj);
+                var obj = CtpValueEncodingNative.Load(m_stream);
                 dataPoint.Metadata = m_lookup(obj);
                 m_channelMap.Assign(dataPoint.Metadata, m_lastChannelID);
             }

@@ -37,7 +37,7 @@ namespace Sttp
         /// The unique identifier for this PointID. This will typically be a GUID, but may also be a string or integer.
         /// </summary>
         [CommandField()]
-        public CtpObject DataPointID { get; private set; }
+        public CtpObject DataPointID { get; set; }
 
         /// <summary>
         /// The list of user defined Key/Value pairs of metadata associated with this data point.

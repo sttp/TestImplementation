@@ -68,7 +68,7 @@ namespace CTP
         /// </summary>
         /// <param name="name"></param>
         /// <param name="value"></param>
-        protected virtual void MissingValue(string name, CtpObject value)
+        protected virtual void MissingValue(string name, CtpObjectMutable value)
         {
             throw new NotSupportedException();
         }
@@ -102,7 +102,7 @@ namespace CTP
         /// <summary>
         /// Internal Method Called during the loading process.
         /// </summary>
-        internal void OnMissingValue(string name, CtpObject value)
+        internal void OnMissingValue(string name, CtpObjectMutable value)
         {
             MissingValue(name, value);
         }

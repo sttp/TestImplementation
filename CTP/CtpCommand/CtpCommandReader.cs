@@ -35,7 +35,7 @@ namespace CTP
         public CtpCommandReader(byte[] data, int offset)
         {
             m_stream = new CtpCommandBitReader(data, offset, data.Length - offset);
-            Value = new CtpObject();
+            Value = new CtpObjectMutable();
             NodeType = CtpCommandNodeType.StartOfCommand;
             m_rootElement = m_stream.ReadCommandKeyword();
             int elementCount = (int)m_stream.ReadBits16();
@@ -77,7 +77,7 @@ namespace CTP
         /// Note, this is a mutable value and it's contents will change with each iteration. To keep a copy of the 
         /// contents, be sure to call <see cref="CtpObject.Clone"/>
         /// </summary>
-        public CtpObject Value { get; private set; }
+        public CtpObjectMutable Value { get; private set; }
 
         /// <summary>
         /// The type of the current node. To Advance the nodes call <see cref="Read"/>

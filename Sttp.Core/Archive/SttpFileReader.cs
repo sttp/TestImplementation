@@ -40,7 +40,7 @@ namespace Sttp
                 return value;
             }
             var dp = new SttpDataPointMetadata(null);
-            dp.DataPointID.SetValue(dataPointID);
+            dp.DataPointID = dataPointID;
             return dp;
         }
 

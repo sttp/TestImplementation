@@ -8,6 +8,48 @@ namespace Sttp
 {
     public static class CtpValueEncodingNative
     {
+        public static void Save(ByteWriter wr, CtpObjectMutable value)
+        {
+            if (value == null)
+                value = CtpObjectMutable.Null;
+
+            var typeCode = value.ValueTypeCode;
+            wr.WriteBits4((byte)typeCode);
+            switch (typeCode)
+            {
+                case CtpTypeCode.Null:
+                    break;
+                case CtpTypeCode.Int64:
+                    wr.Write8BitSegments((ulong)PackSign(value.AsInt64));
+                    break;
+                case CtpTypeCode.Single:
+                    wr.Write(value.AsSingle);
+                    break;
+                case CtpTypeCode.Double:
+                    wr.Write(value.AsDouble);
+                    break;
+                case CtpTypeCode.CtpTime:
+                    wr.Write(value.AsCtpTime);
+                    break;
+                case CtpTypeCode.Boolean:
+                    wr.WriteBits1(value.AsBoolean);
+                    break;
+                case CtpTypeCode.Guid:
+                    wr.Write(value.AsGuid);
+                    break;
+                case CtpTypeCode.String:
+                    wr.Write(value.AsString);
+                    break;
+                case CtpTypeCode.CtpBuffer:
+                    wr.Write(value.AsCtpBuffer);
+                    break;
+                case CtpTypeCode.CtpCommand:
+                    wr.Write(value.AsCtpCommand);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
         public static void Save(ByteWriter wr, CtpObject value)
         {
             if (value == null)
@@ -80,8 +122,8 @@ namespace Sttp
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        public static void Load(ByteReader rd, CtpObject output)
+      
+        public static void Load(ByteReader rd, CtpObjectMutable output)
         {
             CtpTypeCode value = (CtpTypeCode)rd.ReadBits4();
             switch (value)
@@ -121,7 +163,6 @@ namespace Sttp
             }
         }
 
-
         private static long PackSign(long value)
         {
             //since negative signed values have leading 1's and positive have leading 0's, 
@@ -131,6 +172,7 @@ namespace Sttp
                 return value << 1;
             return (~value << 1) + 1;
         }
+
         private static long UnPackSign(long value)
         {
             if ((value & 1) == 0) //If it was positive

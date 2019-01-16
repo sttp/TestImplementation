@@ -7,6 +7,37 @@ namespace CTP
     /// </summary>
     public partial class CtpObjectMutable
     {
+        public static explicit operator CtpObject(CtpObjectMutable value)
+        {
+            if ((object)value == null)
+                return CtpObject.Null;
+
+            switch (value.ValueTypeCode)
+            {
+                case CtpTypeCode.Null:
+                    return CtpObject.Null;
+                case CtpTypeCode.Int64:
+                    return new CtpObject(value.IsInt64);
+                case CtpTypeCode.Single:
+                    return new CtpObject(value.IsSingle);
+                case CtpTypeCode.Double:
+                    return new CtpObject(value.IsDouble);
+                case CtpTypeCode.CtpTime:
+                    return new CtpObject(value.IsCtpTime);
+                case CtpTypeCode.Boolean:
+                    return new CtpObject(value.IsBoolean);
+                case CtpTypeCode.Guid:
+                    return new CtpObject(value.IsGuid);
+                case CtpTypeCode.String:
+                    return new CtpObject(value.IsString);
+                case CtpTypeCode.CtpBuffer:
+                    return new CtpObject(value.IsCtpBuffer);
+                case CtpTypeCode.CtpCommand:
+                    return new CtpObject(value.IsCtpCommand);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
         public static explicit operator CtpObjectMutable(DBNull value)
         {
             return new CtpObjectMutable(value);
@@ -230,7 +261,7 @@ namespace CTP
         {
             return value.AsChar;
         }
-        public static explicit operator char[](CtpObjectMutable value)
+        public static explicit operator char[] (CtpObjectMutable value)
         {
             if ((object)value == null || value.IsNull)
                 return null;

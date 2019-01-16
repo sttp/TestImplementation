@@ -7,45 +7,45 @@ namespace CTP
     /// </summary>
     public partial class CtpObject
     {
-        public void SetNull()
+        private void SetNull()
         {
             m_valueTypeCode = CtpTypeCode.Null;
         }
-        public void SetValue(DBNull value)
+        private void SetValue(DBNull value)
         {
             SetNull();
         }
-        public void SetValue(sbyte value)
+        private void SetValue(sbyte value)
         {
             SetValue((long)value);
         }
-        public void SetValue(short value)
+        private void SetValue(short value)
         {
             SetValue((long)value);
         }
-        public void SetValue(int value)
+        private void SetValue(int value)
         {
             SetValue((long)value);
         }
-        public void SetValue(long value)
+        private void SetValue(long value)
         {
             m_valueTypeCode = CtpTypeCode.Int64;
             m_valueInt64 = value;
         }
-        public void SetValue(byte value)
+        private void SetValue(byte value)
         {
             SetValue((ulong)value);
         }
 
-        public void SetValue(ushort value)
+        private void SetValue(ushort value)
         {
             SetValue((ulong)value);
         }
-        public void SetValue(uint value)
+        private void SetValue(uint value)
         {
             SetValue((ulong)value);
         }
-        public void SetValue(ulong value)
+        private void SetValue(ulong value)
         {
             if (value > long.MaxValue)
             {
@@ -56,17 +56,17 @@ namespace CTP
                 SetValue((long)value);
             }
         }
-        public void SetValue(float value)
+        private void SetValue(float value)
         {
             m_valueTypeCode = CtpTypeCode.Single;
             m_valueSingle = value;
         }
-        public void SetValue(double value)
+        private void SetValue(double value)
         {
             m_valueTypeCode = CtpTypeCode.Double;
             m_valueDouble = value;
         }
-        public void SetValue(decimal value)
+        private void SetValue(decimal value)
         {
             var d = Decimal.Truncate(value);
             if (d == value)
@@ -80,34 +80,34 @@ namespace CTP
             }
             SetValue((double)value);
         }
-        public void SetValue(DateTime value)
+        private void SetValue(DateTime value)
         {
             SetValue(new CtpTime(value));
         }
-        public void SetValue(CtpTime value)
+        private void SetValue(CtpTime value)
         {
             m_valueTypeCode = CtpTypeCode.CtpTime;
             m_valueCtpTime = value;
         }
-        public void SetValue(bool value)
+        private void SetValue(bool value)
         {
             m_valueTypeCode = CtpTypeCode.Boolean;
             m_valueBoolean = value;
         }
-        public void SetValue(Guid value)
+        private void SetValue(Guid value)
         {
             m_valueTypeCode = CtpTypeCode.Guid;
             m_valueGuid = value;
         }
-        public void SetValue(char value)
+        private void SetValue(char value)
         {
             SetValue(value.ToString());
         }
-        public void SetValue(char[] value)
+        private void SetValue(char[] value)
         {
             SetValue(value.ToString());
         }
-        public void SetValue(string value)
+        private void SetValue(string value)
         {
             if (value == null)
             {
@@ -117,7 +117,7 @@ namespace CTP
             m_valueTypeCode = CtpTypeCode.String;
             m_valueObject = value;
         }
-        public void SetValue(CtpBuffer value)
+        private void SetValue(CtpBuffer value)
         {
             if (value == null)
             {
@@ -127,7 +127,7 @@ namespace CTP
             m_valueTypeCode = CtpTypeCode.CtpBuffer;
             m_valueObject = value;
         }
-        public void SetValue(CtpCommand value)
+        private void SetValue(CtpCommand value)
         {
             if (value == null)
             {
@@ -138,7 +138,7 @@ namespace CTP
             m_valueObject = value;
         }
 
-        public void SetValue(byte[] value)
+        private void SetValue(byte[] value)
         {
             if (value == null)
             {
@@ -148,112 +148,112 @@ namespace CTP
             SetValue(new CtpBuffer(value));
         }
 
-        public void SetValue(sbyte? value)
+        private void SetValue(sbyte? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(short? value)
+        private void SetValue(short? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(int? value)
+        private void SetValue(int? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(long? value)
+        private void SetValue(long? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(byte? value)
+        private void SetValue(byte? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(ushort? value)
+        private void SetValue(ushort? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(uint? value)
+        private void SetValue(uint? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(ulong? value)
+        private void SetValue(ulong? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(float? value)
+        private void SetValue(float? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(double? value)
+        private void SetValue(double? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(decimal? value)
+        private void SetValue(decimal? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(DateTime? value)
+        private void SetValue(DateTime? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(CtpTime? value)
+        private void SetValue(CtpTime? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(bool? value)
+        private void SetValue(bool? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(Guid? value)
+        private void SetValue(Guid? value)
         {
             if (!value.HasValue)
                 SetNull();
             else
                 SetValue(value.Value);
         }
-        public void SetValue(char? value)
+        private void SetValue(char? value)
         {
             if (!value.HasValue)
                 SetNull();
@@ -261,7 +261,7 @@ namespace CTP
                 SetValue(value.Value);
         }
 
-        public void SetValue(object value)
+        private void SetValue(object value)
         {
             if (value == null || value == DBNull.Value)
             {
@@ -364,7 +364,7 @@ namespace CTP
             }
         }
 
-        public void SetValue(CtpObject value)
+        private void SetValue(CtpObject value)
         {
             m_raw0 = value.m_raw0;
             m_raw1 = value.m_raw1;

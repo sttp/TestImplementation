@@ -52,7 +52,7 @@ namespace CTP
         /// <summary>
         /// A temporary value so this class can support setting from an object type.
         /// </summary>
-        private CtpObject m_tmpValue;
+        private CtpObjectMutable m_tmpValue;
         private int m_prefixLength;
         private CtpCommandKeyword m_rootElement;
 
@@ -63,7 +63,7 @@ namespace CTP
         {
             //2 byte header, 2 byte for ElementNamesCount, 2 byte for ValueNamesCount
             m_prefixLength = 6;
-            m_tmpValue = new CtpObject();
+            m_tmpValue = new CtpObjectMutable();
             m_elementNamesLookup = new RuntimeMapping();
             m_valueNamesLookup = new RuntimeMapping();
             m_elementNames = new List<CtpCommandKeyword>();
