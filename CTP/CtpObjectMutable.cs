@@ -7,9 +7,9 @@ namespace CTP
     /// This class contains the fundamental value for CTP.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public partial class CtpObject : IEquatable<CtpObject>
+    public partial class CtpObjectMutable : IEquatable<CtpObjectMutable>
     {
-        public static CtpObject Null => new CtpObject();
+        public static CtpObjectMutable Null => new CtpObjectMutable();
 
         #region [ Members ]
 
@@ -161,7 +161,7 @@ namespace CTP
             return ToTypeString;
         }
 
-        public bool Equals(CtpObject other)
+        public bool Equals(CtpObjectMutable other)
         {
             if (ReferenceEquals(null, other))
                 return false;
@@ -259,7 +259,7 @@ namespace CTP
             return Equals((CtpObject)obj);
         }
 
-        public static bool operator ==(CtpObject a, CtpObject b)
+        public static bool operator ==(CtpObjectMutable a, CtpObjectMutable b)
         {
             if (ReferenceEquals(a, b))
                 return true;
@@ -270,12 +270,10 @@ namespace CTP
             return a.Equals(b);
         }
 
-        public static bool operator !=(CtpObject a, CtpObject b)
+        public static bool operator !=(CtpObjectMutable a, CtpObjectMutable b)
         {
             return !(a == b);
         }
-
-
 
         #endregion
 

@@ -3,25 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CTP;
 
 namespace Sttp.Codec.DataPoint
 {
     public class MetadataChannelMapEncoder
     {
         private Dictionary<int, int> RuntimeToChannelMapping = new Dictionary<int, int>();
+        private Dictionary<CtpObject, int> RuntimeToChannelMapping2 = new Dictionary<CtpObject, int>();
         private List<SttpDataPointMetadata> ChannelMapping = new List<SttpDataPointMetadata>();
 
         public int GetChannelID(SttpDataPointMetadata metadata, out bool isNew)
         {
-            if (!RuntimeToChannelMapping.TryGetValue(metadata.RuntimeID, out var channelID))
+            int channelID;
+            if (metadata.RuntimeID.HasValue)
             {
-                channelID = ChannelMapping.Count;
-                ChannelMapping.Add(metadata);
-                RuntimeToChannelMapping.Add(metadata.RuntimeID, channelID);
-                isNew = true;
-                return channelID;
+                if (!RuntimeToChannelMapping.TryGetValue(metadata.RuntimeID.Value, out channelID))
+                {
+                    channelID = ChannelMapping.Count;
+                    ChannelMapping.Add(metadata);
+                    RuntimeToChannelMapping.Add(metadata.RuntimeID.Value, channelID);
+                    isNew = true;
+                    return channelID;
+                }
             }
-
+            else
+            {
+                if (!RuntimeToChannelMapping2.TryGetValue(metadata.DataPointID, out channelID))
+                {
+                    channelID = ChannelMapping.Count;
+                    ChannelMapping.Add(metadata);
+                    RuntimeToChannelMapping2.Add(metadata.DataPointID.Clone(), channelID);
+                    isNew = true;
+                    return channelID;
+                }
+            }
             isNew = false;
             return channelID;
         }

@@ -8,7 +8,8 @@ using CTP;
 namespace Sttp
 {
     /// <summary>
-    /// The smallest unit of metadata exchange that contains a list of produced data points
+    /// The smallest unit of metadata exchange that contains a list of produced data points.
+    /// This is likely an individual equipment station or RTU.
     /// </summary>
     [CommandName("ProducerMetadata")]
     public class SttpProducerMetadata
@@ -18,24 +19,25 @@ namespace Sttp
         /// The unique identifier for this Producer.
         /// </summary>
         [CommandField()]
-        public CtpObject ProducerID { get; set; }
+        public CtpObject ProducerID { get; private set; }
 
         /// <summary>
         /// A device record that has child records.
         /// </summary>
         [CommandField()]
-        public List<AttributeValues> Attributes { get; set; }
+        public List<AttributeValues> Attributes { get; private set; }
 
         /// <summary>
         /// All of the Measurements associated with a specific device.
         /// </summary>
         [CommandField()]
-        public List<SttpDataPointMetadata> DataPoints { get; set; }
+        public List<SttpDataPointMetadata> DataPoints { get; private set; }
 
         public SttpProducerMetadata()
         {
             Attributes = new List<AttributeValues>();
             DataPoints = new List<SttpDataPointMetadata>();
+            ProducerID = new CtpObject();
         }
 
         protected override void AfterLoad()

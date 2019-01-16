@@ -12,39 +12,44 @@ namespace Sttp
         : CommandObject<SttpDataPointMetadata>
     {
         /// <summary>
-        /// The owner of this data point.
+        /// The owner of this data point. This is likely an individual equipment station or RTU.
+        /// This field may be null.
         /// </summary>
         public SttpProducerMetadata Producer { get; private set; }
-      
+
         /// <summary>
         /// A token that is defined by the API layer to simplify mapping.
+        /// If the API takes advantage of this, it cannot be assumed that this will always be assigned since
+        /// any updates to metadata by the protocol may cause this field to be reset.
         /// 
         /// Suggestions for this token include the properly mapped point identifier and possibly routing information.
         /// </summary>
         public object Token;
 
         /// <summary>
-        /// A runtime ID for the data point. This value is the ID associated with the <see cref="SttpDataPoint.RuntimeID"/>
-        /// 
-        /// Ideally, all measurements will be mapped to a runtime ID, however, for systems that 
-        /// contains millions or billions of measurements, this is not a practical expectation.
+        /// A runtime ID for the data point. If present, this improves the speed of serialization.
+        /// However, this ID must be a one-to-one relationship to DataPointID for each instance of the application.
         /// </summary>
         [CommandField()]
-        public int RuntimeID { get; set; }
+        public int? RuntimeID { get; set; }
 
         /// <summary>
-        /// The unique identifier for this PointID.
+        /// The unique identifier for this PointID. This will typically be a GUID, but may also be a string or integer.
         /// </summary>
         [CommandField()]
-        public CtpObject DataPointID { get; set; }
+        public CtpObject DataPointID { get; private set; }
 
+        /// <summary>
+        /// The list of user defined Key/Value pairs of metadata associated with this data point.
+        /// </summary>
         [CommandField()]
-        public List<AttributeValues> Attributes { get; set; }
+        public List<AttributeValues> Attributes { get; private set; }
 
         public SttpDataPointMetadata(SttpProducerMetadata producer)
         {
-            AssignProducer(producer);
+            Producer = producer;
             Attributes = new List<AttributeValues>();
+            DataPointID = CtpObject.Null;
         }
 
         private SttpDataPointMetadata()
@@ -64,7 +69,7 @@ namespace Sttp
 
         internal void AssignProducer(SttpProducerMetadata producer)
         {
-            Producer = producer ?? throw new ArgumentNullException(nameof(producer));
+            Producer = producer;
         }
 
         public static explicit operator SttpDataPointMetadata(CtpCommand obj)

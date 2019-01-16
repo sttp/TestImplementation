@@ -6,7 +6,7 @@ using CTP.IO;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
 
-namespace Sttp.Archive
+namespace Sttp
 {
     public enum FileReaderItem
     {
@@ -39,7 +39,9 @@ namespace Sttp.Archive
             {
                 return value;
             }
-            return new SttpDataPointMetadata(null) { DataPointID = dataPointID.Clone() };
+            var dp = new SttpDataPointMetadata(null);
+            dp.DataPointID.SetValue(dataPointID);
+            return dp;
         }
 
         public FileReaderItem Next()
