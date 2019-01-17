@@ -10,22 +10,37 @@ using CTP.IO;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
 
-namespace Sttp.Archive
+namespace Sttp
 {
+    public enum SttpCompressionMode
+    {
+        None,
+        Deflate,
+        Zlib
+    }
+
     public class SttpFileWriter : IDisposable
     {
         private CtpFileStream m_stream;
-
         private BasicEncoder m_encoder;
         private DefalteHelper m_comp;
 
-        public SttpFileWriter(Stream stream, bool ownsStream)
+        public SttpFileWriter(Stream stream, bool ownsStream, SttpCompressionMode mode)
         {
             m_stream = new CtpFileStream(stream, ownsStream);
             m_encoder = new BasicEncoder();
             m_stream.Write(new CommandBeginDataStream(0, "Basic"));
-            m_stream.Write(new CommandBeginCompressionStream(1, "Deflate"));
-            m_comp = new DefalteHelper(new CommandBeginCompressionStream(1, "Deflate"));
+            if (mode == SttpCompressionMode.Deflate)
+            {
+                m_stream.Write(new CommandBeginCompressionStream(1, "Deflate"));
+                m_comp = new DefalteHelper(new CommandBeginCompressionStream(1, "Deflate"));
+            }
+
+            if (mode == SttpCompressionMode.Zlib)
+            {
+                m_stream.Write(new CommandBeginCompressionStream(1, "zlib"));
+                m_comp = new DefalteHelper(new CommandBeginCompressionStream(1, "zlib"));
+            }
         }
 
         public void ProducerMetadata(SttpProducerMetadata metadata)
@@ -41,7 +56,14 @@ namespace Sttp.Archive
 
         private void WriteComp(CtpCommand command)
         {
-            m_stream.Write(m_comp.Deflate(command));
+            if (m_comp == null)
+            {
+                m_stream.Write(command);
+            }
+            else
+            {
+                m_stream.Write(m_comp.Deflate(command));
+            }
         }
 
         public void AddDataPoint(SttpDataPoint dataPoint)
@@ -58,7 +80,7 @@ namespace Sttp.Archive
         {
             if (m_encoder.Length > 0)
             {
-                m_stream.Write(new CtpRaw(m_encoder.ToArray(), 0));
+                WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
                 m_encoder.Clear(false);
             }
 

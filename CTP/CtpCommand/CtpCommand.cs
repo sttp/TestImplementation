@@ -177,7 +177,9 @@ namespace CTP
                     case CtpCommandNodeType.Value:
                         xml.WriteStartElement(reader.ValueName.Value);
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
-                        xml.WriteValue(reader.Value.AsString ?? string.Empty);
+                        var str = reader.Value.AsString??string.Empty;
+                        str = str.Replace('\0', ' ');
+                        xml.WriteValue(str);
                         xml.WriteEndElement();
                         break;
                     case CtpCommandNodeType.EndElement:

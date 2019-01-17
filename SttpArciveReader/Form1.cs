@@ -71,6 +71,7 @@ namespace SttpArciveReader
         {
             DataTable dt = new DataTable();
             dt.Columns.Add("Command", typeof(string));
+            dt.Columns.Add("Count", typeof(int));
             dt.Columns.Add("Record", typeof(string));
 
             using (var fs = new FileStream(fileName, FileMode.Open))
@@ -82,7 +83,7 @@ namespace SttpArciveReader
                     {
                         case FileReaderItem.ProducerMetadata:
                             var md = ctp.GetMetadata();
-                            dt.Rows.Add("Metadata", md.ToString());
+                            dt.Rows.Add("Metadata", md.ToCommand().ToXML().Length, md.ToString());
                             break;
                         case FileReaderItem.DataPoint:
                             var sb = new StringBuilder();
@@ -94,8 +95,7 @@ namespace SttpArciveReader
                                 sb.Append(dp.Value.AsString);
                                 sb.Append(" ");
                             }
-                            sb.Insert(0, $"Cnt{cnt}: ");
-                            dt.Rows.Add("Points", sb.ToString());
+                            dt.Rows.Add("Points", cnt, sb.ToString());
                             break;
                         case FileReaderItem.EndOfStream:
                             dataGridView1.DataSource = dt;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using CTP;
 using CTP.IO;
-using Sttp.Archive;
 using Sttp.Codec;
 using Sttp.Codec.DataPoint;
 
@@ -89,10 +88,6 @@ namespace Sttp
             else if (m_nextCommand.RootElement == "BeginCompressionStream")
             {
                 m_compressionStream = (CommandBeginCompressionStream)m_nextCommand;
-                if (m_compressionStream.EncodingMechanism != "Deflate")
-                {
-                    throw new Exception("Data stream encoding is not supported.");
-                }
                 m_comp = new DefalteHelper(m_compressionStream);
 
             }
