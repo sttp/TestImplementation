@@ -4,7 +4,7 @@ using System.IO;
 using CTP;
 using CTP.IO;
 using Sttp.Codec;
-using Sttp.Codec.DataPoint;
+using Sttp.DataPointEncoding;
 
 namespace Sttp
 {
@@ -18,7 +18,7 @@ namespace Sttp
     public class SttpFileReader : IDisposable
     {
         private CtpFileStream m_stream;
-        private BasicDecoder m_decoder;
+        private DecoderBase m_decoder;
         private CtpCommand m_nextCommand;
 
         private CommandBeginCompressionStream m_compressionStream;
@@ -31,7 +31,6 @@ namespace Sttp
         public SttpFileReader(Stream stream, bool ownsStream)
         {
             m_stream = new CtpFileStream(stream, ownsStream);
-            m_decoder = new BasicDecoder(Lookup);
             m_metadataLookup = new Dictionary<CtpObject, SttpDataPointMetadata>();
         }
 
@@ -57,32 +56,31 @@ namespace Sttp
 
             if (m_nextCommand.IsRaw)
             {
-                if (m_dataStream == null)
-                    throw new Exception("Data stream is not defined for the specified channel.");
-                if (m_compressionStream == null)
-                    throw new Exception("Data stream is not defined for the specified channel.");
-
                 var raw = (CtpRaw)m_nextCommand;
-                if (raw.Channel == m_dataStream.ChannelCode)
+                if (m_dataStream != null && raw.Channel == m_dataStream.ChannelCode)
                 {
                     m_decoder.Load(raw.Payload, false);
                     return FileReaderItem.DataPoint;
                 }
 
-                if (raw.Channel == m_compressionStream.ChannelCode)
+                if (m_compressionStream != null && raw.Channel == m_compressionStream.ChannelCode)
                 {
                     m_nextCommand = m_comp.Inflate(raw);
                     goto TryAfterDecompress;
 
                 }
-                throw new Exception("Data stream is not defined for the specified channel.");
+                throw new Exception("Raw stream is not defined for the specified channel.");
             }
             else if (m_nextCommand.RootElement == "BeginDataStream")
             {
                 m_dataStream = (CommandBeginDataStream)m_nextCommand;
-                if (m_dataStream.EncodingMechanism != "Basic")
+                if (m_dataStream.EncodingMechanism == "Basic")
                 {
-                    throw new Exception("Data stream encoding is not supported.");
+                    m_decoder = new BasicDecoder(Lookup);
+                }
+                if (m_dataStream.EncodingMechanism == "Raw")
+                {
+                    m_decoder = new RawDecoder(Lookup);
                 }
             }
             else if (m_nextCommand.RootElement == "BeginCompressionStream")

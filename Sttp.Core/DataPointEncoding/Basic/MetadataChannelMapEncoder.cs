@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CTP;
 
-namespace Sttp.Codec.DataPoint
+namespace Sttp.DataPointEncoding
 {
     public class MetadataChannelMapEncoder
     {

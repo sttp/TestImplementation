@@ -22,19 +22,16 @@
 //******************************************************************************************************
 
 using System;
+using CTP;
 using Sttp.Collection;
 
-namespace Sttp.Codec.DataPoint.TSSC
+namespace Sttp.DataPointEncoding
 {
     /// <summary>
     /// The decoder for the TSSC protocol.
     /// </summary>
     public class TsscDecoder
     {
-        private byte[] m_data;
-        private int m_position;
-        private int m_lastPosition;
-
         private long m_prevTimestamp1;
         private long m_prevTimestamp2;
 
@@ -45,12 +42,14 @@ namespace Sttp.Codec.DataPoint.TSSC
 
         private TsscPointMetadata m_lastPoint;
         private IndexedArray<TsscPointMetadata> m_points;
+        private ByteReader m_reader;
 
         /// <summary>
         /// Creates a decoder for the TSSC protocol.
         /// </summary>
         public TsscDecoder()
         {
+            m_reader = new ByteReader();
             Reset();
         }
 
@@ -66,12 +65,7 @@ namespace Sttp.Codec.DataPoint.TSSC
         public void Reset()
         {
             m_points = new IndexedArray<TsscPointMetadata>();
-            m_lastPoint = new TsscPointMetadata(null, ReadBit, ReadBits5);
-            m_data = EmptyArray<byte>.Empty;
-            m_position = 0;
-            m_lastPosition = 0;
-            ClearBitStream();
-
+            m_lastPoint = new TsscPointMetadata(null, m_reader);
             m_prevTimeDelta1 = long.MaxValue;
             m_prevTimeDelta2 = long.MaxValue;
             m_prevTimeDelta3 = long.MaxValue;
@@ -89,10 +83,7 @@ namespace Sttp.Codec.DataPoint.TSSC
         public void SetBuffer(byte[] data, int startingPosition, int length)
         {
             data.ValidateParameters(startingPosition, length);
-            ClearBitStream();
-            m_data = data;
-            m_position = startingPosition;
-            m_lastPosition = startingPosition + length;
+            m_reader.SetBuffer(data, startingPosition, length);
         }
 
         /// <summary>
@@ -104,15 +95,14 @@ namespace Sttp.Codec.DataPoint.TSSC
         /// <param name="quality">the quality</param>
         /// <param name="value">the value</param>
         /// <returns>true if successful, false otherwise.</returns>
-        public unsafe bool TryGetMeasurement(out ushort id, out long timestamp, out uint quality, out float value)
+        public unsafe bool TryGetMeasurement(out int id, out CtpTime timestamp, out ulong quality, out CtpObject value)
         {
             TsscPointMetadata nextPoint = null;
 
-            if (m_position == m_lastPosition && BitStreamIsEmpty)
+            if (m_reader.IsEmpty)
             {
-                ClearBitStream();
                 id = 0;
-                timestamp = 0;
+                timestamp = default(CtpTime);
                 quality = 0;
                 value = 0;
                 return false;
@@ -124,80 +114,73 @@ namespace Sttp.Codec.DataPoint.TSSC
             //      measurements generally have some sort of sequence to them, 
             //      this still ends up being a good enough assumption.
 
-            int code = m_lastPoint.ReadCode();
+            uint code = m_lastPoint.PointIDEncoding.ReadCode();
 
-            if (code == TsscCodeWords.EndOfStream)
+            if (code == TsscCodeWordsPointID.EndOfStream)
             {
-                ClearBitStream();
                 id = 0;
-                timestamp = 0;
+                timestamp = default(CtpTime);
                 quality = 0;
                 value = 0;
                 return false;
             }
 
-            if (code <= TsscCodeWords.PointIDXOR16)
-            {
-                DecodePointID(code, m_lastPoint);
-                code = m_lastPoint.ReadCode();
-                if (code < TsscCodeWords.TimeDelta1Forward)
-                    throw new Exception($"Expecting code >= {TsscCodeWords.TimeDelta1Forward} Received {code} at position {m_position} with last position { m_lastPosition}");
-            }
+            id = DecodePointID(code, m_lastPoint);
+            code = m_lastPoint.ValueEncoding.ReadCode();
+            if (code < TsscCodeWordsCommon.TimeDelta1Forward)
+                throw new Exception($"Expecting code >= {TsscCodeWordsCommon.TimeDelta1Forward} Received {code}");
 
-            id = m_lastPoint.PrevNextPointId1;
-            nextPoint = m_points[m_lastPoint.PrevNextPointId1];
-            if (nextPoint == null)
-            {
-                nextPoint = new TsscPointMetadata(null, ReadBit, ReadBits5);
-                m_points[id] = nextPoint;
-                nextPoint.PrevNextPointId1 = (ushort)(id + 1);
-            }
 
-            if (code <= TsscCodeWords.TimeXOR7Bit)
+            if (code <= TsscCodeWordsCommon.TimeXOR7Bit)
             {
                 timestamp = DecodeTimestamp(code);
-                code = m_lastPoint.ReadCode();
-                if (code < TsscCodeWords.Quality2)
-                    throw new Exception($"Expecting code >= {TsscCodeWords.Quality2} Received {code} at position {m_position} with last position { m_lastPosition}");
+                code = m_lastPoint.ValueEncoding.ReadCode();
+                if (code < TsscCodeWordsCommon.Quality2)
+                    throw new Exception($"Expecting code >= {TsscCodeWordsCommon.Quality2} Received {code}");
             }
             else
             {
-                timestamp = m_prevTimestamp1;
+                timestamp = new CtpTime(m_prevTimestamp1);
             }
 
-            if (code <= TsscCodeWords.Quality7Bit32)
+            if (code <= TsscCodeWordsCommon.Quality7Bit32)
             {
-                quality = DecodeQuality(code, nextPoint);
-                code = m_lastPoint.ReadCode();
-                if (code < TsscCodeWords.Value1)
-                    throw new Exception($"Expecting code >= {TsscCodeWords.Value1} Received {code} at position {m_position} with last position { m_lastPosition}");
+                quality = DecodeQuality(code, m_lastPoint);
+                code = m_lastPoint.ValueEncoding.ReadCode();
+                if (code < TsscCodeWordsCommon.ValueTypeChanged)
+                    throw new Exception($"Expecting code >= {TsscCodeWordsCommon.ValueTypeChanged} Received {code}");
             }
             else
             {
                 quality = nextPoint.PrevQuality1;
             }
 
+            if (code == TsscCodeWordsCommon.ValueTypeChanged)
+            {
+                m_lastPoint.PrevTypeCode = (CtpTypeCode)m_reader.ReadBits4();
+            }
+
             //Since value will almost always change, 
             //This is not put inside a function call.
-            uint valueRaw = 0;
-            if (code == TsscCodeWords.Value1)
+            ulong valueRaw = 0;
+            if (code == TsscCodeWordsNumeric.Value1)
             {
                 valueRaw = nextPoint.PrevValue1;
             }
-            else if (code == TsscCodeWords.Value2)
+            else if (code == TsscCodeWordsNumeric.Value2)
             {
                 valueRaw = nextPoint.PrevValue2;
                 nextPoint.PrevValue2 = nextPoint.PrevValue1;
                 nextPoint.PrevValue1 = valueRaw;
             }
-            else if (code == TsscCodeWords.Value3)
+            else if (code == TsscCodeWordsNumeric.Value3)
             {
                 valueRaw = nextPoint.PrevValue3;
                 nextPoint.PrevValue3 = nextPoint.PrevValue2;
                 nextPoint.PrevValue2 = nextPoint.PrevValue1;
                 nextPoint.PrevValue1 = valueRaw;
             }
-            else if (code == TsscCodeWords.ValueZero)
+            else if (code == TsscCodeWordsNumeric.ValueZero)
             {
                 valueRaw = 0;
                 nextPoint.PrevValue3 = nextPoint.PrevValue2;
@@ -208,39 +191,44 @@ namespace Sttp.Codec.DataPoint.TSSC
             {
                 switch (code)
                 {
-                    case TsscCodeWords.ValueXOR4:
-                        valueRaw = (uint)ReadBits4() ^ nextPoint.PrevValue1;
+                    case TsscCodeWordsNumeric.ValueXOR4:
+                        valueRaw = m_reader.ReadBits4() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR8:
-                        valueRaw = m_data[m_position] ^ nextPoint.PrevValue1;
-                        m_position = m_position + 1;
+                    case TsscCodeWordsNumeric.ValueXOR8:
+                        valueRaw = m_reader.ReadBits8() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR12:
-                        valueRaw = (uint)ReadBits4() ^ (uint)(m_data[m_position] << 4) ^ nextPoint.PrevValue1;
-                        m_position = m_position + 1;
+                    case TsscCodeWordsNumeric.ValueXOR12:
+                        valueRaw = m_reader.ReadBits12() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR16:
-                        valueRaw = m_data[m_position] ^ (uint)(m_data[m_position + 1] << 8) ^ nextPoint.PrevValue1;
-                        m_position = m_position + 2;
+                    case TsscCodeWordsNumeric.ValueXOR16:
+                        valueRaw = m_reader.ReadBits16() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR20:
-                        valueRaw = (uint)ReadBits4() ^ (uint)(m_data[m_position] << 4) ^ (uint)(m_data[m_position + 1] << 12) ^ nextPoint.PrevValue1;
-                        m_position = m_position + 2;
+                    case TsscCodeWordsNumeric.ValueXOR20:
+                        valueRaw = m_reader.ReadBits20() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR24:
-                        valueRaw = m_data[m_position] ^ (uint)(m_data[m_position + 1] << 8) ^ (uint)(m_data[m_position + 2] << 16) ^ nextPoint.PrevValue1;
-                        m_position = m_position + 3;
+                    case TsscCodeWordsNumeric.ValueXOR24:
+                        valueRaw = m_reader.ReadBits24() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR28:
-                        valueRaw = (uint)ReadBits4() ^ (uint)(m_data[m_position] << 4) ^ (uint)(m_data[m_position + 1] << 12) ^ (uint)(m_data[m_position + 2] << 20) ^ nextPoint.PrevValue1;
-                        m_position = m_position + 3;
+                    case TsscCodeWordsNumeric.ValueXOR28:
+                        valueRaw = m_reader.ReadBits28() ^ nextPoint.PrevValue1;
                         break;
-                    case TsscCodeWords.ValueXOR32:
-                        valueRaw = m_data[m_position] ^ (uint)(m_data[m_position + 1] << 8) ^ (uint)(m_data[m_position + 2] << 16) ^ (uint)(m_data[m_position + 3] << 24) ^ nextPoint.PrevValue1;
-                        m_position = m_position + 4;
+                    case TsscCodeWordsNumeric.ValueXOR32:
+                        valueRaw = m_reader.ReadBits32() ^ nextPoint.PrevValue1;
+                        break;
+                    case TsscCodeWordsNumeric.ValueXOR40:
+                        valueRaw = m_reader.ReadBits40() ^ nextPoint.PrevValue1;
+                        break;
+                    case TsscCodeWordsNumeric.ValueXOR48:
+                        valueRaw = m_reader.ReadBits48() ^ nextPoint.PrevValue1;
+                        break;
+                    case TsscCodeWordsNumeric.ValueXOR56:
+                        valueRaw = m_reader.ReadBits56() ^ nextPoint.PrevValue1;
+                        break;
+                    case TsscCodeWordsNumeric.ValueXOR64:
+                        valueRaw = m_reader.ReadBits64() ^ nextPoint.PrevValue1;
                         break;
                     default:
-                        throw new Exception($"Invalid code received {code} at position {m_position} with last position { m_lastPosition}");
+                        throw new Exception($"Invalid code received {code}");
                 }
 
                 nextPoint.PrevValue3 = nextPoint.PrevValue2;
@@ -253,70 +241,84 @@ namespace Sttp.Codec.DataPoint.TSSC
             return true;
         }
 
-        private void DecodePointID(int code, TsscPointMetadata lastPoint)
+        private int DecodePointID(uint code, TsscPointMetadata lastPoint)
         {
-            if (code == TsscCodeWords.PointIDXOR4)
+            if (code == TsscCodeWordsPointID.PointIDXOR8)
             {
-                lastPoint.PrevNextPointId1 ^= (ushort)ReadBits4();
+                lastPoint.PrevNextPointId1 ^= (int)m_reader.ReadBits8();
             }
-            else if (code == TsscCodeWords.PointIDXOR8)
+            else if (code == TsscCodeWordsPointID.PointIDXOR12)
             {
-                lastPoint.PrevNextPointId1 ^= m_data[m_position++];
+                lastPoint.PrevNextPointId1 ^= (int)m_reader.ReadBits12();
             }
-            else if (code == TsscCodeWords.PointIDXOR12)
+            else if (code == TsscCodeWordsPointID.PointIDXOR16)
             {
-                lastPoint.PrevNextPointId1 ^= (ushort)ReadBits4();
-                lastPoint.PrevNextPointId1 ^= (ushort)(m_data[m_position++] << 4);
+                lastPoint.PrevNextPointId1 ^= (int)m_reader.ReadBits16();
+            }
+            else if (code == TsscCodeWordsPointID.PointIDXOR24)
+            {
+                lastPoint.PrevNextPointId1 ^= (int)m_reader.ReadBits24();
             }
             else
             {
-                lastPoint.PrevNextPointId1 ^= m_data[m_position++];
-                lastPoint.PrevNextPointId1 ^= (ushort)(m_data[m_position++] << 8);
+                lastPoint.PrevNextPointId1 ^= (int)m_reader.ReadBits32();
             }
+
+
+            int id = m_lastPoint.PrevNextPointId1;
+            var nextPoint = m_points[m_lastPoint.PrevNextPointId1];
+            if (nextPoint == null)
+            {
+                nextPoint = new TsscPointMetadata(null, m_reader);
+                m_points[id] = nextPoint;
+                nextPoint.PrevNextPointId1 = (ushort)(id + 1);
+            }
+            m_lastPoint = nextPoint;
+            return id;
         }
 
-        private long DecodeTimestamp(int code)
+        private CtpTime DecodeTimestamp(uint code)
         {
             long timestamp;
-            if (code == TsscCodeWords.TimeDelta1Forward)
+            if (code == TsscCodeWordsCommon.TimeDelta1Forward)
             {
                 timestamp = m_prevTimestamp1 + m_prevTimeDelta1;
             }
-            else if (code == TsscCodeWords.TimeDelta2Forward)
+            else if (code == TsscCodeWordsCommon.TimeDelta2Forward)
             {
                 timestamp = m_prevTimestamp1 + m_prevTimeDelta2;
             }
-            else if (code == TsscCodeWords.TimeDelta3Forward)
+            else if (code == TsscCodeWordsCommon.TimeDelta3Forward)
             {
                 timestamp = m_prevTimestamp1 + m_prevTimeDelta3;
             }
-            else if (code == TsscCodeWords.TimeDelta4Forward)
+            else if (code == TsscCodeWordsCommon.TimeDelta4Forward)
             {
                 timestamp = m_prevTimestamp1 + m_prevTimeDelta4;
             }
-            else if (code == TsscCodeWords.TimeDelta1Reverse)
+            else if (code == TsscCodeWordsCommon.TimeDelta1Reverse)
             {
                 timestamp = m_prevTimestamp1 - m_prevTimeDelta1;
             }
-            else if (code == TsscCodeWords.TimeDelta2Reverse)
+            else if (code == TsscCodeWordsCommon.TimeDelta2Reverse)
             {
                 timestamp = m_prevTimestamp1 - m_prevTimeDelta2;
             }
-            else if (code == TsscCodeWords.TimeDelta3Reverse)
+            else if (code == TsscCodeWordsCommon.TimeDelta3Reverse)
             {
                 timestamp = m_prevTimestamp1 - m_prevTimeDelta3;
             }
-            else if (code == TsscCodeWords.TimeDelta4Reverse)
+            else if (code == TsscCodeWordsCommon.TimeDelta4Reverse)
             {
                 timestamp = m_prevTimestamp1 - m_prevTimeDelta4;
             }
-            else if (code == TsscCodeWords.Timestamp2)
+            else if (code == TsscCodeWordsCommon.Timestamp2)
             {
                 timestamp = m_prevTimestamp2;
             }
             else
             {
-                timestamp = m_prevTimestamp1 ^ (long)Encoding7Bit.ReadUInt64(m_data, ref m_position);
+                timestamp = m_prevTimestamp1 ^ (long)m_reader.Read8BitSegments();
             }
 
             //Save the smallest delta time
@@ -350,83 +352,25 @@ namespace Sttp.Codec.DataPoint.TSSC
 
             m_prevTimestamp2 = m_prevTimestamp1;
             m_prevTimestamp1 = timestamp;
-            return timestamp;
+            return new CtpTime(timestamp);
         }
 
-        private uint DecodeQuality(int code, TsscPointMetadata nextPoint)
+        private ulong DecodeQuality(uint code, TsscPointMetadata nextPoint)
         {
-            uint quality;
-            if (code == TsscCodeWords.Quality2)
+            ulong quality;
+            if (code == TsscCodeWordsCommon.Quality2)
             {
                 quality = nextPoint.PrevQuality2;
             }
             else
             {
-                quality = Encoding7Bit.ReadUInt32(m_data, ref m_position);
+                quality = m_reader.Read8BitSegments();
             }
             nextPoint.PrevQuality2 = nextPoint.PrevQuality1;
             nextPoint.PrevQuality1 = quality;
             return quality;
         }
 
-        #region [ BitStream ]
-
-        /// <summary>
-        /// The number of bits in m_bitStreamCache that are valid. 0 Means the bitstream is empty.
-        /// </summary>
-        private int m_bitStreamCount;
-        /// <summary>
-        /// A cache of bits that need to be flushed to m_buffer when full. Bits filled starting from the right moving left.
-        /// </summary>
-        private int m_bitStreamCache;
-
-        private bool BitStreamIsEmpty => m_bitStreamCount == 0;
-
-        /// <summary>
-        /// Resets the stream so it can be reused. All measurements must be registered again.
-        /// </summary>
-        private void ClearBitStream()
-        {
-            m_bitStreamCount = 0;
-            m_bitStreamCache = 0;
-        }
-
-        private int ReadBit()
-        {
-            if (m_bitStreamCount == 0)
-            {
-                m_bitStreamCount = 8;
-                m_bitStreamCache = m_data[m_position++];
-            }
-            m_bitStreamCount--;
-            return (m_bitStreamCache >> m_bitStreamCount) & 1;
-        }
-
-        private int ReadBits4()
-        {
-            return ReadBit() << 3 | ReadBit() << 2 | ReadBit() << 1 | ReadBit();
-            //if (m_bitCount < 4)
-            //{
-            //    m_bitCount += 8;
-            //    m_cache = m_cache << 8 | m_parent.m_buffer.Data[m_parent.m_buffer.Position++];
-            //}
-            //m_bitCount -= 4;
-            //return (m_cache >> m_bitCount) & 15;
-        }
-
-        private int ReadBits5()
-        {
-            return ReadBit() << 4 | ReadBit() << 3 | ReadBit() << 2 | ReadBit() << 1 | ReadBit();
-            //if (m_bitCount < 5)
-            //{
-            //    m_bitCount += 8;
-            //    m_cache = m_cache << 8 | m_parent.m_buffer.Data[m_parent.m_buffer.Position++];
-            //}
-            //m_bitCount -= 5;
-            //return (m_cache >> m_bitCount) & 31;
-        }
-
-        #endregion
     }
 
 }

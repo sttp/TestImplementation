@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Sttp.Codec.DataPoint
+namespace Sttp.DataPointEncoding
 {
     public class MetadataChannelMapDecoder
     {

@@ -157,79 +157,79 @@ namespace CTP
 
         public bool Equals(CtpObject other)
         {
-            if (ValueTypeCode == other.ValueTypeCode)
+            if (m_valueTypeCode == other.m_valueTypeCode)
             {
-                switch (ValueTypeCode)
+                switch (m_valueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return true; //Null == Null, should that return false?
                     case CtpTypeCode.Int64:
-                        return AsInt64 == other.AsInt64;
+                        return m_valueInt64 == other.m_valueInt64;
                     case CtpTypeCode.Single:
-                        return AsSingle == other.AsSingle;
+                        return m_valueSingle == other.m_valueSingle;
                     case CtpTypeCode.Double:
-                        return AsDouble == other.AsDouble;
+                        return m_valueDouble == other.m_valueDouble;
                     case CtpTypeCode.CtpTime:
-                        return AsCtpTime == other.AsCtpTime;
+                        return m_valueCtpTime == other.m_valueCtpTime;
                     case CtpTypeCode.Boolean:
-                        return AsBoolean == other.AsBoolean;
+                        return m_valueBoolean == other.m_valueBoolean;
                     case CtpTypeCode.Guid:
-                        return AsGuid == other.AsGuid;
+                        return m_valueGuid == other.m_valueGuid;
                     case CtpTypeCode.String:
-                        return AsString == other.AsString;
+                        return (string)m_valueObject == (string)other.m_valueObject;
                     case CtpTypeCode.CtpBuffer:
-                        return AsCtpBuffer == other.AsCtpBuffer;
+                        return (CtpBuffer)m_valueObject == (CtpBuffer)other.m_valueObject;
                     case CtpTypeCode.CtpCommand:
-                        return AsCtpCommand == other.AsCtpCommand;
+                        return (CtpCommand)m_valueObject == (CtpCommand)other.m_valueObject;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
 
-            if (ValueTypeCode == CtpTypeCode.Null || other.ValueTypeCode == CtpTypeCode.Null)
+            if (m_valueTypeCode == CtpTypeCode.Null || other.m_valueTypeCode == CtpTypeCode.Null)
                 return false;
 
-            switch (ValueTypeCode)
+            switch (m_valueTypeCode)
             {
                 case CtpTypeCode.Int64:
                     {
-                        var value = AsInt64;
-                        switch (other.ValueTypeCode)
+                        var value = m_valueInt64;
+                        switch (other.m_valueTypeCode)
                         {
                             case CtpTypeCode.Int64:
-                                return value == other.AsInt64;
+                                return value == other.m_valueInt64;
                             case CtpTypeCode.Single:
-                                return value == other.AsSingle;
+                                return value == other.m_valueSingle;
                             case CtpTypeCode.Double:
-                                return value == other.AsDouble;
+                                return value == other.m_valueDouble;
                         }
                         break;
                     }
                 case CtpTypeCode.Single:
                     {
-                        var value = AsSingle;
-                        switch (other.ValueTypeCode)
+                        var value = m_valueSingle;
+                        switch (other.m_valueTypeCode)
                         {
                             case CtpTypeCode.Int64:
-                                return value == other.AsInt64;
+                                return value == other.m_valueInt64;
                             case CtpTypeCode.Single:
-                                return value == other.AsSingle;
+                                return value == other.m_valueSingle;
                             case CtpTypeCode.Double:
-                                return value == other.AsDouble;
+                                return value == other.m_valueDouble;
                         }
                         break;
                     }
                 case CtpTypeCode.Double:
                     {
-                        var value = AsDouble;
-                        switch (other.ValueTypeCode)
+                        var value = m_valueDouble;
+                        switch (other.m_valueTypeCode)
                         {
                             case CtpTypeCode.Int64:
-                                return value == other.AsInt64;
+                                return value == other.m_valueInt64;
                             case CtpTypeCode.Single:
-                                return value == other.AsSingle;
+                                return value == other.m_valueSingle;
                             case CtpTypeCode.Double:
-                                return value == other.AsDouble;
+                                return value == other.m_valueDouble;
                         }
                         break;
                     }
@@ -254,6 +254,35 @@ namespace CTP
         public static bool operator !=(CtpObject a, CtpObject b)
         {
             return !(a == b);
+        }
+
+        public override int GetHashCode()
+        {
+            switch (m_valueTypeCode)
+            {
+                case CtpTypeCode.Null:
+                    return (int)m_valueTypeCode;
+                case CtpTypeCode.Int64:
+                    return (m_valueInt64.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.Single:
+                    return (m_valueSingle.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.Double:
+                    return (m_valueDouble.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.CtpTime:
+                    return (m_valueCtpTime.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.Boolean:
+                    return (m_valueBoolean.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.Guid:
+                    return (m_valueGuid.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.String:
+                    return (m_valueObject.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.CtpBuffer:
+                    return (m_valueObject.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.CtpCommand:
+                    return (m_valueObject.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
 

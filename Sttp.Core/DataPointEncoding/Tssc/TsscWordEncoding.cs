@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  TsscPointMetadata.cs - Gbtc
+//  TsscWordEncoding.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -24,21 +24,13 @@
 
 using System;
 
-namespace Sttp.Codec.DataPoint.TSSC
+namespace Sttp.DataPointEncoding
 {
     /// <summary>
     /// The metadata kept for each pointID.
     /// </summary>
-    internal class TsscPointMetadata
+    internal class TsscWordEncoding
     {
-        public ushort PrevNextPointId1;
-
-        public uint PrevQuality1;
-        public uint PrevQuality2;
-        public uint PrevValue1;
-        public uint PrevValue2;
-        public uint PrevValue3;
-
         private readonly byte[] m_commandStats;
         private int m_commandsSentSinceLastChange = 0;
 
@@ -57,83 +49,67 @@ namespace Sttp.Codec.DataPoint.TSSC
 
         private int m_startupMode = 0;
 
-        private readonly Action<int, int> m_writeBits;
+        private readonly ByteWriter m_writeBits;
 
-        private readonly Func<int> m_readBit;
+        private readonly ByteReader m_readBit;
 
-        private readonly Func<int> m_readBits5;
-
-        public TsscPointMetadata(Action<int, int> writeBits, Func<int> readBit, Func<int> readBits5)
+        public TsscWordEncoding(ByteWriter writer, ByteReader reader)
         {
             m_commandsSentSinceLastChange = 0;
             m_commandStats = new byte[32];
-            m_mode = 4;
-            m_mode41 = TsscCodeWords.Value1;
-            m_mode401 = TsscCodeWords.Value2;
-            m_mode4001 = TsscCodeWords.Value3;
+            m_mode = 1;
 
-            m_writeBits = writeBits ?? NotImplementedMethod2;
-            m_readBit = readBit ?? NotImplementedMethod1;
-            m_readBits5 = readBits5 ?? NotImplementedMethod1;
+            m_writeBits = writer;
+            m_readBit = reader;
         }
 
-        private int NotImplementedMethod1()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void NotImplementedMethod2(int a, int b)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WriteCode(int code)
+        public void WriteCode(uint code)
         {
             switch (m_mode)
             {
                 case 1:
-                    m_writeBits(code, 5);
+                    m_writeBits.WriteBits5(code);
                     break;
                 case 2:
                     if (code == m_mode21)
                     {
-                        m_writeBits(1, 1);
+                        m_writeBits.WriteBits1(1);
                     }
                     else
                     {
-                        m_writeBits(code, 6);
+                        m_writeBits.WriteBits6(code);
                     }
                     break;
                 case 3:
                     if (code == m_mode31)
                     {
-                        m_writeBits(1, 1);
+                        m_writeBits.WriteBits1(1);
                     }
                     else if (code == m_mode301)
                     {
-                        m_writeBits(1, 2);
+                        m_writeBits.WriteBits2(1);
                     }
                     else
                     {
-                        m_writeBits(code, 7);
+                        m_writeBits.WriteBits7(code);
                     }
                     break;
                 case 4:
                     if (code == m_mode41)
                     {
-                        m_writeBits(1, 1);
+                        m_writeBits.WriteBits1(1);
                     }
                     else if (code == m_mode401)
                     {
-                        m_writeBits(1, 2);
+                        m_writeBits.WriteBits2(1);
                     }
                     else if (code == m_mode4001)
                     {
-                        m_writeBits(1, 3);
+                        m_writeBits.WriteBits3(1);
                     }
                     else
                     {
-                        m_writeBits(code, 8);
+                        m_writeBits.WriteBits8(code);
                     }
                     break;
                 default:
@@ -143,54 +119,54 @@ namespace Sttp.Codec.DataPoint.TSSC
             UpdatedCodeStatistics(code);
         }
 
-        public int ReadCode()
+        public uint ReadCode()
         {
-            int code = 0;
+            uint code = 0;
             switch (m_mode)
             {
                 case 1:
-                    code = m_readBits5();
+                    code = m_readBit.ReadBits5();
                     break;
                 case 2:
-                    if (m_readBit() == 1)
+                    if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode21;
                     }
                     else
                     {
-                        code = m_readBits5();
+                        code = m_readBit.ReadBits5();
                     }
                     break;
                 case 3:
-                    if (m_readBit() == 1)
+                    if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode31;
                     }
-                    else if (m_readBit() == 1)
+                    else if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode301;
                     }
                     else
                     {
-                        code = m_readBits5();
+                        code = m_readBit.ReadBits5();
                     }
                     break;
                 case 4:
-                    if (m_readBit() == 1)
+                    if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode41;
                     }
-                    else if (m_readBit() == 1)
+                    else if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode401;
                     }
-                    else if (m_readBit() == 1)
+                    else if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode4001;
                     }
                     else
                     {
-                        code = m_readBits5();
+                        code = m_readBit.ReadBits5();
                     }
                     break;
                 default:
@@ -201,7 +177,7 @@ namespace Sttp.Codec.DataPoint.TSSC
             return code;
         }
 
-        private void UpdatedCodeStatistics(int code)
+        private void UpdatedCodeStatistics(uint code)
         {
             m_commandsSentSinceLastChange++;
             m_commandStats[code]++;

@@ -435,6 +435,13 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 0] = (byte)value;
             m_byteLength += 1;
         }
+
+        public void WriteBits12(uint value)
+        {
+            WriteBits4(value);
+            WriteBits8(value >> 4);
+        }
+
         public void WriteBits16(uint value)
         {
             EnsureCapacityBytes(2);
@@ -442,6 +449,13 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 1] = (byte)value;
             m_byteLength += 2;
         }
+
+        public void WriteBits20(uint value)
+        {
+            WriteBits4(value);
+            WriteBits16(value >> 4);
+        }
+
         public void WriteBits24(uint value)
         {
             EnsureCapacityBytes(3);
@@ -450,6 +464,13 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 2] = (byte)value;
             m_byteLength += 3;
         }
+
+        public void WriteBits28(uint value)
+        {
+            WriteBits4(value);
+            WriteBits24(value >> 4);
+        }
+
         public void WriteBits32(uint value)
         {
             EnsureCapacityBytes(4);

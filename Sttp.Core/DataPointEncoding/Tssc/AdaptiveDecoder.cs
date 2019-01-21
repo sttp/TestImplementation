@@ -4,13 +4,10 @@ using System.Linq;
 using System.Text;
 using CTP;
 
-namespace Sttp.Codec.DataPoint
+namespace Sttp.DataPointEncoding
 {
-    public delegate SttpDataPointMetadata LookupMetadata(CtpObject dataPointID);
-
-    public class BasicDecoder
+    public class AdaptiveDecoder : DecoderBase
     {
-        private LookupMetadata m_lookup;
         private MetadataChannelMapDecoder m_channelMap;
         private ByteReader m_stream;
         private int m_lastChannelID = 0;
@@ -18,14 +15,14 @@ namespace Sttp.Codec.DataPoint
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
 
-        public BasicDecoder(LookupMetadata lookup)
+        public AdaptiveDecoder(LookupMetadata lookup)
+            : base(lookup)
         {
-            m_lookup = lookup;
             m_stream = new ByteReader();
             m_channelMap = new MetadataChannelMapDecoder();
         }
 
-        public void Load(byte[] data, bool clearMapping)
+        public override void Load(byte[] data, bool clearMapping)
         {
             m_lastChannelID = 0;
             m_lastTimestamp = default(CtpTime);
@@ -38,7 +35,7 @@ namespace Sttp.Codec.DataPoint
             }
         }
 
-        public bool Read(SttpDataPoint dataPoint)
+        public override bool Read(SttpDataPoint dataPoint)
         {
             if (m_stream.IsEmpty)
             {
@@ -95,7 +92,7 @@ namespace Sttp.Codec.DataPoint
             if (dataPoint.Metadata == null)
             {
                 var obj = CtpValueEncodingNative.Load(m_stream);
-                dataPoint.Metadata = m_lookup(obj);
+                dataPoint.Metadata = LookupMetadata(obj);
                 m_channelMap.Assign(dataPoint.Metadata, m_lastChannelID);
             }
             return true;

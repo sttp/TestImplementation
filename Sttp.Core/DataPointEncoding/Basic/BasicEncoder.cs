@@ -6,9 +6,9 @@ using System.Text;
 using CTP;
 using Sttp.Codec;
 
-namespace Sttp.Codec.DataPoint
+namespace Sttp.DataPointEncoding
 {
-    public class BasicEncoder
+    public class BasicEncoder : EncoderBase
     {
         private ByteWriter m_stream;
         private int m_lastChannelID = 0;
@@ -23,9 +23,9 @@ namespace Sttp.Codec.DataPoint
             m_channelMap = new MetadataChannelMapEncoder();
         }
 
-        public int Length => m_stream.Length;
+        public override int Length => m_stream.Length;
 
-        public void Clear(bool clearMapping)
+        public override void Clear(bool clearMapping)
         {
             m_lastChannelID = 0;
             m_lastTimestamp = default(CtpTime);
@@ -38,7 +38,7 @@ namespace Sttp.Codec.DataPoint
             }
         }
 
-        public void AddDataPoint(SttpDataPoint point)
+        public override void AddDataPoint(SttpDataPoint point)
         {
             bool hasExtendedData = !point.ExtendedData.IsNull;
             bool qualityChanged = point.Quality != m_lastQuality;
@@ -93,7 +93,7 @@ namespace Sttp.Codec.DataPoint
             }
         }
 
-        public byte[] ToArray()
+        public override byte[] ToArray()
         {
             return m_stream.ToArray();
         }

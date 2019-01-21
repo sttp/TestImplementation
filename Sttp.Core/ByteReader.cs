@@ -304,6 +304,11 @@ namespace Sttp
             return rv;
         }
 
+        public uint ReadBits12()
+        {
+            return (ReadBits8() << 4) | ReadBits4();
+        }
+
         public uint ReadBits16()
         {
             if (m_currentBytePosition + 2 > m_currentBitPosition)
@@ -314,6 +319,11 @@ namespace Sttp
                     | (uint)m_buffer[m_currentBytePosition + 1];
             m_currentBytePosition += 2;
             return rv;
+        }
+
+        public uint ReadBits20()
+        {
+            return (ReadBits16() << 4) | ReadBits4();
         }
 
         public uint ReadBits24()
@@ -327,6 +337,11 @@ namespace Sttp
                       | (uint)m_buffer[m_currentBytePosition + 2];
             m_currentBytePosition += 3;
             return rv;
+        }
+
+        public uint ReadBits28()
+        {
+            return (ReadBits24() << 4) | ReadBits4();
         }
 
         public uint ReadBits32()
@@ -513,5 +528,7 @@ namespace Sttp
         }
 
         #endregion
+
+
     }
 }
