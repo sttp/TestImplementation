@@ -89,7 +89,7 @@ namespace Sttp
         public void AddDataPoint(SttpDataPoint dataPoint)
         {
             m_encoder.AddDataPoint(dataPoint);
-            if (m_encoder.Length > 1000)
+            if (m_encoder.Length > 1500)
             {
                 WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
                 m_encoder.Clear(false);

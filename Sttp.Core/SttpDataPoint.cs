@@ -31,19 +31,6 @@ namespace Sttp
         /// </summary>
         public long Quality;
 
-        /// <summary>
-        /// An extra field in the event that one is needed. It's not recommended to use this field for complex value types, but rather
-        /// if data must be transported with this value that does not fit in one of the other categories (PointID, Time, Value, Quality)
-        /// Examples include:
-        ///   Some kind of sequence identifier.
-        ///   Some kind of pivot field. 
-        ///   Extra quality data or analysis.
-        ///   Metadata that must be transported with every measurement. (Caution, this will introduce substantial overhead)
-        /// 
-        /// Note: Since this field is considered ancillary assigning something other than null will introduce a penalty that may be considerable in some circumstances.
-        /// </summary>
-        public CtpObject ExtendedData;
-
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

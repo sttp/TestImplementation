@@ -43,14 +43,12 @@ namespace Sttp.DataPointEncoding
                 return false;
             }
 
-            bool hasExtendedData = false;
             bool qualityChanged = false;
             bool timeChanged = false;
             bool typeChanged = false;
 
             if (m_stream.ReadBits1() == 0)
             {
-                hasExtendedData = m_stream.ReadBits1() == 1;
                 qualityChanged = m_stream.ReadBits1() == 1;
                 timeChanged = m_stream.ReadBits1() == 1;
                 typeChanged = m_stream.ReadBits1() == 1;
@@ -59,15 +57,6 @@ namespace Sttp.DataPointEncoding
 
             m_lastChannelID ^= (int)(uint)m_stream.Read4BitSegments();
             dataPoint.Metadata = m_channelMap.GetMetadata(m_lastChannelID);
-
-            if (hasExtendedData)
-            {
-                dataPoint.ExtendedData = CtpValueEncodingNative.Load(m_stream);
-            }
-            else
-            {
-                dataPoint.ExtendedData = CtpObject.Null;
-            }
 
             if (qualityChanged)
             {

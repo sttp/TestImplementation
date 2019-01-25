@@ -32,30 +32,23 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
-            bool hasExtendedData = !point.ExtendedData.IsNull;
             bool qualityChanged = point.Quality != m_lastQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
             bool typeChanged = point.Value.ValueTypeCode != m_lastValueCode;
 
-            if (!hasExtendedData && !qualityChanged && !timeChanged && !typeChanged)
+            if (!qualityChanged && !timeChanged && !typeChanged)
             {
                 m_stream.WriteBits1(true); //Is the common header.
             }
             else
             {
                 m_stream.WriteBits1(false); //Is not the common header.
-                m_stream.WriteBits1(hasExtendedData);
                 m_stream.WriteBits1(qualityChanged);
                 m_stream.WriteBits1(timeChanged);
                 m_stream.WriteBits1(typeChanged);
             }
 
             CtpValueEncodingNative.Save(m_stream, point.Metadata.DataPointID);
-
-            if (hasExtendedData)
-            {
-                CtpValueEncodingNative.Save(m_stream, point.ExtendedData);
-            }
 
             if (qualityChanged)
             {

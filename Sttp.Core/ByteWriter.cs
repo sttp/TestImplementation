@@ -303,6 +303,61 @@ namespace Sttp
             WriteBits(bits, value);
         }
 
+        public void WriteBits(int bits, uint value)
+        {
+            if (bits > 64 || bits < 0)
+                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
+
+            //Since the lowest order bits are most chaotic, these should be stored in the bit stream.
+
+            switch (bits & 7)
+            {
+                case 0:
+                    break;
+                case 1:
+                    WriteBits1((uint)value);
+                    break;
+                case 2:
+                    WriteBits2((uint)value);
+                    break;
+                case 3:
+                    WriteBits3((uint)value);
+                    break;
+                case 4:
+                    WriteBits4((uint)value);
+                    break;
+                case 5:
+                    WriteBits5((uint)value);
+                    break;
+                case 6:
+                    WriteBits6((uint)value);
+                    break;
+                case 7:
+                    WriteBits7((uint)value);
+                    break;
+            }
+
+            value >>= bits & 7;
+
+            switch (bits >> 3)
+            {
+                case 0:
+                    return;
+                case 1:
+                    WriteBits8((uint)value);
+                    return;
+                case 2:
+                    WriteBits16((uint)value);
+                    return;
+                case 3:
+                    WriteBits24((uint)value);
+                    return;
+                case 4:
+                    WriteBits32((uint)value);
+                    return;
+            }
+        }
+
         private void WriteBits(int bits, ulong value)
         {
             if (bits > 64 || bits < 0)
@@ -436,9 +491,21 @@ namespace Sttp
             m_byteLength += 1;
         }
 
+        public void WriteBits10(uint value)
+        {
+            WriteBits2(value);
+            WriteBits8(value >> 4);
+        }
+
         public void WriteBits12(uint value)
         {
             WriteBits4(value);
+            WriteBits8(value >> 4);
+        }
+
+        public void WriteBits14(uint value)
+        {
+            WriteBits6(value);
             WriteBits8(value >> 4);
         }
 
@@ -450,9 +517,21 @@ namespace Sttp
             m_byteLength += 2;
         }
 
+        public void WriteBits18(uint value)
+        {
+            WriteBits2(value);
+            WriteBits16(value >> 4);
+        }
+
         public void WriteBits20(uint value)
         {
             WriteBits4(value);
+            WriteBits16(value >> 4);
+        }
+
+        public void WriteBits22(uint value)
+        {
+            WriteBits6(value);
             WriteBits16(value >> 4);
         }
 
@@ -465,9 +544,21 @@ namespace Sttp
             m_byteLength += 3;
         }
 
+        public void WriteBits26(uint value)
+        {
+            WriteBits2(value);
+            WriteBits24(value >> 4);
+        }
+
         public void WriteBits28(uint value)
         {
             WriteBits4(value);
+            WriteBits24(value >> 4);
+        }
+
+        public void WriteBits30(uint value)
+        {
+            WriteBits6(value);
             WriteBits24(value >> 4);
         }
 

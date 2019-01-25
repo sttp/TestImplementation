@@ -8,8 +8,11 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using CTP;
+using GSF;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sttp.Core;
+using Sttp.DataPointEncoding;
 using Sttp.Services;
 
 namespace Sttp.Tests
@@ -71,7 +74,7 @@ namespace Sttp.Tests
             sw.Start();
             for (int x = 0; x < 5; x++)
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Adaptive);
             }
 
             Console.WriteLine(PointCount);
@@ -83,6 +86,11 @@ namespace Sttp.Tests
         public void Profile()
         {
             BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Adaptive);
+            Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
+            Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Zlib, EncodingMethod.Adaptive);
+            Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
         }
 
         private void BenchmarkFile(string source, string dest, SttpCompressionMode mode, EncodingMethod encoding)
@@ -98,7 +106,7 @@ namespace Sttp.Tests
                     {
                         case FileReaderItem.ProducerMetadata:
                             var md = ctp.GetMetadata();
-                            ctp2.ProducerMetadata(md);
+                            //ctp2.ProducerMetadata(md);
                             break;
                         case FileReaderItem.DataPoint:
                             var dp = new SttpDataPoint();

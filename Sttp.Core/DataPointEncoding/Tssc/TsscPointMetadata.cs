@@ -32,28 +32,25 @@ namespace Sttp.DataPointEncoding
     /// </summary>
     internal class TsscPointMetadata
     {
-        public int PrevNextPointId1;
-        public int PrevNextPointId2;
+        public int PrevNextChannelId1;
 
         public ulong PrevQuality1;
-        public ulong PrevQuality2;
 
-        public CtpTypeCode PrevTypeCode;
+        public CtpTypeCode PrevTypeCode = CtpTypeCode.Single;
         public ulong PrevValue1;
-        public ulong PrevValue2;
-        public ulong PrevValue3;
 
         public CtpObject Prev1;
         public CtpObject Prev2;
         public CtpObject Prev3;
 
-        public TsscPointIDWordEncoding PointIDEncoding;
-        public TsscWordEncoding ValueEncoding;
+        /// <summary>
+        /// When reading the next point, this encoding method is used ONLY the first time.
+        /// </summary>
+        public TsscWordEncoding NextValueEncoding;
 
         public TsscPointMetadata(ByteWriter writer, ByteReader reader)
         {
-            PointIDEncoding = new TsscPointIDWordEncoding(writer, reader);
-            ValueEncoding = new TsscWordEncoding(writer, reader);
+            NextValueEncoding = new TsscWordEncoding(writer, reader);
         }
     }
 }
