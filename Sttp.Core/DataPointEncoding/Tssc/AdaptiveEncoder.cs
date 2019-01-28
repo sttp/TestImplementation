@@ -52,6 +52,8 @@ namespace Sttp.DataPointEncoding
         private TsscPointMetadata m_prevPoint;
         private TsscPointMetadata m_nextPoint;
         private TsscWordEncoding m_encoder;
+        private TsscTimestampEncoding m_timeChanges;
+
 
         private IndexedArray<TsscPointMetadata> m_points;
 
@@ -249,22 +251,23 @@ namespace Sttp.DataPointEncoding
 
         }
 
+
         private void WriteExceptionCase(SttpDataPoint point, int channelID)
         {
             if (m_prevPoint.PrevNextChannelId1 != channelID)
             {
                 m_encoder.WriteCode(0);
-                Writer.WriteBits2(0);
-                Writer.Write4BitSegments((uint)channelID);
+                Writer.WriteBits1(0);
+                Writer.Write8BitSegments((uint)channelID);
                 m_prevPoint.PrevNextChannelId1 = channelID;
             }
             if (m_prevTimestamp1 != point.Time.Ticks)
             {
                 long timestamp = point.Time.Ticks;
-                m_prevTimestamp1 = timestamp;
                 m_encoder.WriteCode(0);
                 Writer.WriteBits2(1);
-                Writer.Write8BitSegments((ulong)(timestamp ^ m_prevTimestamp1));
+                m_timeChanges.WriteCode(timestamp - m_prevTimestamp1);
+                m_prevTimestamp1 = timestamp;
             }
             if (m_nextPoint.PrevQuality1 != (ulong)point.Quality)
             {
@@ -303,6 +306,7 @@ namespace Sttp.DataPointEncoding
             if (clearMapping)
             {
                 m_points = new IndexedArray<TsscPointMetadata>();
+                m_timeChanges = new TsscTimestampEncoding(Writer, null);
                 m_prevPoint = new TsscPointMetadata(Writer, null);
                 m_prevTimestamp1 = 0;
             }
