@@ -358,7 +358,7 @@ namespace Sttp
             }
         }
 
-        private void WriteBits(int bits, ulong value)
+        public void WriteBits(int bits, ulong value)
         {
             if (bits > 64 || bits < 0)
                 throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");

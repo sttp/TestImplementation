@@ -33,6 +33,8 @@ namespace Sttp.DataPointEncoding
     internal class TsscPointMetadata
     {
         public int PrevNextChannelId1;
+        public int JumpedToCounter;
+        public int JumpID;
 
         public ulong PrevQuality1;
 

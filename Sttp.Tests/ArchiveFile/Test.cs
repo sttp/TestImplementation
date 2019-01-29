@@ -112,6 +112,8 @@ namespace Sttp.Tests
                             while (ctp.ReadDataPoint(dp))
                             {
                                 PointCount++;
+                                //dp.Value = (double)dp.Value;
+                                //dp.Value = (long)dp.Value;
                                 ctp2.AddDataPoint(dp);
                             }
                             break;

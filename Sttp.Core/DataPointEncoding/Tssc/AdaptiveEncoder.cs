@@ -13,9 +13,18 @@ namespace Sttp.DataPointEncoding
     {
         private MetadataChannelMapEncoder m_channelMap;
 
-        const uint Bits31 = 0x7FFFFFFu;
-        const uint Bits30 = 0x3FFFFFFu;
-        const uint Bits29 = 0x1FFFFFFu;
+        const ulong Bits64 = 0xFFFFFFFFFFFFFFFFu;
+        const ulong Bits60 = 0xFFFFFFFFFFFFFFFu;
+        const ulong Bits56 = 0xFFFFFFFFFFFFFFu;
+        const ulong Bits52 = 0xFFFFFFFFFFFFFu;
+        const ulong Bits48 = 0xFFFFFFFFFFFFu;
+        const ulong Bits44 = 0xFFFFFFFFFFFu;
+        const ulong Bits40 = 0xFFFFFFFFFFu;
+        const ulong Bits36 = 0xFFFFFFFFFu;
+        const uint Bits32 = 0xFFFFFFFFu;
+        const uint Bits31 = 0x7FFFFFFFu;
+        const uint Bits30 = 0x3FFFFFFFu;
+        const uint Bits29 = 0x1FFFFFFFu;
         const uint Bits28 = 0xFFFFFFFu;
         const uint Bits27 = 0x7FFFFFFu;
         const uint Bits26 = 0x3FFFFFFu;
@@ -53,7 +62,7 @@ namespace Sttp.DataPointEncoding
         private TsscPointMetadata m_nextPoint;
         private TsscWordEncoding m_encoder;
         private TsscTimestampEncoding m_timeChanges;
-
+        private TsscPointIDEncoding m_pointChanges;
 
         private IndexedArray<TsscPointMetadata> m_points;
 
@@ -254,11 +263,13 @@ namespace Sttp.DataPointEncoding
 
         private void WriteExceptionCase(SttpDataPoint point, int channelID)
         {
+            return;
             if (m_prevPoint.PrevNextChannelId1 != channelID)
             {
                 m_encoder.WriteCode(0);
-                Writer.WriteBits1(0);
-                Writer.Write8BitSegments((uint)channelID);
+                Writer.WriteBits2(0);
+                m_pointChanges.WriteCode(channelID);
+                //Writer.Write8BitSegments((uint)channelID);
                 m_prevPoint.PrevNextChannelId1 = channelID;
             }
             if (m_prevTimestamp1 != point.Time.Ticks)
@@ -307,81 +318,181 @@ namespace Sttp.DataPointEncoding
             {
                 m_points = new IndexedArray<TsscPointMetadata>();
                 m_timeChanges = new TsscTimestampEncoding(Writer, null);
+                m_pointChanges = new TsscPointIDEncoding(m_points, Writer, null);
                 m_prevPoint = new TsscPointMetadata(Writer, null);
                 m_prevTimestamp1 = 0;
             }
         }
 
-        private unsafe void Write64(ulong value)
+        private unsafe void Write64(ulong valueRaw)
         {
-            throw new NotImplementedException();
+            TsscPointMetadata point = m_nextPoint;
+
+            if (valueRaw == 0)
+            {
+                m_encoder.WriteCode(TsscCodeWordsInt.ValueZero);
+            }
+            else if (point.PrevValue1 == valueRaw)
+            {
+                m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR0);
+            }
+            else
+            {
+                ulong bitsChanged;
+                bitsChanged = CompareUInt64.Compare(valueRaw, point.PrevValue1);
+                point.PrevValue1 = valueRaw;
+                if (bitsChanged <= Bits4)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR4);
+                    Writer.WriteBits(4, bitsChanged);
+                }
+                else if (bitsChanged <= Bits8)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR8);
+                    Writer.WriteBits(8, bitsChanged);
+                }
+                else if (bitsChanged <= Bits12)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR12);
+                    Writer.WriteBits(12, bitsChanged);
+                }
+                else if (bitsChanged <= Bits16)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR16);
+                    Writer.WriteBits(16, bitsChanged);
+                }
+                else if (bitsChanged <= Bits20)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR20);
+                    Writer.WriteBits(20, bitsChanged);
+                }
+                else if (bitsChanged <= Bits24)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR24);
+                    Writer.WriteBits(24, bitsChanged);
+                }
+                else if (bitsChanged <= Bits28)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR28);
+                    Writer.WriteBits(28, bitsChanged);
+                }
+                else if (bitsChanged <= Bits32)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR32);
+                    Writer.WriteBits(32, bitsChanged);
+                }
+                else if (bitsChanged <= Bits36)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR36);
+                    Writer.WriteBits(36, bitsChanged);
+                }
+                else if (bitsChanged <= Bits40)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR40);
+                    Writer.WriteBits(40, bitsChanged);
+                }
+                else if (bitsChanged <= Bits48)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR48);
+                    Writer.WriteBits(48, bitsChanged);
+                }
+                else if (bitsChanged <= Bits56)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR56);
+                    Writer.WriteBits(56, bitsChanged);
+                }
+                else
+                {
+                    m_encoder.WriteCode(TsscCodeWordsInt.ValueXOR64);
+                    Writer.WriteBits(64, bitsChanged);
+                }
+            }
         }
 
         private unsafe void WriteDouble(double value)
         {
-            throw new NotSupportedException();
-            //TsscPointMetadata point = m_nextPoint;
-            //ulong valueRaw = *(ulong*)&value;
+            TsscPointMetadata point = m_nextPoint;
+            ulong valueRaw = *(ulong*)&value;
 
-            //if (valueRaw == 0)
-            //{
-            //    m_encoder.WriteCode(TsscCodeWordsFloat.ValueZero);
-            //}
-            //else if (point.PrevValue1 == valueRaw)
-            //{
-            //    m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR0);
-            //}
-            //else
-            //{
-            //    uint bitsChanged;
-            //    bitsChanged = CompareUInt32.Compare(valueRaw, (uint)point.PrevValue1);
-            //    point.PrevValue1 = valueRaw;
-            //    if (bitsChanged <= Bits6)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR6);
-            //        Writer.WriteBits(6, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits9)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR9);
-            //        Writer.WriteBits(9, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits12)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR12);
-            //        Writer.WriteBits(12, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits15)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR15);
-            //        Writer.WriteBits(15, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits18)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR18);
-            //        Writer.WriteBits(18, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits21)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR21);
-            //        Writer.WriteBits(21, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits24)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR24);
-            //        Writer.WriteBits(24, bitsChanged);
-            //    }
-            //    else if (bitsChanged <= Bits28)
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR28);
-            //        Writer.WriteBits(28, bitsChanged);
-            //    }
-            //    else
-            //    {
-            //        m_encoder.WriteCode(TsscCodeWordsFloat.ValueXOR32);
-            //        Writer.WriteBits32(bitsChanged);
-            //    }
-            //}
+            if (valueRaw == 0)
+            {
+                m_encoder.WriteCode(TsscCodeWordsDouble.ValueZero);
+            }
+            else if (point.PrevValue1 == valueRaw)
+            {
+                m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR0);
+            }
+            else
+            {
+                ulong bitsChanged;
+                bitsChanged = CompareUInt64.Compare(valueRaw, point.PrevValue1);
+                point.PrevValue1 = valueRaw;
+                if (bitsChanged <= Bits8)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR8);
+                    Writer.WriteBits(8, bitsChanged);
+                }
+                else if (bitsChanged <= Bits16)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR16);
+                    Writer.WriteBits(16, bitsChanged);
+                }
+                else if (bitsChanged <= Bits24)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR24);
+                    Writer.WriteBits(24, bitsChanged);
+                }
+                else if (bitsChanged <= Bits28)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR28);
+                    Writer.WriteBits(28, bitsChanged);
+                }
+                else if (bitsChanged <= Bits32)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR32);
+                    Writer.WriteBits(32, bitsChanged);
+                }
+                else if (bitsChanged <= Bits36)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR36);
+                    Writer.WriteBits(36, bitsChanged);
+                }
+                else if (bitsChanged <= Bits40)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR40);
+                    Writer.WriteBits(40, bitsChanged);
+                }
+                else if (bitsChanged <= Bits44)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR44);
+                    Writer.WriteBits(44, bitsChanged);
+                }
+                else if (bitsChanged <= Bits48)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR48);
+                    Writer.WriteBits(48, bitsChanged);
+                }
+                else if (bitsChanged <= Bits52)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR52);
+                    Writer.WriteBits(52, bitsChanged);
+                }
+                else if (bitsChanged <= Bits56)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR56);
+                    Writer.WriteBits(56, bitsChanged);
+                }
+                else if (bitsChanged <= Bits60)
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR60);
+                    Writer.WriteBits(60, bitsChanged);
+                }
+                else
+                {
+                    m_encoder.WriteCode(TsscCodeWordsDouble.ValueXOR64);
+                    Writer.WriteBits(64, bitsChanged);
+                }
+            }
         }
         private unsafe void WriteSingle(float value)
         {

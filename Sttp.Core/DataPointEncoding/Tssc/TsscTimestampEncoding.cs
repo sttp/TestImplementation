@@ -89,12 +89,12 @@ namespace Sttp.DataPointEncoding
                 m_writeBits.WriteBits1(1);
                 if (value < 0)
                 {
-                    m_writeBits.Write4BitSegments((ulong)~value);
+                    m_writeBits.Write8BitSegments((ulong)~value);
                     m_writeBits.WriteBits1(1);
                 }
                 else
                 {
-                    m_writeBits.Write4BitSegments((ulong)value);
+                    m_writeBits.Write8BitSegments((ulong)value);
                     m_writeBits.WriteBits1(0);
                 }
             }

@@ -28,7 +28,7 @@ namespace Sttp.DataPointEncoding
     /// The encoding commands supported by TSSC. This class is used by 
     /// <see cref="TsscDecoder"/> and <see cref="TsscEncoder"/>.
     /// </summary>
-    internal static class TsscCodeWordsFloat //For Int64, Float, Double, Time
+    internal static class TsscCodeWordsFloat //For Float,
     {
         public const byte ValueZero = 1;
         public const byte ValueXOR0 = 2;
@@ -45,6 +45,51 @@ namespace Sttp.DataPointEncoding
         public const byte ValueXOR26 = 13;
         public const byte ValueXOR28 = 14;
         public const byte ValueXOR32 = 15;
+    }
+
+    /// <summary>
+    /// The encoding commands supported by TSSC. This class is used by 
+    /// <see cref="TsscDecoder"/> and <see cref="TsscEncoder"/>.
+    /// </summary>
+    internal static class TsscCodeWordsInt //For Int64, Time
+    {
+        public const byte ValueZero = 1;
+        public const byte ValueXOR0 = 2;
+        public const byte ValueXOR4 = 3;
+        public const byte ValueXOR8 = 4;
+        public const byte ValueXOR12 = 5;
+        public const byte ValueXOR16 = 6;
+        public const byte ValueXOR20 = 7;
+        public const byte ValueXOR24 = 8;
+        public const byte ValueXOR28 = 9;
+        public const byte ValueXOR32 = 10;
+        public const byte ValueXOR36 = 11;
+        public const byte ValueXOR40 = 12;
+        public const byte ValueXOR48 = 13;
+        public const byte ValueXOR56 = 14;
+        public const byte ValueXOR64 = 15;
+    }
+    /// <summary>
+    /// The encoding commands supported by TSSC. This class is used by 
+    /// <see cref="TsscDecoder"/> and <see cref="TsscEncoder"/>.
+    /// </summary>
+    internal static class TsscCodeWordsDouble //For double
+    {
+        public const byte ValueZero = 1;
+        public const byte ValueXOR0 = 2;
+        public const byte ValueXOR8 = 3;
+        public const byte ValueXOR16 = 4;
+        public const byte ValueXOR24 = 5;
+        public const byte ValueXOR28 = 6;
+        public const byte ValueXOR32 = 7;
+        public const byte ValueXOR36 = 8;
+        public const byte ValueXOR40 = 9;
+        public const byte ValueXOR44 = 10;
+        public const byte ValueXOR48 = 11;
+        public const byte ValueXOR52 = 12;
+        public const byte ValueXOR56 = 13;
+        public const byte ValueXOR60 = 14;
+        public const byte ValueXOR64 = 15;
     }
 
     /// <summary>
