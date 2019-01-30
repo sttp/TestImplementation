@@ -86,6 +86,7 @@ namespace Sttp.Tests
         {
             BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Adaptive);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
+
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Zlib, EncodingMethod.Adaptive);
@@ -113,7 +114,7 @@ namespace Sttp.Tests
                             {
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
-                                //dp.Value = (long)dp.Value;
+                                //dp.Value = (long)dp.Value*1000;
                                 ctp2.AddDataPoint(dp);
                             }
                             break;

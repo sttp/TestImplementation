@@ -52,7 +52,7 @@ namespace Sttp.DataPointEncoding
         {
             m_codesPer = 0;
             m_codesSinceLast = 0;
-            m_commandStats = new byte[16];
+            m_commandStats = new byte[32];
             m_mode = 1;
             m_writeBits = writer;
             m_readBit = reader;
@@ -63,7 +63,7 @@ namespace Sttp.DataPointEncoding
             switch (m_mode)
             {
                 case 1:
-                    m_writeBits.WriteBits4(code);
+                    m_writeBits.WriteBits5(code);
                     break;
                 case 2:
                     if (code == m_mode1)
@@ -73,7 +73,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits1(0);
-                        m_writeBits.WriteBits4(code);
+                        m_writeBits.WriteBits5(code);
                     }
                     break;
                 case 3:
@@ -88,7 +88,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits2(0);
-                        m_writeBits.WriteBits4(code);
+                        m_writeBits.WriteBits5(code);
                     }
                     break;
                 case 4:
@@ -107,7 +107,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits3(0);
-                        m_writeBits.WriteBits4(code);
+                        m_writeBits.WriteBits5(code);
                     }
                     break;
                 case 5:
@@ -130,7 +130,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits4(0);
-                        m_writeBits.WriteBits4(code);
+                        m_writeBits.WriteBits5(code);
                     }
                     break;
                 default:
@@ -146,7 +146,7 @@ namespace Sttp.DataPointEncoding
             switch (m_mode)
             {
                 case 1:
-                    code = m_readBit.ReadBits4();
+                    code = m_readBit.ReadBits5();
                     break;
                 case 2:
                     if (m_readBit.ReadBits1() == 1)
@@ -155,7 +155,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits4();
+                        code = m_readBit.ReadBits5();
                     }
                     break;
                 case 3:
@@ -169,7 +169,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits4();
+                        code = m_readBit.ReadBits5();
                     }
                     break;
                 case 4:
@@ -187,7 +187,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits4();
+                        code = m_readBit.ReadBits5();
                     }
                     break;
                 case 5:
@@ -203,7 +203,7 @@ namespace Sttp.DataPointEncoding
                     {
                         code = m_mode001;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBit.ReadBits5() == 1)
                     {
                         code = m_mode0001;
                     }
@@ -265,7 +265,7 @@ namespace Sttp.DataPointEncoding
                     m_codesSinceLast = 0;
                     Array.Clear(m_commandStats, 0, m_commandStats.Length);
                 }
-             
+
             }
         }
 
@@ -335,11 +335,11 @@ namespace Sttp.DataPointEncoding
             }
 
 
-            int mode1Size = total * 4;
-            int mode2Size = count1 * 1 + (total - count1) * 5;
-            int mode3Size = count1 * 1 + count2 * 2 + (total - count1 - count2) * 6;
-            int mode4Size = count1 * 1 + count2 * 2 + count3 * 3 + (total - count1 - count2 - count3) * 7;
-            int mode5Size = count1 * 1 + count2 * 2 + count3 * 3 + count4 * 3 + (total - count1 - count2 - count3 - count4) * 8;
+            int mode1Size = total * 5;
+            int mode2Size = count1 * 1 + (total - count1) * 6;
+            int mode3Size = count1 * 1 + count2 * 2 + (total - count1 - count2) * 7;
+            int mode4Size = count1 * 1 + count2 * 2 + count3 * 3 + (total - count1 - count2 - count3) * 8;
+            int mode5Size = count1 * 1 + count2 * 2 + count3 * 3 + count4 * 3 + (total - count1 - count2 - count3 - count4) * 9;
 
             int minSize = int.MaxValue;
             minSize = Math.Min(minSize, mode1Size);

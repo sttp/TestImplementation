@@ -43,7 +43,6 @@ namespace Sttp.DataPointEncoding
         private TsscPointMetadata m_lastPoint;
         private IndexedArray<TsscPointMetadata> m_points;
         private ByteReader m_reader;
-        private TsscWordEncoding m_encoding;
 
         /// <summary>
         /// Creates a decoder for the TSSC protocol.
