@@ -30,14 +30,16 @@ namespace Sttp.DataPointEncoding
     /// <summary>
     /// The metadata kept for each pointID.
     /// </summary>
-    public class TsscTimestampEncoding
+    internal class AdvancedTimestampEncoding
     {
         private int m_codesSinceLast = 0;
         private int m_codesPer = 0;
 
-        private long m_mode1;
-        private long m_mode01;
-        private long m_mode001;
+        private long m_time1;
+        private long m_time2;
+        private long m_time3;
+        private long m_time4;
+        private long m_time5;
 
         private readonly ByteWriter m_writeBits;
 
@@ -45,7 +47,7 @@ namespace Sttp.DataPointEncoding
 
         private Dictionary<long, int> m_validValues = new Dictionary<long, int>();
 
-        public TsscTimestampEncoding(ByteWriter writer, ByteReader reader)
+        public AdvancedTimestampEncoding(ByteWriter writer, ByteReader reader)
         {
             m_codesPer = 0;
             m_codesSinceLast = 0;
@@ -53,30 +55,44 @@ namespace Sttp.DataPointEncoding
             m_readBit = reader;
         }
 
-        public void WriteCode(long value)
+        public void WriteCode(AdvancedWordEncoding encoder, long value)
         {
-            if (value == m_mode1)
+            var valueCheck = Math.Abs(value);
+            if (valueCheck == m_time1)
             {
-                m_writeBits.WriteBits1(1);
+                encoder.WriteCode(AdvancedCodeWords.Timestamp1);
                 if (value < 0)
                     m_writeBits.WriteBits1(1);
                 else
                     m_writeBits.WriteBits1(0);
             }
-            else if (value == m_mode01)
+            else if (valueCheck == m_time2)
             {
-                m_writeBits.WriteBits1(0);
-                m_writeBits.WriteBits1(1);
+                encoder.WriteCode(AdvancedCodeWords.Timestamp2);
                 if (value < 0)
                     m_writeBits.WriteBits1(1);
                 else
                     m_writeBits.WriteBits1(0);
             }
-            else if (value == m_mode001)
+            else if (valueCheck == m_time3)
             {
-                m_writeBits.WriteBits1(0);
-                m_writeBits.WriteBits1(0);
-                m_writeBits.WriteBits1(1);
+                encoder.WriteCode(AdvancedCodeWords.Timestamp3);
+                if (value < 0)
+                    m_writeBits.WriteBits1(1);
+                else
+                    m_writeBits.WriteBits1(0);
+            }
+            else if (valueCheck == m_time4)
+            {
+                encoder.WriteCode(AdvancedCodeWords.Timestamp4);
+                if (value < 0)
+                    m_writeBits.WriteBits1(1);
+                else
+                    m_writeBits.WriteBits1(0);
+            }
+            else if (valueCheck == m_time5)
+            {
+                encoder.WriteCode(AdvancedCodeWords.Timestamp5);
                 if (value < 0)
                     m_writeBits.WriteBits1(1);
                 else
@@ -84,47 +100,90 @@ namespace Sttp.DataPointEncoding
             }
             else
             {
-                m_writeBits.WriteBits1(0);
-                m_writeBits.WriteBits1(0);
-                m_writeBits.WriteBits1(1);
+                encoder.WriteCode(AdvancedCodeWords.TimestampElse);
                 if (value < 0)
                 {
-                    m_writeBits.Write8BitSegments((ulong)~value);
                     m_writeBits.WriteBits1(1);
+                    m_writeBits.Write8BitSegments((ulong)~value);
                 }
                 else
                 {
-                    m_writeBits.Write8BitSegments((ulong)value);
                     m_writeBits.WriteBits1(0);
+                    m_writeBits.Write8BitSegments((ulong)value);
                 }
             }
 
             UpdatedCodeStatistics(value);
         }
 
-        public long ReadCode()
+        public long ReadCode(AdvancedCodeWords encoding)
         {
             long code;
-            if (m_readBit.ReadBits1() == 1)
-            {
-                code = m_mode1;
-            }
-            else if (m_readBit.ReadBits1() == 1)
-            {
-                code = m_mode01;
-            }
-            else if (m_readBit.ReadBits1() == 1)
-            {
-                code = m_mode001;
-            }
-            else
-            {
-                code = m_readBit.ReadBits4();
-            }
 
-            if (m_readBit.ReadBits1() == 1)
+            switch (encoding)
             {
-                code = ~code;
+                case AdvancedCodeWords.Timestamp1:
+                    if (m_readBit.ReadBits1() == 0)
+                    {
+                        code = m_time1;
+                    }
+                    else
+                    {
+                        code = -m_time1;
+                    }
+                    break;
+                case AdvancedCodeWords.Timestamp2:
+                    if (m_readBit.ReadBits1() == 0)
+                    {
+                        code = m_time2;
+                    }
+                    else
+                    {
+                        code = -m_time2;
+                    }
+                    break;
+                case AdvancedCodeWords.Timestamp3:
+                    if (m_readBit.ReadBits1() == 0)
+                    {
+                        code = m_time3;
+                    }
+                    else
+                    {
+                        code = -m_time3;
+                    }
+                    break;
+                case AdvancedCodeWords.Timestamp4:
+                    if (m_readBit.ReadBits1() == 0)
+                    {
+                        code = m_time4;
+                    }
+                    else
+                    {
+                        code = -m_time4;
+                    }
+                    break;
+                case AdvancedCodeWords.Timestamp5:
+                    if (m_readBit.ReadBits1() == 0)
+                    {
+                        code = m_time5;
+                    }
+                    else
+                    {
+                        code = -m_time5;
+                    }
+                    break;
+                case AdvancedCodeWords.TimestampElse:
+                    if (m_readBit.ReadBits1() == 0)
+                    {
+                        code = (long)m_readBit.Read8BitSegments();
+                    }
+                    else
+                    {
+                        code = -(long)m_readBit.Read8BitSegments();
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encoding), encoding, null);
             }
 
             UpdatedCodeStatistics(code);
@@ -182,15 +241,27 @@ namespace Sttp.DataPointEncoding
             long code3 = 0;
             int count3 = 0;
 
+            long code4 = 0;
+            int count4 = 0;
+
+            long code5 = 0;
+            int count5 = 0;
+
             foreach (var item in m_validValues)
             {
                 int cnt = item.Value;
                 long x = item.Key;
 
-                if (cnt > count3)
+                if (cnt > count5)
                 {
                     if (cnt > count1)
                     {
+                        code5 = code4;
+                        count5 = count4;
+
+                        code4 = code3;
+                        count4 = count3;
+
                         code3 = code2;
                         count3 = count2;
 
@@ -202,23 +273,50 @@ namespace Sttp.DataPointEncoding
                     }
                     else if (cnt > count2)
                     {
+                        code5 = code4;
+                        count5 = count4;
+
+                        code4 = code3;
+                        count4 = count3;
+
                         code3 = code2;
                         count3 = count2;
 
                         code2 = x;
                         count2 = cnt;
                     }
-                    else
+                    else if (cnt > count3)
                     {
+                        code5 = code4;
+                        count5 = count4;
+
+                        code4 = code3;
+                        count4 = count3;
+
                         code3 = x;
                         count3 = cnt;
+                    }
+                    else if (cnt > count4)
+                    {
+                        code5 = code4;
+                        count5 = count4;
+
+                        code4 = x;
+                        count4 = cnt;
+                    }
+                    else
+                    {
+                        code5 = x;
+                        count5 = cnt;
                     }
                 }
             }
 
-            m_mode1 = code1;
-            m_mode01 = code2;
-            m_mode001 = code3;
+            m_time1 = code1;
+            m_time2 = code2;
+            m_time3 = code3;
+            m_time4 = code4;
+            m_time5 = code5;
 
         }
     }

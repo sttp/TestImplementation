@@ -1,7 +1,7 @@
 ﻿//******************************************************************************************************
-//  TsscPointMetadata.cs - Gbtc
+//  AdvancedPointMetadata.cs - Gbtc
 //
-//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//  Copyright © 2019, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  12/02/2016 - Steven E. Chisholm
+//  01/30/2019 - Steven E. Chisholm
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -30,29 +30,29 @@ namespace Sttp.DataPointEncoding
     /// <summary>
     /// The metadata kept for each pointID.
     /// </summary>
-    internal class TsscPointMetadata
+    internal class AdvancedPointMetadata
     {
-        public int PrevNextChannelId1;
-        public int JumpedToCounter;
-        public int JumpID;
+        public CtpTypeCode PrevTypeCode;
+        public long PrevQuality;
+        public CtpObject PrevValue;
 
-        public ulong PrevQuality1;
-
-        public CtpTypeCode PrevTypeCode = CtpTypeCode.Single;
-        public ulong PrevValue1;
-
-        public CtpObject Prev1;
-        public CtpObject Prev2;
-        public CtpObject Prev3;
+        public int NeighborChannelId;
 
         /// <summary>
-        /// When reading the next point, this encoding method is used ONLY the first time.
+        /// When reading the next point
         /// </summary>
-        public TsscWordEncoding NextValueEncoding;
+        public AdvancedWordEncoding NextValueEncoding;
 
-        public TsscPointMetadata(ByteWriter writer, ByteReader reader)
+        public AdvancedPointMetadata(ByteWriter writer, ByteReader reader, SttpDataPoint point)
         {
-            NextValueEncoding = new TsscWordEncoding(writer, reader);
+            NextValueEncoding = new AdvancedWordEncoding(writer, reader);
+            if (point != null)
+            {
+                PrevTypeCode = point.Value.ValueTypeCode;
+                PrevValue = point.Value;
+                PrevQuality = point.Quality;
+            }
+
         }
     }
 }

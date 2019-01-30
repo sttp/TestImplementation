@@ -68,7 +68,7 @@ namespace Sttp.Data
             CtpObject[] item = new CtpObject[values.Length];
             for (int x = 0; x < values.Length; x++)
             {
-                item[x] = values[x].Clone();
+                item[x] = values[x];
             }
             Rows.Add(item);
         }

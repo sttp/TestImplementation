@@ -86,6 +86,7 @@ namespace Sttp.Tests
         {
             BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Adaptive);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
+            Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
 
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
@@ -112,6 +113,8 @@ namespace Sttp.Tests
                             var dp = new SttpDataPoint();
                             while (ctp.ReadDataPoint(dp))
                             {
+                                //if (dp.Metadata.DataPointID.AsString.EndsWith(":Status0"))
+                                //    continue;
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
                                 //dp.Value = (long)dp.Value*1000;

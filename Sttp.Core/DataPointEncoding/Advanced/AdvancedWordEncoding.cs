@@ -1,7 +1,7 @@
 ﻿//******************************************************************************************************
-//  TsscWordEncoding.cs - Gbtc
+//  AdvancedWordEncoding.cs - Gbtc
 //
-//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//  Copyright © 2019, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  12/02/2016 - Steven E. Chisholm
+//  01/30/2019 - Steven E. Chisholm
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -30,25 +30,24 @@ namespace Sttp.DataPointEncoding
     /// <summary>
     /// The metadata kept for each pointID.
     /// </summary>
-    public class TsscWordEncoding
+    internal class AdvancedWordEncoding
     {
         private readonly byte[] m_commandStats;
         private int m_codesSinceLast = 0;
         private int m_codesPer = 0;
 
-        //Bit codes for the 4 modes of encoding. 
         private byte m_mode;
 
-        private byte m_mode1;
-        private byte m_mode01;
-        private byte m_mode001;
-        private byte m_mode0001;
+        private AdvancedCodeWords m_mode1;
+        private AdvancedCodeWords m_mode01;
+        private AdvancedCodeWords m_mode001;
+        private AdvancedCodeWords m_mode0001;
 
         private readonly ByteWriter m_writeBits;
 
         private readonly ByteReader m_readBit;
 
-        public TsscWordEncoding(ByteWriter writer, ByteReader reader)
+        public AdvancedWordEncoding(ByteWriter writer, ByteReader reader)
         {
             m_codesPer = 0;
             m_codesSinceLast = 0;
@@ -58,12 +57,12 @@ namespace Sttp.DataPointEncoding
             m_readBit = reader;
         }
 
-        public void WriteCode(byte code)
+        public void WriteCode(AdvancedCodeWords code)
         {
             switch (m_mode)
             {
                 case 1:
-                    m_writeBits.WriteBits5(code);
+                    m_writeBits.WriteBits5((byte)code);
                     break;
                 case 2:
                     if (code == m_mode1)
@@ -73,7 +72,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits1(0);
-                        m_writeBits.WriteBits5(code);
+                        m_writeBits.WriteBits5((byte)code);
                     }
                     break;
                 case 3:
@@ -88,7 +87,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits2(0);
-                        m_writeBits.WriteBits5(code);
+                        m_writeBits.WriteBits5((byte)code);
                     }
                     break;
                 case 4:
@@ -107,7 +106,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits3(0);
-                        m_writeBits.WriteBits5(code);
+                        m_writeBits.WriteBits5((byte)code);
                     }
                     break;
                 case 5:
@@ -130,7 +129,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writeBits.WriteBits4(0);
-                        m_writeBits.WriteBits5(code);
+                        m_writeBits.WriteBits5((byte)code);
                     }
                     break;
                 default:
@@ -140,13 +139,13 @@ namespace Sttp.DataPointEncoding
             UpdatedCodeStatistics(code);
         }
 
-        public uint ReadCode()
+        public AdvancedCodeWords ReadCode()
         {
-            uint code = 0;
+            AdvancedCodeWords code = 0;
             switch (m_mode)
             {
                 case 1:
-                    code = m_readBit.ReadBits5();
+                    code = (AdvancedCodeWords)m_readBit.ReadBits5();
                     break;
                 case 2:
                     if (m_readBit.ReadBits1() == 1)
@@ -155,7 +154,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits5();
+                        code = (AdvancedCodeWords)m_readBit.ReadBits5();
                     }
                     break;
                 case 3:
@@ -169,7 +168,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits5();
+                        code = (AdvancedCodeWords)m_readBit.ReadBits5();
                     }
                     break;
                 case 4:
@@ -187,7 +186,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits5();
+                        code = (AdvancedCodeWords)m_readBit.ReadBits5();
                     }
                     break;
                 case 5:
@@ -209,7 +208,7 @@ namespace Sttp.DataPointEncoding
                     }
                     else
                     {
-                        code = m_readBit.ReadBits4();
+                        code = (AdvancedCodeWords)m_readBit.ReadBits4();
                     }
                     break;
                 default:
@@ -220,7 +219,7 @@ namespace Sttp.DataPointEncoding
             return code;
         }
 
-        private void UpdatedCodeStatistics(uint code)
+        private void UpdatedCodeStatistics(AdvancedCodeWords code)
         {
             if (m_codesPer == 0)
             {
@@ -238,12 +237,12 @@ namespace Sttp.DataPointEncoding
                     return;
                 m_codesPer = 2;
                 m_codesSinceLast++;
-                m_commandStats[code]++;
+                m_commandStats[(byte)code]++;
                 AdaptCommands();
                 return;
             }
             m_codesSinceLast++;
-            m_commandStats[code]++;
+            m_commandStats[(byte)code]++;
 
             if (m_codesSinceLast >= m_codesPer)
             {
@@ -271,16 +270,16 @@ namespace Sttp.DataPointEncoding
 
         private void AdaptCommands()
         {
-            byte code1 = 0;
+            AdvancedCodeWords code1 = 0;
             int count1 = 0;
 
-            byte code2 = 1;
+            AdvancedCodeWords code2 = 0;
             int count2 = 0;
 
-            byte code3 = 2;
+            AdvancedCodeWords code3 = 0;
             int count3 = 0;
 
-            byte code4 = 3;
+            AdvancedCodeWords code4 = 0;
             int count4 = 0;
 
             int total = 0;
@@ -304,7 +303,7 @@ namespace Sttp.DataPointEncoding
                         code2 = code1;
                         count2 = count1;
 
-                        code1 = (byte)x;
+                        code1 = (AdvancedCodeWords)x;
                         count1 = cnt;
                     }
                     else if (cnt > count2)
@@ -315,7 +314,7 @@ namespace Sttp.DataPointEncoding
                         code3 = code2;
                         count3 = count2;
 
-                        code2 = (byte)x;
+                        code2 = (AdvancedCodeWords)x;
                         count2 = cnt;
                     }
                     else if (cnt > count3)
@@ -323,12 +322,12 @@ namespace Sttp.DataPointEncoding
                         code4 = code3;
                         count4 = count3;
 
-                        code3 = (byte)x;
+                        code3 = (AdvancedCodeWords)x;
                         count3 = cnt;
                     }
                     else
                     {
-                        code4 = (byte)x;
+                        code4 = (AdvancedCodeWords)x;
                         count4 = cnt;
                     }
                 }

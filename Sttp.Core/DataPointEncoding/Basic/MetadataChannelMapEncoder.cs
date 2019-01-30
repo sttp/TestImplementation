@@ -15,6 +15,7 @@ namespace Sttp.DataPointEncoding
 
         public int GetChannelID(SttpDataPointMetadata metadata, out bool isNew)
         {
+            isNew = false;
             int channelID;
             if (metadata.RuntimeID.HasValue)
             {
@@ -24,21 +25,17 @@ namespace Sttp.DataPointEncoding
                     ChannelMapping.Add(metadata);
                     RuntimeToChannelMapping.Add(metadata.RuntimeID.Value, channelID);
                     isNew = true;
-                    return channelID;
                 }
+                return channelID;
             }
-            else
+
+            if (!RuntimeToChannelMapping2.TryGetValue(metadata.DataPointID, out channelID))
             {
-                if (!RuntimeToChannelMapping2.TryGetValue(metadata.DataPointID, out channelID))
-                {
-                    channelID = ChannelMapping.Count;
-                    ChannelMapping.Add(metadata);
-                    RuntimeToChannelMapping2.Add(metadata.DataPointID.Clone(), channelID);
-                    isNew = true;
-                    return channelID;
-                }
+                channelID = ChannelMapping.Count;
+                ChannelMapping.Add(metadata);
+                RuntimeToChannelMapping2.Add(metadata.DataPointID, channelID);
+                isNew = true;
             }
-            isNew = false;
             return channelID;
         }
 

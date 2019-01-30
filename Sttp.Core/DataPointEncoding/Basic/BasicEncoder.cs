@@ -56,7 +56,7 @@ namespace Sttp.DataPointEncoding
                 m_stream.WriteBits1(typeChanged);
             }
 
-            int channelID = m_channelMap.GetChannelID(point.Metadata, out bool isNew);
+            int channelID = m_channelMap.GetChannelID(point.Metadata, out var isNew);
             int pointIDDelta = channelID ^ m_lastChannelID;
             m_stream.Write4BitSegments((uint)pointIDDelta);
             m_lastChannelID = channelID;

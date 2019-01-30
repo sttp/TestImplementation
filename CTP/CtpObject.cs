@@ -26,6 +26,9 @@ namespace CTP
         [FieldOffset(0)]
         private readonly Guid m_valueGuid;
 
+        [FieldOffset(0)]
+        private readonly int m_rawInt32;
+
         [FieldOffset(16)]
         private readonly object m_valueObject;
 
@@ -40,6 +43,62 @@ namespace CTP
         /// The type code of the value.
         /// </summary>
         public CtpTypeCode ValueTypeCode => m_valueTypeCode;
+
+        /// <summary>
+        /// Gets if the specified value is considered the default value for that type.
+        /// Default values for object types are zero length objects since null is a predefined data type.
+        /// </summary>
+        public bool IsDefault
+        {
+            get
+            {
+                switch (m_valueTypeCode)
+                {
+                    case CtpTypeCode.Null:
+                        return true;
+                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Single:
+                    case CtpTypeCode.Double:
+                    case CtpTypeCode.CtpTime:
+                    case CtpTypeCode.Boolean:
+                        return m_valueInt64 == 0;
+                    case CtpTypeCode.Guid:
+                        return m_valueGuid == Guid.Empty;
+                    case CtpTypeCode.String:
+                        return ((string)m_valueObject).Length == 0;
+                    case CtpTypeCode.CtpBuffer:
+                        return ((CtpBuffer)m_valueObject).Length == 0;
+                    case CtpTypeCode.CtpCommand:
+                        return ((CtpCommand)m_valueObject).Length == 0;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        public ulong AsRaw64
+        {
+            get
+            {
+                switch (m_valueTypeCode)
+                {
+                    case CtpTypeCode.Single:
+                        return (ulong)(long)m_rawInt32;
+                    case CtpTypeCode.Null:
+                        return 0;
+                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Double:
+                    case CtpTypeCode.CtpTime:
+                        return (ulong)m_valueInt64;
+                    case CtpTypeCode.Boolean:
+                        if (m_valueBoolean)
+                            return 1;
+                        return 0;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
         public long IsInt64
         {
@@ -144,11 +203,6 @@ namespace CTP
         #endregion
 
         #region [ Methods ] 
-
-        public CtpObject Clone()
-        {
-            return (CtpObject)MemberwiseClone();
-        }
 
         public override string ToString()
         {

@@ -40,8 +40,8 @@ namespace Sttp.DataPointEncoding
         private long m_prevTimeDelta3;
         private long m_prevTimeDelta4;
 
-        private TsscPointMetadata m_lastPoint;
-        private IndexedArray<TsscPointMetadata> m_points;
+        private AdvancedPointMetadata m_lastPoint;
+        private IndexedArray<AdvancedPointMetadata> m_points;
         private ByteReader m_reader;
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace Sttp.DataPointEncoding
         /// </remarks>
         public void Reset()
         {
-            m_points = new IndexedArray<TsscPointMetadata>();
-            m_lastPoint = new TsscPointMetadata(null, m_reader);
+            m_points = new IndexedArray<AdvancedPointMetadata>();
+            m_lastPoint = new AdvancedPointMetadata(null, m_reader, null);
             m_prevTimeDelta1 = long.MaxValue;
             m_prevTimeDelta2 = long.MaxValue;
             m_prevTimeDelta3 = long.MaxValue;
@@ -97,7 +97,7 @@ namespace Sttp.DataPointEncoding
         /// <returns>true if successful, false otherwise.</returns>
         public unsafe bool TryGetMeasurement(out int id, out CtpTime timestamp, out ulong quality, out CtpObject value)
         {
-            TsscPointMetadata nextPoint = null;
+            AdvancedPointMetadata nextPoint = null;
 
             if (m_reader.IsEmpty)
             {

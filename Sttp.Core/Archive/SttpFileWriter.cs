@@ -47,7 +47,7 @@ namespace Sttp
             }
             if (encoding == EncodingMethod.Adaptive)
             {
-                m_encoder = new AdaptiveEncoder();
+                m_encoder = new AdvancedEncoder();
                 m_stream.Write(new CommandBeginDataStream(0, "Adaptive"));
             }
 
