@@ -32,9 +32,12 @@ namespace Sttp.DataPointEncoding
     /// </summary>
     internal class AdvancedPointMetadata
     {
-        public CtpTypeCode PrevTypeCode;
         public long PrevQuality;
+        public long PrevTime;
         public CtpObject PrevValue;
+        public long TimeDelta1 = 0;
+        public long TimeDelta2 = 0;
+        public long TimeDelta3 = 0;
 
         public int NeighborChannelId;
 
@@ -43,16 +46,16 @@ namespace Sttp.DataPointEncoding
         /// </summary>
         public AdvancedWordEncoding NextValueEncoding;
 
-        public AdvancedPointMetadata(ByteWriter writer, ByteReader reader, SttpDataPoint point)
+        public AdvancedPointMetadata(ByteWriter writer, ByteReader reader)
         {
             NextValueEncoding = new AdvancedWordEncoding(writer, reader);
-            if (point != null)
-            {
-                PrevTypeCode = point.Value.ValueTypeCode;
-                PrevValue = point.Value;
-                PrevQuality = point.Quality;
-            }
+        }
 
+        public void Assign(SttpDataPoint point)
+        {
+            PrevValue = point.Value;
+            PrevQuality = point.Quality;
+            PrevTime = point.Time.Ticks;
         }
     }
 }

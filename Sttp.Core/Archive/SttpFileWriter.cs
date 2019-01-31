@@ -23,7 +23,8 @@ namespace Sttp
     {
         Basic,
         Raw,
-        Adaptive
+        Advanced,
+        //Adaptive
     }
 
     public class SttpFileWriter : IDisposable
@@ -45,11 +46,15 @@ namespace Sttp
                 m_encoder = new BasicEncoder();
                 m_stream.Write(new CommandBeginDataStream(0, "Basic"));
             }
-            if (encoding == EncodingMethod.Adaptive)
+            if (encoding == EncodingMethod.Advanced)
             {
                 m_encoder = new AdvancedEncoder();
-                m_stream.Write(new CommandBeginDataStream(0, "Adaptive"));
+                m_stream.Write(new CommandBeginDataStream(0, "Advanced"));
             }
+            //if (encoding == EncodingMethod.Adaptive)
+            //{
+            //    throw new NotSupportedException();
+            //}
 
             if (mode == SttpCompressionMode.Deflate)
             {

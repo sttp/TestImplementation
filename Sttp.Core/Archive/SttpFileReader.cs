@@ -78,6 +78,10 @@ namespace Sttp
                 {
                     m_decoder = new BasicDecoder(Lookup);
                 }
+                if (m_dataStream.EncodingMechanism == "Advanced")
+                {
+                    m_decoder = new AdvancedDecoder(Lookup);
+                }
                 if (m_dataStream.EncodingMechanism == "Raw")
                 {
                     m_decoder = new RawDecoder(Lookup);

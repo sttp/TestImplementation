@@ -9,7 +9,7 @@ using Sttp.Collection;
 
 namespace Sttp.DataPointEncoding
 {
-    public class AdvancedEncoder : EncoderBase
+    public sealed class AdvancedEncoder : EncoderBase
     {
         private MetadataChannelMapEncoder m_channelMap;
 
@@ -40,13 +40,12 @@ namespace Sttp.DataPointEncoding
         const uint Bits0 = 0x0u;
 
         public ByteWriter Writer;
+        private int m_count = 0;
 
         private long m_prevTimestamp;
         private AdvancedPointMetadata m_prevPoint;
         private AdvancedPointMetadata m_nextPoint;
-        private AdvancedWordEncoding m_encoder;
-
-        private AdvancedTimestampEncoding m_timeEncoding;
+        private AdvancedWordEncoding m_encoder => m_prevPoint.NextValueEncoding;
 
         private IndexedArray<AdvancedPointMetadata> m_points;
 
@@ -54,135 +53,147 @@ namespace Sttp.DataPointEncoding
         {
             m_channelMap = new MetadataChannelMapEncoder();
             Writer = new ByteWriter();
-            Reset(true);
+            Clear(true);
         }
 
         public override int Length => Writer.Length;
 
         public override void Clear(bool clearMapping)
         {
-            Reset(clearMapping);
+            Writer.Clear();
             if (clearMapping)
             {
+                m_points = new IndexedArray<AdvancedPointMetadata>();
+                m_prevPoint = new AdvancedPointMetadata(Writer, null);
+                m_prevTimestamp = 0;
                 m_channelMap.Clear();
             }
         }
 
         public override void AddDataPoint(SttpDataPoint point)
         {
+            m_count++;
+
+            if (m_count == 1499)
+                m_count = 1499;
+
             int channelID = m_channelMap.GetChannelID(point.Metadata, out var isNew);
 
             if (isNew)
             {
-                m_nextPoint = new AdvancedPointMetadata(Writer, null, point);
+                m_nextPoint = new AdvancedPointMetadata(Writer, null);
+                m_nextPoint.Assign(point);
                 m_points[channelID] = m_nextPoint;
-                m_encoder = m_prevPoint.NextValueEncoding;
+
                 m_encoder.WriteCode(AdvancedCodeWords.NewPoint);
                 CtpValueEncodingNative.Save(Writer, point.Metadata.DataPointID);
                 Writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_prevTimestamp));
-                m_prevTimestamp = point.Time.Ticks;
                 Writer.Write8BitSegments((ulong)point.Quality);
                 CtpValueEncodingNative.Save(Writer, point.Value);
+                m_prevTimestamp = point.Time.Ticks;
+                m_prevPoint.NeighborChannelId = channelID;
+                m_prevPoint = m_nextPoint;
+                return;
+            }
+            m_nextPoint = m_points[channelID];
+
+            if (m_prevPoint.NeighborChannelId != channelID)
+            {
+                m_encoder.WriteCode(AdvancedCodeWords.PointID);
+                Writer.Write8BitSegments((uint)channelID);
                 m_prevPoint.NeighborChannelId = channelID;
             }
-            else
+
+            if (m_prevTimestamp != point.Time.Ticks)
             {
-                m_nextPoint = m_points[channelID];
-                m_encoder = m_prevPoint.NextValueEncoding;
-
-                if (m_prevPoint.NeighborChannelId != channelID)
+                long timestamp = point.Time.Ticks;
+                m_encoder.WriteCode(AdvancedCodeWords.Timestamp);
+                var delta = timestamp - m_nextPoint.PrevTime;
+                if (m_nextPoint.TimeDelta1 == delta)
                 {
-                    m_encoder.WriteCode(AdvancedCodeWords.PointID);
-                    Writer.Write8BitSegments((uint)channelID);
-                    m_prevPoint.NeighborChannelId = channelID;
+                    Writer.WriteBits2(0);
                 }
-                if (m_prevTimestamp != point.Time.Ticks)
+                else if (m_nextPoint.TimeDelta2 == delta)
                 {
-                    long timestamp = point.Time.Ticks;
-                    m_timeEncoding.WriteCode(m_encoder, timestamp - m_prevTimestamp);
-                    m_prevTimestamp = timestamp;
+                    Writer.WriteBits2(1);
                 }
-                if (m_nextPoint.PrevQuality != point.Quality)
+                else if (m_nextPoint.TimeDelta3 == delta)
                 {
-                    m_encoder.WriteCode(AdvancedCodeWords.Quality);
-                    Writer.Write8BitSegments((ulong)point.Quality);
-                    m_nextPoint.PrevQuality = point.Quality;
-                }
-                if (point.Value.ValueTypeCode != m_nextPoint.PrevTypeCode)
-                {
-                    m_encoder.WriteCode(AdvancedCodeWords.Type);
-                    Writer.WriteBits4((uint)point.Value.ValueTypeCode & 15);
-                    m_nextPoint.PrevTypeCode = point.Value.ValueTypeCode;
-                    m_nextPoint.PrevValue = CtpObject.Null;
-                }
-
-                if (point.Value.IsDefault)
-                {
-                    m_encoder.WriteCode(AdvancedCodeWords.ValueDefault);
-                    m_nextPoint.PrevValue = point.Value;
-                }
-                else if (m_nextPoint.PrevValue == point.Value)
-                {
-                    m_encoder.WriteCode(AdvancedCodeWords.ValuePrev);
+                    Writer.WriteBits2(2);
+                    m_nextPoint.TimeDelta3 = m_nextPoint.TimeDelta2;
+                    m_nextPoint.TimeDelta2 = m_nextPoint.TimeDelta1;
+                    m_nextPoint.TimeDelta1 = delta;
                 }
                 else
                 {
-                    switch (point.Value.ValueTypeCode)
-                    {
-                        case CtpTypeCode.Int64:
-                        case CtpTypeCode.Single:
-                        case CtpTypeCode.Double:
-                        case CtpTypeCode.CtpTime:
-                            Write64(point.Value.AsRaw64);
-                            break;
-                        case CtpTypeCode.Boolean:
-                            //Cannot be false, that would be Default.
-                            m_encoder.WriteCode(AdvancedCodeWords.ValueTrue);
-                            break;
-                        case CtpTypeCode.Guid:
-                        case CtpTypeCode.String:
-                        case CtpTypeCode.CtpCommand:
-                        case CtpTypeCode.CtpBuffer:
-                            m_encoder.WriteCode(AdvancedCodeWords.ValueRaw);
-                            CtpValueEncodingNative.Save(Writer, point.Value);
-                            break;
-                        case CtpTypeCode.Null:
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                    m_nextPoint.PrevValue = point.Value;
+                    m_nextPoint.TimeDelta3 = m_nextPoint.TimeDelta2;
+                    m_nextPoint.TimeDelta2 = m_nextPoint.TimeDelta1;
+                    m_nextPoint.TimeDelta1 = delta;
+
+                    Writer.WriteBits2(3);
+                    Writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_nextPoint.PrevTime));
                 }
+                m_prevTimestamp = timestamp;
             }
 
+            if (m_nextPoint.PrevQuality != point.Quality)
+            {
+                m_encoder.WriteCode(AdvancedCodeWords.Quality);
+                Writer.Write8BitSegments((ulong)point.Quality);
+                m_nextPoint.PrevQuality = point.Quality;
+            }
 
+            if (point.Value.ValueTypeCode != m_nextPoint.PrevValue.ValueTypeCode)
+            {
+                m_encoder.WriteCode(AdvancedCodeWords.Type);
+                Writer.WriteBits4((uint)point.Value.ValueTypeCode & 15);
+                m_nextPoint.PrevValue = CtpObject.CreateDefault(point.Value.ValueTypeCode);
+            }
+
+            if (point.Value.IsDefault)
+            {
+                m_encoder.WriteCode(AdvancedCodeWords.ValueDefault);
+                m_nextPoint.PrevValue = point.Value;
+            }
+            else if (m_nextPoint.PrevValue == point.Value)
+            {
+                m_encoder.WriteCode(AdvancedCodeWords.ValuePrev);
+            }
+            else
+            {
+                switch (point.Value.ValueTypeCode)
+                {
+                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Single:
+                    case CtpTypeCode.Double:
+                    case CtpTypeCode.CtpTime:
+                        Write64(point.Value.AsRaw64);
+                        break;
+                    case CtpTypeCode.Boolean:
+                        //Cannot be false, that would be Default.
+                        m_encoder.WriteCode(AdvancedCodeWords.ValueTrue);
+                        break;
+                    case CtpTypeCode.Guid:
+                    case CtpTypeCode.String:
+                    case CtpTypeCode.CtpCommand:
+                    case CtpTypeCode.CtpBuffer:
+                        m_encoder.WriteCode(AdvancedCodeWords.ValueRaw);
+                        CtpValueEncodingNative.Save(Writer, point.Value);
+                        break;
+                    case CtpTypeCode.Null:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                m_nextPoint.PrevValue = point.Value;
+            }
 
             m_prevPoint = m_nextPoint;
+            m_nextPoint.Assign(point);
         }
 
         public override byte[] ToArray()
         {
             return Writer.ToArray();
-        }
-
-        /// <summary>
-        /// Resets the TSSC Encoder to the initial state. 
-        /// </summary>
-        /// <remarks>
-        /// TSSC is a stateful encoder that requires a state
-        /// of the previous data to be maintained. Therefore, if 
-        /// the state ever becomes corrupt (out of order, dropped, corrupted, or duplicated)
-        /// the state must be reset on both ends.
-        /// </remarks>
-        public void Reset(bool clearMapping)
-        {
-            Writer.Clear();
-            if (clearMapping)
-            {
-                m_points = new IndexedArray<AdvancedPointMetadata>();
-                m_prevPoint = new AdvancedPointMetadata(Writer, null, null);
-                m_timeEncoding = new AdvancedTimestampEncoding(Writer, null);
-                m_prevTimestamp = 0;
-            }
         }
 
         private void Write64(ulong valueRaw)

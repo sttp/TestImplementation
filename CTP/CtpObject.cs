@@ -343,5 +343,33 @@ namespace CTP
 
         #endregion
 
+        public static CtpObject CreateDefault(CtpTypeCode typeCode)
+        {
+            switch (typeCode)
+            {
+                case CtpTypeCode.Null:
+                    return CtpObject.Null;
+                case CtpTypeCode.Int64:
+                    return new CtpObject(0);
+                case CtpTypeCode.Single:
+                    return new CtpObject(0f);
+                case CtpTypeCode.Double:
+                    return new CtpObject(0d);
+                case CtpTypeCode.CtpTime:
+                    return new CtpTime(0);
+                case CtpTypeCode.Boolean:
+                    return new CtpObject(false);
+                case CtpTypeCode.Guid:
+                    return new CtpObject(Guid.Empty);
+                case CtpTypeCode.String:
+                    return new CtpObject(string.Empty);
+                case CtpTypeCode.CtpBuffer:
+                    return new CtpObject(new CtpBuffer(new byte[0]));
+                case CtpTypeCode.CtpCommand:
+                    return new CtpObject(CtpCommand.Load(new byte[0]));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(typeCode), typeCode, null);
+            }
+        }
     }
 }

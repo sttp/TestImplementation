@@ -74,7 +74,7 @@ namespace Sttp.Tests
             sw.Start();
             for (int x = 0; x < 5; x++)
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Adaptive);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
             }
 
             Console.WriteLine(PointCount);
@@ -84,9 +84,45 @@ namespace Sttp.Tests
         [TestMethod]
         public void Profile()
         {
-            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Adaptive);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
+
+            BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+
+            string[] file1 = File.ReadAllLines(@"C:\temp\C37Test\benchmark1.txt");
+            string[] file2 = File.ReadAllLines(@"C:\temp\C37Test\benchmark2.txt");
+
+            int cnt = 0;
+            int l = Math.Max(file1.Length, file2.Length);
+            //int l = Math.Min(file1.Length, file2.Length);
+            for (int x = 0; x < l; x++)
+            {
+                if (x >= file1.Length)
+                {
+                    Console.WriteLine(x);
+                    Console.WriteLine(file2[x]);
+                    cnt++;
+                }
+                else if (x >= file2.Length)
+                {
+                    Console.WriteLine(x);
+                    Console.WriteLine(file1[x]);
+                    cnt++;
+                }
+                else if (file1[x] != file2[x])
+                {
+                    Console.WriteLine(x);
+                    Console.WriteLine(file1[x]);
+                    Console.WriteLine(file2[x]);
+                    cnt++;
+                }
+
+                if (cnt == 10)
+                    return;
+            }
+
+
 
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
@@ -96,6 +132,9 @@ namespace Sttp.Tests
 
         private void BenchmarkFile(string source, string dest, SttpCompressionMode mode, EncodingMethod encoding)
         {
+            string newFileName = Path.ChangeExtension(source, ".txt");
+
+            using (var raw = new StreamWriter(newFileName, false))
             using (var fs = new FileStream(source, FileMode.Open))
             using (var fs2 = new FileStream(dest, FileMode.Create))
             using (var ctp = new SttpFileReader(fs, false))
@@ -113,6 +152,7 @@ namespace Sttp.Tests
                             var dp = new SttpDataPoint();
                             while (ctp.ReadDataPoint(dp))
                             {
+                                raw.WriteLine(dp.ToString());
                                 //if (dp.Metadata.DataPointID.AsString.EndsWith(":Status0"))
                                 //    continue;
                                 PointCount++;

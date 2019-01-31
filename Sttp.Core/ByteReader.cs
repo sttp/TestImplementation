@@ -45,7 +45,13 @@ namespace Sttp
                 if (m_bitStreamCacheBitCount == 0)
                     return true;
 
-                if (m_bitStreamCacheBitCount >= 8 - m_usedBitsForLastBitWord)
+                //BUG: ToDo, determine if anything else is impacted by this bug.
+                //if (m_bitStreamCacheBitCount >= 8 - m_usedBitsForLastBitWord)
+                //{
+                //    return true;
+                //}
+
+                if (m_bitStreamCacheBitCount == 8 - m_usedBitsForLastBitWord)
                 {
                     return true;
                 }

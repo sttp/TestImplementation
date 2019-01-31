@@ -202,13 +202,13 @@ namespace Sttp.DataPointEncoding
                     {
                         code = m_mode001;
                     }
-                    else if (m_readBit.ReadBits5() == 1)
+                    else if (m_readBit.ReadBits1() == 1)
                     {
                         code = m_mode0001;
                     }
                     else
                     {
-                        code = (AdvancedCodeWords)m_readBit.ReadBits4();
+                        code = (AdvancedCodeWords)m_readBit.ReadBits5();
                     }
                     break;
                 default:

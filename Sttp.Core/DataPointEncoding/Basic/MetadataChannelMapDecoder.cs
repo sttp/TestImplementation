@@ -6,6 +6,8 @@ namespace Sttp.DataPointEncoding
     {
         private List<SttpDataPointMetadata> ChannelMapping = new List<SttpDataPointMetadata>();
 
+        public int GetNextChannelID => ChannelMapping.Count;
+
         public SttpDataPointMetadata GetMetadata(int channelID)
         {
             if (channelID >= ChannelMapping.Count)

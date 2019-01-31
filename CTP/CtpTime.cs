@@ -139,7 +139,7 @@ namespace CTP
 
         public override string ToString()
         {
-            return AsDateTime.ToString();
+            return AsDateTime.ToString("O");
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
