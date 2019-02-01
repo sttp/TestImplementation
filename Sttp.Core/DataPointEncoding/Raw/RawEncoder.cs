@@ -22,7 +22,7 @@ namespace Sttp.DataPointEncoding
 
         public override int Length => m_stream.Length;
 
-        public override void Clear(bool clearMapping)
+        public override void Clear()
         {
             m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;

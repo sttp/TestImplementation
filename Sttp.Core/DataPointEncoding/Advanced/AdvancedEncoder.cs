@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using CTP;
-using Sttp.Codec;
-using Sttp.Collection;
 
 namespace Sttp.DataPointEncoding
 {
     public sealed class AdvancedEncoder : EncoderBase
     {
-        private MetadataChannelMapEncoder m_channelMap;
-
         const ulong Bits64 = 0xFFFFFFFFFFFFFFFFu;
         const ulong Bits60 = 0xFFFFFFFFFFFFFFFu;
         const ulong Bits56 = 0xFFFFFFFFFFFFFFu;
@@ -22,279 +15,293 @@ namespace Sttp.DataPointEncoding
         const ulong Bits40 = 0xFFFFFFFFFFu;
         const ulong Bits36 = 0xFFFFFFFFFu;
         const uint Bits32 = 0xFFFFFFFFu;
-        const uint Bits30 = 0x3FFFFFFFu;
         const uint Bits28 = 0xFFFFFFFu;
-        const uint Bits26 = 0x3FFFFFFu;
         const uint Bits24 = 0xFFFFFFu;
-        const uint Bits22 = 0x3FFFFFu;
         const uint Bits20 = 0xFFFFFu;
-        const uint Bits18 = 0x3FFFFu;
         const uint Bits16 = 0xFFFFu;
-        const uint Bits14 = 0x3FFFu;
         const uint Bits12 = 0xFFFu;
-        const uint Bits10 = 0x3FFu;
         const uint Bits8 = 0xFFu;
-        const uint Bits6 = 0x3Fu;
         const uint Bits4 = 0xFu;
-        const uint Bits2 = 0x3u;
-        const uint Bits0 = 0x0u;
 
-        public ByteWriter Writer;
-        private int m_count = 0;
-
+        private ByteWriter m_writer;
+        /// <summary>
+        /// </summary>
         private long m_prevTimestamp;
-        private AdvancedPointMetadata m_prevPoint;
-        private AdvancedPointMetadata m_nextPoint;
-        private AdvancedWordEncoding m_encoder => m_prevPoint.NextValueEncoding;
+        private AdvancedMetadata m_prevPoint;
+        private AdvancedMetadata m_currentPoint;
+        private Dictionary<int, int> m_runtimeIDToChannelIDMapping = new Dictionary<int, int>();
+        private Dictionary<CtpObject, int> m_pointIDToChannelIDMapping = new Dictionary<CtpObject, int>();
+        private List<AdvancedMetadata> m_metadata = new List<AdvancedMetadata>();
 
-        private IndexedArray<AdvancedPointMetadata> m_points;
+        private int m_count;
 
         public AdvancedEncoder()
         {
-            m_channelMap = new MetadataChannelMapEncoder();
-            Writer = new ByteWriter();
-            Clear(true);
+            m_writer = new ByteWriter();
         }
 
-        public override int Length => Writer.Length;
+        public override int Length => m_writer.Length;
 
-        public override void Clear(bool clearMapping)
+        public override void Clear()
         {
-            Writer.Clear();
-            if (clearMapping)
-            {
-                m_points = new IndexedArray<AdvancedPointMetadata>();
-                m_prevPoint = new AdvancedPointMetadata(Writer, null);
-                m_prevTimestamp = 0;
-                m_channelMap.Clear();
-            }
+            m_writer.Clear();
         }
 
         public override void AddDataPoint(SttpDataPoint point)
         {
             m_count++;
+            if (m_count == 211)
+                m_count = m_count;
 
-            if (m_count == 1499)
-                m_count = 1499;
-
-            int channelID = m_channelMap.GetChannelID(point.Metadata, out var isNew);
+            m_currentPoint = FindMetadata(point.Metadata, out var isNew);
 
             if (isNew)
             {
-                m_nextPoint = new AdvancedPointMetadata(Writer, null);
-                m_nextPoint.Assign(point);
-                m_points[channelID] = m_nextPoint;
-
-                m_encoder.WriteCode(AdvancedCodeWords.NewPoint);
-                CtpValueEncodingNative.Save(Writer, point.Metadata.DataPointID);
-                Writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_prevTimestamp));
-                Writer.Write8BitSegments((ulong)point.Quality);
-                CtpValueEncodingNative.Save(Writer, point.Value);
+                m_currentPoint.Assign(point);
+                if (m_prevPoint != null) //If there is no previous point, the first symbol is unspecified and assumed to be DefineChannel.
+                {
+                    m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.DefineChannel);
+                    m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
+                }
+                CtpValueEncodingNative.Save(m_writer, point.Metadata.DataPointID);
+                m_writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_prevTimestamp));
+                m_writer.Write8BitSegments((ulong)point.Quality);
+                CtpValueEncodingNative.Save(m_writer, point.Value);
                 m_prevTimestamp = point.Time.Ticks;
-                m_prevPoint.NeighborChannelId = channelID;
-                m_prevPoint = m_nextPoint;
+                m_prevPoint = m_currentPoint;
                 return;
             }
-            m_nextPoint = m_points[channelID];
 
-            if (m_prevPoint.NeighborChannelId != channelID)
+            if (m_prevPoint == null)
+                throw new Exception("This should never occur");
+
+            if (m_prevPoint.NeighborChannelId != m_currentPoint.ChannelID)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.PointID);
-                Writer.Write8BitSegments((uint)channelID);
-                m_prevPoint.NeighborChannelId = channelID;
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ChannelID);
+                m_writer.WriteBits(CompareUInt32.RequiredBits((uint)m_metadata.Count), (uint)m_currentPoint.ChannelID);
+                m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
             }
 
             if (m_prevTimestamp != point.Time.Ticks)
             {
                 long timestamp = point.Time.Ticks;
-                m_encoder.WriteCode(AdvancedCodeWords.Timestamp);
-                var delta = timestamp - m_nextPoint.PrevTime;
-                if (m_nextPoint.TimeDelta1 == delta)
+                var delta = timestamp - m_currentPoint.PrevTime;
+                if (m_currentPoint.TimeDelta1 == delta)
                 {
-                    Writer.WriteBits2(0);
+                    m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.TimestampDelta1);
                 }
-                else if (m_nextPoint.TimeDelta2 == delta)
+                else if (m_currentPoint.TimeDelta2 == delta)
                 {
-                    Writer.WriteBits2(1);
+                    m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.TimestampDelta2);
                 }
-                else if (m_nextPoint.TimeDelta3 == delta)
+                else if (m_currentPoint.TimeDelta3 == delta)
                 {
-                    Writer.WriteBits2(2);
-                    m_nextPoint.TimeDelta3 = m_nextPoint.TimeDelta2;
-                    m_nextPoint.TimeDelta2 = m_nextPoint.TimeDelta1;
-                    m_nextPoint.TimeDelta1 = delta;
+                    m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.TimestampDelta3);
+                    m_currentPoint.TimeDelta3 = m_currentPoint.TimeDelta2;
+                    m_currentPoint.TimeDelta2 = m_currentPoint.TimeDelta1;
+                    m_currentPoint.TimeDelta1 = delta;
                 }
                 else
                 {
-                    m_nextPoint.TimeDelta3 = m_nextPoint.TimeDelta2;
-                    m_nextPoint.TimeDelta2 = m_nextPoint.TimeDelta1;
-                    m_nextPoint.TimeDelta1 = delta;
-
-                    Writer.WriteBits2(3);
-                    Writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_nextPoint.PrevTime));
+                    m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.TimestampElse);
+                    m_currentPoint.TimeDelta3 = m_currentPoint.TimeDelta2;
+                    m_currentPoint.TimeDelta2 = m_currentPoint.TimeDelta1;
+                    m_currentPoint.TimeDelta1 = delta;
+                    m_writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_currentPoint.PrevTime));
                 }
                 m_prevTimestamp = timestamp;
             }
 
-            if (m_nextPoint.PrevQuality != point.Quality)
+            if (m_currentPoint.PrevQuality != point.Quality)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.Quality);
-                Writer.Write8BitSegments((ulong)point.Quality);
-                m_nextPoint.PrevQuality = point.Quality;
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.Quality);
+                m_writer.Write8BitSegments((ulong)point.Quality);
+                m_currentPoint.PrevQuality = point.Quality;
             }
 
-            if (point.Value.ValueTypeCode != m_nextPoint.PrevValue.ValueTypeCode)
+            if (point.Value.ValueTypeCode != m_currentPoint.PrevValue.ValueTypeCode)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.Type);
-                Writer.WriteBits4((uint)point.Value.ValueTypeCode & 15);
-                m_nextPoint.PrevValue = CtpObject.CreateDefault(point.Value.ValueTypeCode);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.Type);
+                m_writer.WriteBits4((uint)point.Value.ValueTypeCode & 15);
+                m_currentPoint.PrevValue = CtpObject.CreateDefault(point.Value.ValueTypeCode);
             }
 
             if (point.Value.IsDefault)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueDefault);
-                m_nextPoint.PrevValue = point.Value;
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueDefault);
+                m_currentPoint.PrevValue = point.Value;
             }
-            else if (m_nextPoint.PrevValue == point.Value)
+            else if (m_currentPoint.PrevValue == point.Value)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValuePrev);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueLast);
             }
             else
             {
                 switch (point.Value.ValueTypeCode)
                 {
-                    case CtpTypeCode.Int64:
                     case CtpTypeCode.Single:
+                    case CtpTypeCode.Int64:
                     case CtpTypeCode.Double:
                     case CtpTypeCode.CtpTime:
-                        Write64(point.Value.AsRaw64);
+                        ulong bitsChanged = CompareUInt64.Compare(point.Value.AsRaw64, m_currentPoint.PrevValue.AsRaw64);
+                        Write64(bitsChanged);
                         break;
                     case CtpTypeCode.Boolean:
                         //Cannot be false, that would be Default.
-                        m_encoder.WriteCode(AdvancedCodeWords.ValueTrue);
+                        m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueTrue);
                         break;
                     case CtpTypeCode.Guid:
+                        m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits128);
+                        CtpValueEncodingNative.Save(m_writer, point.Value);
+                        break;
                     case CtpTypeCode.String:
                     case CtpTypeCode.CtpCommand:
                     case CtpTypeCode.CtpBuffer:
-                        m_encoder.WriteCode(AdvancedCodeWords.ValueRaw);
-                        CtpValueEncodingNative.Save(Writer, point.Value);
+                        m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBuffer);
+                        CtpValueEncodingNative.Save(m_writer, point.Value);
                         break;
                     case CtpTypeCode.Null:
+                        //Will always be caught by Default
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                m_nextPoint.PrevValue = point.Value;
+                m_currentPoint.PrevValue = point.Value;
             }
 
-            m_prevPoint = m_nextPoint;
-            m_nextPoint.Assign(point);
+            m_prevPoint = m_currentPoint;
+            m_currentPoint.Assign(point);
         }
 
         public override byte[] ToArray()
         {
-            return Writer.ToArray();
+            return m_writer.ToArray();
         }
 
-        private void Write64(ulong valueRaw)
+        private void Write64(ulong bitsChanged)
         {
-            ulong bitsChanged = CompareUInt64.Compare(valueRaw, m_nextPoint.PrevValue.AsRaw64);
             if (bitsChanged <= Bits4)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR4);
-                Writer.WriteBits(4, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits4);
+                m_writer.WriteBits(4, bitsChanged);
             }
             else if (bitsChanged <= Bits8)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR8);
-                Writer.WriteBits(8, bitsChanged);
-            }
-            else if (bitsChanged <= Bits10)
-            {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR10);
-                Writer.WriteBits(10, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits8);
+                m_writer.WriteBits(8, bitsChanged);
             }
             else if (bitsChanged <= Bits12)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR12);
-                Writer.WriteBits(12, bitsChanged);
-            }
-            else if (bitsChanged <= Bits14)
-            {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR14);
-                Writer.WriteBits(14, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits12);
+                m_writer.WriteBits(12, bitsChanged);
             }
             else if (bitsChanged <= Bits16)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR16);
-                Writer.WriteBits(16, bitsChanged);
-            }
-            else if (bitsChanged <= Bits18)
-            {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR18);
-                Writer.WriteBits(18, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits16);
+                m_writer.WriteBits(16, bitsChanged);
             }
             else if (bitsChanged <= Bits20)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR20);
-                Writer.WriteBits(20, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits20);
+                m_writer.WriteBits(20, bitsChanged);
             }
             else if (bitsChanged <= Bits24)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR24);
-                Writer.WriteBits(24, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits24);
+                m_writer.WriteBits(24, bitsChanged);
             }
             else if (bitsChanged <= Bits28)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR28);
-                Writer.WriteBits(28, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits28);
+                m_writer.WriteBits(28, bitsChanged);
             }
             else if (bitsChanged <= Bits32)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR32);
-                Writer.WriteBits(32, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits32);
+                m_writer.WriteBits(32, bitsChanged);
             }
             else if (bitsChanged <= Bits36)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR36);
-                Writer.WriteBits(36, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits36);
+                m_writer.WriteBits(36, bitsChanged);
             }
             else if (bitsChanged <= Bits40)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR40);
-                Writer.WriteBits(40, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits40);
+                m_writer.WriteBits(40, bitsChanged);
             }
             else if (bitsChanged <= Bits44)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR44);
-                Writer.WriteBits(44, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits44);
+                m_writer.WriteBits(44, bitsChanged);
             }
             else if (bitsChanged <= Bits48)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR48);
-                Writer.WriteBits(48, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits48);
+                m_writer.WriteBits(48, bitsChanged);
             }
             else if (bitsChanged <= Bits52)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR52);
-                Writer.WriteBits(52, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits52);
+                m_writer.WriteBits(52, bitsChanged);
             }
             else if (bitsChanged <= Bits56)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR56);
-                Writer.WriteBits(56, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits56);
+                m_writer.WriteBits(56, bitsChanged);
             }
             else if (bitsChanged <= Bits60)
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueXOR60);
-                Writer.WriteBits(60, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits60);
+                m_writer.WriteBits(60, bitsChanged);
             }
             else
             {
-                m_encoder.WriteCode(AdvancedCodeWords.ValueRaw);
-                Writer.WriteBits(64, bitsChanged);
+                m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits64);
+                m_writer.WriteBits(64, bitsChanged);
             }
         }
+
+        private AdvancedMetadata FindMetadata(SttpDataPointMetadata metadata, out bool isNew)
+        {
+            isNew = false;
+            int channelID;
+
+            //Since most of the time, sequencing will be preserved, this check avoids a dictionary lookup.
+            if (m_prevPoint != null)
+            {
+                channelID = m_prevPoint.NeighborChannelId;
+                if (m_metadata[channelID].Metadata.DataPointID == metadata.DataPointID)
+                    return m_metadata[channelID];
+            }
+
+            if (metadata.RuntimeID.HasValue)
+            {
+                if (!m_runtimeIDToChannelIDMapping.TryGetValue(metadata.RuntimeID.Value, out channelID))
+                {
+                    channelID = m_metadata.Count;
+                    var point = new AdvancedMetadata(channelID, metadata, m_writer, null);
+                    m_metadata.Add(point);
+                    m_runtimeIDToChannelIDMapping.Add(metadata.RuntimeID.Value, channelID);
+                    isNew = true;
+                }
+                return m_metadata[channelID];
+            }
+
+            if (!m_pointIDToChannelIDMapping.TryGetValue(metadata.DataPointID, out channelID))
+            {
+                channelID = m_metadata.Count;
+                var point = new AdvancedMetadata(channelID, metadata, m_writer, null);
+                m_metadata.Add(point);
+                m_pointIDToChannelIDMapping.Add(metadata.DataPointID, channelID);
+                isNew = true;
+            }
+            return m_metadata[channelID];
+        }
+
+
+
+
+
 
     }
 }

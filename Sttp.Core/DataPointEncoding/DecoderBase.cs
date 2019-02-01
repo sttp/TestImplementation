@@ -17,7 +17,7 @@ namespace Sttp.DataPointEncoding
         }
 
 
-        public abstract void Load(byte[] data, bool clearMapping);
+        public abstract void Load(byte[] data);
 
         public abstract bool Read(SttpDataPoint dataPoint);
 

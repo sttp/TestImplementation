@@ -216,7 +216,7 @@ namespace CTP
                 switch (m_valueTypeCode)
                 {
                     case CtpTypeCode.Null:
-                        return true; //Null == Null, should that return false?
+                        return true; 
                     case CtpTypeCode.Int64:
                         return m_valueInt64 == other.m_valueInt64;
                     case CtpTypeCode.Single:

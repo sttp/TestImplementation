@@ -84,11 +84,21 @@ namespace Sttp.Tests
         [TestMethod]
         public void Profile()
         {
+            
+            PointCount = 0;
             BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
 
-            BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+            try
+            {
+                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+
+            }
+            catch (Exception e)
+            {
+            }
+
 
             string[] file1 = File.ReadAllLines(@"C:\temp\C37Test\benchmark1.txt");
             string[] file2 = File.ReadAllLines(@"C:\temp\C37Test\benchmark2.txt");
@@ -122,8 +132,6 @@ namespace Sttp.Tests
                     return;
             }
 
-
-
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Zlib, EncodingMethod.Adaptive);
@@ -153,8 +161,6 @@ namespace Sttp.Tests
                             while (ctp.ReadDataPoint(dp))
                             {
                                 raw.WriteLine(dp.ToString());
-                                //if (dp.Metadata.DataPointID.AsString.EndsWith(":Status0"))
-                                //    continue;
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
                                 //dp.Value = (long)dp.Value*1000;

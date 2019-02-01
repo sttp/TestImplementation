@@ -19,7 +19,7 @@ namespace Sttp.DataPointEncoding
             m_stream = new ByteReader();
         }
 
-        public override void Load(byte[] data, bool clearMapping)
+        public override void Load(byte[] data)
         {
             m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;

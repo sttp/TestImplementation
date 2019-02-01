@@ -12,6 +12,7 @@ namespace Sttp.DataPointEncoding
         private Dictionary<int, int> RuntimeToChannelMapping = new Dictionary<int, int>();
         private Dictionary<CtpObject, int> RuntimeToChannelMapping2 = new Dictionary<CtpObject, int>();
         private List<SttpDataPointMetadata> ChannelMapping = new List<SttpDataPointMetadata>();
+        public int Count => ChannelMapping.Count;
 
         public int GetChannelID(SttpDataPointMetadata metadata, out bool isNew)
         {

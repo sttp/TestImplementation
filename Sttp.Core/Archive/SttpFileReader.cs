@@ -59,7 +59,7 @@ namespace Sttp
                 var raw = (CtpRaw)m_nextCommand;
                 if (m_dataStream != null && raw.Channel == m_dataStream.ChannelCode)
                 {
-                    m_decoder.Load(raw.Payload, false);
+                    m_decoder.Load(raw.Payload);
                     return FileReaderItem.DataPoint;
                 }
 

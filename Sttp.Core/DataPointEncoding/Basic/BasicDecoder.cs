@@ -22,17 +22,13 @@ namespace Sttp.DataPointEncoding
             m_channelMap = new MetadataChannelMapDecoder();
         }
 
-        public override void Load(byte[] data, bool clearMapping)
+        public override void Load(byte[] data)
         {
             m_lastChannelID = 0;
             m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;
             m_lastValueCode = CtpTypeCode.Null;
             m_stream.SetBuffer(data, 0, data.Length);
-            if (clearMapping)
-            {
-                m_channelMap.Clear();
-            }
         }
 
         public override bool Read(SttpDataPoint dataPoint)

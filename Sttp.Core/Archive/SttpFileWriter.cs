@@ -73,7 +73,7 @@ namespace Sttp
             if (m_encoder.Length > 0)
             {
                 WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
-                m_encoder.Clear(false);
+                m_encoder.Clear();
             }
 
             WriteComp(metadata);
@@ -97,7 +97,7 @@ namespace Sttp
             if (m_encoder.Length > 1500)
             {
                 WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
-                m_encoder.Clear(false);
+                m_encoder.Clear();
             }
         }
 
@@ -106,7 +106,7 @@ namespace Sttp
             if (m_encoder.Length > 0)
             {
                 WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
-                m_encoder.Clear(false);
+                m_encoder.Clear();
             }
 
             m_stream?.Dispose();

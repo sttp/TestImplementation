@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace Sttp.DataPointEncoding
 {
-    public static class CompareUInt64
+    public static class CompareUInt32
     {
-        public static ulong Compare(ulong value1, ulong value2)
+        public static uint Compare(uint value1, uint value2)
         {
             return ChangeSign(value1 - value2);
         }
 
-        private const ulong SignChangeValue = (1ul << 63);
+        private const uint SignChangeValue = (1u << 31);
 
-        private static ulong ChangeSign(ulong value)
+        private static uint ChangeSign(uint value)
         {
-            //if bit 64 is high, bits 1-63 will be inverted
+            //if bit 32 is high, bits 1-31 will be inverted
             //Then all bits will be rotated 1 to the left
             if (value >= SignChangeValue)
             {
@@ -26,13 +26,13 @@ namespace Sttp.DataPointEncoding
             return (value << 1);
         }
 
-        public static ulong UnCompare(ulong comparedResult, ulong value2)
+        public static uint UnCompare(uint comparedResult, uint value2)
         {
             comparedResult = UnChangeSign(comparedResult);
             return comparedResult + value2;
         }
 
-        private static ulong UnChangeSign(ulong value)
+        private static uint UnChangeSign(uint value)
         {
             if ((value & 1) == 0)
             {
@@ -41,6 +41,7 @@ namespace Sttp.DataPointEncoding
             return ((~value) >> 1) + SignChangeValue;
         }
 
+        /// <summary>
         /// Counts the number of bits required to store this value if leading zero's are ignored.
         /// </summary>
         /// <param name="value"></param>
@@ -49,16 +50,35 @@ namespace Sttp.DataPointEncoding
         /// Unfortunately, c# cannot call the cpu instruction clz
         /// Example from http://en.wikipedia.org/wiki/Find_first_set
         /// </remarks>
-        public static int RequiredBits(ulong value)
+        public static int RequiredBits(uint value)
         {
-            if (value > 0xFFFFFFFFu)
+            int position = 0;
+            if (value > 0xFFFFu)
             {
-                return CompareUInt32.RequiredBits((uint)value) + 32;
+                value >>= 16;
+                position += 16;
             }
-            return CompareUInt32.RequiredBits((uint)value);
+            if (value > 0xFFu)
+            {
+                value >>= 8;
+                position += 8;
+            }
+            if (value > 15u)
+            {
+                value >>= 4;
+                position += 4;
+            }
+            if (value > 3u)
+            {
+                value >>= 2;
+                position += 2;
+            }
+            if (value > 2u)
+            {
+                return (int)(position + 1 + (value >> 1));
+            }
+            return (int)(position + value);
         }
-
-
 
     }
 }
