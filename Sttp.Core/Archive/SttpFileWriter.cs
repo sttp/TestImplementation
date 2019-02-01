@@ -21,8 +21,9 @@ namespace Sttp
 
     public enum EncodingMethod
     {
-        Basic,
         Raw,
+        Basic,
+        Simple,
         Advanced,
         //Adaptive
     }
@@ -40,6 +41,11 @@ namespace Sttp
             {
                 m_encoder = new RawEncoder();
                 m_stream.Write(new CommandBeginDataStream(0, "Raw"));
+            }
+            if (encoding == EncodingMethod.Simple)
+            {
+                m_encoder = new SimpleEncoder();
+                m_stream.Write(new CommandBeginDataStream(0, "Simple"));
             }
             if (encoding == EncodingMethod.Basic)
             {

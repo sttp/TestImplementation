@@ -84,15 +84,14 @@ namespace Sttp.Tests
         [TestMethod]
         public void Profile()
         {
-            
+
             PointCount = 0;
-            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Simple);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
-
             try
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", SttpCompressionMode.None, EncodingMethod.Simple);
 
             }
             catch (Exception e)
@@ -132,11 +131,14 @@ namespace Sttp.Tests
                     return;
             }
 
+            Console.WriteLine(Names.Average(x => x.Length));
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Zlib, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
         }
+
+        private HashSet<string> Names = new HashSet<string>();
 
         private void BenchmarkFile(string source, string dest, SttpCompressionMode mode, EncodingMethod encoding)
         {
@@ -160,6 +162,7 @@ namespace Sttp.Tests
                             var dp = new SttpDataPoint();
                             while (ctp.ReadDataPoint(dp))
                             {
+                                Names.Add(dp.Metadata.DataPointID.AsString);
                                 raw.WriteLine(dp.ToString());
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
