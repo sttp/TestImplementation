@@ -41,7 +41,7 @@ namespace Sttp.DataPointEncoding
 
             if (m_prevPoint != null)
             {
-                code = (SimpleSymbols)m_reader.ReadBits3();
+                code = ReadCode();
             }
             else
             {
@@ -75,7 +75,7 @@ namespace Sttp.DataPointEncoding
             {
                 channelID = (int)m_reader.ReadBits(CompareUInt32.RequiredBits((uint)m_metadata.Count));
                 m_prevPoint.NeighborChannelId = channelID;
-                code = (SimpleSymbols)m_reader.ReadBits3();
+                code = ReadCode();
                 if (code <= SimpleSymbols.ChannelID)
                     throw new Exception("Parsing Error");
             }
@@ -86,7 +86,7 @@ namespace Sttp.DataPointEncoding
             if (code <= SimpleSymbols.Timestamp)
             {
                 m_prevTimestamp = (long)m_reader.Read8BitSegments() ^ m_currentPoint.PrevTime;
-                code = (SimpleSymbols)m_reader.ReadBits3();
+                code = ReadCode();
                 if (code <= SimpleSymbols.Timestamp)
                     throw new Exception("Parsing Error");
             }
@@ -97,7 +97,7 @@ namespace Sttp.DataPointEncoding
             {
                 m_currentPoint.PrevQuality = (long)m_reader.Read8BitSegments();
 
-                code = (SimpleSymbols)m_reader.ReadBits3();
+                code = ReadCode();
                 if (code <= SimpleSymbols.Quality)
                     throw new Exception("Parsing Error");
             }
@@ -108,7 +108,7 @@ namespace Sttp.DataPointEncoding
             {
                 m_currentPoint.PrevValue = CtpObject.CreateDefault((CtpTypeCode)m_reader.ReadBits4());
 
-                code = (SimpleSymbols)m_reader.ReadBits3();
+                code = ReadCode();
                 if (code <= SimpleSymbols.Type)
                     throw new Exception("Parsing Error");
             }
@@ -170,6 +170,15 @@ namespace Sttp.DataPointEncoding
             m_currentPoint.Assign(dataPoint);
             m_prevPoint = m_currentPoint;
             return true;
+        }
+
+        private SimpleSymbols ReadCode()
+        {
+            if (m_reader.ReadBits1() == 0)
+            {
+                return (SimpleSymbols)m_reader.ReadBits3();
+            }
+            return SimpleSymbols.ValueOther;
         }
 
         private ulong ReadInt32()

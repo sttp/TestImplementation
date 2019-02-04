@@ -37,7 +37,7 @@ namespace Sttp.DataPointEncoding
         Type = 4,
         ValueDefault = 5,
         ValueLast = 6,
-        ValueOther = 7,
+        ValueOther = 7
     }
 
 }

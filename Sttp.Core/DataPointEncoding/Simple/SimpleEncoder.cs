@@ -49,9 +49,6 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
-            m_count++;
-            if (m_count == 211)
-                m_count = m_count;
 
             m_currentPoint = FindMetadata(point.Metadata, out var isNew);
 
@@ -60,7 +57,7 @@ namespace Sttp.DataPointEncoding
                 m_currentPoint.Assign(point);
                 if (m_prevPoint != null) //If there is no previous point, the first symbol is unspecified and assumed to be DefineChannel.
                 {
-                    m_writer.WriteBits3((byte)SimpleSymbols.DefineChannel);
+                    m_writer.WriteBits4((byte)SimpleSymbols.DefineChannel);
                     m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
                 }
                 CtpValueEncodingNative.Save(m_writer, point.Metadata.DataPointID);
@@ -77,44 +74,44 @@ namespace Sttp.DataPointEncoding
 
             if (m_prevPoint.NeighborChannelId != m_currentPoint.ChannelID)
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.ChannelID);
+                m_writer.WriteBits4((byte)SimpleSymbols.ChannelID);
                 m_writer.WriteBits(CompareUInt32.RequiredBits((uint)m_metadata.Count), (uint)m_currentPoint.ChannelID);
                 m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
             }
 
             if (m_prevTimestamp != point.Time.Ticks)
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.Timestamp);
+                m_writer.WriteBits4((byte)SimpleSymbols.Timestamp);
                 m_writer.Write8BitSegments((ulong)point.Time.Ticks ^ (ulong)m_currentPoint.PrevTime);
                 m_prevTimestamp = point.Time.Ticks;
             }
 
             if (m_currentPoint.PrevQuality != point.Quality)
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.Quality);
+                m_writer.WriteBits4((byte)SimpleSymbols.Quality);
                 m_writer.Write8BitSegments((ulong)point.Quality);
                 m_currentPoint.PrevQuality = point.Quality;
             }
 
             if (point.Value.ValueTypeCode != m_currentPoint.PrevValue.ValueTypeCode)
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.Type);
+                m_writer.WriteBits4((byte)SimpleSymbols.Type);
                 m_writer.WriteBits4((uint)point.Value.ValueTypeCode & 15);
                 m_currentPoint.PrevValue = CtpObject.CreateDefault(point.Value.ValueTypeCode);
             }
 
             if (point.Value.IsDefault)
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.ValueDefault);
+                m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
                 m_currentPoint.PrevValue = point.Value;
             }
             else if (m_currentPoint.PrevValue == point.Value)
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.ValueLast);
+                m_writer.WriteBits4((byte)SimpleSymbols.ValueLast);
             }
             else
             {
-                m_writer.WriteBits3((byte)SimpleSymbols.ValueOther);
+                m_writer.WriteBits1(1);
 
                 switch (point.Value.ValueTypeCode)
                 {
