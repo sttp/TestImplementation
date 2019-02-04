@@ -68,13 +68,13 @@ namespace Sttp.Tests
         [TestMethod]
         public void BenchmarkFiles()
         {
-            BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
+            //BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
             PointCount = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int x = 0; x < 5; x++)
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Simple);
             }
 
             Console.WriteLine(PointCount);
@@ -144,7 +144,7 @@ namespace Sttp.Tests
         {
             string newFileName = Path.ChangeExtension(source, ".txt");
 
-            using (var raw = new StreamWriter(newFileName, false))
+            //using (var raw = new StreamWriter(newFileName, false))
             using (var fs = new FileStream(source, FileMode.Open))
             using (var fs2 = new FileStream(dest, FileMode.Create))
             using (var ctp = new SttpFileReader(fs, false))
@@ -162,8 +162,8 @@ namespace Sttp.Tests
                             var dp = new SttpDataPoint();
                             while (ctp.ReadDataPoint(dp))
                             {
-                                Names.Add(dp.Metadata.DataPointID.AsString);
-                                raw.WriteLine(dp.ToString());
+                                //Names.Add(dp.Metadata.DataPointID.AsString);
+                                //raw.WriteLine(dp.ToString());
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
                                 //dp.Value = (long)dp.Value*1000;

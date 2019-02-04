@@ -11,7 +11,7 @@ namespace Sttp
         private byte[] m_byteBuffer;
         private byte[] m_bitBuffer;
         private int m_byteLength;
-        private int m_bitStreamCacheBitCount;
+        private int m_bitStreamCacheBitCount; 
         private uint m_bitStreamCache;
         private int m_bitLength;
         private bool m_hasReservedUnusedBitsHeader;
@@ -571,6 +571,13 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 3] = (byte)value;
             m_byteLength += 4;
         }
+
+        public void WriteBits36(ulong value)
+        {
+            WriteBits4((uint)value);
+            WriteBits32((uint)(value >> 4));
+        }
+
         public void WriteBits40(ulong value)
         {
             EnsureCapacityBytes(5);
@@ -581,6 +588,14 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 4] = (byte)value;
             m_byteLength += 5;
         }
+
+
+        public void WriteBits44(ulong value)
+        {
+            WriteBits4((uint)value);
+            WriteBits40(value >> 4);
+        }
+
         public void WriteBits48(ulong value)
         {
             EnsureCapacityBytes(6);
@@ -592,6 +607,13 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 5] = (byte)value;
             m_byteLength += 6;
         }
+
+        public void WriteBits52(ulong value)
+        {
+            WriteBits4((uint)value);
+            WriteBits48(value >> 4);
+        }
+
         public void WriteBits56(ulong value)
         {
             EnsureCapacityBytes(7);
@@ -604,6 +626,13 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 6] = (byte)value;
             m_byteLength += 7;
         }
+
+        public void WriteBits60(ulong value)
+        {
+            WriteBits4((uint)value);
+            WriteBits56(value >> 4);
+        }
+
         public void WriteBits64(ulong value)
         {
             EnsureCapacityBytes(8);

@@ -198,37 +198,37 @@ namespace Sttp.DataPointEncoding
             switch (code)
             {
                 case AdvancedSymbols.ValueBits4:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(4), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(4), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits8:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(8), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(8), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits12:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(12), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(12), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits16:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(16), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(16), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits20:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(20), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(20), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits24:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(24), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(24), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits28:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(28), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(28), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits32:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(32), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(32), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits36:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(36), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(36), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits40:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(40), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(40), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits44:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(44), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(44), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits48:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(48), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(48), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits52:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(52), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(52), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits56:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(56), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(56), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits60:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(60), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(60), m_currentPoint.PrevValue.UnsafeRawInt64);
                 case AdvancedSymbols.ValueBits64:
-                    return CompareUInt64.UnCompare(m_reader.ReadBits(64), m_currentPoint.PrevValue.AsRaw64);
+                    return CompareUInt64.UnCompare(m_reader.ReadBits(64), m_currentPoint.PrevValue.UnsafeRawInt64);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(code), code, null);
             }

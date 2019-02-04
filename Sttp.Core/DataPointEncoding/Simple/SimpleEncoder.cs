@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using CTP;
 
 namespace Sttp.DataPointEncoding
@@ -29,7 +30,6 @@ namespace Sttp.DataPointEncoding
         private long m_prevTimestamp;
         private SimpleMetadata m_prevPoint;
         private SimpleMetadata m_currentPoint;
-        private Dictionary<int, int> m_runtimeIDToChannelIDMapping = new Dictionary<int, int>();
         private Dictionary<CtpObject, int> m_pointIDToChannelIDMapping = new Dictionary<CtpObject, int>();
         private List<SimpleMetadata> m_metadata = new List<SimpleMetadata>();
 
@@ -49,29 +49,22 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
-
-            m_currentPoint = FindMetadata(point.Metadata, out var isNew);
-
-            if (isNew)
+            if (m_prevPoint != null && m_metadata[m_prevPoint.NeighborChannelId].Metadata.DataPointID.Equals(point.Metadata.DataPointID))
             {
-                m_currentPoint.Assign(point);
-                if (m_prevPoint != null) //If there is no previous point, the first symbol is unspecified and assumed to be DefineChannel.
+                //Most of the time, measurements will be sequential, this limits a dictionary lookup
+                m_currentPoint = m_metadata[m_prevPoint.NeighborChannelId];
+            }
+            else
+            {
+                if (!m_pointIDToChannelIDMapping.TryGetValue(point.Metadata.DataPointID, out int channelID))
                 {
-                    m_writer.WriteBits4((byte)SimpleSymbols.DefineChannel);
-                    m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
+                    DefineChannel(point);
+                    return;
                 }
-                CtpValueEncodingNative.Save(m_writer, point.Metadata.DataPointID);
-                m_writer.Write8BitSegments((ulong)point.Time.Ticks ^ (ulong)m_prevTimestamp);
-                m_writer.Write8BitSegments((ulong)point.Quality);
-                CtpValueEncodingNative.Save(m_writer, point.Value);
-                m_prevTimestamp = point.Time.Ticks;
-                m_prevPoint = m_currentPoint;
-                return;
+                m_currentPoint = m_metadata[channelID];
             }
 
-            if (m_prevPoint == null)
-                throw new Exception("This should never occur");
-
+            // ReSharper disable once PossibleNullReferenceException
             if (m_prevPoint.NeighborChannelId != m_currentPoint.ChannelID)
             {
                 m_writer.WriteBits4((byte)SimpleSymbols.ChannelID);
@@ -90,7 +83,6 @@ namespace Sttp.DataPointEncoding
             {
                 m_writer.WriteBits4((byte)SimpleSymbols.Quality);
                 m_writer.Write8BitSegments((ulong)point.Quality);
-                m_currentPoint.PrevQuality = point.Quality;
             }
 
             if (point.Value.ValueTypeCode != m_currentPoint.PrevValue.ValueTypeCode)
@@ -100,50 +92,121 @@ namespace Sttp.DataPointEncoding
                 m_currentPoint.PrevValue = CtpObject.CreateDefault(point.Value.ValueTypeCode);
             }
 
-            if (point.Value.IsDefault)
+            if (point.Value.ValueTypeCode == CtpTypeCode.Single)
             {
-                m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
-                m_currentPoint.PrevValue = point.Value;
-            }
-            else if (m_currentPoint.PrevValue == point.Value)
-            {
-                m_writer.WriteBits4((byte)SimpleSymbols.ValueLast);
+                uint prev = m_prevPoint.PrevValue.UnsafeRawInt32;
+                uint cur = point.Value.UnsafeRawInt32;
+                if (cur == 0)
+                {
+                    m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
+                }
+                else if (prev == cur)
+                {
+                    m_writer.WriteBits4((byte)SimpleSymbols.ValueLast);
+                }
+                else
+                {
+                    m_writer.WriteBits1(1);
+                    Write32(prev ^ cur);
+                }
             }
             else
             {
-                m_writer.WriteBits1(1);
-
-                switch (point.Value.ValueTypeCode)
-                {
-                    case CtpTypeCode.Single:
-                        Write32((uint)(point.Value.AsRaw64 ^ m_currentPoint.PrevValue.AsRaw64));
-                        break;
-                    case CtpTypeCode.Int64:
-                    case CtpTypeCode.Double:
-                    case CtpTypeCode.CtpTime:
-                        Write64(point.Value.AsRaw64 ^ m_currentPoint.PrevValue.AsRaw64);
-                        break;
-                    case CtpTypeCode.Boolean:
-                        //Write nothing, this can only be true;
-                        break;
-                    case CtpTypeCode.Guid:
-                        CtpValueEncodingNative.Save(m_writer, point.Value);
-                        break;
-                    case CtpTypeCode.String:
-                    case CtpTypeCode.CtpCommand:
-                    case CtpTypeCode.CtpBuffer:
-                        CtpValueEncodingNative.Save(m_writer, point.Value);
-                        break;
-                    case CtpTypeCode.Null:
-                    //Will always be caught by Default
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                m_currentPoint.PrevValue = point.Value;
+                AddDataPoint2(point);
             }
 
             m_prevPoint = m_currentPoint;
             m_currentPoint.Assign(point);
+        }
+
+        private void DefineChannel(SttpDataPoint point)
+        {
+            int channelID;
+            channelID = m_metadata.Count;
+            m_currentPoint = new SimpleMetadata(channelID, point.Metadata);
+            m_metadata.Add(m_currentPoint);
+            m_pointIDToChannelIDMapping.Add(point.Metadata.DataPointID, channelID);
+            m_currentPoint.Assign(point);
+            if (m_prevPoint != null) //If there is no previous point, the first symbol is unspecified and assumed to be DefineChannel.
+            {
+                m_writer.WriteBits4((byte)SimpleSymbols.DefineChannel);
+                m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
+            }
+
+            CtpValueEncodingNative.Save(m_writer, point.Metadata.DataPointID);
+            m_writer.Write8BitSegments((ulong)point.Time.Ticks ^ (ulong)m_prevTimestamp);
+            m_writer.Write8BitSegments((ulong)point.Quality);
+            CtpValueEncodingNative.Save(m_writer, point.Value);
+            m_prevTimestamp = point.Time.Ticks;
+            m_prevPoint = m_currentPoint;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddDataPoint2(SttpDataPoint point)
+        {
+            switch (point.Value.ValueTypeCode)
+            {
+                case CtpTypeCode.Null:
+                    {
+                        m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
+                        break;
+                    }
+                case CtpTypeCode.Boolean:
+                    {
+                        if (!point.Value.IsBoolean)
+                        {
+                            m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
+                        }
+                        else
+                        {
+                            m_writer.WriteBits4((byte)SimpleSymbols.ValueLast);
+                        }
+                        break;
+                    }
+                case CtpTypeCode.Int64:
+                case CtpTypeCode.Double:
+                case CtpTypeCode.CtpTime:
+                    {
+                        ulong prev = m_prevPoint.PrevValue.UnsafeRawInt64;
+                        ulong cur = point.Value.UnsafeRawInt64;
+                        if (cur == 0)
+                        {
+                            m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
+                        }
+                        else if (prev == cur)
+                        {
+                            m_writer.WriteBits4((byte)SimpleSymbols.ValueLast);
+                        }
+                        else
+                        {
+                            m_writer.WriteBits1(1);
+                            Write64(prev ^ cur);
+                        }
+                        break;
+                    }
+                case CtpTypeCode.Guid:
+                case CtpTypeCode.String:
+                case CtpTypeCode.CtpCommand:
+                case CtpTypeCode.CtpBuffer:
+                    if (point.Value.IsDefault)
+                    {
+                        m_writer.WriteBits4((byte)SimpleSymbols.ValueDefault);
+                    }
+                    else if (m_currentPoint.PrevValue.Equals(point.Value))
+                    {
+                        m_writer.WriteBits4((byte)SimpleSymbols.ValueLast);
+                    }
+                    else
+                    {
+                        m_writer.WriteBits1(1);
+                        CtpValueEncodingNative.Save(m_writer, point.Value);
+                    }
+                    break;
+                case CtpTypeCode.Single:
+                //Single is handled above
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public override byte[] ToArray()
@@ -153,51 +216,137 @@ namespace Sttp.DataPointEncoding
 
         private void Write32(uint bitsChanged)
         {
-            int bits = CompareUInt32.RequiredBits(bitsChanged);
-            if (bits == 0)
-                throw new NotSupportedException();
-            bits = ((bits + 3) >> 2) - 1; //Round up to the nearest check;
-            m_writer.WriteBits3((uint)bits);
-            m_writer.WriteBits((bits + 1) * 4, bitsChanged);
+            if (bitsChanged <= Bits4)
+            {
+                m_writer.WriteBits3(0);
+                m_writer.WriteBits4(bitsChanged);
+            }
+            else if (bitsChanged <= Bits8)
+            {
+                m_writer.WriteBits3(1);
+                m_writer.WriteBits8(bitsChanged);
+            }
+            else if (bitsChanged <= Bits12)
+            {
+                m_writer.WriteBits3(2);
+                m_writer.WriteBits12(bitsChanged);
+            }
+            else if (bitsChanged <= Bits16)
+            {
+                m_writer.WriteBits3(3);
+                m_writer.WriteBits16(bitsChanged);
+            }
+            else if (bitsChanged <= Bits20)
+            {
+                m_writer.WriteBits3(4);
+                m_writer.WriteBits20(bitsChanged);
+            }
+            else if (bitsChanged <= Bits24)
+            {
+                m_writer.WriteBits3(5);
+                m_writer.WriteBits24(bitsChanged);
+            }
+            else if (bitsChanged <= Bits28)
+            {
+                m_writer.WriteBits3(6);
+                m_writer.WriteBits28(bitsChanged);
+            }
+            else
+            {
+                m_writer.WriteBits3(7);
+                m_writer.WriteBits32(bitsChanged);
+            }
         }
 
         private void Write64(ulong bitsChanged)
         {
-            int bits = CompareUInt64.RequiredBits(bitsChanged);
-            if (bits == 0)
-                throw new NotSupportedException();
-            bits = ((bits + 3) >> 2) - 1; //Round up to the nearest check;
-            m_writer.WriteBits4((uint)bits);
-            m_writer.WriteBits((bits + 1) * 4, bitsChanged);
+            if (bitsChanged <= Bits4)
+            {
+                m_writer.WriteBits4(0);
+                m_writer.WriteBits4((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits8)
+            {
+                m_writer.WriteBits4(1);
+                m_writer.WriteBits8((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits12)
+            {
+                m_writer.WriteBits4(2);
+                m_writer.WriteBits12((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits16)
+            {
+                m_writer.WriteBits4(3);
+                m_writer.WriteBits16((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits20)
+            {
+                m_writer.WriteBits4(4);
+                m_writer.WriteBits20((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits24)
+            {
+                m_writer.WriteBits4(5);
+                m_writer.WriteBits24((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits28)
+            {
+                m_writer.WriteBits4(6);
+                m_writer.WriteBits28((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits32)
+            {
+                m_writer.WriteBits4(7);
+                m_writer.WriteBits32((uint)bitsChanged);
+            }
+            else if (bitsChanged <= Bits36)
+            {
+                m_writer.WriteBits4(8);
+                m_writer.WriteBits36(bitsChanged);
+            }
+            else if (bitsChanged <= Bits40)
+            {
+                m_writer.WriteBits4(9);
+                m_writer.WriteBits40(bitsChanged);
+            }
+            else if (bitsChanged <= Bits44)
+            {
+                m_writer.WriteBits4(10);
+                m_writer.WriteBits44(bitsChanged);
+            }
+            else if (bitsChanged <= Bits48)
+            {
+                m_writer.WriteBits4(11);
+                m_writer.WriteBits48(bitsChanged);
+            }
+            else if (bitsChanged <= Bits52)
+            {
+                m_writer.WriteBits4(12);
+                m_writer.WriteBits52(bitsChanged);
+            }
+            else if (bitsChanged <= Bits56)
+            {
+                m_writer.WriteBits4(13);
+                m_writer.WriteBits56(bitsChanged);
+            }
+            else if (bitsChanged <= Bits60)
+            {
+                m_writer.WriteBits4(14);
+                m_writer.WriteBits60(bitsChanged);
+            }
+            else
+            {
+                m_writer.WriteBits4(15);
+                m_writer.WriteBits64(bitsChanged);
+            }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private SimpleMetadata FindMetadata(SttpDataPointMetadata metadata, out bool isNew)
         {
             isNew = false;
-            int channelID;
-
-            //Since most of the time, sequencing will be preserved, this check avoids a dictionary lookup.
-            if (m_prevPoint != null)
-            {
-                channelID = m_prevPoint.NeighborChannelId;
-                if (m_metadata[channelID].Metadata.DataPointID == metadata.DataPointID)
-                    return m_metadata[channelID];
-            }
-
-            if (metadata.RuntimeID.HasValue)
-            {
-                if (!m_runtimeIDToChannelIDMapping.TryGetValue(metadata.RuntimeID.Value, out channelID))
-                {
-                    channelID = m_metadata.Count;
-                    var point = new SimpleMetadata(channelID, metadata);
-                    m_metadata.Add(point);
-                    m_runtimeIDToChannelIDMapping.Add(metadata.RuntimeID.Value, channelID);
-                    isNew = true;
-                }
-                return m_metadata[channelID];
-            }
-
-            if (!m_pointIDToChannelIDMapping.TryGetValue(metadata.DataPointID, out channelID))
+            if (!m_pointIDToChannelIDMapping.TryGetValue(metadata.DataPointID, out int channelID))
             {
                 channelID = m_metadata.Count;
                 var point = new SimpleMetadata(channelID, metadata);

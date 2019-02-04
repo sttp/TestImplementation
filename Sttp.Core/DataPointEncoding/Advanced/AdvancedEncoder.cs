@@ -131,7 +131,7 @@ namespace Sttp.DataPointEncoding
                 m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueDefault);
                 m_currentPoint.PrevValue = point.Value;
             }
-            else if (m_currentPoint.PrevValue == point.Value)
+            else if (m_currentPoint.PrevValue.Equals(point.Value))
             {
                 m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueLast);
             }
@@ -143,7 +143,7 @@ namespace Sttp.DataPointEncoding
                     case CtpTypeCode.Int64:
                     case CtpTypeCode.Double:
                     case CtpTypeCode.CtpTime:
-                        ulong bitsChanged = CompareUInt64.Compare(point.Value.AsRaw64, m_currentPoint.PrevValue.AsRaw64);
+                        ulong bitsChanged = CompareUInt64.Compare(point.Value.UnsafeRawInt64, m_currentPoint.PrevValue.UnsafeRawInt64);
                         Write64(bitsChanged);
                         break;
                     case CtpTypeCode.Boolean:
@@ -270,7 +270,7 @@ namespace Sttp.DataPointEncoding
             if (m_prevPoint != null)
             {
                 channelID = m_prevPoint.NeighborChannelId;
-                if (m_metadata[channelID].Metadata.DataPointID == metadata.DataPointID)
+                if (m_metadata[channelID].Metadata.DataPointID.Equals(metadata.DataPointID))
                     return m_metadata[channelID];
             }
 

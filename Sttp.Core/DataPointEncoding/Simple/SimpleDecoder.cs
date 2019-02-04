@@ -183,12 +183,12 @@ namespace Sttp.DataPointEncoding
 
         private ulong ReadInt32()
         {
-            return (m_reader.ReadBits((int)(m_reader.ReadBits3() + 1) * 4) ^ m_currentPoint.PrevValue.AsRaw64);
+            return (m_reader.ReadBits((int)(m_reader.ReadBits3() + 1) * 4) ^ m_currentPoint.PrevValue.UnsafeRawInt64);
         }
 
         private ulong ReadInt64()
         {
-            return (m_reader.ReadBits((int)(m_reader.ReadBits4() + 1) * 4) ^ m_currentPoint.PrevValue.AsRaw64);
+            return (m_reader.ReadBits((int)(m_reader.ReadBits4() + 1) * 4) ^ m_currentPoint.PrevValue.UnsafeRawInt64);
         }
     }
 }
