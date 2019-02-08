@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using CTP;
 
@@ -11,10 +12,20 @@ namespace Sttp
         private byte[] m_byteBuffer;
         private byte[] m_bitBuffer;
         private int m_byteLength;
-        private int m_bitStreamCacheBitCount; 
-        private uint m_bitStreamCache;
+
+        /// <summary>
+        /// The number of bits in the bit buffer, not including the cached space.
+        /// </summary>
         private int m_bitLength;
-        private bool m_hasReservedUnusedBitsHeader;
+
+        /// <summary>
+        /// The number of valid bits in <see cref="m_bitStreamCache"/>
+        /// </summary>
+        private int m_bitStreamCacheBitCount;
+        /// <summary>
+        /// A pending place to store bits. Bits are stored right aligned and appended on the right.
+        /// </summary>
+        private uint m_bitStreamCache;
 
         public ByteWriter()
         {
@@ -23,45 +34,20 @@ namespace Sttp
             Clear();
         }
 
-        public int Length => m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
-
-        protected void GetBuffer(out byte[] data, out int offset, out int length)
-        {
-            //Copy the bit stream to the end of the byte stream.
-
-            //Flush any pending data to the stream, but don't reset any of the values since that would mess up the state if the 
-            //user decides to continue to write data to the stream afterwords.
-            int bitLength = m_bitLength;
-            if (m_bitStreamCacheBitCount > 0)
-            {
-                EnsureCapacityBits(1);
-                bitLength++;
-                //Make up 8 bits by padding.
-                uint cache = m_bitStreamCache << (8 - m_bitStreamCacheBitCount);
-                m_bitBuffer[m_bitBuffer.Length - bitLength] = (byte)cache;
-            }
-            if (m_hasReservedUnusedBitsHeader)
-            {
-                m_bitBuffer[m_bitBuffer.Length - 1] &= 31; //Clear bits 6,7,8
-                m_bitBuffer[m_bitBuffer.Length - 1] |= (byte)(m_bitStreamCacheBitCount << 5);
-            }
-            EnsureCapacityBytes(m_bitLength);
-            Array.Copy(m_bitBuffer, m_bitBuffer.Length - bitLength, m_byteBuffer, m_byteLength, bitLength);
-            data = m_byteBuffer;
-            offset = 0;
-            length = m_byteLength + bitLength;
-        }
+        public int ApproximateSize => 5 + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
 
         /// <summary>
         /// Ensures that the byte stream has the room to store the specified number of bytes.
         /// </summary>
         /// <param name="neededBytes"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacityBytes(int neededBytes)
         {
             if (m_byteLength + neededBytes >= m_byteBuffer.Length)
                 GrowBytes(neededBytes);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void GrowBytes(int neededBytes)
         {
             while (m_byteLength + neededBytes >= m_byteBuffer.Length)
@@ -87,18 +73,29 @@ namespace Sttp
             while (m_bitLength + neededBytes >= m_bitBuffer.Length)
             {
                 byte[] newBuffer = new byte[m_bitBuffer.Length * 2];
-                m_bitBuffer.CopyTo(newBuffer, newBuffer.Length - m_bitBuffer.Length);
+                m_bitBuffer.CopyTo(newBuffer, 0);
                 m_bitBuffer = newBuffer;
             }
         }
 
         public byte[] ToArray()
         {
-            //ToDo: There might be a better CopyTo alternative.
-            GetBuffer(out byte[] origBuffer, out int offset, out int length);
+            FlushBitStream(); //This means only what is in the bit cache remains and is 0 to 7 bits.
 
-            byte[] data = new byte[length];
-            Array.Copy(origBuffer, offset, data, 0, length);
+            uint bitSize = (uint)(m_bitLength * 8) + (uint)m_bitStreamCacheBitCount;
+            int headerSize = Encoding7Bit.GetSize(bitSize);
+            byte[] data = new byte[headerSize + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3)];
+            int position = 0;
+            Encoding7Bit.Write(data, ref position, bitSize);
+
+            Array.Copy(m_byteBuffer, 0, data, headerSize, m_byteLength);
+            Array.Copy(m_bitBuffer, 0, data, headerSize + m_byteLength, m_bitLength);
+
+            if (m_bitStreamCacheBitCount > 0)
+            {
+                //The final byte is right 0 padded.
+                data[data.Length - 1] = (byte)(m_bitStreamCache << (8 - m_bitStreamCacheBitCount));
+            }
             return data;
         }
 
@@ -108,7 +105,6 @@ namespace Sttp
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
             m_byteLength = 0;
-            m_hasReservedUnusedBitsHeader = false;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
@@ -213,27 +209,6 @@ namespace Sttp
             }
 
             Write(Encoding.UTF8.GetBytes(value));
-        }
-
-        public void WriteAsciiShort(string value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            if (value.Length > 255)
-                throw new Exception("Length of string cannot exceed 255 characters");
-
-            EnsureCapacityBytes(value.Length + 1);
-
-            m_byteBuffer[m_byteLength + 0] = (byte)value.Length;
-
-            for (var x = 0; x < value.Length; x++)
-            {
-                if ((ushort)value[x] > 127) //casting to ushort also takes care of negative numbers if they exist.
-                    throw new Exception("Not an ASCII string");
-                m_byteBuffer[m_byteLength + 1 + x] = (byte)value[x];
-            }
-
-            m_byteLength += 1 + value.Length;
         }
 
         #endregion
@@ -442,6 +417,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits2(uint value)
         {
             const int bits = 2;
@@ -449,6 +425,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits3(uint value)
         {
             const int bits = 3;
@@ -456,6 +433,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits4(uint value)
         {
             const int bits = 4;
@@ -463,6 +441,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits5(uint value)
         {
             const int bits = 5;
@@ -470,6 +449,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits6(uint value)
         {
             const int bits = 6;
@@ -477,6 +457,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits7(uint value)
         {
             const int bits = 7;
@@ -484,6 +465,7 @@ namespace Sttp
             m_bitStreamCacheBitCount += bits;
             ValidateBitStream();
         }
+
         public void WriteBits8(uint value)
         {
             EnsureCapacityBytes(1);
@@ -491,21 +473,9 @@ namespace Sttp
             m_byteLength += 1;
         }
 
-        public void WriteBits10(uint value)
-        {
-            WriteBits2(value);
-            WriteBits8(value >> 4);
-        }
-
         public void WriteBits12(uint value)
         {
             WriteBits4(value);
-            WriteBits8(value >> 4);
-        }
-
-        public void WriteBits14(uint value)
-        {
-            WriteBits6(value);
             WriteBits8(value >> 4);
         }
 
@@ -517,21 +487,9 @@ namespace Sttp
             m_byteLength += 2;
         }
 
-        public void WriteBits18(uint value)
-        {
-            WriteBits2(value);
-            WriteBits16(value >> 4);
-        }
-
         public void WriteBits20(uint value)
         {
             WriteBits4(value);
-            WriteBits16(value >> 4);
-        }
-
-        public void WriteBits22(uint value)
-        {
-            WriteBits6(value);
             WriteBits16(value >> 4);
         }
 
@@ -544,21 +502,9 @@ namespace Sttp
             m_byteLength += 3;
         }
 
-        public void WriteBits26(uint value)
-        {
-            WriteBits2(value);
-            WriteBits24(value >> 4);
-        }
-
         public void WriteBits28(uint value)
         {
             WriteBits4(value);
-            WriteBits24(value >> 4);
-        }
-
-        public void WriteBits30(uint value)
-        {
-            WriteBits6(value);
             WriteBits24(value >> 4);
         }
 
@@ -588,7 +534,6 @@ namespace Sttp
             m_byteBuffer[m_byteLength + 4] = (byte)value;
             m_byteLength += 5;
         }
-
 
         public void WriteBits44(ulong value)
         {
@@ -647,27 +592,21 @@ namespace Sttp
             m_byteLength += 8;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ValidateBitStream()
         {
-            if (!m_hasReservedUnusedBitsHeader || m_bitStreamCacheBitCount > 7)
-                ProcessBitStream();
+            if (m_bitStreamCacheBitCount > 20)
+                FlushBitStream();
         }
 
-        private void ProcessBitStream()
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void FlushBitStream()
         {
-            if (!m_hasReservedUnusedBitsHeader)
-            {
-                //reserve 3 bits for the number of unused bits in the bitstream.
-                //To reserve bits at the beginning of the bit stream, all we have to do is say there were 3 more bits.
-                m_bitStreamCacheBitCount += 3;
-                m_hasReservedUnusedBitsHeader = true;
-            }
-
-            EnsureCapacityBits(2); //It's ok to be too large here. It just ensures that at least 2 bytes are free before doing anything.
+            EnsureCapacityBits(4); //It's ok to be too large here. It just ensures that at least 4 bytes are free before doing anything.
             while (m_bitStreamCacheBitCount > 7)
             {
+                m_bitBuffer[m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
                 m_bitLength++;
-                m_bitBuffer[m_bitBuffer.Length - m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
                 m_bitStreamCacheBitCount -= 8;
             }
         }

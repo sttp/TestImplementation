@@ -33,6 +33,50 @@ namespace Sttp
     /// </summary>
     public static class Encoding7Bit
     {
+        /// <summary>
+        /// Gets the number of bytes required to write the provided value.
+        /// </summary>
+        /// <param name="value1">the value to measure</param>
+        /// <returns></returns>
+        public static int GetSize(uint value1)
+        {
+            if (value1 < 128)
+                return 1;
+            if (value1 < 128 * 128)
+                return 2;
+            if (value1 < 128 * 128 * 128)
+                return 3;
+            if (value1 < 128 * 128 * 128 * 128)
+                return 4;
+            return 5;
+        }
+
+        /// <summary>
+        /// Gets the number of bytes required to write the provided value.
+        /// </summary>
+        /// <param name="value1">the value to measure</param>
+        /// <returns>The number of bytes needed to store the provided value.</returns>
+        public static int GetSize(ulong value1)
+        {
+            if (value1 < 128)
+                return 1;
+            if (value1 < 128 * 128)
+                return 2;
+            if (value1 < 128 * 128 * 128)
+                return 3;
+            if (value1 < 128 * 128 * 128 * 128)
+                return 4;
+            if (value1 < 128L * 128 * 128 * 128 * 128)
+                return 5;
+            if (value1 < 128L * 128 * 128 * 128 * 128 * 128)
+                return 6;
+            if (value1 < 128L * 128 * 128 * 128 * 128 * 128 * 128)
+                return 7;
+            if (value1 < 128L * 128 * 128 * 128 * 128 * 128 * 128 * 128)
+                return 8;
+            return 9;
+        }
+
         #region [ 32 bit ]
 
         #region [ Write ]

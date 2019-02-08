@@ -23,7 +23,7 @@ namespace Sttp.DataPointEncoding
             m_channelMap = new MetadataChannelMapEncoder();
         }
 
-        public override int Length => m_stream.Length;
+        public override int Length => m_stream.ApproximateSize;
 
         public override void Clear()
         {

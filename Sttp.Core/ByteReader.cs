@@ -11,52 +11,38 @@ namespace Sttp
         private static readonly byte[] Empty = new byte[0];
 
         private byte[] m_buffer;
-        private int m_startingPosition;
-        private int m_lastPosition;
+        /// <summary>
+        /// The position 1 beyond the last byte of the byte stream
+        /// </summary>
+        private int m_endOfByteStream;
+        /// <summary>
+        /// The position 1 beyond the last byte of the bit stream
+        /// </summary>
+        private int m_endOfBitStream;
 
         private int m_currentBytePosition;
         private int m_currentBitPosition;
 
         private int m_bitStreamCacheBitCount;
         private uint m_bitStreamCache;
-        private byte m_usedBitsForLastBitWord;
+        private int m_bitsInLastByte;
 
         public ByteReader()
         {
             m_buffer = Empty;
         }
 
-        public ByteReader(byte[] data)
-        {
-            SetBuffer(data, 0, data.Length);
-        }
-
-        public ByteReader(byte[] data, int position, int length)
-        {
-            SetBuffer(data, position, length);
-        }
-
         public bool IsEmpty
         {
             get
             {
-                if (m_currentBitPosition != m_currentBytePosition)
+                if (m_currentBytePosition != m_endOfByteStream)
                     return false;
-                if (m_bitStreamCacheBitCount == 0)
-                    return true;
 
-                //BUG: ToDo, determine if anything else is impacted by this bug.
-                //if (m_bitStreamCacheBitCount >= 8 - m_usedBitsForLastBitWord)
-                //{
-                //    return true;
-                //}
+                if (m_currentBitPosition != m_endOfBitStream)
+                    return false;
 
-                if (m_bitStreamCacheBitCount == 8 - m_usedBitsForLastBitWord)
-                {
-                    return true;
-                }
-
-                return false;
+                return m_bitStreamCacheBitCount == 0;
             }
         }
 
@@ -68,15 +54,18 @@ namespace Sttp
         public void SetBuffer(byte[] data, int position, int length)
         {
             m_buffer = data;
-            m_startingPosition = position;
-            m_lastPosition = length + position;
+            m_endOfBitStream = position + length;
+
+            uint bits = Encoding7Bit.ReadUInt32(data, ref position);
+            m_bitsInLastByte = (int)(bits & 7);
+            if (m_bitsInLastByte == 0)
+                m_bitsInLastByte = 8;
 
             m_currentBytePosition = position;
-            m_currentBitPosition = m_lastPosition;
+            m_endOfByteStream = m_currentBitPosition = m_endOfBitStream - (int)((bits + 7) >> 3);
 
             m_bitStreamCacheBitCount = 0;
             m_bitStreamCache = 0;
-            m_usedBitsForLastBitWord = 0;
         }
 
         private void ThrowEndOfStreamException()
@@ -86,7 +75,7 @@ namespace Sttp
 
         private void EnsureCapacity(int length)
         {
-            if (m_currentBytePosition + length > m_currentBitPosition)
+            if (m_currentBytePosition + length > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -156,7 +145,7 @@ namespace Sttp
 
         public Guid ReadGuid()
         {
-            if (m_currentBytePosition + 16 > m_currentBitPosition)
+            if (m_currentBytePosition + 16 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -193,28 +182,6 @@ namespace Sttp
 
             return Encoding.UTF8.GetString(rv);
         }
-
-        public string ReadAsciiShort()
-        {
-            if (m_currentBytePosition + 1 > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            if (m_currentBytePosition + 1 + m_buffer[m_currentBytePosition] > m_currentBitPosition)
-            {
-                ThrowEndOfStreamException();
-            }
-            char[] data = new char[m_buffer[m_currentBytePosition]];
-            for (int x = 0; x < data.Length; x++)
-            {
-                data[x] = (char)m_buffer[m_currentBytePosition + 1 + x];
-                if (data[x] > 127)
-                    throw new Exception("Not an ASCII string");
-            }
-            m_currentBytePosition += 1 + data.Length;
-            return new string(data);
-        }
-
 
         #endregion
 
@@ -299,9 +266,10 @@ namespace Sttp
             m_bitStreamCacheBitCount -= bits;
             return (uint)((m_bitStreamCache >> m_bitStreamCacheBitCount) & ((1 << bits) - 1));
         }
+
         public uint ReadBits8()
         {
-            if (m_currentBytePosition + 1 > m_currentBitPosition)
+            if (m_currentBytePosition + 1 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -317,7 +285,7 @@ namespace Sttp
 
         public uint ReadBits16()
         {
-            if (m_currentBytePosition + 2 > m_currentBitPosition)
+            if (m_currentBytePosition + 2 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -334,7 +302,7 @@ namespace Sttp
 
         public uint ReadBits24()
         {
-            if (m_currentBytePosition + 3 > m_currentBitPosition)
+            if (m_currentBytePosition + 3 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -352,7 +320,7 @@ namespace Sttp
 
         public uint ReadBits32()
         {
-            if (m_currentBytePosition + 4 > m_currentBitPosition)
+            if (m_currentBytePosition + 4 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -366,7 +334,7 @@ namespace Sttp
 
         public ulong ReadBits40()
         {
-            if (m_currentBytePosition + 5 > m_currentBitPosition)
+            if (m_currentBytePosition + 5 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -381,7 +349,7 @@ namespace Sttp
 
         public ulong ReadBits48()
         {
-            if (m_currentBytePosition + 6 > m_currentBitPosition)
+            if (m_currentBytePosition + 6 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -397,7 +365,7 @@ namespace Sttp
 
         public ulong ReadBits56()
         {
-            if (m_currentBytePosition + 7 > m_currentBitPosition)
+            if (m_currentBytePosition + 7 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -414,7 +382,7 @@ namespace Sttp
 
         public ulong ReadBits64()
         {
-            if (m_currentBytePosition + 8 > m_currentBitPosition)
+            if (m_currentBytePosition + 8 > m_endOfByteStream)
             {
                 ThrowEndOfStreamException();
             }
@@ -430,30 +398,28 @@ namespace Sttp
             return rv;
         }
 
-        private void ReadMoreBits(int len)
+        private void ReadMoreBits(int requiredBits)
         {
-            if (m_currentBitPosition - m_currentBytePosition < 1)
-            {
+            if (m_currentBitPosition == m_endOfBitStream)
                 ThrowEndOfStreamException();
-            }
-            if (m_currentBitPosition == m_lastPosition)
+
+            while (m_bitStreamCacheBitCount < 20 && m_currentBitPosition != m_endOfBitStream)
             {
-                m_currentBitPosition--;
-                m_bitStreamCacheBitCount = 5;
-                m_bitStreamCache = m_buffer[m_currentBitPosition];
-                m_usedBitsForLastBitWord = (byte)(m_bitStreamCache >> 5);
-                if (len > 5)
+                if (m_currentBitPosition + 1 == m_endOfBitStream)
                 {
-                    ReadMoreBits(len - 5);
+                    m_bitStreamCacheBitCount += m_bitsInLastByte;
+                    m_bitStreamCache = (m_bitStreamCache << m_bitsInLastByte) | ((uint)m_buffer[m_currentBitPosition] >> (8 - m_bitsInLastByte));
                 }
-            }
-            else
-            {
-                m_currentBitPosition--;
-                m_bitStreamCacheBitCount += 8;
-                m_bitStreamCache = (m_bitStreamCache << 8) | m_buffer[m_currentBitPosition];
+                else
+                {
+                    m_bitStreamCacheBitCount += 8;
+                    m_bitStreamCache = (m_bitStreamCache << 8) | m_buffer[m_currentBitPosition];
+                }
+                m_currentBitPosition++;
             }
 
+            if (m_bitStreamCacheBitCount < requiredBits)
+                ThrowEndOfStreamException();
         }
 
         public ulong Read8BitSegments()

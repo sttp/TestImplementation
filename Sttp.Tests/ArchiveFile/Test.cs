@@ -68,13 +68,13 @@ namespace Sttp.Tests
         [TestMethod]
         public void BenchmarkFiles()
         {
-            //BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
             PointCount = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int x = 0; x < 5; x++)
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Simple);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
             }
 
             Console.WriteLine(PointCount);

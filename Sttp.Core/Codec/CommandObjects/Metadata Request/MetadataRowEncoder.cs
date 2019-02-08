@@ -20,7 +20,7 @@ namespace Sttp.Codec
             m_stream.Clear();
         }
 
-        public int Size => m_stream.Length;
+        public int Size => m_stream.ApproximateSize;
 
         public void AddRow(CtpObject[] row)
         {

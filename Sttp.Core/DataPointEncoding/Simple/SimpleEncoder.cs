@@ -40,7 +40,7 @@ namespace Sttp.DataPointEncoding
             m_writer = new ByteWriter();
         }
 
-        public override int Length => m_writer.Length;
+        public override int Length => m_writer.ApproximateSize;
 
         public override void Clear()
         {

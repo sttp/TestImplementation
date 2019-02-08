@@ -20,7 +20,7 @@ namespace Sttp.DataPointEncoding
             m_stream = new ByteWriter();
         }
 
-        public override int Length => m_stream.Length;
+        public override int Length => m_stream.ApproximateSize;
 
         public override void Clear()
         {
