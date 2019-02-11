@@ -21,21 +21,22 @@
         ValueInvertedInt64 = 4,
         ValueSingle = 5,
         ValueDouble = 6,
-        ValueCtpTime = 7,
-        ValueBooleanTrue = 8,
-        ValueBooleanFalse = 9,
-        ValueGuid = 10,
+        ValueNumeric = 7,
+        ValueCtpTime = 8,
+        ValueBooleanTrue = 9,
+        ValueBooleanFalse =10,
+        ValueGuid = 11,
         /// <summary>
         /// Encoded as 7BitInt(DataLength(Value)), Value.
         /// </summary>
-        ValueString = 11,
+        ValueString = 12,
         /// <summary>
         /// Encoded as 7BitInt(DataLength(Value)), Value.
         /// </summary>
-        ValueCtpBuffer = 12,
+        ValueCtpBuffer = 13,
         /// <summary>
         /// Encoded as 7BitInt(DataLength(Value)), Value.
         /// </summary>
-        ValueCtpCommand = 13,
+        ValueCtpCommand = 14,
     }
 }

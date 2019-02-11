@@ -174,6 +174,7 @@ namespace Sttp.DataPointEncoding
                             throw new Exception("Expected a GUID.");
                         m_currentPoint.PrevValue = CtpValueEncodingNative.Load(m_reader);
                         break;
+                    case CtpTypeCode.Numeric:
                     case CtpTypeCode.String:
                     case CtpTypeCode.CtpCommand:
                     case CtpTypeCode.CtpBuffer:

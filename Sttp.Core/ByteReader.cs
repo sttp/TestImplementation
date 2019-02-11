@@ -202,6 +202,15 @@ namespace Sttp
             return new CtpTime(ReadInt64());
         }
 
+        public CtpNumeric ReadNumeric()
+        {
+            int flags = ReadInt32();
+            int high = ReadInt32();
+            int mid = ReadInt32();
+            int low = ReadInt32();
+            return new CtpNumeric(flags, high, mid, low);
+        }
+
         #region [ Read Bits ]
 
         public uint ReadBits0()
@@ -501,6 +510,6 @@ namespace Sttp
 
         #endregion
 
-
+       
     }
 }

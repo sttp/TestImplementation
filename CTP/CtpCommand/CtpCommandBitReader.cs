@@ -74,6 +74,15 @@ namespace CTP
             return rv;
         }
 
+        public CtpNumeric ReadNumeric()
+        {
+            int flags = (int)ReadBits32();
+            int high = (int)ReadBits32();
+            int mid = (int)ReadBits32();
+            int low = (int)ReadBits32();
+            return new CtpNumeric(flags, high, mid, low);
+        }
+
         public CtpTime ReadTime()
         {
             return new CtpTime((long)ReadBits64());

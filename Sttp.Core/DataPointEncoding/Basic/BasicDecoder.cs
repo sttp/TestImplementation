@@ -50,7 +50,6 @@ namespace Sttp.DataPointEncoding
                 typeChanged = m_stream.ReadBits1() == 1;
             }
 
-
             m_lastChannelID ^= (int)(uint)m_stream.Read4BitSegments();
             dataPoint.Metadata = m_channelMap.GetMetadata(m_lastChannelID);
 

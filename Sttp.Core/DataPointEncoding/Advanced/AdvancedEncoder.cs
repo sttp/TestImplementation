@@ -154,6 +154,7 @@ namespace Sttp.DataPointEncoding
                         m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits128);
                         CtpValueEncodingNative.Save(m_writer, point.Value);
                         break;
+                    case CtpTypeCode.Numeric:
                     case CtpTypeCode.String:
                     case CtpTypeCode.CtpCommand:
                     case CtpTypeCode.CtpBuffer:

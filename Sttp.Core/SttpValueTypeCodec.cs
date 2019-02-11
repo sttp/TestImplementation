@@ -38,6 +38,8 @@ namespace Sttp
                 return CtpTypeCode.Double;
             if (columnDataType == typeof(Single))
                 return CtpTypeCode.Single;
+            if (columnDataType == typeof(CtpNumeric))
+                return CtpTypeCode.Numeric;
             if (columnDataType == typeof(DateTime))
                 return CtpTypeCode.CtpTime;
             if (columnDataType == typeof(bool))
@@ -64,6 +66,8 @@ namespace Sttp
                     return typeof(Single);
                 case CtpTypeCode.Double:
                     return typeof(Double);
+                case CtpTypeCode.Numeric:
+                    return typeof(CtpNumeric);
                 case CtpTypeCode.CtpTime:
                     return typeof(CtpTime);
                 case CtpTypeCode.Boolean:

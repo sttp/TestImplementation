@@ -34,6 +34,8 @@ namespace Sttp.Codec
                         return "Single";
                     case CtpTypeCode.Double:
                         return "Double";
+                    case CtpTypeCode.Numeric:
+                        return "Numeric";
                     case CtpTypeCode.CtpTime:
                         return "CtpTime";
                     case CtpTypeCode.Boolean:
@@ -65,6 +67,9 @@ namespace Sttp.Codec
                         break;
                     case "Double":
                         TypeCode = CtpTypeCode.Double;
+                        break;
+                    case "Numeric":
+                        TypeCode = CtpTypeCode.Numeric;
                         break;
                     case "CtpTime":
                         TypeCode = CtpTypeCode.CtpTime;

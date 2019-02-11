@@ -184,6 +184,7 @@ namespace Sttp.DataPointEncoding
                         }
                         break;
                     }
+                case CtpTypeCode.Numeric:
                 case CtpTypeCode.Guid:
                 case CtpTypeCode.String:
                 case CtpTypeCode.CtpCommand:

@@ -27,6 +27,9 @@ namespace CTP
         private readonly Guid m_valueGuid;
 
         [FieldOffset(0)]
+        private readonly CtpNumeric m_valueNumeric;
+
+        [FieldOffset(0)]
         private readonly int m_rawInt32;
 
         [FieldOffset(16)]
@@ -67,6 +70,8 @@ namespace CTP
                     case CtpTypeCode.CtpTime:
                     case CtpTypeCode.Boolean:
                         return m_valueInt64 == 0;
+                    case CtpTypeCode.Numeric:
+                        return m_valueNumeric.IsDefault;
                     case CtpTypeCode.Guid:
                         return m_valueGuid == Guid.Empty;
                     case CtpTypeCode.String:
@@ -108,6 +113,16 @@ namespace CTP
                 if (m_valueTypeCode != CtpTypeCode.Double)
                     ThrowHelper(CtpTypeCode.Double);
                 return m_valueDouble;
+            }
+        }
+
+        public CtpNumeric IsNumeric
+        {
+            get
+            {
+                if (m_valueTypeCode != CtpTypeCode.Numeric)
+                    ThrowHelper(CtpTypeCode.Numeric);
+                return m_valueNumeric;
             }
         }
 
@@ -204,6 +219,8 @@ namespace CTP
                 case CtpTypeCode.Double:
                 case CtpTypeCode.CtpTime:
                     return m_valueInt64 == other.m_valueInt64;
+                case CtpTypeCode.Numeric:
+                    return m_valueNumeric == other.m_valueNumeric;
                 case CtpTypeCode.Guid:
                     return m_valueGuid == other.m_valueGuid;
                 case CtpTypeCode.String:
@@ -327,6 +344,8 @@ namespace CTP
                     return (m_valueSingle.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
                 case CtpTypeCode.Double:
                     return (m_valueDouble.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                case CtpTypeCode.Numeric:
+                    return (m_valueNumeric.GetHashCode() << 3) ^ m_valueNumeric.GetHashCode();
                 case CtpTypeCode.CtpTime:
                     return (m_valueCtpTime.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
                 case CtpTypeCode.Boolean:
@@ -360,6 +379,8 @@ namespace CTP
                     return new CtpObject(0f);
                 case CtpTypeCode.Double:
                     return new CtpObject(0d);
+                case CtpTypeCode.Numeric:
+                    return new CtpObject(default(CtpNumeric));
                 case CtpTypeCode.CtpTime:
                     return new CtpTime(0);
                 case CtpTypeCode.Boolean:

@@ -148,11 +148,18 @@ namespace CTP
             m_length += value.Length;
         }
 
-        internal void Write(CtpTime isCtpTime)
+        internal void Write(CtpTime value)
         {
-            WriteBits64((ulong)isCtpTime.Ticks);
+            WriteBits64((ulong)value.Ticks);
         }
 
+        public void Write(CtpNumeric value)
+        {
+            WriteBits32((uint)value.Flags);
+            WriteBits32((uint)value.High);
+            WriteBits32((uint)value.Mid);
+            WriteBits32((uint)value.Low);
+        }
 
         #endregion
 

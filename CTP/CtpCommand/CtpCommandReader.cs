@@ -129,6 +129,9 @@ namespace CTP
                     case CtpCommandHeader.ValueDouble:
                         Value = (CtpObject)m_stream.ReadDouble();
                         break;
+                    case CtpCommandHeader.ValueNumeric:
+                        Value = (CtpObject)m_stream.ReadNumeric();
+                        break;
                     case CtpCommandHeader.ValueCtpTime:
                         Value = (CtpObject)m_stream.ReadTime();
                         break;

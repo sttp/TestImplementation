@@ -73,6 +73,11 @@ namespace CTP
             return new CtpObject((double)value);
         }
 
+        public static implicit operator CtpObject(CtpNumeric value)
+        {
+            return new CtpObject(value);
+        }
+
         public static implicit operator CtpObject(DateTime value)
         {
             return new CtpObject((CtpTime)value);
@@ -173,6 +178,12 @@ namespace CTP
                 return new CtpObject();
             return (CtpObject)value.Value;
         }
+        public static implicit operator CtpObject(CtpNumeric? value)
+        {
+            if (!value.HasValue)
+                return new CtpObject();
+            return (CtpObject)value.Value;
+        }
         public static implicit operator CtpObject(decimal? value)
         {
             if (!value.HasValue)
@@ -260,6 +271,10 @@ namespace CTP
         {
             return value.AsDecimal;
         }
+        public static explicit operator CtpNumeric(CtpObject value)
+        {
+            return value.AsNumeric;
+        }
         public static explicit operator DateTime(CtpObject value)
         {
             return value.AsDateTime;
@@ -280,7 +295,7 @@ namespace CTP
         {
             return value.AsChar;
         }
-        public static explicit operator char[](CtpObject value)
+        public static explicit operator char[] (CtpObject value)
         {
             if (value.IsNull)
                 return null;
@@ -370,6 +385,12 @@ namespace CTP
             if (value.IsNull)
                 return null;
             return value.AsDouble;
+        }
+        public static explicit operator CtpNumeric? (CtpObject value)
+        {
+            if (value.IsNull)
+                return null;
+            return value.AsNumeric;
         }
         public static explicit operator decimal? (CtpObject value)
         {

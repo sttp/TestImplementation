@@ -18,6 +18,8 @@ namespace CTP
                         return $"(float){m_valueSingle.ToString()}";
                     case CtpTypeCode.Double:
                         return $"(double){m_valueDouble.ToString()}";
+                    case CtpTypeCode.Numeric:
+                        return $"(Numeric){m_valueNumeric.ToString()}";
                     case CtpTypeCode.CtpTime:
                         return $"(CtpTime){m_valueCtpTime.ToString()}";
                     case CtpTypeCode.Boolean:
@@ -50,6 +52,8 @@ namespace CTP
                         return m_valueSingle;
                     case CtpTypeCode.Double:
                         return m_valueDouble;
+                    case CtpTypeCode.Numeric:
+                        return m_valueNumeric;
                     case CtpTypeCode.CtpTime:
                         return m_valueCtpTime;
                     case CtpTypeCode.Boolean:
@@ -156,6 +160,10 @@ namespace CTP
             {
                 return (CtpObject)((CtpCommand)value);
             }
+            else if (type == typeof(CtpNumeric))
+            {
+                return (CtpObject)((CtpNumeric)value);
+            }
             else if (type == typeof(byte[]))
             {
                 return (CtpObject)((byte[])value);
@@ -240,6 +248,11 @@ namespace CTP
                                 return (long)m_valueDouble;
                             }
                         }
+                    case CtpTypeCode.Numeric:
+                        checked
+                        {
+                            return (long)(decimal)m_valueNumeric;
+                        }
                     case CtpTypeCode.String:
                         {
                             checked
@@ -318,6 +331,11 @@ namespace CTP
                         {
                             return (float)m_valueDouble;
                         }
+                    case CtpTypeCode.Numeric:
+                        checked
+                        {
+                            return (float)(decimal)m_valueNumeric;
+                        }
                     case CtpTypeCode.String:
                     {
                         checked
@@ -351,6 +369,11 @@ namespace CTP
                         checked
                         {
                             return (double)m_valueDouble;
+                        }
+                    case CtpTypeCode.Numeric:
+                        checked
+                        {
+                            return (double)(decimal)m_valueNumeric;
                         }
                     case CtpTypeCode.String:
                     {
@@ -387,12 +410,55 @@ namespace CTP
                         {
                             return (decimal)m_valueDouble;
                         }
+                    case CtpTypeCode.Numeric:
+                        checked
+                        {
+                            return (decimal)m_valueNumeric;
+                        }
                     case CtpTypeCode.String:
                         {
                             if (decimal.TryParse((string)m_valueObject, out var result))
                                 return result;
                             throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
                         }
+                    default:
+                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
+                }
+            }
+        }
+
+        public CtpNumeric AsNumeric
+        {
+            get
+            {
+                switch (m_valueTypeCode)
+                {
+                    case CtpTypeCode.Int64:
+                        checked
+                        {
+                            return (CtpNumeric)(decimal)m_valueInt64;
+                        }
+                    case CtpTypeCode.Single:
+                        checked
+                        {
+                            return (CtpNumeric)(decimal)m_valueSingle;
+                        }
+                    case CtpTypeCode.Double:
+                        checked
+                        {
+                            return (CtpNumeric)(decimal)m_valueDouble;
+                        }
+                    case CtpTypeCode.Numeric:
+                        checked
+                        {
+                            return m_valueNumeric;
+                        }
+                    case CtpTypeCode.String:
+                    {
+                        if (decimal.TryParse((string)m_valueObject, out var result))
+                            return (CtpNumeric)result;
+                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
+                    }
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
                 }
@@ -489,6 +555,8 @@ namespace CTP
                         return m_valueSingle.ToString();
                     case CtpTypeCode.Double:
                         return m_valueDouble.ToString();
+                    case CtpTypeCode.Numeric:
+                        return m_valueNumeric.ToString();
                     case CtpTypeCode.CtpTime:
                         return m_valueCtpTime.ToString();
                     case CtpTypeCode.Boolean:

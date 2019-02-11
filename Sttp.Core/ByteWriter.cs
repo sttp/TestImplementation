@@ -34,6 +34,8 @@ namespace Sttp
             Clear();
         }
 
+       
+
         public int ApproximateSize => 5 + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
 
         /// <summary>
@@ -238,6 +240,14 @@ namespace Sttp
             EnsureCapacityBytes(value.Length);
             value.CopyTo(m_byteBuffer, m_byteLength);
             m_byteLength += value.Length;
+        }
+
+        public void Write(CtpNumeric value)
+        {
+            Write(value.High);
+            Write(value.Mid);
+            Write(value.Low);
+            Write(value.Flags);
         }
 
         #region [ Writing Bits ]

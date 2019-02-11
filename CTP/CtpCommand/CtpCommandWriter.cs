@@ -135,8 +135,6 @@ namespace CTP
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
-            if ((object)value == null)
-                value = CtpObject.Null;
 
             switch (value.ValueTypeCode)
             {
@@ -162,6 +160,10 @@ namespace CTP
                 case CtpTypeCode.Double:
                     m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueDouble);
                     m_stream.Write(value.IsDouble);
+                    break;
+                case CtpTypeCode.Numeric:
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpCommand);
+                    m_stream.Write(value.IsNumeric);
                     break;
                 case CtpTypeCode.CtpTime:
                     m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpTime);
@@ -193,6 +195,7 @@ namespace CTP
                     m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpCommand);
                     m_stream.Write(value.IsCtpCommand);
                     break;
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -29,6 +29,13 @@ namespace CTP
             m_valueDouble = value;
         }
 
+        private CtpObject(CtpNumeric value)
+            : this()
+        {
+            m_valueTypeCode = CtpTypeCode.Numeric;
+            m_valueNumeric = value;
+        }
+
         private CtpObject(CtpTime value)
           : this()
         {

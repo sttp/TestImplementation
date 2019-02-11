@@ -26,6 +26,9 @@ namespace Sttp
                 case CtpTypeCode.Double:
                     wr.Write(value.AsDouble);
                     break;
+                case CtpTypeCode.Numeric:
+                    wr.Write(value.AsNumeric);
+                    break;
                 case CtpTypeCode.CtpTime:
                     wr.Write(value.AsCtpTime);
                     break;
@@ -62,6 +65,8 @@ namespace Sttp
                     return (CtpObject)rd.ReadSingle();
                 case CtpTypeCode.Double:
                     return (CtpObject)rd.ReadDouble();
+                case CtpTypeCode.Numeric:
+                    return (CtpObject)rd.ReadNumeric();
                 case CtpTypeCode.CtpTime:
                     return (CtpObject)rd.ReadCtpTime();
                 case CtpTypeCode.Boolean:

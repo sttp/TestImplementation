@@ -23,6 +23,7 @@ namespace Sttp.Tests.WireProtocol
                 CtpValueEncodingNative.Save(wr, (CtpObject)x);
                 CtpValueEncodingNative.Save(wr, (CtpObject)(float)x);
                 CtpValueEncodingNative.Save(wr, (CtpObject)(double)x);
+                CtpValueEncodingNative.Save(wr, (CtpObject)(CtpNumeric)(decimal)x);
                 CtpValueEncodingNative.Save(wr, (CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
                 CtpValueEncodingNative.Save(wr, (CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 CtpValueEncodingNative.Save(wr, (CtpObject)((x & 1) == 1));
@@ -38,6 +39,7 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsInt32, x);
                 Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsSingle, (float)x);
                 Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsDouble, (double)x);
+                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsNumeric, (CtpNumeric)(decimal)x);
                 Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
                 Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsBoolean, ((x & 1) == 1));
@@ -57,6 +59,7 @@ namespace Sttp.Tests.WireProtocol
                 CtpValueEncodingWithoutType.Save(wr, (CtpObject)x);
                 CtpValueEncodingWithoutType.Save(wr, (CtpObject)(float)x);
                 CtpValueEncodingWithoutType.Save(wr, (CtpObject)(double)x);
+                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(CtpNumeric)(decimal)x);
                 CtpValueEncodingWithoutType.Save(wr, (CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
                 CtpValueEncodingWithoutType.Save(wr, (CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 CtpValueEncodingWithoutType.Save(wr, (CtpObject)((x & 1) == 1));
@@ -72,6 +75,7 @@ namespace Sttp.Tests.WireProtocol
                 Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Int64).AsInt32, x);
                 Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Single).AsSingle, (float)x);
                 Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Double).AsDouble, (double)x);
+                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Numeric).AsNumeric, (CtpNumeric)(decimal)x);
                 Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.CtpTime).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
                 Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Guid).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
                 Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Boolean).AsBoolean, ((x & 1) == 1));
