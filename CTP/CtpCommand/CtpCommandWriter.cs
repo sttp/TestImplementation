@@ -162,7 +162,7 @@ namespace CTP
                     m_stream.Write(value.IsDouble);
                     break;
                 case CtpTypeCode.Numeric:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpCommand);
+                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueNumeric);
                     m_stream.Write(value.IsNumeric);
                     break;
                 case CtpTypeCode.CtpTime:

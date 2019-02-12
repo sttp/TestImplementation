@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Runtime.CompilerServices;
 using System.Text;
 using GSF;
@@ -155,9 +156,21 @@ namespace CTP
 
         public void Write(CtpNumeric value)
         {
-            WriteBits32((uint)value.Flags);
-            WriteBits32((uint)value.High);
-            WriteBits32((uint)value.Mid);
+            byte code = value.Scale;
+            if (value.IsNegative)
+                code |= 128;
+
+            if (value.High != 0)
+                code |= 64;
+            if (value.Mid != 0)
+                code |= 32;
+
+            WriteBits8(code);
+
+            if (value.High != 0)
+                WriteBits32((uint)value.High);
+            if (value.Mid != 0)
+                WriteBits32((uint)value.Mid);
             WriteBits32((uint)value.Low);
         }
 

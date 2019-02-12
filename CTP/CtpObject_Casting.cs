@@ -457,10 +457,10 @@ namespace CTP
                     {
                         if (decimal.TryParse((string)m_valueObject, out var result))
                             return (CtpNumeric)result;
-                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
+                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to Numeric");
                     }
                     default:
-                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to Decimal");
+                        throw new InvalidCastException($"Cannot cast from {ToTypeString} to Numeric");
                 }
             }
         }

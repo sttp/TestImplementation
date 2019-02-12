@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GSF;
 
 namespace CTP
 {
@@ -21,7 +22,7 @@ namespace CTP
             High = bits[2];
             Flags = bits[3];
         }
-
+        
         public CtpNumeric(int flags, int high, int mid, int low)
         {
             Flags = flags;

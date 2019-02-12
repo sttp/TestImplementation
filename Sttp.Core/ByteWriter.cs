@@ -244,10 +244,10 @@ namespace Sttp
 
         public void Write(CtpNumeric value)
         {
+            Write(value.Flags);
             Write(value.High);
             Write(value.Mid);
             Write(value.Low);
-            Write(value.Flags);
         }
 
         #region [ Writing Bits ]

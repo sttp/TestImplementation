@@ -21,6 +21,11 @@ namespace Sttp.Tests
     public class ArchiveFile
     {
         [TestMethod]
+        public void TestDecimal()
+        {
+        }
+
+        [TestMethod]
         public void CompareFiles()
         {
             MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
@@ -131,7 +136,7 @@ namespace Sttp.Tests
                     return;
             }
 
-            Console.WriteLine(Names.Average(x => x.Length));
+            //Console.WriteLine(Names.Average(x => x.Length));
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Adaptive);
             //Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             //BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.Zlib, EncodingMethod.Adaptive);

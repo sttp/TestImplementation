@@ -76,10 +76,25 @@ namespace CTP
 
         public CtpNumeric ReadNumeric()
         {
-            int flags = (int)ReadBits32();
-            int high = (int)ReadBits32();
-            int mid = (int)ReadBits32();
-            int low = (int)ReadBits32();
+            byte code = (byte)ReadBits8();
+
+            int flags = (code & 31) << 16;
+            if (code > 127)
+            {
+                flags |= unchecked((int)Bits.Bit31);
+            }
+
+            int high = 0;
+            int mid = 0;
+            int low = 0;
+
+            if ((flags & 64) != 0)
+                high = (int)Read7BitInt();
+
+            if ((flags & 32) != 0)
+                mid = (int)Read7BitInt();
+
+            low = (int)Read7BitInt();
             return new CtpNumeric(flags, high, mid, low);
         }
 

@@ -35,7 +35,6 @@ namespace CTP
             HashCode = value.GetHashCode();
         }
 
-
         private bool Equals(byte[] buffer, int offset)
         {
             if (buffer[offset] == TextWithPrefix[0])
