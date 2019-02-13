@@ -46,8 +46,9 @@ namespace CTP.Serialization
             Add(new TypeSerializationString());
             Add(new TypeSerializationByteArray());
             Add(new TypeSerializationCharArray());
-            Add(new TypeSerializationDocument());
+            Add(new TypeSerializationCommand());
             Add(new TypeSerializationBuffer());
+            Add(new TypeSerializationNumeric());
             Add(new TypeSerializationCtpObject());
             Add(new TypeSerializationObject());
         }

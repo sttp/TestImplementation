@@ -38,7 +38,7 @@ namespace CTP
         /// <summary>
         /// The list of elements so an error can occur when the element tree is invalid.
         /// </summary>
-        private Stack<string> m_elementStack;
+        private Stack<bool> m_elementStack;
         /// <summary>
         /// Where to write the data.
         /// </summary>
@@ -52,6 +52,8 @@ namespace CTP
         /// </summary>
         private int m_prefixLength;
 
+        private bool m_isArray;
+
         private CtpCommandKeyword m_rootElement;
 
         /// <summary>
@@ -63,9 +65,10 @@ namespace CTP
             m_prefixLength = 4;
             m_namesLookup = new RuntimeMapping();
             m_names = new List<CtpCommandKeyword>();
-            m_elementStack = new Stack<string>();
+            m_elementStack = new Stack<bool>();
             m_stream = new ByteWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
+            m_isArray = false;
         }
 
         public void Initialize(CtpCommandKeyword rootElement)
@@ -78,6 +81,7 @@ namespace CTP
             m_stream.Clear();
             m_rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             m_prefixLength += m_rootElement.TextWithPrefix.Length;
+            m_isArray = false;
         }
 
         /// <summary>
@@ -97,14 +101,18 @@ namespace CTP
         /// <summary>
         /// Starts a new element with the specified name. 
         /// </summary>
-        /// <param name="name">The name of the element. This name must conform to 7-bit ASCII and may not exceed 255 characters in length.</param>
+        /// <param name="nameID">The name of the element. This name must conform to 7-bit ASCII and may not exceed 255 characters in length.</param>
+        /// <param name="isArray"></param>
         /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
-        public IDisposable StartElement(CtpCommandKeyword name)
+        public IDisposable StartElement(int nameID, bool isArray)
         {
             m_stream.WriteBits1(0);
             m_stream.WriteBits1(0);
-            WriteName(name);
-            m_elementStack.Push(name.Value);
+            m_stream.WriteBits1(isArray);
+            if (!m_isArray)
+                m_stream.Write4BitSegments((uint)nameID);
+            m_isArray = isArray;
+            m_elementStack.Push(isArray);
             return m_endElementHelper;
         }
 
@@ -116,8 +124,8 @@ namespace CTP
         {
             if (m_elementStack.Count == 0)
                 throw new InvalidOperationException("Too many calls to EndElement has occurred. There are no elements to end.");
-
             m_elementStack.Pop();
+            m_isArray = m_elementStack.Count != 0 && m_elementStack.Peek();
             m_stream.WriteBits1(0);
             m_stream.WriteBits1(1);
         }
@@ -125,15 +133,13 @@ namespace CTP
         /// <summary>
         /// Writes the provided value.
         /// </summary>
-        /// <param name="name">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
+        /// <param name="nameID">the name of the value. This name must conform to 7-bit ascii and may not exceed 255 characters in length.</param>
         /// <param name="value">the value</param>
-        public void WriteValue(CtpCommandKeyword name, CtpObject value)
+        public void WriteValue(int nameID, CtpObject value)
         {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-
             m_stream.WriteBits1(1);
-            WriteName(name);
+            if (!m_isArray)
+                m_stream.Write4BitSegments((uint)nameID);
             m_stream.WriteObject(value);
         }
 

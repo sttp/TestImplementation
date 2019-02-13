@@ -14,7 +14,7 @@ namespace CTP.Serialization
             return (string)reader.Value;
         }
 
-        public override void Save(string obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(string obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }
@@ -30,7 +30,7 @@ namespace CTP.Serialization
             return (byte[])reader.Value;
         }
 
-        public override void Save(byte[] obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(byte[] obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }
@@ -46,13 +46,13 @@ namespace CTP.Serialization
             return (char[])reader.Value;
         }
 
-        public override void Save(char[] obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(char[] obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }
     }
 
-    internal class TypeSerializationDocument
+    internal class TypeSerializationCommand
         : TypeSerializationMethodBase<CtpCommand>
     {
         public override CtpCommand Load(CtpCommandReader reader)
@@ -62,7 +62,7 @@ namespace CTP.Serialization
             return (CtpCommand)reader.Value;
         }
 
-        public override void Save(CtpCommand obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(CtpCommand obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }
@@ -78,7 +78,23 @@ namespace CTP.Serialization
             return (CtpBuffer)reader.Value;
         }
 
-        public override void Save(CtpBuffer obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(CtpBuffer obj, CtpCommandWriter writer, int recordName)
+        {
+            writer.WriteValue(recordName, (CtpObject)obj);
+        }
+    }
+
+    internal class TypeSerializationNumeric
+        : TypeSerializationMethodBase<CtpNumeric>
+    {
+        public override CtpNumeric Load(CtpCommandReader reader)
+        {
+            if (reader.NodeType != CtpCommandNodeType.Value)
+                throw new Exception("Parsing Error");
+            return (CtpNumeric)reader.Value;
+        }
+
+        public override void Save(CtpNumeric obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }
@@ -95,7 +111,7 @@ namespace CTP.Serialization
             return (CtpObject)reader.Value;
         }
 
-        public override void Save(CtpObject obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(CtpObject obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, obj);
         }
@@ -111,7 +127,7 @@ namespace CTP.Serialization
             return reader.Value.ToNativeType;
         }
 
-        public override void Save(object obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(object obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }

@@ -9,7 +9,8 @@ namespace CTP.Serialization
     /// This class assists in the automatic serialization of <see cref="CommandObject"/>s to and from <see cref="CtpCommand"/>s.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal static class TypeSerialization<T>
+    internal static class TypeSerializationSpecial<T>
+        where T : CommandObject
     {
         private static TypeSerializationMethodBase<T> s_serialization;
         private static readonly Exception s_loadError;
@@ -52,7 +53,7 @@ namespace CTP.Serialization
             }
         }
 
-        static TypeSerialization()
+        static TypeSerializationSpecial()
         {
             try
             {
@@ -68,11 +69,13 @@ namespace CTP.Serialization
                     s_loadError = new Exception("Specified type must be of type class");
                     return;
                 }
+
                 if (type.IsAbstract)
                 {
                     s_loadError = new Exception("Specified type cannot be an abstract or static type");
                     return;
                 }
+
                 if (type.IsInterface)
                 {
                     s_loadError = new Exception("Specified type cannot be an interface type");
@@ -89,7 +92,8 @@ namespace CTP.Serialization
                     s_loadError = new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
                     return;
                 }
-                s_serialization = CommandObjectSerializationMethod.Create<T>(c);
+
+                s_serialization = new CommandObjectSerializationMethod<T>(c);
             }
             catch (Exception e)
             {

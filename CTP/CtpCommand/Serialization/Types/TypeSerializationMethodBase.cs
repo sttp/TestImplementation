@@ -7,6 +7,6 @@ namespace CTP.Serialization
     {
         public abstract T Load(CtpCommandReader reader);
 
-        public abstract void Save(T obj, CtpCommandWriter writer, CtpCommandKeyword recordName);
+        public abstract void Save(T obj, CtpCommandWriter writer, int recordName);
     }
 }

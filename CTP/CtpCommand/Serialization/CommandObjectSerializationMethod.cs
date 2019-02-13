@@ -124,26 +124,25 @@ namespace CTP.Serialization
             }
             rv.OnAfterLoad();
             return rv;
-
         }
 
-        public override void Save(T obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(T obj, CtpCommandWriter writer, int recordName)
         {
             //Root elements have a record name == null. These do not need to start an element.
             if ((object)recordName == null)
             {
                 foreach (var item in m_records)
                 {
-                    item.Save(obj, writer);
+                    item.Save(obj, writer, null);
                 }
             }
             else
             {
-                using (writer.StartElement(recordName))
+                using (writer.StartElement(recordName, false))
                 {
                     foreach (var item in m_records)
                     {
-                        item.Save(obj, writer);
+                        item.Save(obj, writer, null);
                     }
                 }
             }

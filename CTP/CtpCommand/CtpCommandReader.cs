@@ -79,6 +79,8 @@ namespace CTP
         /// </summary>
         public CtpCommandNodeType NodeType { get; private set; }
 
+        public bool IsArray => throw new NotImplementedException();
+
         /// <summary>
         /// Reads to the next node. If the next node is the end of the document. False is returned. Otherwise true.
         /// </summary>

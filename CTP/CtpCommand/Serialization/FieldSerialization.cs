@@ -27,7 +27,8 @@ namespace CTP.Serialization
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="writer"></param>
-        public abstract void Save(CommandObject obj, CtpCommandWriter writer);
+        /// <param name="recordID"></param>
+        public abstract void Save(CommandObject obj, CtpCommandWriter writer, int recordID);
 
         private static readonly MethodInfo Method2 = typeof(FieldSerialization).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -84,13 +85,13 @@ namespace CTP.Serialization
             m_write(obj, item);
         }
 
-        public override void Save(CommandObject obj, CtpCommandWriter writer)
+        public override void Save(CommandObject obj, CtpCommandWriter writer, int recordID)
         {
             var item = m_read(obj);
             if (item == null)
                 return;
 
-            m_method.Save(item, writer, RecordName);
+            m_method.Save(item, writer, recordID);
         }
     }
 }

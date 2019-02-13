@@ -12,8 +12,6 @@ namespace CTP.Serialization
         : TypeSerializationMethodBase<TEnum>
         where TEnum : IEnumerable<T>
     {
-        private static CtpCommandKeyword Item = CtpCommandKeyword.Create("Item");
-
         private TypeSerializationMethodBase<T> m_serializeT;
 
         private Func<List<T>, TEnum> m_castToType;
@@ -27,6 +25,8 @@ namespace CTP.Serialization
 
         public override TEnum Load(CtpCommandReader reader)
         {
+            if (!reader.IsArray)
+                throw new Exception("Expecting An Array Type");
             List<T> items = new List<T>();
 
             while (reader.Read())
@@ -34,13 +34,9 @@ namespace CTP.Serialization
                 switch (reader.NodeType)
                 {
                     case CtpCommandNodeType.StartElement:
-                        if (reader.ElementName != Item)
-                            throw new Exception("Expecting An Array Type");
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.Value:
-                        if (reader.ValueName != Item)
-                            throw new Exception("Expecting An Array Type");
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.EndElement:
@@ -55,16 +51,16 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(TEnum obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(TEnum obj, CtpCommandWriter writer, int recordName)
         {
             if (obj == null)
                 return;
 
-            using (writer.StartElement(recordName))
+            using (writer.StartElement(recordName, true))
             {
                 foreach (var item in obj)
                 {
-                    m_serializeT.Save(item, writer, Item);
+                    m_serializeT.Save(item, writer, -1);
                 }
 
             }

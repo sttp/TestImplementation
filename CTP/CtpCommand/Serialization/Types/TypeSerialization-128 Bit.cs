@@ -14,7 +14,7 @@ namespace CTP.Serialization
             return (decimal)reader.Value;
         }
 
-        public override void Save(decimal obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(decimal obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }
@@ -30,7 +30,7 @@ namespace CTP.Serialization
             return (Guid)reader.Value;
         }
 
-        public override void Save(Guid obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(Guid obj, CtpCommandWriter writer, int recordName)
         {
             writer.WriteValue(recordName, (CtpObject)obj);
         }

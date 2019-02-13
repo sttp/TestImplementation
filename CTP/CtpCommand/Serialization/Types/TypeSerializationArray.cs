@@ -10,7 +10,6 @@ namespace CTP.Serialization
     internal class TypeSerializationArray<T>
         : TypeSerializationMethodBase<T[]>
     {
-        private static CtpCommandKeyword Item = CtpCommandKeyword.Create("Item");
 
         private TypeSerializationMethodBase<T> m_serializeT;
 
@@ -22,19 +21,18 @@ namespace CTP.Serialization
 
         public override T[] Load(CtpCommandReader reader)
         {
+            if (!reader.IsArray)
+                throw new Exception("Expecting An Array Type");
+
             List<T> items = new List<T>();
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
                     case CtpCommandNodeType.StartElement:
-                        if (reader.ElementName != Item)
-                            throw new Exception("Expecting An Array Type");
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.Value:
-                        if (reader.ValueName != Item)
-                            throw new Exception("Expecting An Array Type");
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.EndElement:
@@ -49,13 +47,13 @@ namespace CTP.Serialization
 
         }
 
-        public override void Save(T[] obj, CtpCommandWriter writer, CtpCommandKeyword recordName)
+        public override void Save(T[] obj, CtpCommandWriter writer, int recordName)
         {
-            using (writer.StartElement(recordName))
+            using (writer.StartElement(recordName, true))
             {
                 for (int i = 0; i < obj.Length; i++)
                 {
-                    m_serializeT.Save(obj[i], writer, Item);
+                    m_serializeT.Save(obj[i], writer, -1);
                 }
             }
         }
