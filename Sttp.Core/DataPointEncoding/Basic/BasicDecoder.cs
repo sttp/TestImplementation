@@ -71,11 +71,11 @@ namespace Sttp.DataPointEncoding
                 m_lastValueCode = (CtpTypeCode)m_stream.ReadBits4();
             }
 
-            dataPoint.Value = CtpValueEncodingWithoutType.Load(m_stream, m_lastValueCode);
+            dataPoint.Value = m_stream.ReadObjectWithoutType(m_lastValueCode);
 
             if (dataPoint.Metadata == null)
             {
-                var obj = CtpValueEncodingNative.Load(m_stream);
+                var obj = m_stream.ReadObject();
                 dataPoint.Metadata = LookupMetadata(obj);
                 m_channelMap.Assign(dataPoint.Metadata, m_lastChannelID);
             }

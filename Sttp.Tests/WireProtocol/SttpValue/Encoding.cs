@@ -19,32 +19,32 @@ namespace Sttp.Tests.WireProtocol
             var rd = new ByteReader();
             for (int x = -100; x < 100; x++)
             {
-                CtpValueEncodingNative.Save(wr, (CtpObject)x.ToString());
-                CtpValueEncodingNative.Save(wr, (CtpObject)x);
-                CtpValueEncodingNative.Save(wr, (CtpObject)(float)x);
-                CtpValueEncodingNative.Save(wr, (CtpObject)(double)x);
-                CtpValueEncodingNative.Save(wr, (CtpObject)(CtpNumeric)(decimal)x);
-                CtpValueEncodingNative.Save(wr, (CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
-                CtpValueEncodingNative.Save(wr, (CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                CtpValueEncodingNative.Save(wr, (CtpObject)((x & 1) == 1));
-                CtpValueEncodingNative.Save(wr, (CtpObject)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                CtpValueEncodingNative.Save(wr, (CtpObject)GetBytes(x));
+                wr.WriteObject((CtpObject)x.ToString());
+                wr.WriteObject((CtpObject)x);
+                wr.WriteObject((CtpObject)(float)x);
+                wr.WriteObject((CtpObject)(double)x);
+                wr.WriteObject((CtpObject)(CtpNumeric)(decimal)x);
+                wr.WriteObject((CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
+                wr.WriteObject((CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                wr.WriteObject((CtpObject)((x & 1) == 1));
+                wr.WriteObject((CtpObject)(((x & 1) == 1) ? (bool?)null : (bool?)true));
+                wr.WriteObject((CtpObject)GetBytes(x));
             }
 
             rd.SetBuffer(wr.ToArray());
 
             for (int x = -100; x < 100; x++)
             {
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsString, x.ToString());
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsInt32, x);
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsSingle, (float)x);
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsDouble, (double)x);
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsNumeric, (CtpNumeric)(decimal)x);
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                Assert.AreEqual(CtpValueEncodingNative.Load(rd).AsBoolean, ((x & 1) == 1));
-                Assert.AreEqual((bool?)CtpValueEncodingNative.Load(rd), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.IsTrue(GetBytes(x).SequenceEqual((byte[])CtpValueEncodingNative.Load(rd)));
+                Assert.AreEqual(rd.ReadObject().AsString, x.ToString());
+                Assert.AreEqual(rd.ReadObject().AsInt32, x);
+                Assert.AreEqual(rd.ReadObject().AsSingle, (float)x);
+                Assert.AreEqual(rd.ReadObject().AsDouble, (double)x);
+                Assert.AreEqual(rd.ReadObject().AsNumeric, (CtpNumeric)(decimal)x);
+                Assert.AreEqual(rd.ReadObject().AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
+                Assert.AreEqual(rd.ReadObject().AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                Assert.AreEqual(rd.ReadObject().AsBoolean, ((x & 1) == 1));
+                Assert.AreEqual((bool?)rd.ReadObject(), ((x & 1) == 1) ? (bool?)null : (bool?)true);
+                Assert.IsTrue(GetBytes(x).SequenceEqual((byte[])rd.ReadObject()));
             }
         }
 
@@ -55,32 +55,32 @@ namespace Sttp.Tests.WireProtocol
             var rd = new ByteReader();
             for (int x = -100; x < 100; x++)
             {
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)x.ToString());
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(float)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(double)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(CtpNumeric)(decimal)x);
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)((x & 1) == 1));
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)(((x & 1) == 1) ? (bool?)null : (bool?)true));
-                CtpValueEncodingWithoutType.Save(wr, (CtpObject)GetBytes(x));
+                wr.WriteObjectWithoutType((CtpObject)x.ToString());
+                wr.WriteObjectWithoutType((CtpObject)x);
+                wr.WriteObjectWithoutType((CtpObject)(float)x);
+                wr.WriteObjectWithoutType((CtpObject)(double)x);
+                wr.WriteObjectWithoutType((CtpObject)(CtpNumeric)(decimal)x);
+                wr.WriteObjectWithoutType((CtpObject)DateTime.Parse("1/1/2010").AddMinutes(x));
+                wr.WriteObjectWithoutType((CtpObject)new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                wr.WriteObjectWithoutType((CtpObject)((x & 1) == 1));
+                wr.WriteObjectWithoutType((CtpObject)(((x & 1) == 1) ? (bool?)null : (bool?)true));
+                wr.WriteObjectWithoutType((CtpObject)GetBytes(x));
             }
 
             rd.SetBuffer(wr.ToArray());
 
             for (int x = -100; x < 100; x++)
             {
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.String).AsString, x.ToString());
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Int64).AsInt32, x);
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Single).AsSingle, (float)x);
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Double).AsDouble, (double)x);
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Numeric).AsNumeric, (CtpNumeric)(decimal)x);
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.CtpTime).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Guid).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-                Assert.AreEqual(CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.Boolean).AsBoolean, ((x & 1) == 1));
-                Assert.AreEqual((bool?)CtpValueEncodingWithoutType.Load(rd, ((x & 1) == 1) ? CtpTypeCode.Null : CtpTypeCode.Boolean), ((x & 1) == 1) ? (bool?)null : (bool?)true);
-                Assert.IsTrue(GetBytes(x).SequenceEqual((byte[])CtpValueEncodingWithoutType.Load(rd, CtpTypeCode.CtpBuffer)));
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.String).AsString, x.ToString());
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.Int64).AsInt32, x);
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.Single).AsSingle, (float)x);
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.Double).AsDouble, (double)x);
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.Numeric).AsNumeric, (CtpNumeric)(decimal)x);
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.CtpTime).AsDateTime, DateTime.Parse("1/1/2010").AddMinutes(x));
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.Guid).AsGuid, new Guid(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+                Assert.AreEqual(rd.ReadObjectWithoutType(CtpTypeCode.Boolean).AsBoolean, ((x & 1) == 1));
+                Assert.AreEqual((bool?)rd.ReadObjectWithoutType(((x & 1) == 1) ? CtpTypeCode.Null : CtpTypeCode.Boolean), ((x & 1) == 1) ? (bool?)null : (bool?)true);
+                Assert.IsTrue(GetBytes(x).SequenceEqual((byte[])rd.ReadObjectWithoutType(CtpTypeCode.CtpBuffer)));
             }
         }
 

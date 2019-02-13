@@ -46,7 +46,7 @@ namespace Sttp.DataPointEncoding
                 typeChanged = m_stream.ReadBits1() == 1;
             }
 
-            var obj = CtpValueEncodingNative.Load(m_stream);
+            var obj = m_stream.ReadObject();
             dataPoint.Metadata = LookupMetadata(obj);
 
             if (qualityChanged)
@@ -67,7 +67,7 @@ namespace Sttp.DataPointEncoding
                 m_lastValueCode = (CtpTypeCode)m_stream.ReadBits4();
             }
 
-            dataPoint.Value = CtpValueEncodingWithoutType.Load(m_stream, m_lastValueCode);
+            dataPoint.Value = m_stream.ReadObjectWithoutType(m_lastValueCode);
 
             return true;
         }

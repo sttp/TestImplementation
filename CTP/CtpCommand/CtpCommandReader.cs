@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace CTP
 {
@@ -11,12 +13,11 @@ namespace CTP
         /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
-        private CtpCommandBitReader m_stream;
+        private ByteReader m_stream;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
-        private CtpCommandKeyword[] m_elementNamesList;
-        private CtpCommandKeyword[] m_valueNamesList;
+        private CtpCommandKeyword[] m_namesList;
         /// <summary>
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
@@ -34,23 +35,17 @@ namespace CTP
         /// <param name="offset"></param>
         public CtpCommandReader(byte[] data, int offset)
         {
-            m_stream = new CtpCommandBitReader(data, offset, data.Length - offset);
             Value = CtpObject.Null;
             NodeType = CtpCommandNodeType.StartOfCommand;
-            m_rootElement = m_stream.ReadCommandKeyword();
-            int elementCount = (int)m_stream.ReadBits16();
-            int valueCount = (int)m_stream.ReadBits16();
-            m_elementNamesList = new CtpCommandKeyword[elementCount];
-            m_valueNamesList = new CtpCommandKeyword[valueCount];
-            for (int x = 0; x < elementCount; x++)
+            m_rootElement = ReadCommandKeyword(data, ref offset, data.Length);
+            int count = (int)ReadBits16(data, ref offset, data.Length);
+            m_namesList = new CtpCommandKeyword[count];
+            for (int x = 0; x < count; x++)
             {
-                m_elementNamesList[x] = m_stream.ReadCommandKeyword();
-            }
-            for (int x = 0; x < valueCount; x++)
-            {
-                m_valueNamesList[x] = m_stream.ReadCommandKeyword();
+                m_namesList[x] = ReadCommandKeyword(data, ref offset, data.Length);
             }
             ElementName = GetCurrentElement();
+            m_stream = CreateReader(data, offset, data.Length);
         }
 
         /// <summary>
@@ -98,82 +93,37 @@ namespace CTP
                 ElementName = GetCurrentElement();
             }
 
-            if (m_stream.IsEos)
+            if (m_stream.IsEmpty)
             {
                 NodeType = CtpCommandNodeType.EndOfCommand;
                 return false;
             }
 
-            uint code = (uint)m_stream.Read7BitInt();
-            CtpCommandHeader header = (CtpCommandHeader)(code & 15);
-
-            if (header >= CtpCommandHeader.ValueNull)
+            if (m_stream.ReadBits1() == 0)
             {
-                NodeType = CtpCommandNodeType.Value;
-                ValueName = m_valueNamesList[code >> 4];
-
-                switch (header)
+                if (m_stream.ReadBits1() == 0)
                 {
-                    case CtpCommandHeader.ValueNull:
-                        Value = CtpObject.Null;
-                        break;
-                    case CtpCommandHeader.ValueInt64:
-                        Value = (CtpObject)(long)m_stream.Read7BitInt();
-                        break;
-                    case CtpCommandHeader.ValueInvertedInt64:
-                        Value = (CtpObject)(long)~m_stream.Read7BitInt();
-                        break;
-                    case CtpCommandHeader.ValueSingle:
-                        Value = (CtpObject)m_stream.ReadSingle();
-                        break;
-                    case CtpCommandHeader.ValueDouble:
-                        Value = (CtpObject)m_stream.ReadDouble();
-                        break;
-                    case CtpCommandHeader.ValueNumeric:
-                        Value = (CtpObject)m_stream.ReadNumeric();
-                        break;
-                    case CtpCommandHeader.ValueCtpTime:
-                        Value = (CtpObject)m_stream.ReadTime();
-                        break;
-                    case CtpCommandHeader.ValueBooleanTrue:
-                        Value = (CtpObject)true;
-                        break;
-                    case CtpCommandHeader.ValueBooleanFalse:
-                        Value = (CtpObject)false;
-                        break;
-                    case CtpCommandHeader.ValueGuid:
-                        Value = (CtpObject)m_stream.ReadGuid();
-                        break;
-                    case CtpCommandHeader.ValueString:
-                        Value = (CtpObject)m_stream.ReadString();
-                        break;
-                    case CtpCommandHeader.ValueCtpBuffer:
-                        Value = (CtpObject)m_stream.ReadBuffer();
-                        break;
-                    case CtpCommandHeader.ValueCtpCommand:
-                        Value = (CtpObject)m_stream.ReadCommand();
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    //00 = Start Element
+                    NodeType = CtpCommandNodeType.StartElement;
+                    Value = CtpObject.Null;
+                    ElementName = m_namesList[m_stream.Read4BitSegments()];
+                    ValueName = null;
+                    m_elementStack.Push(ElementName);
                 }
-            }
-            else if (header == CtpCommandHeader.StartElement)
-            {
-                NodeType = CtpCommandNodeType.StartElement;
-                Value = CtpObject.Null;
-                ElementName = m_elementNamesList[code >> 4];
-                ValueName = null;
-                m_elementStack.Push(ElementName);
-            }
-            else if (header == CtpCommandHeader.EndElement)
-            {
-                NodeType = CtpCommandNodeType.EndElement;
-                ElementName = GetCurrentElement();
-                m_elementStack.Pop();
+                else
+                {
+                    //01 = End Element
+                    NodeType = CtpCommandNodeType.EndElement;
+                    ElementName = GetCurrentElement();
+                    m_elementStack.Pop();
+                }
             }
             else
             {
-                throw new ArgumentOutOfRangeException();
+                //1 = WriteValue
+                NodeType = CtpCommandNodeType.Value;
+                ValueName = m_namesList[m_stream.Read4BitSegments()];
+                Value = m_stream.ReadObject();
             }
             return true;
         }
@@ -194,5 +144,40 @@ namespace CTP
                     return;
             }
         }
+
+        public static ByteReader CreateReader(byte[] m_buffer, int m_position, int m_length)
+        {
+            var b = new ByteReader();
+            b.SetBuffer(m_buffer, m_position, m_length - m_position);
+            return b;
+        }
+
+        public static CtpCommandKeyword ReadCommandKeyword(byte[] m_buffer, ref int m_position, int m_length)
+        {
+            if (m_position + 1 > m_length)
+            {
+                throw new EndOfStreamException();
+            }
+            if (m_position + 1 + m_buffer[m_position] > m_length)
+            {
+                throw new EndOfStreamException();
+            }
+            var rv = CtpCommandKeyword.Lookup(m_buffer, m_position);
+            m_position += m_buffer[m_position] + 1;
+            return rv;
+        }
+
+        public static uint ReadBits16(byte[] m_buffer, ref int m_position, int m_length)
+        {
+            if (m_position + 2 > m_length)
+            {
+                throw new EndOfStreamException();
+            }
+            uint rv = (uint)m_buffer[m_position] << 8
+                      | (uint)m_buffer[m_position + 1];
+            m_position += 2;
+            return rv;
+        }
+
     }
 }

@@ -29,7 +29,7 @@ namespace Sttp.Codec
 
             for (int x = 0; x < row.Length; x++)
             {
-                CtpValueEncodingNative.Save(m_stream, row[x]);
+                m_stream.WriteObject(row[x]);
             }
         }
 

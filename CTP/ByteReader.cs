@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using CTP;
+using GSF;
 
-namespace Sttp
+namespace CTP
 {
     public unsafe class ByteReader
     {
@@ -204,10 +205,25 @@ namespace Sttp
 
         public CtpNumeric ReadNumeric()
         {
-            int flags = ReadInt32();
-            int high = ReadInt32();
-            int mid = ReadInt32();
-            int low = ReadInt32();
+            byte code = (byte)ReadBits8();
+
+            int flags = (code & 31) << 16;
+            if (code > 127)
+            {
+                flags |= unchecked((int)Bits.Bit31);
+            }
+
+            int high = 0;
+            int mid = 0;
+            int low = 0;
+
+            if ((flags & 64) != 0)
+                high = (int)ReadBits8();
+
+            if ((flags & 32) != 0)
+                mid = (int)ReadBits8();
+
+            low = (int)ReadBits8();
             return new CtpNumeric(flags, high, mid, low);
         }
 
@@ -510,6 +526,47 @@ namespace Sttp
 
         #endregion
 
-       
+        public CtpObject ReadObjectWithoutType(CtpTypeCode code)
+        {
+            switch (code)
+            {
+                case CtpTypeCode.Null:
+                    return CtpObject.Null;
+                case CtpTypeCode.Int64:
+                    if (ReadBits1() == 1)
+                    {
+                        return ~(long)Read8BitSegments();
+                    }
+                    else
+                    {
+                        return (long)Read8BitSegments();
+                    }
+                case CtpTypeCode.Single:
+                    return (CtpObject)ReadSingle();
+                case CtpTypeCode.Double:
+                    return (CtpObject)ReadDouble();
+                case CtpTypeCode.Numeric:
+                    return (CtpObject)ReadNumeric();
+                case CtpTypeCode.CtpTime:
+                    return (CtpObject)ReadCtpTime();
+                case CtpTypeCode.Boolean:
+                    return (CtpObject)(ReadBits1() == 1);
+                case CtpTypeCode.Guid:
+                    return (CtpObject)ReadGuid();
+                case CtpTypeCode.String:
+                    return (CtpObject)ReadString();
+                case CtpTypeCode.CtpBuffer:
+                    return (CtpObject)ReadCtpBuffer();
+                case CtpTypeCode.CtpCommand:
+                    return (CtpObject)ReadCtpCommand();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public CtpObject ReadObject()
+        {
+            return ReadObjectWithoutType((CtpTypeCode)ReadBits4());
+        }
     }
 }

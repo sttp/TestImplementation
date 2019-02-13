@@ -30,13 +30,11 @@ namespace CTP
         /// <summary>
         /// A lookup of all names that have been registered.
         /// </summary>
-        private RuntimeMapping m_elementNamesLookup;
-        private RuntimeMapping m_valueNamesLookup;
+        private RuntimeMapping m_namesLookup;
         /// <summary>
         /// A list of all names and the state data associated with these names.
         /// </summary>
-        private List<CtpCommandKeyword> m_elementNames;
-        private List<CtpCommandKeyword> m_valueNames;
+        private List<CtpCommandKeyword> m_names;
         /// <summary>
         /// The list of elements so an error can occur when the element tree is invalid.
         /// </summary>
@@ -44,7 +42,7 @@ namespace CTP
         /// <summary>
         /// Where to write the data.
         /// </summary>
-        private CtpCommandBitWriter m_stream;
+        private ByteWriter m_stream;
         /// <summary>
         /// A reusable class to ease in calling the <see cref="EndElement"/> method.
         /// </summary>
@@ -52,8 +50,8 @@ namespace CTP
         /// <summary>
         /// A temporary value so this class can support setting from an object type.
         /// </summary>
-        private CtpObject m_tmpValue;
         private int m_prefixLength;
+
         private CtpCommandKeyword m_rootElement;
 
         /// <summary>
@@ -61,26 +59,21 @@ namespace CTP
         /// </summary>
         public CtpCommandWriter()
         {
-            //2 byte header, 2 byte for ElementNamesCount, 2 byte for ValueNamesCount
-            m_prefixLength = 6;
-            m_tmpValue = CtpObject.Null;
-            m_elementNamesLookup = new RuntimeMapping();
-            m_valueNamesLookup = new RuntimeMapping();
-            m_elementNames = new List<CtpCommandKeyword>();
-            m_valueNames = new List<CtpCommandKeyword>();
+            //2 byte header, 2 byte for NamesCount
+            m_prefixLength = 4;
+            m_namesLookup = new RuntimeMapping();
+            m_names = new List<CtpCommandKeyword>();
             m_elementStack = new Stack<string>();
-            m_stream = new CtpCommandBitWriter();
+            m_stream = new ByteWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
         }
 
         public void Initialize(CtpCommandKeyword rootElement)
         {
-            //2 byte header, 2 byte for ElementNamesCount, 2 byte for ValueNamesCount
-            m_prefixLength = 6;
-            m_elementNamesLookup.Clear();
-            m_valueNamesLookup.Clear();
-            m_elementNames.Clear();
-            m_valueNames.Clear();
+            //2 byte header, 2 byte for NamesCount
+            m_prefixLength = 4;
+            m_namesLookup.Clear();
+            m_names.Clear();
             m_elementStack.Clear();
             m_stream.Clear();
             m_rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
@@ -94,7 +87,7 @@ namespace CTP
         {
             get
             {
-                var innerLength = m_stream.Length + m_prefixLength + m_elementStack.Count;
+                var innerLength = m_stream.ActualSize + m_prefixLength;
                 if (innerLength > 4093)
                     return innerLength + 2;
                 return innerLength;
@@ -108,7 +101,9 @@ namespace CTP
         /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
         public IDisposable StartElement(CtpCommandKeyword name)
         {
-            m_stream.Write7BitInt((GetElementNameIndex(name) << 4) + (uint)CtpCommandHeader.StartElement);
+            m_stream.WriteBits1(0);
+            m_stream.WriteBits1(0);
+            WriteName(name);
             m_elementStack.Push(name.Value);
             return m_endElementHelper;
         }
@@ -123,7 +118,8 @@ namespace CTP
                 throw new InvalidOperationException("Too many calls to EndElement has occurred. There are no elements to end.");
 
             m_elementStack.Pop();
-            m_stream.Write7BitInt((uint)CtpCommandHeader.EndElement);
+            m_stream.WriteBits1(0);
+            m_stream.WriteBits1(1);
         }
 
         /// <summary>
@@ -136,97 +132,23 @@ namespace CTP
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            switch (value.ValueTypeCode)
-            {
-                case CtpTypeCode.Null:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueNull);
-                    break;
-                case CtpTypeCode.Int64:
-                    if (value.IsInt64 < 0)
-                    {
-                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueInvertedInt64);
-                        m_stream.Write7BitInt(~(ulong)value.IsInt64);
-                    }
-                    else
-                    {
-                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueInt64);
-                        m_stream.Write7BitInt((ulong)value.IsInt64);
-                    }
-                    break;
-                case CtpTypeCode.Single:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueSingle);
-                    m_stream.Write(value.IsSingle);
-                    break;
-                case CtpTypeCode.Double:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueDouble);
-                    m_stream.Write(value.IsDouble);
-                    break;
-                case CtpTypeCode.Numeric:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueNumeric);
-                    m_stream.Write(value.IsNumeric);
-                    break;
-                case CtpTypeCode.CtpTime:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpTime);
-                    m_stream.Write(value.IsCtpTime);
-                    break;
-                case CtpTypeCode.Boolean:
-                    if (value.IsBoolean)
-                    {
-                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueBooleanTrue);
-                    }
-                    else
-                    {
-                        m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueBooleanFalse);
-                    }
-                    break;
-                case CtpTypeCode.Guid:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueGuid);
-                    m_stream.Write(value.IsGuid);
-                    break;
-                case CtpTypeCode.String:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueString);
-                    m_stream.Write(value.IsString);
-                    break;
-                case CtpTypeCode.CtpBuffer:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpBuffer);
-                    m_stream.Write(value.IsCtpBuffer);
-                    break;
-                case CtpTypeCode.CtpCommand:
-                    m_stream.Write7BitInt((GetValueNameIndex(name) << 4) + (byte)CtpCommandHeader.ValueCtpCommand);
-                    m_stream.Write(value.IsCtpCommand);
-                    break;
-                
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            m_stream.WriteBits1(1);
+            WriteName(name);
+            m_stream.WriteObject(value);
         }
 
-        private uint GetElementNameIndex(CtpCommandKeyword name)
+        private void WriteName(CtpCommandKeyword name)
         {
             if (name.RuntimeID < 0)
                 throw new ArgumentException();
-            if (!m_elementNamesLookup.TryGetValue(name.RuntimeID, out int index))
+            if (!m_namesLookup.TryGetValue(name.RuntimeID, out int index))
             {
-                m_elementNamesLookup.Add(name.RuntimeID, m_elementNamesLookup.Count);
-                m_elementNames.Add(name);
-                index = m_elementNamesLookup.Count - 1;
+                m_namesLookup.Add(name.RuntimeID, m_namesLookup.Count);
+                m_names.Add(name);
+                index = m_namesLookup.Count - 1;
                 m_prefixLength += name.TextWithPrefix.Length;
             }
-            return (uint)index;
-        }
-
-        private uint GetValueNameIndex(CtpCommandKeyword name)
-        {
-            if (name.RuntimeID < 0)
-                throw new ArgumentException();
-            if (!m_valueNamesLookup.TryGetValue(name.RuntimeID, out int index))
-            {
-                m_valueNamesLookup.Add(name.RuntimeID, m_valueNamesLookup.Count);
-                m_valueNames.Add(name);
-                index = m_valueNamesLookup.Count - 1;
-                m_prefixLength += name.TextWithPrefix.Length;
-            }
-            return (uint)index;
+            m_stream.Write4BitSegments((uint)index);
         }
 
         /// <summary>
@@ -267,17 +189,11 @@ namespace CTP
                 WriteSize(buffer, ref offset, (uint)(length + (1 << 28)));
             }
 
-            WriteAscii(buffer, ref offset, m_rootElement);
-            WriteSize(buffer, ref offset, (ushort)m_elementNames.Count);
-            WriteSize(buffer, ref offset, (ushort)m_valueNames.Count);
-            for (var index = 0; index < m_elementNames.Count; index++)
+            Write(buffer, ref offset, m_rootElement);
+            WriteSize(buffer, ref offset, (ushort)m_names.Count);
+            for (var index = 0; index < m_names.Count; index++)
             {
-                WriteAscii(buffer, ref offset, m_elementNames[index]);
-            }
-
-            for (var index = 0; index < m_valueNames.Count; index++)
-            {
-                WriteAscii(buffer, ref offset, m_valueNames[index]);
+                Write(buffer, ref offset, m_names[index]);
             }
 
             m_stream.CopyTo(buffer, offset);
@@ -303,7 +219,7 @@ namespace CTP
             length++;
         }
 
-        private void WriteAscii(byte[] buffer, ref int length, CtpCommandKeyword value)
+        private void Write(byte[] buffer, ref int length, CtpCommandKeyword value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));

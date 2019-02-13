@@ -31,7 +31,7 @@ namespace Sttp.Codec
 
             for (int x = 0; x < row.Length; x++)
             {
-                row[x] = CtpValueEncodingNative.Load(m_stream);
+                row[x] = m_stream.ReadObject();
             }
 
             return true;

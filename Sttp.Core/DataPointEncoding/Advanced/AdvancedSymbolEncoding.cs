@@ -24,6 +24,7 @@
 
 using System;
 using System.Text;
+using CTP;
 
 namespace Sttp.DataPointEncoding
 {

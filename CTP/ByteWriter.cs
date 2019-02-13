@@ -4,8 +4,9 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using CTP;
+using GSF;
 
-namespace Sttp
+namespace CTP
 {
     public unsafe class ByteWriter
     {
@@ -34,8 +35,7 @@ namespace Sttp
             Clear();
         }
 
-       
-
+        public int ActualSize => Encoding7Bit.GetSize((uint)(m_bitStreamCacheBitCount + m_bitLength * 8)) + m_byteLength + m_bitLength;
         public int ApproximateSize => 5 + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
 
         /// <summary>
@@ -82,23 +82,28 @@ namespace Sttp
 
         public byte[] ToArray()
         {
+            byte[] data = new byte[ActualSize];
+            CopyTo(data, 0);
+            return data;
+        }
+
+        public void CopyTo(byte[] data, int offset)
+        {
             FlushBitStream(); //This means only what is in the bit cache remains and is 0 to 7 bits.
-
             uint bitSize = (uint)(m_bitLength * 8) + (uint)m_bitStreamCacheBitCount;
-            int headerSize = Encoding7Bit.GetSize(bitSize);
-            byte[] data = new byte[headerSize + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3)];
-            int position = 0;
-            Encoding7Bit.Write(data, ref position, bitSize);
+            Encoding7Bit.Write(data, ref offset, bitSize);
 
-            Array.Copy(m_byteBuffer, 0, data, headerSize, m_byteLength);
-            Array.Copy(m_bitBuffer, 0, data, headerSize + m_byteLength, m_bitLength);
+            Array.Copy(m_byteBuffer, 0, data, offset, m_byteLength);
+            offset += m_byteLength;
+            Array.Copy(m_bitBuffer, 0, data, offset, m_bitLength);
+            offset += m_bitLength;
 
             if (m_bitStreamCacheBitCount > 0)
             {
                 //The final byte is right 0 padded.
-                data[data.Length - 1] = (byte)(m_bitStreamCache << (8 - m_bitStreamCacheBitCount));
+                data[offset] = (byte)(m_bitStreamCache << (8 - m_bitStreamCacheBitCount));
             }
-            return data;
+            return;
         }
 
         public void Clear()
@@ -244,10 +249,80 @@ namespace Sttp
 
         public void Write(CtpNumeric value)
         {
-            Write(value.Flags);
-            Write(value.High);
-            Write(value.Mid);
-            Write(value.Low);
+            byte code = value.Scale;
+            if (value.IsNegative)
+                code |= 128;
+
+            if (value.High != 0)
+                code |= 64;
+            if (value.Mid != 0)
+                code |= 32;
+
+            WriteBits8(code);
+
+            if (value.High != 0)
+                Write8BitSegments((uint)value.High);
+            if (value.Mid != 0)
+                Write8BitSegments((uint)value.Mid);
+            Write8BitSegments((uint)value.Low);
+        }
+
+        public void WriteObject(CtpObject value)
+        {
+            var typeCode = value.ValueTypeCode;
+            WriteBits4((byte)typeCode);
+            WriteObjectWithoutType(value);
+        }
+
+        public void WriteObjectWithoutType(CtpObject value)
+        {
+            switch (value.ValueTypeCode)
+            {
+                case CtpTypeCode.Null:
+                    break;
+                case CtpTypeCode.Int64:
+                    long v = value.IsInt64;
+                    if (v < 0)
+                    {
+                        WriteBits1(true);
+                        Write8BitSegments((ulong)~v);
+                    }
+                    else
+                    {
+                        WriteBits1(false);
+                        Write8BitSegments((ulong)v);
+                    }
+                    break;
+                case CtpTypeCode.Single:
+                    Write(value.AsSingle);
+                    break;
+                case CtpTypeCode.Double:
+                    Write(value.AsDouble);
+                    break;
+                case CtpTypeCode.Numeric:
+                    Write(value.AsNumeric);
+                    break;
+                case CtpTypeCode.CtpTime:
+                    Write(value.AsCtpTime);
+                    break;
+                case CtpTypeCode.Boolean:
+                    WriteBits1(value.AsBoolean);
+                    break;
+                case CtpTypeCode.Guid:
+                    Write(value.AsGuid);
+                    break;
+                case CtpTypeCode.String:
+                    Write(value.AsString);
+                    break;
+                case CtpTypeCode.CtpBuffer:
+                    Write(value.AsCtpBuffer);
+                    break;
+                case CtpTypeCode.CtpCommand:
+                    Write(value.AsCtpCommand);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         #region [ Writing Bits ]

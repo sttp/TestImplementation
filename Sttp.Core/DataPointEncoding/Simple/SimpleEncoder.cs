@@ -133,10 +133,10 @@ namespace Sttp.DataPointEncoding
                 m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
             }
 
-            CtpValueEncodingNative.Save(m_writer, point.Metadata.DataPointID);
+            m_writer.WriteObject(point.Metadata.DataPointID);
             m_writer.Write8BitSegments((ulong)point.Time.Ticks ^ (ulong)m_prevTimestamp);
             m_writer.Write8BitSegments((ulong)point.Quality);
-            CtpValueEncodingNative.Save(m_writer, point.Value);
+            m_writer.WriteObject(point.Value);
             m_prevTimestamp = point.Time.Ticks;
             m_prevPoint = m_currentPoint;
         }
@@ -200,7 +200,7 @@ namespace Sttp.DataPointEncoding
                     else
                     {
                         m_writer.WriteBits1(1);
-                        CtpValueEncodingNative.Save(m_writer, point.Value);
+                        m_writer.WriteObject(point.Value);
                     }
                     break;
                 case CtpTypeCode.Single:

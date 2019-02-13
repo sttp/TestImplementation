@@ -74,11 +74,11 @@ namespace Sttp.DataPointEncoding
                 m_lastValueCode = point.Value.ValueTypeCode;
             }
 
-            CtpValueEncodingWithoutType.Save(m_stream, point.Value);
+            m_stream.WriteObjectWithoutType(point.Value);
 
             if (isNew)
             {
-                CtpValueEncodingNative.Save(m_stream, point.Metadata.DataPointID);
+                m_stream.WriteObject(point.Metadata.DataPointID);
             }
         }
 

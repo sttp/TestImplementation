@@ -51,11 +51,11 @@ namespace Sttp.DataPointEncoding
             if (code == AdvancedSymbols.DefineChannel)
             {
                 channelID = m_metadata.Count;
-                CtpObject dataPointID = CtpValueEncodingNative.Load(m_reader);
+                CtpObject dataPointID = m_reader.ReadObject();
                 m_prevTimestamp = (long)CompareUInt64.UnCompare(m_reader.Read8BitSegments(), (ulong)m_prevTimestamp);
                 dataPoint.Time = new CtpTime(m_prevTimestamp);
                 dataPoint.Quality = (long)m_reader.Read8BitSegments();
-                dataPoint.Value = CtpValueEncodingNative.Load(m_reader);
+                dataPoint.Value = m_reader.ReadObject();
                 dataPoint.Metadata = LookupMetadata(dataPointID);
                 if (m_prevPoint != null)
                 {
@@ -172,7 +172,9 @@ namespace Sttp.DataPointEncoding
                     case CtpTypeCode.Guid:
                         if (code != AdvancedSymbols.ValueBits128)
                             throw new Exception("Expected a GUID.");
-                        m_currentPoint.PrevValue = CtpValueEncodingNative.Load(m_reader);
+                    {
+                        m_currentPoint.PrevValue = m_reader.ReadObject();
+                    }
                         break;
                     case CtpTypeCode.Numeric:
                     case CtpTypeCode.String:
@@ -180,7 +182,9 @@ namespace Sttp.DataPointEncoding
                     case CtpTypeCode.CtpBuffer:
                         if (code != AdvancedSymbols.ValueBuffer)
                             throw new Exception("Only raw types are supported here.");
-                        m_currentPoint.PrevValue = CtpValueEncodingNative.Load(m_reader);
+                    {
+                        m_currentPoint.PrevValue = m_reader.ReadObject();
+                    }
                         break;
                     case CtpTypeCode.Null:
                     default:

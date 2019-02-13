@@ -33,8 +33,6 @@ namespace Sttp.DataPointEncoding
         private Dictionary<CtpObject, int> m_pointIDToChannelIDMapping = new Dictionary<CtpObject, int>();
         private List<AdvancedMetadata> m_metadata = new List<AdvancedMetadata>();
 
-        private int m_count;
-
         public AdvancedEncoder()
         {
             m_writer = new ByteWriter();
@@ -49,10 +47,6 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
-            m_count++;
-            if (m_count == 211)
-                m_count = m_count;
-
             m_currentPoint = FindMetadata(point.Metadata, out var isNew);
 
             if (isNew)
@@ -63,10 +57,11 @@ namespace Sttp.DataPointEncoding
                     m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.DefineChannel);
                     m_prevPoint.NeighborChannelId = m_currentPoint.ChannelID;
                 }
-                CtpValueEncodingNative.Save(m_writer, point.Metadata.DataPointID);
+
+                m_writer.WriteObject(point.Metadata.DataPointID);
                 m_writer.Write8BitSegments(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_prevTimestamp));
                 m_writer.Write8BitSegments((ulong)point.Quality);
-                CtpValueEncodingNative.Save(m_writer, point.Value);
+                m_writer.WriteObject(point.Value);
                 m_prevTimestamp = point.Time.Ticks;
                 m_prevPoint = m_currentPoint;
                 return;
@@ -152,14 +147,18 @@ namespace Sttp.DataPointEncoding
                         break;
                     case CtpTypeCode.Guid:
                         m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBits128);
-                        CtpValueEncodingNative.Save(m_writer, point.Value);
+                    {
+                        m_writer.WriteObject(point.Value);
+                    }
                         break;
                     case CtpTypeCode.Numeric:
                     case CtpTypeCode.String:
                     case CtpTypeCode.CtpCommand:
                     case CtpTypeCode.CtpBuffer:
                         m_prevPoint.NextSymbolEncoding.WriteCode(AdvancedSymbols.ValueBuffer);
-                        CtpValueEncodingNative.Save(m_writer, point.Value);
+                    {
+                        m_writer.WriteObject(point.Value);
+                    }
                         break;
                     case CtpTypeCode.Null:
                         //Will always be caught by Default
