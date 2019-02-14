@@ -56,6 +56,8 @@ namespace CTP
 
         private CtpCommandKeyword m_rootElement;
 
+        private SerializationSchema m_writeSchema;
+
         /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>
@@ -71,7 +73,7 @@ namespace CTP
             m_isArray = false;
         }
 
-        public void Initialize(CtpCommandKeyword rootElement)
+        public void Initialize(SerializationSchema writeSchema, CtpCommandKeyword rootElement)
         {
             //2 byte header, 2 byte for NamesCount
             m_prefixLength = 4;
@@ -82,6 +84,7 @@ namespace CTP
             m_rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             m_prefixLength += m_rootElement.TextWithPrefix.Length;
             m_isArray = false;
+            m_writeSchema = writeSchema;
         }
 
         /// <summary>

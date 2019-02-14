@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using CTP;
-using CTP.Serialization;
 using Sttp.Codec;
 
 namespace Sttp.Codec

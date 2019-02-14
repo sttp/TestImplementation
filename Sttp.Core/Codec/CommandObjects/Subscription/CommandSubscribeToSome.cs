@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using CTP;
-using CTP.Serialization;
 
 namespace Sttp.Codec
 {

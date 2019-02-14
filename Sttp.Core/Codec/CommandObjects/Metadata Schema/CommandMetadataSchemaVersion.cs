@@ -1,6 +1,5 @@
 ﻿using System;
 using CTP;
-using CTP.Serialization;
 
 namespace Sttp.Codec
 {
