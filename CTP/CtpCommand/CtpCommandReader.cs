@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using GSF;
 
 namespace CTP
 {
@@ -28,6 +29,10 @@ namespace CTP
         /// </summary>
         private CtpCommandKeyword m_rootElement;
 
+        private Stack<bool> m_isArrayStack;
+
+        private int m_bitsPerName;
+
         /// <summary>
         /// Creates a <see cref="CtpCommandReader"/> from the specified byte array.
         /// </summary>
@@ -46,6 +51,10 @@ namespace CTP
             }
             ElementName = GetCurrentElement();
             m_stream = CreateReader(data, offset, data.Length);
+            IsArray = false;
+            m_isArrayStack = new Stack<bool>();
+            m_bitsPerName = 32 - BitMath.CountLeadingZeros((uint)m_namesList.Length-1);
+
         }
 
         /// <summary>
@@ -79,7 +88,9 @@ namespace CTP
         /// </summary>
         public CtpCommandNodeType NodeType { get; private set; }
 
-        public bool IsArray => throw new NotImplementedException();
+        public bool IsArray { get; private set; }
+
+        private static CtpCommandKeyword Item = CtpCommandKeyword.Create("Item");
 
         /// <summary>
         /// Reads to the next node. If the next node is the end of the document. False is returned. Otherwise true.
@@ -106,11 +117,18 @@ namespace CTP
                 if (m_stream.ReadBits1() == 0)
                 {
                     //00 = Start Element
+                    bool isArray = m_stream.ReadBits1() == 1;
                     NodeType = CtpCommandNodeType.StartElement;
                     Value = CtpObject.Null;
-                    ElementName = m_namesList[m_stream.Read4BitSegments()];
+                    if (IsArray)
+                        ElementName = Item;
+                    else
+                        ElementName = m_namesList[m_stream.ReadBits(m_bitsPerName)];
                     ValueName = null;
                     m_elementStack.Push(ElementName);
+                    //0 or 1 for IsArray
+                    IsArray = isArray;
+                    m_isArrayStack.Push(IsArray);
                 }
                 else
                 {
@@ -118,13 +136,22 @@ namespace CTP
                     NodeType = CtpCommandNodeType.EndElement;
                     ElementName = GetCurrentElement();
                     m_elementStack.Pop();
+                    m_isArrayStack.Pop();
+                    if (m_isArrayStack.Count == 0)
+                        IsArray = false;
+                    else
+                        IsArray = m_isArrayStack.Peek();
+
                 }
             }
             else
             {
                 //1 = WriteValue
                 NodeType = CtpCommandNodeType.Value;
-                ValueName = m_namesList[m_stream.Read4BitSegments()];
+                if (IsArray)
+                    ValueName = Item;
+                else
+                    ValueName = m_namesList[m_stream.ReadBits(m_bitsPerName)];
                 Value = m_stream.ReadObject();
             }
             return true;

@@ -51,7 +51,7 @@ namespace CTP
         public CtpCommandWriter(SerializationSchema writeSchema)
         {
             m_writeSchema = writeSchema;
-            m_bitsPerName = 32 - BitMath.CountLeadingZeros((uint)writeSchema.NamesCount);
+            m_bitsPerName = 32 - BitMath.CountLeadingZeros((uint)writeSchema.NamesCount-1);
             m_elementStack = new Stack<bool>();
             m_stream = new ByteWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
@@ -80,13 +80,17 @@ namespace CTP
         /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
         public IDisposable StartElement(int nameID, bool isArray)
         {
-            if(m_elementStack.Count>30)
+            if (m_elementStack.Count > 30)
                 throw new Exception("Element depth cannot exceed 30 nested elements.");
             m_stream.WriteBits1(0);
             m_stream.WriteBits1(0);
             m_stream.WriteBits1(isArray);
             if (!m_isArray)
-                m_stream.Write4BitSegments((uint)nameID);
+            {
+                if (nameID < 0)
+                    throw new ArgumentException();
+                m_stream.WriteBits(m_bitsPerName, (uint)nameID);
+            }
             m_isArray = isArray;
             m_elementStack.Push(isArray);
             return m_endElementHelper;
@@ -115,7 +119,11 @@ namespace CTP
         {
             m_stream.WriteBits1(1);
             if (!m_isArray)
+            {
+                if (nameID < 0)
+                    throw new ArgumentException();
                 m_stream.WriteBits(m_bitsPerName, (uint)nameID);
+            }
             m_stream.WriteObject(value);
         }
 

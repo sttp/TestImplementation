@@ -35,7 +35,7 @@ namespace CTP
             Clear();
         }
 
-        public int ActualSize => Encoding7Bit.GetSize((uint)(m_bitStreamCacheBitCount + m_bitLength * 8)) + m_byteLength + m_bitLength;
+        public int ActualSize => Encoding7Bit.GetSize((uint)(m_bitStreamCacheBitCount + m_bitLength * 8)) + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
         public int ApproximateSize => 5 + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
 
         /// <summary>

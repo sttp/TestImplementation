@@ -30,7 +30,7 @@ namespace CTP.SerializationWrite
 
             keyword = CtpCommandKeyword.Create(attribute?.CommandName ?? type.Name);
             schema = new SerializationSchema(keyword);
-            method = CommandObjectWriteMethod.Create<T>(false, schema, schema.WriteName(keyword));
+            method = CommandObjectWriteMethod.Create<T>(true, schema, -1);
         }
 
         /// <summary>
