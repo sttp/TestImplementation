@@ -152,9 +152,8 @@ namespace CTP
             }
             if (LoadError != null)
                 throw LoadError;
-            var wr = new CtpCommandWriter();
-            wr.Initialize(WriteSchema, CmdName);
-            Write.Save(obj, wr);
+            var wr = new CtpCommandWriter(WriteSchema);
+            WriteMethod.Save(obj, wr);
             return wr.ToCtpCommand();
         }
 
@@ -189,7 +188,6 @@ namespace CTP
         private static readonly Exception LoadError;
         private static readonly SerializationWrite.TypeWriteMethodBase<T> WriteMethod;
         private static readonly SerializationSchema WriteSchema;
-        private static readonly SerializationWrite.TypeWriteMethodBase<T> Write;
 
         static CommandObject()
         {

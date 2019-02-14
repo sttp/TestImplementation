@@ -4,8 +4,8 @@ using GSF;
 
 namespace CTP.SerializationRead
 {
-    internal class TypeSerializationDecimal
-        : TypeSerializationMethodBase<decimal>
+    internal class TypeReadDecimal
+        : TypeReadMethodBase<decimal>
     {
         public override decimal Load(CtpCommandReader reader)
         {
@@ -16,8 +16,8 @@ namespace CTP.SerializationRead
 
     }
 
-    internal class TypeSerializationGuid
-        : TypeSerializationMethodBase<Guid>
+    internal class TypeReadGuid
+        : TypeReadMethodBase<Guid>
     {
         public override Guid Load(CtpCommandReader reader)
         {

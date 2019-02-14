@@ -6,23 +6,27 @@ namespace CTP.SerializationRead
     /// <summary>
     /// Can serialize an array type.
     /// </summary>
+    /// <typeparam name="TEnum"></typeparam>
     /// <typeparam name="T"></typeparam>
-    internal class TypeSerializationList<T>
-        : TypeSerializationMethodBase<List<T>>
+    internal class TypeReadEnumerable<TEnum, T>
+        : TypeReadMethodBase<TEnum>
+        where TEnum : IEnumerable<T>
     {
-        private TypeSerializationMethodBase<T> m_serializeT;
+        private TypeReadMethodBase<T> m_serializeT;
 
-        public TypeSerializationList()
+        private Func<List<T>, TEnum> m_castToType;
+
+        public TypeReadEnumerable(Func<List<T>, TEnum> castToType)
         {
-            TypeSerialization<List<T>>.Set(this); //This is required to fix circular reference issues.
-            m_serializeT = TypeSerialization<T>.Get();
+            TypeRead<TEnum>.Set(this); //This is required to fix circular reference issues.
+            m_castToType = castToType;
+            m_serializeT = TypeRead<T>.Get();
         }
 
-        public override List<T> Load(CtpCommandReader reader)
+        public override TEnum Load(CtpCommandReader reader)
         {
             if (!reader.IsArray)
                 throw new Exception("Expecting An Array Type");
-
             List<T> items = new List<T>();
 
             while (reader.Read())
@@ -36,7 +40,7 @@ namespace CTP.SerializationRead
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.EndElement:
-                        return items;
+                        return m_castToType(items);
                     case CtpCommandNodeType.EndOfCommand:
                     case CtpCommandNodeType.StartOfCommand:
                     default:
@@ -46,6 +50,6 @@ namespace CTP.SerializationRead
             throw new ArgumentOutOfRangeException();
 
         }
-
-     }
+        
+    }
 }

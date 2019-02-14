@@ -7,16 +7,16 @@ namespace CTP.SerializationRead
     /// Can serialize an array type.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class TypeSerializationArray<T>
-        : TypeSerializationMethodBase<T[]>
+    internal class TypeReadArray<T>
+        : TypeReadMethodBase<T[]>
     {
 
-        private TypeSerializationMethodBase<T> m_serializeT;
+        private TypeReadMethodBase<T> m_serializeT;
 
-        public TypeSerializationArray()
+        public TypeReadArray()
         {
-            TypeSerialization<T[]>.Set(this); //This is required to fix circular reference issues.
-            m_serializeT = TypeSerialization<T>.Get();
+            TypeRead<T[]>.Set(this); //This is required to fix circular reference issues.
+            m_serializeT = TypeRead<T>.Get();
         }
 
         public override T[] Load(CtpCommandReader reader)

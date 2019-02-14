@@ -3,8 +3,8 @@ using CTP;
 
 namespace CTP.SerializationRead
 {
-    internal class TypeSerializationUInt32Null
-        : TypeSerializationMethodBase<uint?>
+    internal class TypeReadUInt32Null
+        : TypeReadMethodBase<uint?>
     {
         public override uint? Load(CtpCommandReader reader)
         {
@@ -15,8 +15,8 @@ namespace CTP.SerializationRead
 
     }
 
-    internal class TypeSerializationInt32Null
-        : TypeSerializationMethodBase<int?>
+    internal class TypeReadInt32Null
+        : TypeReadMethodBase<int?>
     {
         public override int? Load(CtpCommandReader reader)
         {
@@ -28,8 +28,8 @@ namespace CTP.SerializationRead
      
     }
 
-    internal class TypeSerializationSingleNull
-        : TypeSerializationMethodBase<float?>
+    internal class TypeReadSingleNull
+        : TypeReadMethodBase<float?>
     {
         public override float? Load(CtpCommandReader reader)
         {

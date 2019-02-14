@@ -4,8 +4,8 @@ using CTP;
 
 namespace CTP.SerializationRead
 {
-    internal class TypeSerializationString
-        : TypeSerializationMethodBase<string>
+    internal class TypeReadString
+        : TypeReadMethodBase<string>
     {
         public override string Load(CtpCommandReader reader)
         {
@@ -13,12 +13,10 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return (string)reader.Value;
         }
-
-      
     }
 
-    internal class TypeSerializationByteArray
-       : TypeSerializationMethodBase<byte[]>
+    internal class TypeReadByteArray
+       : TypeReadMethodBase<byte[]>
     {
         public override byte[] Load(CtpCommandReader reader)
         {
@@ -26,12 +24,10 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return (byte[])reader.Value;
         }
-
-   
     }
 
-    internal class TypeSerializationCharArray
-        : TypeSerializationMethodBase<char[]>
+    internal class TypeReadCharArray
+        : TypeReadMethodBase<char[]>
     {
         public override char[] Load(CtpCommandReader reader)
         {
@@ -39,12 +35,10 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return (char[])reader.Value;
         }
-
-        
     }
 
-    internal class TypeSerializationCommand
-        : TypeSerializationMethodBase<CtpCommand>
+    internal class TypeReadCommand
+        : TypeReadMethodBase<CtpCommand>
     {
         public override CtpCommand Load(CtpCommandReader reader)
         {
@@ -52,12 +46,10 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return (CtpCommand)reader.Value;
         }
-
-        
     }
 
-    internal class TypeSerializationBuffer
-        : TypeSerializationMethodBase<CtpBuffer>
+    internal class TypeReadBuffer
+        : TypeReadMethodBase<CtpBuffer>
     {
         public override CtpBuffer Load(CtpCommandReader reader)
         {
@@ -65,12 +57,10 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return (CtpBuffer)reader.Value;
         }
-
-      
     }
 
-    internal class TypeSerializationNumeric
-        : TypeSerializationMethodBase<CtpNumeric>
+    internal class TypeReadNumeric
+        : TypeReadMethodBase<CtpNumeric>
     {
         public override CtpNumeric Load(CtpCommandReader reader)
         {
@@ -80,8 +70,8 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeSerializationNumericNull
-        : TypeSerializationMethodBase<CtpNumeric?>
+    internal class TypeReadNumericNull
+        : TypeReadMethodBase<CtpNumeric?>
     {
         public override CtpNumeric? Load(CtpCommandReader reader)
         {
@@ -91,9 +81,8 @@ namespace CTP.SerializationRead
         }
     }
 
-
-    internal class TypeSerializationCtpObject
-        : TypeSerializationMethodBase<CtpObject>
+    internal class TypeReadCtpObject
+        : TypeReadMethodBase<CtpObject>
     {
         public override CtpObject Load(CtpCommandReader reader)
         {
@@ -101,12 +90,10 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return (CtpObject)reader.Value;
         }
-
-      
     }
 
-    internal class TypeSerializationObject
-        : TypeSerializationMethodBase<object>
+    internal class TypeReadObject
+        : TypeReadMethodBase<object>
     {
         public override object Load(CtpCommandReader reader)
         {
@@ -114,7 +101,5 @@ namespace CTP.SerializationRead
                 throw new Exception("Parsing Error");
             return reader.Value.ToNativeType;
         }
-
-        
     }
 }

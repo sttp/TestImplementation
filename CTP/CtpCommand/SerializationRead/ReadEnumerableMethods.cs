@@ -8,22 +8,22 @@ namespace CTP.SerializationRead
     /// <summary>
     /// Creates methods for serializing one of these types: Array, List, HashSet, SortedSet, or ReadOnlyCollection
     /// </summary>
-    internal static class EnumerableSerializationMethods
+    internal static class ReadEnumerableMethods
     {
         private static readonly MethodInfo Method;
 
-        static EnumerableSerializationMethods()
+        static ReadEnumerableMethods()
         {
-            Method = typeof(EnumerableSerializationMethods).GetMethod("Generic", BindingFlags.Static | BindingFlags.NonPublic);
+            Method = typeof(ReadEnumerableMethods).GetMethod("Generic", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        public static TypeSerializationMethodBase<T> TryCreate<T>()
+        public static TypeReadMethodBase<T> TryCreate<T>()
         {
             var type = typeof(T);
             if (type.IsArray)
             {
                 var func = Method.MakeGenericMethod(type, type.GetElementType());
-                return (TypeSerializationMethodBase<T>)func.Invoke(null, null);
+                return (TypeReadMethodBase<T>)func.Invoke(null, null);
             }
             else if (type.IsGenericType)
             {
@@ -31,7 +31,7 @@ namespace CTP.SerializationRead
                 if (types.Length == 1)
                 {
                     var func = Method.MakeGenericMethod(type, types[0]);
-                    return (TypeSerializationMethodBase<T>)func.Invoke(null, null);
+                    return (TypeReadMethodBase<T>)func.Invoke(null, null);
                 }
                 else
                 {
@@ -46,23 +46,23 @@ namespace CTP.SerializationRead
         {
             if (typeof(TEnum) == typeof(T[]))
             {
-                return new TypeSerializationArray<T>();
+                return new TypeReadArray<T>();
             }
             if (typeof(TEnum) == typeof(List<T>))
             {
-                return new TypeSerializationList<T>();
+                return new TypeReadList<T>();
             }
             if (typeof(TEnum) == typeof(HashSet<T>))
             {
-                return new TypeSerializationEnumerable<HashSet<T>, T>(x => new HashSet<T>(x));
+                return new TypeReadEnumerable<HashSet<T>, T>(x => new HashSet<T>(x));
             }
             if (typeof(TEnum) == typeof(SortedSet<T>))
             {
-                return new TypeSerializationEnumerable<SortedSet<T>, T>(x => new SortedSet<T>(x));
+                return new TypeReadEnumerable<SortedSet<T>, T>(x => new SortedSet<T>(x));
             }
             if (typeof(TEnum) == typeof(ReadOnlyCollection<T>))
             {
-                return new TypeSerializationEnumerable<ReadOnlyCollection<T>, T>(x => new ReadOnlyCollection<T>(x));
+                return new TypeReadEnumerable<ReadOnlyCollection<T>, T>(x => new ReadOnlyCollection<T>(x));
             }
             throw new Exception("Cannot serialize generic type");
         }

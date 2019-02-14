@@ -7,7 +7,7 @@ namespace CTP.SerializationRead
     /// <summary>
     /// Responsible for creating runtime lambda expressions to assign fields/properties. This is done without boxing. 
     /// </summary>
-    internal abstract class FieldSerialization
+    internal abstract class FieldRead
     {
         /// <summary>
         /// The name of the field/element to use in CtpDocument.
@@ -22,32 +22,32 @@ namespace CTP.SerializationRead
         /// <param name="reader"></param>
         public abstract void Load(CommandObject obj, CtpCommandReader reader);
 
-        private static readonly MethodInfo Method2 = typeof(FieldSerialization).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo Method2 = typeof(FieldRead).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
 
-        public static FieldSerialization CreateFieldOptions(MemberInfo member, Type targetType, CommandFieldAttribute autoLoad)
+        public static FieldRead CreateFieldOptions(MemberInfo member, Type targetType, CommandFieldAttribute autoLoad)
         {
             var genericMethod = Method2.MakeGenericMethod(targetType);
-            return (FieldSerialization)genericMethod.Invoke(null, new object[] { member, autoLoad });
+            return (FieldRead)genericMethod.Invoke(null, new object[] { member, autoLoad });
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static FieldSerialization CreateFieldSerializationInternal<TFieldType>(MemberInfo member, CommandFieldAttribute autoLoad)
+        private static FieldRead CreateFieldSerializationInternal<TFieldType>(MemberInfo member, CommandFieldAttribute autoLoad)
         {
-            return new FieldSerialization<TFieldType>(member, autoLoad);
+            return new FieldRead<TFieldType>(member, autoLoad);
         }
     }
 
     /// <summary>
     /// Responsible for creating runtime lambda expressions to assign fields/properties. This is done without boxing. 
     /// </summary>
-    internal class FieldSerialization<T>
-        : FieldSerialization
+    internal class FieldRead<T>
+        : FieldRead
     {
         private CtpCommandKeyword m_recordName;
-        private TypeSerializationMethodBase<T> m_method;
+        private TypeReadMethodBase<T> m_method;
         private Action<object, T> m_write;
 
-        public FieldSerialization(MemberInfo member, CommandFieldAttribute autoLoad)
+        public FieldRead(MemberInfo member, CommandFieldAttribute autoLoad)
         {
             m_recordName = CtpCommandKeyword.Create(autoLoad.RecordName ?? member.Name);
 
@@ -63,7 +63,7 @@ namespace CTP.SerializationRead
             {
                 throw new NotSupportedException();
             }
-            m_method = TypeSerialization<T>.Get();
+            m_method = TypeRead<T>.Get();
         }
 
         public override CtpCommandKeyword RecordName => m_recordName;

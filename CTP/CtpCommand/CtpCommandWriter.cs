@@ -26,15 +26,6 @@ namespace CTP
                 m_parent.EndElement();
             }
         }
-
-        /// <summary>
-        /// A lookup of all names that have been registered.
-        /// </summary>
-        private RuntimeMapping m_namesLookup;
-        /// <summary>
-        /// A list of all names and the state data associated with these names.
-        /// </summary>
-        private List<CtpCommandKeyword> m_names;
         /// <summary>
         /// The list of elements so an error can occur when the element tree is invalid.
         /// </summary>
@@ -47,44 +38,24 @@ namespace CTP
         /// A reusable class to ease in calling the <see cref="EndElement"/> method.
         /// </summary>
         private ElementEndElementHelper m_endElementHelper;
-        /// <summary>
-        /// A temporary value so this class can support setting from an object type.
-        /// </summary>
-        private int m_prefixLength;
 
         private bool m_isArray;
 
-        private CtpCommandKeyword m_rootElement;
+        private int m_bitsPerName;
 
         private SerializationSchema m_writeSchema;
 
         /// <summary>
         /// Create a new writer with the provided root element.
         /// </summary>
-        public CtpCommandWriter()
+        public CtpCommandWriter(SerializationSchema writeSchema)
         {
-            //2 byte header, 2 byte for NamesCount
-            m_prefixLength = 4;
-            m_namesLookup = new RuntimeMapping();
-            m_names = new List<CtpCommandKeyword>();
+            m_writeSchema = writeSchema;
+            m_bitsPerName = 32 - BitMath.CountLeadingZeros((uint)writeSchema.NamesCount);
             m_elementStack = new Stack<bool>();
             m_stream = new ByteWriter();
             m_endElementHelper = new ElementEndElementHelper(this);
             m_isArray = false;
-        }
-
-        public void Initialize(SerializationSchema writeSchema, CtpCommandKeyword rootElement)
-        {
-            //2 byte header, 2 byte for NamesCount
-            m_prefixLength = 4;
-            m_namesLookup.Clear();
-            m_names.Clear();
-            m_elementStack.Clear();
-            m_stream.Clear();
-            m_rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
-            m_prefixLength += m_rootElement.TextWithPrefix.Length;
-            m_isArray = false;
-            m_writeSchema = writeSchema;
         }
 
         /// <summary>
@@ -94,7 +65,7 @@ namespace CTP
         {
             get
             {
-                var innerLength = m_stream.ActualSize + m_prefixLength;
+                var innerLength = 2 + m_stream.ActualSize + m_writeSchema.Length;
                 if (innerLength > 4093)
                     return innerLength + 2;
                 return innerLength;
@@ -109,6 +80,8 @@ namespace CTP
         /// <returns>An object that can be used in a using block to make the code cleaner. Disposing this object will call <see cref="EndElement"/></returns>
         public IDisposable StartElement(int nameID, bool isArray)
         {
+            if(m_elementStack.Count>30)
+                throw new Exception("Element depth cannot exceed 30 nested elements.");
             m_stream.WriteBits1(0);
             m_stream.WriteBits1(0);
             m_stream.WriteBits1(isArray);
@@ -142,22 +115,8 @@ namespace CTP
         {
             m_stream.WriteBits1(1);
             if (!m_isArray)
-                m_stream.Write4BitSegments((uint)nameID);
+                m_stream.WriteBits(m_bitsPerName, (uint)nameID);
             m_stream.WriteObject(value);
-        }
-
-        private void WriteName(CtpCommandKeyword name)
-        {
-            if (name.RuntimeID < 0)
-                throw new ArgumentException();
-            if (!m_namesLookup.TryGetValue(name.RuntimeID, out int index))
-            {
-                m_namesLookup.Add(name.RuntimeID, m_namesLookup.Count);
-                m_names.Add(name);
-                index = m_namesLookup.Count - 1;
-                m_prefixLength += name.TextWithPrefix.Length;
-            }
-            m_stream.Write4BitSegments((uint)index);
         }
 
         /// <summary>
@@ -198,13 +157,8 @@ namespace CTP
                 WriteSize(buffer, ref offset, (uint)(length + (1 << 28)));
             }
 
-            Write(buffer, ref offset, m_rootElement);
-            WriteSize(buffer, ref offset, (ushort)m_names.Count);
-            for (var index = 0; index < m_names.Count; index++)
-            {
-                Write(buffer, ref offset, m_names[index]);
-            }
-
+            m_writeSchema.CopyTo(buffer, offset);
+            offset += m_writeSchema.Length;
             m_stream.CopyTo(buffer, offset);
         }
 
@@ -226,15 +180,6 @@ namespace CTP
             length++;
             buffer[length] = (byte)(value);
             length++;
-        }
-
-        private void Write(byte[] buffer, ref int length, CtpCommandKeyword value)
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            Array.Copy(value.TextWithPrefix, 0, buffer, length, value.TextWithPrefix.Length);
-            length += value.TextWithPrefix.Length;
         }
 
     }

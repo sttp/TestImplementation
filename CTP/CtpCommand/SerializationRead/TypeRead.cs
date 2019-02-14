@@ -9,9 +9,9 @@ namespace CTP.SerializationRead
     /// This class assists in the automatic serialization of <see cref="CommandObject"/>s to and from <see cref="CtpCommand"/>s.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal static class TypeSerialization<T>
+    internal static class TypeRead<T>
     {
-        private static TypeSerializationMethodBase<T> s_serialization;
+        private static TypeReadMethodBase<T> s_read;
         private static readonly Exception s_loadError;
         private static readonly CommandNameAttribute s_commandAttribute;
 
@@ -19,45 +19,45 @@ namespace CTP.SerializationRead
         /// Sets the TypeSerializationMethod variable in the instance of a circular reference.
         /// </summary>
         /// <param name="method"></param>
-        public static void Set(TypeSerializationMethodBase<T> method)
+        public static void Set(TypeReadMethodBase<T> method)
         {
-            Interlocked.CompareExchange(ref s_serialization, method, null);
+            Interlocked.CompareExchange(ref s_read, method, null);
         }
 
         /// <summary>
         /// Used by other serialization methods to acquire the serialization method
         /// </summary>
         /// <returns></returns>
-        public static TypeSerializationMethodBase<T> Get()
+        public static TypeReadMethodBase<T> Get()
         {
             if (s_loadError != null)
                 throw s_loadError;
-            if (s_serialization == null)
+            if (s_read == null)
                 throw new Exception("Serialization method is missing");
-            return s_serialization;
+            return s_read;
         }
 
-        public static void Get(out Exception loadError, out CtpCommandKeyword commandName, out TypeSerializationMethodBase<T> serialization)
+        public static void Get(out Exception loadError, out CtpCommandKeyword commandName, out TypeReadMethodBase<T> read)
         {
             loadError = s_loadError;
             if (loadError == null)
             {
                 commandName = CtpCommandKeyword.Create(s_commandAttribute?.CommandName ?? nameof(T));
-                serialization = s_serialization;
+                read = s_read;
             }
             else
             {
                 commandName = null;
-                serialization = null;
+                read = null;
             }
         }
 
-        static TypeSerialization()
+        static TypeRead()
         {
             try
             {
-                s_serialization = BuiltinSerializationMethods.TryGetMethod<T>();
-                if (s_serialization != null)
+                s_read = BuiltinSerializationMethods.TryGetMethod<T>();
+                if (s_read != null)
                     return;
 
                 var type = typeof(T);
@@ -79,8 +79,8 @@ namespace CTP.SerializationRead
                     return;
                 }
 
-                s_serialization = EnumerableSerializationMethods.TryCreate<T>();
-                if (s_serialization != null)
+                s_read = ReadEnumerableMethods.TryCreate<T>();
+                if (s_read != null)
                     return;
 
                 var c = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
@@ -89,11 +89,11 @@ namespace CTP.SerializationRead
                     s_loadError = new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
                     return;
                 }
-                s_serialization = CommandObjectSerializationMethod.Create<T>(c);
+                s_read = CommandObjectReadMethod.Create<T>(c);
             }
             catch (Exception e)
             {
-                s_serialization = null;
+                s_read = null;
                 s_loadError = e;
             }
 

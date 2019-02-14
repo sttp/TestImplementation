@@ -3,8 +3,8 @@ using CTP;
 
 namespace CTP.SerializationRead
 {
-    internal class TypeSerializationUInt64
-        : TypeSerializationMethodBase<ulong>
+    internal class TypeReadUInt64
+        : TypeReadMethodBase<ulong>
     {
         public override ulong Load(CtpCommandReader reader)
         {
@@ -16,8 +16,8 @@ namespace CTP.SerializationRead
        
     }
 
-    internal class TypeSerializationInt64
-        : TypeSerializationMethodBase<long>
+    internal class TypeReadInt64
+        : TypeReadMethodBase<long>
     {
 
         public override long Load(CtpCommandReader reader)
@@ -30,8 +30,8 @@ namespace CTP.SerializationRead
       
     }
 
-    internal class TypeSerializationDouble
-        : TypeSerializationMethodBase<double>
+    internal class TypeReadDouble
+        : TypeReadMethodBase<double>
     {
 
         public override double Load(CtpCommandReader reader)
@@ -44,8 +44,8 @@ namespace CTP.SerializationRead
         
     }
   
-    internal class TypeSerializationDateTime
-        : TypeSerializationMethodBase<DateTime>
+    internal class TypeReadDateTime
+        : TypeReadMethodBase<DateTime>
     {
         public override DateTime Load(CtpCommandReader reader)
         {
@@ -56,8 +56,8 @@ namespace CTP.SerializationRead
 
     }
 
-    internal class TypeSerializationCtpTime
-        : TypeSerializationMethodBase<CtpTime>
+    internal class TypeReadCtpTime
+        : TypeReadMethodBase<CtpTime>
     {
         public override CtpTime Load(CtpCommandReader reader)
         {

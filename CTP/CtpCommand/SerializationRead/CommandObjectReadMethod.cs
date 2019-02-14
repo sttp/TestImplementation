@@ -6,42 +6,42 @@ using GSF.Reflection;
 
 namespace CTP.SerializationRead
 {
-    internal class CommandObjectSerializationMethod
+    internal class CommandObjectReadMethod
     {
-        private static readonly MethodInfo Method2 = typeof(CommandObjectSerializationMethod).GetMethod("Create2", BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo Method2 = typeof(CommandObjectReadMethod).GetMethod("Create2", BindingFlags.Static | BindingFlags.NonPublic);
 
-        public static TypeSerializationMethodBase<T> Create<T>(ConstructorInfo c)
+        public static TypeReadMethodBase<T> Create<T>(ConstructorInfo c)
         {
             var genericMethod = Method2.MakeGenericMethod(typeof(T));
-            return (TypeSerializationMethodBase<T>)genericMethod.Invoke(null, new object[] { c });
+            return (TypeReadMethodBase<T>)genericMethod.Invoke(null, new object[] { c });
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static TypeSerializationMethodBase<T> Create2<T>(ConstructorInfo c)
+        private static TypeReadMethodBase<T> Create2<T>(ConstructorInfo c)
             where T : CommandObject
         {
-            return new CommandObjectSerializationMethod<T>(c);
+            return new CommandObjectReadMethod<T>(c);
         }
     }
 
-    internal class CommandObjectSerializationMethod<T>
-       : TypeSerializationMethodBase<T>
+    internal class CommandObjectReadMethod<T>
+       : TypeReadMethodBase<T>
         where T : CommandObject
     {
-        private readonly FieldSerialization[] m_records;
+        private readonly FieldRead[] m_records;
 
         private readonly RuntimeMapping m_recordsLookup = new RuntimeMapping();
 
         private readonly Func<T> m_constructor;
 
-        public CommandObjectSerializationMethod(ConstructorInfo c)
+        public CommandObjectReadMethod(ConstructorInfo c)
         {
-            TypeSerialization<T>.Set(this); //This is required to fix circular reference issues.
+            TypeRead<T>.Set(this); //This is required to fix circular reference issues.
 
             var type = typeof(T);
             m_constructor = c.Compile<T>();
 
-            var records = new List<FieldSerialization>();
+            var records = new List<FieldRead>();
             foreach (var member in type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
                 TryCreateFieldOptions(member, records);
@@ -57,7 +57,7 @@ namespace CTP.SerializationRead
             }
         }
 
-        private void TryCreateFieldOptions(MemberInfo member, List<FieldSerialization> records)
+        private void TryCreateFieldOptions(MemberInfo member, List<FieldRead> records)
         {
             Type targetType;
 
@@ -72,7 +72,7 @@ namespace CTP.SerializationRead
             CommandFieldAttribute attribute = attributes.OfType<CommandFieldAttribute>().FirstOrDefault();
             if (attribute != null)
             {
-                var field = FieldSerialization.CreateFieldOptions(member, targetType, attribute);
+                var field = FieldRead.CreateFieldOptions(member, targetType, attribute);
                 m_recordsLookup.Add(field.RecordName.RuntimeID, records.Count);
                 records.Add(field);
             }
@@ -82,7 +82,7 @@ namespace CTP.SerializationRead
         {
             var rv = m_constructor();
             rv.OnBeforeLoad();
-            FieldSerialization serialization;
+            FieldRead read;
             int id;
 
             while (reader.Read())
@@ -92,8 +92,8 @@ namespace CTP.SerializationRead
                     case CtpCommandNodeType.StartElement:
                         if (m_recordsLookup.TryGetValue(reader.ElementName.RuntimeID, out id))
                         {
-                            serialization = m_records[id];
-                            serialization.Load(rv, reader);
+                            read = m_records[id];
+                            read.Load(rv, reader);
                         }
                         else
                         {
@@ -104,8 +104,8 @@ namespace CTP.SerializationRead
                     case CtpCommandNodeType.Value:
                         if (m_recordsLookup.TryGetValue(reader.ValueName.RuntimeID, out id))
                         {
-                            serialization = m_records[id];
-                            serialization.Load(rv, reader);
+                            read = m_records[id];
+                            read.Load(rv, reader);
                         }
                         else
                         {
