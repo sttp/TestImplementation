@@ -27,7 +27,7 @@ namespace CTP
         /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
-        private BitReader m_stream;
+        private CtpObjectReader m_stream;
         /// <summary>
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
@@ -147,7 +147,7 @@ namespace CTP
                     NodeType = CtpCommandNodeType.StartElement;
                     Value = CtpObject.Null;
                     ValueName = null;
-                    m_elementStack.Push(new StackDefinition(node, (int)m_stream.ReadObject()));
+                    m_elementStack.Push(new StackDefinition(node, (int)m_stream.Read()));
                     break;
                 case CommandSchemaSymbol.DefineElement:
                     NodeType = CtpCommandNodeType.StartElement;
@@ -158,7 +158,7 @@ namespace CTP
                 case CommandSchemaSymbol.DefineValue:
                     NodeType = CtpCommandNodeType.Value;
                     ValueName = node.NodeName;
-                    Value = m_stream.ReadObject();
+                    Value = m_stream.Read();
                     break;
                 case CommandSchemaSymbol.EndOFStream:
                     break;
@@ -176,9 +176,9 @@ namespace CTP
             }
         }
 
-        public static BitReader CreateReader(byte[] m_buffer, int m_position, int m_length)
+        public static CtpObjectReader CreateReader(byte[] m_buffer, int m_position, int m_length)
         {
-            var b = new BitReader();
+            var b = new CtpObjectReader();
             b.SetBuffer(m_buffer, m_position, m_length - m_position);
             return b;
         }

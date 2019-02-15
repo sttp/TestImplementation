@@ -12,13 +12,13 @@ namespace CTP
         /// <summary>
         /// Where to write the data.
         /// </summary>
-        private BitWriter m_stream;
+        private CtpObjectWriter m_stream;
         private CommandSchema m_schema;
 
         public CtpCommandWriter(CommandSchema schema)
         {
             m_schema = schema;
-            m_stream = new BitWriter();
+            m_stream = new CtpObjectWriter();
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace CTP
         {
             get
             {
-                var innerLength = 2 + m_stream.ActualSize;
+                var innerLength = 2 + m_stream.Length;
                 if (innerLength > 4093)
                     return innerLength + 2;
                 return innerLength;
@@ -37,7 +37,7 @@ namespace CTP
 
         public void WriteArray(int count)
         {
-            m_stream.WriteObject(count);
+            m_stream.Write(count);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace CTP
         /// <param name="value">the value</param>
         public void WriteValue(CtpObject value)
         {
-            m_stream.WriteObject(value);
+            m_stream.Write(value);
         }
 
         /// <summary>
