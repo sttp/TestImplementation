@@ -8,29 +8,29 @@ namespace CTP
 {
     internal class CommandSchemaWriter
     {
-        private ByteWriter m_stream;
+        private CtpObjectWriter m_stream;
 
         public CommandSchemaWriter()
         {
-            m_stream = new ByteWriter();
+            m_stream = new CtpObjectWriter();
         }
 
         public void DefineArray(string name)
         {
-            m_stream.WriteBits8(0);
+            m_stream.Write(0);
             m_stream.Write(name);
         }
 
         public void DefineElement(string name, int count)
         {
-            m_stream.WriteBits8(1);
+            m_stream.Write(1);
             m_stream.Write(name);
-            m_stream.Write7BitInt((uint)count);
+            m_stream.Write(count);
         }
 
         public void DefineValue(string name)
         {
-            m_stream.WriteBits8(2);
+            m_stream.Write(2);
             m_stream.Write(name);
         }
 
@@ -50,7 +50,7 @@ namespace CTP
 
     internal class CommandSchemaReader
     {
-        private ByteReader m_stream;
+        private CtpObjectReader m_stream;
 
         public CommandSchemaSymbol Symbol;
 
@@ -60,7 +60,7 @@ namespace CTP
 
         public CommandSchemaReader(byte[] data)
         {
-            m_stream = new ByteReader();
+            m_stream = new CtpObjectReader();
             m_stream.SetBuffer(data, 0, data.Length);
         }
 
@@ -80,21 +80,21 @@ namespace CTP
                 return false;
             }
 
-            switch (m_stream.ReadBits8())
+            switch ((int)m_stream.Read())
             {
                 case 0:
                     Symbol = CommandSchemaSymbol.DefineArray;
-                    Name = m_stream.ReadString();
+                    Name = (string)m_stream.Read();
                     ElementCount = 0;
                     return true;
                 case 1:
                     Symbol = CommandSchemaSymbol.DefineElement;
-                    Name = m_stream.ReadString();
-                    ElementCount = (int)m_stream.Read7BitInt();
+                    Name = (string)m_stream.Read();
+                    ElementCount = (int)m_stream.Read();
                     return true;
                 case 2:
                     Symbol = CommandSchemaSymbol.DefineValue;
-                    Name = m_stream.ReadString();
+                    Name = (string)m_stream.Read();
                     ElementCount = 0;
                     return true;
                 default:

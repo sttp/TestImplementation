@@ -31,6 +31,17 @@ namespace CTP
             Low = low;
         }
 
+        public CtpNumeric(bool isNegative, int scale, int high, int mid, int low)
+        {
+            Flags = 0;
+            if (isNegative)
+                Flags = (1 << 31);
+            Flags |= (scale << 16);
+            High = high;
+            Mid = mid;
+            Low = low;
+        }
+
         public static explicit operator CtpNumeric(decimal value)
         {
             return new CtpNumeric(value);

@@ -13,6 +13,23 @@ namespace Sttp.Tests.Commands
     public class Metadata
     {
         [TestMethod]
+        public unsafe void NumericConsts()
+        {
+            float value;
+            value = -1; Console.WriteLine($"//{value} = 0x{(*(uint*)&value).ToString("X8")}" );
+            value = 0; Console.WriteLine($"//{value} = 0x{(*(uint*)&value).ToString("X8")}" );
+            value = 1; Console.WriteLine($"//{value} = 0x{(*(uint*)&value).ToString("X8")}" );
+        }
+        [TestMethod]
+        public unsafe void NumericConsts2()
+        {
+            double value;
+            value = -1; Console.WriteLine($"//{value} = 0x{(*(ulong*)&value).ToString("X16")}");
+            value = 0; Console.WriteLine($"//{value} = 0x{(*(ulong*)&value).ToString("X16")}");
+            value = 1; Console.WriteLine($"//{value} = 0x{(*(ulong*)&value).ToString("X16")}");
+        }
+
+        [TestMethod]
         public void GetMetadata()
         {
             var cmd = new CommandGetMetadata("Measurement", new string[] { "ID", "SignalID", "TagName" });
