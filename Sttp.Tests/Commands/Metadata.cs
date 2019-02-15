@@ -35,6 +35,17 @@ namespace Sttp.Tests.Commands
             tbls.Add(tbl);
 
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 1, tbls);
+
+            var rdr = cmd.ToCommand().MakeReader();
+            while (rdr.Read())
+            {
+                Console.WriteLine($"{rdr.NodeType,15} {rdr.ElementName,15} {rdr.ValueName,25} {rdr.Value}");
+            }
+
+            return;
+
+            Console.WriteLine(cmd.ToString());
+
             cmd = (CommandMetadataSchema)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }

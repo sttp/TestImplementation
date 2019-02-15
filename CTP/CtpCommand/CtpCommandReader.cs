@@ -11,66 +11,67 @@ namespace CTP
     /// </summary>
     internal class CtpCommandReader
     {
+        private class StackDefinition
+        {
+            public CommandSchemaCompiled.Node Node;
+            public int ChildCount;
+
+            public StackDefinition(CommandSchemaCompiled.Node node, int childCount)
+            {
+                Node = node;
+                ChildCount = childCount;
+            }
+        }
+
+        private CommandSchemaCompiled m_schema;
         /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
-        private ByteReader m_stream;
-        /// <summary>
-        /// A list of all names and the state data associated with these names.
-        /// </summary>
-        private CtpCommandKeyword[] m_namesList;
+        private BitReader m_stream;
         /// <summary>
         /// The list of elements so the <see cref="ElementName"/> can be retrieved.
         /// </summary>
-        private Stack<CtpCommandKeyword> m_elementStack = new Stack<CtpCommandKeyword>();
+        private Stack<StackDefinition> m_elementStack = new Stack<StackDefinition>();
 
-        /// <summary>
-        /// The root element.
-        /// </summary>
         private CtpCommandKeyword m_rootElement;
-
-        private Stack<bool> m_isArrayStack;
-
-        private int m_bitsPerName;
 
         /// <summary>
         /// Creates a <see cref="CtpCommandReader"/> from the specified byte array.
         /// </summary>
         /// <param name="data"></param>
         /// <param name="offset"></param>
-        public CtpCommandReader(byte[] data, int offset)
+        /// <param name="schema"></param>
+        public CtpCommandReader(byte[] data, int offset, CommandSchema schema)
         {
+            m_schema = schema.CompiledReader();
             Value = CtpObject.Null;
             NodeType = CtpCommandNodeType.StartOfCommand;
-            m_rootElement = ReadCommandKeyword(data, ref offset, data.Length);
-            int count = (int)ReadBits16(data, ref offset, data.Length);
-            m_namesList = new CtpCommandKeyword[count];
-            for (int x = 0; x < count; x++)
-            {
-                m_namesList[x] = ReadCommandKeyword(data, ref offset, data.Length);
-            }
-            ElementName = GetCurrentElement();
+            m_rootElement = m_schema[0].NodeName;
+            m_elementStack.Push(new StackDefinition(m_schema[0], m_schema[0].ElementCount));
             m_stream = CreateReader(data, offset, data.Length);
-            IsArray = false;
-            m_isArrayStack = new Stack<bool>();
-            m_bitsPerName = 32 - BitMath.CountLeadingZeros((uint)m_namesList.Length-1);
-
+            m_currentSchemaIndex = 0;
         }
 
         /// <summary>
         /// The name of the root element.
         /// </summary>
         public CtpCommandKeyword RootElement => m_rootElement;
-        /// <summary>
-        /// The depth of the element stack. 0 means the depth is at the root element.
-        /// </summary>
-        public int ElementDepth => m_elementStack.Count;
+
         /// <summary>
         /// The current name of the current element. Can be the RootElement if ElementDepth is 0
         /// and <see cref="NodeType"/> is not <see cref="CtpCommandNodeType.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
-        public CtpCommandKeyword ElementName { get; private set; }
+        public CtpCommandKeyword ElementName
+        {
+            get
+            {
+                if (m_elementStack.Count == 0)
+                    return m_rootElement;
+                return m_elementStack.Peek().Node.NodeName;
+            }
+        }
+
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the name of the value. Otherwise, null.
         /// </summary>
@@ -88,9 +89,17 @@ namespace CTP
         /// </summary>
         public CtpCommandNodeType NodeType { get; private set; }
 
-        public bool IsArray { get; private set; }
+        public bool IsArray
+        {
+            get
+            {
+                if (m_elementStack.Count == 0)
+                    return false;
+                return m_elementStack.Peek().Node.Symbol == CommandSchemaSymbol.DefineArray;
+            }
+        }
 
-        private static CtpCommandKeyword Item = CtpCommandKeyword.Create("Item");
+        private int m_currentSchemaIndex;
 
         /// <summary>
         /// Reads to the next node. If the next node is the end of the document. False is returned. Otherwise true.
@@ -101,67 +110,60 @@ namespace CTP
             if (NodeType == CtpCommandNodeType.EndOfCommand)
                 return false;
 
-            if (NodeType == CtpCommandNodeType.EndElement)
+            if (NodeType == CtpCommandNodeType.StartOfCommand)
             {
-                ElementName = GetCurrentElement();
+                NodeType = CtpCommandNodeType.StartElement;
+                return true;
             }
 
-            if (m_stream.IsEmpty)
+            if (m_elementStack.Count == 0)
             {
                 NodeType = CtpCommandNodeType.EndOfCommand;
                 return false;
             }
 
-            if (m_stream.ReadBits1() == 0)
+            var currentElement = m_elementStack.Peek();
+            if (currentElement.ChildCount == 0)
             {
-                if (m_stream.ReadBits1() == 0)
+                m_elementStack.Pop();
+                if (m_elementStack.Count > 0 && m_elementStack.Peek().ChildCount != 0)
                 {
-                    //00 = Start Element
-                    bool isArray = m_stream.ReadBits1() == 1;
+                    m_currentSchemaIndex = m_elementStack.Peek().Node.PositionIndex;
+                }
+                NodeType = CtpCommandNodeType.EndElement;
+                ValueName = null;
+                Value = CtpObject.Null;
+                return true;
+            }
+
+            m_currentSchemaIndex++;
+            var node = m_schema[m_currentSchemaIndex];
+            currentElement.ChildCount--;
+
+
+            switch (node.Symbol)
+            {
+                case CommandSchemaSymbol.DefineArray:
                     NodeType = CtpCommandNodeType.StartElement;
                     Value = CtpObject.Null;
-                    if (IsArray)
-                        ElementName = Item;
-                    else
-                        ElementName = m_namesList[m_stream.ReadBits(m_bitsPerName)];
                     ValueName = null;
-                    m_elementStack.Push(ElementName);
-                    //0 or 1 for IsArray
-                    IsArray = isArray;
-                    m_isArrayStack.Push(IsArray);
-                }
-                else
-                {
-                    //01 = End Element
-                    NodeType = CtpCommandNodeType.EndElement;
-                    ElementName = GetCurrentElement();
-                    m_elementStack.Pop();
-                    m_isArrayStack.Pop();
-                    if (m_isArrayStack.Count == 0)
-                        IsArray = false;
-                    else
-                        IsArray = m_isArrayStack.Peek();
-
-                }
-            }
-            else
-            {
-                //1 = WriteValue
-                NodeType = CtpCommandNodeType.Value;
-                if (IsArray)
-                    ValueName = Item;
-                else
-                    ValueName = m_namesList[m_stream.ReadBits(m_bitsPerName)];
-                Value = m_stream.ReadObject();
+                    m_elementStack.Push(new StackDefinition(node, (int)m_stream.ReadObject()));
+                    break;
+                case CommandSchemaSymbol.DefineElement:
+                    NodeType = CtpCommandNodeType.StartElement;
+                    Value = CtpObject.Null;
+                    ValueName = null;
+                    m_elementStack.Push(new StackDefinition(node, node.ElementCount));
+                    break;
+                case CommandSchemaSymbol.DefineValue:
+                    NodeType = CtpCommandNodeType.Value;
+                    ValueName = node.NodeName;
+                    Value = m_stream.ReadObject();
+                    break;
+                case CommandSchemaSymbol.EndOFStream:
+                    break;
             }
             return true;
-        }
-
-        private CtpCommandKeyword GetCurrentElement()
-        {
-            if (m_elementStack.Count == 0)
-                return m_rootElement;
-            return m_elementStack.Peek();
         }
 
         public void SkipElement()
@@ -174,39 +176,11 @@ namespace CTP
             }
         }
 
-        public static ByteReader CreateReader(byte[] m_buffer, int m_position, int m_length)
+        public static BitReader CreateReader(byte[] m_buffer, int m_position, int m_length)
         {
-            var b = new ByteReader();
+            var b = new BitReader();
             b.SetBuffer(m_buffer, m_position, m_length - m_position);
             return b;
         }
-
-        public static CtpCommandKeyword ReadCommandKeyword(byte[] m_buffer, ref int m_position, int m_length)
-        {
-            if (m_position + 1 > m_length)
-            {
-                throw new EndOfStreamException();
-            }
-            if (m_position + 1 + m_buffer[m_position] > m_length)
-            {
-                throw new EndOfStreamException();
-            }
-            var rv = CtpCommandKeyword.Lookup(m_buffer, m_position);
-            m_position += m_buffer[m_position] + 1;
-            return rv;
-        }
-
-        public static uint ReadBits16(byte[] m_buffer, ref int m_position, int m_length)
-        {
-            if (m_position + 2 > m_length)
-            {
-                throw new EndOfStreamException();
-            }
-            uint rv = (uint)m_buffer[m_position] << 8
-                      | (uint)m_buffer[m_position + 1];
-            m_position += 2;
-            return rv;
-        }
-
     }
 }

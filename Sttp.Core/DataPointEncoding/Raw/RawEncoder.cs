@@ -10,14 +10,14 @@ namespace Sttp.DataPointEncoding
 {
     public class RawEncoder : EncoderBase
     {
-        private ByteWriter m_stream;
+        private BitWriter m_stream;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
 
         public RawEncoder()
         {
-            m_stream = new ByteWriter();
+            m_stream = new BitWriter();
         }
 
         public override int Length => m_stream.ApproximateSize;

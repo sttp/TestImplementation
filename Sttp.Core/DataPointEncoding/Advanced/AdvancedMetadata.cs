@@ -49,7 +49,7 @@ namespace Sttp.DataPointEncoding
         /// </summary>
         public AdvancedSymbolEncoding NextSymbolEncoding;
 
-        public AdvancedMetadata(int channelID, SttpDataPointMetadata metadata, ByteWriter writer, ByteReader reader)
+        public AdvancedMetadata(int channelID, SttpDataPointMetadata metadata, BitWriter writer, BitReader reader)
         {
             Metadata = metadata;
             ChannelID = channelID;

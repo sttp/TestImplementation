@@ -232,7 +232,7 @@ namespace CTP
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             //if (m_valueTypeCode == other.m_valueTypeCode)
             //{
             //    switch (m_valueTypeCode)
@@ -392,7 +392,7 @@ namespace CTP
                 case CtpTypeCode.CtpBuffer:
                     return new CtpObject(new CtpBuffer(new byte[0]));
                 case CtpTypeCode.CtpCommand:
-                    return new CtpObject(CtpCommand.Load(new byte[0]));
+                    return new CtpObject(CtpCommand.Load(new byte[0], false, null));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(typeCode), typeCode, null);
             }

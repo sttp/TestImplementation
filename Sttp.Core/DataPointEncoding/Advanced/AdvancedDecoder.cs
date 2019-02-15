@@ -12,13 +12,13 @@ namespace Sttp.DataPointEncoding
         private AdvancedMetadata m_prevPoint;
         private AdvancedMetadata m_currentPoint;
         private List<AdvancedMetadata> m_metadata = new List<AdvancedMetadata>();
-        private ByteReader m_reader;
+        private BitReader m_reader;
         private int m_count;
 
         public AdvancedDecoder(LookupMetadata lookup)
             : base(lookup)
         {
-            m_reader = new ByteReader();
+            m_reader = new BitReader();
         }
 
         public override void Load(byte[] data)

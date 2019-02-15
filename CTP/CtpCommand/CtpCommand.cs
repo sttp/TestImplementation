@@ -12,6 +12,7 @@ namespace CTP
     /// </summary>
     public class CtpCommand : IEquatable<CtpCommand>
     {
+        private CommandSchema m_schema;
         private readonly byte[] m_data;
         private bool m_isRaw;
         private string m_commandName;
@@ -23,9 +24,11 @@ namespace CTP
         /// Creates an <see cref="CtpCommand"/> from a byte array. This method also validates the data.
         /// </summary>
         /// <param name="data">The data</param>
-        private CtpCommand(byte[] data)
+        /// <param name="schema"></param>
+        private CtpCommand(byte[] data, CommandSchema schema)
         {
             m_data = data;
+            m_schema = schema;
         }
 
         private void ValidateData()
@@ -72,8 +75,14 @@ namespace CTP
                 {
                     if (m_isRaw)
                         m_commandName = "Raw";
+                    else if (m_schema == null)
+                    {
+                        m_commandName = "(Undefined Schema)";
+                    }
                     else
-                        m_commandName = Encoding.ASCII.GetString(m_data, m_headerLength + 1, m_data[m_headerLength]);
+                    {
+                        m_commandName = m_schema.CompiledReader()[0].NodeName.Value;
+                    }
                 }
                 return m_commandName;
             }
@@ -97,7 +106,9 @@ namespace CTP
         {
             if (m_isRaw)
                 throw new InvalidOperationException("A raw file cannot have a reader");
-            return new CtpCommandReader(m_data, m_headerLength);
+            if (m_schema == null)
+                throw new InvalidOperationException("Cannot parse a command without it's schema");
+            return new CtpCommandReader(m_data, m_headerLength, m_schema);
         }
 
         /// <summary>
@@ -177,7 +188,7 @@ namespace CTP
                     case CtpCommandNodeType.Value:
                         xml.WriteStartElement(reader.ValueName.Value);
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
-                        var str = reader.Value.AsString??string.Empty;
+                        var str = reader.Value.AsString ?? string.Empty;
                         str = str.Replace('\0', ' ');
                         xml.WriteValue(str);
                         xml.WriteEndElement();
@@ -218,7 +229,6 @@ namespace CTP
             }
 
             var reader = MakeReader();
-
 
             Stack<string> prefix = new Stack<string>();
             prefix.Push("  ");
@@ -284,11 +294,11 @@ namespace CTP
             }
 
             var reader = MakeReader();
-
+            reader.Read();
             Stack<string> prefix = new Stack<string>();
             prefix.Push(" ");
             sb.Append("---");
-            sb.Append(reader.RootElement);
+            sb.Append(reader.ElementName);
             sb.AppendLine();
 
             //Note: There's an issue with a trailing commas.
@@ -428,18 +438,18 @@ namespace CTP
         /// <summary>
         /// Creates a <see cref="CtpCommand"/> from a byte array. This method also validates the data.
         /// </summary>
-        public static CtpCommand Load(byte[] data, bool shouldCloneArray = true)
+        public static CtpCommand Load(byte[] data, bool shouldCloneArray, CommandSchema schema)
         {
             CtpCommand rv;
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
             if (shouldCloneArray)
             {
-                rv = new CtpCommand((byte[])data.Clone());
+                rv = new CtpCommand((byte[])data.Clone(), schema);
             }
             else
             {
-                rv = new CtpCommand(data);
+                rv = new CtpCommand(data, schema);
             }
             rv.ValidateData();
             return rv;
@@ -469,7 +479,7 @@ namespace CTP
                 BigEndian.CopyBytes((ushort)(rawData.Length + 3 + (1 << 13)), data, 0);
             }
             CtpCommand rv;
-            rv = new CtpCommand(data);
+            rv = new CtpCommand(data, null);
             rv.ValidateData();
             return rv;
         }

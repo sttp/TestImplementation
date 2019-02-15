@@ -66,7 +66,7 @@ namespace Sttp
                         comp.CopyTo(ms2);
                     }
 
-                    return CtpCommand.Load(ms2.ToArray(), false);
+                    return CtpCommand.Load(ms2.ToArray(), false, null);
                 }
             }
 
@@ -77,7 +77,7 @@ namespace Sttp
             byte[] rv = new byte[length];
             m_inflate.Read(rv, 0, rv.Length);
             m_stream.SetLength(0);
-            return CtpCommand.Load(rv, false);
+            return CtpCommand.Load(rv, false, null);
         }
 
 

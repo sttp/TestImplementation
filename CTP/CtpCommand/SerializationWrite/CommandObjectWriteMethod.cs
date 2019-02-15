@@ -10,17 +10,17 @@ namespace CTP.SerializationWrite
     {
         private static readonly MethodInfo Method2 = typeof(CommandObjectWriteMethod).GetMethod("Create2", BindingFlags.Static | BindingFlags.NonPublic);
 
-        public static TypeWriteMethodBase<T> Create<T>(bool isRoot, SerializationSchema schema, int recordName)
+        public static TypeWriteMethodBase<T> Create<T>(CommandSchemaWriter schema, string recordName)
         {
             var genericMethod = Method2.MakeGenericMethod(typeof(T));
-            return (TypeWriteMethodBase<T>)genericMethod.Invoke(null, new object[] { isRoot, schema, recordName });
+            return (TypeWriteMethodBase<T>)genericMethod.Invoke(null, new object[] { schema, recordName });
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static TypeWriteMethodBase<T> Create2<T>(bool isRoot, SerializationSchema schema, int recordName)
+        private static TypeWriteMethodBase<T> Create2<T>(CommandSchemaWriter schema, string recordName)
             where T : CommandObject
         {
-            return new CommandObjectWriteMethod<T>(isRoot, schema, recordName);
+            return new CommandObjectWriteMethod<T>(schema, recordName);
         }
     }
 
@@ -30,23 +30,27 @@ namespace CTP.SerializationWrite
     {
         private readonly FieldWrite[] m_records;
 
-        private readonly RuntimeMapping m_recordsLookup = new RuntimeMapping();
-
-        private bool m_isRoot;
-
-        private int m_recordName;
-
-        public CommandObjectWriteMethod(bool isRoot, SerializationSchema schema, int recordName)
+        public CommandObjectWriteMethod(CommandSchemaWriter schema, string recordName)
         {
-            m_recordName = recordName;
-            m_isRoot = isRoot;
             var type = typeof(T);
 
             var records = new List<FieldWrite>();
+            var items = new List<Tuple<MemberInfo, CommandFieldAttribute, Type>>();
+
             foreach (var member in type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                TryCreateFieldOptions(member, records, schema);
+                if (TryValidate(member, out var item))
+                {
+                    items.Add(item);
+                }
             }
+
+            schema.DefineElement(recordName, items.Count);
+            foreach (var item in items)
+            {
+                records.Add(FieldWrite.CreateFieldOptions(item.Item1,item.Item3, item.Item2, schema));
+            }
+
             m_records = records.ToArray();
 
             //Test for collisions
@@ -58,8 +62,9 @@ namespace CTP.SerializationWrite
             }
         }
 
-        private void TryCreateFieldOptions(MemberInfo member, List<FieldWrite> records, SerializationSchema schema)
+        private bool TryValidate(MemberInfo member, out Tuple<MemberInfo, CommandFieldAttribute, Type> item)
         {
+            item = null;
             Type targetType;
 
             if (member is FieldInfo)
@@ -67,39 +72,27 @@ namespace CTP.SerializationWrite
             else if (member is PropertyInfo)
                 targetType = ((PropertyInfo)member).PropertyType;
             else
-                return;
+                return false;
 
             object[] attributes = member.GetCustomAttributes(true);
             CommandFieldAttribute attribute = attributes.OfType<CommandFieldAttribute>().FirstOrDefault();
             if (attribute != null)
             {
-                var field = FieldWrite.CreateFieldOptions(member, targetType, attribute, schema);
-                m_recordsLookup.Add(field.RecordName.RuntimeID, records.Count);
-                records.Add(field);
+                item = Tuple.Create(member, attribute, targetType);
+                return true;
             }
+
+            return false;
+
         }
 
         public override void Save(T obj, CtpCommandWriter writer)
         {
             //Root elements have a record name == null. These do not need to start an element.
-            if (m_isRoot)
+            foreach (var item in m_records)
             {
-                foreach (var item in m_records)
-                {
-                    item.Save(obj, writer);
-                }
+                item.Save(obj, writer);
             }
-            else
-            {
-                using (writer.StartElement(m_recordName, false))
-                {
-                    foreach (var item in m_records)
-                    {
-                        item.Save(obj, writer);
-                    }
-                }
-            }
-
         }
 
     }

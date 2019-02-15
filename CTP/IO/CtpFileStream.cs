@@ -138,7 +138,7 @@ namespace CTP.IO
             Array.Copy(m_inboundBuffer, m_inboundBufferCurrentPosition, payload, 0, length);
 
             //ToDo: Consider not killing the connection on a command type casting error.
-            command = CtpCommand.Load(payload, false);
+            command = CtpCommand.Load(payload, false, null);
             m_inboundBufferCurrentPosition += length;
             m_inboundBufferLength -= length;
             return true;
@@ -171,7 +171,7 @@ namespace CTP.IO
                     m_stream?.Dispose();
                 }
             }
-            
+
         }
 
     }

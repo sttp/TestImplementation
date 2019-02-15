@@ -13,20 +13,18 @@ namespace CTP.SerializationWrite
         private TypeWriteMethodBase<T> m_serializeT;
         private int m_recordName;
 
-        public TypeWriteArray(SerializationSchema schema, int recordName)
+        public TypeWriteArray(CommandSchemaWriter schema, string recordName)
         {
-            m_recordName = recordName;
-            m_serializeT = TypeWrite.Get<T>(schema, -1);
+            schema.DefineArray(recordName);
+            m_serializeT = TypeWrite.Get<T>(schema, "Item");
         }
 
         public override void Save(T[] obj, CtpCommandWriter writer)
         {
-            using (writer.StartElement(m_recordName, true))
+            writer.WriteArray(obj.Length);
+            for (int i = 0; i < obj.Length; i++)
             {
-                for (int i = 0; i < obj.Length; i++)
-                {
-                    m_serializeT.Save(obj[i], writer);
-                }
+                m_serializeT.Save(obj[i], writer);
             }
         }
 

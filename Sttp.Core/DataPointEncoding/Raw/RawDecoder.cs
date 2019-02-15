@@ -8,7 +8,7 @@ namespace Sttp.DataPointEncoding
 {
     public class RawDecoder : DecoderBase
     {
-        private ByteReader m_stream;
+        private BitReader m_stream;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
         private CtpTypeCode m_lastValueCode;
@@ -16,7 +16,7 @@ namespace Sttp.DataPointEncoding
         public RawDecoder(LookupMetadata lookup)
             : base(lookup)
         {
-            m_stream = new ByteReader();
+            m_stream = new BitReader();
         }
 
         public override void Load(byte[] data)

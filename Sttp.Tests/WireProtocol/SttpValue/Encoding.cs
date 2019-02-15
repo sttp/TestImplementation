@@ -15,8 +15,8 @@ namespace Sttp.Tests.WireProtocol
         public void Test()
         {
 
-            var wr = new ByteWriter();
-            var rd = new ByteReader();
+            var wr = new BitWriter();
+            var rd = new BitReader();
             for (int x = -100; x < 100; x++)
             {
                 wr.WriteObject((CtpObject)x.ToString());
@@ -51,8 +51,8 @@ namespace Sttp.Tests.WireProtocol
         [TestMethod]
         public void Test2()
         {
-            var wr = new ByteWriter();
-            var rd = new ByteReader();
+            var wr = new BitWriter();
+            var rd = new BitReader();
             for (int x = -100; x < 100; x++)
             {
                 wr.WriteObjectWithoutType((CtpObject)x.ToString());

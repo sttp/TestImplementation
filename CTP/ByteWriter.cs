@@ -11,33 +11,16 @@ namespace CTP
     public unsafe class ByteWriter
     {
         private byte[] m_byteBuffer;
-        private byte[] m_bitBuffer;
         private int m_byteLength;
-
-        /// <summary>
-        /// The number of bits in the bit buffer, not including the cached space.
-        /// </summary>
-        private int m_bitLength;
-
-        /// <summary>
-        /// The number of valid bits in <see cref="m_bitStreamCache"/>
-        /// </summary>
-        private int m_bitStreamCacheBitCount;
-        /// <summary>
-        /// A pending place to store bits. Bits are stored right aligned and appended on the right.
-        /// </summary>
-        private uint m_bitStreamCache;
 
         public ByteWriter()
         {
             m_byteBuffer = new byte[64];
-            m_bitBuffer = new byte[8];
             Clear();
         }
 
-        public int ActualSize => Encoding7Bit.GetSize((uint)(m_bitStreamCacheBitCount + m_bitLength * 8)) + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
-        public int ApproximateSize => 5 + m_byteLength + m_bitLength + ((m_bitStreamCacheBitCount + 7) >> 3);
-
+        public int Length => m_byteLength;
+        
         /// <summary>
         /// Ensures that the byte stream has the room to store the specified number of bytes.
         /// </summary>
@@ -60,57 +43,20 @@ namespace CTP
             }
         }
 
-        /// <summary>
-        /// Ensures that the byte stream has the room to store the specified number of bytes.
-        /// </summary>
-        /// <param name="neededBytes"></param>
-        private void EnsureCapacityBits(int neededBytes)
-        {
-            if (m_bitLength + neededBytes >= m_bitBuffer.Length)
-                GrowBits(neededBytes);
-        }
-
-        private void GrowBits(int neededBytes)
-        {
-            while (m_bitLength + neededBytes >= m_bitBuffer.Length)
-            {
-                byte[] newBuffer = new byte[m_bitBuffer.Length * 2];
-                m_bitBuffer.CopyTo(newBuffer, 0);
-                m_bitBuffer = newBuffer;
-            }
-        }
-
         public byte[] ToArray()
         {
-            byte[] data = new byte[ActualSize];
+            byte[] data = new byte[Length];
             CopyTo(data, 0);
             return data;
         }
 
         public void CopyTo(byte[] data, int offset)
         {
-            FlushBitStream(); //This means only what is in the bit cache remains and is 0 to 7 bits.
-            uint bitSize = (uint)(m_bitLength * 8) + (uint)m_bitStreamCacheBitCount;
-            Encoding7Bit.Write(data, ref offset, bitSize);
-
             Array.Copy(m_byteBuffer, 0, data, offset, m_byteLength);
-            offset += m_byteLength;
-            Array.Copy(m_bitBuffer, 0, data, offset, m_bitLength);
-            offset += m_bitLength;
-
-            if (m_bitStreamCacheBitCount > 0)
-            {
-                //The final byte is right 0 padded.
-                data[offset] = (byte)(m_bitStreamCache << (8 - m_bitStreamCacheBitCount));
-            }
-            return;
         }
 
         public void Clear()
         {
-            m_bitLength = 0;
-            m_bitStreamCacheBitCount = 0;
-            m_bitStreamCache = 0;
             m_byteLength = 0;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
@@ -188,7 +134,7 @@ namespace CTP
         public void Write(byte[] value, int start, int length)
         {
             value.ValidateParameters(start, length);
-            Write4BitSegments((uint)length);
+            Write7BitInt((uint)length);
             if (length == 0)
                 return;
 
@@ -211,345 +157,22 @@ namespace CTP
 
             if (value.Length == 0)
             {
-                Write4BitSegments(0);
+                Write7BitInt(0);
                 return;
             }
 
             Write(Encoding.UTF8.GetBytes(value));
         }
 
+        public void Write7BitInt(uint value)
+        {
+            EnsureCapacityBytes(5);
+            Encoding7Bit.Write(m_byteBuffer, ref m_byteLength, value);
+        }
+
         #endregion
 
-        public void Write(CtpTime value)
-        {
-            Write(value.Ticks);
-        }
-
-        public void Write(CtpBuffer value)
-        {
-            Write4BitSegments((uint)value.Length);
-            if (value.Length == 0)
-                return;
-
-            EnsureCapacityBytes(value.Length);
-            value.CopyTo(m_byteBuffer, m_byteLength);
-            m_byteLength += value.Length;
-        }
-
-        public void Write(CtpCommand value)
-        {
-            Write4BitSegments((uint)value.Length);
-            if (value.Length == 0)
-                return;
-
-            EnsureCapacityBytes(value.Length);
-            value.CopyTo(m_byteBuffer, m_byteLength);
-            m_byteLength += value.Length;
-        }
-
-        public void Write(CtpNumeric value)
-        {
-            byte code = value.Scale;
-            if (value.IsNegative)
-                code |= 128;
-
-            if (value.High != 0)
-                code |= 64;
-            if (value.Mid != 0)
-                code |= 32;
-
-            WriteBits8(code);
-
-            if (value.High != 0)
-                Write8BitSegments((uint)value.High);
-            if (value.Mid != 0)
-                Write8BitSegments((uint)value.Mid);
-            Write8BitSegments((uint)value.Low);
-        }
-
-        public void WriteObject(CtpObject value)
-        {
-            var typeCode = value.ValueTypeCode;
-            WriteBits4((byte)typeCode);
-            WriteObjectWithoutType(value);
-        }
-
-        public void WriteObjectWithoutType(CtpObject value)
-        {
-            switch (value.ValueTypeCode)
-            {
-                case CtpTypeCode.Null:
-                    break;
-                case CtpTypeCode.Int64:
-                    long v = value.IsInt64;
-                    if (v < 0)
-                    {
-                        WriteBits1(true);
-                        Write8BitSegments((ulong)~v);
-                    }
-                    else
-                    {
-                        WriteBits1(false);
-                        Write8BitSegments((ulong)v);
-                    }
-                    break;
-                case CtpTypeCode.Single:
-                    Write(value.AsSingle);
-                    break;
-                case CtpTypeCode.Double:
-                    Write(value.AsDouble);
-                    break;
-                case CtpTypeCode.Numeric:
-                    Write(value.AsNumeric);
-                    break;
-                case CtpTypeCode.CtpTime:
-                    Write(value.AsCtpTime);
-                    break;
-                case CtpTypeCode.Boolean:
-                    WriteBits1(value.AsBoolean);
-                    break;
-                case CtpTypeCode.Guid:
-                    Write(value.AsGuid);
-                    break;
-                case CtpTypeCode.String:
-                    Write(value.AsString);
-                    break;
-                case CtpTypeCode.CtpBuffer:
-                    Write(value.AsCtpBuffer);
-                    break;
-                case CtpTypeCode.CtpCommand:
-                    Write(value.AsCtpCommand);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
         #region [ Writing Bits ]
-
-        /// <summary>
-        /// While (NotZero), WriteBits8
-        /// </summary>
-        /// <param name="value"></param>
-        public void Write8BitSegments(ulong value)
-        {
-            int bits = 0;
-            ulong tmpValue = value;
-            while (tmpValue > 0)
-            {
-                bits += 8;
-                tmpValue >>= 8;
-                WriteBits1(1);
-            }
-            WriteBits1(0);
-            WriteBits(bits, value);
-        }
-
-        /// <summary>
-        /// While (NotZero), WriteBits4
-        /// </summary>
-        /// <param name="value"></param>
-        public void Write4BitSegments(ulong value)
-        {
-            int bits = 0;
-            ulong tmpValue = value;
-            while (tmpValue > 0)
-            {
-                bits += 4;
-                tmpValue >>= 4;
-                WriteBits1(1);
-            }
-            WriteBits1(0);
-            WriteBits(bits, value);
-        }
-
-        public void WriteBits(int bits, uint value)
-        {
-            if (bits > 64 || bits < 0)
-                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
-
-            //Since the lowest order bits are most chaotic, these should be stored in the bit stream.
-
-            switch (bits & 7)
-            {
-                case 0:
-                    break;
-                case 1:
-                    WriteBits1((uint)value);
-                    break;
-                case 2:
-                    WriteBits2((uint)value);
-                    break;
-                case 3:
-                    WriteBits3((uint)value);
-                    break;
-                case 4:
-                    WriteBits4((uint)value);
-                    break;
-                case 5:
-                    WriteBits5((uint)value);
-                    break;
-                case 6:
-                    WriteBits6((uint)value);
-                    break;
-                case 7:
-                    WriteBits7((uint)value);
-                    break;
-            }
-
-            value >>= bits & 7;
-
-            switch (bits >> 3)
-            {
-                case 0:
-                    return;
-                case 1:
-                    WriteBits8((uint)value);
-                    return;
-                case 2:
-                    WriteBits16((uint)value);
-                    return;
-                case 3:
-                    WriteBits24((uint)value);
-                    return;
-                case 4:
-                    WriteBits32((uint)value);
-                    return;
-            }
-        }
-
-        public void WriteBits(int bits, ulong value)
-        {
-            if (bits > 64 || bits < 0)
-                throw new ArgumentOutOfRangeException(nameof(bits), "Must be between 0 and 64 inclusive");
-
-            //Since the lowest order bits are most chaotic, these should be stored in the bit stream.
-
-            switch (bits & 7)
-            {
-                case 0:
-                    break;
-                case 1:
-                    WriteBits1((uint)value);
-                    break;
-                case 2:
-                    WriteBits2((uint)value);
-                    break;
-                case 3:
-                    WriteBits3((uint)value);
-                    break;
-                case 4:
-                    WriteBits4((uint)value);
-                    break;
-                case 5:
-                    WriteBits5((uint)value);
-                    break;
-                case 6:
-                    WriteBits6((uint)value);
-                    break;
-                case 7:
-                    WriteBits7((uint)value);
-                    break;
-            }
-
-            value >>= bits & 7;
-
-            switch (bits >> 3)
-            {
-                case 0:
-                    return;
-                case 1:
-                    WriteBits8((uint)value);
-                    return;
-                case 2:
-                    WriteBits16((uint)value);
-                    return;
-                case 3:
-                    WriteBits24((uint)value);
-                    return;
-                case 4:
-                    WriteBits32((uint)value);
-                    return;
-                case 5:
-                    WriteBits40(value);
-                    return;
-                case 6:
-                    WriteBits48(value);
-                    return;
-                case 7:
-                    WriteBits56(value);
-                    return;
-                case 8:
-                    WriteBits64(value);
-                    return;
-            }
-        }
-
-        public void WriteBits0(uint value)
-        {
-
-        }
-
-        public void WriteBits1(bool value)
-        {
-            WriteBits1(value ? 1u : 0u);
-        }
-
-        public void WriteBits1(uint value)
-        {
-            const int bits = 1;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-
-        public void WriteBits2(uint value)
-        {
-            const int bits = 2;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-
-        public void WriteBits3(uint value)
-        {
-            const int bits = 3;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-
-        public void WriteBits4(uint value)
-        {
-            const int bits = 4;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-
-        public void WriteBits5(uint value)
-        {
-            const int bits = 5;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-
-        public void WriteBits6(uint value)
-        {
-            const int bits = 6;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
-
-        public void WriteBits7(uint value)
-        {
-            const int bits = 7;
-            m_bitStreamCache = (m_bitStreamCache << bits) | (value & ((1 << bits) - 1));
-            m_bitStreamCacheBitCount += bits;
-            ValidateBitStream();
-        }
 
         public void WriteBits8(uint value)
         {
@@ -558,24 +181,12 @@ namespace CTP
             m_byteLength += 1;
         }
 
-        public void WriteBits12(uint value)
-        {
-            WriteBits4(value);
-            WriteBits8(value >> 4);
-        }
-
         public void WriteBits16(uint value)
         {
             EnsureCapacityBytes(2);
             m_byteBuffer[m_byteLength + 0] = (byte)(value >> 8);
             m_byteBuffer[m_byteLength + 1] = (byte)value;
             m_byteLength += 2;
-        }
-
-        public void WriteBits20(uint value)
-        {
-            WriteBits4(value);
-            WriteBits16(value >> 4);
         }
 
         public void WriteBits24(uint value)
@@ -587,12 +198,6 @@ namespace CTP
             m_byteLength += 3;
         }
 
-        public void WriteBits28(uint value)
-        {
-            WriteBits4(value);
-            WriteBits24(value >> 4);
-        }
-
         public void WriteBits32(uint value)
         {
             EnsureCapacityBytes(4);
@@ -601,12 +206,6 @@ namespace CTP
             m_byteBuffer[m_byteLength + 2] = (byte)(value >> 8);
             m_byteBuffer[m_byteLength + 3] = (byte)value;
             m_byteLength += 4;
-        }
-
-        public void WriteBits36(ulong value)
-        {
-            WriteBits4((uint)value);
-            WriteBits32((uint)(value >> 4));
         }
 
         public void WriteBits40(ulong value)
@@ -620,12 +219,6 @@ namespace CTP
             m_byteLength += 5;
         }
 
-        public void WriteBits44(ulong value)
-        {
-            WriteBits4((uint)value);
-            WriteBits40(value >> 4);
-        }
-
         public void WriteBits48(ulong value)
         {
             EnsureCapacityBytes(6);
@@ -636,12 +229,6 @@ namespace CTP
             m_byteBuffer[m_byteLength + 4] = (byte)(value >> 8);
             m_byteBuffer[m_byteLength + 5] = (byte)value;
             m_byteLength += 6;
-        }
-
-        public void WriteBits52(ulong value)
-        {
-            WriteBits4((uint)value);
-            WriteBits48(value >> 4);
         }
 
         public void WriteBits56(ulong value)
@@ -657,12 +244,6 @@ namespace CTP
             m_byteLength += 7;
         }
 
-        public void WriteBits60(ulong value)
-        {
-            WriteBits4((uint)value);
-            WriteBits56(value >> 4);
-        }
-
         public void WriteBits64(ulong value)
         {
             EnsureCapacityBytes(8);
@@ -675,25 +256,6 @@ namespace CTP
             m_byteBuffer[m_byteLength + 6] = (byte)(value >> 8);
             m_byteBuffer[m_byteLength + 7] = (byte)value;
             m_byteLength += 8;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ValidateBitStream()
-        {
-            if (m_bitStreamCacheBitCount > 20)
-                FlushBitStream();
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void FlushBitStream()
-        {
-            EnsureCapacityBits(4); //It's ok to be too large here. It just ensures that at least 4 bytes are free before doing anything.
-            while (m_bitStreamCacheBitCount > 7)
-            {
-                m_bitBuffer[m_bitLength] = (byte)(m_bitStreamCache >> (m_bitStreamCacheBitCount - 8));
-                m_bitLength++;
-                m_bitStreamCacheBitCount -= 8;
-            }
         }
 
         #endregion

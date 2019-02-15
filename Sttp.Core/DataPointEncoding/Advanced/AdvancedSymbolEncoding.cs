@@ -44,10 +44,10 @@ namespace Sttp.DataPointEncoding
         private AdvancedSymbols m_mode0001;
         private AdvancedSymbols m_mode00001;
 
-        private readonly ByteWriter m_writeBits;
-        private readonly ByteReader m_readBit;
+        private readonly BitWriter m_writeBits;
+        private readonly BitReader m_readBit;
 
-        public AdvancedSymbolEncoding(ByteWriter writer, ByteReader reader)
+        public AdvancedSymbolEncoding(BitWriter writer, BitReader reader)
         {
             m_codesPer = 0;
             m_codesSinceLast = 0;

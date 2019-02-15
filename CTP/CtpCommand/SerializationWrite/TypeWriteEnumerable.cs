@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CTP.SerializationWrite
 {
@@ -16,10 +17,10 @@ namespace CTP.SerializationWrite
 
         private int m_recordName;
 
-        public TypeWriteEnumerable(SerializationSchema schema, int recordName)
+        public TypeWriteEnumerable(CommandSchemaWriter schema, string recordName)
         {
-            m_recordName = recordName;
-            m_serializeT = TypeWrite.Get<T>(schema, -1);
+            schema.DefineArray(recordName);
+            m_serializeT = TypeWrite.Get<T>(schema, "Item");
         }
 
         public override void Save(TEnum obj, CtpCommandWriter writer)
@@ -27,14 +28,12 @@ namespace CTP.SerializationWrite
             if (obj == null)
                 return;
 
-            using (writer.StartElement(m_recordName, true))
+            writer.WriteArray(obj.Count());
+            foreach (var item in obj)
             {
-                foreach (var item in obj)
-                {
-                    m_serializeT.Save(item, writer);
-                }
-
+                m_serializeT.Save(item, writer);
             }
+
         }
 
     }

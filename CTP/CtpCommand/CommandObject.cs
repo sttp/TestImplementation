@@ -180,6 +180,7 @@ namespace CTP
             if (CmdName.Value != command.RootElement)
                 throw new Exception("Document Mismatch");
             var rdr = command.MakeReader();
+            rdr.Read();
             return ReadMethod.Load(rdr);
         }
 
@@ -187,13 +188,14 @@ namespace CTP
         private static readonly Exception LoadError;
         private static readonly SerializationWrite.TypeWriteMethodBase<T> WriteMethod;
         private static readonly SerializationRead.TypeReadMethodBase<T> ReadMethod;
-        private static readonly SerializationSchema WriteSchema;
+        private static readonly CommandSchema WriteSchema;
 
         static CommandObject()
         {
             try
             {
-                SerializationWrite.TypeWrite.Get(out WriteMethod, out WriteSchema, out CmdName);
+                SerializationWrite.TypeWrite.Get(out WriteMethod, out var writeSchema, out CmdName);
+                WriteSchema = writeSchema.ToSchema();
                 SerializationRead.TypeRead<T>.Get(out LoadError, out CmdName, out ReadMethod);
             }
             catch (Exception e)

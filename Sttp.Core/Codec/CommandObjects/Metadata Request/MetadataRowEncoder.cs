@@ -7,12 +7,12 @@ namespace Sttp.Codec
     public class MetadataRowEncoder
     {
         private readonly List<MetadataColumn> m_columns;
-        private ByteWriter m_stream;
+        private BitWriter m_stream;
 
         public MetadataRowEncoder(List<MetadataColumn> columns)
         {
             m_columns = columns;
-            m_stream = new ByteWriter();
+            m_stream = new BitWriter();
         }
 
         public void Clear()

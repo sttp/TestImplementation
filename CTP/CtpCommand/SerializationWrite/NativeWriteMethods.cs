@@ -9,61 +9,62 @@ namespace CTP.SerializationWrite
 
         static NativeWriteMethods()
         {
-            Add((x) => new TypeWriteDecimal(x));
-            Add((x) => new TypeWriteGuid(x));
-            Add((x) => new TypeWriteUInt16(x));
-            Add((x) => new TypeWriteInt16(x));
-            Add((x) => new TypeWriteChar(x));
-            Add((x) => new TypeWriteUInt32(x));
-            Add((x) => new TypeWriteInt32(x));
-            Add((x) => new TypeWriteSingle(x));
-            Add((x) => new TypeWriteUInt64(x));
-            Add((x) => new TypeWriteInt64(x));
-            Add((x) => new TypeWriteDouble(x));
-            Add((x) => new TypeWriteDateTime(x));
-            Add((x) => new TypeWriteCtpTime(x));
-            Add((x) => new TypeWriteUInt8(x));
-            Add((x) => new TypeWriteInt8(x));
-            Add((x) => new TypeWriteBool(x));
+            Add(new TypeWriteDecimal());
+            Add(new TypeWriteGuid());
+            Add(new TypeWriteUInt16());
+            Add(new TypeWriteInt16());
+            Add(new TypeWriteChar());
+            Add(new TypeWriteUInt32());
+            Add(new TypeWriteInt32());
+            Add(new TypeWriteSingle());
+            Add(new TypeWriteUInt64());
+            Add(new TypeWriteInt64());
+            Add(new TypeWriteDouble());
+            Add(new TypeWriteDateTime());
+            Add(new TypeWriteCtpTime());
+            Add(new TypeWriteUInt8());
+            Add(new TypeWriteInt8());
+            Add(new TypeWriteBool());
 
-            Add((x) => new TypeWriteDecimalNull(x));
-            Add((x) => new TypeWriteGuidNull(x));
-            Add((x) => new TypeWriteUInt16Null(x));
-            Add((x) => new TypeWriteInt16Null(x));
-            Add((x) => new TypeWriteCharNull(x));
-            Add((x) => new TypeWriteUInt32Null(x));
-            Add((x) => new TypeWriteInt32Null(x));
-            Add((x) => new TypeWriteSingleNull(x));
-            Add((x) => new TypeWriteUInt64Null(x));
-            Add((x) => new TypeWriteInt64Null(x));
-            Add((x) => new TypeWriteDoubleNull(x));
-            Add((x) => new TypeWriteDateTimeNull(x));
-            Add((x) => new TypeWriteCtpTimeNull(x));
-            Add((x) => new TypeWriteUInt8Null(x));
-            Add((x) => new TypeWriteInt8Null(x));
-            Add((x) => new TypeWriteBoolNull(x));
+            Add(new TypeWriteDecimalNull());
+            Add(new TypeWriteGuidNull());
+            Add(new TypeWriteUInt16Null());
+            Add(new TypeWriteInt16Null());
+            Add(new TypeWriteCharNull());
+            Add(new TypeWriteUInt32Null());
+            Add(new TypeWriteInt32Null());
+            Add(new TypeWriteSingleNull());
+            Add(new TypeWriteUInt64Null());
+            Add(new TypeWriteInt64Null());
+            Add(new TypeWriteDoubleNull());
+            Add(new TypeWriteDateTimeNull());
+            Add(new TypeWriteCtpTimeNull());
+            Add(new TypeWriteUInt8Null());
+            Add(new TypeWriteInt8Null());
+            Add(new TypeWriteBoolNull());
 
-            Add((x) => new TypeWriteString(x));
-            Add((x) => new TypeWriteByteArray(x));
-            Add((x) => new TypeWriteCharArray(x));
-            Add((x) => new TypeWriteCommand(x));
-            Add((x) => new TypeWriteBuffer(x));
-            Add((x) => new TypeWriteNumeric(x));
-            Add((x) => new TypeWriteNumericNull(x));
-            Add((x) => new TypeWriteCtpObject(x));
-            Add((x) => new TypeWriteObject(x));
+            Add(new TypeWriteString());
+            Add(new TypeWriteByteArray());
+            Add(new TypeWriteCharArray());
+            Add(new TypeWriteCommand());
+            Add(new TypeWriteBuffer());
+            Add(new TypeWriteNumeric());
+            Add(new TypeWriteNumericNull());
+            Add(new TypeWriteCtpObject());
+            Add(new TypeWriteObject());
         }
 
-        static void Add<T>(Func<int, TypeWriteMethodBase<T>> method)
+        static void Add<T>(TypeWriteMethodBase<T> method)
         {
             Methods.Add(typeof(T), method);
         }
 
-        public static TypeWriteMethodBase<T> TryGetMethod<T>(int recordID)
+        public static TypeWriteMethodBase<T> TryGetMethod<T>(CommandSchemaWriter schema, string record)
         {
             if (Methods.TryGetValue(typeof(T), out object value))
             {
-                return ((Func<int, TypeWriteMethodBase<T>>)value)(recordID);
+                schema.DefineValue(record);
+                return (TypeWriteMethodBase<T>)value;
             }
             return null;
         }

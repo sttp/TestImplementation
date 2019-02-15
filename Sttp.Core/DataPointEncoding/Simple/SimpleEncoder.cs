@@ -24,7 +24,7 @@ namespace Sttp.DataPointEncoding
         const uint Bits8 = 0xFFu;
         const uint Bits4 = 0xFu;
 
-        private ByteWriter m_writer;
+        private BitWriter m_writer;
         /// <summary>
         /// </summary>
         private long m_prevTimestamp;
@@ -37,7 +37,7 @@ namespace Sttp.DataPointEncoding
 
         public SimpleEncoder()
         {
-            m_writer = new ByteWriter();
+            m_writer = new BitWriter();
         }
 
         public override int Length => m_writer.ApproximateSize;

@@ -9,7 +9,7 @@ namespace Sttp.DataPointEncoding
     public class BasicDecoder : DecoderBase
     {
         private MetadataChannelMapDecoder m_channelMap;
-        private ByteReader m_stream;
+        private BitReader m_stream;
         private int m_lastChannelID = 0;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
@@ -18,7 +18,7 @@ namespace Sttp.DataPointEncoding
         public BasicDecoder(LookupMetadata lookup)
             : base(lookup)
         {
-            m_stream = new ByteReader();
+            m_stream = new BitReader();
             m_channelMap = new MetadataChannelMapDecoder();
         }
 

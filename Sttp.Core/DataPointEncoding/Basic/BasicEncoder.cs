@@ -10,7 +10,7 @@ namespace Sttp.DataPointEncoding
 {
     public class BasicEncoder : EncoderBase
     {
-        private ByteWriter m_stream;
+        private BitWriter m_stream;
         private int m_lastChannelID = 0;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
@@ -19,7 +19,7 @@ namespace Sttp.DataPointEncoding
 
         public BasicEncoder()
         {
-            m_stream = new ByteWriter();
+            m_stream = new BitWriter();
             m_channelMap = new MetadataChannelMapEncoder();
         }
 

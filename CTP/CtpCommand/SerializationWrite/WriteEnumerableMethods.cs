@@ -17,7 +17,7 @@ namespace CTP.SerializationWrite
             Method = typeof(WriteEnumerableMethods).GetMethod("Generic", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        public static TypeWriteMethodBase<T> TryCreate<T>(SerializationSchema schema, int recordName)
+        public static TypeWriteMethodBase<T> TryCreate<T>(CommandSchemaWriter schema, string recordName)
         {
             var type = typeof(T);
             if (type.IsArray)
@@ -42,7 +42,7 @@ namespace CTP.SerializationWrite
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static object Generic<TEnum, T>(SerializationSchema schema, int recordName)
+        private static object Generic<TEnum, T>(CommandSchemaWriter schema, string recordName)
         {
             if (typeof(TEnum) == typeof(T[]))
             {

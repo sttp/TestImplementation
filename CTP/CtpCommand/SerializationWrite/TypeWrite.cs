@@ -10,7 +10,7 @@ namespace CTP.SerializationWrite
     /// </summary>
     internal static class TypeWrite
     {
-        public static void Get<T>(out TypeWriteMethodBase<T> method, out SerializationSchema schema, out CtpCommandKeyword keyword)
+        public static void Get<T>(out TypeWriteMethodBase<T> method, out CommandSchemaWriter schema, out CtpCommandKeyword keyword)
            where T : CommandObject
         {
             var type = typeof(T);
@@ -29,17 +29,17 @@ namespace CTP.SerializationWrite
             }
 
             keyword = CtpCommandKeyword.Create(attribute?.CommandName ?? type.Name);
-            schema = new SerializationSchema(keyword);
-            method = CommandObjectWriteMethod.Create<T>(true, schema, -1);
+            schema = new CommandSchemaWriter();
+            method = CommandObjectWriteMethod.Create<T>(schema, keyword.Value);
         }
 
         /// <summary>
         /// Used by other serialization methods to acquire the serialization method
         /// </summary>
         /// <returns></returns>
-        public static TypeWriteMethodBase<T> Get<T>(SerializationSchema schema, int recordName)
+        public static TypeWriteMethodBase<T> Get<T>(CommandSchemaWriter schema, string recordName)
         {
-            var serialization = NativeWriteMethods.TryGetMethod<T>(recordName);
+            var serialization = NativeWriteMethods.TryGetMethod<T>(schema, recordName);
             if (serialization != null)
                 return serialization;
 
@@ -61,7 +61,7 @@ namespace CTP.SerializationWrite
             {
                 throw new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
             }
-            serialization = CommandObjectWriteMethod.Create<T>(false, schema, recordName);
+            serialization = CommandObjectWriteMethod.Create<T>(schema, recordName);
             return serialization;
         }
     }

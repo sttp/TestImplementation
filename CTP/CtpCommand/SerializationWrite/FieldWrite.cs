@@ -24,14 +24,14 @@ namespace CTP.SerializationWrite
 
         private static readonly MethodInfo Method2 = typeof(FieldWrite).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
 
-        public static FieldWrite CreateFieldOptions(MemberInfo member, Type targetType, CommandFieldAttribute autoLoad, SerializationSchema schema)
+        public static FieldWrite CreateFieldOptions(MemberInfo member, Type targetType, CommandFieldAttribute autoLoad, CommandSchemaWriter schema)
         {
             var genericMethod = Method2.MakeGenericMethod(targetType);
             return (FieldWrite)genericMethod.Invoke(null, new object[] { member, autoLoad, schema });
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static FieldWrite CreateFieldSerializationInternal<TFieldType>(MemberInfo member, CommandFieldAttribute autoLoad, SerializationSchema schema)
+        private static FieldWrite CreateFieldSerializationInternal<TFieldType>(MemberInfo member, CommandFieldAttribute autoLoad, CommandSchemaWriter schema)
         {
             return new FieldWrite<TFieldType>(member, autoLoad, schema);
         }
@@ -47,7 +47,7 @@ namespace CTP.SerializationWrite
         private TypeWriteMethodBase<T> m_method;
         private Func<object, T> m_read;
 
-        public FieldWrite(MemberInfo member, CommandFieldAttribute autoLoad, SerializationSchema schema)
+        public FieldWrite(MemberInfo member, CommandFieldAttribute autoLoad, CommandSchemaWriter schema)
         {
             m_recordName = CtpCommandKeyword.Create(autoLoad.RecordName ?? member.Name);
 
@@ -63,7 +63,7 @@ namespace CTP.SerializationWrite
             {
                 throw new NotSupportedException();
             }
-            m_method = TypeWrite.Get<T>(schema, schema.WriteName(m_recordName));
+            m_method = TypeWrite.Get<T>(schema, m_recordName.Value);
         }
 
         public override CtpCommandKeyword RecordName => m_recordName;
