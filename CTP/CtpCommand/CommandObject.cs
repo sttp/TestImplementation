@@ -188,7 +188,7 @@ namespace CTP
         private static readonly Exception LoadError;
         private static readonly SerializationWrite.TypeWriteMethodBase<T> WriteMethod;
         private static readonly SerializationRead.TypeReadMethodBase<T> ReadMethod;
-        private static readonly CommandSchema WriteSchema;
+        private static readonly CtpCommandSchema WriteSchema;
 
         static CommandObject()
         {

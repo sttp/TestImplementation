@@ -13,9 +13,9 @@ namespace CTP
         /// Where to write the data.
         /// </summary>
         private CtpObjectWriter m_stream;
-        private CommandSchema m_schema;
+        private CtpCommandSchema m_schema;
 
-        public CtpCommandWriter(CommandSchema schema)
+        public CtpCommandWriter(CtpCommandSchema schema)
         {
             m_schema = schema;
             m_stream = new CtpObjectWriter();

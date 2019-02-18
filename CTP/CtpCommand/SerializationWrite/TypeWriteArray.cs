@@ -11,12 +11,11 @@ namespace CTP.SerializationWrite
         : TypeWriteMethodBase<T[]>
     {
         private TypeWriteMethodBase<T> m_serializeT;
-        private int m_recordName;
 
         public TypeWriteArray(CommandSchemaWriter schema, string recordName)
         {
             schema.DefineArray(recordName);
-            m_serializeT = TypeWrite.Get<T>(schema, "Item");
+            m_serializeT = TypeWrite.GetUnknownType<T>(schema, "Item");
         }
 
         public override void Save(T[] obj, CtpCommandWriter writer)

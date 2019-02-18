@@ -7,12 +7,19 @@ using GSF;
 
 namespace CTP
 {
+    public enum PacketContents
+    {
+        Raw,
+        CommandSchema,
+        CommandData,
+    }
+
     /// <summary>
     /// A packet that can be serialized.
     /// </summary>
     public class CtpCommand : IEquatable<CtpCommand>
     {
-        private CommandSchema m_schema;
+        private CtpCommandSchema m_schema;
         private readonly byte[] m_data;
         private bool m_isRaw;
         private string m_commandName;
@@ -25,7 +32,7 @@ namespace CTP
         /// </summary>
         /// <param name="data">The data</param>
         /// <param name="schema"></param>
-        private CtpCommand(byte[] data, CommandSchema schema)
+        internal CtpCommand(byte[] data, CtpCommandSchema schema)
         {
             m_data = data;
             m_schema = schema;
@@ -438,7 +445,7 @@ namespace CTP
         /// <summary>
         /// Creates a <see cref="CtpCommand"/> from a byte array. This method also validates the data.
         /// </summary>
-        public static CtpCommand Load(byte[] data, bool shouldCloneArray, CommandSchema schema)
+        public static CtpCommand Load(byte[] data, bool shouldCloneArray, CtpCommandSchema schema)
         {
             CtpCommand rv;
             if (data == null)

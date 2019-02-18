@@ -41,7 +41,7 @@ namespace CTP
         /// <param name="data"></param>
         /// <param name="offset"></param>
         /// <param name="schema"></param>
-        public CtpCommandReader(byte[] data, int offset, CommandSchema schema)
+        public CtpCommandReader(byte[] data, int offset, CtpCommandSchema schema)
         {
             m_schema = schema.CompiledReader();
             Value = CtpObject.Null;
@@ -140,7 +140,6 @@ namespace CTP
             var node = m_schema[m_currentSchemaIndex];
             currentElement.ChildCount--;
 
-
             switch (node.Symbol)
             {
                 case CommandSchemaSymbol.DefineArray:
@@ -178,8 +177,7 @@ namespace CTP
 
         public static CtpObjectReader CreateReader(byte[] m_buffer, int m_position, int m_length)
         {
-            var b = new CtpObjectReader();
-            b.SetBuffer(m_buffer, m_position, m_length - m_position);
+            var b = new CtpObjectReader(m_buffer, m_position, m_length - m_position);
             return b;
         }
     }

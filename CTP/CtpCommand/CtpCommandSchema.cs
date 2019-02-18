@@ -34,9 +34,9 @@ namespace CTP
             m_stream.Write(name);
         }
 
-        public CommandSchema ToSchema()
+        public CtpCommandSchema ToSchema()
         {
-            return new CommandSchema(m_stream.ToArray());
+            return new CtpCommandSchema(Guid.NewGuid(), m_stream.ToArray());
         }
     }
 
@@ -60,14 +60,7 @@ namespace CTP
 
         public CommandSchemaReader(byte[] data)
         {
-            m_stream = new CtpObjectReader();
-            m_stream.SetBuffer(data, 0, data.Length);
-        }
-
-        public int Position
-        {
-            get => m_stream.Position;
-            set => m_stream.Position = value;
+            m_stream = new CtpObjectReader(data);
         }
 
         public bool Next()
@@ -128,7 +121,7 @@ namespace CTP
 
         private List<Node> m_nodes = new List<Node>();
 
-        public CommandSchemaCompiled(CommandSchema schema)
+        public CommandSchemaCompiled(CtpCommandSchema schema)
         {
             var reader = schema.CreateReader();
             while (reader.Next())
@@ -148,13 +141,16 @@ namespace CTP
         }
     }
 
-    public class CommandSchema
+    public class CtpCommandSchema : IEquatable<CtpCommandSchema>
     {
+        public readonly Guid Identifier;
         private byte[] m_data;
+        private CommandSchemaCompiled m_compiled;
 
-        public CommandSchema(byte[] data)
+        public CtpCommandSchema(Guid identifier, byte[] data)
         {
-            m_data = data;
+            Identifier = identifier;
+            m_data = data ?? throw new ArgumentNullException(nameof(data));
         }
 
         internal CommandSchemaReader CreateReader()
@@ -164,7 +160,55 @@ namespace CTP
 
         internal CommandSchemaCompiled CompiledReader()
         {
-            return new CommandSchemaCompiled(this);
+            if (m_compiled == null)
+            {
+                m_compiled = new CommandSchemaCompiled(this);
+            }
+            return m_compiled;
+        }
+
+        public bool Equals(CtpCommandSchema other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            if (Identifier!=other.Identifier)
+                return false;
+            if (m_data.Length != other.m_data.Length)
+                return false;
+            for (var x = 0; x < m_data.Length; x++)
+            {
+                if (m_data[x] != other.m_data[x])
+                    return false;
+            }
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != this.GetType())
+                return false;
+            return Equals((CtpCommandSchema)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Identifier.GetHashCode() * 397) ^ m_data.GetHashCode();
+        }
+
+        public static bool operator ==(CtpCommandSchema left, CtpCommandSchema right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(CtpCommandSchema left, CtpCommandSchema right)
+        {
+            return !Equals(left, right);
         }
     }
 

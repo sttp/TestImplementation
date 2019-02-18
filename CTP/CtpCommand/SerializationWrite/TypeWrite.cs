@@ -15,34 +15,41 @@ namespace CTP.SerializationWrite
         {
             var type = typeof(T);
             var attribute = type.GetCustomAttributes(false).OfType<CommandNameAttribute>().FirstOrDefault();
-            if (!type.IsClass)
-                throw new Exception("Specified type must be of type class");
-            if (type.IsAbstract)
-                throw new Exception("Specified type cannot be an abstract or static type");
-            if (type.IsInterface)
-                throw new Exception("Specified type cannot be an interface type");
-
-            var c = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-            if ((object)c == null)
-            {
-                throw new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
-            }
-
             keyword = CtpCommandKeyword.Create(attribute?.CommandName ?? type.Name);
             schema = new CommandSchemaWriter();
-            method = CommandObjectWriteMethod.Create<T>(schema, keyword.Value);
+            method = GetStrongTyped<T>(schema, keyword.Value);
         }
 
         /// <summary>
-        /// Used by other serialization methods to acquire the serialization method
+        /// Used by other serialization methods to acquire child serialization methods
         /// </summary>
         /// <returns></returns>
-        public static TypeWriteMethodBase<T> Get<T>(CommandSchemaWriter schema, string recordName)
+        public static TypeWriteMethodBase<T> GetUnknownType<T>(CommandSchemaWriter schema, string recordName)
         {
             var serialization = NativeWriteMethods.TryGetMethod<T>(schema, recordName);
             if (serialization != null)
                 return serialization;
 
+            serialization = WriteEnumerableMethods.TryCreate<T>(schema, recordName);
+            if (serialization != null)
+                return serialization;
+
+            if (typeof(T).IsSubclassOf(typeof(CommandObject)))
+            {
+                var strongTyped = Method.MakeGenericMethod(typeof(T));
+                return (TypeWriteMethodBase<T>)strongTyped.Invoke(null, new object[] { schema, recordName });
+            }
+
+            throw new NotSupportedException(typeof(T).FullName + " Is not a supported type for serialization.");
+        }
+
+        /// <summary>
+        /// Used by other serialization methods to acquire child serialization methods
+        /// </summary>
+        /// <returns></returns>
+        public static TypeWriteMethodBase<T> GetStrongTyped<T>(CommandSchemaWriter schema, string recordName)
+            where T : CommandObject
+        {
             var type = typeof(T);
 
             if (!type.IsClass)
@@ -52,17 +59,15 @@ namespace CTP.SerializationWrite
             if (type.IsInterface)
                 throw new Exception("Specified type cannot be an interface type");
 
-            serialization = WriteEnumerableMethods.TryCreate<T>(schema, recordName);
-            if (serialization != null)
-                return serialization;
-
             var c = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
             if ((object)c == null)
             {
                 throw new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
             }
-            serialization = CommandObjectWriteMethod.Create<T>(schema, recordName);
-            return serialization;
+
+            return new CommandObjectWriteMethod<T>(schema, recordName);
         }
+
+        private static readonly MethodInfo Method = typeof(TypeWrite).GetMethod("GetStrongTyped", BindingFlags.Static | BindingFlags.NonPublic);
     }
 }

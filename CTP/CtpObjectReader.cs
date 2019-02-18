@@ -22,9 +22,14 @@ namespace CTP
 
         private int m_currentBytePosition;
 
-        public CtpObjectReader()
+        public CtpObjectReader(byte[] data)
         {
-            m_buffer = Empty;
+            SetBuffer(data);
+        }
+
+        public CtpObjectReader(byte[] data, int position, int length)
+        {
+            SetBuffer(data, position, length);
         }
 
         public bool IsEmpty
