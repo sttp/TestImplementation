@@ -14,12 +14,14 @@ namespace CTP
         private class StackDefinition
         {
             public CommandSchemaNode Node;
-            public int ChildCount;
+            public int ArrayCount;
 
-            public StackDefinition(CommandSchemaNode node, int childCount)
+            public bool IsArray => Node.Symbol == CommandSchemaSymbol.DefineArray;
+
+            public StackDefinition(CommandSchemaNode node, int arrayCount)
             {
                 Node = node;
-                ChildCount = childCount;
+                ArrayCount = arrayCount;
             }
         }
 
@@ -46,7 +48,7 @@ namespace CTP
             Value = CtpObject.Null;
             NodeType = CtpCommandNodeType.StartOfCommand;
             RootElement = m_schema[0].NodeName;
-            m_elementStack.Push(new StackDefinition(m_schema[0], m_schema[0].ElementCount));
+            m_elementStack.Push(new StackDefinition(m_schema[0], 0));
             m_stream = new CtpObjectReader(data);
             m_currentSchemaIndex = 0;
         }
@@ -121,22 +123,26 @@ namespace CTP
             }
 
             var currentElement = m_elementStack.Peek();
-            if (currentElement.ChildCount == 0)
+            if (currentElement.IsArray)
             {
-                m_elementStack.Pop();
-                if (m_elementStack.Count > 0 && m_elementStack.Peek().ChildCount != 0)
+                if (currentElement.ArrayCount == 0)
                 {
-                    m_currentSchemaIndex = m_elementStack.Peek().Node.PositionIndex;
+                    m_elementStack.Pop();
+                    NodeType = CtpCommandNodeType.EndElement;
+                    ValueName = null;
+                    Value = CtpObject.Null;
+                    return true;
                 }
-                NodeType = CtpCommandNodeType.EndElement;
-                ValueName = null;
-                Value = CtpObject.Null;
-                return true;
+                else
+                {
+                    m_currentSchemaIndex = currentElement.Node.PositionIndex;
+                    currentElement.ArrayCount--;
+                }
             }
+
 
             m_currentSchemaIndex++;
             var node = m_schema[m_currentSchemaIndex];
-            currentElement.ChildCount--;
 
             switch (node.Symbol)
             {
@@ -150,15 +156,23 @@ namespace CTP
                     NodeType = CtpCommandNodeType.StartElement;
                     Value = CtpObject.Null;
                     ValueName = null;
-                    m_elementStack.Push(new StackDefinition(node, node.ElementCount));
+                    m_elementStack.Push(new StackDefinition(node, 0));
                     break;
                 case CommandSchemaSymbol.DefineValue:
                     NodeType = CtpCommandNodeType.Value;
                     ValueName = node.NodeName;
                     Value = m_stream.Read();
                     break;
+                case CommandSchemaSymbol.EndElement:
+                    m_elementStack.Pop();
+                    NodeType = CtpCommandNodeType.EndElement;
+                    ValueName = null;
+                    Value = CtpObject.Null;
+                    return true;
                 case CommandSchemaSymbol.EndOFStream:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
             return true;
         }
@@ -170,6 +184,25 @@ namespace CTP
             {
                 if (m_elementStack.Count < stack)
                     return;
+            }
+        }
+
+        public override string ToString()
+        {
+            switch (NodeType)
+            {
+                case CtpCommandNodeType.StartElement:
+                    return $"+{ElementName}";
+                case CtpCommandNodeType.Value:
+                    return $" {ElementName}/{ValueName} = {Value}";
+                case CtpCommandNodeType.EndElement:
+                    return $"-{ElementName}";
+                case CtpCommandNodeType.EndOfCommand:
+                    return $"End Command {RootElement}";
+                case CtpCommandNodeType.StartOfCommand:
+                    return $"Start Command {RootElement}";
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }

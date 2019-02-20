@@ -18,20 +18,24 @@ namespace CTP
 
         public void DefineArray(string name)
         {
-            m_stream.Write(0);
+            m_stream.Write((byte)CommandSchemaSymbol.DefineArray);
             m_stream.Write(name);
         }
 
-        public void DefineElement(string name, int count)
+        public void DefineElement(string name)
         {
-            m_stream.Write(1);
+            m_stream.Write((byte)CommandSchemaSymbol.DefineElement);
             m_stream.Write(name);
-            m_stream.Write(count);
+        }
+
+        public void EndElement()
+        {
+            m_stream.Write((byte)CommandSchemaSymbol.EndElement);
         }
 
         public void DefineValue(string name)
         {
-            m_stream.Write(2);
+            m_stream.Write((byte)CommandSchemaSymbol.DefineValue);
             m_stream.Write(name);
         }
 
@@ -46,6 +50,7 @@ namespace CTP
         DefineArray,
         DefineElement,
         DefineValue,
+        EndElement,
         EndOFStream
     }
 
@@ -57,8 +62,6 @@ namespace CTP
         public CommandSchemaSymbol Symbol;
 
         public string Name;
-
-        public int ElementCount;
 
         public CommandSchemaReader(byte[] data)
         {
@@ -72,26 +75,19 @@ namespace CTP
             {
                 Symbol = CommandSchemaSymbol.EndOFStream;
                 Name = null;
-                ElementCount = 0;
                 return false;
             }
 
-            switch ((int)m_stream.Read())
+            Symbol = (CommandSchemaSymbol)(byte)m_stream.Read();
+            switch (Symbol)
             {
-                case 0:
-                    Symbol = CommandSchemaSymbol.DefineArray;
+                case CommandSchemaSymbol.DefineArray:
+                case CommandSchemaSymbol.DefineElement:
+                case CommandSchemaSymbol.DefineValue:
                     Name = (string)m_stream.Read();
-                    ElementCount = 0;
                     return true;
-                case 1:
-                    Symbol = CommandSchemaSymbol.DefineElement;
-                    Name = (string)m_stream.Read();
-                    ElementCount = (int)m_stream.Read();
-                    return true;
-                case 2:
-                    Symbol = CommandSchemaSymbol.DefineValue;
-                    Name = (string)m_stream.Read();
-                    ElementCount = 0;
+                case CommandSchemaSymbol.EndElement:
+                    Name = string.Empty;
                     return true;
                 default:
                     throw new Exception("Wrong version number");
@@ -103,7 +99,6 @@ namespace CTP
     {
         public readonly CommandSchemaSymbol Symbol;
         public readonly string NodeName;
-        public readonly int ElementCount;
         public readonly int PositionIndex;
 
         public CommandSchemaNode(CommandSchemaReader reader, int positionIndex)
@@ -111,12 +106,11 @@ namespace CTP
             PositionIndex = positionIndex;
             NodeName = reader.Name;
             Symbol = reader.Symbol;
-            ElementCount = reader.ElementCount;
         }
 
         public override string ToString()
         {
-            return $"{Symbol} {NodeName} {ElementCount}";
+            return $"{Symbol} {NodeName}";
         }
     }
 

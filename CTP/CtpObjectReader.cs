@@ -98,6 +98,8 @@ namespace CTP
                 return ReadTime(symbol);
             if (symbol <= CtpObjectSymbols.BoolElse)
                 return symbol == CtpObjectSymbols.BoolElse;
+            if (symbol <= CtpObjectSymbols.GuidElse)
+                return ReadGuid(symbol);
             if (symbol <= CtpObjectSymbols.StringElse)
                 return ReadString(symbol);
             if (symbol <= CtpObjectSymbols.CtpBufferElse)
@@ -107,11 +109,22 @@ namespace CTP
             throw new ArgumentOutOfRangeException();
         }
 
+        private CtpObject ReadGuid(CtpObjectSymbols symbol)
+        {
+            if (symbol == CtpObjectSymbols.GuidEmpty)
+                return Guid.Empty;
+
+            EnsureCapacity(16);
+            Guid rv = GuidExtensions.ToRfcGuid(m_buffer, m_currentBytePosition);
+            m_currentBytePosition += 16;
+            return rv;
+        }
+
         private CtpObject ReadInt64(CtpObjectSymbols symbol)
         {
             if (symbol <= CtpObjectSymbols.Int100)
             {
-                return 100 - (int)symbol;
+                return (int)symbol - (int)CtpObjectSymbols.Int0;
             }
             if (symbol <= CtpObjectSymbols.IntBits56)
             {

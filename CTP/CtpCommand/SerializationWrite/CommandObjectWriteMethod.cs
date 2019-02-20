@@ -32,11 +32,13 @@ namespace CTP.SerializationWrite
                     throw new Exception(string.Format("Duplicate Load Names: {0} detected in class {1}.", f.Item2, type.ToString()));
             }
 
-            schema.DefineElement(recordName, items.Count);
+            schema.DefineElement(recordName);
             foreach (var item in items)
             {
                 records.Add(FieldWrite.CreateFieldOptions(item.Item1, item.Item3, item.Item2, schema));
             }
+            schema.EndElement();
+
 
             m_records = records.ToArray();
         }
