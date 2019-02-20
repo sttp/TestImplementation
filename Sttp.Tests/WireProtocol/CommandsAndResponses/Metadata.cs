@@ -59,12 +59,13 @@ namespace Sttp.Tests.CommandsAndResponses
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 382, tbl);
             cmd.ToCommand();
 
+            const int Count = 100_000;
             Stopwatch sw = Stopwatch.StartNew();
-            for (int x = 0; x < 1_000_000; x++)
+            for (int x = 0; x < Count; x++)
             {
                 cmd.ToCommand();
             }
-            Console.WriteLine(sw.Elapsed.TotalSeconds);
+            Console.WriteLine(Count / sw.Elapsed.TotalSeconds / 1_000_000);
         }
 
         [TestMethod]
@@ -88,12 +89,13 @@ namespace Sttp.Tests.CommandsAndResponses
             var doc = cmd.ToCommand();
             var obj = (CommandMetadataSchema)doc;
 
+            const int Count = 100_000;
             Stopwatch sw = Stopwatch.StartNew();
-            for (int x = 0; x < 1_0_000; x++)
+            for (int x = 0; x < Count; x++)
             {
                 obj = (CommandMetadataSchema)doc;
             }
-            Console.WriteLine(sw.Elapsed.TotalSeconds);
+            Console.WriteLine(Count / sw.Elapsed.TotalSeconds / 1_000_000);
         }
 
         [TestMethod]

@@ -33,22 +33,18 @@ namespace Sttp
             if (encoding == EncodingMethod.Raw)
             {
                 m_encoder = new RawEncoder();
-                m_stream.Write(new CommandBeginDataStream(0, "Raw"));
             }
             if (encoding == EncodingMethod.Simple)
             {
                 m_encoder = new SimpleEncoder();
-                m_stream.Write(new CommandBeginDataStream(0, "Simple"));
             }
             if (encoding == EncodingMethod.Basic)
             {
                 m_encoder = new BasicEncoder();
-                m_stream.Write(new CommandBeginDataStream(0, "Basic"));
             }
             if (encoding == EncodingMethod.Advanced)
             {
                 m_encoder = new AdvancedEncoder();
-                m_stream.Write(new CommandBeginDataStream(0, "Advanced"));
             }
         }
 

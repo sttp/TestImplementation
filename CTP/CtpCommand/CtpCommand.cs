@@ -63,6 +63,11 @@ namespace CTP
             return new CtpCommandReader(m_schema, m_data);
         }
 
+        internal CtpObjectReader MakeDataReader()
+        {
+            return new CtpObjectReader(m_data);
+        }
+
         /// <summary>
         /// Converts CtpObject to a <see cref="CommandObject"/>
         /// </summary>

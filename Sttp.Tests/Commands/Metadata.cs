@@ -59,9 +59,11 @@ namespace Sttp.Tests.Commands
                 Console.WriteLine($"{rdr.NodeType,15} {rdr.ElementName,15} {rdr.ValueName,25} {rdr.Value}");
             }
 
-            return;
-
-            Console.WriteLine(cmd.ToString());
+            var rdr2 = cmd.ToCommand().MakeDataReader();
+            while (!rdr2.IsEmpty)
+            {
+                Console.WriteLine(rdr2.Read());
+            }
 
             cmd = (CommandMetadataSchema)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());

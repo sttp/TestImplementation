@@ -68,6 +68,6 @@ namespace CTP.SerializationWrite
             return new CommandObjectWriteMethod<T>(schema, recordName);
         }
 
-        private static readonly MethodInfo Method = typeof(TypeWrite).GetMethod("GetStrongTyped", BindingFlags.Static | BindingFlags.NonPublic);
+        private static readonly MethodInfo Method = typeof(TypeWrite).GetMethod("GetStrongTyped", BindingFlags.Static | BindingFlags.Public);
     }
 }
