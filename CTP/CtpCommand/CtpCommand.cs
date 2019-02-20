@@ -7,103 +7,50 @@ using GSF;
 
 namespace CTP
 {
-    public enum PacketContents
-    {
-        Raw,
-        CommandSchema,
-        CommandData,
-    }
-
     /// <summary>
     /// A packet that can be serialized.
     /// </summary>
     public class CtpCommand : IEquatable<CtpCommand>
     {
         private CtpCommandSchema m_schema;
-        private readonly byte[] m_data;
-        private bool m_isRaw;
-        private string m_commandName;
-        private int m_length;
-        private byte m_channelNumber;
-        private int m_headerLength;
+        private byte[] m_data;
+
+        public CtpCommand(byte[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            int schemaLength = BigEndian.ToUInt16(data, 0);
+            byte[] schema = new byte[schemaLength];
+            Array.Copy(data, 2, schema, 0, schemaLength);
+            m_schema = new CtpCommandSchema(schema);
+            m_data = new byte[data.Length - 2 - schemaLength];
+            Array.Copy(data, data.Length - m_data.Length, m_data, 0, m_data.Length);
+        }
 
         /// <summary>
         /// Creates an <see cref="CtpCommand"/> from a byte array. This method also validates the data.
         /// </summary>
         /// <param name="data">The data</param>
         /// <param name="schema"></param>
-        internal CtpCommand(byte[] data, CtpCommandSchema schema)
+        public CtpCommand(CtpCommandSchema schema, byte[] data)
         {
-            m_data = data;
-            m_schema = schema;
+            m_schema = schema ?? throw new ArgumentNullException(nameof(schema));
+            m_data = data ?? throw new ArgumentNullException(nameof(data));
         }
 
-        private void ValidateData()
+        public byte[] ToArray()
         {
-            if (m_data.Length < 2)
-                throw new Exception("Packet wrong size");
-            if (m_data[0] >= 64)
-                throw new Exception("Wrong Version");
-
-            m_isRaw = (m_data[0] & 32) > 0;
-            bool longPayload = (m_data[0] & 16) > 0;
-            if (!longPayload)
-            {
-                m_headerLength = 2;
-                m_length = BigEndian.ToInt16(m_data, 0) & ((1 << 12) - 1);
-            }
-            else
-            {
-                m_headerLength = 4;
-                if (m_data.Length < 4)
-                    throw new Exception("Packet wrong size");
-                m_length = BigEndian.ToInt32(m_data, 0) & ((1 << 28) - 1);
-
-            }
-            if (m_data.Length < m_length)
-                throw new Exception("Packet wrong size");
-
-            if (m_isRaw)
-            {
-                m_channelNumber = m_data[m_headerLength];
-                m_headerLength++;
-            }
-            else
-            {
-                m_channelNumber = 0;
-            }
+            var rv = new byte[2 + m_schema.Length + m_data.Length];
+            BigEndian.CopyBytes((ushort)m_schema.Length, rv, 0);
+            m_schema.CopyTo(rv, 2);
+            m_data.CopyTo(rv, 2 + m_schema.Length);
+            return rv;
         }
 
-        public string RootElement
-        {
-            get
-            {
-                if (m_commandName == null)
-                {
-                    if (m_isRaw)
-                        m_commandName = "Raw";
-                    else if (m_schema == null)
-                    {
-                        m_commandName = "(Undefined Schema)";
-                    }
-                    else
-                    {
-                        m_commandName = m_schema.CompiledReader()[0].NodeName.Value;
-                    }
-                }
-                return m_commandName;
-            }
-        }
-
-        /// <summary>
-        /// Gets if this command is encoded as a raw payload.
-        /// </summary>
-        public bool IsRaw => m_isRaw;
-
-        /// <summary>
-        /// Gets the length of the entire command.
-        /// </summary>
-        public int Length => m_length;
+        public Guid SchemaID => m_schema.Identifier;
+        public string RootElement => m_schema.RootElement;
+        public int DataLength => m_data.Length;
 
         /// <summary>
         /// Create a means for reading the data from the CtpDocument.
@@ -111,11 +58,9 @@ namespace CTP
         /// <returns></returns>
         internal CtpCommandReader MakeReader()
         {
-            if (m_isRaw)
-                throw new InvalidOperationException("A raw file cannot have a reader");
             if (m_schema == null)
                 throw new InvalidOperationException("Cannot parse a command without it's schema");
-            return new CtpCommandReader(m_data, m_headerLength, m_schema);
+            return new CtpCommandReader(m_schema, m_data);
         }
 
         /// <summary>
@@ -130,70 +75,28 @@ namespace CTP
         }
 
         /// <summary>
-        /// Clones the internal data and returns it as an array.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ToArray()
-        {
-            return (byte[])m_data.Clone();
-        }
-
-        /// <summary>
-        /// Copies the internal buffer to the provided byte array.
-        /// Be sure to call <see cref="Length"/> to ensure that the destination buffer
-        /// has enough space to receive the copy.
-        /// </summary>
-        /// <param name="buffer">the buffer to copy to.</param>
-        /// <param name="offset">the offset position of <see pref="buffer"/></param>
-        public void CopyTo(byte[] buffer, int offset)
-        {
-            Array.Copy(m_data, 0, buffer, offset, m_data.Length); // write data
-        }
-
-        public void CopyTo(Stream stream)
-        {
-            stream.Write(m_data, 0, m_data.Length);
-        }
-
-        /// <summary>
         /// Creates an XML string representation of this CtpDocument file.
         /// </summary>
         /// <returns></returns>
         public string ToXML()
         {
             var sb = new StringBuilder();
-
-            if (m_isRaw)
-            {
-                //ToDo: Fix the XML serialization
-                sb.AppendLine("---Raw");
-                sb.AppendLine(" Channel: " + m_channelNumber);
-                sb.Append(" Data: 0x");
-                for (int x = m_headerLength; x < m_data.Length; x++)
-                {
-                    sb.Append(m_data[x].ToString("X2"));
-                }
-                sb.AppendLine();
-                sb.Length -= Environment.NewLine.Length;
-                return sb.ToString();
-            }
-
             var reader = MakeReader();
 
             var settings = new XmlWriterSettings();
             settings.Indent = true;
             var xml = XmlWriter.Create(sb, settings);
 
-            xml.WriteStartElement(reader.RootElement.Value);
+            xml.WriteStartElement(reader.RootElement);
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
                     case CtpCommandNodeType.StartElement:
-                        xml.WriteStartElement(reader.ElementName.Value);
+                        xml.WriteStartElement(reader.ElementName);
                         break;
                     case CtpCommandNodeType.Value:
-                        xml.WriteStartElement(reader.ValueName.Value);
+                        xml.WriteStartElement(reader.ValueName);
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
                         var str = reader.Value.AsString ?? string.Empty;
                         str = str.Replace('\0', ' ');
@@ -219,22 +122,6 @@ namespace CTP
         public string ToJSON()
         {
             var sb = new StringBuilder();
-
-            if (m_isRaw)
-            {
-                //ToDo: Fix the JSON serialization
-                sb.AppendLine("---Raw");
-                sb.AppendLine(" Channel: " + m_channelNumber);
-                sb.Append(" Data: 0x");
-                for (int x = m_headerLength; x < m_data.Length; x++)
-                {
-                    sb.Append(m_data[x].ToString("X2"));
-                }
-                sb.AppendLine();
-                sb.Length -= Environment.NewLine.Length;
-                return sb.ToString();
-            }
-
             var reader = MakeReader();
 
             Stack<string> prefix = new Stack<string>();
@@ -285,20 +172,6 @@ namespace CTP
         public string ToYAML()
         {
             var sb = new StringBuilder();
-
-            if (m_isRaw)
-            {
-                sb.AppendLine("---Raw");
-                sb.AppendLine(" Channel: " + m_channelNumber);
-                sb.Append(" Data: 0x");
-                for (int x = m_headerLength; x < m_data.Length; x++)
-                {
-                    sb.Append(m_data[x].ToString("X2"));
-                }
-                sb.AppendLine();
-                sb.Length -= Environment.NewLine.Length;
-                return sb.ToString();
-            }
 
             var reader = MakeReader();
             reader.Read();
@@ -397,20 +270,6 @@ namespace CTP
         }
 
         /// <summary>
-        /// Extracts a <see cref="CtpRaw"/> from this command. Only works if the command is flagged as a raw command.
-        /// this method is called by the type casting library. The user should simply type cast this object.
-        /// </summary>
-        /// <returns></returns>
-        internal CtpRaw ToCtpRaw()
-        {
-            if (!m_isRaw)
-                throw new InvalidOperationException("Cannot convert a document to a CTPRaw with this method");
-            byte[] data = new byte[m_length - m_headerLength];
-            Array.Copy(m_data, m_headerLength, data, 0, data.Length);
-            return new CtpRaw(data, m_channelNumber);
-        }
-
-        /// <summary>
         /// Compares two object for equality.
         /// </summary>
         /// <param name="a"></param>
@@ -442,53 +301,14 @@ namespace CTP
             return !Equals(a, b);
         }
 
-        /// <summary>
-        /// Creates a <see cref="CtpCommand"/> from a byte array. This method also validates the data.
-        /// </summary>
-        public static CtpCommand Load(byte[] data, bool shouldCloneArray, CtpCommandSchema schema)
+        public byte[] ToCommandSchema(int schemaRuntimeID)
         {
-            CtpCommand rv;
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            if (shouldCloneArray)
-            {
-                rv = new CtpCommand((byte[])data.Clone(), schema);
-            }
-            else
-            {
-                rv = new CtpCommand(data, schema);
-            }
-            rv.ValidateData();
-            return rv;
+            return m_schema.ToCommand(schemaRuntimeID);
         }
 
-        /// <summary>
-        /// Forms a <see cref="CtpCommand"/> object from a set of raw data.
-        /// </summary>
-        /// <param name="rawData">the raw data to serialize</param>
-        /// <param name="channelNumber">the channel number to assign the raw data.</param>
-        /// <returns></returns>
-        public static CtpCommand CreateRaw(byte[] rawData, byte channelNumber)
+        public byte[] ToCommandData(int schemaRuntimeID)
         {
-            byte[] data;
-            if (rawData.Length >= 4093)
-            {
-                data = new byte[rawData.Length + 5];
-                rawData.CopyTo(data, 5);
-                data[4] = channelNumber;
-                BigEndian.CopyBytes(rawData.Length + 5 + (1 << 28) + (1 << 29), data, 0);
-            }
-            else
-            {
-                data = new byte[rawData.Length + 3];
-                rawData.CopyTo(data, 3);
-                data[2] = channelNumber;
-                BigEndian.CopyBytes((ushort)(rawData.Length + 3 + (1 << 13)), data, 0);
-            }
-            CtpCommand rv;
-            rv = new CtpCommand(data, null);
-            rv.ValidateData();
-            return rv;
+            return CtpObjectWriter.CreatePacket(PacketContents.CommandData, schemaRuntimeID, m_data);
         }
     }
 }

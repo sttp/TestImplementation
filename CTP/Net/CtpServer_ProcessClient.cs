@@ -55,14 +55,14 @@ namespace CTP.Net
                         ssl.AuthenticateAsServer(config.ServerCertificate, true, SslProtocols.None, false);
                     }
 
-                    var session = new CtpStream(socket, netStream, ssl);
-                    var command = session.Read();
+                    var session = new CtpNetStream(socket, netStream, ssl);
+                    var packet = session.Read();
                     string accountName = null;
                     session.GrantedRoles = new HashSet<string>();
-                    switch (command.RootElement)
+                    switch (packet.RootElement)
                     {
                         case "Auth":
-                            var auth = (Auth)command;
+                            var auth = (Auth)packet;
                             if (m_server.m_config.CertificateClients.TryGetValue(auth.CertificateThumbprint, out var clientCert))
                             {
                                 if (auth.ValidateSignature(clientCert.Certificate))

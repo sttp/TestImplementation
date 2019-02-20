@@ -32,7 +32,7 @@ namespace Sttp.Tests
                 schema = (CommandMetadataSchema)schema.ToCommand();
             }
             Console.WriteLine(cnt / sw.Elapsed.TotalSeconds);
-            Console.WriteLine(schema.ToCommand().Length);
+            Console.WriteLine(schema.ToCommand().DataLength);
             //File.WriteAllBytes("C:\\temp\\TestFile.bin", schema.ToDocument().ToArray());
         }
         [TestMethod]

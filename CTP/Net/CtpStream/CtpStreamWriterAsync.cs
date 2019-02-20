@@ -22,16 +22,11 @@ namespace CTP
         /// </summary>
         private Stream m_stream;
 
-        /// <summary>
-        /// The buffer used to write packets to the stream.
-        /// </summary>
-        private byte[] m_writeBuffer;
-
         private AsyncCallback m_endWrite;
 
         private WaitCallback m_processNextWrite;
 
-        private Queue<Tuple<ShortTime, CtpCommand>> m_queue;
+        private Queue<Tuple<ShortTime, byte[]>> m_queue;
 
         private ScheduledTask m_processTimeouts;
 
@@ -57,9 +52,8 @@ namespace CTP
             m_onException = onException ?? throw new ArgumentNullException(nameof(onException));
             m_timeout = timeout;
             m_stream = stream;
-            m_writeBuffer = new byte[128];
             m_endWrite = EndWrite;
-            m_queue = new Queue<Tuple<ShortTime, CtpCommand>>();
+            m_queue = new Queue<Tuple<ShortTime, byte[]>>();
 
             m_processTimeouts = new ScheduledTask();
             m_processTimeouts.Running += M_processTimeouts_Running;
@@ -112,7 +106,7 @@ namespace CTP
             if (m_disposed)
                 return;
 
-            CtpCommand packet;
+            byte[] data;
             lock (m_syncLock)
             {
                 if (m_disposed)
@@ -122,7 +116,7 @@ namespace CTP
                 }
                 if (m_queue.Count > 0)
                 {
-                    packet = m_queue.Dequeue().Item2;
+                    data = m_queue.Dequeue().Item2;
                 }
                 else
                 {
@@ -132,9 +126,7 @@ namespace CTP
             }
             try
             {
-                EnsureCapacity(packet.Length);
-                packet.CopyTo(m_writeBuffer, 0);
-                if (m_stream.BeginWrite(m_writeBuffer, 0, packet.Length, m_endWrite, null).CompletedSynchronously)
+                if (m_stream.BeginWrite(data, 0, data.Length, m_endWrite, null).CompletedSynchronously)
                     goto TryAgain;
                 //If this completed async, the EndWrite method will return control to this method.
             }
@@ -165,13 +157,13 @@ namespace CTP
         /// <summary>
         /// Writes a packet to the underlying stream. 
         /// </summary>
-        public void Write(CtpCommand packet)
+        public void Write(byte[] data)
         {
-            if ((object)packet == null)
-                throw new ArgumentNullException(nameof(packet));
+            if ((object)data == null)
+                throw new ArgumentNullException(nameof(data));
 
             //In case of an overflow exception.
-            if (packet.Length > MaximumPacketSize)
+            if (data.Length > MaximumPacketSize)
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
             lock (m_syncLock)
@@ -182,29 +174,12 @@ namespace CTP
                     return;
                 }
 
-                m_queue.Enqueue(Tuple.Create(ShortTime.Now, packet));
+                m_queue.Enqueue(Tuple.Create(ShortTime.Now, data));
                 if (!m_isWritePumping)
                 {
                     m_isWritePumping = true;
                     ThreadPool.QueueUserWorkItem(m_processNextWrite);
                 }
-            }
-        }
-
-
-        /// <summary>
-        /// Ensures that <see cref="m_writeBuffer"/> has at least the supplied number of bytes
-        /// before returning.
-        /// </summary>
-        /// <param name="bufferSize"></param>
-        private void EnsureCapacity(int bufferSize)
-        {
-            if (m_writeBuffer.Length < bufferSize)
-            {
-                //12% larger than the requested buffer size.
-                byte[] newBuffer = new byte[bufferSize + (bufferSize >> 3)];
-                m_writeBuffer.CopyTo(newBuffer, 0);
-                m_writeBuffer = newBuffer;
             }
         }
 

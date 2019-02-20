@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CTP;
+using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
@@ -172,9 +173,9 @@ namespace Sttp.DataPointEncoding
             m_currentPoint.Assign(point);
         }
 
-        public override byte[] ToArray()
+        public override CtpCommand ToArray()
         {
-            return m_writer.ToArray();
+            return new CommandDataStreamAdvanced(m_writer.ToArray());
         }
 
         private void Write64(ulong bitsChanged)

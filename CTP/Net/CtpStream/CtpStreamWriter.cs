@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -10,18 +11,12 @@ namespace CTP
     internal class CtpStreamWriter : IDisposable
     {
         private Action<object, Exception> m_onException;
-
         private object m_writeLock = new object();
 
         /// <summary>
         /// The underlying stream
         /// </summary>
         private Stream m_stream;
-
-        /// <summary>
-        /// The buffer used to write packets to the stream.
-        /// </summary>
-        private byte[] m_writeBuffer;
 
         private int m_writeTimeout;
 
@@ -37,7 +32,6 @@ namespace CTP
             m_onException = onException ?? throw new ArgumentNullException(nameof(onException));
             m_stream = stream;
             m_writeTimeout = stream.WriteTimeout;
-            m_writeBuffer = new byte[128];
         }
 
         /// <summary>
@@ -48,21 +42,18 @@ namespace CTP
         /// <summary>
         /// Writes a command to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        public void Write(CtpCommand command, int timeout)
+        public void Write(byte[] data, int timeout)
         {
             try
             {
-                if ((object)command == null)
-                    throw new ArgumentNullException(nameof(command));
+                if ((object)data == null)
+                    throw new ArgumentNullException(nameof(data));
 
-                if (command.Length > MaximumPacketSize)
+                if (data.Length > MaximumPacketSize)
                     throw new Exception("This command is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
                 lock (m_writeLock)
                 {
-                    EnsureCapacity(command.Length);
-                    command.CopyTo(m_writeBuffer, 0);
-
                     if (m_disposed)
                         throw new ObjectDisposedException("Stream has been closed");
                     if (m_writeTimeout != timeout)
@@ -70,7 +61,7 @@ namespace CTP
                         m_writeTimeout = timeout;
                         m_stream.WriteTimeout = timeout;
                     }
-                    m_stream.Write(m_writeBuffer, 0, command.Length);
+                    m_stream.Write(data, 0, data.Length);
                 }
             }
             catch (Exception ex)
@@ -78,22 +69,6 @@ namespace CTP
                 m_disposed = true;
                 m_onException(this, ex);
                 throw;
-            }
-        }
-
-        /// <summary>
-        /// Ensures that <see cref="m_writeBuffer"/> has at least the supplied number of bytes
-        /// before returning.
-        /// </summary>
-        /// <param name="bufferSize"></param>
-        private void EnsureCapacity(int bufferSize)
-        {
-            if (m_writeBuffer.Length < bufferSize)
-            {
-                //12% larger than the requested buffer size.
-                byte[] newBuffer = new byte[bufferSize + (bufferSize >> 3)];
-                m_writeBuffer.CopyTo(newBuffer, 0);
-                m_writeBuffer = newBuffer;
             }
         }
 

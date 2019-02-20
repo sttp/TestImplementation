@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CTP;
 using CTP.IO;
 using Sttp;
 
@@ -53,14 +54,14 @@ namespace SttpArciveReader
             dt.Columns.Add("Record", typeof(string));
 
             using (var fs = new FileStream(fileName, FileMode.Open))
-            using (var ctp = new CtpFileStream(fs, false))
+            using (var ctp = new CtpFileStream(fs, CtpCompressionMode.None, false))
             {
                 while (true)
                 {
                     var cmd = ctp.Read();
                     if ((object)cmd == null)
                         break;
-                    dt.Rows.Add(cmd.RootElement, cmd.Length, cmd);
+                    dt.Rows.Add(cmd.RootElement, cmd.DataLength, cmd);
                 }
             }
 

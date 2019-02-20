@@ -99,19 +99,19 @@ namespace CTP
             if (symbol <= CtpObjectSymbols.BoolElse)
                 return symbol == CtpObjectSymbols.BoolElse;
             if (symbol <= CtpObjectSymbols.StringElse)
-                return Encoding.UTF8.GetString(ReadBuffer(symbol - CtpObjectSymbols.String0));
+                return ReadString(symbol);
             if (symbol <= CtpObjectSymbols.CtpBufferElse)
-                return Encoding.UTF8.GetString(ReadBuffer(symbol - CtpObjectSymbols.CtpBuffer0));
+                return ReadBuffer(symbol);
             if (symbol <= CtpObjectSymbols.CtpCommandElse)
-                return Encoding.UTF8.GetString(ReadBuffer(symbol - CtpObjectSymbols.CtpCommand0));
+                return ReadCommand();
             throw new ArgumentOutOfRangeException();
         }
 
         private CtpObject ReadInt64(CtpObjectSymbols symbol)
         {
-            if (symbol <= CtpObjectSymbols.Int137)
+            if (symbol <= CtpObjectSymbols.Int100)
             {
-                return 137 - (int)symbol;
+                return 100 - (int)symbol;
             }
             if (symbol <= CtpObjectSymbols.IntBits56)
             {
@@ -161,9 +161,6 @@ namespace CTP
             {
                 return (long)ReadBits64();
             }
-
-
-
         }
 
         private CtpObject ReadSingle(CtpObjectSymbols symbol)
@@ -290,15 +287,42 @@ namespace CTP
             return new CtpTime((long)ReadBits64());
         }
 
-        private byte[] ReadBuffer(int lengthCode)
+        private byte[] ReadBuffer(CtpObjectSymbols symbol)
         {
-            if (lengthCode == 20)
-                lengthCode = (int)Read();
-            EnsureCapacity(lengthCode);
-            byte[] rv = new byte[lengthCode];
-            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, lengthCode);
-            m_currentBytePosition += lengthCode;
+            int length = symbol - CtpObjectSymbols.CtpBuffer0;
+            if (symbol == CtpObjectSymbols.CtpBufferElse)
+            {
+                length = (int)Read();
+            }
+            EnsureCapacity(length);
+            byte[] rv = new byte[length];
+            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
+            m_currentBytePosition += length;
             return rv;
+        }
+
+        private string ReadString(CtpObjectSymbols symbol)
+        {
+            int length = symbol - CtpObjectSymbols.String0;
+            if (symbol == CtpObjectSymbols.StringElse)
+            {
+                length = (int)Read();
+            }
+            EnsureCapacity(length);
+            byte[] rv = new byte[length];
+            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
+            m_currentBytePosition += length;
+            return Encoding.UTF8.GetString(rv);
+        }
+
+        private CtpCommand ReadCommand()
+        {
+            int length = (int)Read();
+            EnsureCapacity(length);
+            byte[] rv = new byte[length];
+            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
+            m_currentBytePosition += length;
+            return new CtpCommand(rv);
         }
 
         private uint ReadBits8()
@@ -417,6 +441,12 @@ namespace CTP
             return rv;
         }
 
+        internal static bool TryReadPacket(byte[] data, int position, int length, int maximumPacketSize, out long payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength)
+        {
+            if (length > maximumPacketSize)
+                throw new Exception("Command size is too large");
+            throw new NotImplementedException();
+        }
 
     }
 }

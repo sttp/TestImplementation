@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using CTP.IO;
 using GSF;
 
 namespace CTP
@@ -8,7 +9,7 @@ namespace CTP
     /// <summary>
     /// Serializes <see cref="CtpCommand"/> messages from a <see cref="Stream"/>.
     /// </summary>
-    internal class CtpStreamReaderAsync : CtpStreamReaderBase
+    internal class CtpStreamReaderAsync : IDisposable
     {
         public event Action<CtpCommand> NewPacket;
         private AsyncCallback m_endRead;
@@ -18,11 +19,14 @@ namespace CTP
         /// The underlying stream
         /// </summary>
         private Stream m_stream;
+        private readonly Action<object, Exception> m_onException;
 
         /// <summary>
         /// A buffer used to read data from the underlying stream.
         /// </summary>
         private byte[] m_readBuffer;
+        private bool m_disposed;
+        private CtpReadParser m_read;
 
         /// <summary>
         /// Creates a <see cref="CtpStreamReader"/>
@@ -30,12 +34,13 @@ namespace CTP
         /// <param name="stream"></param>
         /// <param name="onException"></param>
         public CtpStreamReaderAsync(Stream stream, Action<object, Exception> onException)
-            : base(onException)
         {
             m_stream = stream;
+            m_onException = onException;
             m_beginRead = BeginRead;
             m_endRead = EndRead;
             m_readBuffer = new byte[3000];
+            m_read = new CtpReadParser();
         }
 
         public void Start()
@@ -48,7 +53,7 @@ namespace CTP
 
         private void BeginRead(object state)
         {
-            if (Disposed)
+            if (m_disposed)
                 return;
             try
             {
@@ -56,7 +61,7 @@ namespace CTP
             }
             catch (Exception e)
             {
-                OnException(e);
+                m_onException(this, e);
             }
         }
 
@@ -65,15 +70,15 @@ namespace CTP
             try
             {
                 int length = m_stream.EndRead(ar);
-                AppendToBuffer(m_readBuffer, length);
-                while (ReadFromBuffer(out var command))
+                m_read.AppendToBuffer(m_readBuffer, length);
+                while (m_read.ReadFromBuffer(out var packet))
                 {
-                    if (Disposed)
+                    if (m_disposed)
                         return;
 
                     try
                     {
-                        NewPacket?.Invoke(command);
+                        NewPacket?.Invoke(packet);
                     }
                     catch (Exception e)
                     {
@@ -88,9 +93,15 @@ namespace CTP
             }
             catch (Exception e)
             {
-                OnException(e);
+                m_onException(this, e);
             }
 
+        }
+
+        public void Dispose()
+        {
+            m_disposed = true;
+            m_read.Dispose();
         }
     }
 }

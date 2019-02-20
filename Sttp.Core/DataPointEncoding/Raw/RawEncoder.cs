@@ -70,9 +70,9 @@ namespace Sttp.DataPointEncoding
             m_stream.WriteObjectWithoutType(point.Value);
         }
 
-        public override byte[] ToArray()
+        public override CtpCommand ToArray()
         {
-            return m_stream.ToArray();
+            return new CommandDataStreamRaw(m_stream.ToArray());
         }
     }
 }

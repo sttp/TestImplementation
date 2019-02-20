@@ -10,14 +10,14 @@ namespace CTP.SerializationWrite
     /// </summary>
     internal static class TypeWrite
     {
-        public static void Get<T>(out TypeWriteMethodBase<T> method, out CommandSchemaWriter schema, out CtpCommandKeyword keyword)
+        public static void Get<T>(out TypeWriteMethodBase<T> method, out CommandSchemaWriter schema, out string keyword)
            where T : CommandObject
         {
             var type = typeof(T);
             var attribute = type.GetCustomAttributes(false).OfType<CommandNameAttribute>().FirstOrDefault();
-            keyword = CtpCommandKeyword.Create(attribute?.CommandName ?? type.Name);
+            keyword = attribute?.CommandName ?? type.Name;
             schema = new CommandSchemaWriter();
-            method = GetStrongTyped<T>(schema, keyword.Value);
+            method = GetStrongTyped<T>(schema, keyword);
         }
 
         /// <summary>

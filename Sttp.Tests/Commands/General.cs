@@ -27,14 +27,6 @@ namespace Sttp.Tests.Commands
         }
 
         [TestMethod]
-        public void Raw()
-        {
-            var cmd = new CtpRaw(Guid.NewGuid().ToByteArray(), 1);
-            cmd = (CtpRaw)(CtpCommand)cmd;
-            Console.WriteLine(cmd.ToString());
-        }
-
-        [TestMethod]
         public void RequestFailed()
         {
             try

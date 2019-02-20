@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CTP;
+using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
@@ -210,9 +211,9 @@ namespace Sttp.DataPointEncoding
             }
         }
 
-        public override byte[] ToArray()
+        public override CtpCommand ToArray()
         {
-            return m_writer.ToArray();
+            return new CommandDataStreamSimple(m_writer.ToArray());
         }
 
         private void Write32(uint bitsChanged)

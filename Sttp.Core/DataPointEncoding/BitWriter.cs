@@ -238,13 +238,11 @@ namespace CTP
 
         public void Write(CtpCommand value)
         {
-            Write4BitSegments((uint)value.Length);
-            if (value.Length == 0)
-                return;
-
-            EnsureCapacityBytes(value.Length);
-            value.CopyTo(m_byteBuffer, m_byteLength);
-            m_byteLength += value.Length;
+            var data = value.ToArray();
+            Write4BitSegments((uint)data.Length);
+            EnsureCapacityBytes(data.Length);
+            data.CopyTo(m_byteBuffer, m_byteLength);
+            m_byteLength += data.Length;
         }
 
         public void Write(CtpNumeric value)

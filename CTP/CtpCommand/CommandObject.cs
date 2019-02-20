@@ -136,7 +136,7 @@ namespace CTP
         /// <summary>
         /// The name that is associated with this command record. If this is a nested object, this value will be ignored.
         /// </summary>
-        public sealed override string CommandName => CmdName.Value;
+        public sealed override string CommandName => CmdName;
 
         /// <summary>
         /// Converts this object into a <see cref="CtpCommand"/>
@@ -145,11 +145,6 @@ namespace CTP
         public sealed override CtpCommand ToCommand()
         {
             T obj = this as T;
-            var raw = obj as CtpRaw;
-            if (raw != null)
-            {
-                return CtpCommand.CreateRaw(raw.Payload, raw.Channel);
-            }
             if (LoadError != null)
                 throw LoadError;
             var wr = new CtpCommandWriter(WriteSchema);
@@ -164,27 +159,16 @@ namespace CTP
         /// <returns></returns>
         public static T FromCommand(CtpCommand command)
         {
-            if (command.IsRaw)
-            {
-                if (typeof(T) == typeof(CtpRaw))
-                {
-                    return (T)(object)command.ToCtpRaw();
-                }
-                else
-                {
-                    throw new Exception("Must cast to CtpRaw");
-                }
-            }
             if (LoadError != null)
                 throw LoadError;
-            if (CmdName.Value != command.RootElement)
+            if (CmdName != command.RootElement)
                 throw new Exception("Document Mismatch");
             var rdr = command.MakeReader();
             rdr.Read();
             return ReadMethod.Load(rdr);
         }
 
-        private static readonly CtpCommandKeyword CmdName;
+        private static readonly string CmdName;
         private static readonly Exception LoadError;
         private static readonly SerializationWrite.TypeWriteMethodBase<T> WriteMethod;
         private static readonly SerializationRead.TypeReadMethodBase<T> ReadMethod;

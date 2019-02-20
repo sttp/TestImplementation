@@ -6,11 +6,12 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using CTP.IO;
 using GSF.Diagnostics;
 
 namespace CTP.Net
 {
-    public delegate void CommandReceivedEventHandler(CtpStream sender, CtpCommand command);
+    public delegate void PacketReceivedEventHandler(CtpNetStream sender, CtpCommand command);
 
     public enum ReceiveMode
     {
@@ -24,9 +25,9 @@ namespace CTP.Net
         Queueing
     }
 
-    public class CtpStream : IDisposable
+    public class CtpNetStream : IDisposable
     {
-        public static LogPublisher Log = Logger.CreatePublisher(typeof(CtpStream), MessageClass.Component);
+        public static LogPublisher Log = Logger.CreatePublisher(typeof(CtpNetStream), MessageClass.Component);
 
         /// <summary>
         /// Occurs when this class is disposed. This event is raised on a ThreadPool thread and will only be called once.
@@ -63,7 +64,7 @@ namespace CTP.Net
         /// For Blocking Mode: This event will not be raised.
         /// For Queuing Mode: This event will be raised 
         /// </summary>
-        public event CommandReceivedEventHandler PacketReceived;
+        public event PacketReceivedEventHandler PacketReceived;
 
         private CtpStreamReader m_reader;
         private CtpStreamReaderAsync m_readerAsync;
@@ -74,8 +75,9 @@ namespace CTP.Net
         private SendMode m_sendMode;
         private ReceiveMode m_receiveMode;
         private int m_disposed = 0;
+        private CtpWriteParser m_write;
 
-        public CtpStream(TcpClient socket, NetworkStream netStream, SslStream ssl)
+        public CtpNetStream(TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
             m_socket = socket;
             m_netStream = netStream;
@@ -88,6 +90,7 @@ namespace CTP.Net
             m_receiveMode = ReceiveMode.Blocking;
             m_writer = new CtpStreamWriter(m_stream, SendReceiveOnException);
             m_reader = new CtpStreamReader(m_stream, SendReceiveOnException);
+            m_write = new CtpWriteParser(CtpCompressionMode.None, InternalSend);
         }
 
         /// <summary>
@@ -270,7 +273,12 @@ namespace CTP.Net
             }
         }
 
-        public void Send(CtpCommand packet)
+        public void Send(CtpCommand command)
+        {
+            m_write.Send(command);
+        }
+
+        private void InternalSend(byte[] packet)
         {
             switch (SendMode)
             {
@@ -284,5 +292,6 @@ namespace CTP.Net
                     throw new ArgumentOutOfRangeException();
             }
         }
+
     }
 }

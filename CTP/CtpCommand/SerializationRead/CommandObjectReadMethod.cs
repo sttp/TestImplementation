@@ -30,7 +30,7 @@ namespace CTP.SerializationRead
     {
         private readonly FieldRead[] m_records;
 
-        private readonly RuntimeMapping m_recordsLookup = new RuntimeMapping();
+        private readonly Dictionary<string, int> m_recordsLookup = new Dictionary<string, int>();
 
         private readonly Func<T> m_constructor;
 
@@ -49,7 +49,7 @@ namespace CTP.SerializationRead
             m_records = records.ToArray();
 
             //Test for collisions
-            HashSet<CtpCommandKeyword> ids = new HashSet<CtpCommandKeyword>();
+            HashSet<string> ids = new HashSet<string>();
             foreach (var f in m_records)
             {
                 if (!ids.Add(f.RecordName))
@@ -73,7 +73,7 @@ namespace CTP.SerializationRead
             if (attribute != null)
             {
                 var field = FieldRead.CreateFieldOptions(member, targetType, attribute);
-                m_recordsLookup.Add(field.RecordName.RuntimeID, records.Count);
+                m_recordsLookup.Add(field.RecordName, records.Count);
                 records.Add(field);
             }
         }
@@ -90,26 +90,26 @@ namespace CTP.SerializationRead
                 switch (reader.NodeType)
                 {
                     case CtpCommandNodeType.StartElement:
-                        if (m_recordsLookup.TryGetValue(reader.ElementName.RuntimeID, out id))
+                        if (m_recordsLookup.TryGetValue(reader.ElementName, out id))
                         {
                             read = m_records[id];
                             read.Load(rv, reader);
                         }
                         else
                         {
-                            rv.OnMissingElement(reader.ElementName.Value);
+                            rv.OnMissingElement(reader.ElementName);
                             reader.SkipElement();
                         }
                         break;
                     case CtpCommandNodeType.Value:
-                        if (m_recordsLookup.TryGetValue(reader.ValueName.RuntimeID, out id))
+                        if (m_recordsLookup.TryGetValue(reader.ValueName, out id))
                         {
                             read = m_records[id];
                             read.Load(rv, reader);
                         }
                         else
                         {
-                            rv.OnMissingValue(reader.ValueName.Value, reader.Value);
+                            rv.OnMissingValue(reader.ValueName, reader.Value);
                             reader.SkipElement();
                         }
                         break;
@@ -126,7 +126,7 @@ namespace CTP.SerializationRead
             return rv;
         }
 
-       
+
 
     }
 }

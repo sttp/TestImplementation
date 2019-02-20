@@ -37,12 +37,12 @@ namespace CTP.SerializationRead
             return s_read;
         }
 
-        public static void Get(out Exception loadError, out CtpCommandKeyword commandName, out TypeReadMethodBase<T> read)
+        public static void Get(out Exception loadError, out string commandName, out TypeReadMethodBase<T> read)
         {
             loadError = s_loadError;
             if (loadError == null)
             {
-                commandName = CtpCommandKeyword.Create(s_commandAttribute?.CommandName ?? nameof(T));
+                commandName = s_commandAttribute?.CommandName ?? nameof(T);
                 read = s_read;
             }
             else

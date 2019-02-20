@@ -28,16 +28,16 @@ namespace Sttp.Tests
         [TestMethod]
         public void CompareFiles()
         {
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test2.sttp", SttpCompressionMode.Deflate, EncodingMethod.Basic);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test3.sttp", SttpCompressionMode.Zlib, EncodingMethod.Basic);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test1.sttp", CtpCompressionMode.None, EncodingMethod.Basic);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test2.sttp", CtpCompressionMode.Deflate, EncodingMethod.Basic);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test3.sttp", CtpCompressionMode.Zlib, EncodingMethod.Basic);
 
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test4.sttp", SttpCompressionMode.None, EncodingMethod.Raw);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test5.sttp", SttpCompressionMode.Deflate, EncodingMethod.Raw);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test6.sttp", SttpCompressionMode.Zlib, EncodingMethod.Raw);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test4.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test5.sttp", CtpCompressionMode.Deflate, EncodingMethod.Raw);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test6.sttp", CtpCompressionMode.Zlib, EncodingMethod.Raw);
         }
 
-        private static void MakeFile(string source, string dest, SttpCompressionMode mode, EncodingMethod encoding)
+        private static void MakeFile(string source, string dest, CtpCompressionMode mode, EncodingMethod encoding)
         {
             using (var fs = new FileStream(source, FileMode.Open))
             using (var fs2 = new FileStream(dest, FileMode.Create))
@@ -73,13 +73,13 @@ namespace Sttp.Tests
         [TestMethod]
         public void BenchmarkFiles()
         {
-            BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", SttpCompressionMode.None, EncodingMethod.Basic);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", CtpCompressionMode.None, EncodingMethod.Basic);
             PointCount = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int x = 0; x < 5; x++)
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Advanced);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Advanced);
             }
 
             Console.WriteLine(PointCount);
@@ -90,13 +90,13 @@ namespace Sttp.Tests
         public void Profile()
         {
             PointCount = 0;
-            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", SttpCompressionMode.None, EncodingMethod.Simple);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Simple);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
 
             try
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", SttpCompressionMode.None, EncodingMethod.Simple);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", CtpCompressionMode.None, EncodingMethod.Simple);
 
             }
             catch (Exception e)
@@ -145,7 +145,7 @@ namespace Sttp.Tests
 
         private HashSet<string> Names = new HashSet<string>();
 
-        private void BenchmarkFile(string source, string dest, SttpCompressionMode mode, EncodingMethod encoding)
+        private void BenchmarkFile(string source, string dest, CtpCompressionMode mode, EncodingMethod encoding)
         {
             string newFileName = Path.ChangeExtension(source, ".txt");
 

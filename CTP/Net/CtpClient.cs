@@ -10,7 +10,7 @@ using GSF.Diagnostics;
 namespace CTP.Net
 {
     /// <summary>
-    /// A client that can connect to a <see cref="CtpServer"/>. Call <see cref="Connect"/> to grab a <see cref="CtpStream"/>.
+    /// A client that can connect to a <see cref="CtpServer"/>. Call <see cref="Connect"/> to grab a <see cref="CtpNetStream"/>.
     /// <see cref="Connect"/> can be called multiple times to create new connections and either blocks, errors, or times out.
     /// </summary>
     public class CtpClient
@@ -34,7 +34,7 @@ namespace CTP.Net
         public bool UseSSL => m_ticket != null;
         private List<string> m_approvedCerts;
 
-        public CtpStream Connect()
+        public CtpNetStream Connect()
         {
             var auth = m_ticket?.GetTicket();
 
@@ -52,7 +52,7 @@ namespace CTP.Net
                 m_sslStream.AuthenticateAsClient(string.Empty, new X509Certificate2Collection(auth.ClientCertificate), SslProtocols.None, false);
             }
 
-            var session = new CtpStream(socket, netStream, m_sslStream);
+            var session = new CtpNetStream(socket, netStream, m_sslStream);
             if (auth == null)
             {
                 session.Send(new AuthNone());

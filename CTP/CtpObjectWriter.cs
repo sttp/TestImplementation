@@ -109,31 +109,45 @@ namespace CTP
 
         private void WriteCommand(CtpCommand value)
         {
-            WriteBuffer(value.ToArray(), CtpObjectSymbols.CtpCommand0);
+            WriteSymbol(CtpObjectSymbols.CtpCommandElse);
+            byte[] buffer = value.ToArray();
+            Write(buffer.Length);
+            EnsureCapacityBytes(buffer.Length);
+            Array.Copy(buffer, 0, m_byteBuffer, m_byteLength, buffer.Length);
+            m_byteLength += buffer.Length;
         }
 
         private void WriteBuffer(CtpBuffer value)
         {
-            WriteBuffer(value.ToBuffer(), CtpObjectSymbols.CtpBuffer0);
+            byte[] buffer = value.ToBuffer();
+            if (buffer.Length <= 64)
+            {
+                WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)buffer.Length);
+            }
+            else
+            {
+                WriteSymbol(CtpObjectSymbols.CtpBufferElse);
+                Write(buffer.Length);
+            }
+            EnsureCapacityBytes(buffer.Length);
+            Array.Copy(buffer, 0, m_byteBuffer, m_byteLength, buffer.Length);
+            m_byteLength += buffer.Length;
+
         }
 
         private void WriteString(string value)
         {
-            WriteBuffer(Encoding.UTF8.GetBytes(value), CtpObjectSymbols.String0);
-        }
-
-        private void WriteBuffer(byte[] buffer, CtpObjectSymbols itemZero)
-        {
-            if (buffer.Length <= 19)
+            byte[] buffer = Encoding.UTF8.GetBytes(value);
+            if (buffer.Length <= 20)
             {
-                WriteSymbol(itemZero + (byte)buffer.Length);
+                WriteSymbol(CtpObjectSymbols.String0 + (byte)buffer.Length);
             }
             else
             {
-                WriteSymbol(itemZero + 20);
+                WriteSymbol(CtpObjectSymbols.StringElse);
                 Write(buffer.Length);
             }
-
+            EnsureCapacityBytes(buffer.Length);
             Array.Copy(buffer, 0, m_byteBuffer, m_byteLength, buffer.Length);
             m_byteLength += buffer.Length;
         }
@@ -312,9 +326,9 @@ namespace CTP
 
         private void WriteInt64(long value)
         {
-            if (-9 <= value && value <= 137)
+            if (-2 <= value && value <= 100)
             {
-                WriteSymbol(CtpObjectSymbols.IntNeg9 + (byte)(value + 9));
+                WriteSymbol(CtpObjectSymbols.IntNeg2 + (byte)(value + 2));
             }
             else
             {
@@ -498,6 +512,10 @@ namespace CTP
             m_byteLength += 8;
         }
 
+        internal static byte[] CreatePacket(PacketContents contentType, int contentFlags, byte[] payload)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

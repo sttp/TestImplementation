@@ -13,6 +13,7 @@ namespace CTP
         public CommandSchemaWriter()
         {
             m_stream = new CtpObjectWriter();
+            m_stream.Write(Guid.NewGuid());
         }
 
         public void DefineArray(string name)
@@ -36,7 +37,7 @@ namespace CTP
 
         public CtpCommandSchema ToSchema()
         {
-            return new CtpCommandSchema(Guid.NewGuid(), m_stream.ToArray());
+            return new CtpCommandSchema(m_stream.ToArray());
         }
     }
 
@@ -51,6 +52,7 @@ namespace CTP
     internal class CommandSchemaReader
     {
         private CtpObjectReader m_stream;
+        public readonly Guid Identifier;
 
         public CommandSchemaSymbol Symbol;
 
@@ -61,6 +63,7 @@ namespace CTP
         public CommandSchemaReader(byte[] data)
         {
             m_stream = new CtpObjectReader(data);
+            Identifier = m_stream.Read().AsGuid;
         }
 
         public bool Next()
@@ -96,41 +99,48 @@ namespace CTP
         }
     }
 
-    internal class CommandSchemaCompiled
+    internal class CommandSchemaNode
     {
-        public class Node
+        public readonly CommandSchemaSymbol Symbol;
+        public readonly string NodeName;
+        public readonly int ElementCount;
+        public readonly int PositionIndex;
+
+        public CommandSchemaNode(CommandSchemaReader reader, int positionIndex)
         {
-            public readonly CommandSchemaSymbol Symbol;
-            public readonly CtpCommandKeyword NodeName;
-            public readonly int ElementCount;
-            public readonly int PositionIndex;
-
-            public Node(CommandSchemaReader reader, int positionIndex)
-            {
-                PositionIndex = positionIndex;
-                NodeName = CtpCommandKeyword.Create(reader.Name);
-                Symbol = reader.Symbol;
-                ElementCount = reader.ElementCount;
-            }
-
-            public override string ToString()
-            {
-                return $"{Symbol} {NodeName} {ElementCount}";
-            }
+            PositionIndex = positionIndex;
+            NodeName = reader.Name;
+            Symbol = reader.Symbol;
+            ElementCount = reader.ElementCount;
         }
 
-        private List<Node> m_nodes = new List<Node>();
-
-        public CommandSchemaCompiled(CtpCommandSchema schema)
+        public override string ToString()
         {
-            var reader = schema.CreateReader();
+            return $"{Symbol} {NodeName} {ElementCount}";
+        }
+    }
+
+    public class CtpCommandSchema : IEquatable<CtpCommandSchema>
+    {
+        public readonly Guid Identifier;
+        public readonly string RootElement;
+
+        private readonly byte[] m_data;
+        private List<CommandSchemaNode> m_nodes = new List<CommandSchemaNode>();
+
+        public CtpCommandSchema(byte[] data)
+        {
+            m_data = data ?? throw new ArgumentNullException(nameof(data));
+            var reader = new CommandSchemaReader(m_data);
+            Identifier = reader.Identifier;
             while (reader.Next())
             {
-                m_nodes.Add(new Node(reader, m_nodes.Count));
+                m_nodes.Add(new CommandSchemaNode(reader, m_nodes.Count));
             }
+            RootElement = m_nodes[0].NodeName;
         }
 
-        public Node this[int index]
+        internal CommandSchemaNode this[int index]
         {
             get
             {
@@ -139,33 +149,8 @@ namespace CTP
                 return m_nodes[index];
             }
         }
-    }
 
-    public class CtpCommandSchema : IEquatable<CtpCommandSchema>
-    {
-        public readonly Guid Identifier;
-        private byte[] m_data;
-        private CommandSchemaCompiled m_compiled;
-
-        public CtpCommandSchema(Guid identifier, byte[] data)
-        {
-            Identifier = identifier;
-            m_data = data ?? throw new ArgumentNullException(nameof(data));
-        }
-
-        internal CommandSchemaReader CreateReader()
-        {
-            return new CommandSchemaReader(m_data);
-        }
-
-        internal CommandSchemaCompiled CompiledReader()
-        {
-            if (m_compiled == null)
-            {
-                m_compiled = new CommandSchemaCompiled(this);
-            }
-            return m_compiled;
-        }
+        public int Length => m_data.Length;
 
         public bool Equals(CtpCommandSchema other)
         {
@@ -173,7 +158,7 @@ namespace CTP
                 return false;
             if (ReferenceEquals(this, other))
                 return true;
-            if (Identifier!=other.Identifier)
+            if (Identifier != other.Identifier)
                 return false;
             if (m_data.Length != other.m_data.Length)
                 return false;
@@ -209,6 +194,16 @@ namespace CTP
         public static bool operator !=(CtpCommandSchema left, CtpCommandSchema right)
         {
             return !Equals(left, right);
+        }
+
+        public byte[] ToCommand(int schemaRuntimeID)
+        {
+            return CtpObjectWriter.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
+        }
+
+        public void CopyTo(byte[] data, int offset)
+        {
+            m_data.CopyTo(data, offset);
         }
     }
 

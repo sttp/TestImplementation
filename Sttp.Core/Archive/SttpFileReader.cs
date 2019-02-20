@@ -18,19 +18,20 @@ namespace Sttp
     public class SttpFileReader : IDisposable
     {
         private CtpFileStream m_stream;
-        private DecoderBase m_decoder;
-        private CtpCommand m_nextCommand;
+        private DecoderBase m_decoderRaw;
+        private DecoderBase m_decoderBasic;
+        private DecoderBase m_decoderSimple;
+        private DecoderBase m_decoderAdvanced;
+        private DecoderBase m_currentDecoder;
+        private CtpCommand m_nextPacket;
 
-        private CommandBeginCompressionStream m_compressionStream;
-        private CommandBeginDataStream m_dataStream;
         private SttpProducerMetadata m_metadata;
-        private DefalteHelper m_comp;
 
         private Dictionary<CtpObject, SttpDataPointMetadata> m_metadataLookup;
 
         public SttpFileReader(Stream stream, bool ownsStream)
         {
-            m_stream = new CtpFileStream(stream, ownsStream);
+            m_stream = new CtpFileStream(stream, CtpCompressionMode.None, ownsStream);
             m_metadataLookup = new Dictionary<CtpObject, SttpDataPointMetadata>();
         }
 
@@ -48,70 +49,59 @@ namespace Sttp
         public FileReaderItem Next()
         {
             TryAgain:
-            m_nextCommand = m_stream.Read();
-            if ((object)m_nextCommand == null)
+            m_nextPacket = m_stream.Read();
+            if ((object)m_nextPacket == null)
                 return FileReaderItem.EndOfStream;
-
-            TryAfterDecompress:
-
-            if (m_nextCommand.IsRaw)
+            
+            if (m_nextPacket.RootElement == "DataStreamRaw")
             {
-                var raw = (CtpRaw)m_nextCommand;
-                if (m_dataStream != null && raw.Channel == m_dataStream.ChannelCode)
-                {
-                    m_decoder.Load(raw.Payload);
-                    return FileReaderItem.DataPoint;
-                }
-
-                if (m_compressionStream != null && raw.Channel == m_compressionStream.ChannelCode)
-                {
-                    m_nextCommand = m_comp.Inflate(raw);
-                    goto TryAfterDecompress;
-
-                }
-                throw new Exception("Raw stream is not defined for the specified channel.");
+                if (m_decoderRaw == null)
+                    m_decoderRaw = new RawDecoder(Lookup);
+                m_decoderRaw.Load(((CommandDataStreamRaw)m_nextPacket).Data);
+                m_currentDecoder = m_decoderRaw;
+                return FileReaderItem.DataPoint;
             }
-            else if (m_nextCommand.RootElement == "BeginDataStream")
+            else if (m_nextPacket.RootElement == "DataStreamBasic")
             {
-                m_dataStream = (CommandBeginDataStream)m_nextCommand;
-                if (m_dataStream.EncodingMechanism == "Basic")
-                {
-                    m_decoder = new BasicDecoder(Lookup);
-                }
-                if (m_dataStream.EncodingMechanism == "Simple")
-                {
-                    m_decoder = new SimpleDecoder(Lookup);
-                }
-                if (m_dataStream.EncodingMechanism == "Advanced")
-                {
-                    m_decoder = new AdvancedDecoder(Lookup);
-                }
-                if (m_dataStream.EncodingMechanism == "Raw")
-                {
-                    m_decoder = new RawDecoder(Lookup);
-                }
+                if (m_decoderBasic == null)
+                    m_decoderBasic = new BasicDecoder(Lookup);
+                m_decoderBasic.Load(((CommandDataStreamBasic)m_nextPacket).Data);
+                m_currentDecoder = m_decoderBasic;
+                return FileReaderItem.DataPoint;
             }
-            else if (m_nextCommand.RootElement == "BeginCompressionStream")
+            else if (m_nextPacket.RootElement == "DataStreamSimple")
             {
-                m_compressionStream = (CommandBeginCompressionStream)m_nextCommand;
-                m_comp = new DefalteHelper(m_compressionStream);
+                if (m_decoderSimple == null)
+                    m_decoderSimple = new SimpleDecoder(Lookup);
+                m_decoderSimple.Load(((CommandDataStreamSimple)m_nextPacket).Data);
+                m_currentDecoder = m_decoderSimple;
+                return FileReaderItem.DataPoint;
+            }
+            else if (m_nextPacket.RootElement == "DataStreamAdvanced")
+            {
+                if (m_decoderAdvanced == null)
+                    m_decoderAdvanced = new AdvancedDecoder(Lookup);
+                m_decoderAdvanced.Load(((CommandDataStreamAdvanced)m_nextPacket).Data);
+                m_currentDecoder = m_decoderAdvanced;
+                return FileReaderItem.DataPoint;
 
             }
-            else if (m_nextCommand.RootElement == "ProducerMetadata")
+            else if (m_nextPacket.RootElement == "ProducerMetadata")
             {
-                m_metadata = (SttpProducerMetadata)m_nextCommand;
+                m_metadata = (SttpProducerMetadata)m_nextPacket;
                 foreach (var item in m_metadata.DataPoints)
                 {
                     m_metadataLookup[item.DataPointID] = item;
                 }
                 return FileReaderItem.ProducerMetadata;
             }
+
             goto TryAgain;
         }
 
         public bool ReadDataPoint(SttpDataPoint dataPoint)
         {
-            return m_decoder.Read(dataPoint);
+            return m_currentDecoder.Read(dataPoint);
         }
 
         public SttpProducerMetadata GetMetadata()

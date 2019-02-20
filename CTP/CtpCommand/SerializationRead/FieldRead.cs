@@ -12,7 +12,7 @@ namespace CTP.SerializationRead
         /// <summary>
         /// The name of the field/element to use in CtpDocument.
         /// </summary>
-        public abstract CtpCommandKeyword RecordName { get; }
+        public abstract string RecordName { get; }
 
 
         /// <summary>
@@ -43,13 +43,13 @@ namespace CTP.SerializationRead
     internal class FieldRead<T>
         : FieldRead
     {
-        private CtpCommandKeyword m_recordName;
+        private string m_recordName;
         private TypeReadMethodBase<T> m_method;
         private Action<object, T> m_write;
 
         public FieldRead(MemberInfo member, CommandFieldAttribute autoLoad)
         {
-            m_recordName = CtpCommandKeyword.Create(autoLoad.RecordName ?? member.Name);
+            m_recordName = autoLoad.RecordName ?? member.Name;
 
             if (member is PropertyInfo)
             {
@@ -66,7 +66,7 @@ namespace CTP.SerializationRead
             m_method = TypeRead<T>.Get();
         }
 
-        public override CtpCommandKeyword RecordName => m_recordName;
+        public override string RecordName => m_recordName;
 
         public override void Load(CommandObject obj, CtpCommandReader reader)
         {

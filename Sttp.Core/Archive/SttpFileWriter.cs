@@ -12,12 +12,6 @@ using Sttp.DataPointEncoding;
 
 namespace Sttp
 {
-    public enum SttpCompressionMode
-    {
-        None,
-        Deflate,
-        Zlib
-    }
 
     public enum EncodingMethod
     {
@@ -32,11 +26,10 @@ namespace Sttp
     {
         private CtpFileStream m_stream;
         private EncoderBase m_encoder;
-        private DefalteHelper m_comp;
 
-        public SttpFileWriter(Stream stream, bool ownsStream, SttpCompressionMode mode, EncodingMethod encoding)
+        public SttpFileWriter(Stream stream, bool ownsStream, CtpCompressionMode mode, EncodingMethod encoding)
         {
-            m_stream = new CtpFileStream(stream, ownsStream);
+            m_stream = new CtpFileStream(stream, mode, ownsStream);
             if (encoding == EncodingMethod.Raw)
             {
                 m_encoder = new RawEncoder();
@@ -57,44 +50,17 @@ namespace Sttp
                 m_encoder = new AdvancedEncoder();
                 m_stream.Write(new CommandBeginDataStream(0, "Advanced"));
             }
-            //if (encoding == EncodingMethod.Adaptive)
-            //{
-            //    throw new NotSupportedException();
-            //}
-
-            if (mode == SttpCompressionMode.Deflate)
-            {
-                m_stream.Write(new CommandBeginCompressionStream(1, "Deflate"));
-                m_comp = new DefalteHelper(new CommandBeginCompressionStream(1, "Deflate"));
-            }
-            if (mode == SttpCompressionMode.Zlib)
-            {
-                m_stream.Write(new CommandBeginCompressionStream(1, "zlib"));
-                m_comp = new DefalteHelper(new CommandBeginCompressionStream(1, "zlib"));
-            }
         }
 
         public void ProducerMetadata(SttpProducerMetadata metadata)
         {
             if (m_encoder.Length > 0)
             {
-                WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
+                m_stream.Write(m_encoder.ToArray());
                 m_encoder.Clear();
             }
 
-            WriteComp(metadata);
-        }
-
-        private void WriteComp(CtpCommand command)
-        {
-            if (m_comp == null)
-            {
-                m_stream.Write(command);
-            }
-            else
-            {
-                m_stream.Write(m_comp.Deflate(command));
-            }
+            m_stream.Write(metadata);
         }
 
         public void AddDataPoint(SttpDataPoint dataPoint)
@@ -102,7 +68,7 @@ namespace Sttp
             m_encoder.AddDataPoint(dataPoint);
             if (m_encoder.Length > 1500)
             {
-                WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
+                m_stream.Write(m_encoder.ToArray());
                 m_encoder.Clear();
             }
         }
@@ -111,7 +77,7 @@ namespace Sttp
         {
             if (m_encoder.Length > 0)
             {
-                WriteComp(new CtpRaw(m_encoder.ToArray(), 0));
+                m_stream.Write(m_encoder.ToArray());
                 m_encoder.Clear();
             }
 

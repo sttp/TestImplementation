@@ -13,17 +13,17 @@ namespace CTP
     {
         private class StackDefinition
         {
-            public CommandSchemaCompiled.Node Node;
+            public CommandSchemaNode Node;
             public int ChildCount;
 
-            public StackDefinition(CommandSchemaCompiled.Node node, int childCount)
+            public StackDefinition(CommandSchemaNode node, int childCount)
             {
                 Node = node;
                 ChildCount = childCount;
             }
         }
 
-        private CommandSchemaCompiled m_schema;
+        private CtpCommandSchema m_schema;
         /// <summary>
         /// The stream for reading the byte array.
         /// </summary>
@@ -33,41 +33,39 @@ namespace CTP
         /// </summary>
         private Stack<StackDefinition> m_elementStack = new Stack<StackDefinition>();
 
-        private CtpCommandKeyword m_rootElement;
+        public readonly string RootElement;
 
         /// <summary>
         /// Creates a <see cref="CtpCommandReader"/> from the specified byte array.
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="offset"></param>
         /// <param name="schema"></param>
-        public CtpCommandReader(byte[] data, int offset, CtpCommandSchema schema)
+        /// <param name="data"></param>
+        public CtpCommandReader(CtpCommandSchema schema, byte[] data)
         {
-            m_schema = schema.CompiledReader();
+            m_schema = schema;
             Value = CtpObject.Null;
             NodeType = CtpCommandNodeType.StartOfCommand;
-            m_rootElement = m_schema[0].NodeName;
+            RootElement = m_schema[0].NodeName;
             m_elementStack.Push(new StackDefinition(m_schema[0], m_schema[0].ElementCount));
-            m_stream = CreateReader(data, offset, data.Length);
+            m_stream = new CtpObjectReader(data);
             m_currentSchemaIndex = 0;
         }
 
         /// <summary>
         /// The name of the root element.
         /// </summary>
-        public CtpCommandKeyword RootElement => m_rootElement;
 
         /// <summary>
         /// The current name of the current element. Can be the RootElement if ElementDepth is 0
         /// and <see cref="NodeType"/> is not <see cref="CtpCommandNodeType.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
-        public CtpCommandKeyword ElementName
+        public string ElementName
         {
             get
             {
                 if (m_elementStack.Count == 0)
-                    return m_rootElement;
+                    return RootElement;
                 return m_elementStack.Peek().Node.NodeName;
             }
         }
@@ -75,7 +73,7 @@ namespace CTP
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the name of the value. Otherwise, null.
         /// </summary>
-        public CtpCommandKeyword ValueName { get; private set; }
+        public string ValueName { get; private set; }
 
         /// <summary>
         /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the value. Otherwise, CtpObject.Null.
@@ -173,12 +171,6 @@ namespace CTP
                 if (m_elementStack.Count < stack)
                     return;
             }
-        }
-
-        public static CtpObjectReader CreateReader(byte[] m_buffer, int m_position, int m_length)
-        {
-            var b = new CtpObjectReader(m_buffer, m_position, m_length - m_position);
-            return b;
         }
     }
 }

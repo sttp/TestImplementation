@@ -190,7 +190,7 @@ namespace CTP
 
         public CtpCommand ReadCtpCommand()
         {
-            return CtpCommand.Load(ReadBytes(), false, null);
+            return new CtpCommand(ReadBytes());
         }
 
         public CtpBuffer ReadCtpBuffer()

@@ -79,7 +79,7 @@ namespace CTP
                     case CtpTypeCode.CtpBuffer:
                         return ((CtpBuffer)m_valueObject).Length == 0;
                     case CtpTypeCode.CtpCommand:
-                        return ((CtpCommand)m_valueObject).Length == 0;
+                        return false;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -392,7 +392,7 @@ namespace CTP
                 case CtpTypeCode.CtpBuffer:
                     return new CtpObject(new CtpBuffer(new byte[0]));
                 case CtpTypeCode.CtpCommand:
-                    return new CtpObject(CtpCommand.Load(new byte[0], false, null));
+                    throw new NotSupportedException();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(typeCode), typeCode, null);
             }
