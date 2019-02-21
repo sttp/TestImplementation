@@ -73,54 +73,63 @@ namespace CTP
             throw new EndOfStreamException();
         }
 
-        private void EnsureCapacity(int length)
-        {
-            if (m_currentBytePosition + length > m_endOfByteStream)
-            {
-                ThrowEndOfStreamException();
-            }
-        }
-
         public CtpObject Read()
         {
-            CtpObjectSymbols symbol = (CtpObjectSymbols)ReadBits8();
+            int currentPosition = m_currentBytePosition;
+            var rv = Read(m_buffer, ref currentPosition, m_endOfByteStream);
+            if (currentPosition > m_endOfByteStream)
+                throw new EndOfStreamException();
+            m_currentBytePosition = currentPosition;
+            return rv;
+        }
+
+        public static CtpObject Read(byte[] data, ref int currentPosition, int endPosition)
+        {
+            CtpObjectSymbols symbol = (CtpObjectSymbols)ReadBits8(data, ref currentPosition, endPosition);
+            if (currentPosition > endPosition)
+                return CtpObject.Null;
+
             if (symbol <= CtpObjectSymbols.Null)
                 return CtpObject.Null;
             if (symbol <= CtpObjectSymbols.IntElse)
-                return ReadInt64(symbol);
+                return ReadInt64(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.SingleElse)
-                return ReadSingle(symbol);
+                return ReadSingle(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.DoubleElse)
-                return ReadDouble(symbol);
+                return ReadDouble(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.NumericElse)
-                return ReadNumeric(symbol);
+                return ReadNumeric(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.CtpTimeElse)
-                return ReadTime(symbol);
+                return ReadTime(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.BoolElse)
                 return symbol == CtpObjectSymbols.BoolElse;
             if (symbol <= CtpObjectSymbols.GuidElse)
-                return ReadGuid(symbol);
+                return ReadGuid(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.StringElse)
-                return ReadString(symbol);
+                return ReadString(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.CtpBufferElse)
-                return ReadBuffer(symbol);
+                return ReadBuffer(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.CtpCommandElse)
-                return ReadCommand();
+                return ReadCommand(data, ref currentPosition, endPosition);
             throw new ArgumentOutOfRangeException();
         }
 
-        private CtpObject ReadGuid(CtpObjectSymbols symbol)
+        private static CtpObject ReadGuid(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             if (symbol == CtpObjectSymbols.GuidEmpty)
                 return Guid.Empty;
 
-            EnsureCapacity(16);
-            Guid rv = GuidExtensions.ToRfcGuid(m_buffer, m_currentBytePosition);
-            m_currentBytePosition += 16;
+            if (currentPosition + 16 > endPosition)
+            {
+                currentPosition += 16;
+                return CtpObject.Null;
+            }
+            Guid rv = GuidExtensions.ToRfcGuid(data, currentPosition);
+            currentPosition += 16;
             return rv;
         }
 
-        private CtpObject ReadInt64(CtpObjectSymbols symbol)
+        private static CtpObject ReadInt64(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             if (symbol <= CtpObjectSymbols.Int100)
             {
@@ -131,52 +140,49 @@ namespace CTP
                 switch (symbol)
                 {
                     case CtpObjectSymbols.IntBits8:
-                        return (int)ReadBits8();
+                        return (int)ReadBits8(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntBits16:
-                        return (int)ReadBits16();
+                        return (int)ReadBits16(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntBits24:
-                        return (int)ReadBits24();
+                        return (int)ReadBits24(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntBits32:
-                        return (int)ReadBits32();
+                        return (long)ReadBits32(data, ref currentPosition, endPosition); //Type long here since casting a uint->int->long can make the number negative
                     case CtpObjectSymbols.IntBits40:
-                        return (long)ReadBits40();
+                        return (long)ReadBits40(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntBits48:
-                        return (long)ReadBits48();
+                        return (long)ReadBits48(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntBits56:
-                        return (long)ReadBits56();
+                        return (long)ReadBits56(data, ref currentPosition, endPosition);
                     default:
                         throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
                 }
             }
-            else if (symbol <= CtpObjectSymbols.IntNegBits56)
+            if (symbol <= CtpObjectSymbols.IntNegBits56)
             {
                 switch (symbol)
                 {
                     case CtpObjectSymbols.IntNegBits8:
-                        return ~(int)ReadBits8();
+                        return ~(long)ReadBits8(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntNegBits16:
-                        return ~(int)ReadBits16();
+                        return ~(long)ReadBits16(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntNegBits24:
-                        return ~(int)ReadBits24();
+                        return ~(long)ReadBits24(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntNegBits32:
-                        return ~(int)ReadBits32();
+                        return ~(long)ReadBits32(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntNegBits40:
-                        return ~(long)ReadBits40();
+                        return ~(long)ReadBits40(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntNegBits48:
-                        return ~(long)ReadBits48();
+                        return ~(long)ReadBits48(data, ref currentPosition, endPosition);
                     case CtpObjectSymbols.IntNegBits56:
-                        return ~(long)ReadBits56();
+                        return ~(long)ReadBits56(data, ref currentPosition, endPosition);
                     default:
                         throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
                 }
             }
-            else
-            {
-                return (long)ReadBits64();
-            }
+            return (long)ReadBits64(data, ref currentPosition, endPosition);
         }
 
-        private CtpObject ReadSingle(CtpObjectSymbols symbol)
+        private static CtpObject ReadSingle(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             switch (symbol)
             {
@@ -187,14 +193,14 @@ namespace CTP
                 case CtpObjectSymbols.Single1:
                     return 1f;
                 case CtpObjectSymbols.SingleElse:
-                    uint value = ReadBits32();
+                    uint value = ReadBits32(data, ref currentPosition, endPosition);
                     return *(float*)&value;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
             }
         }
 
-        private CtpObject ReadDouble(CtpObjectSymbols symbol)
+        private static CtpObject ReadDouble(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             switch (symbol)
             {
@@ -205,14 +211,14 @@ namespace CTP
                 case CtpObjectSymbols.Double1:
                     return 1.0;
                 case CtpObjectSymbols.DoubleElse:
-                    ulong value = ReadBits64();
+                    ulong value = ReadBits64(data, ref currentPosition, endPosition);
                     return *(double*)&value;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
             }
         }
 
-        private CtpObject ReadNumeric(CtpObjectSymbols symbol)
+        private static CtpObject ReadNumeric(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             switch (symbol)
             {
@@ -236,7 +242,7 @@ namespace CTP
                 case CtpObjectSymbols.NumericBytes11:
                 case CtpObjectSymbols.NumericElse:
                     {
-                        byte code = (byte)ReadBits8();
+                        byte code = (byte)ReadBits8(data, ref currentPosition, endPosition);
                         int flags = (code & 31) << 16;
                         int low;
                         int mid;
@@ -249,41 +255,41 @@ namespace CTP
                             case CtpObjectSymbols.NumericBytes0:
                                 return new CtpNumeric(flags, 0, 0, 0);
                             case CtpObjectSymbols.NumericBytes1:
-                                return new CtpNumeric(flags, 0, 0, (int)ReadBits8());
+                                return new CtpNumeric(flags, 0, 0, (int)ReadBits8(data, ref currentPosition, endPosition));
                             case CtpObjectSymbols.NumericBytes2:
-                                return new CtpNumeric(flags, 0, 0, (int)ReadBits16());
+                                return new CtpNumeric(flags, 0, 0, (int)ReadBits16(data, ref currentPosition, endPosition));
                             case CtpObjectSymbols.NumericBytes3:
-                                return new CtpNumeric(flags, 0, 0, (int)ReadBits24());
+                                return new CtpNumeric(flags, 0, 0, (int)ReadBits24(data, ref currentPosition, endPosition));
                             case CtpObjectSymbols.NumericBytes4:
-                                return new CtpNumeric(flags, 0, 0, (int)ReadBits32());
+                                return new CtpNumeric(flags, 0, 0, (int)ReadBits32(data, ref currentPosition, endPosition));
                             case CtpObjectSymbols.NumericBytes5:
-                                low = (int)ReadBits32();
-                                return new CtpNumeric(flags, 0, (int)ReadBits8(), low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, 0, (int)ReadBits8(data, ref currentPosition, endPosition), low);
                             case CtpObjectSymbols.NumericBytes6:
-                                low = (int)ReadBits32();
-                                return new CtpNumeric(flags, 0, (int)ReadBits16(), low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, 0, (int)ReadBits16(data, ref currentPosition, endPosition), low);
                             case CtpObjectSymbols.NumericBytes7:
-                                low = (int)ReadBits32();
-                                return new CtpNumeric(flags, 0, (int)ReadBits24(), low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, 0, (int)ReadBits24(data, ref currentPosition, endPosition), low);
                             case CtpObjectSymbols.NumericBytes8:
-                                low = (int)ReadBits32();
-                                return new CtpNumeric(flags, 0, (int)ReadBits32(), low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, 0, (int)ReadBits32(data, ref currentPosition, endPosition), low);
                             case CtpObjectSymbols.NumericBytes9:
-                                low = (int)ReadBits32();
-                                mid = (int)ReadBits32();
-                                return new CtpNumeric(flags, (int)ReadBits8(), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                mid = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, (int)ReadBits8(data, ref currentPosition, endPosition), mid, low);
                             case CtpObjectSymbols.NumericBytes10:
-                                low = (int)ReadBits32();
-                                mid = (int)ReadBits32();
-                                return new CtpNumeric(flags, (int)ReadBits16(), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                mid = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, (int)ReadBits16(data, ref currentPosition, endPosition), mid, low);
                             case CtpObjectSymbols.NumericBytes11:
-                                low = (int)ReadBits32();
-                                mid = (int)ReadBits32();
-                                return new CtpNumeric(flags, (int)ReadBits24(), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                mid = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, (int)ReadBits24(data, ref currentPosition, endPosition), mid, low);
                             case CtpObjectSymbols.NumericElse:
-                                low = (int)ReadBits32();
-                                mid = (int)ReadBits32();
-                                return new CtpNumeric(flags, (int)ReadBits32(), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                mid = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, (int)ReadBits32(data, ref currentPosition, endPosition), mid, low);
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
                         }
@@ -293,172 +299,231 @@ namespace CTP
             }
         }
 
-        private CtpObject ReadTime(CtpObjectSymbols symbol)
+        private static CtpObject ReadTime(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             if (symbol == CtpObjectSymbols.CtpTimeZero)
                 return new CtpTime(0);
-            return new CtpTime((long)ReadBits64());
+            return new CtpTime((long)ReadBits64(data, ref currentPosition, endPosition));
         }
 
-        private byte[] ReadBuffer(CtpObjectSymbols symbol)
+        private static CtpObject ReadBuffer(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             int length = symbol - CtpObjectSymbols.CtpBuffer0;
             if (symbol == CtpObjectSymbols.CtpBufferElse)
             {
-                length = (int)Read();
+                var lenObj = Read(data, ref currentPosition, endPosition);
+                if (currentPosition > endPosition)
+                {
+                    return CtpObject.Null;
+                }
+                length = (int)lenObj;
             }
-            EnsureCapacity(length);
+            if (currentPosition + length > endPosition)
+            {
+                currentPosition += length;
+                return CtpObject.Null;
+            }
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
-            m_currentBytePosition += length;
+            Array.Copy(data, currentPosition, rv, 0, length);
+            currentPosition += length;
             return rv;
         }
 
-        private string ReadString(CtpObjectSymbols symbol)
+        private static CtpObject ReadString(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
             int length = symbol - CtpObjectSymbols.String0;
             if (symbol == CtpObjectSymbols.StringElse)
             {
-                length = (int)Read();
+                var lenObj = Read(data, ref currentPosition, endPosition);
+                if (currentPosition > endPosition)
+                {
+                    return CtpObject.Null;
+                }
+                length = (int)lenObj;
             }
-            EnsureCapacity(length);
+            if (currentPosition + length > endPosition)
+            {
+                currentPosition += length;
+                return CtpObject.Null;
+            }
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
-            m_currentBytePosition += length;
+            Array.Copy(data, currentPosition, rv, 0, length);
+            currentPosition += length;
             return Encoding.UTF8.GetString(rv);
         }
 
-        private CtpCommand ReadCommand()
+        private static CtpObject ReadCommand(byte[] data, ref int currentPosition, int endPosition)
         {
-            int length = (int)Read();
-            EnsureCapacity(length);
+            var lenObj = Read(data, ref currentPosition, endPosition);
+            if (currentPosition > endPosition)
+            {
+                return CtpObject.Null;
+            }
+            int length = (int)lenObj;
+            if (currentPosition + length > endPosition)
+            {
+                currentPosition += length;
+                return CtpObject.Null;
+            }
             byte[] rv = new byte[length];
-            Array.Copy(m_buffer, m_currentBytePosition, rv, 0, length);
-            m_currentBytePosition += length;
+            Array.Copy(data, currentPosition, rv, 0, length);
+            currentPosition += length;
             return new CtpCommand(rv);
         }
 
-        private uint ReadBits8()
+        private static uint ReadBits8(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 1 > m_endOfByteStream)
+            if (currentPosition + 1 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition++;
+                return 0;
             }
-            byte rv = m_buffer[m_currentBytePosition];
-            m_currentBytePosition++;
+            byte rv = data[currentPosition];
+            currentPosition++;
             return rv;
         }
 
-        private uint ReadBits16()
+        private static uint ReadBits16(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 2 > m_endOfByteStream)
+            if (currentPosition + 2 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 2;
+                return 0;
             }
-            uint rv = (uint)m_buffer[m_currentBytePosition] << 8
-                    | (uint)m_buffer[m_currentBytePosition + 1];
-            m_currentBytePosition += 2;
+            uint rv = (uint)data[currentPosition] << 8
+                    | (uint)data[currentPosition + 1];
+            currentPosition += 2;
             return rv;
         }
 
-        private uint ReadBits24()
+        private static uint ReadBits24(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 3 > m_endOfByteStream)
+            if (currentPosition + 3 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 3;
+                return 0;
             }
-            uint rv = (uint)m_buffer[m_currentBytePosition] << 16
-                      | (uint)m_buffer[m_currentBytePosition + 1] << 8
-                      | (uint)m_buffer[m_currentBytePosition + 2];
-            m_currentBytePosition += 3;
+            uint rv = (uint)data[currentPosition] << 16
+                      | (uint)data[currentPosition + 1] << 8
+                      | (uint)data[currentPosition + 2];
+            currentPosition += 3;
             return rv;
         }
 
-        private uint ReadBits32()
+        private static uint ReadBits32(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 4 > m_endOfByteStream)
+            if (currentPosition + 4 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 4;
+                return 0;
             }
-            uint rv = (uint)m_buffer[m_currentBytePosition] << 24
-                      | (uint)m_buffer[m_currentBytePosition + 1] << 16
-                      | (uint)m_buffer[m_currentBytePosition + 2] << 8
-                      | (uint)m_buffer[m_currentBytePosition + 3];
-            m_currentBytePosition += 4;
+            uint rv = (uint)data[currentPosition] << 24
+                      | (uint)data[currentPosition + 1] << 16
+                      | (uint)data[currentPosition + 2] << 8
+                      | (uint)data[currentPosition + 3];
+            currentPosition += 4;
             return rv;
         }
 
-        private ulong ReadBits40()
+        private static ulong ReadBits40(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 5 > m_endOfByteStream)
+            if (currentPosition + 5 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 5;
+                return 0;
             }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 32 |
-                       (ulong)m_buffer[m_currentBytePosition + 1] << 24 |
-                       (ulong)m_buffer[m_currentBytePosition + 2] << 16 |
-                       (ulong)m_buffer[m_currentBytePosition + 3] << 8 |
-                       (ulong)m_buffer[m_currentBytePosition + 4];
-            m_currentBytePosition += 5;
+            ulong rv = (ulong)data[currentPosition + 0] << 32 |
+                       (ulong)data[currentPosition + 1] << 24 |
+                       (ulong)data[currentPosition + 2] << 16 |
+                       (ulong)data[currentPosition + 3] << 8 |
+                       (ulong)data[currentPosition + 4];
+            currentPosition += 5;
             return rv;
         }
 
-        private ulong ReadBits48()
+        private static ulong ReadBits48(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 6 > m_endOfByteStream)
+            if (currentPosition + 6 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 6;
+                return 0;
             }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 40 |
-                       (ulong)m_buffer[m_currentBytePosition + 1] << 32 |
-                       (ulong)m_buffer[m_currentBytePosition + 2] << 24 |
-                       (ulong)m_buffer[m_currentBytePosition + 3] << 16 |
-                       (ulong)m_buffer[m_currentBytePosition + 4] << 8 |
-                       (ulong)m_buffer[m_currentBytePosition + 5];
-            m_currentBytePosition += 6;
+            ulong rv = (ulong)data[currentPosition + 0] << 40 |
+                       (ulong)data[currentPosition + 1] << 32 |
+                       (ulong)data[currentPosition + 2] << 24 |
+                       (ulong)data[currentPosition + 3] << 16 |
+                       (ulong)data[currentPosition + 4] << 8 |
+                       (ulong)data[currentPosition + 5];
+            currentPosition += 6;
             return rv;
         }
 
-        private ulong ReadBits56()
+        private static ulong ReadBits56(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 7 > m_endOfByteStream)
+            if (currentPosition + 7 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 7;
+                return 0;
             }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 48 |
-                       (ulong)m_buffer[m_currentBytePosition + 1] << 40 |
-                       (ulong)m_buffer[m_currentBytePosition + 2] << 32 |
-                       (ulong)m_buffer[m_currentBytePosition + 3] << 24 |
-                       (ulong)m_buffer[m_currentBytePosition + 4] << 16 |
-                       (ulong)m_buffer[m_currentBytePosition + 5] << 8 |
-                       (ulong)m_buffer[m_currentBytePosition + 6];
-            m_currentBytePosition += 7;
+            ulong rv = (ulong)data[currentPosition + 0] << 48 |
+                       (ulong)data[currentPosition + 1] << 40 |
+                       (ulong)data[currentPosition + 2] << 32 |
+                       (ulong)data[currentPosition + 3] << 24 |
+                       (ulong)data[currentPosition + 4] << 16 |
+                       (ulong)data[currentPosition + 5] << 8 |
+                       (ulong)data[currentPosition + 6];
+            currentPosition += 7;
             return rv;
         }
 
-        private ulong ReadBits64()
+        private static ulong ReadBits64(byte[] data, ref int currentPosition, int endPosition)
         {
-            if (m_currentBytePosition + 8 > m_endOfByteStream)
+            if (currentPosition + 8 > endPosition)
             {
-                ThrowEndOfStreamException();
+                currentPosition += 8;
+                return 0;
             }
-            ulong rv = (ulong)m_buffer[m_currentBytePosition + 0] << 56 |
-                      (ulong)m_buffer[m_currentBytePosition + 1] << 48 |
-                      (ulong)m_buffer[m_currentBytePosition + 2] << 40 |
-                      (ulong)m_buffer[m_currentBytePosition + 3] << 32 |
-                      (ulong)m_buffer[m_currentBytePosition + 4] << 24 |
-                      (ulong)m_buffer[m_currentBytePosition + 5] << 16 |
-                      (ulong)m_buffer[m_currentBytePosition + 6] << 8 |
-                      (ulong)m_buffer[m_currentBytePosition + 7];
-            m_currentBytePosition += 8;
+            ulong rv = (ulong)data[currentPosition + 0] << 56 |
+                      (ulong)data[currentPosition + 1] << 48 |
+                      (ulong)data[currentPosition + 2] << 40 |
+                      (ulong)data[currentPosition + 3] << 32 |
+                      (ulong)data[currentPosition + 4] << 24 |
+                      (ulong)data[currentPosition + 5] << 16 |
+                      (ulong)data[currentPosition + 6] << 8 |
+                      (ulong)data[currentPosition + 7];
+            currentPosition += 8;
             return rv;
         }
 
-        internal static bool TryReadPacket(byte[] data, int position, int length, int maximumPacketSize, out long payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength)
+        internal static bool TryReadPacket(byte[] data, int position, int length, int maximumPacketSize, out PacketContents payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength)
         {
             if (length > maximumPacketSize)
                 throw new Exception("Command size is too large");
-            throw new NotImplementedException();
+
+            int startPosition = position;
+            var eos = position + length;
+
+            var pType = Read(data, ref position, eos);
+            var pFlags = Read(data, ref position, eos);
+            var pData = Read(data, ref position, eos);
+
+            if (position > eos)
+            {
+                payloadType = PacketContents.CommandSchema;
+                payloadFlags = 0;
+                payloadBuffer = null;
+                consumedLength = 0;
+                return false;
+            }
+            else
+            {
+                payloadType = (PacketContents)(byte)pType;
+                payloadFlags = (long)pFlags;
+                payloadBuffer = (byte[])pData;
+                consumedLength = position - startPosition;
+                return true;
+            }
+
         }
 
     }

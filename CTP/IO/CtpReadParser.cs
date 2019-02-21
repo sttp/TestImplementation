@@ -43,6 +43,7 @@ namespace CTP.IO
         public CtpReadParser()
         {
             m_inboundSchemes = new Dictionary<long, CtpCommandSchema>();
+            m_inboundBuffer = new byte[128];
         }
 
         public void AppendToBuffer(byte[] buffer, int length)
@@ -100,10 +101,10 @@ namespace CTP.IO
             if (length < 2)
                 return 0;
 
-            if (!CtpObjectReader.TryReadPacket(buffer, current, length, MaximumPacketSize, out long payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength))
+            if (!CtpObjectReader.TryReadPacket(buffer, current, length, MaximumPacketSize, out PacketContents payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength))
                 return 0;
 
-            switch ((PacketContents)payloadType)
+            switch (payloadType)
             {
                 case PacketContents.CommandSchema:
                     var scheme = new CtpCommandSchema(payloadBuffer);
@@ -117,7 +118,7 @@ namespace CTP.IO
                     break;
                 case PacketContents.CompressedDeflate:
                 case PacketContents.CompressedZlib:
-                    packet = Inflate((PacketContents)payloadType, payloadFlags, payloadBuffer);
+                    packet = Inflate(payloadType, payloadFlags, payloadBuffer);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

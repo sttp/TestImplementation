@@ -103,7 +103,6 @@ namespace Sttp.Tests
             {
             }
 
-
             string[] file1 = File.ReadAllLines(@"C:\temp\C37Test\benchmark1.txt");
             string[] file2 = File.ReadAllLines(@"C:\temp\C37Test\benchmark2.txt");
 
@@ -149,7 +148,7 @@ namespace Sttp.Tests
         {
             string newFileName = Path.ChangeExtension(source, ".txt");
 
-            //using (var raw = new StreamWriter(newFileName, false))
+            using (var raw = new StreamWriter(newFileName, false))
             using (var fs = new FileStream(source, FileMode.Open))
             using (var fs2 = new FileStream(dest, FileMode.Create))
             using (var ctp = new SttpFileReader(fs, false))
@@ -168,7 +167,7 @@ namespace Sttp.Tests
                             while (ctp.ReadDataPoint(dp))
                             {
                                 //Names.Add(dp.Metadata.DataPointID.AsString);
-                                //raw.WriteLine(dp.ToString());
+                                raw.WriteLine(dp.ToString());
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
                                 //dp.Value = (long)dp.Value*1000;

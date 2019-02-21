@@ -85,7 +85,7 @@ namespace CTP
                     WriteTime(value.IsCtpTime);
                     break;
                 case CtpTypeCode.Boolean:
-                    if (value.IsBoolean)
+                    if (!value.IsBoolean)
                         WriteSymbol(CtpObjectSymbols.BoolFalse);
                     else
                         WriteSymbol(CtpObjectSymbols.BoolElse);
@@ -514,7 +514,11 @@ namespace CTP
 
         internal static byte[] CreatePacket(PacketContents contentType, int contentFlags, byte[] payload)
         {
-            throw new NotImplementedException();
+            var wr = new CtpObjectWriter();
+            wr.Write((byte)contentType);
+            wr.Write(contentFlags);
+            wr.Write(payload);
+            return wr.ToArray();
         }
     }
 }
