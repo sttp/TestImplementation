@@ -96,7 +96,7 @@ namespace Sttp.Tests
 
             try
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", CtpCompressionMode.None, EncodingMethod.Simple);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", CtpCompressionMode.None, EncodingMethod.Basic);
 
             }
             catch (Exception e)

@@ -82,7 +82,7 @@ namespace Sttp.Codec
             return FromCommand(obj);
         }
     }
-    [CommandName("DataStreamAdvanced")]
+    [CommandName("DataStreamRaw")]
     public class CommandDataStreamRaw
         : CommandObject<CommandDataStreamRaw>
     {

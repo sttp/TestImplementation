@@ -205,7 +205,7 @@ namespace Sttp.DataPointEncoding
                     }
                     break;
                 case CtpTypeCode.Single:
-                //Single is handled above
+                //Single is handled in AddDataPoint
                 default:
                     throw new ArgumentOutOfRangeException();
             }

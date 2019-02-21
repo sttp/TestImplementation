@@ -131,8 +131,7 @@ namespace Sttp.DataPointEncoding
                         m_currentPoint.PrevValue = (long)value;
                         break;
                     case CtpTypeCode.Single:
-                        value = ReadInt32();
-                        uint v2 = (uint)value;
+                        uint v2 = ReadInt32();
                         m_currentPoint.PrevValue = *(float*)&v2;
                         break;
                     case CtpTypeCode.Double:
@@ -186,9 +185,9 @@ namespace Sttp.DataPointEncoding
             return SimpleSymbols.ValueOther;
         }
 
-        private ulong ReadInt32()
+        private uint ReadInt32()
         {
-            return (m_reader.ReadBits((int)(m_reader.ReadBits3() + 1) * 4) ^ m_currentPoint.PrevValue.UnsafeRawInt64);
+            return ((uint)m_reader.ReadBits((int)(m_reader.ReadBits3() + 1) * 4) ^ m_currentPoint.PrevValue.UnsafeRawInt32);
         }
 
         private ulong ReadInt64()
