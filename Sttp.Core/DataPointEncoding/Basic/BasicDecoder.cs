@@ -15,7 +15,7 @@ namespace Sttp.DataPointEncoding
         private int m_lastChannelID = 0;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
-
+        
         public BasicDecoder(LookupMetadata lookup)
             : base(lookup)
         {
@@ -40,7 +40,7 @@ namespace Sttp.DataPointEncoding
 
             bool qualityChanged = false;
             bool timeChanged = false;
-
+            
             if (m_stream2.ReadBits1() == 0)
             {
                 qualityChanged = m_stream2.ReadBits1() == 1;
