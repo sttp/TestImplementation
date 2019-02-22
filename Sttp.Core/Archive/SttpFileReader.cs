@@ -18,10 +18,10 @@ namespace Sttp
     public class SttpFileReader : IDisposable
     {
         private CtpFileStream m_stream;
-        private DecoderBase m_decoderRaw;
-        private DecoderBase m_decoderBasic;
-        private DecoderBase m_decoderSimple;
-        private DecoderBase m_decoderAdvanced;
+        private RawDecoder m_decoderRaw;
+        private BasicDecoder m_decoderBasic;
+        private SimpleDecoder m_decoderSimple;
+        private AdvancedDecoder m_decoderAdvanced;
         private DecoderBase m_currentDecoder;
         private CtpCommand m_nextPacket;
 
@@ -57,7 +57,7 @@ namespace Sttp
             {
                 if (m_decoderRaw == null)
                     m_decoderRaw = new RawDecoder(Lookup);
-                m_decoderRaw.Load(((CommandDataStreamRaw)m_nextPacket).Data);
+                m_decoderRaw.Load(((CommandDataStreamRaw)m_nextPacket));
                 m_currentDecoder = m_decoderRaw;
                 return FileReaderItem.DataPoint;
             }
@@ -65,7 +65,7 @@ namespace Sttp
             {
                 if (m_decoderBasic == null)
                     m_decoderBasic = new BasicDecoder(Lookup);
-                m_decoderBasic.Load(((CommandDataStreamBasic)m_nextPacket).Data);
+                m_decoderBasic.Load(((CommandDataStreamBasic)m_nextPacket));
                 m_currentDecoder = m_decoderBasic;
                 return FileReaderItem.DataPoint;
             }
@@ -73,7 +73,7 @@ namespace Sttp
             {
                 if (m_decoderSimple == null)
                     m_decoderSimple = new SimpleDecoder(Lookup);
-                m_decoderSimple.Load(((CommandDataStreamSimple)m_nextPacket).Data);
+                m_decoderSimple.Load(((CommandDataStreamSimple)m_nextPacket));
                 m_currentDecoder = m_decoderSimple;
                 return FileReaderItem.DataPoint;
             }
@@ -81,7 +81,7 @@ namespace Sttp
             {
                 if (m_decoderAdvanced == null)
                     m_decoderAdvanced = new AdvancedDecoder(Lookup);
-                m_decoderAdvanced.Load(((CommandDataStreamAdvanced)m_nextPacket).Data);
+                m_decoderAdvanced.Load(((CommandDataStreamAdvanced)m_nextPacket));
                 m_currentDecoder = m_decoderAdvanced;
                 return FileReaderItem.DataPoint;
 

@@ -3,71 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CTP;
+using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
     public class RawDecoder : DecoderBase
     {
-        private BitReader m_stream;
+        private CtpObjectReader m_stream1;
+        private BitStreamReader m_stream2;
         private CtpTime m_lastTimestamp;
-        private long m_lastQuality = 0;
-        private CtpTypeCode m_lastValueCode;
+        private long m_lastQuality;
 
         public RawDecoder(LookupMetadata lookup)
             : base(lookup)
         {
-            m_stream = new BitReader();
+            m_stream1 = new CtpObjectReader();
+            m_stream2 = new BitStreamReader();
         }
 
-        public override void Load(byte[] data)
+        public void Load(CommandDataStreamRaw data)
         {
             m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;
-            m_lastValueCode = CtpTypeCode.Null;
-            m_stream.SetBuffer(data, 0, data.Length);
+            m_stream1.SetBuffer(data.ObjectStream);
+            m_stream2.SetBuffer(data.BitStream);
         }
 
         public override bool Read(SttpDataPoint dataPoint)
         {
-            if (m_stream.IsEmpty)
-            {
-                //It's possible that this is not enough since items might eventually be stored with a few bits, so I need some kind of extra escape sequence.
+            if (m_stream2.IsEmpty)
                 return false;
-            }
 
-            bool qualityChanged = false;
-            bool timeChanged = false;
-            bool typeChanged = false;
-
-            if (m_stream.ReadBits1() == 0)
-            {
-                qualityChanged = m_stream.ReadBits1() == 1;
-                timeChanged = m_stream.ReadBits1() == 1;
-                typeChanged = m_stream.ReadBits1() == 1;
-            }
-
-            var obj = m_stream.ReadObject();
-            dataPoint.Metadata = LookupMetadata(obj);
-
-            if (qualityChanged)
-            {
-                m_lastQuality = m_stream.ReadInt64();
-            }
+            if (m_stream2.ReadBits1() == 0)
+                m_lastQuality = (long)m_stream1.Read();
             dataPoint.Quality = m_lastQuality;
 
-            if (timeChanged)
-            {
-                m_lastTimestamp = m_stream.ReadCtpTime();
-            }
-
+            if (m_stream2.ReadBits1() == 0)
+                m_lastTimestamp = (CtpTime)m_stream1.Read();
             dataPoint.Time = m_lastTimestamp;
 
-            if (typeChanged)
-            {
-                m_lastValueCode = (CtpTypeCode)m_stream.ReadBits4();
-            }
-
-            dataPoint.Value = m_stream.ReadObjectWithoutType(m_lastValueCode);
+            dataPoint.Metadata = LookupMetadata(m_stream1.Read());
+            dataPoint.Value = m_stream1.Read();
 
             return true;
         }

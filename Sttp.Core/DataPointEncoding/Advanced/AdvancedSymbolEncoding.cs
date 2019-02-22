@@ -44,17 +44,17 @@ namespace Sttp.DataPointEncoding
         private AdvancedSymbols m_mode0001;
         private AdvancedSymbols m_mode00001;
 
-        private readonly BitWriter m_writeBits;
-        private readonly BitReader m_readBit;
+        private readonly BitStreamWriter m_writeBitsStream;
+        private readonly BitStreamReader m_readBitStream;
 
-        public AdvancedSymbolEncoding(BitWriter writer, BitReader reader)
+        public AdvancedSymbolEncoding(BitStreamWriter streamWriter, BitStreamReader streamReader)
         {
             m_codesPer = 0;
             m_codesSinceLast = 0;
             m_commandStats = new byte[32];
             m_mode = 1;
-            m_writeBits = writer;
-            m_readBit = reader;
+            m_writeBitsStream = streamWriter;
+            m_readBitStream = streamReader;
         }
 
         public void WriteCode(AdvancedSymbols code)
@@ -62,101 +62,101 @@ namespace Sttp.DataPointEncoding
             switch (m_mode)
             {
                 case 1:
-                    m_writeBits.WriteBits5((byte)code);
+                    m_writeBitsStream.WriteBits5((byte)code);
                     break;
                 case 2:
                     if (code == m_mode1)
                     {
-                        m_writeBits.WriteBits1(1);
+                        m_writeBitsStream.WriteBits1(1);
                     }
                     else
                     {
-                        m_writeBits.WriteBits1(0);
-                        m_writeBits.WriteBits5((byte)code);
+                        m_writeBitsStream.WriteBits1(0);
+                        m_writeBitsStream.WriteBits5((byte)code);
                     }
                     break;
                 case 3:
                     if (code == m_mode1)
                     {
-                        m_writeBits.WriteBits1(1);
+                        m_writeBitsStream.WriteBits1(1);
                     }
                     else if (code == m_mode01)
                     {
-                        m_writeBits.WriteBits2(1);
+                        m_writeBitsStream.WriteBits2(1);
                     }
                     else
                     {
-                        m_writeBits.WriteBits2(0);
-                        m_writeBits.WriteBits5((byte)code);
+                        m_writeBitsStream.WriteBits2(0);
+                        m_writeBitsStream.WriteBits5((byte)code);
                     }
                     break;
                 case 4:
                     if (code == m_mode1)
                     {
-                        m_writeBits.WriteBits1(1);
+                        m_writeBitsStream.WriteBits1(1);
                     }
                     else if (code == m_mode01)
                     {
-                        m_writeBits.WriteBits2(1);
+                        m_writeBitsStream.WriteBits2(1);
                     }
                     else if (code == m_mode001)
                     {
-                        m_writeBits.WriteBits3(1);
+                        m_writeBitsStream.WriteBits3(1);
                     }
                     else
                     {
-                        m_writeBits.WriteBits3(0);
-                        m_writeBits.WriteBits5((byte)code);
+                        m_writeBitsStream.WriteBits3(0);
+                        m_writeBitsStream.WriteBits5((byte)code);
                     }
                     break;
                 case 5:
                     if (code == m_mode1)
                     {
-                        m_writeBits.WriteBits1(1);
+                        m_writeBitsStream.WriteBits1(1);
                     }
                     else if (code == m_mode01)
                     {
-                        m_writeBits.WriteBits2(1);
+                        m_writeBitsStream.WriteBits2(1);
                     }
                     else if (code == m_mode001)
                     {
-                        m_writeBits.WriteBits3(1);
+                        m_writeBitsStream.WriteBits3(1);
                     }
                     else if (code == m_mode0001)
                     {
-                        m_writeBits.WriteBits4(1);
+                        m_writeBitsStream.WriteBits4(1);
                     }
                     else
                     {
-                        m_writeBits.WriteBits4(0);
-                        m_writeBits.WriteBits5((byte)code);
+                        m_writeBitsStream.WriteBits4(0);
+                        m_writeBitsStream.WriteBits5((byte)code);
                     }
                     break;
                 case 6:
                     if (code == m_mode1)
                     {
-                        m_writeBits.WriteBits1(1);
+                        m_writeBitsStream.WriteBits1(1);
                     }
                     else if (code == m_mode01)
                     {
-                        m_writeBits.WriteBits2(1);
+                        m_writeBitsStream.WriteBits2(1);
                     }
                     else if (code == m_mode001)
                     {
-                        m_writeBits.WriteBits3(1);
+                        m_writeBitsStream.WriteBits3(1);
                     }
                     else if (code == m_mode0001)
                     {
-                        m_writeBits.WriteBits4(1);
+                        m_writeBitsStream.WriteBits4(1);
                     }
                     else if (code == m_mode00001)
                     {
-                        m_writeBits.WriteBits5(1);
+                        m_writeBitsStream.WriteBits5(1);
                     }
                     else
                     {
-                        m_writeBits.WriteBits5(0);
-                        m_writeBits.WriteBits5((byte)code);
+                        m_writeBitsStream.WriteBits5(0);
+                        m_writeBitsStream.WriteBits5((byte)code);
                     }
                     break;
                 default:
@@ -172,96 +172,96 @@ namespace Sttp.DataPointEncoding
             switch (m_mode)
             {
                 case 1:
-                    code = (AdvancedSymbols)m_readBit.ReadBits5();
+                    code = (AdvancedSymbols)m_readBitStream.ReadBits5();
                     break;
                 case 2:
-                    if (m_readBit.ReadBits1() == 1)
+                    if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode1;
                     }
                     else
                     {
-                        code = (AdvancedSymbols)m_readBit.ReadBits5();
+                        code = (AdvancedSymbols)m_readBitStream.ReadBits5();
                     }
                     break;
                 case 3:
-                    if (m_readBit.ReadBits1() == 1)
+                    if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode1;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode01;
                     }
                     else
                     {
-                        code = (AdvancedSymbols)m_readBit.ReadBits5();
+                        code = (AdvancedSymbols)m_readBitStream.ReadBits5();
                     }
                     break;
                 case 4:
-                    if (m_readBit.ReadBits1() == 1)
+                    if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode1;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode01;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode001;
                     }
                     else
                     {
-                        code = (AdvancedSymbols)m_readBit.ReadBits5();
+                        code = (AdvancedSymbols)m_readBitStream.ReadBits5();
                     }
                     break;
                 case 5:
-                    if (m_readBit.ReadBits1() == 1)
+                    if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode1;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode01;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode001;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode0001;
                     }
                     else
                     {
-                        code = (AdvancedSymbols)m_readBit.ReadBits5();
+                        code = (AdvancedSymbols)m_readBitStream.ReadBits5();
                     }
                     break;
                 case 6:
-                    if (m_readBit.ReadBits1() == 1)
+                    if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode1;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode01;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode001;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode0001;
                     }
-                    else if (m_readBit.ReadBits1() == 1)
+                    else if (m_readBitStream.ReadBits1() == 1)
                     {
                         code = m_mode00001;
                     }
                     else
                     {
-                        code = (AdvancedSymbols)m_readBit.ReadBits5();
+                        code = (AdvancedSymbols)m_readBitStream.ReadBits5();
                     }
                     break;
                 default:

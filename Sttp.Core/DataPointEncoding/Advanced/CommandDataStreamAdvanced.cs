@@ -12,14 +12,21 @@ namespace Sttp.Codec
         : CommandObject<CommandDataStreamAdvanced>
     {
         /// <summary>
-        /// The data for this stream
+        /// Contains the stream of object types.
         /// </summary>
         [CommandField()]
-        public byte[] Data { get; set; }
+        public byte[] ObjectStream { get; set; }
 
-        public CommandDataStreamAdvanced(byte[] data)
+        /// <summary>
+        /// Contains the stream of bit data.
+        /// </summary>
+        [CommandField()]
+        public byte[] BitStream { get; set; }
+
+        public CommandDataStreamAdvanced(byte[] objectStream, byte[] bitStream)
         {
-            Data = data;
+            ObjectStream = objectStream;
+            BitStream = bitStream;
         }
 
         private CommandDataStreamAdvanced()
@@ -37,14 +44,21 @@ namespace Sttp.Codec
         : CommandObject<CommandDataStreamSimple>
     {
         /// <summary>
-        /// The data for this stream
+        /// Contains the stream of object types.
         /// </summary>
         [CommandField()]
-        public byte[] Data { get; set; }
+        public byte[] ObjectStream { get; set; }
 
-        public CommandDataStreamSimple(byte[] data)
+        /// <summary>
+        /// Contains the stream of bit data.
+        /// </summary>
+        [CommandField()]
+        public byte[] BitStream { get; set; }
+
+        public CommandDataStreamSimple(byte[] objectStream, byte[] bitStream)
         {
-            Data = data;
+            ObjectStream = objectStream;
+            BitStream = bitStream;
         }
 
         private CommandDataStreamSimple()
@@ -62,14 +76,21 @@ namespace Sttp.Codec
         : CommandObject<CommandDataStreamBasic>
     {
         /// <summary>
-        /// The data for this stream
+        /// Contains the stream of object types.
         /// </summary>
         [CommandField()]
-        public byte[] Data { get; set; }
+        public byte[] ObjectStream { get; set; }
 
-        public CommandDataStreamBasic(byte[] data)
+        /// <summary>
+        /// Contains the stream of bit data.
+        /// </summary>
+        [CommandField()]
+        public byte[] BitStream { get; set; }
+
+        public CommandDataStreamBasic(byte[] objectStream, byte[] bitStream)
         {
-            Data = data;
+            ObjectStream = objectStream;
+            BitStream = bitStream;
         }
 
         private CommandDataStreamBasic()
@@ -87,14 +108,21 @@ namespace Sttp.Codec
         : CommandObject<CommandDataStreamRaw>
     {
         /// <summary>
-        /// The data for this stream
+        /// Contains the stream of object types.
         /// </summary>
         [CommandField()]
-        public byte[] Data { get; set; }
+        public byte[] ObjectStream { get; set; }
 
-        public CommandDataStreamRaw(byte[] data)
+        /// <summary>
+        /// Contains the stream of bit data.
+        /// </summary>
+        [CommandField()]
+        public byte[] BitStream { get; set; }
+
+        public CommandDataStreamRaw(byte[] objectStream, byte[] bitStream)
         {
-            Data = data;
+            ObjectStream = objectStream;
+            BitStream = bitStream;
         }
 
         private CommandDataStreamRaw()

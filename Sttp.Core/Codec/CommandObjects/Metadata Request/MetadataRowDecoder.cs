@@ -5,12 +5,12 @@ namespace Sttp.Codec
 {
     public class MetadataRowDecoder
     {
-        private BitReader m_stream;
+        private CtpObjectReader m_stream;
         private CommandBeginMetadataResponse m_response;
         public MetadataRowDecoder(CommandBeginMetadataResponse metadataResponse)
         {
             m_response = metadataResponse;
-            m_stream = new BitReader();
+            m_stream = new CtpObjectReader();
         }
 
         public void Load(byte[] data)
@@ -31,7 +31,7 @@ namespace Sttp.Codec
 
             for (int x = 0; x < row.Length; x++)
             {
-                row[x] = m_stream.ReadObject();
+                row[x] = m_stream.Read();
             }
 
             return true;

@@ -7,12 +7,12 @@ namespace Sttp.Codec
     public class MetadataRowEncoder
     {
         private readonly List<MetadataColumn> m_columns;
-        private BitWriter m_stream;
+        private CtpObjectWriter m_stream;
 
         public MetadataRowEncoder(List<MetadataColumn> columns)
         {
             m_columns = columns;
-            m_stream = new BitWriter();
+            m_stream = new CtpObjectWriter();
         }
 
         public void Clear()
@@ -20,7 +20,7 @@ namespace Sttp.Codec
             m_stream.Clear();
         }
 
-        public int Size => m_stream.ApproximateSize;
+        public int Size => m_stream.Length;
 
         public void AddRow(CtpObject[] row)
         {
@@ -29,7 +29,7 @@ namespace Sttp.Codec
 
             for (int x = 0; x < row.Length; x++)
             {
-                m_stream.WriteObject(row[x]);
+                m_stream.Write(row[x]);
             }
         }
 

@@ -17,8 +17,6 @@ namespace Sttp.DataPointEncoding
         }
 
 
-        public abstract void Load(byte[] data);
-
         public abstract bool Read(SttpDataPoint dataPoint);
 
         public SttpDataPointMetadata LookupMetadata(CtpObject dataPointID)

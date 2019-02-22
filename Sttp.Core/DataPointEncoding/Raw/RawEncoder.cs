@@ -10,69 +10,54 @@ namespace Sttp.DataPointEncoding
 {
     public class RawEncoder : EncoderBase
     {
-        private BitWriter m_stream;
+        private CtpObjectWriter m_stream1;
+        private BitStreamWriter m_stream2;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
-        private CtpTypeCode m_lastValueCode;
 
         public RawEncoder()
         {
-            m_stream = new BitWriter();
+            m_stream1 = new CtpObjectWriter();
+            m_stream2 = new BitStreamWriter();
         }
 
-        public override int Length => m_stream.ApproximateSize;
+        public override int Length => m_stream1.Length + m_stream2.Length;
 
         public override void Clear()
         {
             m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;
-            m_lastValueCode = CtpTypeCode.Null;
-            m_stream.Clear();
+            m_stream1.Clear();
+            m_stream2.Clear();
+        }
+
+        public override CtpCommand ToArray()
+        {
+            return new CommandDataStreamRaw(m_stream1.ToArray(), m_stream2.ToArray());
         }
 
         public override void AddDataPoint(SttpDataPoint point)
         {
             bool qualityChanged = point.Quality != m_lastQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
-            bool typeChanged = point.Value.ValueTypeCode != m_lastValueCode;
 
-            if (!qualityChanged && !timeChanged && !typeChanged)
-            {
-                m_stream.WriteBits1(true); //Is the common header.
-            }
-            else
-            {
-                m_stream.WriteBits1(false); //Is not the common header.
-                m_stream.WriteBits1(qualityChanged);
-                m_stream.WriteBits1(timeChanged);
-                m_stream.WriteBits1(typeChanged);
-            }
-
-            m_stream.WriteObject(point.Metadata.DataPointID);
-
+            m_stream2.WriteBits1(qualityChanged);
             if (qualityChanged)
             {
-                m_stream.Write(point.Quality);
+                m_stream1.Write(point.Quality);
+                m_lastQuality = point.Quality;
             }
 
+            m_stream2.WriteBits1(timeChanged);
             if (timeChanged)
             {
-                m_stream.Write(point.Time);
+                m_stream1.Write(point.Time);
                 m_lastTimestamp = point.Time;
             }
-
-            if (typeChanged)
-            {
-                m_stream.WriteBits4((byte)point.Value.ValueTypeCode);
-                m_lastValueCode = point.Value.ValueTypeCode;
-            }
-
-            m_stream.WriteObjectWithoutType(point.Value);
+            m_stream1.Write(point.Metadata.DataPointID);
+            m_stream1.Write(point.Value);
         }
 
-        public override CtpCommand ToArray()
-        {
-            return new CommandDataStreamRaw(m_stream.ToArray());
-        }
+
     }
 }
