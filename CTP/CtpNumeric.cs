@@ -68,6 +68,20 @@ namespace CTP
             High = 0;
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="value">a signed value that is to be scaled.</param>
+        /// <param name="scale">A scaling factor. From 0 to 28</param>
+        public CtpNumeric(ulong value, byte scale = 0)
+        {
+            if (scale > 28)
+                throw new ArgumentException("Invalid Scale Factor");
+            m_flags = scale;
+            Low = (int)value;
+            Mid = (int)(value >> 32);
+            High = 0;
+        }
+
         public static explicit operator CtpNumeric(decimal value)
         {
             return new CtpNumeric(value);

@@ -12,6 +12,12 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return $"(Null)";
+                    case CtpTypeCode.Int8:
+                        return $"(sbyte){m_valueInt64.ToString()}";
+                    case CtpTypeCode.Int16:
+                        return $"(short){m_valueInt64.ToString()}";
+                    case CtpTypeCode.Int32:
+                        return $"(int){m_valueInt64.ToString()}";
                     case CtpTypeCode.Int64:
                         return $"(long){m_valueInt64.ToString()}";
                     case CtpTypeCode.Single:
@@ -46,6 +52,12 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return null;
+                    case CtpTypeCode.Int8:
+                        return (sbyte)m_valueInt64;
+                    case CtpTypeCode.Int16:
+                        return (short)m_valueInt64;
+                    case CtpTypeCode.Int32:
+                        return (int)m_valueInt64;
                     case CtpTypeCode.Int64:
                         return m_valueInt64;
                     case CtpTypeCode.Single:
@@ -227,6 +239,9 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
+                    case CtpTypeCode.Int8:
+                    case CtpTypeCode.Int16:
+                    case CtpTypeCode.Int32:
                     case CtpTypeCode.Int64:
                         {
                             checked
@@ -316,6 +331,9 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
+                    case CtpTypeCode.Int8:
+                    case CtpTypeCode.Int16:
+                    case CtpTypeCode.Int32:
                     case CtpTypeCode.Int64:
                         checked
                         {
@@ -355,6 +373,9 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
+                    case CtpTypeCode.Int8:
+                    case CtpTypeCode.Int16:
+                    case CtpTypeCode.Int32:
                     case CtpTypeCode.Int64:
                         checked
                         {
@@ -395,6 +416,9 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
+                    case CtpTypeCode.Int8:
+                    case CtpTypeCode.Int16:
+                    case CtpTypeCode.Int32:
                     case CtpTypeCode.Int64:
                         checked
                         {
@@ -433,6 +457,9 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
+                    case CtpTypeCode.Int8:
+                    case CtpTypeCode.Int16:
+                    case CtpTypeCode.Int32:
                     case CtpTypeCode.Int64:
                         checked
                         {
@@ -549,6 +576,9 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return null;
+                    case CtpTypeCode.Int8:
+                    case CtpTypeCode.Int16:
+                    case CtpTypeCode.Int32:
                     case CtpTypeCode.Int64:
                         return m_valueInt64.ToString();
                     case CtpTypeCode.Single:
