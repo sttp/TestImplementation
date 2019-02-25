@@ -167,6 +167,10 @@ namespace Sttp.Tests
                             var dp = new SttpDataPoint();
                             while (ctp.ReadDataPoint(dp))
                             {
+                                if (dp.Metadata.DataPointID.AsString.EndsWith(":DFreq0"))
+                                {
+                                    dp.Value = new CtpNumeric((long)(dp.Value.AsSingle * 100), 2);
+                                }
                                 //Names.Add(dp.Metadata.DataPointID.AsString);
                                 //raw.WriteLine(dp.ToString());
                                 PointCount++;

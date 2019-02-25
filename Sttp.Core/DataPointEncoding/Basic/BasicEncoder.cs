@@ -53,16 +53,16 @@ namespace Sttp.DataPointEncoding
 
             if (!sendMetadata && !qualityChanged && !timeChanged && !valueTypeChanged && !channelIDChanged)
             {
-                m_stream2.WriteBits1(0); //Is the common header.
+                m_stream2.WriteBits1(0); //Is the common header. (~75% of the time, this is true)
             }
             else
             {
-                m_stream2.WriteBits1(1); //Is not the common header.
-                m_stream2.WriteBits1(qualityChanged);
-                m_stream2.WriteBits1(timeChanged);
+                m_stream2.WriteBits2(1); //Is not the common header.
+                m_stream2.WriteBits1(qualityChanged); //Rare
+                m_stream2.WriteBits1(timeChanged); //Nearly Rare
                 m_stream2.WriteBits1(valueTypeChanged);
                 m_stream2.WriteBits1(channelIDChanged);
-                m_stream2.WriteBits1(sendMetadata);
+                m_stream2.WriteBits1(sendMetadata); //Rare
             }
 
             if (channelIDChanged)

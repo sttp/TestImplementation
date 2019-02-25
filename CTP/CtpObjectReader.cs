@@ -247,14 +247,9 @@ namespace CTP
                 case CtpObjectSymbols.NumericBytes11:
                 case CtpObjectSymbols.NumericElse:
                     {
-                        byte code = (byte)ReadBits8(data, ref currentPosition, endPosition);
-                        int flags = (code & 31) << 16;
+                        byte flags = (byte)ReadBits8(data, ref currentPosition, endPosition);
                         int low;
                         int mid;
-                        if (code > 127)
-                        {
-                            flags |= unchecked((int)Bits.Bit31);
-                        }
                         switch (symbol)
                         {
                             case CtpObjectSymbols.NumericBytes0:

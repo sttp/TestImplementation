@@ -15,7 +15,7 @@ namespace Sttp.DataPointEncoding
 
         private const ulong SignChangeValue = (1ul << 63);
 
-        private static ulong ChangeSign(ulong value)
+        public static ulong ChangeSign(ulong value)
         {
             //if bit 64 is high, bits 1-63 will be inverted
             //Then all bits will be rotated 1 to the left
@@ -32,7 +32,7 @@ namespace Sttp.DataPointEncoding
             return comparedResult + prevValue;
         }
 
-        private static ulong UnChangeSign(ulong value)
+        public static ulong UnChangeSign(ulong value)
         {
             if ((value & 1) == 0)
             {
