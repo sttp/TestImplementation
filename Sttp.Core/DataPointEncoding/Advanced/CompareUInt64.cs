@@ -8,9 +8,9 @@ namespace Sttp.DataPointEncoding
 {
     public static class CompareUInt64
     {
-        public static ulong Compare(ulong value1, ulong value2)
+        public static ulong Compare(ulong currentValue, ulong prevValue)
         {
-            return ChangeSign(value1 - value2);
+            return ChangeSign(currentValue - prevValue);
         }
 
         private const ulong SignChangeValue = (1ul << 63);
@@ -26,10 +26,10 @@ namespace Sttp.DataPointEncoding
             return (value << 1);
         }
 
-        public static ulong UnCompare(ulong comparedResult, ulong value2)
+        public static ulong UnCompare(ulong comparedResult, ulong prevValue)
         {
             comparedResult = UnChangeSign(comparedResult);
-            return comparedResult + value2;
+            return comparedResult + prevValue;
         }
 
         private static ulong UnChangeSign(ulong value)
@@ -40,25 +40,5 @@ namespace Sttp.DataPointEncoding
             }
             return ((~value) >> 1) + SignChangeValue;
         }
-
-        /// Counts the number of bits required to store this value if leading zero's are ignored.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Unfortunately, c# cannot call the cpu instruction clz
-        /// Example from http://en.wikipedia.org/wiki/Find_first_set
-        /// </remarks>
-        public static int RequiredBits(ulong value)
-        {
-            if (value > 0xFFFFFFFFu)
-            {
-                return CompareUInt32.RequiredBits((uint)value) + 32;
-            }
-            return CompareUInt32.RequiredBits((uint)value);
-        }
-
-
-
     }
 }

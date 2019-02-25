@@ -7,7 +7,7 @@ using CTP;
 
 namespace Sttp.DataPointEncoding
 {
-    public unsafe class CustomBitEncoding
+    public static unsafe class CustomBitEncoding
     {
         const ulong Bits64 = 0xFFFFFFFFFFFFFFFFu;
         const ulong Bits60 = 0xFFFFFFFFFFFFFFFu;
@@ -16,283 +16,270 @@ namespace Sttp.DataPointEncoding
         const ulong Bits48 = 0xFFFFFFFFFFFFu;
         const ulong Bits44 = 0xFFFFFFFFFFFu;
         const ulong Bits40 = 0xFFFFFFFFFFu;
+        const ulong Bits37 = 0x1FFFFFFFFFu;
         const ulong Bits36 = 0xFFFFFFFFFu;
         const uint Bits32 = 0xFFFFFFFFu;
         const uint Bits28 = 0xFFFFFFFu;
+        const uint Bits25 = 0x1FFFFFFu;
         const uint Bits24 = 0xFFFFFFu;
+        const uint Bits21 = 0x1FFFFFu;
         const uint Bits20 = 0xFFFFFu;
+        const uint Bits17 = 0x1FFFFu;
         const uint Bits16 = 0xFFFFu;
         const uint Bits12 = 0xFFFu;
         const uint Bits8 = 0xFFu;
         const uint Bits4 = 0xFu;
 
-        private BitStreamWriter m_writer;
-
-        public CustomBitEncoding(BitStreamWriter writer)
+        public static CtpTime ReadTimeChanged(BitStreamReader stream, CtpTime prev)
         {
-            m_writer = writer;
+            ulong bitsChanged;
+
+            switch (stream.ReadBits3())
+            {
+                case 0:
+                    bitsChanged = stream.ReadBits17();
+                    break;
+                case 1:
+                    bitsChanged = stream.ReadBits21();
+                    break;
+                case 2:
+                    bitsChanged = stream.ReadBits25();
+                    break;
+                case 3:
+                    bitsChanged = stream.ReadBits32();
+                    break;
+                case 4:
+                    bitsChanged = stream.ReadBits(37);
+                    break;
+                case 5:
+                    bitsChanged = stream.ReadBits(44);
+                    break;
+                case 6:
+                    bitsChanged = stream.ReadBits(56);
+                    break;
+                case 7:
+                    bitsChanged = stream.ReadBits(64);
+                    break;
+                default:
+                    throw new Exception(); //Impossible to get here.
+            }
+
+            return new CtpTime((long)CompareUInt64.UnCompare(bitsChanged, (ulong)prev.Ticks));
         }
 
-        public void Clear()
+        public static void WriteTimeChanged(BitStreamWriter stream, CtpTime prev, CtpTime current)
         {
+            ulong bitsChanged = CompareUInt64.Compare((ulong)current.Ticks, (ulong)prev.Ticks);
 
-        }
-
-        public void WriteBitsChanged64(ulong bitsChanged)
-        {
-            if (bitsChanged <= Bits4)
+            if (bitsChanged <= Bits17) //Changes by up to 6.5ms
             {
-                m_writer.WriteBits4(0);
-                m_writer.WriteBits4((uint)bitsChanged);
+                stream.WriteBits3(0);
+                stream.WriteBits17((uint)bitsChanged);
             }
-            else if (bitsChanged <= Bits8)
+            else if (bitsChanged <= Bits21) //Changes up to 104ms
             {
-                m_writer.WriteBits4(1);
-                m_writer.WriteBits8((uint)bitsChanged);
+                stream.WriteBits3(1);
+                stream.WriteBits21((uint)bitsChanged);
             }
-            else if (bitsChanged <= Bits12)
+            else if (bitsChanged <= Bits25) //Changes up to 1.6 seconds
             {
-                m_writer.WriteBits4(2);
-                m_writer.WriteBits12((uint)bitsChanged);
+                stream.WriteBits3(2);
+                stream.WriteBits25((uint)bitsChanged);
             }
-            else if (bitsChanged <= Bits16)
+            else if (bitsChanged <= Bits32) //changes up to 3.5 Minutes
             {
-                m_writer.WriteBits4(3);
-                m_writer.WriteBits16((uint)bitsChanged);
+                stream.WriteBits3(3);
+                stream.WriteBits32((uint)bitsChanged);
             }
-            else if (bitsChanged <= Bits20)
+            else if (bitsChanged <= Bits37) //changes up to 1.9 hours
             {
-                m_writer.WriteBits4(4);
-                m_writer.WriteBits20((uint)bitsChanged);
+                stream.WriteBits3(4);
+                stream.WriteBits(37, bitsChanged);
             }
-            else if (bitsChanged <= Bits24)
+            else if (bitsChanged <= Bits44) //changes up to 10 days
             {
-                m_writer.WriteBits4(5);
-                m_writer.WriteBits24((uint)bitsChanged);
+                stream.WriteBits3(5);
+                stream.WriteBits(44, bitsChanged);
             }
-            else if (bitsChanged <= Bits28)
+            else if (bitsChanged <= Bits56) //Changes up to 114 Years
             {
-                m_writer.WriteBits4(6);
-                m_writer.WriteBits28((uint)bitsChanged);
-            }
-            else if (bitsChanged <= Bits32)
-            {
-                m_writer.WriteBits4(7);
-                m_writer.WriteBits32((uint)bitsChanged);
-            }
-            else if (bitsChanged <= Bits36)
-            {
-                m_writer.WriteBits4(8);
-                m_writer.WriteBits(36, bitsChanged);
-            }
-            else if (bitsChanged <= Bits40)
-            {
-                m_writer.WriteBits4(9);
-                m_writer.WriteBits(40, bitsChanged);
-            }
-            else if (bitsChanged <= Bits44)
-            {
-                m_writer.WriteBits4(10);
-                m_writer.WriteBits(44, bitsChanged);
-            }
-            else if (bitsChanged <= Bits48)
-            {
-                m_writer.WriteBits4(11);
-                m_writer.WriteBits(48, bitsChanged);
-            }
-            else if (bitsChanged <= Bits52)
-            {
-                m_writer.WriteBits4(12);
-                m_writer.WriteBits(52, bitsChanged);
-            }
-            else if (bitsChanged <= Bits56)
-            {
-                m_writer.WriteBits4(13);
-                m_writer.WriteBits(56, bitsChanged);
-            }
-            else if (bitsChanged <= Bits60)
-            {
-                m_writer.WriteBits4(14);
-                m_writer.WriteBits(60, bitsChanged);
+                stream.WriteBits3(6);
+                stream.WriteBits(56, bitsChanged);
             }
             else
             {
-                m_writer.WriteBits4(15);
-                m_writer.WriteBits(64, bitsChanged);
+                stream.WriteBits3(7);
+                stream.WriteBits(64, bitsChanged);
             }
         }
 
-        public void WriteBitsChanged32(uint bitsChanged)
+        public static void WritePointID(BitStreamWriter stream, int value)
         {
-            if (bitsChanged <= Bits4)
+            if (value <= Bits8) // up to 256 points
             {
-                m_writer.WriteBits3(0);
-                m_writer.WriteBits4(bitsChanged);
+                stream.WriteBits2(0);
+                stream.WriteBits8((uint)value);
             }
-            else if (bitsChanged <= Bits8)
+            else if (value <= Bits12) // up to 4096 points
             {
-                m_writer.WriteBits3(1);
-                m_writer.WriteBits8(bitsChanged);
+                stream.WriteBits2(1);
+                stream.WriteBits12((uint)value);
             }
-            else if (bitsChanged <= Bits12)
+            else if (value <= Bits16)  // up to 65536 points
             {
-                m_writer.WriteBits3(2);
-                m_writer.WriteBits12(bitsChanged);
+                stream.WriteBits2(2);
+                stream.WriteBits16((uint)value);
             }
-            else if (bitsChanged <= Bits16)
+            else if (value <= Bits20) // Up to 1 million points
             {
-                m_writer.WriteBits3(3);
-                m_writer.WriteBits16(bitsChanged);
+                stream.WriteBits2(3);
+                stream.WriteBits1(0);
+                stream.WriteBits20((uint)value);
             }
-            else if (bitsChanged <= Bits20)
+            else //up to 4 billion points
             {
-                m_writer.WriteBits3(4);
-                m_writer.WriteBits20(bitsChanged);
-            }
-            else if (bitsChanged <= Bits24)
-            {
-                m_writer.WriteBits3(5);
-                m_writer.WriteBits24(bitsChanged);
-            }
-            else if (bitsChanged <= Bits28)
-            {
-                m_writer.WriteBits3(6);
-                m_writer.WriteBits28(bitsChanged);
-            }
-            else
-            {
-                m_writer.WriteBits3(7);
-                m_writer.WriteBits32(bitsChanged);
+                stream.WriteBits2(3);
+                stream.WriteBits1(1);
+                stream.WriteBits32((uint)value);
             }
         }
 
-        public void WriteInt32(int value)
+        public static int ReadPointID(BitStreamReader stream)
+        {
+            switch (stream.ReadBits2())
+            {
+                case 0:
+                    return (int)stream.ReadBits8();
+                case 1:
+                    return (int)stream.ReadBits12();
+                case 2:
+                    return (int)stream.ReadBits16();
+                case 3:
+                    {
+                        if (stream.ReadBits1() == 0)
+                            return (int)stream.ReadBits20();
+                        return (int)stream.ReadBits32();
+                    }
+                default:
+                    throw new Exception(); //impossible to get here.
+            }
+        }
+
+        public static long ReadInt64(BitStreamReader stream)
+        {
+            ulong negate = stream.ReadBits1() == 0 ? 0 : ulong.MaxValue;
+
+            switch (stream.ReadBits3())
+            {
+                case 0:
+                    return (long)(stream.ReadBits8() ^ negate);
+                case 1:
+                    return (long)(stream.ReadBits16() ^ negate);
+                case 2:
+                    return (long)(stream.ReadBits24() ^ negate);
+                case 3:
+                    return (long)(stream.ReadBits32() ^ negate);
+                case 4:
+                    return (long)(stream.ReadBits(40) ^ negate);
+                case 5:
+                    return (long)(stream.ReadBits(48) ^ negate);
+                case 6:
+                    return (long)(stream.ReadBits(56) ^ negate);
+                case 7:
+                    return (long)(stream.ReadBits(64) ^ negate);
+                default:
+                    throw new Exception(); //Impossible to get here.
+            }
+        }
+
+        public static void WriteInt64(BitStreamWriter stream, long value)
         {
             if (value < 0)
             {
-                m_writer.WriteBits1(1);
+                stream.WriteBits1(1);
                 value = ~value;
             }
             else
             {
-                m_writer.WriteBits1(0);
-            }
-
-            if (value <= Bits4)
-            {
-                m_writer.WriteBits3(0);
-                m_writer.WriteBits4((uint)value);
-            }
-            else if (value <= Bits8)
-            {
-                m_writer.WriteBits3(1);
-                m_writer.WriteBits8((uint)value);
-            }
-            else if (value <= Bits12)
-            {
-                m_writer.WriteBits3(2);
-                m_writer.WriteBits12((uint)value);
-            }
-            else if (value <= Bits16)
-            {
-                m_writer.WriteBits3(3);
-                m_writer.WriteBits16((uint)value);
-            }
-            else if (value <= Bits20)
-            {
-                m_writer.WriteBits3(4);
-                m_writer.WriteBits20((uint)value);
-            }
-            else if (value <= Bits24)
-            {
-                m_writer.WriteBits3(5);
-                m_writer.WriteBits24((uint)value);
-            }
-            else if (value <= Bits28)
-            {
-                m_writer.WriteBits3(6);
-                m_writer.WriteBits28((uint)value);
-            }
-            else
-            {
-                m_writer.WriteBits3(7);
-                m_writer.WriteBits32((uint)value);
-            }
-        }
-
-        public void WriteInt64(long value)
-        {
-            if (value < 0)
-            {
-                m_writer.WriteBits1(1);
-                value = ~value;
-            }
-            else
-            {
-                m_writer.WriteBits1(0);
+                stream.WriteBits1(0);
             }
 
             if (value <= Bits8)
             {
-                m_writer.WriteBits3(0);
-                m_writer.WriteBits8((uint)(int)value);
+                stream.WriteBits3(0);
+                stream.WriteBits8((uint)(int)value);
             }
             else if (value <= Bits16)
             {
-                m_writer.WriteBits3(1);
-                m_writer.WriteBits16((uint)(int)value);
+                stream.WriteBits3(1);
+                stream.WriteBits16((uint)(int)value);
             }
             else if (value <= Bits24)
             {
-                m_writer.WriteBits3(2);
-                m_writer.WriteBits24((uint)(int)value);
+                stream.WriteBits3(2);
+                stream.WriteBits24((uint)(int)value);
             }
             else if (value <= Bits32)
             {
-                m_writer.WriteBits3(3);
-                m_writer.WriteBits32((uint)(int)value);
+                stream.WriteBits3(3);
+                stream.WriteBits32((uint)(int)value);
             }
             else if (value <= (long)Bits40)
             {
-                m_writer.WriteBits3(4);
-                m_writer.WriteBits(40, (ulong)value);
+                stream.WriteBits3(4);
+                stream.WriteBits(40, (ulong)value);
             }
             else if (value <= (long)Bits48)
             {
-                m_writer.WriteBits3(5);
-                m_writer.WriteBits(48, (ulong)value);
+                stream.WriteBits3(5);
+                stream.WriteBits(48, (ulong)value);
             }
             else if (value <= (long)Bits56)
             {
-                m_writer.WriteBits3(6);
-                m_writer.WriteBits(56, (ulong)value);
+                stream.WriteBits3(6);
+                stream.WriteBits(56, (ulong)value);
             }
             else
             {
-                m_writer.WriteBits3(7);
-                m_writer.WriteBits(64, (ulong)value);
+                stream.WriteBits3(7);
+                stream.WriteBits(64, (ulong)value);
             }
         }
 
-        public void WriteSingle(float value)
+        public static float ReadSingle(BitStreamReader stream)
+        {
+            uint value = stream.ReadBits32();
+            return *(float*)&value;
+        }
+
+        public static void WriteSingle(BitStreamWriter stream, float value)
         {
             uint v = *(uint*)&value;
-            m_writer.WriteBits32(v);
+            stream.WriteBits32(v);
         }
 
-        public void WriteBoolean(bool value)
-        {
-            m_writer.WriteBits1(value);
-        }
-
-        public void WriteDouble(double value)
+        public static void WriteDouble(BitStreamWriter stream, double value)
         {
             ulong v = *(ulong*)&value;
-            m_writer.WriteBits(64,v);
+            stream.WriteBits(64, v);
         }
-        public void WriteTime(CtpTime value)
+
+        public static double ReadDouble(BitStreamReader stream)
         {
-            m_writer.WriteBits(64, (ulong)value.Ticks);
+            ulong value = stream.ReadBits(64);
+            return *(double*)&value;
         }
+
+        public static void WriteBoolean(BitStreamWriter stream, bool value)
+        {
+            stream.WriteBits1(value);
+        }
+
+        public static bool ReadBoolean(BitStreamReader stream)
+        {
+            return stream.ReadBits1() == 1;
+        }
+
+
     }
 }
