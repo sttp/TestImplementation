@@ -16,6 +16,9 @@ namespace Sttp.Tests.Object_Serialzation
         public void TestValues()
         {
             Test(new Random(0), CtpTypeCode.Null);
+            Test(new Random(0), CtpTypeCode.Int8);
+            Test(new Random(0), CtpTypeCode.Int16);
+            Test(new Random(0), CtpTypeCode.Int32);
             Test(new Random(0), CtpTypeCode.Int64);
             Test(new Random(0), CtpTypeCode.Single);
             Test(new Random(0), CtpTypeCode.Double);
@@ -38,7 +41,7 @@ namespace Sttp.Tests.Object_Serialzation
                 var list = new List<CtpObject>();
                 for (int x = 0; x < length; x++)
                 {
-                    list.Add(CreateRandom(r, (CtpTypeCode)r.Next(10)));
+                    list.Add(CreateRandom(r, (CtpTypeCode)r.Next(14)));
                 }
                 Test(list);
             }
@@ -84,7 +87,7 @@ namespace Sttp.Tests.Object_Serialzation
             {
                 case CtpTypeCode.Null:
                     return CtpObject.Null;
-                case CtpTypeCode.Int64:
+                case CtpTypeCode.Int8:
                     switch (r.Next(100))
                     {
                         case 0: return -1;
@@ -94,11 +97,30 @@ namespace Sttp.Tests.Object_Serialzation
                         case 4: return 99;
                         case 5: return 100;
                         case 6: return 101;
-                        case 7: return int.MaxValue;
-                        case 8: return int.MinValue;
-                        case 9: return long.MaxValue;
-                        case 10: return long.MinValue;
-                        default: return BigEndian.ToInt64(buffer, 0) >> r.Next(63);
+                        case 7: return sbyte.MaxValue;
+                        case 8: return sbyte.MinValue;
+                        default: return ((sbyte)buffer[0]) >> r.Next(8);
+                    }
+                case CtpTypeCode.Int16:
+                    switch (r.Next(100))
+                    {
+                        case 0: return short.MaxValue;
+                        case 1: return short.MinValue;
+                        default: return BigEndian.ToInt16(buffer, 0) >> r.Next(16);
+                    }
+                case CtpTypeCode.Int32:
+                    switch (r.Next(100))
+                    {
+                        case 0: return int.MaxValue;
+                        case 1: return int.MinValue;
+                        default: return BigEndian.ToInt64(buffer, 0) >> r.Next(32);
+                    }
+                case CtpTypeCode.Int64:
+                    switch (r.Next(100))
+                    {
+                        case 0: return long.MaxValue;
+                        case 1: return long.MinValue;
+                        default: return BigEndian.ToInt64(buffer, 0) >> r.Next(64);
                     }
                 case CtpTypeCode.Single:
                     switch (r.Next(100))
@@ -161,7 +183,6 @@ namespace Sttp.Tests.Object_Serialzation
                                 {
                                     high >>= shift;
                                 }
-
                                 return new decimal((int)low, (int)mid, (int)high, r.Next(2) == 0, (byte)r.Next(29));
                             }
                     }
@@ -193,18 +214,6 @@ namespace Sttp.Tests.Object_Serialzation
                 default:
                     throw new ArgumentOutOfRangeException(nameof(typeCode), typeCode, null);
             }
-        }
-
-
-        public static byte[] GetBytes(int value)
-        {
-            return new[]
-                   {
-                       (byte)(value >> 24),
-                       (byte)(value >> 16),
-                       (byte)(value >> 8),
-                       (byte)(value)
-                   };
         }
 
     }

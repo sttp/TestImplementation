@@ -9,7 +9,7 @@ namespace CTP
 {
     public struct CtpNumeric
     {
-        private readonly byte m_flags;
+        public readonly byte Flags;
         public readonly int High;
         public readonly int Low;
         public readonly int Mid;
@@ -20,11 +20,11 @@ namespace CTP
             Low = bits[0];
             Mid = bits[1];
             High = bits[2];
-            m_flags = (byte)((bits[3] >> 16) & 31);
-            if (m_flags > 28)
+            Flags = (byte)((bits[3] >> 16) & 31);
+            if (Flags > 28)
                 throw new ArgumentException("Invalid Scale Factor");
             if (bits[3] < 0)
-                m_flags += 128;
+                Flags += 128;
         }
 
         public CtpNumeric(byte flags, int high, int mid, int low)
@@ -32,7 +32,7 @@ namespace CTP
             High = high;
             Mid = mid;
             Low = low;
-            m_flags = flags;
+            Flags = flags;
             if (Scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
         }
@@ -41,9 +41,9 @@ namespace CTP
         {
             if (scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
-            m_flags = scale;
+            Flags = scale;
             if (isNegative)
-                m_flags += 128;
+                Flags += 128;
             High = high;
             Mid = mid;
             Low = low;
@@ -57,10 +57,10 @@ namespace CTP
         {
             if (scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
-            m_flags = scale;
+            Flags = scale;
             if (value < 0)
             {
-                m_flags += 128;
+                Flags += 128;
                 value = -value; //ToDo: Check this conversion
             }
             Low = (int)value;
@@ -76,7 +76,7 @@ namespace CTP
         {
             if (scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
-            m_flags = scale;
+            Flags = scale;
             Low = (int)value;
             Mid = (int)(value >> 32);
             High = 0;
@@ -102,9 +102,9 @@ namespace CTP
             return !(a == b);
         }
 
-        public byte Scale => (byte)(m_flags & 31);
-        public bool IsNegative => m_flags > 127;
-        public bool IsDefault => m_flags == 0 && High == 0 && Low == 0 && Mid == 0;
+        public byte Scale => (byte)(Flags & 31);
+        public bool IsNegative => Flags > 127;
+        public bool IsDefault => Flags == 0 && High == 0 && Low == 0 && Mid == 0;
 
         public override bool Equals(object value)
         {
@@ -122,7 +122,7 @@ namespace CTP
 
         public override int GetHashCode()
         {
-            return m_flags ^ High ^ Low ^ Mid;
+            return Flags ^ High ^ Low ^ Mid;
         }
 
     }

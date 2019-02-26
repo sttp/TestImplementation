@@ -96,6 +96,12 @@ namespace CTP
 
             if (symbol <= CtpObjectSymbols.Null)
                 return CtpObject.Null;
+            if (symbol <= CtpObjectSymbols.IntBits8)
+                return ReadInt8(symbol, data, ref currentPosition, endPosition);
+            if (symbol <= CtpObjectSymbols.IntBits16)
+                return ReadInt16(symbol, data, ref currentPosition, endPosition);
+            if (symbol <= CtpObjectSymbols.IntBits32)
+                return ReadInt32(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.IntElse)
                 return ReadInt64(symbol, data, ref currentPosition, endPosition);
             if (symbol <= CtpObjectSymbols.SingleElse)
@@ -134,57 +140,75 @@ namespace CTP
             return rv;
         }
 
-        private static CtpObject ReadInt64(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
+        private static CtpObject ReadInt8(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
         {
-            if (symbol <= CtpObjectSymbols.Int100)
+            if (symbol <= CtpObjectSymbols.Int64)
             {
                 return (int)symbol - (int)CtpObjectSymbols.Int0;
             }
-            if (symbol <= CtpObjectSymbols.IntBits56)
+            return (sbyte)ReadBits8(data, ref currentPosition, endPosition);
+        }
+
+        private static CtpObject ReadInt16(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
+        {
+            switch (symbol)
             {
-                switch (symbol)
-                {
-                    case CtpObjectSymbols.IntBits8:
-                        return (int)ReadBits8(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntBits16:
-                        return (int)ReadBits16(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntBits24:
-                        return (int)ReadBits24(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntBits32:
-                        return (long)ReadBits32(data, ref currentPosition, endPosition); //Type long here since casting a uint->int->long can make the number negative
-                    case CtpObjectSymbols.IntBits40:
-                        return (long)ReadBits40(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntBits48:
-                        return (long)ReadBits48(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntBits56:
-                        return (long)ReadBits56(data, ref currentPosition, endPosition);
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
-                }
+                case CtpObjectSymbols.IntBits9Positive:
+                    return (short)(ushort)ReadBits8(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits9Negative:
+                    return (short)~(ushort)ReadBits8(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits16:
+                    return (short)ReadBits16(data, ref currentPosition, endPosition);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
             }
-            if (symbol <= CtpObjectSymbols.IntNegBits56)
+        }
+
+        private static CtpObject ReadInt32(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
+        {
+            switch (symbol)
             {
-                switch (symbol)
-                {
-                    case CtpObjectSymbols.IntNegBits8:
-                        return ~(long)ReadBits8(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntNegBits16:
-                        return ~(long)ReadBits16(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntNegBits24:
-                        return ~(long)ReadBits24(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntNegBits32:
-                        return ~(long)ReadBits32(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntNegBits40:
-                        return ~(long)ReadBits40(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntNegBits48:
-                        return ~(long)ReadBits48(data, ref currentPosition, endPosition);
-                    case CtpObjectSymbols.IntNegBits56:
-                        return ~(long)ReadBits56(data, ref currentPosition, endPosition);
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
-                }
+                case CtpObjectSymbols.IntBits17Positive:
+                    return (int)(uint)ReadBits16(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits17Negative:
+                    return (int)~(uint)ReadBits16(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits24:
+                    return (int)(uint)ReadBits24(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntNegBits24:
+                    return ~(int)(uint)ReadBits24(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits32:
+                    return (int)ReadBits32(data, ref currentPosition, endPosition);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
             }
-            return (long)ReadBits64(data, ref currentPosition, endPosition);
+        }
+
+        private static CtpObject ReadInt64(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
+        {
+            switch (symbol)
+            {
+                case CtpObjectSymbols.IntBits33Positive:
+                    return (long)ReadBits32(data, ref currentPosition, endPosition); //Type long here since casting a uint->int->long can make the number negative
+                case CtpObjectSymbols.IntBits40:
+                    return (long)ReadBits40(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits48:
+                    return (long)ReadBits48(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits56:
+                    return (long)ReadBits56(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntBits33Negative:
+                    return ~(long)ReadBits32(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntNegBits40:
+                    return ~(long)ReadBits40(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntNegBits48:
+                    return ~(long)ReadBits48(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntNegBits56:
+                    return ~(long)ReadBits56(data, ref currentPosition, endPosition);
+                case CtpObjectSymbols.IntElse:
+                    return (long)ReadBits64(data, ref currentPosition, endPosition);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
+            }
+
         }
 
         private static CtpObject ReadSingle(CtpObjectSymbols symbol, byte[] data, ref int currentPosition, int endPosition)
@@ -250,6 +274,7 @@ namespace CTP
                         byte flags = (byte)ReadBits8(data, ref currentPosition, endPosition);
                         int low;
                         int mid;
+                        int high;
                         switch (symbol)
                         {
                             case CtpObjectSymbols.NumericBytes0:
@@ -263,33 +288,41 @@ namespace CTP
                             case CtpObjectSymbols.NumericBytes4:
                                 return new CtpNumeric(flags, 0, 0, (int)ReadBits32(data, ref currentPosition, endPosition));
                             case CtpObjectSymbols.NumericBytes5:
+                                mid = (int)ReadBits8(data, ref currentPosition, endPosition);
                                 low = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, 0, (int)ReadBits8(data, ref currentPosition, endPosition), low);
+                                return new CtpNumeric(flags, 0, mid, low);
                             case CtpObjectSymbols.NumericBytes6:
+                                mid = (int)ReadBits16(data, ref currentPosition, endPosition);
                                 low = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, 0, (int)ReadBits16(data, ref currentPosition, endPosition), low);
+                                return new CtpNumeric(flags, 0, mid, low);
                             case CtpObjectSymbols.NumericBytes7:
+                                mid = (int)ReadBits24(data, ref currentPosition, endPosition);
                                 low = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, 0, (int)ReadBits24(data, ref currentPosition, endPosition), low);
+                                return new CtpNumeric(flags, 0, mid, low);
                             case CtpObjectSymbols.NumericBytes8:
+                                mid = (int)ReadBits32(data, ref currentPosition, endPosition);
                                 low = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, 0, (int)ReadBits32(data, ref currentPosition, endPosition), low);
+                                return new CtpNumeric(flags, 0, mid, low);
                             case CtpObjectSymbols.NumericBytes9:
-                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                high = (int)ReadBits8(data, ref currentPosition, endPosition);
                                 mid = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, (int)ReadBits8(data, ref currentPosition, endPosition), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, high, mid, low);
                             case CtpObjectSymbols.NumericBytes10:
-                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                high = (int)ReadBits16(data, ref currentPosition, endPosition);
                                 mid = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, (int)ReadBits16(data, ref currentPosition, endPosition), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, high, mid, low);
                             case CtpObjectSymbols.NumericBytes11:
-                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                high = (int)ReadBits24(data, ref currentPosition, endPosition);
                                 mid = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, (int)ReadBits24(data, ref currentPosition, endPosition), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, high, mid, low);
                             case CtpObjectSymbols.NumericElse:
-                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                high = (int)ReadBits32(data, ref currentPosition, endPosition);
                                 mid = (int)ReadBits32(data, ref currentPosition, endPosition);
-                                return new CtpNumeric(flags, (int)ReadBits32(data, ref currentPosition, endPosition), mid, low);
+                                low = (int)ReadBits32(data, ref currentPosition, endPosition);
+                                return new CtpNumeric(flags, high, mid, low);
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(symbol), symbol, null);
                         }
