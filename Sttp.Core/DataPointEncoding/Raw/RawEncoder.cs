@@ -20,14 +20,15 @@ namespace Sttp.DataPointEncoding
         {
             m_stream = new CtpObjectWriter();
             m_channelMap = new MetadataChannelMapEncoder();
+            Clear();
         }
 
         public override int Length => m_stream.Length;
 
-        public override void Clear()
+        public sealed override void Clear()
         {
             m_lastChannelID = 0;
-            m_lastTimestamp = new CtpTime(new DateTime(2020, 1, 1));
+            m_lastTimestamp = default(CtpTime);
             m_lastQuality = 0;
             m_stream.Clear();
         }
@@ -39,21 +40,23 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
+            CtpObject value = point.Value;
             int channelID = m_channelMap.GetChannelID(point.Metadata, out var includeMetadata);
             bool qualityChanged = point.Quality != m_lastQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
             bool channelIDChanged = m_lastChannelID + 1 != channelID;
+            bool isSpecialExclusion = (value.ValueTypeCode == CtpTypeCode.Integer && value.IsInteger > long.MaxValue - 16);
 
-            if (includeMetadata || qualityChanged || timeChanged || channelIDChanged || point.Value.ValueTypeCode == CtpTypeCode.Integer)
+            if (includeMetadata || qualityChanged || timeChanged || channelIDChanged || isSpecialExclusion)
             {
                 byte code = 0;
-                if (qualityChanged)
-                    code |= 1;
-                if (timeChanged)
-                    code |= 2;
                 if (channelIDChanged)
-                    code |= 4;
+                    code |= 1;
                 if (includeMetadata)
+                    code |= 2;
+                if (qualityChanged)
+                    code |= 4;
+                if (timeChanged)
                     code |= 8;
 
                 m_stream.Write(code);
@@ -64,9 +67,15 @@ namespace Sttp.DataPointEncoding
                 if (qualityChanged)
                     m_stream.Write(point.Quality);
                 if (timeChanged)
-                    m_stream.Write(CompareUInt64.Compare((ulong)point.Time.Ticks, (ulong)m_lastTimestamp.Ticks));
+                    m_stream.Write(point.Time);
             }
-            m_stream.Write(point.Value);
+            else if (value.ValueTypeCode == CtpTypeCode.Integer)
+            {
+                if (value.IsInteger >= 0)
+                    value = value.IsInteger + 16;
+            }
+
+            m_stream.Write(value);
             m_lastChannelID = channelID;
             m_lastQuality = point.Quality;
             m_lastTimestamp = point.Time;

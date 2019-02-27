@@ -46,6 +46,7 @@ namespace Sttp
             {
                 m_encoder = new AdvancedEncoder();
             }
+            m_encoder.Clear();
         }
 
         public void ProducerMetadata(SttpProducerMetadata metadata)
