@@ -21,8 +21,70 @@ namespace Sttp.Tests
     public class ArchiveFile
     {
         [TestMethod]
-        public void TestDecimal()
+        public void TestFloat()
         {
+            byte[] min = new byte[] { 0, 0, 0, 0 };
+            byte[] max = new byte[] { 0, 255, 255, 255 };
+
+            for (int x = 0; x < 256; x++)
+            {
+                min[0] = (byte)x;
+                max[0] = (byte)x;
+
+                double mind = Math.Abs(BigEndian.ToSingle(min, 0));
+                double maxd = Math.Abs(BigEndian.ToSingle(max, 0));
+
+                if (maxd < 0.00000001)
+                    continue;
+                if (mind > 1_000_000_000_000)
+                    continue;
+
+                Console.WriteLine($"{x}\t{BigEndian.ToSingle(min, 0)}\t{BigEndian.ToSingle(max, 0)}");
+            }
+        }
+
+        [TestMethod]
+        public void TestDouble()
+        {
+            byte[] min = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] max = new byte[] { 0, 255, 255, 255, 255, 255, 255, 255 };
+
+            for (int x = 0; x < 256; x++)
+            {
+                min[0] = (byte)x;
+                max[0] = (byte)x;
+
+                double mind = Math.Abs(BigEndian.ToDouble(min, 0));
+                double maxd = Math.Abs(BigEndian.ToDouble(max, 0));
+
+                if (maxd < 0.00000001)
+                    continue;
+                if (mind > 1_000_000_000_000)
+                    continue;
+
+                Console.WriteLine($"{x}\t{BigEndian.ToDouble(min, 0)}\t{BigEndian.ToDouble(max, 0)}");
+            }
+        }
+
+        [TestMethod]
+        public void TestDateTime()
+        {
+            byte[] min = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] max = new byte[] { 0, 255, 255, 255, 0, 0, 0, 0 };
+
+            for (int x = 0; x < 128; x++)
+            {
+                min[0] = (byte)x;
+                max[0] = (byte)x;
+
+                long mind = BigEndian.ToInt64(min, 0);
+                long maxd = BigEndian.ToInt64(max, 0);
+
+                if (maxd > CtpTime.MaxValue.Ticks)
+                    continue;
+
+                Console.WriteLine($"{x}\t{new CtpTime(mind)}\t{new CtpTime(maxd)}");
+            }
         }
 
         [TestMethod]
@@ -93,6 +155,11 @@ namespace Sttp.Tests
             BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Basic);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
+
+            for (int x = 0; x < 256; x++)
+            {
+                Console.WriteLine($"{x.ToString("X2")}\t{CustomBitEncoding.SingleBuckets[x]}");
+            }
 
             return;
             try
@@ -167,10 +234,14 @@ namespace Sttp.Tests
                             var dp = new SttpDataPoint();
                             while (ctp.ReadDataPoint(dp))
                             {
-                                if (dp.Metadata.DataPointID.AsString.EndsWith(":DFreq0"))
-                                {
-                                    dp.Value = new CtpNumeric((long)(dp.Value.AsSingle * 100), 2);
-                                }
+                                //if (dp.Value.AsSingle > 3000000)
+                                //{
+                                //    dp.Value = dp.Value;
+                                //}
+                                //if (dp.Metadata.DataPointID.AsString.EndsWith(":DFreq0"))
+                                //{
+                                //    dp.Value = new CtpNumeric((long)(dp.Value.AsSingle * 100), 2);
+                                //}
                                 //Names.Add(dp.Metadata.DataPointID.AsString);
                                 //raw.WriteLine(dp.ToString());
                                 PointCount++;

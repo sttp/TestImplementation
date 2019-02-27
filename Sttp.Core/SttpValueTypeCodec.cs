@@ -19,21 +19,21 @@ namespace Sttp
         public static CtpTypeCode FromType(Type columnDataType)
         {
             if (columnDataType == typeof(sbyte))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(Int16))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(Int32))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(Int64))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(Byte))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(UInt16))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(UInt32))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(UInt64))
-                return CtpTypeCode.Int64;
+                return CtpTypeCode.Integer;
             if (columnDataType == typeof(Double))
                 return CtpTypeCode.Double;
             if (columnDataType == typeof(Single))
@@ -60,7 +60,7 @@ namespace Sttp
             {
                 case CtpTypeCode.Null:
                     return typeof(DBNull);
-                case CtpTypeCode.Int64:
+                case CtpTypeCode.Integer:
                     return typeof(Int64);
                 case CtpTypeCode.Single:
                     return typeof(Single);

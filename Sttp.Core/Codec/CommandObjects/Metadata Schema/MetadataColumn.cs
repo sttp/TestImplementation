@@ -27,8 +27,8 @@ namespace Sttp.Codec
                 {
                     case CtpTypeCode.Null:
                         return "Null";
-                    case CtpTypeCode.Int64:
-                        return "Int64";
+                    case CtpTypeCode.Integer:
+                        return "Integer";
                     case CtpTypeCode.Single:
                         return "Single";
                     case CtpTypeCode.Double:
@@ -58,8 +58,8 @@ namespace Sttp.Codec
                     case "Null":
                         TypeCode = CtpTypeCode.Null;
                         break;
-                    case "Int64":
-                        TypeCode = CtpTypeCode.Int64;
+                    case "Integer":
+                        TypeCode = CtpTypeCode.Integer;
                         break;
                     case "Single":
                         TypeCode = CtpTypeCode.Single;

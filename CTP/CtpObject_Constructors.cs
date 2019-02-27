@@ -8,31 +8,10 @@ namespace CTP
     /// </summary>
     public partial struct CtpObject
     {
-        private CtpObject(sbyte value)
-            : this()
-        {
-            m_valueTypeCode = CtpTypeCode.Int8;
-            m_valueInt64 = value;
-        }
-
-        private CtpObject(short value)
-            : this()
-        {
-            m_valueTypeCode = CtpTypeCode.Int16;
-            m_valueInt64 = value;
-        }
-
-        private CtpObject(int value)
-            : this()
-        {
-            m_valueTypeCode = CtpTypeCode.Int32;
-            m_valueInt64 = value;
-        }
-
         private CtpObject(long value)
           : this()
         {
-            m_valueTypeCode = CtpTypeCode.Int64;
+            m_valueTypeCode = CtpTypeCode.Integer;
             m_valueInt64 = value;
         }
 

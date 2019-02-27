@@ -15,7 +15,7 @@ namespace Sttp.DataPointEncoding
 
         private const uint SignChangeValue = (1u << 31);
 
-        private static uint ChangeSign(uint value)
+        public static uint ChangeSign(uint value)
         {
             //if bit 32 is high, bits 1-31 will be inverted
             //Then all bits will be rotated 1 to the left
@@ -32,7 +32,7 @@ namespace Sttp.DataPointEncoding
             return comparedResult + value2;
         }
 
-        private static uint UnChangeSign(uint value)
+        public static uint UnChangeSign(uint value)
         {
             if ((value & 1) == 0)
             {

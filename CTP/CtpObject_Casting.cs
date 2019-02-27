@@ -12,13 +12,7 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return $"(Null)";
-                    case CtpTypeCode.Int8:
-                        return $"(sbyte){m_valueInt64.ToString()}";
-                    case CtpTypeCode.Int16:
-                        return $"(short){m_valueInt64.ToString()}";
-                    case CtpTypeCode.Int32:
-                        return $"(int){m_valueInt64.ToString()}";
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         return $"(long){m_valueInt64.ToString()}";
                     case CtpTypeCode.Single:
                         return $"(float){m_valueSingle.ToString()}";
@@ -52,13 +46,7 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return null;
-                    case CtpTypeCode.Int8:
-                        return (sbyte)m_valueInt64;
-                    case CtpTypeCode.Int16:
-                        return (short)m_valueInt64;
-                    case CtpTypeCode.Int32:
-                        return (int)m_valueInt64;
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         return m_valueInt64;
                     case CtpTypeCode.Single:
                         return m_valueSingle;
@@ -239,10 +227,7 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         {
                             checked
                             {
@@ -331,10 +316,7 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         checked
                         {
                             return (float)m_valueInt64;
@@ -373,10 +355,7 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         checked
                         {
                             return (double)m_valueInt64;
@@ -416,10 +395,7 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         checked
                         {
                             return (decimal)m_valueInt64;
@@ -457,10 +433,7 @@ namespace CTP
             {
                 switch (m_valueTypeCode)
                 {
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         checked
                         {
                             return (CtpNumeric)(decimal)m_valueInt64;
@@ -576,10 +549,7 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return null;
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                         return m_valueInt64.ToString();
                     case CtpTypeCode.Single:
                         return m_valueSingle.ToString();

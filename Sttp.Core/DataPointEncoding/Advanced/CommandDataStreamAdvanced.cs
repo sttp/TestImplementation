@@ -113,16 +113,9 @@ namespace Sttp.Codec
         [CommandField()]
         public byte[] ObjectStream { get; set; }
 
-        /// <summary>
-        /// Contains the stream of bit data.
-        /// </summary>
-        [CommandField()]
-        public byte[] BitStream { get; set; }
-
-        public CommandDataStreamRaw(byte[] objectStream, byte[] bitStream)
+        public CommandDataStreamRaw(byte[] objectStream)
         {
             ObjectStream = objectStream;
-            BitStream = bitStream;
         }
 
         private CommandDataStreamRaw()

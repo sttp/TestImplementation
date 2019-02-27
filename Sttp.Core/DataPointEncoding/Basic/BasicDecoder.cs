@@ -94,9 +94,18 @@ namespace Sttp.DataPointEncoding
                 case CtpTypeCode.Null:
                     dataPoint.Value = CtpObject.Null;
                     break;
-                case CtpTypeCode.Int64:
-                    dataPoint.Value = CustomBitEncoding.ReadInt64(m_stream2);
-                    break;
+                //case CtpTypeCode.Int8:
+                //    dataPoint.Value = CustomBitEncoding.ReadInt8(m_stream2);
+                //    break;
+                //case CtpTypeCode.Int16:
+                //    dataPoint.Value = CustomBitEncoding.ReadInt16(m_stream2);
+                //    break;
+                //case CtpTypeCode.Int32:
+                //    dataPoint.Value = CustomBitEncoding.ReadInt32(m_stream2);
+                //    break;
+                //case CtpTypeCode.Int64:
+                //    dataPoint.Value = CustomBitEncoding.ReadInt64(m_stream2);
+                //    break;
                 case CtpTypeCode.Single:
                     dataPoint.Value = CustomBitEncoding.ReadSingle(m_stream2);
                     break;

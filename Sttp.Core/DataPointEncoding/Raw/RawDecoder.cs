@@ -9,41 +9,66 @@ namespace Sttp.DataPointEncoding
 {
     public class RawDecoder : DecoderBase
     {
-        private CtpObjectReader m_stream1;
-        private BitStreamReader m_stream2;
+        private MetadataChannelMapDecoder m_channelMap;
+        private CtpObjectReader m_stream;
+        private int m_lastChannelID = 0;
         private CtpTime m_lastTimestamp;
-        private long m_lastQuality;
+        private long m_lastQuality = 0;
 
         public RawDecoder(LookupMetadata lookup)
             : base(lookup)
         {
-            m_stream1 = new CtpObjectReader();
-            m_stream2 = new BitStreamReader();
+            m_stream = new CtpObjectReader();
+            m_channelMap = new MetadataChannelMapDecoder();
         }
 
         public void Load(CommandDataStreamRaw data)
         {
-            m_lastTimestamp = default(CtpTime);
+            m_lastChannelID = 0;
+            m_lastTimestamp = new CtpTime(new DateTime(2020, 1, 1));
             m_lastQuality = 0;
-            m_stream1.SetBuffer(data.ObjectStream);
-            m_stream2.SetBuffer(data.BitStream);
+            m_stream.SetBuffer(data.ObjectStream);
         }
 
         public override bool Read(SttpDataPoint dataPoint)
         {
-            if (m_stream2.IsEmpty)
+            TryAgain:
+            if (m_stream.IsEmpty)
                 return false;
 
-            if (m_stream2.ReadBits1() == 0)
-                m_lastQuality = (long)m_stream1.Read();
+            m_lastChannelID++;
+            CtpObject value = m_stream.Read();
+
+            if (value.ValueTypeCode == CtpTypeCode.Integer)
+            {
+                byte code = value.AsByte;
+                bool qualityChanged = (code & 1) != 0;
+                bool timeChanged = (code & 2) != 0; ;
+                bool channelIDChanged = (code & 4) != 0; ;
+                bool hasMetadata = (code & 8) != 0; ;
+
+                if (channelIDChanged)
+                    m_lastChannelID = m_stream.Read().AsInt32;
+
+                if (hasMetadata)
+                    m_channelMap.Assign(LookupMetadata(m_stream.Read()), m_lastChannelID);
+
+                if (qualityChanged)
+                    m_lastQuality = m_stream.Read().AsInt64;
+                
+                if (timeChanged)
+                    m_lastTimestamp = new CtpTime((long)CompareUInt64.UnCompare(m_stream.Read().AsUInt64, (ulong)m_lastTimestamp.Ticks));
+
+                value = m_stream.Read();
+            }
+
+            dataPoint.Metadata = m_channelMap.GetMetadata(m_lastChannelID);
             dataPoint.Quality = m_lastQuality;
-
-            if (m_stream2.ReadBits1() == 0)
-                m_lastTimestamp = (CtpTime)m_stream1.Read();
             dataPoint.Time = m_lastTimestamp;
+            dataPoint.Value = value;
 
-            dataPoint.Metadata = LookupMetadata(m_stream1.Read());
-            dataPoint.Value = m_stream1.Read();
+            if (dataPoint.Metadata == null)
+                goto TryAgain;
 
             return true;
         }

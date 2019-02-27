@@ -10,43 +10,46 @@ namespace CTP
     public struct CtpNumeric
     {
         public readonly byte Flags;
-        public readonly int High;
-        public readonly int Low;
-        public readonly int Mid;
+        public readonly uint High;
+        public readonly uint Low;
+        public readonly uint Mid;
 
         public CtpNumeric(decimal value)
         {
             var bits = decimal.GetBits(value);
-            Low = bits[0];
-            Mid = bits[1];
-            High = bits[2];
+            Low = (uint)bits[0];
+            Mid = (uint)bits[1];
+            High = (uint)bits[2];
             Flags = (byte)((bits[3] >> 16) & 31);
             if (Flags > 28)
                 throw new ArgumentException("Invalid Scale Factor");
             if (bits[3] < 0)
-                Flags += 128;
+                Flags += 32;
         }
 
-        public CtpNumeric(byte flags, int high, int mid, int low)
+        public CtpNumeric(byte flags, uint high, uint mid, uint low)
         {
-            High = high;
-            Mid = mid;
-            Low = low;
+            High = (uint)high;
+            Mid = (uint)mid;
+            Low = (uint)low;
             Flags = flags;
             if (Scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
+            if (Flags > 63)
+                throw new ArgumentException("Flags");
+
         }
 
-        public CtpNumeric(bool isNegative, byte scale, int high, int mid, int low)
+        public CtpNumeric(bool isNegative, byte scale, uint high, uint mid, uint low)
         {
             if (scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
             Flags = scale;
             if (isNegative)
-                Flags += 128;
-            High = high;
-            Mid = mid;
-            Low = low;
+                Flags += 32;
+            High = (uint)high;
+            Mid = (uint)mid;
+            Low = (uint)low;
         }
 
         /// <summary>
@@ -60,11 +63,11 @@ namespace CTP
             Flags = scale;
             if (value < 0)
             {
-                Flags += 128;
+                Flags += 32;
                 value = -value; //ToDo: Check this conversion
             }
-            Low = (int)value;
-            Mid = (int)(value >> 32);
+            Low = (uint)value;
+            Mid = (uint)(value >> 32);
             High = 0;
         }
 
@@ -77,8 +80,8 @@ namespace CTP
             if (scale > 28)
                 throw new ArgumentException("Invalid Scale Factor");
             Flags = scale;
-            Low = (int)value;
-            Mid = (int)(value >> 32);
+            Low = (uint)value;
+            Mid = (uint)(value >> 32);
             High = 0;
         }
 
@@ -89,7 +92,7 @@ namespace CTP
 
         public static explicit operator decimal(CtpNumeric value)
         {
-            return new decimal(value.Low, value.Mid, value.High, value.IsNegative, value.Scale);
+            return new decimal((int)value.Low, (int)value.Mid, (int)value.High, value.IsNegative, value.Scale);
         }
 
         public static bool operator ==(CtpNumeric a, CtpNumeric b)
@@ -103,7 +106,7 @@ namespace CTP
         }
 
         public byte Scale => (byte)(Flags & 31);
-        public bool IsNegative => Flags > 127;
+        public bool IsNegative => Flags >= 32;
         public bool IsDefault => Flags == 0 && High == 0 && Low == 0 && Mid == 0;
 
         public override bool Equals(object value)
@@ -122,7 +125,7 @@ namespace CTP
 
         public override int GetHashCode()
         {
-            return Flags ^ High ^ Low ^ Mid;
+            return (int)(Flags ^ High ^ Low ^ Mid);
         }
 
     }

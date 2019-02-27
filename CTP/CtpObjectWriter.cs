@@ -11,34 +11,24 @@ namespace CTP
 {
     public class CtpObjectWriter
     {
-        const ulong Bits64 = 0xFFFFFFFFFFFFFFFFu;
-        const ulong Bits60 = 0xFFFFFFFFFFFFFFFu;
         const ulong Bits56 = 0xFFFFFFFFFFFFFFu;
-        const ulong Bits52 = 0xFFFFFFFFFFFFFu;
         const ulong Bits48 = 0xFFFFFFFFFFFFu;
-        const ulong Bits44 = 0xFFFFFFFFFFFu;
         const ulong Bits40 = 0xFFFFFFFFFFu;
-        const ulong Bits36 = 0xFFFFFFFFFu;
         const uint Bits32 = 0xFFFFFFFFu;
-        const uint Bits28 = 0xFFFFFFFu;
         const uint Bits24 = 0xFFFFFFu;
-        const uint Bits20 = 0xFFFFFu;
         const uint Bits16 = 0xFFFFu;
-        const uint Bits12 = 0xFFFu;
         const uint Bits8 = 0xFFu;
-        const uint Bits4 = 0xFu;
 
-
-        private byte[] m_byteBuffer;
-        private int m_byteLength;
+        private byte[] m_buffer;
+        private int m_length;
 
         public CtpObjectWriter()
         {
-            m_byteBuffer = new byte[64];
+            m_buffer = new byte[64];
             Clear();
         }
 
-        public int Length => m_byteLength;
+        public int Length => m_length;
 
         /// <summary>
         /// Ensures that the byte stream has the room to store the specified number of bytes.
@@ -47,18 +37,18 @@ namespace CTP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureCapacityBytes(int neededBytes)
         {
-            if (m_byteLength + neededBytes >= m_byteBuffer.Length)
+            if (m_length + neededBytes >= m_buffer.Length)
                 GrowBytes(neededBytes);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void GrowBytes(int neededBytes)
         {
-            while (m_byteLength + neededBytes >= m_byteBuffer.Length)
+            while (m_length + neededBytes >= m_buffer.Length)
             {
-                byte[] newBuffer = new byte[m_byteBuffer.Length * 2];
-                m_byteBuffer.CopyTo(newBuffer, 0);
-                m_byteBuffer = newBuffer;
+                byte[] newBuffer = new byte[m_buffer.Length * 2];
+                m_buffer.CopyTo(newBuffer, 0);
+                m_buffer = newBuffer;
             }
         }
 
@@ -71,12 +61,12 @@ namespace CTP
 
         public void CopyTo(byte[] data, int offset)
         {
-            Array.Copy(m_byteBuffer, 0, data, offset, m_byteLength);
+            Array.Copy(m_buffer, 0, data, offset, m_length);
         }
 
         public void Clear()
         {
-            m_byteLength = 0;
+            m_length = 0;
             //Note: Clearing the array isn't required since this class prohibits advancing the position.
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
@@ -88,17 +78,8 @@ namespace CTP
                 case CtpTypeCode.Null:
                     WriteSymbol(CtpObjectSymbols.Null);
                     break;
-                case CtpTypeCode.Int8:
-                    WriteInt8(value.IsInt8);
-                    break;
-                case CtpTypeCode.Int16:
-                    WriteInt16(value.IsInt16);
-                    break;
-                case CtpTypeCode.Int32:
-                    WriteInt32(value.IsInt32);
-                    break;
-                case CtpTypeCode.Int64:
-                    WriteInt64(value.IsInt64);
+                case CtpTypeCode.Integer:
+                    WriteInt(value.IsInteger);
                     break;
                 case CtpTypeCode.Single:
                     WriteSingle(value.UnsafeRawInt32);
@@ -113,10 +94,10 @@ namespace CTP
                     WriteTime(value.IsCtpTime);
                     break;
                 case CtpTypeCode.Boolean:
-                    if (!value.IsBoolean)
-                        WriteSymbol(CtpObjectSymbols.BoolFalse);
+                    if (value.IsBoolean)
+                        WriteSymbol(CtpObjectSymbols.BoolTrue);
                     else
-                        WriteSymbol(CtpObjectSymbols.BoolElse);
+                        WriteSymbol(CtpObjectSymbols.BoolFalse);
                     break;
                 case CtpTypeCode.Guid:
                     WriteGuid(value.IsGuid);
@@ -135,203 +116,60 @@ namespace CTP
             }
         }
 
-        private void WriteCommand(CtpCommand value)
+        private void WriteInt(long value)
         {
-            WriteSymbol(CtpObjectSymbols.CtpCommandElse);
-            byte[] buffer = value.ToArray();
-            Write(buffer.Length);
-            EnsureCapacityBytes(buffer.Length);
-            Array.Copy(buffer, 0, m_byteBuffer, m_byteLength, buffer.Length);
-            m_byteLength += buffer.Length;
-        }
-
-        private void WriteBuffer(CtpBuffer value)
-        {
-            byte[] buffer = value.ToBuffer();
-            if (buffer.Length <= 64)
+            if (-2 <= value && value <= 64)
             {
-                WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)buffer.Length);
+                WriteSymbol(CtpObjectSymbols.IntNeg2 + (byte)(value + 2));
+            }
+            else if ((ulong)value > Bits56)
+            {
+                WriteSymbol(CtpObjectSymbols.IntElse);
+                WriteBits64((ulong)value);
             }
             else
             {
-                WriteSymbol(CtpObjectSymbols.CtpBufferElse);
-                Write(buffer.Length);
-            }
-            EnsureCapacityBytes(buffer.Length);
-            Array.Copy(buffer, 0, m_byteBuffer, m_byteLength, buffer.Length);
-            m_byteLength += buffer.Length;
-
-        }
-
-        private void WriteString(string value)
-        {
-            byte[] buffer = Encoding.UTF8.GetBytes(value);
-            if (buffer.Length <= 20)
-            {
-                WriteSymbol(CtpObjectSymbols.String0 + (byte)buffer.Length);
-            }
-            else
-            {
-                WriteSymbol(CtpObjectSymbols.StringElse);
-                Write(buffer.Length);
-            }
-            EnsureCapacityBytes(buffer.Length);
-            Array.Copy(buffer, 0, m_byteBuffer, m_byteLength, buffer.Length);
-            m_byteLength += buffer.Length;
-        }
-
-        private void WriteGuid(Guid value)
-        {
-            if (value == Guid.Empty)
-            {
-                WriteSymbol(CtpObjectSymbols.GuidEmpty);
-            }
-            else
-            {
-                WriteSymbol(CtpObjectSymbols.GuidElse);
-                EnsureCapacityBytes(16);
-                Array.Copy(value.ToRfcBytes(), 0, m_byteBuffer, m_byteLength, 16);
-                m_byteLength += 16;
-            }
-        }
-
-        private void WriteTime(CtpTime value)
-        {
-            if (value.Ticks == 0)
-            {
-                WriteSymbol(CtpObjectSymbols.CtpTimeZero);
-            }
-            else
-            {
-                WriteSymbol(CtpObjectSymbols.CtpTimeElse);
-                WriteBits64((ulong)value.Ticks);
-            }
-        }
-
-        private void WriteNumeric(CtpNumeric value)
-        {
-            if (value.Scale == 0 && value.High == 0 && value.Mid == 0)
-            {
-                if (value.IsNegative && value.Low == 1)
+                byte adder = 0;
+                if (value < 0)
                 {
-                    WriteSymbol(CtpObjectSymbols.NumericNeg1);
-                    return;
+                    value = ~value; //1's complement not 2. This ensures that the new value cannot be negative.
+                    adder = CtpObjectSymbols.IntBits8Neg - CtpObjectSymbols.IntBits8Pos;
                 }
-                if (!value.IsNegative && value.Low == 0)
+                if (value <= Bits8)
                 {
-                    WriteSymbol(CtpObjectSymbols.Numeric0);
-                    return;
+                    WriteSymbol(CtpObjectSymbols.IntBits8Pos + adder);
+                    WriteBits8((uint)value);
                 }
-                if (!value.IsNegative && value.Low == 1)
+                else if (value <= Bits16)
                 {
-                    WriteSymbol(CtpObjectSymbols.Numeric1);
-                    return;
+                    WriteSymbol(CtpObjectSymbols.IntBits16Pos + adder);
+                    WriteBits16((uint)value);
                 }
-            }
-
-            if ((uint)value.High >= (uint)Bits.Bit24)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericElse);
-                WriteBits8(value.Flags);
-                WriteBits32((uint)value.High);
-                WriteBits32((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.High >= (uint)Bits.Bit16)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes11);
-                WriteBits8(value.Flags);
-                WriteBits24((uint)value.High);
-                WriteBits32((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.High >= (uint)Bits.Bit08)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes10);
-                WriteBits8(value.Flags);
-                WriteBits16((uint)value.High);
-                WriteBits32((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.High >= (uint)Bits.Bit00)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes9);
-                WriteBits8(value.Flags);
-                WriteBits8((uint)value.High);
-                WriteBits32((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.Mid >= (uint)Bits.Bit24)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes8);
-                WriteBits8(value.Flags);
-                WriteBits32((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.Mid >= (uint)Bits.Bit16)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes7);
-                WriteBits8(value.Flags);
-                WriteBits24((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.Mid >= (uint)Bits.Bit08)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes6);
-                WriteBits8(value.Flags);
-                WriteBits16((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.Mid >= (uint)Bits.Bit00)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes5);
-                WriteBits8(value.Flags);
-                WriteBits8((uint)value.Mid);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.Low >= (uint)Bits.Bit24)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes4);
-                WriteBits8(value.Flags);
-                WriteBits32((uint)value.Low);
-            }
-            else if ((uint)value.Low >= (uint)Bits.Bit16)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes3);
-                WriteBits8(value.Flags);
-                WriteBits24((uint)value.Low);
-            }
-            else if ((uint)value.Low >= (uint)Bits.Bit08)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes2);
-                WriteBits8(value.Flags);
-                WriteBits16((uint)value.Low);
-            }
-            else if ((uint)value.Low >= (uint)Bits.Bit00)
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes1);
-                WriteBits8(value.Flags);
-                WriteBits8((uint)value.Low);
-            }
-            else
-            {
-                WriteSymbol(CtpObjectSymbols.NumericBytes0);
-                WriteBits8(value.Flags);
-            }
-        }
-
-        private void WriteDouble(ulong value)
-        {
-            if (value == NumericConstants.DoubleNeg1)
-                WriteSymbol(CtpObjectSymbols.DoubleNeg1);
-            else if (value == NumericConstants.Double0)
-                WriteSymbol(CtpObjectSymbols.Double0);
-            else if (value == NumericConstants.Double1)
-                WriteSymbol(CtpObjectSymbols.Double1);
-            else
-            {
-                WriteSymbol(CtpObjectSymbols.DoubleElse);
-                WriteBits64(value);
+                else if (value <= Bits24)
+                {
+                    WriteSymbol(CtpObjectSymbols.IntBits24Pos + adder);
+                    WriteBits24((uint)value);
+                }
+                else if (value <= Bits32)
+                {
+                    WriteSymbol(CtpObjectSymbols.IntBits32Pos + adder);
+                    WriteBits32((uint)value);
+                }
+                else if (value <= (long)Bits40)
+                {
+                    WriteSymbol(CtpObjectSymbols.IntBits40Pos + adder);
+                    WriteBits40((ulong)value);
+                }
+                else if (value <= (long)Bits48)
+                {
+                    WriteSymbol(CtpObjectSymbols.IntBits48Pos + adder);
+                    WriteBits48((ulong)value);
+                }
+                else 
+                {
+                    WriteSymbol(CtpObjectSymbols.IntBits56Pos + adder);
+                    WriteBits56((ulong)value);
+                }
             }
         }
 
@@ -345,143 +183,196 @@ namespace CTP
                 WriteSymbol(CtpObjectSymbols.Single1);
             else
             {
-                WriteSymbol(CtpObjectSymbols.SingleElse);
+                byte firstByte = (byte)(value >> 24);
+                if (56 <= firstByte && firstByte <= 79)
+                {
+                    WriteSymbol(CtpObjectSymbols.Single56 + (byte)(firstByte - 56));
+                    WriteBits24(value);
+                }
+                else if (184 <= firstByte && firstByte <= 207)
+                {
+                    WriteSymbol(CtpObjectSymbols.Single184 + (byte)(firstByte - 184));
+                    WriteBits24(value);
+                }
+                else
+                {
+                    WriteSymbol(CtpObjectSymbols.SingleElse);
+                    WriteBits32(value);
+                }
+            }
+        }
+
+        private void WriteDouble(ulong value)
+        {
+            if (value == NumericConstants.DoubleNeg1)
+                WriteSymbol(CtpObjectSymbols.DoubleNeg1);
+            else if (value == NumericConstants.Double0)
+                WriteSymbol(CtpObjectSymbols.Double0);
+            else if (value == NumericConstants.Double1)
+                WriteSymbol(CtpObjectSymbols.Double1);
+            else
+            {
+                byte firstByte = (byte)(value >> 56);
+                if (63 <= firstByte && firstByte <= 65)
+                {
+                    WriteSymbol(CtpObjectSymbols.Double63 + (byte)(firstByte - 63));
+                    WriteBits56(value);
+                }
+                else if (191 <= firstByte && firstByte <= 193)
+                {
+                    WriteSymbol(CtpObjectSymbols.Double191 + (byte)(firstByte - 191));
+                    WriteBits56(value);
+                }
+                else
+                {
+                    WriteSymbol(CtpObjectSymbols.DoubleElse);
+                    WriteBits64(value);
+                }
+            }
+        }
+
+        private void WriteNumeric(CtpNumeric value)
+        {
+            if (value.High != 0)
+            {
+                WriteSymbol(CtpObjectSymbols.NumericHigh);
+                WriteNumericHelper(value.Flags, value.High);
+                WriteBits32(value.Mid);
+                WriteBits32(value.Low);
+            }
+            else if (value.Mid != 0)
+            {
+                WriteSymbol(CtpObjectSymbols.NumericMid);
+                WriteNumericHelper(value.Flags, value.Mid);
+                WriteBits32(value.Low);
+            }
+            else if (value.Low != 0)
+            {
+                WriteSymbol(CtpObjectSymbols.NumericLow);
+                WriteNumericHelper(value.Flags, value.Low);
+            }
+            else
+            {
+                WriteSymbol(CtpObjectSymbols.NumericNone);
+                WriteBits8(value.Flags);
+            }
+        }
+
+        private void WriteNumericHelper(byte flags, uint value)
+        {
+            if (value > Bits24)
+            {
+                WriteBits8(flags + 192u);
                 WriteBits32(value);
             }
-        }
-
-        private void WriteInt8(sbyte value)
-        {
-            if (-2 <= value && value <= 64)
+            else if (value > Bits16)
             {
-                WriteSymbol(CtpObjectSymbols.IntNeg2 + (byte)(value + 2));
+                WriteBits8(flags + 128u);
+                WriteBits24(value);
+            }
+            else if (value > Bits8)
+            {
+                WriteBits8(flags + 64u);
+                WriteBits16(value);
             }
             else
             {
-                WriteSymbol(CtpObjectSymbols.IntBits8);
-                WriteBits8((byte)value);
+                WriteBits8(flags);
+                WriteBits8(value);
             }
         }
 
-        private void WriteInt16(short value)
+        private void WriteTime(CtpTime value)
         {
-            if (value < 0)
+            if (value.Ticks == 0)
             {
-                if (~value < Bits8)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits9Negative);
-                    WriteBits8((uint)~value);
-                    return;
-                }
+                WriteSymbol(CtpObjectSymbols.CtpTimeZero);
             }
             else
             {
-                if (value < Bits8)
+                byte firstByte = (byte)(value.Ticks >> 56);
+                if (14 <= firstByte && firstByte <= 17)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits9Positive);
-                    WriteBits8((uint)value);
-                    return;
-                }
-            }
-
-            WriteSymbol(CtpObjectSymbols.IntBits16);
-            WriteBits16((ushort)value);
-        }
-
-        private void WriteInt32(int value)
-        {
-            if (value < 0)
-            {
-                if (~value < Bits16)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits17Negative);
-                    WriteBits16((uint)~value);
-                    return;
-                }
-                if (~value < Bits24)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntNegBits24);
-                    WriteBits24((uint)~value);
-                    return;
-                }
-            }
-            else
-            {
-                if (value < Bits16)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits17Positive);
-                    WriteBits16((uint)value);
-                    return;
-                }
-                if (value < Bits24)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits24);
-                    WriteBits24((uint)value);
-                    return;
-                }
-            }
-            WriteSymbol(CtpObjectSymbols.IntBits32);
-            WriteBits32((uint)value);
-        }
-
-        private void WriteInt64(long value)
-        {
-            if (value < 0)
-            {
-                value = ~value;
-                if (value < (long)Bits32)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits33Negative);
-                    WriteBits32((uint)value);
-                }
-                else if (value < (long)Bits40)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntNegBits40);
-                    WriteBits40((ulong)value);
-                }
-                else if (value < (long)Bits48)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntNegBits48);
-                    WriteBits48((ulong)value);
-                }
-                else if (value < (long)Bits56)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntNegBits56);
-                    WriteBits56((ulong)value);
+                    WriteSymbol(CtpObjectSymbols.CtpTime14 + (byte)(firstByte - 14));
+                    WriteBits56((ulong)value.Ticks);
                 }
                 else
                 {
-                    WriteSymbol(CtpObjectSymbols.IntElse);
-                    WriteBits64(~(ulong)value);
+                    WriteSymbol(CtpObjectSymbols.CtpTimeElse);
+                    WriteBits64((ulong)value.Ticks);
                 }
+            }
+        }
+
+        private void WriteGuid(Guid value)
+        {
+            if (value == Guid.Empty)
+            {
+                WriteSymbol(CtpObjectSymbols.GuidEmpty);
             }
             else
             {
-                if (value < (long)Bits32)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits33Positive);
-                    WriteBits32((uint)value);
-                }
-                else if (value < (long)Bits40)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits40);
-                    WriteBits40((ulong)value);
-                }
-                else if (value < (long)Bits48)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits48);
-                    WriteBits48((ulong)value);
-                }
-                else if (value < (long)Bits56)
-                {
-                    WriteSymbol(CtpObjectSymbols.IntBits56);
-                    WriteBits56((ulong)value);
-                }
-                else
-                {
-                    WriteSymbol(CtpObjectSymbols.IntElse);
-                    WriteBits64((ulong)value);
-                }
+                WriteSymbol(CtpObjectSymbols.GuidElse);
+                EnsureCapacityBytes(16);
+                Array.Copy(value.ToRfcBytes(), 0, m_buffer, m_length, 16);
+                m_length += 16;
+            }
+        }
+
+        private void WriteString(string value)
+        {
+            byte[] buffer = Encoding.UTF8.GetBytes(value);
+            if (buffer.Length <= 30)
+                WriteSymbol(CtpObjectSymbols.String0 + (byte)buffer.Length);
+            else
+                WriteArrayLength(CtpObjectSymbols.String8Bit, buffer.Length);
+            EnsureCapacityBytes(buffer.Length);
+            Array.Copy(buffer, 0, m_buffer, m_length, buffer.Length);
+            m_length += buffer.Length;
+        }
+
+        private void WriteBuffer(CtpBuffer value)
+        {
+            byte[] buffer = value.ToBuffer();
+            if (buffer.Length <= 50)
+                WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)buffer.Length);
+            else
+                WriteArrayLength(CtpObjectSymbols.CtpBuffer8Bit, buffer.Length);
+            EnsureCapacityBytes(buffer.Length);
+            Array.Copy(buffer, 0, m_buffer, m_length, buffer.Length);
+            m_length += buffer.Length;
+        }
+
+        private void WriteCommand(CtpCommand value)
+        {
+            byte[] buffer = value.ToArray();
+            WriteArrayLength(CtpObjectSymbols.CtpCommand8Bit, buffer.Length);
+            EnsureCapacityBytes(buffer.Length);
+            Array.Copy(buffer, 0, m_buffer, m_length, buffer.Length);
+            m_length += buffer.Length;
+        }
+
+        private void WriteArrayLength(CtpObjectSymbols baseSymbol, int length)
+        {
+            if (length > Bits24)
+            {
+                WriteBits8((uint)baseSymbol + 3u);
+                WriteBits32((uint)length);
+            }
+            else if (length > Bits16)
+            {
+                WriteBits8((uint)baseSymbol + 2u);
+                WriteBits24((uint)length);
+            }
+            else if (length > Bits8)
+            {
+                WriteBits8((uint)baseSymbol + 1u);
+                WriteBits16((uint)length);
+            }
+            else
+            {
+                WriteBits8((uint)baseSymbol + 0u);
+                WriteBits8((uint)length);
             }
         }
 
@@ -494,85 +385,85 @@ namespace CTP
         private void WriteBits8(uint value)
         {
             EnsureCapacityBytes(1);
-            m_byteBuffer[m_byteLength + 0] = (byte)value;
-            m_byteLength += 1;
+            m_buffer[m_length + 0] = (byte)value;
+            m_length += 1;
         }
 
         private void WriteBits16(uint value)
         {
             EnsureCapacityBytes(2);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 1] = (byte)value;
-            m_byteLength += 2;
+            m_buffer[m_length + 0] = (byte)(value >> 8);
+            m_buffer[m_length + 1] = (byte)value;
+            m_length += 2;
         }
 
         private void WriteBits24(uint value)
         {
             EnsureCapacityBytes(3);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 2] = (byte)value;
-            m_byteLength += 3;
+            m_buffer[m_length + 0] = (byte)(value >> 16);
+            m_buffer[m_length + 1] = (byte)(value >> 8);
+            m_buffer[m_length + 2] = (byte)value;
+            m_length += 3;
         }
 
         private void WriteBits32(uint value)
         {
             EnsureCapacityBytes(4);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 3] = (byte)value;
-            m_byteLength += 4;
+            m_buffer[m_length + 0] = (byte)(value >> 24);
+            m_buffer[m_length + 1] = (byte)(value >> 16);
+            m_buffer[m_length + 2] = (byte)(value >> 8);
+            m_buffer[m_length + 3] = (byte)value;
+            m_length += 4;
         }
 
         private void WriteBits40(ulong value)
         {
             EnsureCapacityBytes(5);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 4] = (byte)value;
-            m_byteLength += 5;
+            m_buffer[m_length + 0] = (byte)(value >> 32);
+            m_buffer[m_length + 1] = (byte)(value >> 24);
+            m_buffer[m_length + 2] = (byte)(value >> 16);
+            m_buffer[m_length + 3] = (byte)(value >> 8);
+            m_buffer[m_length + 4] = (byte)value;
+            m_length += 5;
         }
 
         private void WriteBits48(ulong value)
         {
             EnsureCapacityBytes(6);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 40);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 5] = (byte)value;
-            m_byteLength += 6;
+            m_buffer[m_length + 0] = (byte)(value >> 40);
+            m_buffer[m_length + 1] = (byte)(value >> 32);
+            m_buffer[m_length + 2] = (byte)(value >> 24);
+            m_buffer[m_length + 3] = (byte)(value >> 16);
+            m_buffer[m_length + 4] = (byte)(value >> 8);
+            m_buffer[m_length + 5] = (byte)value;
+            m_length += 6;
         }
 
         private void WriteBits56(ulong value)
         {
             EnsureCapacityBytes(7);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 48);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 40);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 6] = (byte)value;
-            m_byteLength += 7;
+            m_buffer[m_length + 0] = (byte)(value >> 48);
+            m_buffer[m_length + 1] = (byte)(value >> 40);
+            m_buffer[m_length + 2] = (byte)(value >> 32);
+            m_buffer[m_length + 3] = (byte)(value >> 24);
+            m_buffer[m_length + 4] = (byte)(value >> 16);
+            m_buffer[m_length + 5] = (byte)(value >> 8);
+            m_buffer[m_length + 6] = (byte)value;
+            m_length += 7;
         }
 
         private void WriteBits64(ulong value)
         {
             EnsureCapacityBytes(8);
-            m_byteBuffer[m_byteLength + 0] = (byte)(value >> 56);
-            m_byteBuffer[m_byteLength + 1] = (byte)(value >> 48);
-            m_byteBuffer[m_byteLength + 2] = (byte)(value >> 40);
-            m_byteBuffer[m_byteLength + 3] = (byte)(value >> 32);
-            m_byteBuffer[m_byteLength + 4] = (byte)(value >> 24);
-            m_byteBuffer[m_byteLength + 5] = (byte)(value >> 16);
-            m_byteBuffer[m_byteLength + 6] = (byte)(value >> 8);
-            m_byteBuffer[m_byteLength + 7] = (byte)value;
-            m_byteLength += 8;
+            m_buffer[m_length + 0] = (byte)(value >> 56);
+            m_buffer[m_length + 1] = (byte)(value >> 48);
+            m_buffer[m_length + 2] = (byte)(value >> 40);
+            m_buffer[m_length + 3] = (byte)(value >> 32);
+            m_buffer[m_length + 4] = (byte)(value >> 24);
+            m_buffer[m_length + 5] = (byte)(value >> 16);
+            m_buffer[m_length + 6] = (byte)(value >> 8);
+            m_buffer[m_length + 7] = (byte)value;
+            m_length += 8;
         }
 
         internal static byte[] CreatePacket(PacketContents contentType, int contentFlags, byte[] payload)

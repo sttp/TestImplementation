@@ -165,98 +165,194 @@ namespace Sttp.DataPointEncoding
             }
         }
 
-        public static long ReadInt64(BitStreamReader stream)
+        public static sbyte ReadInt8(BitStreamReader stream)
         {
-            ulong negate = stream.ReadBits1() == 0 ? 0 : ulong.MaxValue;
-
-            switch (stream.ReadBits3())
+            switch (stream.ReadBits2())
             {
                 case 0:
-                    return (long)(stream.ReadBits8() ^ negate);
+                    return (sbyte)0;
                 case 1:
-                    return (long)(stream.ReadBits16() ^ negate);
-                case 2:
-                    return (long)(stream.ReadBits24() ^ negate);
-                case 3:
-                    return (long)(stream.ReadBits32() ^ negate);
-                case 4:
-                    return (long)(stream.ReadBits(40) ^ negate);
-                case 5:
-                    return (long)(stream.ReadBits(48) ^ negate);
-                case 6:
-                    return (long)(stream.ReadBits(56) ^ negate);
-                case 7:
-                    return (long)(stream.ReadBits(64) ^ negate);
+                    return (sbyte)stream.ReadBits4();
                 default:
-                    throw new Exception(); //Impossible to get here.
+                    return (sbyte)stream.ReadBits8();
+            }
+        }
+
+        public static void WriteInt8(BitStreamWriter stream, sbyte value)
+        {
+            if (value == 0)
+            {
+                stream.WriteBits2(0);
+            }
+            else if ((byte)value < 16)
+            {
+                stream.WriteBits2(1);
+                stream.WriteBits4((byte)value);
+            }
+            else
+            {
+                stream.WriteBits2(2);
+                stream.WriteBits8((byte)value);
+            }
+        }
+
+        public static short ReadInt16(BitStreamReader stream)
+        {
+           return (short)stream.ReadBits16();
+        }
+
+        public static void WriteInt16(BitStreamWriter stream, short value)
+        {
+            stream.WriteBits16((ushort)value);
+        }
+
+        public static int ReadInt32(BitStreamReader stream)
+        {
+            switch (stream.ReadBits1())
+            {
+                case 0:
+                    return (int)CompareUInt32.UnChangeSign(stream.ReadBits24());
+                default:
+                    return (int)CompareUInt32.UnChangeSign(stream.ReadBits32());
+            }
+        }
+
+        public static void WriteInt32(BitStreamWriter stream, int value)
+        {
+            uint v = CompareUInt32.ChangeSign((uint)value);
+            if (value < Bits24)
+            {
+                stream.WriteBits1(0);
+                stream.WriteBits24(v);
+            }
+            else
+            {
+                stream.WriteBits1(1);
+                stream.WriteBits32(v);
+            }
+        }
+
+        public static long ReadInt64(BitStreamReader stream)
+        {
+            switch (stream.ReadBits2())
+            {
+                case 0:
+                    return (long)CompareUInt64.UnChangeSign(stream.ReadBits(40));
+                case 1:
+                    return (long)CompareUInt64.UnChangeSign(stream.ReadBits(48));
+                case 2:
+                    return (long)CompareUInt64.UnChangeSign(stream.ReadBits(56));
+                default:
+                    return (long)CompareUInt64.UnChangeSign(stream.ReadBits(64));
             }
         }
 
         public static void WriteInt64(BitStreamWriter stream, long value)
         {
-            if (value < 0)
+            ulong v = CompareUInt64.ChangeSign((ulong)value);
+            if (v <= (long)Bits40)
             {
-                stream.WriteBits1(1);
-                value = ~value;
+                stream.WriteBits2(0);
+                stream.WriteBits(40, (ulong)v);
+            }
+            else if (v <= (long)Bits48)
+            {
+                stream.WriteBits2(1);
+                stream.WriteBits(48, (ulong)v);
+            }
+            else if (v <= (long)Bits56)
+            {
+                stream.WriteBits2(2);
+                stream.WriteBits(56, (ulong)v);
             }
             else
             {
-                stream.WriteBits1(0);
-            }
-
-            if (value <= Bits8)
-            {
-                stream.WriteBits3(0);
-                stream.WriteBits8((uint)(int)value);
-            }
-            else if (value <= Bits16)
-            {
-                stream.WriteBits3(1);
-                stream.WriteBits16((uint)(int)value);
-            }
-            else if (value <= Bits24)
-            {
-                stream.WriteBits3(2);
-                stream.WriteBits24((uint)(int)value);
-            }
-            else if (value <= Bits32)
-            {
-                stream.WriteBits3(3);
-                stream.WriteBits32((uint)(int)value);
-            }
-            else if (value <= (long)Bits40)
-            {
-                stream.WriteBits3(4);
-                stream.WriteBits(40, (ulong)value);
-            }
-            else if (value <= (long)Bits48)
-            {
-                stream.WriteBits3(5);
-                stream.WriteBits(48, (ulong)value);
-            }
-            else if (value <= (long)Bits56)
-            {
-                stream.WriteBits3(6);
-                stream.WriteBits(56, (ulong)value);
-            }
-            else
-            {
-                stream.WriteBits3(7);
-                stream.WriteBits(64, (ulong)value);
+                stream.WriteBits2(3);
+                stream.WriteBits(64, (ulong)v);
             }
         }
 
         public static float ReadSingle(BitStreamReader stream)
         {
-            uint value = stream.ReadBits32();
+            uint value;
+            switch (stream.ReadBits8())
+            {
+                case 0:
+                    value = stream.ReadBits24() | (0x42u << 24);
+                    break;
+                case 1:
+                    value = stream.ReadBits24() | (0x47u << 24);
+                    break;
+                case 2:
+                    value = stream.ReadBits24() | (0xC3u << 24);
+                    break;
+                case 3:
+                    value = stream.ReadBits24() | (0x43u << 24);
+                    break;
+                case 4:
+                    value = stream.ReadBits24() | (0xC2u << 24);
+                    break;
+                case 5:
+                    value = stream.ReadBits24() | (0xC1u << 24);
+                    break;
+                case 6:
+                    value = stream.ReadBits24() | (0x48u << 24);
+                    break;
+                default:
+                    value = stream.ReadBits32();
+                    break;
+            }
             return *(float*)&value;
         }
 
         public static void WriteSingle(BitStreamWriter stream, float value)
         {
             uint v = *(uint*)&value;
-            stream.WriteBits32(v);
+            if ((v >> 24) == 0x42)
+            {
+                stream.WriteBits3(0);
+                stream.WriteBits24(v);
+            }
+            else if ((v >> 24) == 0x47)
+            {
+                stream.WriteBits3(1);
+                stream.WriteBits24(v);
+            }
+            else if ((v >> 24) == 0xC3)
+            {
+                stream.WriteBits3(2);
+                stream.WriteBits24(v);
+            }
+            else if ((v >> 24) == 0x43)
+            {
+                stream.WriteBits3(3);
+                stream.WriteBits24(v);
+            }
+            else if ((v >> 24) == 0xC2)
+            {
+                stream.WriteBits3(4);
+                stream.WriteBits24(v);
+            }
+            else if ((v >> 24) == 0xC1)
+            {
+                stream.WriteBits3(5);
+                stream.WriteBits24(v);
+            }
+            else if ((v >> 24) == 0x48)
+            {
+                stream.WriteBits3(6);
+                stream.WriteBits24(v);
+            }
+            else
+            {
+                stream.WriteBits3(7);
+                stream.WriteBits32(v);
+            }
+
+            SingleBuckets[v >> 24]++;
         }
+
+        public static int[] SingleBuckets = new int[256];
 
         public static void WriteDouble(BitStreamWriter stream, double value)
         {

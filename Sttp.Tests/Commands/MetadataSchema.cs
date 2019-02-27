@@ -25,7 +25,7 @@ namespace Sttp.Tests.Commands
         {
             var tbls = new List<MetadataSchemaTable>();
             var tbl = new MetadataSchemaTable();
-            tbl.Columns.Add(new MetadataColumn("ID", CtpTypeCode.Int64));
+            tbl.Columns.Add(new MetadataColumn("ID", CtpTypeCode.Integer));
             tbl.Columns.Add(new MetadataColumn("SignalID", CtpTypeCode.Guid));
             tbl.Columns.Add(new MetadataColumn("TagName", CtpTypeCode.String));
             tbl.Columns.Add(new MetadataColumn("Enabled", CtpTypeCode.Boolean));

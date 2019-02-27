@@ -64,10 +64,7 @@ namespace CTP
                 {
                     case CtpTypeCode.Null:
                         return true;
-                    case CtpTypeCode.Int8:
-                    case CtpTypeCode.Int16:
-                    case CtpTypeCode.Int32:
-                    case CtpTypeCode.Int64:
+                    case CtpTypeCode.Integer:
                     case CtpTypeCode.Single:
                     case CtpTypeCode.Double:
                     case CtpTypeCode.CtpTime:
@@ -89,40 +86,12 @@ namespace CTP
             }
         }
 
-        public sbyte IsInt8
+        public long IsInteger
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Int8)
-                    ThrowHelper(CtpTypeCode.Int8);
-                return (sbyte)m_valueInt64;
-            }
-        }
-        public short IsInt16
-        {
-            get
-            {
-                if (m_valueTypeCode != CtpTypeCode.Int16)
-                    ThrowHelper(CtpTypeCode.Int16);
-                return (short)m_valueInt64;
-            }
-        }
-        public int IsInt32
-        {
-            get
-            {
-                if (m_valueTypeCode != CtpTypeCode.Int32)
-                    ThrowHelper(CtpTypeCode.Int32);
-                return (int)m_valueInt64;
-            }
-        }
-
-        public long IsInt64
-        {
-            get
-            {
-                if (m_valueTypeCode != CtpTypeCode.Int64)
-                    ThrowHelper(CtpTypeCode.Int64);
+                if (m_valueTypeCode != CtpTypeCode.Integer)
+                    ThrowHelper(CtpTypeCode.Integer);
                 return m_valueInt64;
             }
         }
@@ -245,10 +214,7 @@ namespace CTP
             {
                 case CtpTypeCode.Boolean:
                 case CtpTypeCode.Null:
-                case CtpTypeCode.Int8:
-                case CtpTypeCode.Int16:
-                case CtpTypeCode.Int32:
-                case CtpTypeCode.Int64:
+                case CtpTypeCode.Integer:
                 case CtpTypeCode.Single:
                 case CtpTypeCode.Double:
                 case CtpTypeCode.CtpTime:
@@ -283,10 +249,7 @@ namespace CTP
             {
                 case CtpTypeCode.Null:
                     return (int)m_valueTypeCode;
-                case CtpTypeCode.Int8:
-                case CtpTypeCode.Int16:
-                case CtpTypeCode.Int32:
-                case CtpTypeCode.Int64:
+                case CtpTypeCode.Integer:
                     return (m_valueInt64.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
                 case CtpTypeCode.Single:
                     return (m_valueSingle.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
@@ -321,10 +284,7 @@ namespace CTP
             {
                 case CtpTypeCode.Null:
                     return CtpObject.Null;
-                case CtpTypeCode.Int8:
-                case CtpTypeCode.Int16:
-                case CtpTypeCode.Int32:
-                case CtpTypeCode.Int64:
+                case CtpTypeCode.Integer:
                     return new CtpObject(0);
                 case CtpTypeCode.Single:
                     return new CtpObject(0f);

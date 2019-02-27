@@ -158,7 +158,7 @@ namespace CTP
 
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            throw new NotImplementedException();
+            return AsDateTime.ToString(format, formatProvider);
         }
 
         public int CompareTo(object value)

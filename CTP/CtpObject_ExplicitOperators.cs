@@ -13,67 +13,37 @@ namespace CTP
         }
         public static implicit operator CtpObject(sbyte value)
         {
-            return new CtpObject((sbyte)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(short value)
         {
-            if (sbyte.MinValue <= value && value <= sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            return new CtpObject((short)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(int value)
         {
-            if (sbyte.MinValue <= value && value <= sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            if (short.MinValue <= value && value <= short.MaxValue)
-                return new CtpObject((short)value);
-            return new CtpObject((int)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(long value)
         {
-            if (sbyte.MinValue <= value && value <= sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            if (short.MinValue <= value && value <= short.MaxValue)
-                return new CtpObject((short)value);
-            if (int.MinValue <= value && value <= int.MaxValue)
-                return new CtpObject((int)value);
-            return new CtpObject((long)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(byte value)
         {
-            if (value <= sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            return new CtpObject((short)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(ushort value)
         {
-            if (value <= sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            if (value <= short.MaxValue)
-                return new CtpObject((short)value);
-            return new CtpObject((int)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(uint value)
         {
-            if (value <= sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            if (value <= short.MaxValue)
-                return new CtpObject((short)value);
-            if (value <= int.MaxValue)
-                return new CtpObject((int)value);
-            return new CtpObject((long)value);
+            return new CtpObject(value);
         }
         public static implicit operator CtpObject(ulong value)
         {
-            if (value <= (ulong)sbyte.MaxValue)
-                return new CtpObject((sbyte)value);
-            if (value <= (ulong)short.MaxValue)
-                return new CtpObject((short)value);
-            if (value <= (ulong)int.MaxValue)
-                return new CtpObject((int)value);
-            if (value <= (ulong)long.MaxValue)
-                return new CtpObject((long)value);
-            return new CtpObject(new CtpNumeric(value));
+            if (value > long.MaxValue)
+                return new CtpObject(new CtpNumeric(value));
+            return new CtpObject((long)value);
         }
         public static implicit operator CtpObject(float value)
         {
@@ -90,15 +60,9 @@ namespace CTP
 
         public static implicit operator CtpObject(CtpNumeric value)
         {
-            if (value.Scale == 0)
+            if (value.Scale == 0 && value.High == 0)
             {
-                var v = (decimal)value;
-                if (sbyte.MinValue <= v && v <= sbyte.MaxValue)
-                    return new CtpObject((sbyte)v);
-                if (short.MinValue <= v && v <= short.MaxValue)
-                    return new CtpObject((short)v);
-                if (int.MinValue <= v && v <= int.MaxValue)
-                    return new CtpObject((int)v);
+                decimal v = (decimal)value;
                 if (long.MinValue <= v && v <= long.MaxValue)
                     return new CtpObject((long)v);
             }

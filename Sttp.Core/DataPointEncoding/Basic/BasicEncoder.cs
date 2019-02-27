@@ -45,24 +45,24 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
-            int channelID = m_channelMap.GetChannelID(point.Metadata, out var sendMetadata);
+            int channelID = m_channelMap.GetChannelID(point.Metadata, out var includeMetadata);
             bool qualityChanged = point.Quality != m_lastQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
             bool valueTypeChanged = point.Value.ValueTypeCode != m_lastValueType;
             bool channelIDChanged = m_lastChannelID + 1 != channelID;
 
-            if (!sendMetadata && !qualityChanged && !timeChanged && !valueTypeChanged && !channelIDChanged)
+            if (!includeMetadata && !qualityChanged && !timeChanged && !valueTypeChanged && !channelIDChanged)
             {
                 m_stream2.WriteBits1(0); //Is the common header. (~75% of the time, this is true)
             }
             else
             {
-                m_stream2.WriteBits2(1); //Is not the common header.
+                m_stream2.WriteBits1(1); //Is not the common header.
                 m_stream2.WriteBits1(qualityChanged); //Rare
                 m_stream2.WriteBits1(timeChanged); //Nearly Rare
                 m_stream2.WriteBits1(valueTypeChanged);
                 m_stream2.WriteBits1(channelIDChanged);
-                m_stream2.WriteBits1(sendMetadata); //Rare
+                m_stream2.WriteBits1(includeMetadata); //Rare
             }
 
             if (channelIDChanged)
@@ -71,7 +71,7 @@ namespace Sttp.DataPointEncoding
             }
             m_lastChannelID = channelID;
 
-            if (sendMetadata)
+            if (includeMetadata)
             {
                 m_stream1.Write(point.Metadata.DataPointID);
             }
@@ -98,9 +98,18 @@ namespace Sttp.DataPointEncoding
             {
                 case CtpTypeCode.Null:
                     break;
-                case CtpTypeCode.Int64:
-                    CustomBitEncoding.WriteInt64(m_stream2, point.Value.IsInt64);
-                    break;
+                //case CtpTypeCode.Int8:
+                //    CustomBitEncoding.WriteInt8(m_stream2, point.Value.IsInt8);
+                //    break;
+                //case CtpTypeCode.Int16:
+                //    CustomBitEncoding.WriteInt16(m_stream2, point.Value.IsInt16);
+                //    break;
+                //case CtpTypeCode.Int32:
+                //    CustomBitEncoding.WriteInt32(m_stream2, point.Value.IsInt32);
+                //    break;
+                //case CtpTypeCode.Int64:
+                //    CustomBitEncoding.WriteInt64(m_stream2, point.Value.IsInteger);
+                //    break;
                 case CtpTypeCode.Single:
                     CustomBitEncoding.WriteSingle(m_stream2, point.Value.IsSingle);
                     break;
