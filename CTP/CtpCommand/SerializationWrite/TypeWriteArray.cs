@@ -18,9 +18,9 @@ namespace CTP.SerializationWrite
             m_serializeT = TypeWrite.GetUnknownType<T>(schema, "Item");
         }
 
-        public override void Save(T[] obj, CtpCommandWriter writer)
+        public override void Save(T[] obj, CtpObjectWriter writer)
         {
-            writer.WriteArray(obj.Length);
+            writer.Write(obj.Length);
             for (int i = 0; i < obj.Length; i++)
             {
                 m_serializeT.Save(obj[i], writer);

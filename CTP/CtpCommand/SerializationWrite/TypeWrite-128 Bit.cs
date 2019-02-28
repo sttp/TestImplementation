@@ -7,18 +7,18 @@ namespace CTP.SerializationWrite
     internal class TypeWriteDecimal
         : TypeWriteMethodBase<decimal>
     {
-        public override void Save(decimal obj, CtpCommandWriter writer)
+        public override void Save(decimal obj, CtpObjectWriter writer)
         {
-            writer.WriteValue((CtpObject)obj);
+            writer.Write((CtpObject)obj);
         }
     }
 
     internal class TypeWriteGuid
         : TypeWriteMethodBase<Guid>
     {
-        public override void Save(Guid obj, CtpCommandWriter writer)
+        public override void Save(Guid obj, CtpObjectWriter writer)
         {
-            writer.WriteValue((CtpObject)obj);
+            writer.Write((CtpObject)obj);
         }
     }
 }

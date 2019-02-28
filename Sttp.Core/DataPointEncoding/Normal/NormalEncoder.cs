@@ -35,7 +35,7 @@ namespace Sttp.DataPointEncoding
             m_stream.Clear();
         }
 
-        public override CtpCommand ToArray()
+        public override CommandObject ToArray()
         {
             return new CommandDataStreamNormal(m_stream.ToArray());
         }

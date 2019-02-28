@@ -14,7 +14,7 @@ namespace CTP.SerializationWrite
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="writer"></param>
-        public abstract void Save(object obj, CtpCommandWriter writer);
+        public abstract void Save(object obj, CtpObjectWriter writer);
 
         private static readonly MethodInfo Method1 = typeof(FieldWrite).GetMethod("CreateFieldSerializationInternal1", BindingFlags.Static | BindingFlags.NonPublic);
         private static readonly MethodInfo Method2 = typeof(FieldWrite).GetMethod("CreateFieldSerializationInternal2", BindingFlags.Static | BindingFlags.NonPublic);
@@ -75,7 +75,7 @@ namespace CTP.SerializationWrite
             m_method = method;
         }
 
-        public override void Save(object obj, CtpCommandWriter writer)
+        public override void Save(object obj, CtpObjectWriter writer)
         {
             var item = m_read(obj);
             if (item == null)

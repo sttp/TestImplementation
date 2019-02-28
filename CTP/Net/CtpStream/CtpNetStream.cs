@@ -273,7 +273,12 @@ namespace CTP.Net
             }
         }
 
-        public void Send(CtpCommand command)
+        //public void Send(CtpCommand command)
+        //{
+        //    m_write.Send(command);
+        //}
+
+        public void Send(CommandObject command)
         {
             m_write.Send(command);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CTP.IO;
 
 namespace CTP
 {
@@ -192,7 +193,7 @@ namespace CTP
 
         public byte[] ToCommand(int schemaRuntimeID)
         {
-            return CtpObjectWriter.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
+            return PacketMethods.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
         }
 
         public void CopyTo(byte[] data, int offset)

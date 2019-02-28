@@ -67,7 +67,7 @@ namespace CTP.SerializationWrite
             return false;
         }
 
-        public override void Save(T obj, CtpCommandWriter writer)
+        public override void Save(T obj, CtpObjectWriter writer)
         {
             //Root elements have a record name == null. These do not need to start an element.
             foreach (var item in m_records)

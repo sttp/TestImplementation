@@ -21,12 +21,12 @@ namespace CTP.SerializationWrite
             m_serializeT = TypeWrite.GetUnknownType<T>(schema, "Item");
         }
 
-        public override void Save(TEnum obj, CtpCommandWriter writer)
+        public override void Save(TEnum obj, CtpObjectWriter writer)
         {
             if (obj == null)
                 return;
 
-            writer.WriteArray(obj.Count());
+            writer.Write(obj.Count());
             foreach (var item in obj)
             {
                 m_serializeT.Save(item, writer);

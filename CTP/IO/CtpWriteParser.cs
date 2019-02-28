@@ -36,22 +36,38 @@ namespace CTP.IO
         /// </summary>
         public int MaximumSchemeCount { get; set; } = 1_000;
 
-        public void Send(CtpCommand command)
+        public void Send(CommandObject command)
         {
             int schemeRuntimeID;
             lock (m_knownSchemas)
             {
-                if (!m_knownSchemas.TryGetValue(command.SchemaID, out schemeRuntimeID))
+                if (!m_knownSchemas.TryGetValue(command.Schema.Identifier, out schemeRuntimeID))
                 {
                     schemeRuntimeID = m_knownSchemas.Count;
-                    m_knownSchemas.Add(command.SchemaID, schemeRuntimeID);
-                    Send(command.ToCommandSchema(schemeRuntimeID));
+                    m_knownSchemas.Add(command.Schema.Identifier, schemeRuntimeID);
+                    Send(command.Schema.ToCommand(schemeRuntimeID));
                 }
             }
-            Send(command.ToCommandData(schemeRuntimeID));
+
+            Send(command.ToDataCommandPacket(schemeRuntimeID));
         }
 
-        public void Send(byte[] packet)
+        //public void Send(CtpCommand command)
+        //{
+        //    int schemeRuntimeID;
+        //    lock (m_knownSchemas)
+        //    {
+        //        if (!m_knownSchemas.TryGetValue(command.SchemaID, out schemeRuntimeID))
+        //        {
+        //            schemeRuntimeID = m_knownSchemas.Count;
+        //            m_knownSchemas.Add(command.SchemaID, schemeRuntimeID);
+        //            Send(command.ToCommandSchema(schemeRuntimeID));
+        //        }
+        //    }
+        //    Send(command.ToCommandData(schemeRuntimeID));
+        //}
+
+        private void Send(byte[] packet)
         {
             switch (m_compressionMode)
             {
@@ -65,8 +81,7 @@ namespace CTP.IO
                         {
                             comp.Write(packet,0,packet.Length);
                         }
-                        
-                        m_send(CtpObjectWriter.CreatePacket(PacketContents.CompressedDeflate, packet.Length, ms.ToArray()));
+                        m_send(PacketMethods.CreatePacket(PacketContents.CompressedDeflate, packet.Length, ms.ToArray()));
                     }
                     break;
                 case CtpCompressionMode.Zlib:
@@ -82,7 +97,7 @@ namespace CTP.IO
                     m_deflate.Flush();
                     byte[] rv = m_stream.ToArray();
                     m_stream.SetLength(0);
-                    m_send(CtpObjectWriter.CreatePacket(PacketContents.CompressedZlib, packet.Length, rv));
+                    m_send(PacketMethods.CreatePacket(PacketContents.CompressedZlib, packet.Length, rv));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

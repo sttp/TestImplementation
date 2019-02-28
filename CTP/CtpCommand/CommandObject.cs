@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using CTP.IO;
 using GSF.Collections;
 
 namespace CTP
@@ -16,6 +17,11 @@ namespace CTP
         }
 
         /// <summary>
+        /// Gets the Schema associated with this command;
+        /// </summary>
+        public abstract CtpCommandSchema Schema { get; }
+
+        /// <summary>
         /// The name that is associated with this command record. If this is a nested object, this value will be ignored.
         /// </summary>
         public abstract string CommandName { get; }
@@ -26,11 +32,13 @@ namespace CTP
         /// <returns></returns>
         public abstract CtpCommand ToCommand();
 
+        public abstract byte[] ToDataCommandPacket(int schemeRuntimeID);
+
         /// <summary>
         /// Implicitly converts into a <see cref="CtpCommand"/>.
         /// </summary>
         /// <param name="obj"></param>
-        public static implicit operator CtpCommand(CommandObject obj)
+        public static explicit operator CtpCommand(CommandObject obj)
         {
             return obj.ToCommand();
         }
@@ -113,6 +121,7 @@ namespace CTP
         {
             MissingElement(name);
         }
+
     }
 
     /// <summary>
@@ -138,6 +147,18 @@ namespace CTP
         /// </summary>
         public sealed override string CommandName => CmdName;
 
+        public sealed override CtpCommandSchema Schema => WriteSchema;
+
+        public override byte[] ToDataCommandPacket(int schemeRuntimeID)
+        {
+            T obj = this as T;
+            if (LoadError != null)
+                throw LoadError;
+            var wr = new CtpObjectWriter();
+            WriteMethod.Save(obj, wr);
+            return PacketMethods.CreatePacket(PacketContents.CommandData, schemeRuntimeID, wr);
+        }
+
         /// <summary>
         /// Converts this object into a <see cref="CtpCommand"/>
         /// </summary>
@@ -147,9 +168,9 @@ namespace CTP
             T obj = this as T;
             if (LoadError != null)
                 throw LoadError;
-            var wr = new CtpCommandWriter(WriteSchema);
+            var wr = new CtpObjectWriter();
             WriteMethod.Save(obj, wr);
-            return wr.ToCtpCommand();
+            return new CtpCommand(WriteSchema, wr.ToArray());
         }
 
         /// <summary>

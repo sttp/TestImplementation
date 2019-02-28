@@ -7,9 +7,9 @@ namespace CTP.SerializationWrite
         : TypeWriteMethodBase<byte>
     {
        
-        public override void Save(byte obj, CtpCommandWriter writer)
+        public override void Save(byte obj, CtpObjectWriter writer)
         {
-            writer.WriteValue( (CtpObject)obj);
+            writer.Write( (CtpObject)obj);
         }
     }
 
@@ -17,9 +17,9 @@ namespace CTP.SerializationWrite
         : TypeWriteMethodBase<sbyte>
     {
        
-        public override void Save(sbyte obj, CtpCommandWriter writer)
+        public override void Save(sbyte obj, CtpObjectWriter writer)
         {
-            writer.WriteValue( (CtpObject)obj);
+            writer.Write( (CtpObject)obj);
         }
     }
 
@@ -27,9 +27,9 @@ namespace CTP.SerializationWrite
         : TypeWriteMethodBase<bool>
     {
         
-        public override void Save(bool obj, CtpCommandWriter writer)
+        public override void Save(bool obj, CtpObjectWriter writer)
         {
-            writer.WriteValue( (CtpObject)obj);
+            writer.Write( (CtpObject)obj);
         }
     }
 }

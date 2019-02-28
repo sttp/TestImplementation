@@ -150,6 +150,7 @@ namespace Sttp.Tests
             Console.WriteLine((PointCount / sw.Elapsed.TotalSeconds).ToString("N0"));
         }
 
+
         [TestMethod]
         public void Profile()
         {

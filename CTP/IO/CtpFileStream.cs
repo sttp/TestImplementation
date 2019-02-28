@@ -67,10 +67,18 @@ namespace CTP.IO
             set => m_write.MaximumSchemeCount = m_readParser.MaximumSchemeCount = value;
         }
 
+        ///// <summary>
+        ///// Writes a command to the underlying stream. Note: this method blocks until a packet has successfully been sent.
+        ///// </summary>
+        //public void Write(CtpCommand command)
+        //{
+        //    m_write.Send(command);
+        //}
+
         /// <summary>
         /// Writes a command to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        public void Write(CtpCommand command)
+        public void Write(CommandObject command)
         {
             m_write.Send(command);
         }

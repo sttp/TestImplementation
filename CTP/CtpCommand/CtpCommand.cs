@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using CTP.IO;
 using GSF;
 
 namespace CTP
@@ -322,7 +323,7 @@ namespace CTP
 
         public byte[] ToCommandData(int schemaRuntimeID)
         {
-            return CtpObjectWriter.CreatePacket(PacketContents.CommandData, schemaRuntimeID, m_data);
+            return PacketMethods.CreatePacket(PacketContents.CommandData, schemaRuntimeID, m_data);
         }
     }
 }

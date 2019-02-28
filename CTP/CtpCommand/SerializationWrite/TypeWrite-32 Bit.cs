@@ -6,27 +6,27 @@ namespace CTP.SerializationWrite
     internal class TypeWriteUInt32
         : TypeWriteMethodBase<uint>
     {
-        public override void Save(uint obj, CtpCommandWriter writer)
+        public override void Save(uint obj, CtpObjectWriter writer)
         {
-            writer.WriteValue((CtpObject)obj);
+            writer.Write((CtpObject)obj);
         }
     }
 
     internal class TypeWriteInt32
         : TypeWriteMethodBase<int>
     {
-        public override void Save(int obj, CtpCommandWriter writer)
+        public override void Save(int obj, CtpObjectWriter writer)
         {
-            writer.WriteValue((CtpObject)obj);
+            writer.Write((CtpObject)obj);
         }
     }
 
     internal class TypeWriteSingle
         : TypeWriteMethodBase<float>
     {
-        public override void Save(float obj, CtpCommandWriter writer)
+        public override void Save(float obj, CtpObjectWriter writer)
         {
-            writer.WriteValue((CtpObject)obj);
+            writer.Write((CtpObject)obj);
         }
     }
 }

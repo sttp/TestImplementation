@@ -71,6 +71,26 @@ namespace CTP
             //Array.Clear(m_buffer, 0, m_buffer.Length);
         }
 
+        public void Write(byte[] value)
+        {
+            if (value == null)
+                Write(CtpObject.Null);
+            else
+                WriteBuffer(value, 0, value.Length);
+        }
+        public void Write(byte[] value, int offset, int length)
+        {
+            if (value == null)
+            {
+                Write(CtpObject.Null);
+            }
+            else
+            {
+                value.ValidateParameters(offset, length);
+                WriteBuffer(value, offset, length);
+            }
+        }
+
         public void Write(CtpObject value)
         {
             switch (value.ValueTypeCode)
@@ -343,6 +363,17 @@ namespace CTP
             m_length += value.Length;
         }
 
+        private void WriteBuffer(byte[] value, int offset, int length)
+        {
+            if (length <= 50)
+                WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)length);
+            else
+                WriteArrayLength(CtpObjectSymbols.CtpBuffer8Bit, length);
+            EnsureCapacityBytes(length);
+            Array.Copy(value, offset, m_buffer, m_length, length);
+            m_length += length;
+        }
+
         private void WriteCommand(CtpCommand value)
         {
             int length = value.LengthWithSchema;
@@ -466,14 +497,14 @@ namespace CTP
             m_length += 8;
         }
 
-        internal static byte[] CreatePacket(PacketContents contentType, int contentFlags, byte[] payload)
+        public void CopyTo(CtpObjectWriter wr)
         {
-            var wr = new CtpObjectWriter();
-            wr.Write((byte)contentType);
-            wr.Write(contentFlags);
-            wr.Write(CtpBuffer.DoNotClone(payload));
-            return wr.ToArray();
+            wr.Write(m_buffer, 0, m_length);
         }
+
+        
+
+
     }
 }
 
