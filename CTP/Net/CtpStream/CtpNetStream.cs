@@ -6,6 +6,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using CTP.Collection;
 using CTP.IO;
 using GSF.Diagnostics;
 
@@ -283,7 +284,7 @@ namespace CTP.Net
             m_write.Send(command);
         }
 
-        private void InternalSend(ArraySegment<byte> packet)
+        private void InternalSend(PooledBuffer packet)
         {
             switch (SendMode)
             {

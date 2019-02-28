@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CTP.Collection;
 using CTP.IO;
 
 namespace CTP
@@ -191,7 +192,7 @@ namespace CTP
             return !Equals(left, right);
         }
 
-        public ArraySegment<byte> ToCommand(int schemaRuntimeID)
+        public PooledBuffer ToCommand(int schemaRuntimeID)
         {
             return PacketMethods.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
         }

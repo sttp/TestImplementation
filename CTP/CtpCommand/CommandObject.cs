@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using CTP.Collection;
 using CTP.IO;
 using GSF.Collections;
 
@@ -32,7 +33,7 @@ namespace CTP
         /// <returns></returns>
         public abstract CtpCommand ToCommand();
 
-        public abstract ArraySegment<byte> ToDataCommandPacket(int schemeRuntimeID);
+        public abstract PooledBuffer ToDataCommandPacket(int schemeRuntimeID);
 
         /// <summary>
         /// Implicitly converts into a <see cref="CtpCommand"/>.
@@ -134,6 +135,9 @@ namespace CTP
         : CommandObject
         where T : CommandObject<T>
     {
+
+
+
         protected CommandObject()
         {
             if (LoadError != null)
@@ -149,16 +153,20 @@ namespace CTP
 
         public sealed override CtpCommandSchema Schema => WriteSchema;
 
-        public override ArraySegment<byte> ToDataCommandPacket(int schemeRuntimeID)
+        public override PooledBuffer ToDataCommandPacket(int schemeRuntimeID)
         {
             T obj = this as T;
             if (LoadError != null)
                 throw LoadError;
-            using (var wr = new CtpObjectWriter())
-            {
-                WriteMethod.Save(obj, wr);
-                return PacketMethods.CreatePacket(PacketContents.CommandData, schemeRuntimeID, wr);
-            }
+
+
+            var wr = ThreadStaticItems.CommandObject_Writer ?? new CtpObjectWriter();
+            ThreadStaticItems.CommandObject_Writer = null;
+            wr.Clear();
+            WriteMethod.Save(obj, wr);
+            var buffer = PacketMethods.CreatePacket(PacketContents.CommandData, schemeRuntimeID, wr);
+            ThreadStaticItems.CommandObject_Writer = wr;
+            return buffer;
         }
 
         /// <summary>
@@ -170,11 +178,15 @@ namespace CTP
             T obj = this as T;
             if (LoadError != null)
                 throw LoadError;
-            using (var wr = new CtpObjectWriter())
-            {
-                WriteMethod.Save(obj, wr);
-                return new CtpCommand(WriteSchema, wr.ToArray());
-            }
+
+            var wr = ThreadStaticItems.CommandObject_Writer ?? new CtpObjectWriter();
+            ThreadStaticItems.CommandObject_Writer = null;
+            wr.Clear();
+            WriteMethod.Save(obj, wr);
+            var cmd = new CtpCommand(WriteSchema, wr.ToArray());
+            ThreadStaticItems.CommandObject_Writer = wr;
+            return cmd;
+
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CTP.Collection;
 using GSF;
 
 namespace CTP.IO
@@ -83,18 +84,19 @@ namespace CTP.IO
             m_write.Send(command);
         }
 
-        private void WriteInternal(ArraySegment<byte> packet)
+        private void WriteInternal(PooledBuffer packet)
         {
-            if ((object)packet.Array == null)
+            if ((object)packet == null)
                 throw new ArgumentNullException(nameof(packet));
 
-            if (packet.Count > MaximumPacketSize)
+            if (packet.Length > MaximumPacketSize)
                 throw new Exception("This command is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
             if (m_disposed)
                 throw new ObjectDisposedException("Stream has been closed");
 
-            m_stream.Write(packet.Array, packet.Offset, packet.Count);
+            packet.CopyTo(m_stream);
+            packet.Release();
         }
 
         public void Dispose()

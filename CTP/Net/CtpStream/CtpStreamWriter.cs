@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CTP.Collection;
 
 namespace CTP
 {
@@ -42,14 +43,14 @@ namespace CTP
         /// <summary>
         /// Writes a command to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        public void Write(ArraySegment<byte> data, int timeout)
+        public void Write(PooledBuffer data, int timeout)
         {
             try
             {
-                if ((object)data.Array == null)
+                if ((object)data == null)
                     throw new ArgumentNullException(nameof(data));
 
-                if (data.Count > MaximumPacketSize)
+                if (data.Length > MaximumPacketSize)
                     throw new Exception("This command is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
                 lock (m_writeLock)
@@ -61,8 +62,9 @@ namespace CTP
                         m_writeTimeout = timeout;
                         m_stream.WriteTimeout = timeout;
                     }
-                    m_stream.Write(data.Array, data.Offset, data.Count);
+                    data.CopyTo(m_stream);
                 }
+                data.Release();
             }
             catch (Exception ex)
             {

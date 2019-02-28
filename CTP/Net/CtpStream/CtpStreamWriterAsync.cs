@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CTP.Collection;
 using GSF;
 using GSF.Threading;
 
@@ -26,7 +27,7 @@ namespace CTP
 
         private WaitCallback m_processNextWrite;
 
-        private Queue<Tuple<ShortTime, ArraySegment<byte>>> m_queue;
+        private Queue<Tuple<ShortTime, PooledBuffer>> m_queue;
 
         private ScheduledTask m_processTimeouts;
 
@@ -53,7 +54,7 @@ namespace CTP
             m_timeout = timeout;
             m_stream = stream;
             m_endWrite = EndWrite;
-            m_queue = new Queue<Tuple<ShortTime, ArraySegment<byte>>>();
+            m_queue = new Queue<Tuple<ShortTime, PooledBuffer>>();
 
             m_processTimeouts = new ScheduledTask();
             m_processTimeouts.Running += M_processTimeouts_Running;
@@ -106,7 +107,7 @@ namespace CTP
             if (m_disposed)
                 return;
 
-            ArraySegment<byte> data;
+            PooledBuffer data;
             lock (m_syncLock)
             {
                 if (m_disposed)
@@ -126,7 +127,8 @@ namespace CTP
             }
             try
             {
-                if (m_stream.BeginWrite(data.Array, data.Offset, data.Count, m_endWrite, null).CompletedSynchronously)
+
+                if (data.CopyToAsync(m_stream, m_endWrite, data).CompletedSynchronously)
                     goto TryAgain;
                 //If this completed async, the EndWrite method will return control to this method.
             }
@@ -142,6 +144,7 @@ namespace CTP
             try
             {
                 m_stream.EndWrite(ar);
+                ((PooledBuffer)ar.AsyncState).Release();
                 if (ar.CompletedSynchronously) //Allow the BeginWrite method to loop. This prevents stack overflow issues.
                     return;
                 else
@@ -157,13 +160,13 @@ namespace CTP
         /// <summary>
         /// Writes a packet to the underlying stream. 
         /// </summary>
-        public void Write(ArraySegment<byte> data)
+        public void Write(PooledBuffer data)
         {
-            if ((object)data.Array == null)
+            if ((object)data == null)
                 throw new ArgumentNullException(nameof(data));
 
             //In case of an overflow exception.
-            if (data.Count > MaximumPacketSize)
+            if (data.Length > MaximumPacketSize)
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
             lock (m_syncLock)
