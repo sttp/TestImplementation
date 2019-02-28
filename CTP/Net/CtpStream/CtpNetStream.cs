@@ -283,7 +283,7 @@ namespace CTP.Net
             m_write.Send(command);
         }
 
-        private void InternalSend(byte[] packet)
+        private void InternalSend(ArraySegment<byte> packet)
         {
             switch (SendMode)
             {

@@ -42,14 +42,14 @@ namespace CTP
         /// <summary>
         /// Writes a command to the underlying stream. Note: this method blocks until a packet has successfully been sent.
         /// </summary>
-        public void Write(byte[] data, int timeout)
+        public void Write(ArraySegment<byte> data, int timeout)
         {
             try
             {
-                if ((object)data == null)
+                if ((object)data.Array == null)
                     throw new ArgumentNullException(nameof(data));
 
-                if (data.Length > MaximumPacketSize)
+                if (data.Count > MaximumPacketSize)
                     throw new Exception("This command is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
                 lock (m_writeLock)
@@ -61,7 +61,7 @@ namespace CTP
                         m_writeTimeout = timeout;
                         m_stream.WriteTimeout = timeout;
                     }
-                    m_stream.Write(data, 0, data.Length);
+                    m_stream.Write(data.Array, data.Offset, data.Count);
                 }
             }
             catch (Exception ex)

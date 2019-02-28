@@ -5,11 +5,12 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using CTP;
+using CTP.Collection;
 using GSF;
 
 namespace CTP
 {
-    public class CtpObjectWriter
+    public class CtpObjectWriter : IDisposable
     {
         const ulong Bits56 = 0xFFFFFFFFFFFFFFu;
         const ulong Bits48 = 0xFFFFFFFFFFFFu;
@@ -24,7 +25,7 @@ namespace CTP
 
         public CtpObjectWriter()
         {
-            m_buffer = new byte[64];
+            m_buffer = DynamicBufferPool.Get(64);
             Clear();
         }
 
@@ -46,9 +47,11 @@ namespace CTP
         {
             while (m_length + neededBytes >= m_buffer.Length)
             {
-                byte[] newBuffer = new byte[m_buffer.Length * 2];
+                byte[] newBuffer = DynamicBufferPool.Get(m_buffer.Length * 2);
                 m_buffer.CopyTo(newBuffer, 0);
+                var oldBuffer = m_buffer;
                 m_buffer = newBuffer;
+                DynamicBufferPool.Release(oldBuffer);
             }
         }
 
@@ -57,6 +60,14 @@ namespace CTP
             byte[] data = new byte[Length];
             CopyTo(data, 0);
             return data;
+        }
+
+
+        public ArraySegment<byte> TakeBuffer()
+        {
+            byte[] data = m_buffer;
+            m_buffer = null;
+            return new ArraySegment<byte>(data, 0, m_length);
         }
 
         public void CopyTo(byte[] data, int offset)
@@ -78,6 +89,7 @@ namespace CTP
             else
                 WriteBuffer(value, 0, value.Length);
         }
+
         public void Write(byte[] value, int offset, int length)
         {
             if (value == null)
@@ -502,9 +514,15 @@ namespace CTP
             wr.Write(m_buffer, 0, m_length);
         }
 
-        
-
-
+        public void Dispose()
+        {
+            if (m_buffer != null)
+            {
+                byte[] buffer = m_buffer;
+                m_buffer = null;
+                DynamicBufferPool.Release(buffer);
+            }
+        }
     }
 }
 

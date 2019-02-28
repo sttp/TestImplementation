@@ -32,7 +32,7 @@ namespace CTP
         /// <returns></returns>
         public abstract CtpCommand ToCommand();
 
-        public abstract byte[] ToDataCommandPacket(int schemeRuntimeID);
+        public abstract ArraySegment<byte> ToDataCommandPacket(int schemeRuntimeID);
 
         /// <summary>
         /// Implicitly converts into a <see cref="CtpCommand"/>.
@@ -149,14 +149,16 @@ namespace CTP
 
         public sealed override CtpCommandSchema Schema => WriteSchema;
 
-        public override byte[] ToDataCommandPacket(int schemeRuntimeID)
+        public override ArraySegment<byte> ToDataCommandPacket(int schemeRuntimeID)
         {
             T obj = this as T;
             if (LoadError != null)
                 throw LoadError;
-            var wr = new CtpObjectWriter();
-            WriteMethod.Save(obj, wr);
-            return PacketMethods.CreatePacket(PacketContents.CommandData, schemeRuntimeID, wr);
+            using (var wr = new CtpObjectWriter())
+            {
+                WriteMethod.Save(obj, wr);
+                return PacketMethods.CreatePacket(PacketContents.CommandData, schemeRuntimeID, wr);
+            }
         }
 
         /// <summary>
@@ -168,9 +170,11 @@ namespace CTP
             T obj = this as T;
             if (LoadError != null)
                 throw LoadError;
-            var wr = new CtpObjectWriter();
-            WriteMethod.Save(obj, wr);
-            return new CtpCommand(WriteSchema, wr.ToArray());
+            using (var wr = new CtpObjectWriter())
+            {
+                WriteMethod.Save(obj, wr);
+                return new CtpCommand(WriteSchema, wr.ToArray());
+            }
         }
 
         /// <summary>

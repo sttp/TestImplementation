@@ -316,14 +316,14 @@ namespace CTP
             return !Equals(a, b);
         }
 
-        public byte[] ToCommandSchema(int schemaRuntimeID)
-        {
-            return m_schema.ToCommand(schemaRuntimeID);
-        }
+        //public byte[] ToCommandSchema(int schemaRuntimeID)
+        //{
+        //    return m_schema.ToCommand(schemaRuntimeID);
+        //}
 
-        public byte[] ToCommandData(int schemaRuntimeID)
-        {
-            return PacketMethods.CreatePacket(PacketContents.CommandData, schemaRuntimeID, m_data);
-        }
+        //public byte[] ToCommandData(int schemaRuntimeID)
+        //{
+        //    return PacketMethods.CreatePacket(PacketContents.CommandData, schemaRuntimeID, m_data);
+        //}
     }
 }

@@ -191,7 +191,7 @@ namespace CTP
             return !Equals(left, right);
         }
 
-        public byte[] ToCommand(int schemaRuntimeID)
+        public ArraySegment<byte> ToCommand(int schemaRuntimeID)
         {
             return PacketMethods.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
         }

@@ -8,22 +8,27 @@ namespace CTP.IO
 {
     internal static class PacketMethods
     {
-        internal static byte[] CreatePacket(PacketContents contentType, int contentFlags, byte[] payload)
+        internal static ArraySegment<byte> CreatePacket(PacketContents contentType, int contentFlags, byte[] payload)
         {
-            var wr = new CtpObjectWriter();
-            wr.Write((byte)contentType);
-            wr.Write(contentFlags);
-            wr.Write(payload);
-            return wr.ToArray();
+            using (var wr = new CtpObjectWriter())
+            {
+                wr.Write((byte)contentType);
+                wr.Write(contentFlags);
+                wr.Write(payload);
+                return wr.TakeBuffer();
+            }
         }
 
-        internal static byte[] CreatePacket(PacketContents contentType, int contentFlags, CtpObjectWriter payload)
+        internal static ArraySegment<byte> CreatePacket(PacketContents contentType, int contentFlags, CtpObjectWriter payload)
         {
-            var wr = new CtpObjectWriter();
-            wr.Write((byte)contentType);
-            wr.Write(contentFlags);
-            payload.CopyTo(wr);
-            return wr.ToArray();
+            using (var wr = new CtpObjectWriter())
+            {
+                wr.Write((byte)contentType);
+                wr.Write(contentFlags);
+                payload.CopyTo(wr);
+                return wr.TakeBuffer();
+            }
+
         }
     }
 }

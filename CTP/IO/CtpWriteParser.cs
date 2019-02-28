@@ -15,11 +15,11 @@ namespace CTP.IO
     {
         private Dictionary<Guid, int> m_knownSchemas;
         private CtpCompressionMode m_compressionMode;
-        private readonly Action<byte[]> m_send;
+        private readonly Action<ArraySegment<byte>> m_send;
         private MemoryStream m_stream;
         private Ionic.Zlib.DeflateStream m_deflate;
 
-        public CtpWriteParser(CtpCompressionMode mode, Action<byte[]> send)
+        public CtpWriteParser(CtpCompressionMode mode, Action<ArraySegment<byte>> send)
         {
             m_knownSchemas = new Dictionary<Guid, int>();
             m_compressionMode = mode;
@@ -67,7 +67,7 @@ namespace CTP.IO
         //    Send(command.ToCommandData(schemeRuntimeID));
         //}
 
-        private void Send(byte[] packet)
+        private void Send(ArraySegment<byte> packet)
         {
             switch (m_compressionMode)
             {
@@ -79,9 +79,9 @@ namespace CTP.IO
                     {
                         using (var comp = new DeflateStream(ms, CompressionMode.Compress, true))
                         {
-                            comp.Write(packet,0,packet.Length);
+                            comp.Write(packet.Array, packet.Offset, packet.Count);
                         }
-                        m_send(PacketMethods.CreatePacket(PacketContents.CompressedDeflate, packet.Length, ms.ToArray()));
+                        m_send(PacketMethods.CreatePacket(PacketContents.CompressedDeflate, packet.Count, ms.ToArray()));
                     }
                     break;
                 case CtpCompressionMode.Zlib:
@@ -92,12 +92,12 @@ namespace CTP.IO
                         m_deflate.FlushMode = FlushType.Sync;
                     }
 
-                    m_stream.Write(BigEndian.GetBytes(packet.Length), 0, 4);
-                    m_deflate.Write(packet,0,packet.Length);
+                    m_stream.Write(BigEndian.GetBytes(packet.Count), 0, 4);
+                    m_deflate.Write(packet.Array, packet.Offset, packet.Count);
                     m_deflate.Flush();
                     byte[] rv = m_stream.ToArray();
                     m_stream.SetLength(0);
-                    m_send(PacketMethods.CreatePacket(PacketContents.CompressedZlib, packet.Length, rv));
+                    m_send(PacketMethods.CreatePacket(PacketContents.CompressedZlib, packet.Count, rv));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

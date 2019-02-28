@@ -83,18 +83,18 @@ namespace CTP.IO
             m_write.Send(command);
         }
 
-        private void WriteInternal(byte[] packet)
+        private void WriteInternal(ArraySegment<byte> packet)
         {
-            if ((object)packet == null)
+            if ((object)packet.Array == null)
                 throw new ArgumentNullException(nameof(packet));
 
-            if (packet.Length > MaximumPacketSize)
+            if (packet.Count > MaximumPacketSize)
                 throw new Exception("This command is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
             if (m_disposed)
                 throw new ObjectDisposedException("Stream has been closed");
 
-            m_stream.Write(packet, 0, packet.Length);
+            m_stream.Write(packet.Array, packet.Offset, packet.Count);
         }
 
         public void Dispose()

@@ -26,7 +26,7 @@ namespace CTP
 
         private WaitCallback m_processNextWrite;
 
-        private Queue<Tuple<ShortTime, byte[]>> m_queue;
+        private Queue<Tuple<ShortTime, ArraySegment<byte>>> m_queue;
 
         private ScheduledTask m_processTimeouts;
 
@@ -53,7 +53,7 @@ namespace CTP
             m_timeout = timeout;
             m_stream = stream;
             m_endWrite = EndWrite;
-            m_queue = new Queue<Tuple<ShortTime, byte[]>>();
+            m_queue = new Queue<Tuple<ShortTime, ArraySegment<byte>>>();
 
             m_processTimeouts = new ScheduledTask();
             m_processTimeouts.Running += M_processTimeouts_Running;
@@ -106,7 +106,7 @@ namespace CTP
             if (m_disposed)
                 return;
 
-            byte[] data;
+            ArraySegment<byte> data;
             lock (m_syncLock)
             {
                 if (m_disposed)
@@ -126,7 +126,7 @@ namespace CTP
             }
             try
             {
-                if (m_stream.BeginWrite(data, 0, data.Length, m_endWrite, null).CompletedSynchronously)
+                if (m_stream.BeginWrite(data.Array, data.Offset, data.Count, m_endWrite, null).CompletedSynchronously)
                     goto TryAgain;
                 //If this completed async, the EndWrite method will return control to this method.
             }
@@ -157,13 +157,13 @@ namespace CTP
         /// <summary>
         /// Writes a packet to the underlying stream. 
         /// </summary>
-        public void Write(byte[] data)
+        public void Write(ArraySegment<byte> data)
         {
-            if ((object)data == null)
+            if ((object)data.Array == null)
                 throw new ArgumentNullException(nameof(data));
 
             //In case of an overflow exception.
-            if (data.Length > MaximumPacketSize)
+            if (data.Count > MaximumPacketSize)
                 throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
 
             lock (m_syncLock)

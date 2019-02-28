@@ -4,7 +4,7 @@ using GSF;
 
 namespace CTP
 {
-    internal enum PacketContents
+    internal enum PacketContents : byte
     {
         CommandSchema,
         CommandData,
