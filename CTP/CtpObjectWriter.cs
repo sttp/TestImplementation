@@ -165,7 +165,7 @@ namespace CTP
                     WriteSymbol(CtpObjectSymbols.IntBits48Pos + adder);
                     WriteBits48((ulong)value);
                 }
-                else 
+                else
                 {
                     WriteSymbol(CtpObjectSymbols.IntBits56Pos + adder);
                     WriteBits56((ulong)value);
@@ -321,35 +321,35 @@ namespace CTP
 
         private void WriteString(string value)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(value);
-            if (buffer.Length <= 30)
-                WriteSymbol(CtpObjectSymbols.String0 + (byte)buffer.Length);
+            int length = Encoding.UTF8.GetByteCount(value);
+            if (length <= 30)
+                WriteSymbol(CtpObjectSymbols.String0 + (byte)length);
             else
-                WriteArrayLength(CtpObjectSymbols.String8Bit, buffer.Length);
-            EnsureCapacityBytes(buffer.Length);
-            Array.Copy(buffer, 0, m_buffer, m_length, buffer.Length);
-            m_length += buffer.Length;
+                WriteArrayLength(CtpObjectSymbols.String8Bit, length);
+            EnsureCapacityBytes(length);
+            if (length != Encoding.UTF8.GetBytes(value, 0, value.Length, m_buffer, m_length))
+                throw new Exception("Encoding Error");
+            m_length += length;
         }
 
         private void WriteBuffer(CtpBuffer value)
         {
-            byte[] buffer = value.ToBuffer();
-            if (buffer.Length <= 50)
-                WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)buffer.Length);
+            if (value.Length <= 50)
+                WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)value.Length);
             else
-                WriteArrayLength(CtpObjectSymbols.CtpBuffer8Bit, buffer.Length);
-            EnsureCapacityBytes(buffer.Length);
-            Array.Copy(buffer, 0, m_buffer, m_length, buffer.Length);
-            m_length += buffer.Length;
+                WriteArrayLength(CtpObjectSymbols.CtpBuffer8Bit, value.Length);
+            EnsureCapacityBytes(value.Length);
+            value.CopyTo(m_buffer, m_length);
+            m_length += value.Length;
         }
 
         private void WriteCommand(CtpCommand value)
         {
-            byte[] buffer = value.ToArray();
-            WriteArrayLength(CtpObjectSymbols.CtpCommand8Bit, buffer.Length);
-            EnsureCapacityBytes(buffer.Length);
-            Array.Copy(buffer, 0, m_buffer, m_length, buffer.Length);
-            m_length += buffer.Length;
+            int length = value.LengthWithSchema;
+            WriteArrayLength(CtpObjectSymbols.CtpCommand8Bit, length);
+            EnsureCapacityBytes(length);
+            value.CopyTo(m_buffer, m_length);
+            m_length += length;
         }
 
         private void WriteArrayLength(CtpObjectSymbols baseSymbol, int length)
@@ -471,7 +471,7 @@ namespace CTP
             var wr = new CtpObjectWriter();
             wr.Write((byte)contentType);
             wr.Write(contentFlags);
-            wr.Write(payload);
+            wr.Write(CtpBuffer.DoNotClone(payload));
             return wr.ToArray();
         }
     }

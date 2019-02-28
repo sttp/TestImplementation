@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using GSF;
 
 namespace CTP
 {
@@ -8,31 +9,16 @@ namespace CTP
     /// </summary>
     public class CtpBuffer : IEquatable<CtpBuffer>
     {
+        public static readonly CtpBuffer Empty = new CtpBuffer(new byte[0], false);
+
         private readonly byte[] m_data;
 
-        /// <summary>
-        /// Creates a new <see cref="CtpBuffer"/> cloning the provided buffer.
-        /// </summary>
-        /// <param name="data"></param>
-        public CtpBuffer(byte[] data)
+        private CtpBuffer(byte[] data, bool shouldClone)
         {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            m_data = (byte[])data.Clone();
-        }
-
-        internal CtpBuffer(byte[] data, bool unsafeShouldClone)
-        {
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-            if (unsafeShouldClone)
-            {
+            if (shouldClone)
                 m_data = (byte[])data.Clone();
-            }
             else
-            {
                 m_data = data;
-            }
         }
 
         /// <summary>
@@ -114,5 +100,32 @@ namespace CTP
                 sb.Append(b.ToString("X2"));
             return sb.ToString();
         }
+
+        public static CtpBuffer FromArray(byte[] data)
+        {
+            return FromArray(data, 0, data.Length);
+        }
+
+        public static CtpBuffer FromArray(byte[] data, int position, int length)
+        {
+            data.ValidateParameters(position, length);
+            byte[] clone = new byte[length];
+            Array.Copy(data, position, clone, 0, length);
+            return new CtpBuffer(clone, false);
+        }
+
+        public static CtpBuffer DoNotClone(byte[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+            return new CtpBuffer(data, false);
+        }
+
+        public static explicit operator CtpBuffer(byte[] value)
+        {
+            return new CtpBuffer(value, true);
+        }
+
+
     }
 }

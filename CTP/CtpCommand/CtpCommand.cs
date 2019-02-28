@@ -42,11 +42,20 @@ namespace CTP
         public byte[] ToArray()
         {
             var rv = new byte[2 + m_schema.Length + m_data.Length];
-            BigEndian.CopyBytes((ushort)m_schema.Length, rv, 0);
-            m_schema.CopyTo(rv, 2);
-            m_data.CopyTo(rv, 2 + m_schema.Length);
+            CopyTo(rv,0);
             return rv;
         }
+
+        public void CopyTo(byte[] data, int position)
+        {
+            data.ValidateParameters(position, LengthWithSchema);
+            BigEndian.CopyBytes((ushort)m_schema.Length, data, position);
+            m_schema.CopyTo(data, position + 2);
+            m_data.CopyTo(data, position + 2 + m_schema.Length);
+        }
+
+        public int LengthWithSchema => 2 + m_schema.Length + m_data.Length;
+
 
         public Guid SchemaID => m_schema.Identifier;
         public string RootElement => m_schema.RootElement;

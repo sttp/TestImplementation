@@ -197,7 +197,7 @@ namespace Sttp.Tests.Object_Serialzation
                     {
                         var data = new byte[buffer[0]];
                         r.NextBytes(data);
-                        return data;
+                        return CtpBuffer.DoNotClone(data);
                     }
                 case CtpTypeCode.CtpCommand:
                     return new CtpError(CreateRandom(r, CtpTypeCode.String).AsString, CreateRandom(r, CtpTypeCode.String).AsString).ToCommand();

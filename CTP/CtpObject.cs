@@ -274,8 +274,6 @@ namespace CTP
             }
         }
 
-
-
         #endregion
 
         public static CtpObject CreateDefault(CtpTypeCode typeCode)
@@ -301,7 +299,7 @@ namespace CTP
                 case CtpTypeCode.String:
                     return new CtpObject(string.Empty);
                 case CtpTypeCode.CtpBuffer:
-                    return new CtpObject(new CtpBuffer(new byte[0]));
+                    return new CtpObject(CtpBuffer.Empty);
                 case CtpTypeCode.CtpCommand:
                     throw new NotSupportedException();
                 default:

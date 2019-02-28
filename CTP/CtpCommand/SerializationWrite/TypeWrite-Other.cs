@@ -18,7 +18,7 @@ namespace CTP.SerializationWrite
     {
         public override void Save(byte[] obj, CtpCommandWriter writer)
         {
-            writer.WriteValue((CtpObject)obj);
+            writer.WriteValue((CtpObject)CtpBuffer.DoNotClone(obj));
         }
     }
 

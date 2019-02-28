@@ -107,7 +107,7 @@ namespace CTP
         }
         public static implicit operator CtpObject(byte[] value)
         {
-            return new CtpObject(new CtpBuffer(value));
+            return new CtpObject((CtpBuffer)value);
         }
         public static implicit operator CtpObject(sbyte? value)
         {
