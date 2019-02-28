@@ -15,13 +15,14 @@ namespace Sttp.DataPointEncoding
         private int m_lastChannelID = 0;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
-        private MetadataChannelMapEncoder m_channelMap;
+        private Dictionary<CtpObject, int> m_pointIDToChannelIDMapping = new Dictionary<CtpObject, int>();
+        private List<SttpDataPointMetadata> m_metadata = new List<SttpDataPointMetadata>();
 
         public NormalEncoder()
         {
             m_stream = new CtpObjectWriter();
-            m_channelMap = new MetadataChannelMapEncoder();
             Clear();
+
         }
 
         public override int Length => m_stream.Length;
@@ -41,8 +42,22 @@ namespace Sttp.DataPointEncoding
 
         public override void AddDataPoint(SttpDataPoint point)
         {
+            int channelID = m_lastChannelID + 1;
+            bool includeMetadata = false;
+
+            //Most of the time, measurements will be sequential, this limits a dictionary lookup
+            if (channelID >= m_metadata.Count || !m_metadata[channelID].DataPointID.Equals(point.Metadata.DataPointID))
+            {
+                if (!m_pointIDToChannelIDMapping.TryGetValue(point.Metadata.DataPointID, out channelID))
+                {
+                    includeMetadata = true;
+                    channelID = m_metadata.Count;
+                    m_pointIDToChannelIDMapping.Add(point.Metadata.DataPointID, channelID);
+                    m_metadata.Add(point.Metadata);
+                }
+            }
+
             CtpObject value = point.Value;
-            int channelID = m_channelMap.GetChannelID(point.Metadata, out var includeMetadata);
             bool qualityChanged = point.Quality != m_lastQuality;
             bool timeChanged = point.Time != m_lastTimestamp;
             bool channelIDChanged = m_lastChannelID + 1 != channelID;

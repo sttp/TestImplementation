@@ -141,13 +141,13 @@ namespace Sttp.Tests
             PointCount = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            for (int x = 0; x < 0; x++)
+            for (int x = 0; x < 3; x++)
             {
                 BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Normal);
             }
 
             Console.WriteLine(PointCount);
-            Console.WriteLine(PointCount / sw.Elapsed.TotalSeconds);
+            Console.WriteLine((PointCount / sw.Elapsed.TotalSeconds).ToString("N0"));
         }
 
         [TestMethod]
@@ -212,7 +212,7 @@ namespace Sttp.Tests
         {
             string newFileName = Path.ChangeExtension(source, ".txt");
 
-            using (var raw = new StreamWriter(newFileName, false))
+            //using (var raw = new StreamWriter(newFileName, false))
             using (var fs = new FileStream(source, FileMode.Open))
             using (var fs2 = new FileStream(dest, FileMode.Create))
             using (var ctp = new SttpFileReader(fs, false))
@@ -224,7 +224,7 @@ namespace Sttp.Tests
                     {
                         case FileReaderItem.ProducerMetadata:
                             var md = ctp.GetMetadata();
-                            //ctp2.ProducerMetadata(md);
+                            ctp2.ProducerMetadata(md);
                             break;
                         case FileReaderItem.DataPoint:
                             var dp = new SttpDataPoint();
@@ -239,7 +239,7 @@ namespace Sttp.Tests
                                 //    dp.Value = new CtpNumeric((long)(dp.Value.AsSingle * 100), 2);
                                 //}
                                 //Names.Add(dp.Metadata.DataPointID.AsString);
-                                raw.WriteLine(dp.ToString());
+                                //raw.WriteLine(dp.ToString());
                                 PointCount++;
                                 //dp.Value = (double)dp.Value;
                                 //dp.Value = (long)dp.Value*1000;
