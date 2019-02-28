@@ -2,7 +2,7 @@
 
 namespace Sttp.DataPointEncoding
 {
-    public class MetadataChannelMapDecoder
+    internal class MetadataChannelMapDecoder
     {
         private List<SttpDataPointMetadata> ChannelMapping = new List<SttpDataPointMetadata>();
 

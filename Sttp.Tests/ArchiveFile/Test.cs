@@ -92,13 +92,13 @@ namespace Sttp.Tests
         [TestMethod]
         public void CompareFiles()
         {
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test1.sttp", CtpCompressionMode.None, EncodingMethod.Basic);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test2.sttp", CtpCompressionMode.Deflate, EncodingMethod.Basic);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test3.sttp", CtpCompressionMode.Zlib, EncodingMethod.Basic);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test1.sttp", CtpCompressionMode.None, EncodingMethod.Normal);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test2.sttp", CtpCompressionMode.Deflate, EncodingMethod.Normal);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test3.sttp", CtpCompressionMode.Zlib, EncodingMethod.Normal);
 
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test4.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test5.sttp", CtpCompressionMode.Deflate, EncodingMethod.Raw);
-            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test6.sttp", CtpCompressionMode.Zlib, EncodingMethod.Raw);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test4.sttp", CtpCompressionMode.None, EncodingMethod.Normal);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test5.sttp", CtpCompressionMode.Deflate, EncodingMethod.Normal);
+            MakeFile(@"C:\temp\C37Test\test.sttp", @"C:\temp\C37Test\test6.sttp", CtpCompressionMode.Zlib, EncodingMethod.Normal);
         }
 
         private static void MakeFile(string source, string dest, CtpCompressionMode mode, EncodingMethod encoding)
@@ -137,13 +137,13 @@ namespace Sttp.Tests
         [TestMethod]
         public void BenchmarkFiles()
         {
-            BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark.sttp", @"C:\temp\C37Test\benchmark1.sttp", CtpCompressionMode.None, EncodingMethod.Normal);
             PointCount = 0;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int x = 0; x < 0; x++)
             {
-                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
+                BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Normal);
             }
 
             Console.WriteLine(PointCount);
@@ -154,10 +154,10 @@ namespace Sttp.Tests
         public void Profile()
         {
             PointCount = 0;
-            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
+            BenchmarkFile(@"C:\temp\C37Test\benchmark1.sttp", @"C:\temp\C37Test\benchmark2.sttp", CtpCompressionMode.None, EncodingMethod.Normal);
             Console.WriteLine($"None: " + new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / 1024);
             Console.WriteLine(new FileInfo(@"C:\temp\C37Test\benchmark2.sttp").Length / (float)PointCount);
-            BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
+            //BenchmarkFile(@"C:\temp\C37Test\benchmark2.sttp", @"C:\temp\C37Test\benchmark3.sttp", CtpCompressionMode.None, EncodingMethod.Raw);
 
             using (var sha = new SHA1Managed())
             {

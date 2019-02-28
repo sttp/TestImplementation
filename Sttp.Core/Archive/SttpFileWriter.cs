@@ -15,10 +15,7 @@ namespace Sttp
 
     public enum EncodingMethod
     {
-        Raw,
-        Basic,
-        Simple,
-        Advanced,
+        Normal,
         //Adaptive
     }
 
@@ -30,21 +27,9 @@ namespace Sttp
         public SttpFileWriter(Stream stream, bool ownsStream, CtpCompressionMode mode, EncodingMethod encoding)
         {
             m_stream = new CtpFileStream(stream, mode, ownsStream);
-            if (encoding == EncodingMethod.Raw)
+            if (encoding == EncodingMethod.Normal)
             {
-                m_encoder = new RawEncoder();
-            }
-            if (encoding == EncodingMethod.Simple)
-            {
-                m_encoder = new SimpleEncoder();
-            }
-            if (encoding == EncodingMethod.Basic)
-            {
-                m_encoder = new BasicEncoder();
-            }
-            if (encoding == EncodingMethod.Advanced)
-            {
-                m_encoder = new AdvancedEncoder();
+                m_encoder = new NormalEncoder();
             }
             m_encoder.Clear();
         }

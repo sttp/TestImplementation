@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
-    public class RawEncoder : EncoderBase
+    public class NormalEncoder : EncoderBase
     {
         private CtpObjectWriter m_stream;
         private int m_lastChannelID = 0;
@@ -16,7 +17,7 @@ namespace Sttp.DataPointEncoding
         private long m_lastQuality = 0;
         private MetadataChannelMapEncoder m_channelMap;
 
-        public RawEncoder()
+        public NormalEncoder()
         {
             m_stream = new CtpObjectWriter();
             m_channelMap = new MetadataChannelMapEncoder();
@@ -35,7 +36,7 @@ namespace Sttp.DataPointEncoding
 
         public override CtpCommand ToArray()
         {
-            return new CommandDataStreamRaw(m_stream.ToArray());
+            return new CommandDataStreamNormal(m_stream.ToArray());
         }
 
         public override void AddDataPoint(SttpDataPoint point)
@@ -80,6 +81,7 @@ namespace Sttp.DataPointEncoding
             m_lastQuality = point.Quality;
             m_lastTimestamp = point.Time;
         }
+
 
     }
 }

@@ -7,7 +7,7 @@ using CTP;
 
 namespace Sttp.DataPointEncoding
 {
-    public class MetadataChannelMapEncoder
+    internal class MetadataChannelMapEncoder
     {
         private Dictionary<int, int> RuntimeToChannelMapping = new Dictionary<int, int>();
         private Dictionary<CtpObject, int> RuntimeToChannelMapping2 = new Dictionary<CtpObject, int>();

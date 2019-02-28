@@ -7,7 +7,7 @@ using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
-    public class RawDecoder : DecoderBase
+    public class NormalDecoder : DecoderBase
     {
         private MetadataChannelMapDecoder m_channelMap;
         private CtpObjectReader m_stream;
@@ -15,14 +15,14 @@ namespace Sttp.DataPointEncoding
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
 
-        public RawDecoder(LookupMetadata lookup)
+        public NormalDecoder(LookupMetadata lookup)
             : base(lookup)
         {
             m_stream = new CtpObjectReader();
             m_channelMap = new MetadataChannelMapDecoder();
         }
 
-        public void Load(CommandDataStreamRaw data)
+        public void Load(CommandDataStreamNormal data)
         {
             m_lastChannelID = 0;
             m_lastTimestamp = default(CtpTime);
@@ -44,10 +44,10 @@ namespace Sttp.DataPointEncoding
                 long code = value.IsInteger;
                 if (0 <= code && code <= 15)
                 {
-                    bool channelIDChanged = (code & 1) != 0; 
-                    bool hasMetadata = (code & 2) != 0; 
+                    bool channelIDChanged = (code & 1) != 0;
+                    bool hasMetadata = (code & 2) != 0;
                     bool qualityChanged = (code & 4) != 0;
-                    bool timeChanged = (code & 8) != 0; 
+                    bool timeChanged = (code & 8) != 0;
 
                     if (channelIDChanged)
                         m_lastChannelID = m_stream.Read().AsInt32;
