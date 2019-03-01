@@ -6,8 +6,8 @@ namespace CTP
 
     public enum CtpObjectSymbols : byte
     {
-        Null,
-        IntNeg2,
+        Null = 0,
+        IntNeg2 = 1,
         IntNeg1,
         Int0,
         Int1,
@@ -92,9 +92,10 @@ namespace CTP
         IntBits48Neg,
         IntBits56Neg,
 
-        IntElse,
+        IntBits64,
+        IntElse = IntBits64,
 
-        SingleNeg1,
+        SingleNeg1 = 83,
         Single0,
         Single1,
         Single56,
@@ -147,7 +148,7 @@ namespace CTP
         Single207,
         SingleElse,
 
-        DoubleNeg1,
+        DoubleNeg1 = 135,
         Double0,
         Double1,
         Double63,
@@ -158,27 +159,27 @@ namespace CTP
         Double193,
         DoubleElse,
 
-        NumericNone,
+        NumericNone = 145,
         NumericLow,
         NumericMid,
         NumericHigh,
         NumericElse = NumericHigh,
 
-        CtpTimeZero,
+        CtpTimeZero = 149,
         CtpTime14,
         CtpTime15,
         CtpTime16,
         CtpTime17,
         CtpTimeElse,
 
-        BoolFalse,
+        BoolFalse = 155,
         BoolTrue,
         BoolElse = BoolTrue,
 
-        GuidEmpty,
+        GuidEmpty = 157,
         GuidElse,
 
-        String0,
+        String0 = 159,
         String1,
         String2,
         String3,
@@ -215,7 +216,7 @@ namespace CTP
         String32Bit,
         StringElse = String32Bit,
 
-        CtpBuffer0,
+        CtpBuffer0 = 194,
         CtpBuffer1,
         CtpBuffer2,
         CtpBuffer3,
@@ -267,13 +268,13 @@ namespace CTP
         CtpBuffer49,
         CtpBuffer50,
 
-        CtpBuffer8Bit,
+        CtpBuffer8Bit = 245,
         CtpBuffer16Bit,
         CtpBuffer24Bit,
         CtpBuffer32Bit,
         CtpBufferElse = CtpBuffer32Bit,
 
-        CtpCommand8Bit,
+        CtpCommand8Bit = 249,
         CtpCommand16Bit,
         CtpCommand24Bit,
         CtpCommand32Bit,

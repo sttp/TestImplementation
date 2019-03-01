@@ -136,8 +136,6 @@ namespace CTP
         where T : CommandObject<T>
     {
 
-
-
         protected CommandObject()
         {
             if (LoadError != null)

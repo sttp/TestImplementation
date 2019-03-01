@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace CTP.IO
 {
     internal class CtpWriteParser
     {
-        private Dictionary<Guid, int> m_knownSchemas;
+        private Dictionary<int, int> m_knownSchemas;
         private CtpCompressionMode m_compressionMode;
         private readonly Action<PooledBuffer> m_send;
         private MemoryStream m_stream;
@@ -22,7 +23,7 @@ namespace CTP.IO
 
         public CtpWriteParser(CtpCompressionMode mode, Action<PooledBuffer> send)
         {
-            m_knownSchemas = new Dictionary<Guid, int>();
+            m_knownSchemas = new Dictionary<int, int>();
             m_compressionMode = mode;
             m_send = send;
         }
@@ -39,18 +40,28 @@ namespace CTP.IO
 
         public void Send(CommandObject command)
         {
-            int schemeRuntimeID;
-            lock (m_knownSchemas)
+            if (!command.Schema.ProcessRuntimeID.HasValue)
             {
-                if (!m_knownSchemas.TryGetValue(command.Schema.Identifier, out schemeRuntimeID))
+                Send(PacketMethods.CreatePacket(PacketContents.CommandSchemaWithData, 0, command.ToCommand().ToArray()));
+            }
+            else
+            {
+                int schemeRuntimeID;
+                lock (m_knownSchemas)
                 {
-                    schemeRuntimeID = m_knownSchemas.Count;
-                    m_knownSchemas.Add(command.Schema.Identifier, schemeRuntimeID);
-                    Send(command.Schema.ToCommand(schemeRuntimeID));
+
+                    if (!m_knownSchemas.TryGetValue(command.Schema.ProcessRuntimeID.Value, out schemeRuntimeID))
+                    {
+                        if (command.Schema.ProcessRuntimeID == -1)
+                            throw new Exception("Cannot serialize a schema that has not been defined in this process.");
+                        schemeRuntimeID = m_knownSchemas.Count;
+                        m_knownSchemas.Add(command.Schema.ProcessRuntimeID.Value, schemeRuntimeID);
+                        Send(command.Schema.ToCommand(schemeRuntimeID));
+                    }
                 }
+                Send(command.ToDataCommandPacket(schemeRuntimeID));
             }
 
-            Send(command.ToDataCommandPacket(schemeRuntimeID));
         }
 
         //public void Send(CtpCommand command)

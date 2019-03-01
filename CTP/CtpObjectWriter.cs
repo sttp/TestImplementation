@@ -150,7 +150,7 @@ namespace CTP
             }
             else if ((ulong)value > Bits56)
             {
-                WriteSymbol(CtpObjectSymbols.IntElse);
+                WriteSymbol(CtpObjectSymbols.IntBits64);
                 WriteBits64((ulong)value);
             }
             else

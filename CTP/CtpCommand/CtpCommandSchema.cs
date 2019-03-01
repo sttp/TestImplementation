@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CTP.Collection;
 using CTP.IO;
@@ -10,12 +11,13 @@ namespace CTP
 {
     internal class CommandSchemaWriter
     {
+        private static int ProcessRuntimeID;
+
         private CtpObjectWriter m_stream;
 
         public CommandSchemaWriter()
         {
             m_stream = new CtpObjectWriter();
-            m_stream.Write(Guid.NewGuid());
         }
 
         public void DefineArray(string name)
@@ -43,7 +45,11 @@ namespace CTP
 
         public CtpCommandSchema ToSchema()
         {
-            return new CtpCommandSchema(m_stream.ToArray());
+            if (m_stream == null)
+                throw new Exception("Duplicate calls are not supported.");
+            var data = m_stream.ToArray();
+            m_stream = null;
+            return new CtpCommandSchema(data, Interlocked.Increment(ref ProcessRuntimeID));
         }
     }
 
@@ -59,7 +65,6 @@ namespace CTP
     internal class CommandSchemaReader
     {
         private CtpObjectReader m_stream;
-        public readonly Guid Identifier;
 
         public CommandSchemaSymbol Symbol;
 
@@ -68,7 +73,6 @@ namespace CTP
         public CommandSchemaReader(byte[] data)
         {
             m_stream = new CtpObjectReader(data);
-            Identifier = m_stream.Read().AsGuid;
         }
 
         public bool Next()
@@ -116,19 +120,24 @@ namespace CTP
         }
     }
 
-    public class CtpCommandSchema : IEquatable<CtpCommandSchema>
+    public class CtpCommandSchema
     {
-        public readonly Guid Identifier;
+        public readonly int? ProcessRuntimeID;
         public readonly string RootElement;
 
         private readonly byte[] m_data;
         private List<CommandSchemaNode> m_nodes = new List<CommandSchemaNode>();
 
         public CtpCommandSchema(byte[] data)
+          : this(data, null)
+        {
+        }
+
+        internal CtpCommandSchema(byte[] data, int? processRuntimeID)
         {
             m_data = data ?? throw new ArgumentNullException(nameof(data));
             var reader = new CommandSchemaReader(m_data);
-            Identifier = reader.Identifier;
+            ProcessRuntimeID = processRuntimeID;
             while (reader.Next())
             {
                 m_nodes.Add(new CommandSchemaNode(reader, m_nodes.Count));
@@ -146,57 +155,15 @@ namespace CTP
             }
         }
 
-        public int Length => m_data.Length;
+        internal int NodeCount => m_nodes.Count;
 
-        public bool Equals(CtpCommandSchema other)
-        {
-            if (ReferenceEquals(null, other))
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-            if (Identifier != other.Identifier)
-                return false;
-            if (m_data.Length != other.m_data.Length)
-                return false;
-            for (var x = 0; x < m_data.Length; x++)
-            {
-                if (m_data[x] != other.m_data[x])
-                    return false;
-            }
-            return true;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-                return false;
-            if (ReferenceEquals(this, obj))
-                return true;
-            if (obj.GetType() != this.GetType())
-                return false;
-            return Equals((CtpCommandSchema)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return (Identifier.GetHashCode() * 397) ^ m_data.GetHashCode();
-        }
-
-        public static bool operator ==(CtpCommandSchema left, CtpCommandSchema right)
-        {
-            return Equals(left, right);
-        }
-
-        public static bool operator !=(CtpCommandSchema left, CtpCommandSchema right)
-        {
-            return !Equals(left, right);
-        }
+        public int DataLength => m_data.Length;
 
         public PooledBuffer ToCommand(int schemaRuntimeID)
         {
             return PacketMethods.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
         }
-
+       
         public void CopyTo(byte[] data, int offset)
         {
             m_data.CopyTo(data, offset);

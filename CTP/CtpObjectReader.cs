@@ -169,7 +169,7 @@ namespace CTP
                 return;
             }
 
-            if (symbol == CtpObjectSymbols.IntElse)
+            if (symbol == CtpObjectSymbols.IntBits64)
             {
                 m_currentValue = (long)ReadBits64();
                 return;
@@ -604,7 +604,7 @@ namespace CTP
 
             if (stream.m_currentBytePosition > stream.m_endOfByteStream)
             {
-                payloadType = PacketContents.CommandSchema;
+                payloadType = default(PacketContents);
                 payloadFlags = 0;
                 payloadBuffer = null;
                 consumedLength = 0;

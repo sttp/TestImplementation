@@ -34,7 +34,29 @@ namespace Sttp.Tests.Commands
         {
             var cmd = new CommandGetMetadata("Measurement", new string[] { "ID", "SignalID", "TagName" });
             cmd = (CommandGetMetadata)(CtpCommand)cmd;
+
+
+            Console.WriteLine("-------Schema----------");
+
+            for (int x = 0; x < cmd.Schema.NodeCount; x++)
+            {
+                Console.WriteLine(cmd.Schema[x]);
+            }
+
+            Console.WriteLine("-------Data----------");
+
+
+            var rdr3 = cmd.ToCommand().MakeDataReader();
+            while (!rdr3.IsEmpty)
+            {
+                Console.WriteLine(rdr3.Read());
+            }
+
+            Console.WriteLine("-------Text----------");
+
             Console.WriteLine(cmd.ToString());
+
+
         }
 
         [TestMethod]
@@ -59,11 +81,24 @@ namespace Sttp.Tests.Commands
                 Console.WriteLine($"{rdr.NodeType,15} {rdr.ElementName,15} {rdr.ValueName,25} {rdr.Value}");
             }
 
-            var rdr2 = cmd.ToCommand().MakeDataReader();
-            while (!rdr2.IsEmpty)
+            Console.WriteLine("-------Schema----------");
+
+            for (int x = 0; x < cmd.Schema.NodeCount; x++)
             {
-                Console.WriteLine(rdr2.Read());
+                Console.WriteLine(cmd.Schema[x]);
             }
+
+            Console.WriteLine("-------Data----------");
+
+
+            var rdr3 = cmd.ToCommand().MakeDataReader();
+            while (!rdr3.IsEmpty)
+            {
+                Console.WriteLine(rdr3.Read());
+            }
+
+            Console.WriteLine("-------Text----------");
+
 
             cmd = (CommandMetadataSchema)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());

@@ -112,6 +112,9 @@ namespace CTP.IO
                     if (m_inboundSchemes.Count > MaximumSchemeCount)
                         throw new Exception("Too many schemes have been defined.");
                     break;
+                case PacketContents.CommandSchemaWithData:
+                        packet = new CtpCommand(payloadBuffer);
+                    break;
                 case PacketContents.CommandData:
                     if (m_inboundSchemes.TryGetValue(payloadFlags, out var commandSchema))
                         packet = new CtpCommand(commandSchema, payloadBuffer);

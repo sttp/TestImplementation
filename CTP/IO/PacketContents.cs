@@ -6,9 +6,10 @@ namespace CTP
 {
     internal enum PacketContents : byte
     {
-        CommandSchema,
-        CommandData,
-        CompressedDeflate,
-        CompressedZlib,
+        CommandSchema = 0,
+        CommandData = 1,
+        CommandSchemaWithData = 2,
+        CompressedDeflate = 3,
+        CompressedZlib = 4,
     }
 }

@@ -42,7 +42,7 @@ namespace CTP
 
         public byte[] ToArray()
         {
-            var rv = new byte[2 + m_schema.Length + m_data.Length];
+            var rv = new byte[2 + m_schema.DataLength + m_data.Length];
             CopyTo(rv,0);
             return rv;
         }
@@ -50,15 +50,12 @@ namespace CTP
         public void CopyTo(byte[] data, int position)
         {
             data.ValidateParameters(position, LengthWithSchema);
-            BigEndian.CopyBytes((ushort)m_schema.Length, data, position);
+            BigEndian.CopyBytes((ushort)m_schema.DataLength, data, position);
             m_schema.CopyTo(data, position + 2);
-            m_data.CopyTo(data, position + 2 + m_schema.Length);
+            m_data.CopyTo(data, position + 2 + m_schema.DataLength);
         }
 
-        public int LengthWithSchema => 2 + m_schema.Length + m_data.Length;
-
-
-        public Guid SchemaID => m_schema.Identifier;
+        public int LengthWithSchema => 2 + m_schema.DataLength + m_data.Length;
         public string RootElement => m_schema.RootElement;
         public int DataLength => m_data.Length;
 
@@ -315,15 +312,5 @@ namespace CTP
         {
             return !Equals(a, b);
         }
-
-        //public byte[] ToCommandSchema(int schemaRuntimeID)
-        //{
-        //    return m_schema.ToCommand(schemaRuntimeID);
-        //}
-
-        //public byte[] ToCommandData(int schemaRuntimeID)
-        //{
-        //    return PacketMethods.CreatePacket(PacketContents.CommandData, schemaRuntimeID, m_data);
-        //}
     }
 }
