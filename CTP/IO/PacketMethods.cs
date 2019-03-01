@@ -32,9 +32,33 @@ namespace CTP.IO
             wr.Clear();
             wr.Write((byte)contentType);
             wr.Write(contentFlags);
-            payload.CopyTo(wr);
+            payload.CopyToAsCtpBuffer(wr);
             return wr.TakeBuffer();
 
+        }
+
+        internal static bool TryReadPacket(byte[] data, int position, int length, int maximumPacketSize, out PacketContents payloadType, out int payloadFlags, out byte[] payloadBuffer, out int consumedLength)
+        {
+            if (length > maximumPacketSize)
+                throw new Exception("Command size is too large");
+
+            var stream = new CtpObjectReader(data, position, length);
+            CtpObject pType;
+            CtpObject pFlags;
+            CtpObject pData;
+            if (stream.TryRead(out pType) && stream.TryRead(out pFlags) && stream.TryRead(out pData))
+            {
+                payloadType = (PacketContents)(byte)pType;
+                payloadFlags = (int)pFlags;
+                payloadBuffer = (byte[])pData;
+                consumedLength = stream.Position;
+                return true;
+            }
+            payloadType = default(PacketContents);
+            payloadFlags = 0;
+            payloadBuffer = null;
+            consumedLength = 0;
+            return false;
         }
     }
 }

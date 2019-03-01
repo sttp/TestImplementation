@@ -66,6 +66,20 @@ namespace CTP
             m_startBytePosition = position;
         }
 
+        public bool TryRead(out CtpObject obj)
+        {
+            int oldPosition = m_currentBytePosition;
+            ReadInternal();
+            if (m_currentBytePosition > m_endOfByteStream)
+            {
+                m_currentBytePosition = oldPosition;
+                obj = CtpObject.Null;
+                return false;
+            }
+            obj = m_currentValue;
+            return true;
+        }
+
         public CtpObject Read()
         {
             int oldPosition = m_currentBytePosition;
@@ -584,42 +598,7 @@ namespace CTP
 
         #endregion
 
-        internal static bool TryReadPacket(byte[] data, int position, int length, int maximumPacketSize, out PacketContents payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength)
-        {
-            if (length > maximumPacketSize)
-                throw new Exception("Command size is too large");
-
-            var stream = new CtpObjectReader(data, position, length);
-
-            CtpObject pType;
-            CtpObject pFlags;
-            CtpObject pData;
-            stream.ReadInternal();
-            pType = stream.m_currentValue;
-            stream.ReadInternal();
-            pFlags = stream.m_currentValue;
-            stream.ReadInternal();
-            pData = stream.m_currentValue;
-
-
-            if (stream.m_currentBytePosition > stream.m_endOfByteStream)
-            {
-                payloadType = default(PacketContents);
-                payloadFlags = 0;
-                payloadBuffer = null;
-                consumedLength = 0;
-                return false;
-            }
-            else
-            {
-                payloadType = (PacketContents)(byte)pType;
-                payloadFlags = (long)pFlags;
-                payloadBuffer = (byte[])pData;
-                consumedLength = stream.m_currentBytePosition - position;
-                return true;
-            }
-
-        }
+        
 
     }
 }

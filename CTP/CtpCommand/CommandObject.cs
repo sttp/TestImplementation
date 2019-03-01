@@ -33,7 +33,7 @@ namespace CTP
         /// <returns></returns>
         public abstract CtpCommand ToCommand();
 
-        public abstract PooledBuffer ToDataCommandPacket(int schemeRuntimeID);
+        internal abstract PooledBuffer ToDataCommandPacket(int schemeRuntimeID);
 
         /// <summary>
         /// Implicitly converts into a <see cref="CtpCommand"/>.
@@ -151,7 +151,7 @@ namespace CTP
 
         public sealed override CtpCommandSchema Schema => WriteSchema;
 
-        public override PooledBuffer ToDataCommandPacket(int schemeRuntimeID)
+        internal sealed override PooledBuffer ToDataCommandPacket(int schemeRuntimeID)
         {
             T obj = this as T;
             if (LoadError != null)

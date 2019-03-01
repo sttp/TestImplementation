@@ -49,7 +49,6 @@ namespace CTP.IO
                 int schemeRuntimeID;
                 lock (m_knownSchemas)
                 {
-
                     if (!m_knownSchemas.TryGetValue(command.Schema.ProcessRuntimeID.Value, out schemeRuntimeID))
                     {
                         if (command.Schema.ProcessRuntimeID == -1)

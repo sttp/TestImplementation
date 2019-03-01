@@ -35,14 +35,14 @@ namespace CTP.IO
         /// <summary>
         /// A local cache of all schemas
         /// </summary>
-        private Dictionary<long, CtpCommandSchema> m_inboundSchemes;
+        private Dictionary<int, CtpCommandSchema> m_inboundSchemes;
 
         private MemoryStream m_stream;
         private DeflateStream m_inflate;
 
         public CtpReadParser()
         {
-            m_inboundSchemes = new Dictionary<long, CtpCommandSchema>();
+            m_inboundSchemes = new Dictionary<int, CtpCommandSchema>();
             m_inboundBuffer = new byte[128];
         }
 
@@ -101,7 +101,7 @@ namespace CTP.IO
             if (length < 2)
                 return 0;
 
-            if (!CtpObjectReader.TryReadPacket(buffer, current, length, MaximumPacketSize, out PacketContents payloadType, out long payloadFlags, out byte[] payloadBuffer, out int consumedLength))
+            if (!PacketMethods.TryReadPacket(buffer, current, length, MaximumPacketSize, out PacketContents payloadType, out int payloadFlags, out byte[] payloadBuffer, out int consumedLength))
                 return 0;
 
             switch (payloadType)

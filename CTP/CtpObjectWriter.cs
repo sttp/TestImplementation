@@ -65,9 +65,14 @@ namespace CTP
             return data;
         }
 
-        public void CopyTo(byte[] data, int offset)
+        private void CopyTo(byte[] data, int offset)
         {
             Array.Copy(m_buffer, 0, data, offset, m_length);
+        }
+
+        public void CopyToAsCtpBuffer(CtpObjectWriter wr)
+        {
+            wr.Write(m_buffer, 0, m_length);
         }
 
         public void Clear()
@@ -84,6 +89,7 @@ namespace CTP
             else
                 WriteBuffer(value, 0, value.Length);
         }
+
         public void Write(byte[] value, int offset, int length)
         {
             if (value == null)
@@ -503,10 +509,7 @@ namespace CTP
             m_length += 8;
         }
 
-        public void CopyTo(CtpObjectWriter wr)
-        {
-            wr.Write(m_buffer, 0, m_length);
-        }
+        
 
 
     }
