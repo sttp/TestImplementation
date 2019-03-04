@@ -1,11 +1,43 @@
 ﻿using System;
 using System.Dynamic;
+using System.Linq;
 using CTP.Collection;
 using CTP.IO;
+using CTP.SerializationRead;
+using CTP.SerializationWrite;
 using GSF.Collections;
 
 namespace CTP
 {
+    public interface ICommandObjectOptionalMethods
+    {
+        /// <summary>
+        /// When creating a new object from <see cref="CtpCommand"/>, this method is called first to allow the coder
+        /// to define default values.
+        /// </summary>
+        void BeforeLoad();
+
+        /// <summary>
+        /// This occurs after a new object is loaded. This allows the coder to validate or finish the loading process.
+        /// </summary>
+        void AfterLoad();
+
+        /// <summary>
+        /// Occurs during loading when a value is present in the <see cref="CtpCommand"/> but
+        /// there is not a corresponding field.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        void MissingValue(string name, CtpObject value);
+
+        /// <summary>
+        /// Occurs during loading when a element is present in the <see cref="CtpCommand"/> but
+        /// there is not a corresponding field.
+        /// </summary>
+        /// <param name="name"></param>
+        void MissingElement(string name);
+    }
+
     /// <summary>
     /// The base class for all Object that can be automatically serialized to/from a <see cref="CtpCommand"/>.
     /// </summary>
@@ -52,77 +84,6 @@ namespace CTP
         {
             return ToCommand().ToYAML();
         }
-
-        /// <summary>
-        /// When creating a new object from <see cref="CtpCommand"/>, this method is called first to allow the coder
-        /// to define default values.
-        /// </summary>
-        protected virtual void BeforeLoad()
-        {
-
-        }
-
-        /// <summary>
-        /// This occurs after a new object is loaded. This allows the coder to validate or finish the loading process.
-        /// </summary>
-        protected virtual void AfterLoad()
-        {
-
-        }
-
-        /// <summary>
-        /// Occurs during loading when a value is present in the <see cref="CtpCommand"/> but
-        /// there is not a corresponding field.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        protected virtual void MissingValue(string name, CtpObject value)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Occurs during loading when a element is present in the <see cref="CtpCommand"/> but
-        /// there is not a corresponding field.
-        /// </summary>
-        /// <param name="name"></param>
-        protected virtual void MissingElement(string name)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Internal Method Called during the loading process.
-        /// </summary>
-        internal void OnBeforeLoad()
-        {
-            BeforeLoad();
-        }
-
-        /// <summary>
-        /// Internal Method Called during the loading process.
-        /// </summary>
-        internal void OnAfterLoad()
-        {
-            AfterLoad();
-        }
-
-        /// <summary>
-        /// Internal Method Called during the loading process.
-        /// </summary>
-        internal void OnMissingValue(string name, CtpObject value)
-        {
-            MissingValue(name, value);
-        }
-
-        /// <summary>
-        /// Internal Method Called during the loading process.
-        /// </summary>
-        internal void OnMissingElement(string name)
-        {
-            MissingElement(name);
-        }
-
     }
 
     /// <summary>
@@ -135,7 +96,6 @@ namespace CTP
         : CommandObject
         where T : CommandObject<T>
     {
-
         protected CommandObject()
         {
             if (LoadError != null)
@@ -205,24 +165,28 @@ namespace CTP
 
         private static readonly string CmdName;
         private static readonly Exception LoadError;
-        private static readonly SerializationWrite.TypeWriteMethodBase<T> WriteMethod;
-        private static readonly SerializationRead.TypeReadMethodBase<T> ReadMethod;
+        private static readonly TypeWriteMethodBase<T> WriteMethod;
+        private static readonly TypeReadMethodBase<T> ReadMethod;
         private static readonly CtpCommandSchema WriteSchema;
 
         static CommandObject()
         {
             try
             {
-                SerializationWrite.TypeWrite.Get(out WriteMethod, out var writeSchema, out CmdName);
-                WriteSchema = writeSchema.ToSchema();
-                SerializationRead.TypeRead<T>.Get(out LoadError, out CmdName, out ReadMethod);
+                var type = typeof(T);
+                var attribute = type.GetCustomAttributes(false).OfType<CommandNameAttribute>().FirstOrDefault();
+                CmdName = attribute?.CommandName ?? type.Name;
+                WriteMethod = TypeWrite.Create<T>(CmdName);
+                var writer = new CommandSchemaWriter();
+                WriteMethod.WriteSchema(writer);
+                WriteSchema = writer.ToSchema();
+                TypeRead<T>.Get(out LoadError, out CmdName, out ReadMethod);
             }
             catch (Exception e)
             {
                 LoadError = e;
             }
         }
-
     }
 
 }

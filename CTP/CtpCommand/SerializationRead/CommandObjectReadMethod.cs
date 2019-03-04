@@ -81,7 +81,8 @@ namespace CTP.SerializationRead
         public override T Load(CtpCommandReader reader)
         {
             var rv = m_constructor();
-            rv.OnBeforeLoad();
+            ICommandObjectOptionalMethods rv2 = rv as ICommandObjectOptionalMethods;
+            rv2?.BeforeLoad();
             FieldRead read;
             int id;
 
@@ -97,7 +98,9 @@ namespace CTP.SerializationRead
                         }
                         else
                         {
-                            rv.OnMissingElement(reader.ElementName);
+                            if (rv2 == null)
+                                throw new Exception("Missing an element");
+                            rv2.MissingElement(reader.ElementName);
                             reader.SkipElement();
                         }
                         break;
@@ -109,12 +112,14 @@ namespace CTP.SerializationRead
                         }
                         else
                         {
-                            rv.OnMissingValue(reader.ValueName, reader.Value);
+                            if (rv2 == null)
+                                throw new Exception("Missing a value");
+                            rv2.MissingValue(reader.ValueName, reader.Value);
                             reader.SkipElement();
                         }
                         break;
                     case CtpCommandNodeType.EndElement:
-                        rv.OnAfterLoad();
+                        rv2?.AfterLoad();
                         return rv;
                     case CtpCommandNodeType.EndOfCommand:
                     case CtpCommandNodeType.StartOfCommand:
@@ -122,7 +127,7 @@ namespace CTP.SerializationRead
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            rv.OnAfterLoad();
+            rv2?.AfterLoad();
             return rv;
         }
 

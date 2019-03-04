@@ -5,7 +5,7 @@ using CTP;
 namespace CTP.SerializationWrite
 {
     internal class TypeWriteString
-        : TypeWriteMethodBase<string>
+        : NativeMethodsIOBase<string>
     {
         public override void Save(string obj, CtpObjectWriter writer)
         {
@@ -14,7 +14,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteByteArray
-       : TypeWriteMethodBase<byte[]>
+       : NativeMethodsIOBase<byte[]>
     {
         public override void Save(byte[] obj, CtpObjectWriter writer)
         {
@@ -23,7 +23,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteCharArray
-        : TypeWriteMethodBase<char[]>
+        : NativeMethodsIOBase<char[]>
     {
         public override void Save(char[] obj, CtpObjectWriter writer)
         {
@@ -32,7 +32,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteCommand
-        : TypeWriteMethodBase<CtpCommand>
+        : NativeMethodsIOBase<CtpCommand>
     {
         public override void Save(CtpCommand obj, CtpObjectWriter writer)
         {
@@ -41,7 +41,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteBuffer
-        : TypeWriteMethodBase<CtpBuffer>
+        : NativeMethodsIOBase<CtpBuffer>
     {
         public override void Save(CtpBuffer obj, CtpObjectWriter writer)
         {
@@ -50,7 +50,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteNumeric
-        : TypeWriteMethodBase<CtpNumeric>
+        : NativeMethodsIOBase<CtpNumeric>
     {
         public override void Save(CtpNumeric obj, CtpObjectWriter writer)
         {
@@ -59,7 +59,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteNumericNull
-        : TypeWriteMethodBase<CtpNumeric?>
+        : NativeMethodsIOBase<CtpNumeric?>
     {
         public override void Save(CtpNumeric? obj, CtpObjectWriter writer)
         {
@@ -69,7 +69,7 @@ namespace CTP.SerializationWrite
 
 
     internal class TypeWriteCtpObject
-        : TypeWriteMethodBase<CtpObject>
+        : NativeMethodsIOBase<CtpObject>
     {
         public override void Save(CtpObject obj, CtpObjectWriter writer)
         {
@@ -78,7 +78,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteObject
-        : TypeWriteMethodBase<object>
+        : NativeMethodsIOBase<object>
     {
         public override void Save(object obj, CtpObjectWriter writer)
         {

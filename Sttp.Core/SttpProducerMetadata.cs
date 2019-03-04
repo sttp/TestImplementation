@@ -12,8 +12,8 @@ namespace Sttp
     /// This is likely an individual equipment station or RTU.
     /// </summary>
     [CommandName("ProducerMetadata")]
-    public class SttpProducerMetadata
-        : CommandObject<SttpProducerMetadata>
+    public class SttpProducerMetadata 
+        : CommandObject<SttpProducerMetadata>, ICommandObjectOptionalMethods
     {
         /// <summary>
         /// The unique identifier for this Producer.
@@ -40,7 +40,12 @@ namespace Sttp
             ProducerID = CtpObject.Null;
         }
 
-        protected override void AfterLoad()
+        void ICommandObjectOptionalMethods.BeforeLoad()
+        {
+            throw new NotImplementedException();
+        }
+
+        void ICommandObjectOptionalMethods.AfterLoad()
         {
             if (DataPoints == null)
                 DataPoints = new List<SttpDataPointMetadata>();
@@ -54,6 +59,16 @@ namespace Sttp
             {
                 item.AssignProducer(this);
             }
+        }
+
+        void ICommandObjectOptionalMethods.MissingValue(string name, CtpObject value)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ICommandObjectOptionalMethods.MissingElement(string name)
+        {
+            throw new NotImplementedException();
         }
 
         public static explicit operator SttpProducerMetadata(CtpCommand obj)

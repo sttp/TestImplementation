@@ -14,11 +14,12 @@ namespace CTP.SerializationWrite
         where TEnum : IEnumerable<T>
     {
         private TypeWriteMethodBase<T> m_serializeT;
+        private string m_recordName;
 
-        public TypeWriteEnumerable(CommandSchemaWriter schema, string recordName)
+        public TypeWriteEnumerable(string recordName)
         {
-            schema.DefineArray(recordName);
-            m_serializeT = TypeWrite.GetUnknownType<T>(schema, "Item");
+            m_recordName = recordName;
+            m_serializeT = TypeWrite.Create<T>("Item");
         }
 
         public override void Save(TEnum obj, CtpObjectWriter writer)
@@ -32,6 +33,12 @@ namespace CTP.SerializationWrite
                 m_serializeT.Save(item, writer);
             }
 
+        }
+
+        public override void WriteSchema(CommandSchemaWriter schema)
+        {
+            schema.DefineArray(m_recordName);
+            m_serializeT.WriteSchema(schema);
         }
 
     }

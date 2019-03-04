@@ -9,79 +9,75 @@ namespace CTP.SerializationWrite
     /// </summary>
     internal abstract class FieldWrite
     {
+        private class FieldWrite2<T>
+            : FieldWrite
+        {
+            private TypeWriteMethodBase<T> m_method;
+            private Func<object, T> m_get;
+
+            public FieldWrite2(Func<object, T> get, TypeWriteMethodBase<T> method)
+            {
+                m_get = get;
+                m_method = method;
+            }
+
+            public override void Save(object obj, CtpObjectWriter writer)
+            {
+                var item = m_get(obj);
+                if (item == null)
+                    return;
+                m_method.Save(item, writer);
+            }
+
+            public override void WriteSchema(CommandSchemaWriter schema)
+            {
+                m_method.WriteSchema(schema);
+            }
+        }
+
         /// <summary>
-        /// 
+        /// Gets the corresponding field/property from the <see cref="obj"/> and writes the value to the <see cref="writer"/>.
         /// </summary>
-        /// <param name="obj">The object that has the compiled filed.</param>
+        /// <param name="obj"></param>
         /// <param name="writer"></param>
         public abstract void Save(object obj, CtpObjectWriter writer);
+        public abstract void WriteSchema(CommandSchemaWriter schema);
 
-        private static readonly MethodInfo Method1 = typeof(FieldWrite).GetMethod("CreateFieldSerializationInternal1", BindingFlags.Static | BindingFlags.NonPublic);
-        private static readonly MethodInfo Method2 = typeof(FieldWrite).GetMethod("CreateFieldSerializationInternal2", BindingFlags.Static | BindingFlags.NonPublic);
 
-        public static FieldWrite CreateFieldOptions(MemberInfo member, Type targetType, string recordName, CommandSchemaWriter schema)
+        #region [ Static ]
+
+        private static readonly MethodInfo Method = typeof(FieldWrite).GetMethod("CreateFieldWriteGeneric", BindingFlags.Static | BindingFlags.NonPublic);
+
+        /// <summary>
+        /// Uses reflection to compile a way to read/write fields/properties without boxing. 
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <param name="member">The field/property of the <see cref="targetType"/> that will be serialized</param>
+        /// <param name="recordName"></param>
+        /// <returns></returns>
+        public static FieldWrite Create(Type targetType, MemberInfo member, string recordName)
         {
-            //Since I have to do reflection anyway, by checking if inheritance exists, I can call GetStrongTyped instead of GetUnknownType.
-            if (targetType.IsSubclassOf(typeof(CommandObject)))
-            {
-                var genericMethod = Method2.MakeGenericMethod(targetType);
-                return (FieldWrite)genericMethod.Invoke(null, new object[] { member, schema, recordName });
-            }
-            else
-            {
-                var genericMethod = Method1.MakeGenericMethod(targetType);
-                return (FieldWrite)genericMethod.Invoke(null, new object[] { member, schema, recordName });
-            }
+            var genericMethod = Method.MakeGenericMethod(targetType);
+            return (FieldWrite)genericMethod.Invoke(null, new object[] { member, recordName });
         }
 
         // ReSharper disable once UnusedMember.Local
-        private static FieldWrite CreateFieldSerializationInternal1<TFieldType>(MemberInfo member, CommandSchemaWriter schema, string recordName)
+        private static FieldWrite CreateFieldWriteGeneric<T>(MemberInfo member, string recordName)
         {
-            var method = TypeWrite.GetUnknownType<TFieldType>(schema, recordName);
-            return new FieldWrite<TFieldType>(method, member);
-        }
-        // ReSharper disable once UnusedMember.Local
-        private static FieldWrite CreateFieldSerializationInternal2<TFieldType>(MemberInfo member, CommandSchemaWriter schema, string recordName)
-           where TFieldType : CommandObject
-        {
-            var method = TypeWrite.GetStrongTyped<TFieldType>(schema, recordName);
-            return new FieldWrite<TFieldType>(method, member);
-        }
-    }
-
-    /// <summary>
-    /// Responsible for creating runtime lambda expressions to assign fields/properties. This is done without boxing. 
-    /// </summary>
-    internal class FieldWrite<T>
-        : FieldWrite
-    {
-        private TypeWriteMethodBase<T> m_method;
-        private Func<object, T> m_read;
-
-        public FieldWrite(TypeWriteMethodBase<T> method, MemberInfo member)
-        {
-            if (member is PropertyInfo)
-            {
-                m_read = ((PropertyInfo)member).CompileGetter<T>();
-            }
-            else if (member is FieldInfo)
-            {
-                m_read = ((FieldInfo)member).CompileGetter<T>();
-            }
+            Func<object, T> get;
+            if (member is PropertyInfo info)
+                get = info.CompileGetter<T>();
+            else if (member is FieldInfo fieldInfo)
+                get = fieldInfo.CompileGetter<T>();
             else
-            {
                 throw new NotSupportedException();
-            }
-            m_method = method;
+            var writer = TypeWrite.Create<T>(recordName);
+
+            return new FieldWrite2<T>(get, writer);
         }
 
-        public override void Save(object obj, CtpObjectWriter writer)
-        {
-            var item = m_read(obj);
-            if (item == null)
-                return;
-
-            m_method.Save(item, writer);
-        }
+        #endregion
     }
+
+
 }

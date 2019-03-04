@@ -5,7 +5,7 @@ using GSF;
 namespace CTP.SerializationWrite
 {
     internal class TypeWriteDecimal
-        : TypeWriteMethodBase<decimal>
+        : NativeMethodsIOBase<decimal>
     {
         public override void Save(decimal obj, CtpObjectWriter writer)
         {
@@ -14,7 +14,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteGuid
-        : TypeWriteMethodBase<Guid>
+        : NativeMethodsIOBase<Guid>
     {
         public override void Save(Guid obj, CtpObjectWriter writer)
         {

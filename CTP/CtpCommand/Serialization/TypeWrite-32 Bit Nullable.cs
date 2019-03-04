@@ -4,7 +4,7 @@ using CTP;
 namespace CTP.SerializationWrite
 {
     internal class TypeWriteUInt32Null
-        : TypeWriteMethodBase<uint?>
+        : NativeMethodsIOBase<uint?>
     {
         public override void Save(uint? obj, CtpObjectWriter writer)
         {
@@ -13,7 +13,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteInt32Null
-        : TypeWriteMethodBase<int?>
+        : NativeMethodsIOBase<int?>
     {
         public override void Save(int? obj, CtpObjectWriter writer)
         {
@@ -22,7 +22,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteSingleNull
-        : TypeWriteMethodBase<float?>
+        : NativeMethodsIOBase<float?>
     {
         public override void Save(float? obj, CtpObjectWriter writer)
         {

@@ -8,44 +8,25 @@ namespace CTP.SerializationWrite
     internal class CommandObjectWriteMethod<T>
        : TypeWriteMethodBase<T>
     {
+        private string m_recordName;
         private readonly FieldWrite[] m_records;
 
-        public CommandObjectWriteMethod(CommandSchemaWriter schema, string recordName)
+        public CommandObjectWriteMethod(string recordName)
         {
+            m_recordName = recordName;
             var type = typeof(T);
             var records = new List<FieldWrite>();
-            var items = new List<Tuple<MemberInfo, string, Type>>();
+            HashSet<string> ids = new HashSet<string>();
 
             foreach (var member in type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                if (TryValidate(member, out var item))
-                {
-                    items.Add(item);
-                }
+                AddIfValid(ids, records, member);
             }
-
-            //Test for collisions
-            HashSet<string> ids = new HashSet<string>();
-            foreach (var f in items)
-            {
-                if (!ids.Add(f.Item2))
-                    throw new Exception(string.Format("Duplicate Load Names: {0} detected in class {1}.", f.Item2, type.ToString()));
-            }
-
-            schema.DefineElement(recordName);
-            foreach (var item in items)
-            {
-                records.Add(FieldWrite.CreateFieldOptions(item.Item1, item.Item3, item.Item2, schema));
-            }
-            schema.EndElement();
-
-
             m_records = records.ToArray();
         }
 
-        private bool TryValidate(MemberInfo member, out Tuple<MemberInfo, string, Type> item)
+        private void AddIfValid(HashSet<string> duplicateNameChecker, List<FieldWrite> records, MemberInfo member)
         {
-            item = null;
             Type targetType;
 
             if (member is FieldInfo)
@@ -53,28 +34,37 @@ namespace CTP.SerializationWrite
             else if (member is PropertyInfo)
                 targetType = ((PropertyInfo)member).PropertyType;
             else
-                return false;
+                return;
 
             object[] attributes = member.GetCustomAttributes(true);
             CommandFieldAttribute attribute = attributes.OfType<CommandFieldAttribute>().FirstOrDefault();
             if (attribute != null)
             {
                 var recordName = attribute.RecordName ?? member.Name;
-                item = Tuple.Create(member, recordName, targetType);
-                return true;
-            }
 
-            return false;
+                if (!duplicateNameChecker.Add(recordName))
+                    throw new Exception(string.Format("Duplicate Load Names: {0} detected in class {1}.", recordName, typeof(T).ToString()));
+
+                records.Add(FieldWrite.Create(targetType, member, recordName));
+            }
         }
 
         public override void Save(T obj, CtpObjectWriter writer)
         {
-            //Root elements have a record name == null. These do not need to start an element.
             foreach (var item in m_records)
             {
                 item.Save(obj, writer);
             }
         }
 
+        public override void WriteSchema(CommandSchemaWriter schema)
+        {
+            schema.DefineElement(m_recordName);
+            foreach (var member in m_records)
+            {
+                member.WriteSchema(schema);
+            }
+            schema.EndElement();
+        }
     }
 }

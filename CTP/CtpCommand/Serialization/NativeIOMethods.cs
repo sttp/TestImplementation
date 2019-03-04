@@ -3,11 +3,40 @@ using System.Collections.Generic;
 
 namespace CTP.SerializationWrite
 {
-    internal static class NativeWriteMethods
+    internal abstract class NativeMethodsIOBase<T>
     {
+        public abstract void Save(T obj, CtpObjectWriter writer);
+        //public abstract T Load(CtpCommandReader reader);
+    }
+
+    internal static class NativeIOMethods
+    {
+        private class Write<T>
+            : TypeWriteMethodBase<T>
+        {
+            private NativeMethodsIOBase<T> m_io;
+            private string m_recordName;
+
+            public Write(NativeMethodsIOBase<T> io, string recordName)
+            {
+                m_io = io;
+                m_recordName = recordName;
+            }
+
+            public override void Save(T obj, CtpObjectWriter writer)
+            {
+                m_io.Save(obj, writer);
+            }
+
+            public override void WriteSchema(CommandSchemaWriter schema)
+            {
+                schema.DefineValue(m_recordName);
+            }
+        }
+
         private static readonly Dictionary<Type, object> Methods = new Dictionary<Type, object>();
 
-        static NativeWriteMethods()
+        static NativeIOMethods()
         {
             Add(new TypeWriteDecimal());
             Add(new TypeWriteGuid());
@@ -54,17 +83,16 @@ namespace CTP.SerializationWrite
             Add(new TypeWriteObject());
         }
 
-        static void Add<T>(TypeWriteMethodBase<T> method)
+        static void Add<T>(NativeMethodsIOBase<T> method)
         {
             Methods.Add(typeof(T), method);
         }
 
-        public static TypeWriteMethodBase<T> TryGetMethod<T>(CommandSchemaWriter schema, string record)
+        public static TypeWriteMethodBase<T> TryGetWriteMethod<T>(string record)
         {
             if (Methods.TryGetValue(typeof(T), out object value))
             {
-                schema.DefineValue(record);
-                return (TypeWriteMethodBase<T>)value;
+                return new Write<T>((NativeMethodsIOBase<T>)value, record);
             }
             return null;
         }

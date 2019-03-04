@@ -9,7 +9,7 @@ namespace Sttp
     /// The metadata associated with a single data point.
     /// </summary>
     public class SttpDataPointMetadata
-        : CommandObject<SttpDataPointMetadata>
+        : CommandObject<SttpDataPointMetadata>, ICommandObjectOptionalMethods
     {
         /// <summary>
         /// The owner of this data point. This is likely an individual equipment station or RTU.
@@ -57,7 +57,12 @@ namespace Sttp
 
         }
 
-        protected override void AfterLoad()
+        void ICommandObjectOptionalMethods.BeforeLoad()
+        {
+            throw new NotImplementedException();
+        }
+
+        void ICommandObjectOptionalMethods.AfterLoad()
         {
             if (Attributes == null)
                 Attributes = new List<AttributeValues>();
@@ -65,6 +70,16 @@ namespace Sttp
             {
                 DataPointID = CtpObject.Null;
             }
+        }
+
+        void ICommandObjectOptionalMethods.MissingValue(string name, CtpObject value)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ICommandObjectOptionalMethods.MissingElement(string name)
+        {
+            throw new NotImplementedException();
         }
 
         internal void AssignProducer(SttpProducerMetadata producer)

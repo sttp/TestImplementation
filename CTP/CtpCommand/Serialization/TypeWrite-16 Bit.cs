@@ -4,7 +4,7 @@ using CTP;
 namespace CTP.SerializationWrite
 {
     internal class TypeWriteUInt16
-        : TypeWriteMethodBase<ushort>
+        : NativeMethodsIOBase<ushort>
     {
         public override void Save(ushort obj, CtpObjectWriter writer)
         {
@@ -13,7 +13,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteInt16
-        : TypeWriteMethodBase<short>
+        : NativeMethodsIOBase<short>
     {
         public override void Save(short obj, CtpObjectWriter writer)
         {
@@ -22,7 +22,7 @@ namespace CTP.SerializationWrite
     }
 
     internal class TypeWriteChar
-        : TypeWriteMethodBase<char>
+        : NativeMethodsIOBase<char>
     {
         public override void Save(char obj, CtpObjectWriter writer)
         {
