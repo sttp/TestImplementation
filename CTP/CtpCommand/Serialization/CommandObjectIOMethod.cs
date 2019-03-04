@@ -2,43 +2,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CTP.Serialization;
 using GSF.Reflection;
 
-namespace CTP.SerializationRead
+namespace CTP.Serialization
 {
-   internal class CommandObjectReadMethod<T>
-       : TypeReadMethodBase<T>
+    internal class CommandObjectIOMethod<T>
+       : TypeIOMethodBase<T>
     {
-        private readonly FieldRead[] m_records;
-
+        private string m_recordName;
+        private readonly FieldIO[] m_records;
         private readonly Dictionary<string, int> m_recordsLookup = new Dictionary<string, int>();
-
         private readonly Func<T> m_constructor;
 
-        public CommandObjectReadMethod(ConstructorInfo c)
+        public CommandObjectIOMethod(ConstructorInfo c, string recordName)
         {
-            TypeRead<T>.Set(this); //This is required to fix circular reference issues.
-
+            m_recordName = recordName;
             var type = typeof(T);
             m_constructor = c.Compile<T>();
 
-            var records = new List<FieldRead>();
+            var records = new List<FieldIO>();
+            HashSet<string> ids = new HashSet<string>();
             foreach (var member in type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
-                TryCreateFieldOptions(member, records);
+                AddIfValid(ids, records, member);
             }
             m_records = records.ToArray();
-
-            //Test for collisions
-            HashSet<string> ids = new HashSet<string>();
-            foreach (var f in m_records)
-            {
-                if (!ids.Add(f.RecordName))
-                    throw new Exception(string.Format("Duplicate Load Names: {0} detected in class {1}.", f.RecordName, type.ToString()));
-            }
         }
 
-        private void TryCreateFieldOptions(MemberInfo member, List<FieldRead> records)
+        private void AddIfValid(HashSet<string> duplicateNameChecker, List<FieldIO> records, MemberInfo member)
         {
             Type targetType;
 
@@ -53,10 +45,32 @@ namespace CTP.SerializationRead
             CommandFieldAttribute attribute = attributes.OfType<CommandFieldAttribute>().FirstOrDefault();
             if (attribute != null)
             {
-                var field = FieldRead.CreateFieldOptions(member, targetType, attribute);
-                m_recordsLookup.Add(field.RecordName, records.Count);
-                records.Add(field);
+                var recordName = attribute.RecordName ?? member.Name;
+
+                if (!duplicateNameChecker.Add(recordName))
+                    throw new Exception(string.Format("Duplicate Load Names: {0} detected in class {1}.", recordName, typeof(T).ToString()));
+
+                m_recordsLookup.Add(recordName, records.Count);
+                records.Add(FieldIO.Create(targetType, member, recordName));
             }
+        }
+
+        public override void Save(T obj, CtpObjectWriter writer)
+        {
+            foreach (var item in m_records)
+            {
+                item.Save(obj, writer);
+            }
+        }
+
+        public override void WriteSchema(CommandSchemaWriter schema)
+        {
+            schema.DefineElement(m_recordName);
+            foreach (var member in m_records)
+            {
+                member.WriteSchema(schema);
+            }
+            schema.EndElement();
         }
 
         public override T Load(CtpCommandReader reader)
@@ -64,7 +78,7 @@ namespace CTP.SerializationRead
             var rv = m_constructor();
             ICommandObjectOptionalMethods rv2 = rv as ICommandObjectOptionalMethods;
             rv2?.BeforeLoad();
-            FieldRead read;
+            FieldIO read;
             int id;
 
             while (reader.Read())
@@ -111,8 +125,5 @@ namespace CTP.SerializationRead
             rv2?.AfterLoad();
             return rv;
         }
-
-
-
     }
 }

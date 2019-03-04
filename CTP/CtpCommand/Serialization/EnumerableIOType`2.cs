@@ -1,26 +1,46 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace CTP.SerializationRead
+namespace CTP.Serialization
 {
     /// <summary>
     /// Can serialize an array type.
     /// </summary>
     /// <typeparam name="TEnum"></typeparam>
     /// <typeparam name="T"></typeparam>
-    internal class TypeReadEnumerable<TEnum, T>
-        : TypeReadMethodBase<TEnum>
-        where TEnum : IEnumerable<T>
+    internal class EnumerableIOType<TEnum, T>
+        : TypeIOMethodBase<TEnum>
+        where TEnum : ICollection<T>
     {
-        private TypeReadMethodBase<T> m_serializeT;
-
+        private TypeIOMethodBase<T> m_serializeT;
         private Func<List<T>, TEnum> m_castToType;
+        private string m_recordName;
 
-        public TypeReadEnumerable(Func<List<T>, TEnum> castToType)
+        public EnumerableIOType(string recordName, Func<List<T>, TEnum> castToType)
         {
-            TypeRead<TEnum>.Set(this); //This is required to fix circular reference issues.
+            m_recordName = recordName;
             m_castToType = castToType;
-            m_serializeT = TypeRead<T>.Get();
+            m_serializeT = TypeIO.Create<T>("Item");
+        }
+
+        public override void Save(TEnum obj, CtpObjectWriter writer)
+        {
+            if (obj == null)
+                return;
+
+            writer.Write(obj.Count());
+            foreach (var item in obj)
+            {
+                m_serializeT.Save(item, writer);
+            }
+
+        }
+
+        public override void WriteSchema(CommandSchemaWriter schema)
+        {
+            schema.DefineArray(m_recordName);
+            m_serializeT.WriteSchema(schema);
         }
 
         public override TEnum Load(CtpCommandReader reader)
@@ -48,8 +68,10 @@ namespace CTP.SerializationRead
                 }
             }
             throw new ArgumentOutOfRangeException();
-
         }
-        
+
+
+
+
     }
 }

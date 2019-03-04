@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
-namespace CTP.SerializationWrite
+namespace CTP.Serialization
 {
     /// <summary>
     /// Creates methods for serializing one of these types: Array, List, HashSet, SortedSet, or ReadOnlyCollection
     /// </summary>
-    internal static class WriteEnumerableMethods
+    internal static class EnumerableIOType
     {
         private static readonly MethodInfo Method;
 
-        static WriteEnumerableMethods()
+        static EnumerableIOType()
         {
-            Method = typeof(WriteEnumerableMethods).GetMethod("Generic", BindingFlags.Static | BindingFlags.NonPublic);
+            Method = typeof(EnumerableIOType).GetMethod("Generic", BindingFlags.Static | BindingFlags.NonPublic);
         }
 
-        public static TypeWriteMethodBase<T> TryCreate<T>(string recordName)
+        public static TypeIOMethodBase<T> TryCreate<T>(string recordName)
         {
             var type = typeof(T);
             if (type.IsArray)
             {
                 var func = Method.MakeGenericMethod(type, type.GetElementType());
-                return (TypeWriteMethodBase<T>)func.Invoke(null, new object[] { recordName });
+                return (TypeIOMethodBase<T>)func.Invoke(null, new object[] { recordName });
             }
             else if (type.IsGenericType)
             {
@@ -31,7 +31,7 @@ namespace CTP.SerializationWrite
                 if (types.Length == 1)
                 {
                     var func = Method.MakeGenericMethod(type, types[0]);
-                    return (TypeWriteMethodBase<T>)func.Invoke(null, new object[] { recordName });
+                    return (TypeIOMethodBase<T>)func.Invoke(null, new object[] { recordName });
                 }
                 else
                 {
@@ -46,23 +46,23 @@ namespace CTP.SerializationWrite
         {
             if (typeof(TEnum) == typeof(T[]))
             {
-                return new TypeWriteArray<T>(recordName);
+                return new EnumerableIOType<T[], T>(recordName, x => x.ToArray());
             }
             if (typeof(TEnum) == typeof(List<T>))
             {
-                return new TypeWriteList<T>(recordName);
+                return new EnumerableIOType<List<T>, T>(recordName, x => x);
             }
             if (typeof(TEnum) == typeof(HashSet<T>))
             {
-                return new TypeWriteEnumerable<HashSet<T>, T>(recordName);
+                return new EnumerableIOType<HashSet<T>, T>(recordName, x => new HashSet<T>(x));
             }
             if (typeof(TEnum) == typeof(SortedSet<T>))
             {
-                return new TypeWriteEnumerable<SortedSet<T>, T>(recordName);
+                return new EnumerableIOType<SortedSet<T>, T>(recordName, x => new SortedSet<T>(x));
             }
             if (typeof(TEnum) == typeof(ReadOnlyCollection<T>))
             {
-                return new TypeWriteEnumerable<ReadOnlyCollection<T>, T>(recordName);
+                return new EnumerableIOType<ReadOnlyCollection<T>, T>(recordName, x => new ReadOnlyCollection<T>(x));
             }
             throw new Exception("Cannot serialize generic type");
         }

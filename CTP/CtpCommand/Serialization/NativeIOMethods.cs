@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CTP.SerializationRead;
-using CTP.SerializationWrite;
 
 namespace CTP.Serialization
 {
@@ -14,7 +12,7 @@ namespace CTP.Serialization
     internal static class NativeIOMethods
     {
         private class Write<T>
-            : TypeWriteMethodBase<T>
+            : TypeIOMethodBase<T>
         {
             private NativeMethodsIOBase<T> m_io;
             private string m_recordName;
@@ -33,17 +31,6 @@ namespace CTP.Serialization
             public override void WriteSchema(CommandSchemaWriter schema)
             {
                 schema.DefineValue(m_recordName);
-            }
-        }
-
-        private class Read<T>
-            : TypeReadMethodBase<T>
-        {
-            private NativeMethodsIOBase<T> m_io;
-
-            public Read(NativeMethodsIOBase<T> io)
-            {
-                m_io = io;
             }
 
             public override T Load(CtpCommandReader reader)
@@ -106,7 +93,7 @@ namespace CTP.Serialization
             Methods.Add(typeof(T), method);
         }
 
-        public static TypeWriteMethodBase<T> TryGetWriteMethod<T>(string record)
+        public static TypeIOMethodBase<T> TryGetWriteMethod<T>(string record)
         {
             if (Methods.TryGetValue(typeof(T), out object value))
             {
@@ -114,16 +101,6 @@ namespace CTP.Serialization
             }
             return null;
         }
-
-        public static TypeReadMethodBase<T> TryGetMethod<T>()
-        {
-            if (Methods.TryGetValue(typeof(T), out object value))
-            {
-                return new Read<T>((NativeMethodsIOBase<T>)value);
-            }
-            return null;
-        }
-
 
     }
 }

@@ -3,8 +3,7 @@ using System.Dynamic;
 using System.Linq;
 using CTP.Collection;
 using CTP.IO;
-using CTP.SerializationRead;
-using CTP.SerializationWrite;
+using CTP.Serialization;
 using GSF.Collections;
 
 namespace CTP
@@ -121,7 +120,7 @@ namespace CTP
             var wr = ThreadStaticItems.CommandObject_Writer ?? new CtpObjectWriter();
             ThreadStaticItems.CommandObject_Writer = null;
             wr.Clear();
-            WriteMethod.Save(obj, wr);
+            IOMethods.Save(obj, wr);
             var buffer = PacketMethods.CreatePacket(PacketContents.CommandData, schemeRuntimeID, wr);
             ThreadStaticItems.CommandObject_Writer = wr;
             return buffer;
@@ -140,7 +139,7 @@ namespace CTP
             var wr = ThreadStaticItems.CommandObject_Writer ?? new CtpObjectWriter();
             ThreadStaticItems.CommandObject_Writer = null;
             wr.Clear();
-            WriteMethod.Save(obj, wr);
+            IOMethods.Save(obj, wr);
             var cmd = new CtpCommand(WriteSchema, wr.ToArray());
             ThreadStaticItems.CommandObject_Writer = wr;
             return cmd;
@@ -160,13 +159,12 @@ namespace CTP
                 throw new Exception("Document Mismatch");
             var rdr = command.MakeReader();
             rdr.Read();
-            return ReadMethod.Load(rdr);
+            return IOMethods.Load(rdr);
         }
 
         private static readonly string CmdName;
         private static readonly Exception LoadError;
-        private static readonly TypeWriteMethodBase<T> WriteMethod;
-        private static readonly TypeReadMethodBase<T> ReadMethod;
+        private static readonly TypeIOMethodBase<T> IOMethods;
         private static readonly CtpCommandSchema WriteSchema;
 
         static CommandObject()
@@ -176,11 +174,10 @@ namespace CTP
                 var type = typeof(T);
                 var attribute = type.GetCustomAttributes(false).OfType<CommandNameAttribute>().FirstOrDefault();
                 CmdName = attribute?.CommandName ?? type.Name;
-                WriteMethod = TypeWrite.Create<T>(CmdName);
+                IOMethods = TypeIO.Create<T>(CmdName);
                 var writer = new CommandSchemaWriter();
-                WriteMethod.WriteSchema(writer);
+                IOMethods.WriteSchema(writer);
                 WriteSchema = writer.ToSchema();
-                TypeRead<T>.Get(out LoadError, out CmdName, out ReadMethod);
             }
             catch (Exception e)
             {
