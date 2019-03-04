@@ -14,13 +14,12 @@ namespace CTP.SerializationRead
         /// </summary>
         public abstract string RecordName { get; }
 
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="obj">The object that has the compiled filed.</param>
         /// <param name="reader"></param>
-        public abstract void Load(CommandObject obj, CtpCommandReader reader);
+        public abstract void Load(object obj, CtpCommandReader reader);
 
         private static readonly MethodInfo Method2 = typeof(FieldRead).GetMethod("CreateFieldSerializationInternal", BindingFlags.Static | BindingFlags.NonPublic);
 
@@ -68,7 +67,7 @@ namespace CTP.SerializationRead
 
         public override string RecordName => m_recordName;
 
-        public override void Load(CommandObject obj, CtpCommandReader reader)
+        public override void Load(object obj, CtpCommandReader reader)
         {
             T item = m_method.Load(reader);
             m_write(obj, item);

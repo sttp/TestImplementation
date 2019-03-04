@@ -1,43 +1,50 @@
 using System;
 using CTP;
 
-namespace CTP.SerializationRead
+namespace CTP.Serialization
 {
-    internal class TypeReadUInt16Null
-        : TypeReadMethodBase<ushort?>
+    internal class TypeIOUInt16Null
+        : NativeMethodsIOBase<ushort?>
     {
+        public override void Save(ushort? obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override ushort? Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
                 throw new Exception("Parsing Error");
             return (ushort?)reader.Value;
         }
-
     }
 
-    internal class TypeReadInt16Null
-        : TypeReadMethodBase<short?>
+    internal class TypeIOInt16Null
+        : NativeMethodsIOBase<short?>
     {
+        public override void Save(short? obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override short? Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
                 throw new Exception("Parsing Error");
             return (short?)reader.Value;
         }
-
-       
     }
 
-    internal class TypeReadCharNull
-        : TypeReadMethodBase<char?>
+    internal class TypeIOCharNull
+        : NativeMethodsIOBase<char?>
     {
+        public override void Save(char? obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override char? Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
                 throw new Exception("Parsing Error");
             return (char?)reader.Value;
         }
-
-       
     }
 }

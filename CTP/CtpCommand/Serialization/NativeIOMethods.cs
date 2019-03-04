@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using CTP.SerializationRead;
+using CTP.SerializationWrite;
 
-namespace CTP.SerializationWrite
+namespace CTP.Serialization
 {
     internal abstract class NativeMethodsIOBase<T>
     {
         public abstract void Save(T obj, CtpObjectWriter writer);
-        //public abstract T Load(CtpCommandReader reader);
+        public abstract T Load(CtpCommandReader reader);
     }
 
     internal static class NativeIOMethods
@@ -34,53 +36,69 @@ namespace CTP.SerializationWrite
             }
         }
 
+        private class Read<T>
+            : TypeReadMethodBase<T>
+        {
+            private NativeMethodsIOBase<T> m_io;
+
+            public Read(NativeMethodsIOBase<T> io)
+            {
+                m_io = io;
+            }
+
+            public override T Load(CtpCommandReader reader)
+            {
+                return m_io.Load(reader);
+            }
+        }
+
         private static readonly Dictionary<Type, object> Methods = new Dictionary<Type, object>();
 
         static NativeIOMethods()
         {
-            Add(new TypeWriteDecimal());
-            Add(new TypeWriteGuid());
-            Add(new TypeWriteUInt16());
-            Add(new TypeWriteInt16());
-            Add(new TypeWriteChar());
-            Add(new TypeWriteUInt32());
-            Add(new TypeWriteInt32());
-            Add(new TypeWriteSingle());
-            Add(new TypeWriteUInt64());
-            Add(new TypeWriteInt64());
-            Add(new TypeWriteDouble());
-            Add(new TypeWriteDateTime());
-            Add(new TypeWriteCtpTime());
-            Add(new TypeWriteUInt8());
-            Add(new TypeWriteInt8());
-            Add(new TypeWriteBool());
+            Add(new TypeIODecimal());
+            Add(new TypeIOGuid());
+            Add(new TypeIOUInt16());
+            Add(new TypeIOInt16());
+            Add(new TypeIOChar());
+            Add(new TypeIOUInt32());
+            Add(new TypeIOInt32());
+            Add(new TypeIOSingle());
+            Add(new TypeIOUInt64());
+            Add(new TypeIOInt64());
+            Add(new TypeIODouble());
+            Add(new TypeIODateTime());
+            Add(new TypeIOCtpTime());
+            Add(new TypeIOUInt8());
+            Add(new TypeIOInt8());
+            Add(new TypeIOBool());
 
-            Add(new TypeWriteDecimalNull());
-            Add(new TypeWriteGuidNull());
-            Add(new TypeWriteUInt16Null());
-            Add(new TypeWriteInt16Null());
-            Add(new TypeWriteCharNull());
-            Add(new TypeWriteUInt32Null());
-            Add(new TypeWriteInt32Null());
-            Add(new TypeWriteSingleNull());
-            Add(new TypeWriteUInt64Null());
-            Add(new TypeWriteInt64Null());
-            Add(new TypeWriteDoubleNull());
-            Add(new TypeWriteDateTimeNull());
-            Add(new TypeWriteCtpTimeNull());
-            Add(new TypeWriteUInt8Null());
-            Add(new TypeWriteInt8Null());
-            Add(new TypeWriteBoolNull());
+            Add(new TypeIODecimalNull());
+            Add(new TypeIOGuidNull());
+            Add(new TypeIOUInt16Null());
+            Add(new TypeIOInt16Null());
+            Add(new TypeIOCharNull());
+            Add(new TypeIOUInt32Null());
+            Add(new TypeIOInt32Null());
+            Add(new TypeIOSingleNull());
+            Add(new TypeIOUInt64Null());
+            Add(new TypeIOInt64Null());
+            Add(new TypeIODoubleNull());
+            Add(new TypeIODateTimeNull());
+            Add(new TypeIOCtpTimeNull());
+            Add(new TypeIOUInt8Null());
+            Add(new TypeIOInt8Null());
+            Add(new TypeIOBoolNull());
 
-            Add(new TypeWriteString());
-            Add(new TypeWriteByteArray());
-            Add(new TypeWriteCharArray());
-            Add(new TypeWriteCommand());
-            Add(new TypeWriteBuffer());
-            Add(new TypeWriteNumeric());
-            Add(new TypeWriteNumericNull());
-            Add(new TypeWriteCtpObject());
-            Add(new TypeWriteObject());
+            Add(new TypeIOString());
+            Add(new TypeIOByteArray());
+            Add(new TypeIOCharArray());
+            Add(new TypeIOCommand());
+            Add(new TypeIOBuffer());
+            Add(new TypeIONumeric());
+            Add(new TypeIONumericNull());
+            Add(new TypeIOCtpObject());
+            Add(new TypeIOObject());
         }
 
         static void Add<T>(NativeMethodsIOBase<T> method)
@@ -93,6 +111,15 @@ namespace CTP.SerializationWrite
             if (Methods.TryGetValue(typeof(T), out object value))
             {
                 return new Write<T>((NativeMethodsIOBase<T>)value, record);
+            }
+            return null;
+        }
+
+        public static TypeReadMethodBase<T> TryGetMethod<T>()
+        {
+            if (Methods.TryGetValue(typeof(T), out object value))
+            {
+                return new Read<T>((NativeMethodsIOBase<T>)value);
             }
             return null;
         }

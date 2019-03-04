@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using CTP.Serialization;
 
 namespace CTP.SerializationWrite
 {

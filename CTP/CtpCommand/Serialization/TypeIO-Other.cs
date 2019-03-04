@@ -2,11 +2,15 @@ using System;
 using System.Text;
 using CTP;
 
-namespace CTP.SerializationRead
+namespace CTP.Serialization
 {
-    internal class TypeReadString
-        : TypeReadMethodBase<string>
+    internal class TypeIOString
+        : NativeMethodsIOBase<string>
     {
+        public override void Save(string obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override string Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -15,9 +19,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadByteArray
-       : TypeReadMethodBase<byte[]>
+    internal class TypeIOByteArray
+       : NativeMethodsIOBase<byte[]>
     {
+        public override void Save(byte[] obj, CtpObjectWriter writer)
+        {
+            writer.Write(obj);
+        }
         public override byte[] Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -26,9 +34,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadCharArray
-        : TypeReadMethodBase<char[]>
+    internal class TypeIOCharArray
+        : NativeMethodsIOBase<char[]>
     {
+        public override void Save(char[] obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override char[] Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -37,9 +49,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadCommand
-        : TypeReadMethodBase<CtpCommand>
+    internal class TypeIOCommand
+        : NativeMethodsIOBase<CtpCommand>
     {
+        public override void Save(CtpCommand obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override CtpCommand Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -48,9 +64,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadBuffer
-        : TypeReadMethodBase<CtpBuffer>
+    internal class TypeIOBuffer
+        : NativeMethodsIOBase<CtpBuffer>
     {
+        public override void Save(CtpBuffer obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override CtpBuffer Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -59,9 +79,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadNumeric
-        : TypeReadMethodBase<CtpNumeric>
+    internal class TypeIONumeric
+        : NativeMethodsIOBase<CtpNumeric>
     {
+        public override void Save(CtpNumeric obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override CtpNumeric Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -70,9 +94,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadNumericNull
-        : TypeReadMethodBase<CtpNumeric?>
+    internal class TypeIONumericNull
+        : NativeMethodsIOBase<CtpNumeric?>
     {
+        public override void Save(CtpNumeric? obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override CtpNumeric? Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -81,9 +109,14 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadCtpObject
-        : TypeReadMethodBase<CtpObject>
+
+    internal class TypeIOCtpObject
+        : NativeMethodsIOBase<CtpObject>
     {
+        public override void Save(CtpObject obj, CtpObjectWriter writer)
+        {
+            writer.Write(obj);
+        }
         public override CtpObject Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -92,9 +125,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadObject
-        : TypeReadMethodBase<object>
+    internal class TypeIOObject
+        : NativeMethodsIOBase<object>
     {
+        public override void Save(object obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override object Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)

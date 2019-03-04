@@ -6,27 +6,8 @@ using GSF.Reflection;
 
 namespace CTP.SerializationRead
 {
-    internal class CommandObjectReadMethod
-    {
-        private static readonly MethodInfo Method2 = typeof(CommandObjectReadMethod).GetMethod("Create2", BindingFlags.Static | BindingFlags.NonPublic);
-
-        public static TypeReadMethodBase<T> Create<T>(ConstructorInfo c)
-        {
-            var genericMethod = Method2.MakeGenericMethod(typeof(T));
-            return (TypeReadMethodBase<T>)genericMethod.Invoke(null, new object[] { c });
-        }
-
-        // ReSharper disable once UnusedMember.Local
-        private static TypeReadMethodBase<T> Create2<T>(ConstructorInfo c)
-            where T : CommandObject
-        {
-            return new CommandObjectReadMethod<T>(c);
-        }
-    }
-
-    internal class CommandObjectReadMethod<T>
+   internal class CommandObjectReadMethod<T>
        : TypeReadMethodBase<T>
-        where T : CommandObject
     {
         private readonly FieldRead[] m_records;
 

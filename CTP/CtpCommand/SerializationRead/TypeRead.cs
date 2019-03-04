@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using CTP.Serialization;
+using CTP.SerializationWrite;
 
 namespace CTP.SerializationRead
 {
@@ -56,7 +58,7 @@ namespace CTP.SerializationRead
         {
             try
             {
-                s_read = BuiltinSerializationMethods.TryGetMethod<T>();
+                s_read = NativeIOMethods.TryGetMethod<T>();
                 if (s_read != null)
                     return;
 
@@ -89,7 +91,7 @@ namespace CTP.SerializationRead
                     s_loadError = new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
                     return;
                 }
-                s_read = CommandObjectReadMethod.Create<T>(c);
+                s_read = new CommandObjectReadMethod<T>(c);
             }
             catch (Exception e)
             {

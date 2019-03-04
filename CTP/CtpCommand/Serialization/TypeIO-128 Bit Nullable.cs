@@ -3,11 +3,15 @@ using System.Threading;
 using CTP;
 using GSF;
 
-namespace CTP.SerializationRead
+namespace CTP.Serialization
 {
-    internal class TypeReadDecimalNull
-        : TypeReadMethodBase<decimal?>
+    internal class TypeIODecimalNull
+        : NativeMethodsIOBase<decimal?>
     {
+        public override void Save(decimal? obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override decimal? Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -16,9 +20,13 @@ namespace CTP.SerializationRead
         }
     }
 
-    internal class TypeReadGuidNull
-        : TypeReadMethodBase<Guid?>
+    internal class TypeIOGuidNull
+        : NativeMethodsIOBase<Guid?>
     {
+        public override void Save(Guid? obj, CtpObjectWriter writer)
+        {
+            writer.Write((CtpObject)obj);
+        }
         public override Guid? Load(CtpCommandReader reader)
         {
             if (reader.NodeType != CtpCommandNodeType.Value)
@@ -26,4 +34,5 @@ namespace CTP.SerializationRead
             return (Guid?)reader.Value;
         }
     }
+
 }
