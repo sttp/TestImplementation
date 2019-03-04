@@ -5,8 +5,8 @@ using GSF;
 
 namespace CTP.Serialization
 {
-    internal class TypeIODecimalNull
-        : NativeMethodsIOBase<decimal?>
+    internal class PrimitiveIoDecimalNull
+        : PrimitiveIOMethodBase<decimal?>
     {
         public override void Save(decimal? obj, CtpObjectWriter writer)
         {
@@ -20,8 +20,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOGuidNull
-        : NativeMethodsIOBase<Guid?>
+    internal class PrimitiveIoGuidNull
+        : PrimitiveIOMethodBase<Guid?>
     {
         public override void Save(Guid? obj, CtpObjectWriter writer)
         {

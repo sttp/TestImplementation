@@ -4,8 +4,8 @@ using CTP;
 
 namespace CTP.Serialization
 {
-    internal class TypeIOString
-        : NativeMethodsIOBase<string>
+    internal class PrimitiveIoString
+        : PrimitiveIOMethodBase<string>
     {
         public override void Save(string obj, CtpObjectWriter writer)
         {
@@ -19,8 +19,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOByteArray
-       : NativeMethodsIOBase<byte[]>
+    internal class PrimitiveIoByteArray
+       : PrimitiveIOMethodBase<byte[]>
     {
         public override void Save(byte[] obj, CtpObjectWriter writer)
         {
@@ -34,8 +34,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOCharArray
-        : NativeMethodsIOBase<char[]>
+    internal class PrimitiveIoCharArray
+        : PrimitiveIOMethodBase<char[]>
     {
         public override void Save(char[] obj, CtpObjectWriter writer)
         {
@@ -49,8 +49,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOCommand
-        : NativeMethodsIOBase<CtpCommand>
+    internal class PrimitiveIoCommand
+        : PrimitiveIOMethodBase<CtpCommand>
     {
         public override void Save(CtpCommand obj, CtpObjectWriter writer)
         {
@@ -64,8 +64,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOBuffer
-        : NativeMethodsIOBase<CtpBuffer>
+    internal class PrimitiveIoBuffer
+        : PrimitiveIOMethodBase<CtpBuffer>
     {
         public override void Save(CtpBuffer obj, CtpObjectWriter writer)
         {
@@ -79,8 +79,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIONumeric
-        : NativeMethodsIOBase<CtpNumeric>
+    internal class PrimitiveIoNumeric
+        : PrimitiveIOMethodBase<CtpNumeric>
     {
         public override void Save(CtpNumeric obj, CtpObjectWriter writer)
         {
@@ -94,8 +94,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIONumericNull
-        : NativeMethodsIOBase<CtpNumeric?>
+    internal class PrimitiveIoNumericNull
+        : PrimitiveIOMethodBase<CtpNumeric?>
     {
         public override void Save(CtpNumeric? obj, CtpObjectWriter writer)
         {
@@ -110,8 +110,8 @@ namespace CTP.Serialization
     }
 
 
-    internal class TypeIOCtpObject
-        : NativeMethodsIOBase<CtpObject>
+    internal class PrimitiveIoCtpObject
+        : PrimitiveIOMethodBase<CtpObject>
     {
         public override void Save(CtpObject obj, CtpObjectWriter writer)
         {
@@ -125,8 +125,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOObject
-        : NativeMethodsIOBase<object>
+    internal class PrimitiveIoObject
+        : PrimitiveIOMethodBase<object>
     {
         public override void Save(object obj, CtpObjectWriter writer)
         {

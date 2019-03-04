@@ -3,8 +3,8 @@ using CTP;
 
 namespace CTP.Serialization
 {
-    internal class TypeIOUInt64
-        : NativeMethodsIOBase<ulong>
+    internal class PrimitiveIouInt64
+        : PrimitiveIOMethodBase<ulong>
     {
         public override void Save(ulong obj, CtpObjectWriter writer)
         {
@@ -18,8 +18,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOInt64
-        : NativeMethodsIOBase<long>
+    internal class PrimitiveIoInt64
+        : PrimitiveIOMethodBase<long>
     {
         public override void Save(long obj, CtpObjectWriter writer)
         {
@@ -33,8 +33,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIODouble
-        : NativeMethodsIOBase<double>
+    internal class PrimitiveIoDouble
+        : PrimitiveIOMethodBase<double>
     {
        
         public override void Save(double obj, CtpObjectWriter writer)
@@ -49,8 +49,8 @@ namespace CTP.Serialization
         }
     }
   
-    internal class TypeIODateTime
-        : NativeMethodsIOBase<DateTime>
+    internal class PrimitiveIoDateTime
+        : PrimitiveIOMethodBase<DateTime>
     {
         public override void Save(DateTime obj, CtpObjectWriter writer)
         {
@@ -64,8 +64,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOCtpTime
-        : NativeMethodsIOBase<CtpTime>
+    internal class PrimitiveIoCtpTime
+        : PrimitiveIOMethodBase<CtpTime>
     {
         public override void Save(CtpTime obj, CtpObjectWriter writer)
         {

@@ -17,7 +17,7 @@ namespace CTP.Serialization
         /// <returns></returns>
         public static TypeIOMethodBase<T> Create<T>(string recordName)
         {
-            var serialization = NativeIOMethods.TryGetWriteMethod<T>(recordName);
+            var serialization = PrimitiveIOMethods.TryGetWriteMethod<T>(recordName);
             if (serialization != null)
                 return serialization;
 

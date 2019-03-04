@@ -3,8 +3,8 @@ using CTP;
 
 namespace CTP.Serialization
 {
-    internal class TypeIOUInt8
-        : NativeMethodsIOBase<byte>
+    internal class PrimitiveIouInt8
+        : PrimitiveIOMethodBase<byte>
     {
 
         public override void Save(byte obj, CtpObjectWriter writer)
@@ -19,8 +19,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOInt8
-        : NativeMethodsIOBase<sbyte>
+    internal class PrimitiveIoInt8
+        : PrimitiveIOMethodBase<sbyte>
     {
 
         public override void Save(sbyte obj, CtpObjectWriter writer)
@@ -35,8 +35,8 @@ namespace CTP.Serialization
         }
     }
 
-    internal class TypeIOBool
-        : NativeMethodsIOBase<bool>
+    internal class PrimitiveIoBool
+        : PrimitiveIOMethodBase<bool>
     {
 
         public override void Save(bool obj, CtpObjectWriter writer)
