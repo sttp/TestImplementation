@@ -9,7 +9,7 @@ namespace Sttp
     /// The metadata associated with a single data point.
     /// </summary>
     public class SttpDataPointMetadata
-        : CommandObject<SttpDataPointMetadata>, ICommandObjectOptionalMethods
+        : ICommandObjectOptionalMethods
     {
         /// <summary>
         /// The owner of this data point. This is likely an individual equipment station or RTU.
@@ -25,13 +25,6 @@ namespace Sttp
         /// Suggestions for this token include the properly mapped point identifier and possibly routing information.
         /// </summary>
         public object Token;
-
-        /// <summary>
-        /// A runtime ID for the data point. If present, this improves the speed of serialization.
-        /// However, this ID must be a one-to-one relationship to DataPointID for each instance of the application.
-        /// </summary>
-        [CommandField()]
-        public int? RuntimeID { get; set; }
 
         /// <summary>
         /// The unique identifier for this PointID. This will typically be a GUID, but may also be a string or integer.
@@ -66,10 +59,6 @@ namespace Sttp
         {
             if (Attributes == null)
                 Attributes = new List<AttributeValues>();
-            if ((object)DataPointID == null)
-            {
-                DataPointID = CtpObject.Null;
-            }
         }
 
         void ICommandObjectOptionalMethods.MissingValue(string name, CtpObject value)
@@ -86,10 +75,6 @@ namespace Sttp
         {
             Producer = producer;
         }
-
-        public static explicit operator SttpDataPointMetadata(CtpCommand obj)
-        {
-            return FromCommand(obj);
-        }
+       
     }
 }

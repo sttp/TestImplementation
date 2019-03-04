@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -101,17 +102,17 @@ namespace CTP
         }
     }
 
-    internal class CommandSchemaNode
+    public class CommandSchemaNode
     {
         public readonly CommandSchemaSymbol Symbol;
         public readonly string NodeName;
         public readonly int PositionIndex;
 
-        public CommandSchemaNode(CommandSchemaReader reader, int positionIndex)
+        public CommandSchemaNode(string nodeName, CommandSchemaSymbol symbol, int positionIndex)
         {
             PositionIndex = positionIndex;
-            NodeName = reader.Name;
-            Symbol = reader.Symbol;
+            NodeName = nodeName;
+            Symbol = symbol;
         }
 
         public override string ToString()
@@ -120,19 +121,32 @@ namespace CTP
         }
     }
 
-    public class CtpCommandSchema
+    public class CtpCommandSchema : ICollection<CommandSchemaNode>
     {
+        /// <summary>
+        /// Schemas are provided a runtime id if they are saved from <see cref="CommandObject"/>. When they are loaded or serialized in some way, this ID is missing.
+        /// Internally this value is used to determine if a schema can be negotiated once and transmitted without including the schema data. If present,
+        /// this will uniquely define a schema.
+        /// </summary>
         public readonly int? ProcessRuntimeID;
-        public readonly string RootElement;
-
+        /// <summary>
+        /// The case sensitive name of the command associated with this schema.
+        /// </summary>
+        public readonly string CommandName;
         private readonly byte[] m_data;
         private List<CommandSchemaNode> m_nodes = new List<CommandSchemaNode>();
 
         public CtpCommandSchema(byte[] data)
           : this(data, null)
         {
+
         }
 
+        /// <summary>
+        /// Do not call from user code. Protecting this 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="processRuntimeID"></param>
         internal CtpCommandSchema(byte[] data, int? processRuntimeID)
         {
             m_data = data ?? throw new ArgumentNullException(nameof(data));
@@ -140,12 +154,12 @@ namespace CTP
             ProcessRuntimeID = processRuntimeID;
             while (reader.Next())
             {
-                m_nodes.Add(new CommandSchemaNode(reader, m_nodes.Count));
+                m_nodes.Add(new CommandSchemaNode(reader.Name, reader.Symbol, m_nodes.Count));
             }
-            RootElement = m_nodes[0].NodeName;
+            CommandName = m_nodes[0].NodeName;
         }
 
-        internal CommandSchemaNode this[int index]
+        public CommandSchemaNode this[int index]
         {
             get
             {
@@ -155,7 +169,7 @@ namespace CTP
             }
         }
 
-        internal int NodeCount => m_nodes.Count;
+        public int NodeCount => m_nodes.Count;
 
         public int DataLength => m_data.Length;
 
@@ -163,11 +177,50 @@ namespace CTP
         {
             return PacketMethods.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);
         }
-       
+
         public void CopyTo(byte[] data, int offset)
         {
             m_data.CopyTo(data, offset);
         }
+
+        public IEnumerator<CommandSchemaNode> GetEnumerator()
+        {
+            return m_nodes.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void ICollection<CommandSchemaNode>.Add(CommandSchemaNode item)
+        {
+            throw new NotSupportedException();
+        }
+
+        void ICollection<CommandSchemaNode>.Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        bool ICollection<CommandSchemaNode>.Contains(CommandSchemaNode item)
+        {
+            return m_nodes.Contains(item);
+        }
+
+        void ICollection<CommandSchemaNode>.CopyTo(CommandSchemaNode[] array, int arrayIndex)
+        {
+            m_nodes.CopyTo(array, arrayIndex);
+        }
+
+        bool ICollection<CommandSchemaNode>.Remove(CommandSchemaNode item)
+        {
+            throw new NotSupportedException();
+        }
+
+        int ICollection<CommandSchemaNode>.Count => m_nodes.Count;
+
+        bool ICollection<CommandSchemaNode>.IsReadOnly => true;
     }
 
 

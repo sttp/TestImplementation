@@ -81,45 +81,45 @@ namespace Sttp.Publisher
             return false;
         }
 
-        public void SendData(DataPoint dataPoint)
-        {
-            int runtimeID = FindRuntimeID(dataPoint.Key);
-            // Route to needed subscribers
-            foreach (Subscriber subscriber in FindAllFor(runtimeID))
-            {
-                subscriber.SendData(runtimeID, dataPoint);
-            }
-        }
+        //public void SendData(DataPoint dataPoint)
+        //{
+        //    int runtimeID = FindRuntimeID(dataPoint.Key);
+        //    // Route to needed subscribers
+        //    foreach (Subscriber subscriber in FindAllFor(runtimeID))
+        //    {
+        //        subscriber.SendData(runtimeID, dataPoint);
+        //    }
+        //}
 
         private Dictionary<Guid, DataPointMapping> m_dataPointMappingInfo;
 
-        private int FindRuntimeID(DataPointKey key)
-        {
-            DataPointMapping mapping;
-            if (!m_dataPointMappingInfo.TryGetValue(key.UniqueID, out mapping))
-            {
-                mapping = new DataPointMapping()
-                {
-                    AttributeVersionNumber = key.Attributes.Version,
-                    RuntimeID = ~m_dataPointMappingInfo.Count
-                };
-                m_dataPointMappingInfo[key.UniqueID] = mapping;
-            }
-            if (key.Attributes.Version != mapping.AttributeVersionNumber)
-            {
-                foreach (var item in key.Attributes.GetSchema())
-                {
-                    //m_metadata[item.Item1].AddColumn(item.Item2, item.Item3);
-                }
+        //private int FindRuntimeID(DataPointKey key)
+        //{
+        //    DataPointMapping mapping;
+        //    if (!m_dataPointMappingInfo.TryGetValue(key.UniqueID, out mapping))
+        //    {
+        //        mapping = new DataPointMapping()
+        //        {
+        //            AttributeVersionNumber = key.Attributes.Version,
+        //            RuntimeID = ~m_dataPointMappingInfo.Count
+        //        };
+        //        m_dataPointMappingInfo[key.UniqueID] = mapping;
+        //    }
+        //    if (key.Attributes.Version != mapping.AttributeVersionNumber)
+        //    {
+        //        foreach (var item in key.Attributes.GetSchema())
+        //        {
+        //            //m_metadata[item.Item1].AddColumn(item.Item2, item.Item3);
+        //        }
 
-                foreach (var item in key.Attributes.GetValues())
-                {
-                    //m_metadata[item.Item1].AddOrUpdateValue(item.Item2, mapping.RuntimeID, item.Item3);
-                }
-            }
-            return mapping.RuntimeID;
+        //        foreach (var item in key.Attributes.GetValues())
+        //        {
+        //            //m_metadata[item.Item1].AddOrUpdateValue(item.Item2, mapping.RuntimeID, item.Item3);
+        //        }
+        //    }
+        //    return mapping.RuntimeID;
 
-        }
+        //}
 
         private Subscriber[] FindAllFor(int runtimeID)
         {

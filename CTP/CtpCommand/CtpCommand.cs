@@ -56,7 +56,7 @@ namespace CTP
         }
 
         public int LengthWithSchema => 2 + m_schema.DataLength + m_data.Length;
-        public string RootElement => m_schema.RootElement;
+        public string CommandName => m_schema.CommandName;
         public int DataLength => m_data.Length;
 
         /// <summary>

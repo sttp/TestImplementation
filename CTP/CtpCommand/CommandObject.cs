@@ -155,7 +155,7 @@ namespace CTP
         {
             if (LoadError != null)
                 throw LoadError;
-            if (CmdName != command.RootElement)
+            if (CmdName != command.CommandName)
                 throw new Exception("Document Mismatch");
             var rdr = command.MakeReader();
             rdr.Read();

@@ -6,15 +6,14 @@ namespace Sttp
     /// A key/value pair of metadata.
     /// </summary>
     public class AttributeValues
-        : CommandObject<AttributeValues>
     {
         [CommandField()]
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         [CommandField()]
-        public CtpObject Value { get; set; }
+        public CtpObject Value { get; private set; }
 
-        public AttributeValues()
+        private AttributeValues()
         {
 
         }
@@ -24,11 +23,5 @@ namespace Sttp
             Name = name;
             Value = value;
         }
-
-        public static explicit operator AttributeValues(CtpCommand obj)
-        {
-            return FromCommand(obj);
-        }
-
     }
 }

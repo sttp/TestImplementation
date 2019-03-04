@@ -6,16 +6,6 @@ namespace Sttp
 {
     public static class SttpValueTypeCodec
     {
-        //public static SttpValue Encode(SttpValueTypeCode typeCode, object value)
-        //{
-        //    return (SttpValue)value;
-        //}
-
-        //public static object Decode(SttpValueTypeCode typeCode, SttpValue data)
-        //{
-        //    return data.ToNativeType(typeCode);
-        //}
-
         public static CtpTypeCode FromType(Type columnDataType)
         {
             if (columnDataType == typeof(sbyte))

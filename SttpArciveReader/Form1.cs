@@ -61,7 +61,7 @@ namespace SttpArciveReader
                     var cmd = ctp.Read();
                     if ((object)cmd == null)
                         break;
-                    dt.Rows.Add(cmd.RootElement, cmd.DataLength, cmd);
+                    dt.Rows.Add(cmd.CommandName, cmd.DataLength, cmd);
                 }
             }
 

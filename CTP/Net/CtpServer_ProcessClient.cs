@@ -59,7 +59,7 @@ namespace CTP.Net
                     var packet = session.Read();
                     string accountName = null;
                     session.GrantedRoles = new HashSet<string>();
-                    switch (packet.RootElement)
+                    switch (packet.CommandName)
                     {
                         case "Auth":
                             var auth = (Auth)packet;

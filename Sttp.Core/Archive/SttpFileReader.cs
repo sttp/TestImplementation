@@ -50,7 +50,7 @@ namespace Sttp
             if ((object)m_nextPacket == null)
                 return FileReaderItem.EndOfStream;
             
-            if (m_nextPacket.RootElement == "DataStreamNormal")
+            if (m_nextPacket.CommandName == "DataStreamNormal")
             {
                 if (m_decoderNormal == null)
                     m_decoderNormal = new NormalDecoder(Lookup);

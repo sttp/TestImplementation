@@ -22,7 +22,7 @@ namespace Sttp.Publisher
         private readonly Guid m_id;
         private byte[] m_key;
         private byte[] m_iv;
-        private readonly List<DataPoint> m_dataPointQueue;
+        //private readonly List<DataPoint> m_dataPointQueue;
         //private readonly List<Command> m_commandQueue;
         //private readonly List<Response> m_responseQueue;
         private readonly Thread m_dataThread;
@@ -37,7 +37,7 @@ namespace Sttp.Publisher
             m_metadata = metadata;
             m_tcpSocket = tcpSocket;
             m_id = Guid.NewGuid();
-            m_dataPointQueue = new List<DataPoint>();
+            //m_dataPointQueue = new List<DataPoint>();
             //m_commandQueue = new List<Command>();
             //m_responseQueue = new List<Response>();
             m_enabled = true;
@@ -121,11 +121,11 @@ namespace Sttp.Publisher
             //m_encoder.NegotiateSession.SecureUdpDataChannel(key, iv);
         }
 
-        internal void QueueDataPoint(DataPoint dataPoint)
-        {
-            lock (m_dataPointQueue)
-                m_dataPointQueue.Add(dataPoint);
-        }
+        //internal void QueueDataPoint(DataPoint dataPoint)
+        //{
+        //    lock (m_dataPointQueue)
+        //        m_dataPointQueue.Add(dataPoint);
+        //}
 
         private void CollateData()
         {
@@ -134,17 +134,17 @@ namespace Sttp.Publisher
             {
                 Thread.Sleep(100);
 
-                DataPoint[] dataPoints;
+                //DataPoint[] dataPoints;
 
-                lock (m_dataPointQueue)
-                {
-                    dataPoints = m_dataPointQueue.ToArray();
-                    m_dataPointQueue.Clear();
-                }
+                //lock (m_dataPointQueue)
+                //{
+                //    dataPoints = m_dataPointQueue.ToArray();
+                //    m_dataPointQueue.Clear();
+                //}
 
                 SttpDataPoint wire = new SttpDataPoint();
 
-                PatchSignalMapping(dataPoints);
+                //PatchSignalMapping(dataPoints);
 
                 //m_encoder.DataPoint.BeginCommand();
 
@@ -169,23 +169,23 @@ namespace Sttp.Publisher
         private uint m_nextRuntimeIDIndex = 0;
         private uint m_nextBulkValueID = 1;
 
-        private void PatchSignalMapping(DataPoint[] dataPoints)
-        {
-            foreach (var point in dataPoints)
-            {
-                //DataPointKeyWire map;
-                //if (!(m_signalMapping.TryGetValue(point.Key.UniqueID, out map) && map.Type == point.Key.Type))
-                //{
-                //    map = new DataPointKeyWire();
-                //    map.UniqueID = point.Key.UniqueID;
-                //    map.Flags = StateFlags.Quality;
-                //    map.Type = point.Key.Type;
-                //    map.RuntimeID = m_nextRuntimeIDIndex;
-                //    m_nextRuntimeIDIndex++;
-                //    //m_encoder.DataPoint.MapRuntimeID(map);
-                //}
-            }
-        }
+        //private void PatchSignalMapping(DataPoint[] dataPoints)
+        //{
+        //    foreach (var point in dataPoints)
+        //    {
+        //        //DataPointKeyWire map;
+        //        //if (!(m_signalMapping.TryGetValue(point.Key.UniqueID, out map) && map.Type == point.Key.Type))
+        //        //{
+        //        //    map = new DataPointKeyWire();
+        //        //    map.UniqueID = point.Key.UniqueID;
+        //        //    map.Flags = StateFlags.Quality;
+        //        //    map.Type = point.Key.Type;
+        //        //    map.RuntimeID = m_nextRuntimeIDIndex;
+        //        //    m_nextRuntimeIDIndex++;
+        //        //    //m_encoder.DataPoint.MapRuntimeID(map);
+        //        //}
+        //    }
+        //}
 
         private void m_tcpSocket_OnDataReceived(byte[] buffer, int startIndex, int length)
         {
@@ -320,11 +320,11 @@ namespace Sttp.Publisher
 
         public bool SupportsUDP { get; set; } = DefaultSupportsUDP;
 
-        public void SendData(int runtimeID, DataPoint dataPoint)
-        {
-            //ToDo: Handle strings and byte arrays differently.
-            QueueDataPoint(dataPoint);
-        }
+        //public void SendData(int runtimeID, DataPoint dataPoint)
+        //{
+        //    //ToDo: Handle strings and byte arrays differently.
+        //    QueueDataPoint(dataPoint);
+        //}
 
         private void SecureDataChannel()
         {

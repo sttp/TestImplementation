@@ -11,9 +11,6 @@ namespace Sttp
     //    public string Variable;
     //}
 
-
-
-
     //public class SttpProcedure
     //{
     //    public string Function;
