@@ -58,6 +58,15 @@ namespace Sttp
                 m_currentDecoder = m_decoderNormal;
                 return FileReaderItem.DataPoint;
             }
+            else if (m_nextPacket.CommandName == "ProducerMetadata")
+            {
+                m_metadata = (SttpProducerMetadata)m_nextPacket;
+                foreach (var item in m_metadata.DataPoints)
+                {
+                    m_metadataLookup[item.DataPointID] = item;
+                }
+                return FileReaderItem.ProducerMetadata;
+            }
             goto TryAgain;
         }
 

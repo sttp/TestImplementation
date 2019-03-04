@@ -52,7 +52,6 @@ namespace Sttp
 
         void ICommandObjectOptionalMethods.BeforeLoad()
         {
-            throw new NotImplementedException();
         }
 
         void ICommandObjectOptionalMethods.AfterLoad()
@@ -63,12 +62,12 @@ namespace Sttp
 
         void ICommandObjectOptionalMethods.MissingValue(string name, CtpObject value)
         {
-            throw new NotImplementedException();
+            throw new Exception("A value is missing");
         }
 
         void ICommandObjectOptionalMethods.MissingElement(string name)
         {
-            throw new NotImplementedException();
+            throw new Exception("An element is missing");
         }
 
         internal void AssignProducer(SttpProducerMetadata producer)
