@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using CTP;
-using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
     public class NormalDecoder : DecoderBase
     {
-        private MetadataChannelMapDecoder m_channelMap;
         private CtpObjectReader m_stream;
         private int m_lastChannelID = 0;
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
+        private List<SttpDataPointID> m_channelMap = new List<SttpDataPointID>();
 
-        public NormalDecoder(LookupMetadata lookup)
-            : base(lookup)
+        public NormalDecoder()
         {
             m_stream = new CtpObjectReader();
-            m_channelMap = new MetadataChannelMapDecoder();
         }
 
         public void Load(CommandDataStreamNormal data)
@@ -53,7 +47,7 @@ namespace Sttp.DataPointEncoding
                         m_lastChannelID = m_stream.Read().AsInt32;
 
                     if (hasMetadata)
-                        m_channelMap.Assign(LookupMetadata(m_stream.Read()), m_lastChannelID);
+                        Assign(new SttpDataPointID(m_stream.Read()), m_lastChannelID);
 
                     if (qualityChanged)
                         m_lastQuality = m_stream.Read().AsInt64;
@@ -69,18 +63,31 @@ namespace Sttp.DataPointEncoding
                 }
             }
 
-            dataPoint.Metadata = m_channelMap.GetMetadata(m_lastChannelID);
+            dataPoint.DataPoint = GetMetadata(m_lastChannelID);
             dataPoint.Quality = m_lastQuality;
             dataPoint.Time = m_lastTimestamp;
             dataPoint.Value = value;
 
-            if (dataPoint.Metadata == null)
+            if (dataPoint.DataPoint == null)
                 goto TryAgain;
 
             return true;
         }
 
+        private SttpDataPointID GetMetadata(int channelID)
+        {
+            if (channelID >= m_channelMap.Count)
+            {
+                return null;
+            }
+            return m_channelMap[channelID];
+        }
 
-
+        private void Assign(SttpDataPointID metadata, int channelID)
+        {
+            while (m_channelMap.Count <= channelID)
+                m_channelMap.Add(null);
+            m_channelMap[channelID] = metadata;
+        }
     }
 }

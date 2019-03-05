@@ -53,7 +53,7 @@ namespace Sttp
             if (m_nextPacket.CommandName == "DataStreamNormal")
             {
                 if (m_decoderNormal == null)
-                    m_decoderNormal = new NormalDecoder(Lookup);
+                    m_decoderNormal = new NormalDecoder();
                 m_decoderNormal.Load(((CommandDataStreamNormal)m_nextPacket));
                 m_currentDecoder = m_decoderNormal;
                 return FileReaderItem.DataPoint;

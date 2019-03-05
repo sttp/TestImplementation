@@ -14,7 +14,7 @@ namespace Sttp
         /// <summary>
         /// The metadata for a measurement
         /// </summary>
-        public SttpDataPointMetadata Metadata;
+        public SttpDataPointID DataPoint;
 
         /// <summary>
         /// A timestamp field.
@@ -34,7 +34,7 @@ namespace Sttp
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(Metadata.DataPointID.ToString());
+            sb.Append(DataPoint.ID.ToString());
             sb.Append('\t');
             sb.Append(Time.ToString());
             sb.Append('\t');

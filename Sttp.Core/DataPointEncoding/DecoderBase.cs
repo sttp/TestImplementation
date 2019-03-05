@@ -9,20 +9,6 @@ namespace Sttp.DataPointEncoding
 {
     public abstract class DecoderBase
     {
-        private LookupMetadata m_lookup;
-
-        protected DecoderBase(LookupMetadata lookup)
-        {
-            m_lookup = lookup ?? throw new ArgumentNullException(nameof(lookup));
-        }
-
-
         public abstract bool Read(SttpDataPoint dataPoint);
-
-        public SttpDataPointMetadata LookupMetadata(CtpObject dataPointID)
-        {
-            return m_lookup(dataPointID);
-        }
-
     }
 }

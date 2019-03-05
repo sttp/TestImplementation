@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using CTP;
-using Sttp.Codec;
 
 namespace Sttp.DataPointEncoding
 {
@@ -16,13 +10,12 @@ namespace Sttp.DataPointEncoding
         private CtpTime m_lastTimestamp;
         private long m_lastQuality = 0;
         private Dictionary<CtpObject, int> m_pointIDToChannelIDMapping = new Dictionary<CtpObject, int>();
-        private List<SttpDataPointMetadata> m_metadata = new List<SttpDataPointMetadata>();
+        private List<SttpDataPointID> m_metadata = new List<SttpDataPointID>();
 
         public NormalEncoder()
         {
             m_stream = new CtpObjectWriter();
             Clear();
-
         }
 
         public override int Length => m_stream.Length;
@@ -46,14 +39,14 @@ namespace Sttp.DataPointEncoding
             bool includeMetadata = false;
 
             //Most of the time, measurements will be sequential, this limits a dictionary lookup
-            if (channelID >= m_metadata.Count || !m_metadata[channelID].DataPointID.Equals(point.Metadata.DataPointID))
+            if (channelID >= m_metadata.Count || !m_metadata[channelID].ID.Equals(point.DataPoint.ID))
             {
-                if (!m_pointIDToChannelIDMapping.TryGetValue(point.Metadata.DataPointID, out channelID))
+                if (!m_pointIDToChannelIDMapping.TryGetValue(point.DataPoint.ID, out channelID))
                 {
                     includeMetadata = true;
                     channelID = m_metadata.Count;
-                    m_pointIDToChannelIDMapping.Add(point.Metadata.DataPointID, channelID);
-                    m_metadata.Add(point.Metadata);
+                    m_pointIDToChannelIDMapping.Add(point.DataPoint.ID, channelID);
+                    m_metadata.Add(point.DataPoint);
                 }
             }
 
@@ -79,7 +72,7 @@ namespace Sttp.DataPointEncoding
                 if (channelIDChanged)
                     m_stream.Write(channelID);
                 if (includeMetadata)
-                    m_stream.Write(point.Metadata.DataPointID);
+                    m_stream.Write(point.DataPoint.ID);
                 if (qualityChanged)
                     m_stream.Write(point.Quality);
                 if (timeChanged)

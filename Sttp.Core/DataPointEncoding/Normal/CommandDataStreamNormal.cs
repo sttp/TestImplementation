@@ -1,6 +1,6 @@
 ﻿using CTP;
 
-namespace Sttp.Codec
+namespace Sttp.DataPointEncoding
 {
     [CommandName("DataStreamNormal")]
     public class CommandDataStreamNormal
