@@ -33,11 +33,11 @@ namespace SttpArciveReader
                 {
                     if (chkReadRaw.Checked)
                     {
-                        NewMethod(dlg.FileName);
+                        ReadCtp(dlg.FileName);
                     }
                     else
                     {
-                        NewMethod2(dlg.FileName);
+                        ReadSttp(dlg.FileName);
 
                     }
 
@@ -46,7 +46,7 @@ namespace SttpArciveReader
 
         }
 
-        private void NewMethod(string fileName)
+        private void ReadCtp(string fileName)
         {
             DataTable dt = new DataTable();
             dt.Columns.Add("Command", typeof(string));
@@ -68,7 +68,7 @@ namespace SttpArciveReader
             dataGridView1.DataSource = dt;
         }
 
-        private void NewMethod2(string fileName)
+        private void ReadSttp(string fileName)
         {
             DataTable dt = new DataTable();
             dt.Columns.Add("Command", typeof(string));

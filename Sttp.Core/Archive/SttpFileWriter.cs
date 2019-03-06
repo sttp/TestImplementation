@@ -9,6 +9,7 @@ using CTP;
 using CTP.IO;
 using Sttp.Codec;
 using Sttp.DataPointEncoding;
+using Sttp.Metadata;
 
 namespace Sttp
 {
@@ -32,6 +33,17 @@ namespace Sttp
                 m_encoder = new NormalEncoder();
             }
             m_encoder.Clear();
+        }
+
+        public void ProducerMetadata(CommandC37ConfigFrame metadata)
+        {
+            if (m_encoder.Length > 0)
+            {
+                m_stream.Write(m_encoder.ToArray());
+                m_encoder.Clear();
+            }
+
+            m_stream.Write(metadata);
         }
 
         public void ProducerMetadata(SttpProducerMetadata metadata)
