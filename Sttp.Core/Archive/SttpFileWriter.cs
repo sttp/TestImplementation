@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CTP;
 using CTP.IO;
-using Sttp.Codec;
 using Sttp.DataPointEncoding;
 using Sttp.Metadata;
 
 namespace Sttp
 {
-
     public enum EncodingMethod
     {
         Normal,

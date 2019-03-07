@@ -13,7 +13,7 @@ namespace CTP
                     case CtpTypeCode.Null:
                         return $"(Null)";
                     case CtpTypeCode.Integer:
-                        return $"(long){m_valueInt64.ToString()}";
+                        return $"(Integer){m_valueInt64.ToString()}";
                     case CtpTypeCode.Single:
                         return $"(float){m_valueSingle.ToString()}";
                     case CtpTypeCode.Double:

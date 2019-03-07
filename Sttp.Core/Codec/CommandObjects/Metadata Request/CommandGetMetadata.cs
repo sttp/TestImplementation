@@ -10,7 +10,6 @@ namespace Sttp.Codec
     /// If there's an error, <see cref="CommandMetadataRequestFailed"/> will be returned.
     /// If successful, the following series of commands will occur:
     ///     <see cref="CommandBeginMetadataResponse"/> - Opening the raw channel to send the rows, and defining the response.
-    ///     <see cref="CtpRaw"/> - The rows.
     ///     <see cref="CommandEndMetadataResponse"/> - Closing the raw channel.
     /// </summary>
     [CommandName("GetMetadata")]
