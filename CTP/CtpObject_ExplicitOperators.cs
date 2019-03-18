@@ -91,22 +91,32 @@ namespace CTP
         }
         public static implicit operator CtpObject(string value)
         {
+            if (value == null)
+                return CtpObject.Null;
             return new CtpObject(value);
         }
         public static implicit operator CtpObject(char[] value)
         {
+            if (value == null)
+                return CtpObject.Null;
             return new CtpObject(value.ToString());
         }
         public static implicit operator CtpObject(CtpBuffer value)
         {
+            if (value == null)
+                return CtpObject.Null;
             return new CtpObject(value);
         }
         public static implicit operator CtpObject(CtpCommand value)
         {
+            if (value == null)
+                return CtpObject.Null;
             return new CtpObject(value);
         }
         public static implicit operator CtpObject(byte[] value)
         {
+            if (value == null)
+                return CtpObject.Null;
             return new CtpObject((CtpBuffer)value);
         }
         public static implicit operator CtpObject(sbyte? value)

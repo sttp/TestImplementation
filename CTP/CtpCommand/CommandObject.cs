@@ -116,7 +116,6 @@ namespace CTP
             if (LoadError != null)
                 throw LoadError;
 
-
             var wr = ThreadStaticItems.CommandObject_Writer ?? new CtpObjectWriter();
             ThreadStaticItems.CommandObject_Writer = null;
             wr.Clear();
@@ -159,6 +158,8 @@ namespace CTP
                 throw new Exception("Document Mismatch");
             var rdr = command.MakeReader();
             rdr.Read();
+            if (rdr.IsElementOrArrayNull)
+                return null;
             return IOMethods.Load(rdr);
         }
 

@@ -37,7 +37,7 @@ namespace CTP.Serialization
             var c = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
             if ((object)c == null)
             {
-                throw new Exception("Specified type must have a parameterless constructor. This can be a private constructor.");
+                throw new Exception("Specified type must have a parameterless constructor. This can be a private constructor. " + typeof(T).ToString());
             }
 
             return new CommandObjectIOMethod<T>(c, recordName);

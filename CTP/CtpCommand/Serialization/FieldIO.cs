@@ -40,8 +40,6 @@ namespace CTP.Serialization
             public override void Save(object obj, CtpObjectWriter writer)
             {
                 var item = m_get(obj);
-                if (item == null)
-                    return;
                 m_io.Save(item, writer);
             }
 

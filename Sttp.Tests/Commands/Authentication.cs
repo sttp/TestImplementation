@@ -35,6 +35,18 @@ namespace Sttp.Tests.Commands
         }
 
         [TestMethod]
+        public void Ticket2()
+        {
+            var cmd = new Ticket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
+                                 DateTime.Parse("2/2/3456 7:08:09.1234567"),
+                                 "Login",
+                                 null,
+                                 "Cert1");
+            cmd = (Ticket)(CtpCommand)cmd;
+            Console.WriteLine(cmd.ToString());
+        }
+
+        [TestMethod]
         public void AuthFailure()
         {
             var cmd = new AuthFailure("Access Denied");

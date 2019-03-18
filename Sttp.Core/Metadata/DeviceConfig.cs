@@ -14,7 +14,6 @@ namespace Sttp.Metadata
         //SELECT NodeID, UniqueID, OriginalSource, IsConcentrator, Acronym, Name, AccessID,
         //ParentAcronym, ProtocolName, FramesPerSecond, CompanyAcronym, VendorAcronym, VendorDeviceName,
         //Longitude, Latitude, InterconnectionName, ContactList, Enabled, UpdatedOn FROM DeviceDetail WHERE IsConcentrator = 0
-
         [CommandField()]
         public Guid NodeID { get; set; }
         [CommandField()]

@@ -27,14 +27,18 @@ namespace CTP.Serialization
         public override void Save(TEnum obj, CtpObjectWriter writer)
         {
             if (obj == null)
-                return;
-
-            writer.Write(obj.Count());
-            foreach (var item in obj)
             {
-                m_serializeT.Save(item, writer);
+                writer.Write(false);
             }
-
+            else
+            {
+                writer.Write(true);
+                writer.Write(obj.Count());
+                foreach (var item in obj)
+                {
+                    m_serializeT.Save(item, writer);
+                }
+            }
         }
 
         public override void WriteSchema(CommandSchemaWriter schema)
@@ -47,6 +51,11 @@ namespace CTP.Serialization
         {
             if (!reader.IsArray)
                 throw new Exception("Expecting An Array Type");
+            if (reader.IsElementOrArrayNull)
+            {
+                return default(TEnum);
+            }
+
             List<T> items = new List<T>();
 
             while (reader.Read())

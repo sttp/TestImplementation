@@ -37,6 +37,7 @@ namespace CTP
 
         public readonly string RootElement;
 
+
         /// <summary>
         /// Creates a <see cref="CtpCommandReader"/> from the specified byte array.
         /// </summary>
@@ -99,6 +100,8 @@ namespace CTP
             }
         }
 
+        public bool IsElementOrArrayNull { get; private set; }
+
         private int m_currentSchemaIndex;
 
         /// <summary>
@@ -113,6 +116,7 @@ namespace CTP
             if (NodeType == CtpCommandNodeType.StartOfCommand)
             {
                 NodeType = CtpCommandNodeType.StartElement;
+                IsElementOrArrayNull = !m_stream.Read().IsBoolean;
                 return true;
             }
 
@@ -122,7 +126,19 @@ namespace CTP
                 return false;
             }
 
+            if (IsElementOrArrayNull)
+            {
+                m_elementStack.Pop();
+                NodeType = CtpCommandNodeType.EndElement;
+                ValueName = null;
+                Value = CtpObject.Null;
+                IsElementOrArrayNull = false;
+                SkipSchema();
+                return true;
+            }
+
             var currentElement = m_elementStack.Peek();
+
             if (currentElement.IsArray)
             {
                 if (currentElement.ArrayCount == 0)
@@ -140,22 +156,30 @@ namespace CTP
                 }
             }
 
-
             m_currentSchemaIndex++;
             var node = m_schema[m_currentSchemaIndex];
-
+            IsElementOrArrayNull = false;
             switch (node.Symbol)
             {
                 case CommandSchemaSymbol.DefineArray:
                     NodeType = CtpCommandNodeType.StartElement;
                     Value = CtpObject.Null;
                     ValueName = null;
-                    m_elementStack.Push(new StackDefinition(node, (int)m_stream.Read()));
+                    IsElementOrArrayNull = !m_stream.Read().IsBoolean;
+                    if (!IsElementOrArrayNull)
+                    {
+                        m_elementStack.Push(new StackDefinition(node, (int)m_stream.Read()));
+                    }
+                    else
+                    {
+                        m_elementStack.Push(new StackDefinition(node, (int)0));
+                    }
                     break;
                 case CommandSchemaSymbol.DefineElement:
                     NodeType = CtpCommandNodeType.StartElement;
                     Value = CtpObject.Null;
                     ValueName = null;
+                    IsElementOrArrayNull = !m_stream.Read().IsBoolean;
                     m_elementStack.Push(new StackDefinition(node, 0));
                     break;
                 case CommandSchemaSymbol.DefineValue:
@@ -175,6 +199,40 @@ namespace CTP
                     throw new ArgumentOutOfRangeException();
             }
             return true;
+        }
+
+        private void SkipSchema()
+        {
+            int depth = 0;
+            while (true)
+            {
+                TryAgain:
+                switch (m_schema[m_currentSchemaIndex].Symbol)
+                {
+                    case CommandSchemaSymbol.DefineArray:
+                        m_currentSchemaIndex++;
+                        goto TryAgain;
+                    case CommandSchemaSymbol.DefineElement:
+                        depth++;
+                        break;
+                    case CommandSchemaSymbol.DefineValue:
+                        break;
+                    case CommandSchemaSymbol.EndElement:
+                        depth--;
+                        break;
+                    case CommandSchemaSymbol.EndOFStream:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                m_currentSchemaIndex++;
+                if (depth == 0)
+                {
+                    m_currentSchemaIndex--;
+                    return;
+                }
+
+            }
         }
 
         public void SkipElement()

@@ -7,8 +7,8 @@ using GSF.Reflection;
 
 namespace CTP.Serialization
 {
-    internal class CommandObjectIOMethod<T>
-       : TypeIOMethodBase<T>
+    internal class CommandObjectIOMethod<T> 
+        : TypeIOMethodBase<T>
     {
         private string m_recordName;
         private readonly FieldIO[] m_records;
@@ -27,6 +27,7 @@ namespace CTP.Serialization
             {
                 AddIfValid(ids, records, member);
             }
+
             m_records = records.ToArray();
         }
 
@@ -57,9 +58,17 @@ namespace CTP.Serialization
 
         public override void Save(T obj, CtpObjectWriter writer)
         {
-            foreach (var item in m_records)
+            if (obj == null)
             {
-                item.Save(obj, writer);
+                writer.Write(false);
+            }
+            else
+            {
+                writer.Write(true);
+                foreach (var item in m_records)
+                {
+                    item.Save(obj, writer);
+                }
             }
         }
 
@@ -70,11 +79,17 @@ namespace CTP.Serialization
             {
                 member.WriteSchema(schema);
             }
+
             schema.EndElement();
         }
 
         public override T Load(CtpCommandReader reader)
         {
+            if (reader.IsElementOrArrayNull)
+            {
+                return default(T);
+            }
+
             var rv = m_constructor();
             ICommandObjectOptionalMethods rv2 = rv as ICommandObjectOptionalMethods;
             rv2?.BeforeLoad();
@@ -112,6 +127,7 @@ namespace CTP.Serialization
                             rv2.MissingValue(reader.ValueName, reader.Value);
                             reader.SkipElement();
                         }
+
                         break;
                     case CtpCommandNodeType.EndElement:
                         rv2?.AfterLoad();
@@ -122,6 +138,7 @@ namespace CTP.Serialization
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
             rv2?.AfterLoad();
             return rv;
         }
