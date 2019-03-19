@@ -80,6 +80,14 @@ namespace CTP
             return true;
         }
 
+        public bool PeekIsNull()
+        {
+            if (m_currentBytePosition > m_endOfByteStream)
+                throw new EndOfStreamException();
+            CtpObjectSymbols symbol = (CtpObjectSymbols)m_buffer[m_currentBytePosition];
+            return symbol == CtpObjectSymbols.Null;
+        }
+
         public CtpObject Read()
         {
             int oldPosition = m_currentBytePosition;
@@ -471,7 +479,7 @@ namespace CTP
                     return (int)ReadBits32();
             }
         }
-
+        
         private uint ReadBits8()
         {
             if (m_currentBytePosition + 1 > m_endOfByteStream)

@@ -199,6 +199,7 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
+                    case CtpCommandNodeType.StartArray:
                     case CtpCommandNodeType.StartElement:
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ElementName);
@@ -222,6 +223,7 @@ namespace CTP
                         sb.AppendLine();
                         break;
                     case CtpCommandNodeType.EndElement:
+                    case CtpCommandNodeType.EndArray:
                         prefix.Pop();
                         break;
                     default:

@@ -28,11 +28,10 @@ namespace CTP.Serialization
         {
             if (obj == null)
             {
-                writer.Write(false);
+                writer.Write(CtpObject.Null);
             }
             else
             {
-                writer.Write(true);
                 writer.Write(obj.Count());
                 foreach (var item in obj)
                 {
@@ -45,6 +44,7 @@ namespace CTP.Serialization
         {
             schema.DefineArray(m_recordName);
             m_serializeT.WriteSchema(schema);
+            schema.EndArray();
         }
 
         public override TEnum Load(CtpCommandReader reader)
@@ -63,12 +63,14 @@ namespace CTP.Serialization
                 switch (reader.NodeType)
                 {
                     case CtpCommandNodeType.StartElement:
+                    case CtpCommandNodeType.StartArray:
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.Value:
                         items.Add(m_serializeT.Load(reader));
                         break;
                     case CtpCommandNodeType.EndElement:
+                    case CtpCommandNodeType.EndArray:
                         return m_castToType(items);
                     case CtpCommandNodeType.EndOfCommand:
                     case CtpCommandNodeType.StartOfCommand:

@@ -79,7 +79,6 @@ namespace CTP.Serialization
             {
                 member.WriteSchema(schema);
             }
-
             schema.EndElement();
         }
 
@@ -101,6 +100,7 @@ namespace CTP.Serialization
                 switch (reader.NodeType)
                 {
                     case CtpCommandNodeType.StartElement:
+                    case CtpCommandNodeType.StartArray:
                         if (m_recordsLookup.TryGetValue(reader.ElementName, out id))
                         {
                             read = m_records[id];
@@ -130,6 +130,7 @@ namespace CTP.Serialization
 
                         break;
                     case CtpCommandNodeType.EndElement:
+                    case CtpCommandNodeType.EndArray:
                         rv2?.AfterLoad();
                         return rv;
                     case CtpCommandNodeType.EndOfCommand:

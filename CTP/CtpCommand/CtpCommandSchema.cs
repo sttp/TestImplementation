@@ -38,6 +38,11 @@ namespace CTP
             m_stream.Write((byte)CommandSchemaSymbol.EndElement);
         }
 
+        public void EndArray()
+        {
+            m_stream.Write((byte)CommandSchemaSymbol.EndArray);
+        }
+
         public void DefineValue(string name)
         {
             m_stream.Write((byte)CommandSchemaSymbol.DefineValue);
@@ -60,6 +65,7 @@ namespace CTP
         DefineElement,
         DefineValue,
         EndElement,
+        EndArray,
         EndOFStream
     }
 
@@ -93,6 +99,7 @@ namespace CTP
                 case CommandSchemaSymbol.DefineValue:
                     Name = (string)m_stream.Read();
                     return true;
+                case CommandSchemaSymbol.EndArray:
                 case CommandSchemaSymbol.EndElement:
                     Name = string.Empty;
                     return true;
@@ -106,13 +113,52 @@ namespace CTP
     {
         public readonly CommandSchemaSymbol Symbol;
         public readonly string NodeName;
-        public readonly int PositionIndex;
+        /// <summary>
+        /// This is the element or array that this node belongs to.
+        /// </summary>
+        public CommandSchemaNode ParentNode { get; private set; }
+        /// <summary>
+        /// This is the node that is next in sequence as defined by the CommandSchema.
+        /// Null at the end.
+        /// </summary>
+        public CommandSchemaNode NextNode { get; private set; }
+        /// <summary>
+        /// This is the other node for Array's or Elements. For Define, it's End, for End, it's Define. For values, it's null
+        /// </summary>
+        public CommandSchemaNode PairedNode { get; private set; }
 
-        public CommandSchemaNode(string nodeName, CommandSchemaSymbol symbol, int positionIndex)
+        private bool m_isReadOnly;
+
+        public CommandSchemaNode(string nodeName, CommandSchemaSymbol symbol)
         {
-            PositionIndex = positionIndex;
             NodeName = nodeName;
             Symbol = symbol;
+        }
+
+        public void SetNextNode(CommandSchemaNode node)
+        {
+            if (m_isReadOnly)
+                throw new InvalidOperationException("Node already marked as read only");
+            NextNode = node;
+        }
+
+        public void SetPairedNode(CommandSchemaNode node)
+        {
+            if (m_isReadOnly)
+                throw new InvalidOperationException("Node already marked as read only");
+            PairedNode = node;
+        }
+
+        public void SetParentNode(CommandSchemaNode node)
+        {
+            if (m_isReadOnly)
+                throw new InvalidOperationException("Node already marked as read only");
+            ParentNode = node;
+        }
+
+        internal void SetReadOnly()
+        {
+            m_isReadOnly = true;
         }
 
         public override string ToString()
@@ -154,20 +200,61 @@ namespace CTP
             ProcessRuntimeID = processRuntimeID;
             while (reader.Next())
             {
-                m_nodes.Add(new CommandSchemaNode(reader.Name, reader.Symbol, m_nodes.Count));
+                m_nodes.Add(new CommandSchemaNode(reader.Name, reader.Symbol));
             }
+
+            for (int x = 0; x < m_nodes.Count - 1; x++)
+            {
+                m_nodes[x].SetNextNode(m_nodes[x + 1]);
+            }
+
+            Stack<CommandSchemaNode> stack = new Stack<CommandSchemaNode>();
+
+            for (int x = 0; x < m_nodes.Count; x++)
+            {
+                CommandSchemaNode node = m_nodes[x];
+                if (node.Symbol == CommandSchemaSymbol.DefineArray || node.Symbol == CommandSchemaSymbol.DefineElement)
+                {
+                    if (x > 0)
+                        node.SetParentNode(stack.Peek());
+                    stack.Push(node);
+                }
+                else if (node.Symbol == CommandSchemaSymbol.EndArray || node.Symbol == CommandSchemaSymbol.EndElement)
+                {
+                    var n = stack.Pop();
+                    if (node.Symbol == CommandSchemaSymbol.EndArray && n.Symbol == CommandSchemaSymbol.DefineArray 
+                        || node.Symbol == CommandSchemaSymbol.EndElement && n.Symbol == CommandSchemaSymbol.DefineElement)
+                    {
+                        n.SetPairedNode(node);
+                        node.SetPairedNode(n);
+                        if (x + 1 < m_nodes.Count)
+                        {
+                            node.SetParentNode(stack.Peek());
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Malformed Schema");
+                    }
+                }
+                else
+                {
+                    node.SetParentNode(stack.Peek());
+                }
+            }
+
+            if (stack.Count != 0)
+                throw new Exception("Malformed Schema");
+
+            for (int x = 0; x < m_nodes.Count; x++)
+            {
+                m_nodes[x].SetReadOnly();
+            }
+
             CommandName = m_nodes[0].NodeName;
         }
 
-        public CommandSchemaNode this[int index]
-        {
-            get
-            {
-                if (index >= m_nodes.Count)
-                    return null;
-                return m_nodes[index];
-            }
-        }
+        public CommandSchemaNode this[int index] => m_nodes[index];
 
         public int NodeCount => m_nodes.Count;
 

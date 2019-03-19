@@ -9,6 +9,7 @@
         /// Indicates that the node type is an element.
         /// </summary>
         StartElement,
+        StartArray,
         /// <summary>
         /// Indicates that the node type if a value.
         /// </summary>
@@ -17,6 +18,7 @@
         /// Specifies that the node type is the ending marker of a Element, Values don't have ending markers.
         /// </summary>
         EndElement,
+        EndArray,
         /// <summary>
         /// Specifies that the end of the command has occurred.
         /// </summary>
