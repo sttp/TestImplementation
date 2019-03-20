@@ -99,8 +99,8 @@ namespace CTP.Serialization
             {
                 switch (reader.NodeType)
                 {
-                    case CtpCommandNodeType.StartElement:
-                    case CtpCommandNodeType.StartArray:
+                    case CommandSchemaSymbol.StartElement:
+                    case CommandSchemaSymbol.StartArray:
                         if (m_recordsLookup.TryGetValue(reader.ElementName, out id))
                         {
                             read = m_records[id];
@@ -114,7 +114,7 @@ namespace CTP.Serialization
                             reader.SkipElement();
                         }
                         break;
-                    case CtpCommandNodeType.Value:
+                    case CommandSchemaSymbol.Value:
                         if (m_recordsLookup.TryGetValue(reader.ValueName, out id))
                         {
                             read = m_records[id];
@@ -129,12 +129,10 @@ namespace CTP.Serialization
                         }
 
                         break;
-                    case CtpCommandNodeType.EndElement:
-                    case CtpCommandNodeType.EndArray:
+                    case CommandSchemaSymbol.EndElement:
+                    case CommandSchemaSymbol.EndArray:
                         rv2?.AfterLoad();
                         return rv;
-                    case CtpCommandNodeType.EndOfCommand:
-                    case CtpCommandNodeType.StartOfCommand:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

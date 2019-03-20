@@ -12,7 +12,7 @@ namespace CTP.Serialization
         }
         public override ulong Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (ulong)reader.Value;
         }
@@ -27,7 +27,7 @@ namespace CTP.Serialization
         }
         public override long Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (long)reader.Value;
         }
@@ -43,7 +43,7 @@ namespace CTP.Serialization
         }
         public override double Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (double)reader.Value;
         }
@@ -58,7 +58,7 @@ namespace CTP.Serialization
         }
         public override DateTime Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (DateTime)reader.Value;
         }
@@ -73,7 +73,7 @@ namespace CTP.Serialization
         }
         public override CtpTime Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (CtpTime)reader.Value;
         }

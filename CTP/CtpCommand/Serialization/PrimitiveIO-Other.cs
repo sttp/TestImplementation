@@ -13,7 +13,7 @@ namespace CTP.Serialization
         }
         public override string Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (string)reader.Value;
         }
@@ -28,7 +28,7 @@ namespace CTP.Serialization
         }
         public override byte[] Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (byte[])reader.Value;
         }
@@ -43,7 +43,7 @@ namespace CTP.Serialization
         }
         public override char[] Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (char[])reader.Value;
         }
@@ -58,7 +58,7 @@ namespace CTP.Serialization
         }
         public override CtpCommand Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (CtpCommand)reader.Value;
         }
@@ -73,7 +73,7 @@ namespace CTP.Serialization
         }
         public override CtpBuffer Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (CtpBuffer)reader.Value;
         }
@@ -88,7 +88,7 @@ namespace CTP.Serialization
         }
         public override CtpNumeric Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (CtpNumeric)reader.Value;
         }
@@ -103,7 +103,7 @@ namespace CTP.Serialization
         }
         public override CtpNumeric? Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (CtpNumeric?)reader.Value;
         }
@@ -119,7 +119,7 @@ namespace CTP.Serialization
         }
         public override CtpObject Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (CtpObject)reader.Value;
         }
@@ -134,7 +134,7 @@ namespace CTP.Serialization
         }
         public override object Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return reader.Value.ToNativeType;
         }

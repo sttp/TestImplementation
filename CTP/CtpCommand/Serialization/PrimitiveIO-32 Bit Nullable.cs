@@ -12,7 +12,7 @@ namespace CTP.Serialization
         }
         public override uint? Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (uint?)reader.Value;
         }
@@ -27,7 +27,7 @@ namespace CTP.Serialization
         }
         public override int? Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (int?)reader.Value;
         }
@@ -42,7 +42,7 @@ namespace CTP.Serialization
         }
         public override float? Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (float?)reader.Value;
         }

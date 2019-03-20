@@ -10,6 +10,15 @@ using CTP.IO;
 
 namespace CTP
 {
+    public enum CommandSchemaSymbol
+    {
+        StartArray,
+        StartElement,
+        Value,
+        EndElement,
+        EndArray
+    }
+
     internal class CommandSchemaWriter
     {
         private static int ProcessRuntimeID;
@@ -23,13 +32,13 @@ namespace CTP
 
         public void DefineArray(string name)
         {
-            m_stream.Write((byte)CommandSchemaSymbol.DefineArray);
+            m_stream.Write((byte)CommandSchemaSymbol.StartArray);
             m_stream.Write(name);
         }
 
         public void DefineElement(string name)
         {
-            m_stream.Write((byte)CommandSchemaSymbol.DefineElement);
+            m_stream.Write((byte)CommandSchemaSymbol.StartElement);
             m_stream.Write(name);
         }
 
@@ -45,7 +54,7 @@ namespace CTP
 
         public void DefineValue(string name)
         {
-            m_stream.Write((byte)CommandSchemaSymbol.DefineValue);
+            m_stream.Write((byte)CommandSchemaSymbol.Value);
             m_stream.Write(name);
         }
 
@@ -58,56 +67,8 @@ namespace CTP
             return new CtpCommandSchema(data, Interlocked.Increment(ref ProcessRuntimeID));
         }
     }
-
-    public enum CommandSchemaSymbol
-    {
-        DefineArray,
-        DefineElement,
-        DefineValue,
-        EndElement,
-        EndArray,
-        EndOFStream
-    }
-
-    internal class CommandSchemaReader
-    {
-        private CtpObjectReader m_stream;
-
-        public CommandSchemaSymbol Symbol;
-
-        public string Name;
-
-        public CommandSchemaReader(byte[] data)
-        {
-            m_stream = new CtpObjectReader(data);
-        }
-
-        public bool Next()
-        {
-            if (m_stream.IsEmpty)
-            {
-                Symbol = CommandSchemaSymbol.EndOFStream;
-                Name = null;
-                return false;
-            }
-
-            Symbol = (CommandSchemaSymbol)(byte)m_stream.Read();
-            switch (Symbol)
-            {
-                case CommandSchemaSymbol.DefineArray:
-                case CommandSchemaSymbol.DefineElement:
-                case CommandSchemaSymbol.DefineValue:
-                    Name = (string)m_stream.Read();
-                    return true;
-                case CommandSchemaSymbol.EndArray:
-                case CommandSchemaSymbol.EndElement:
-                    Name = string.Empty;
-                    return true;
-                default:
-                    throw new Exception("Wrong version number");
-            }
-        }
-    }
+    
+   
 
     public class CommandSchemaNode
     {
@@ -196,12 +157,28 @@ namespace CTP
         internal CtpCommandSchema(byte[] data, int? processRuntimeID)
         {
             m_data = data ?? throw new ArgumentNullException(nameof(data));
-            var reader = new CommandSchemaReader(m_data);
             ProcessRuntimeID = processRuntimeID;
-            while (reader.Next())
+
+            var reader = new CtpObjectReader(data);
+            while (!reader.IsEmpty)
             {
-                m_nodes.Add(new CommandSchemaNode(reader.Name, reader.Symbol));
+                var symbol = (CommandSchemaSymbol)(byte)reader.Read();
+                switch (symbol)
+                {
+                    case CommandSchemaSymbol.StartArray:
+                    case CommandSchemaSymbol.StartElement:
+                    case CommandSchemaSymbol.Value:
+                        m_nodes.Add(new CommandSchemaNode((string)reader.Read(), symbol));
+                        break;
+                    case CommandSchemaSymbol.EndArray:
+                    case CommandSchemaSymbol.EndElement:
+                        m_nodes.Add(new CommandSchemaNode(string.Empty, symbol));
+                        break;
+                    default:
+                        throw new Exception("Wrong version number");
+                }
             }
+           
 
             for (int x = 0; x < m_nodes.Count - 1; x++)
             {
@@ -213,7 +190,7 @@ namespace CTP
             for (int x = 0; x < m_nodes.Count; x++)
             {
                 CommandSchemaNode node = m_nodes[x];
-                if (node.Symbol == CommandSchemaSymbol.DefineArray || node.Symbol == CommandSchemaSymbol.DefineElement)
+                if (node.Symbol == CommandSchemaSymbol.StartArray || node.Symbol == CommandSchemaSymbol.StartElement)
                 {
                     if (x > 0)
                         node.SetParentNode(stack.Peek());
@@ -222,8 +199,8 @@ namespace CTP
                 else if (node.Symbol == CommandSchemaSymbol.EndArray || node.Symbol == CommandSchemaSymbol.EndElement)
                 {
                     var n = stack.Pop();
-                    if (node.Symbol == CommandSchemaSymbol.EndArray && n.Symbol == CommandSchemaSymbol.DefineArray 
-                        || node.Symbol == CommandSchemaSymbol.EndElement && n.Symbol == CommandSchemaSymbol.DefineElement)
+                    if (node.Symbol == CommandSchemaSymbol.EndArray && n.Symbol == CommandSchemaSymbol.StartArray 
+                        || node.Symbol == CommandSchemaSymbol.EndElement && n.Symbol == CommandSchemaSymbol.StartElement)
                     {
                         n.SetPairedNode(node);
                         node.SetPairedNode(n);

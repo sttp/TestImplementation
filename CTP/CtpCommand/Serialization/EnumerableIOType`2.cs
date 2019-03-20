@@ -62,18 +62,16 @@ namespace CTP.Serialization
             {
                 switch (reader.NodeType)
                 {
-                    case CtpCommandNodeType.StartElement:
-                    case CtpCommandNodeType.StartArray:
+                    case CommandSchemaSymbol.StartElement:
+                    case CommandSchemaSymbol.StartArray:
                         items.Add(m_serializeT.Load(reader));
                         break;
-                    case CtpCommandNodeType.Value:
+                    case CommandSchemaSymbol.Value:
                         items.Add(m_serializeT.Load(reader));
                         break;
-                    case CtpCommandNodeType.EndElement:
-                    case CtpCommandNodeType.EndArray:
+                    case CommandSchemaSymbol.EndElement:
+                    case CommandSchemaSymbol.EndArray:
                         return m_castToType(items);
-                    case CtpCommandNodeType.EndOfCommand:
-                    case CtpCommandNodeType.StartOfCommand:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }

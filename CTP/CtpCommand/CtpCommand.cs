@@ -99,15 +99,16 @@ namespace CTP
             settings.Indent = true;
             var xml = XmlWriter.Create(sb, settings);
 
-            xml.WriteStartElement(reader.RootElement);
+            xml.WriteStartElement(reader.CommandName);
             while (reader.Read())
             {
                 switch (reader.NodeType)
                 {
-                    case CtpCommandNodeType.StartElement:
+                    case CommandSchemaSymbol.StartArray:
+                    case CommandSchemaSymbol.StartElement:
                         xml.WriteStartElement(reader.ElementName);
                         break;
-                    case CtpCommandNodeType.Value:
+                    case CommandSchemaSymbol.Value:
                         xml.WriteStartElement(reader.ValueName);
                         xml.WriteAttributeString("ValueType", reader.Value.ValueTypeCode.ToString());
                         var str = reader.Value.AsString ?? string.Empty;
@@ -115,7 +116,8 @@ namespace CTP
                         xml.WriteValue(str);
                         xml.WriteEndElement();
                         break;
-                    case CtpCommandNodeType.EndElement:
+                    case CommandSchemaSymbol.EndArray:
+                    case CommandSchemaSymbol.EndElement:
                         xml.WriteEndElement();
                         break;
                     default:
@@ -140,7 +142,7 @@ namespace CTP
             prefix.Push("  ");
 
             sb.Append('"');
-            sb.Append(reader.RootElement);
+            sb.Append(reader.CommandName);
             sb.AppendLine("\": {");
 
             //Note: There's an issue with a trailing commas.
@@ -149,14 +151,15 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpCommandNodeType.StartElement:
+                    case CommandSchemaSymbol.StartArray:
+                    case CommandSchemaSymbol.StartElement:
                         sb.Append(prefix.Peek());
                         sb.Append('"');
                         sb.Append(reader.ElementName);
                         sb.AppendLine("\": {");
                         prefix.Push(prefix.Peek() + "  ");
                         break;
-                    case CtpCommandNodeType.Value:
+                    case CommandSchemaSymbol.Value:
                         sb.Append(prefix.Peek());
                         sb.Append('"');
                         sb.Append(reader.ValueName);
@@ -164,7 +167,8 @@ namespace CTP
                         sb.Append(reader.Value.ToTypeString);
                         sb.AppendLine("\",");
                         break;
-                    case CtpCommandNodeType.EndElement:
+                    case CommandSchemaSymbol.EndArray:
+                    case CommandSchemaSymbol.EndElement:
                         prefix.Pop();
                         sb.Append(prefix.Peek());
                         sb.AppendLine("},");
@@ -199,14 +203,14 @@ namespace CTP
             {
                 switch (reader.NodeType)
                 {
-                    case CtpCommandNodeType.StartArray:
-                    case CtpCommandNodeType.StartElement:
+                    case CommandSchemaSymbol.StartArray:
+                    case CommandSchemaSymbol.StartElement:
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ElementName);
                         sb.AppendLine(":");
                         prefix.Push(prefix.Peek() + " ");
                         break;
-                    case CtpCommandNodeType.Value:
+                    case CommandSchemaSymbol.Value:
                         sb.Append(prefix.Peek());
                         sb.Append(reader.ValueName);
                         sb.Append(": ");
@@ -222,8 +226,8 @@ namespace CTP
                         }
                         sb.AppendLine();
                         break;
-                    case CtpCommandNodeType.EndElement:
-                    case CtpCommandNodeType.EndArray:
+                    case CommandSchemaSymbol.EndElement:
+                    case CommandSchemaSymbol.EndArray:
                         prefix.Pop();
                         break;
                     default:

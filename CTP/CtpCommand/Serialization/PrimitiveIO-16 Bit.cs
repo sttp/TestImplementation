@@ -12,7 +12,7 @@ namespace CTP.Serialization
         }
         public override ushort Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (ushort)reader.Value;
         }
@@ -27,7 +27,7 @@ namespace CTP.Serialization
         }
         public override short Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (short)reader.Value;
         }
@@ -42,7 +42,7 @@ namespace CTP.Serialization
         }
         public override char Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (char)reader.Value;
         }

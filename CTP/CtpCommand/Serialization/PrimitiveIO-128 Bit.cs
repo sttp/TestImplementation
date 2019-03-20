@@ -13,7 +13,7 @@ namespace CTP.Serialization
         }
         public override decimal Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (decimal)reader.Value;
         }
@@ -28,7 +28,7 @@ namespace CTP.Serialization
         }
         public override Guid Load(CtpCommandReader reader)
         {
-            if (reader.NodeType != CtpCommandNodeType.Value)
+            if (reader.NodeType != CommandSchemaSymbol.Value)
                 throw new Exception("Parsing Error");
             return (Guid)reader.Value;
         }
