@@ -30,7 +30,7 @@ namespace CTP.Serialization
 
             public override void WriteSchema(CommandSchemaWriter schema)
             {
-                schema.DefineValue(m_recordName);
+                schema.Value(m_recordName);
             }
 
             public override T Load(CtpCommandReader reader)
@@ -59,23 +59,6 @@ namespace CTP.Serialization
             Add(new PrimitiveIouInt8());
             Add(new PrimitiveIoInt8());
             Add(new PrimitiveIoBool());
-
-            Add(new PrimitiveIoDecimalNull());
-            Add(new PrimitiveIoGuidNull());
-            Add(new PrimitiveIouInt16Null());
-            Add(new PrimitiveIoInt16Null());
-            Add(new PrimitiveIoCharNull());
-            Add(new PrimitiveIouInt32Null());
-            Add(new PrimitiveIoInt32Null());
-            Add(new PrimitiveIoSingleNull());
-            Add(new PrimitiveIouInt64Null());
-            Add(new PrimitiveIoInt64Null());
-            Add(new PrimitiveIoDoubleNull());
-            Add(new PrimitiveIoDateTimeNull());
-            Add(new PrimitiveIoCtpTimeNull());
-            Add(new PrimitiveIouInt8Null());
-            Add(new PrimitiveIoInt8Null());
-            Add(new PrimitiveIoBoolNull());
 
             Add(new PrimitiveIoString());
             Add(new PrimitiveIoByteArray());

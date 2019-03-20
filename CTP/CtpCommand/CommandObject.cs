@@ -159,7 +159,10 @@ namespace CTP
             var rdr = command.MakeReader();
             rdr.Read();
             if (rdr.IsElementOrArrayNull)
+            {
+                rdr.Read();
                 return null;
+            }
             return IOMethods.Load(rdr);
         }
 

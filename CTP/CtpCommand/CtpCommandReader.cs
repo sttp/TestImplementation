@@ -26,11 +26,6 @@ namespace CTP
         private bool m_completed;
 
         /// <summary>
-        /// The type of the current node. To Advance the nodes call <see cref="Read"/>
-        /// </summary>
-        public CommandSchemaSymbol NodeType { get; private set; }
-
-        /// <summary>
         /// Creates a <see cref="CtpCommandReader"/> from the specified byte array.
         /// </summary>
         /// <param name="schema"></param>
@@ -38,7 +33,6 @@ namespace CTP
         public CtpCommandReader(CtpCommandSchema schema, byte[] data)
         {
             m_schema = schema;
-            NodeType = (CommandSchemaSymbol)10;
             m_stream = new CtpObjectReader(data);
         }
 
@@ -49,7 +43,7 @@ namespace CTP
 
         /// <summary>
         /// The current name of the current element. Can be the RootElement if ElementDepth is 0
-        /// and <see cref="NodeType"/> is not <see cref="CtpCommandNodeType.EndElement"/>.
+        /// and <see cref="NodeType"/> is not <see cref="CommandSchemaSymbol.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
         public string ElementName
@@ -76,8 +70,25 @@ namespace CTP
             }
         }
 
+        public int ArrayCount
+        {
+            get
+            {
+                if (m_currentNode == null || m_currentNode.Symbol != CommandSchemaSymbol.StartArray)
+                {
+                    return -1;
+                }
+                return m_arrayCountStack.Peek();
+            }
+        }
+
         /// <summary>
-        /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the name of the value. Otherwise, null.
+        /// The type of the current node. To Advance the nodes call <see cref="Read"/>
+        /// </summary>
+        public CommandSchemaSymbol? NodeType => m_currentNode?.Symbol;
+
+        /// <summary>
+        /// If <see cref="NodeType"/> is <see cref="CommandSchemaSymbol.Value"/>, the name of the value. Otherwise, null.
         /// </summary>
         public string ValueName
         {
@@ -92,7 +103,7 @@ namespace CTP
         }
 
         /// <summary>
-        /// If <see cref="NodeType"/> is <see cref="CtpCommandNodeType.Value"/>, the value. Otherwise, CtpObject.Null.
+        /// If <see cref="NodeType"/> is <see cref="CommandSchemaSymbol.Value"/>, the value. Otherwise, CtpObject.Null.
         /// </summary>
         public CtpObject Value
         {
@@ -108,7 +119,7 @@ namespace CTP
 
         /// <summary>
         /// The current name of the current element. Can be the RootElement if ElementDepth is 0
-        /// and <see cref="NodeType"/> is not <see cref="CtpCommandNodeType.EndElement"/>.
+        /// and <see cref="NodeType"/> is not <see cref="CommandSchemaSymbol.EndElement"/>.
         /// In this event, the ElementName does not change and refers to the element that has just ended.
         /// </summary>
         public bool IsArray
@@ -126,8 +137,8 @@ namespace CTP
             get
             {
                 if (m_currentNode != null
-                    && (m_currentNode.Symbol != CommandSchemaSymbol.StartElement
-                     || m_currentNode.Symbol != CommandSchemaSymbol.StartArray))
+                    && (m_currentNode.Symbol == CommandSchemaSymbol.StartElement
+                     || m_currentNode.Symbol == CommandSchemaSymbol.StartArray))
                 {
                     return m_isElementOrArrayNull;
                 }
@@ -173,7 +184,6 @@ namespace CTP
             switch (m_currentNode.Symbol)
             {
                 case CommandSchemaSymbol.StartArray:
-                    NodeType = CommandSchemaSymbol.StartArray;
                     CtpObject count = m_stream.Read();
                     if (count.IsNull)
                     {
@@ -187,21 +197,17 @@ namespace CTP
                     }
                     break;
                 case CommandSchemaSymbol.StartElement:
-                    NodeType = CommandSchemaSymbol.StartElement;
                     m_isElementOrArrayNull = !m_stream.Read().IsBoolean;
                     break;
                 case CommandSchemaSymbol.Value:
-                    NodeType = CommandSchemaSymbol.Value;
                     m_value = m_stream.Read();
                     break;
                 case CommandSchemaSymbol.EndElement:
-                    NodeType = CommandSchemaSymbol.EndElement;
                     return true;
                 case CommandSchemaSymbol.EndArray:
                     var arrayCount = m_arrayCountStack.Pop() - 1;
                     if (arrayCount <= 0)
                     {
-                        NodeType = CommandSchemaSymbol.EndArray;
                         return true;
                     }
                     else
@@ -210,7 +216,6 @@ namespace CTP
                         m_currentNode = m_currentNode.PairedNode;
                         goto TryAgain;
                     }
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

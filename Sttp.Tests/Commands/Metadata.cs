@@ -33,40 +33,8 @@ namespace Sttp.Tests.Commands
         public void GetMetadata()
         {
             var cmd = new CommandGetMetadata("Measurement", new string[] { "ID", "SignalID", "TagName" });
-
-
-            Console.WriteLine("-------Schema----------");
-
-            for (int x = 0; x < cmd.Schema.NodeCount; x++)
-            {
-                Console.WriteLine(cmd.Schema[x]);
-            }
-
-            Console.WriteLine("-------Data----------");
-
-
-            var rdr3 = cmd.ToCommand().MakeDataReader();
-            while (!rdr3.IsEmpty)
-            {
-                Console.WriteLine(rdr3.Read());
-            }
-
-            Console.WriteLine("-------Reader----------");
-            var rdr = cmd.ToCommand().MakeReader();
-
-            Console.WriteLine(rdr.ToString());
-            while (rdr.Read())
-            {
-                Console.WriteLine(rdr.ToString());
-            }
-            Console.WriteLine(rdr.ToString());
-
-            Console.WriteLine("-------Text----------");
-
-            Console.WriteLine(cmd.ToString());
-
+            cmd.DebugToConsole();
             cmd = (CommandGetMetadata)(CtpCommand)cmd;
-
         }
 
         [TestMethod]
@@ -85,41 +53,16 @@ namespace Sttp.Tests.Commands
 
             var cmd = new CommandMetadataSchema(Guid.NewGuid(), 1, tbls);
 
-            var rdr = cmd.ToCommand().MakeReader();
-            while (rdr.Read())
-            {
-                Console.WriteLine($"{rdr.NodeType,15} {rdr.ElementName,15} {rdr.ValueName,25} {rdr.Value}");
-            }
-
-            Console.WriteLine("-------Schema----------");
-
-            for (int x = 0; x < cmd.Schema.NodeCount; x++)
-            {
-                Console.WriteLine(cmd.Schema[x]);
-            }
-
-            Console.WriteLine("-------Data----------");
-
-
-            var rdr3 = cmd.ToCommand().MakeDataReader();
-            while (!rdr3.IsEmpty)
-            {
-                Console.WriteLine(rdr3.Read());
-            }
-
-            Console.WriteLine("-------Text----------");
-
-
+            cmd.DebugToConsole();
             cmd = (CommandMetadataSchema)(CtpCommand)cmd;
-            Console.WriteLine(cmd.ToString());
         }
 
         [TestMethod]
         public void MetadataSchemaVersion()
         {
             var cmd = new CommandMetadataSchemaVersion(Guid.NewGuid(), 1);
+            cmd.DebugToConsole();
             cmd = (CommandMetadataSchemaVersion)(CtpCommand)cmd;
-            Console.WriteLine(cmd.ToString());
         }
 
         [TestMethod]
@@ -131,8 +74,8 @@ namespace Sttp.Tests.Commands
             tbls.Add(tbl);
 
             var cmd = new CommandMetadataSchemaUpdate(Guid.NewGuid(), 1, tbls);
+            cmd.DebugToConsole();
             cmd = (CommandMetadataSchemaUpdate)(CtpCommand)cmd;
-            Console.WriteLine(cmd.ToString());
         }
 
     }

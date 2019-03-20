@@ -1,30 +1,29 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using GSF.IO;
 
 namespace CTP.Serialization
 {
-    /// <summary>
-    /// Can serialize an array type.
-    /// </summary>
-    /// <typeparam name="TEnum"></typeparam>
-    /// <typeparam name="T"></typeparam>
-    internal class EnumerableIOType<TEnum, T>
-        : TypeIOMethodBase<TEnum>
-        where TEnum : class, ICollection<T>
+    internal class IDictionarySerialization<TDictionary, TKey, TValue>
+            : TypeIOMethodBase<TDictionary>
+        where TDictionary : class, IDictionary<TKey, TValue>
     {
-        private TypeIOMethodBase<T> m_serializeT;
-        private Func<T[], TEnum> m_castToType;
+        private TupleHelper<TKey, TValue> m_serializeT;
+        private Func<Dictionary<TKey, TValue>, TDictionary> m_castToType;
         private string m_recordName;
 
-        public EnumerableIOType(string recordName, Func<T[], TEnum> castToType)
+        public IDictionarySerialization(string recordName, Func<Dictionary<TKey, TValue>, TDictionary> castToType)
         {
             m_recordName = recordName;
             m_castToType = castToType;
-            m_serializeT = TypeIO.Create<T>("Item");
+            m_serializeT = new TupleHelper<TKey, TValue>(recordName, "Key", "Value");
         }
 
-        public override void Save(TEnum obj, CtpObjectWriter writer)
+        public override void Save(TDictionary obj, CtpObjectWriter writer)
         {
             if (obj == null)
             {
@@ -35,7 +34,7 @@ namespace CTP.Serialization
                 writer.Write(obj.Count());
                 foreach (var item in obj)
                 {
-                    m_serializeT.Save(item, writer);
+                    m_serializeT.Save(false, item.Key, item.Value, writer);
                 }
             }
         }
@@ -47,17 +46,18 @@ namespace CTP.Serialization
             schema.EndArray();
         }
 
-        public override TEnum Load(CtpCommandReader reader)
+        public override TDictionary Load(CtpCommandReader reader)
         {
             if (!reader.IsArray)
                 throw new Exception("Expecting An Array Type");
             if (reader.IsElementOrArrayNull)
             {
                 reader.Read();
+
                 return null;
             }
 
-            T[] items = new T[reader.ArrayCount];
+            Dictionary<TKey, TValue> items = new Dictionary<TKey, TValue>(reader.ArrayCount);
 
             int x = 0;
             while (reader.Read())
@@ -67,7 +67,10 @@ namespace CTP.Serialization
                     case CommandSchemaSymbol.StartElement:
                     case CommandSchemaSymbol.StartArray:
                     case CommandSchemaSymbol.Value:
-                        items[x] = m_serializeT.Load(reader);
+                        m_serializeT.Load(reader, out bool isNull, out TKey key, out TValue value);
+                        if (isNull)
+                            throw new NotSupportedException();
+                        items[key] = value;
                         x++;
                         break;
                     case CommandSchemaSymbol.EndArray:
@@ -78,5 +81,6 @@ namespace CTP.Serialization
             }
             throw new ArgumentOutOfRangeException();
         }
+
     }
 }

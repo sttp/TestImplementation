@@ -74,7 +74,7 @@ namespace CTP.Serialization
 
         public override void WriteSchema(CommandSchemaWriter schema)
         {
-            schema.DefineElement(m_recordName);
+            schema.StartElement(m_recordName);
             foreach (var member in m_records)
             {
                 member.WriteSchema(schema);
@@ -86,6 +86,7 @@ namespace CTP.Serialization
         {
             if (reader.IsElementOrArrayNull)
             {
+                reader.Read();
                 return default(T);
             }
 
@@ -127,10 +128,8 @@ namespace CTP.Serialization
                             rv2.MissingValue(reader.ValueName, reader.Value);
                             reader.SkipElement();
                         }
-
                         break;
                     case CommandSchemaSymbol.EndElement:
-                    case CommandSchemaSymbol.EndArray:
                         rv2?.AfterLoad();
                         return rv;
                     default:
