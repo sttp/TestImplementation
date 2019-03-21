@@ -13,7 +13,7 @@ namespace Sttp
     /// </summary>
     [CommandName("ProducerMetadata")]
     public class SttpProducerMetadata 
-        : CommandObject<SttpProducerMetadata>, ICommandObjectOptionalMethods
+        : CommandObject<SttpProducerMetadata>
     {
         /// <summary>
         /// The unique identifier for this Producer.
@@ -40,12 +40,8 @@ namespace Sttp
             ProducerID = CtpObject.Null;
         }
 
-        void ICommandObjectOptionalMethods.BeforeLoad()
-        {
-            
-        }
-
-        void ICommandObjectOptionalMethods.AfterLoad()
+        [CommandEvent(CommandEvents.AfterLoad)]
+        void AfterLoad()
         {
             if (DataPoints == null)
                 DataPoints = new List<SttpDataPointMetadata>();
@@ -59,16 +55,6 @@ namespace Sttp
             {
                 item.AssignProducer(this);
             }
-        }
-
-        void ICommandObjectOptionalMethods.MissingValue(string name, CtpObject value)
-        {
-            throw new Exception("A value is missing");
-        }
-
-        void ICommandObjectOptionalMethods.MissingElement(string name)
-        {
-            throw new Exception("An element is missing");
         }
 
         public static explicit operator SttpProducerMetadata(CtpCommand obj)

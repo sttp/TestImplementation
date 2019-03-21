@@ -7,13 +7,21 @@ using GSF.Reflection;
 
 namespace CTP.Serialization
 {
-    internal class CommandObjectIOMethod<T> 
+    internal class CommandObjectIOMethod<T>
         : TypeIOMethodBase<T>
     {
         private string m_recordName;
         private readonly FieldIO[] m_records;
         private readonly Dictionary<string, int> m_recordsLookup = new Dictionary<string, int>();
         private readonly Func<T> m_constructor;
+
+        private List<Action<object>> BeforeLoad;
+        private List<Action<object>> AfterLoad;
+        private List<Action<object>> BeforeSave;
+        private List<Action<object>> AfterSave;
+        private List<Action<object, string, CtpObject>> MissingValue;
+        private List<Action<object, string>> MissingElement;
+
 
         public CommandObjectIOMethod(ConstructorInfo c, string recordName)
         {
@@ -26,9 +34,88 @@ namespace CTP.Serialization
             foreach (var member in type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
             {
                 AddIfValid(ids, records, member);
+                if (member is MethodInfo method)
+                {
+                    object[] attributes = member.GetCustomAttributes(true);
+                    foreach (var attribute in attributes.OfType<CommandEventAttribute>())
+                    {
+                        switch (attribute.Events)
+                        {
+                            case CommandEvents.BeforeLoad:
+                                TryAdd(method, ref BeforeLoad);
+                                break;
+                            case CommandEvents.AfterLoad:
+                                TryAdd(method, ref AfterLoad);
+                                break;
+                            case CommandEvents.BeforeSave:
+                                TryAdd(method, ref BeforeSave);
+                                break;
+                            case CommandEvents.AfterSave:
+                                TryAdd(method, ref AfterSave);
+                                break;
+                            case CommandEvents.MissingValue:
+                                TryAdd(method, ref MissingValue);
+                                break;
+                            case CommandEvents.MissingElement:
+                                TryAdd(method, ref MissingElement);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+
+
+                    }
+                }
             }
 
             m_records = records.ToArray();
+        }
+
+        private void TryAdd(MethodInfo method, ref List<Action<object>> list)
+        {
+            if (method.ReturnType != typeof(void))
+                throw new Exception("Method should not have a return type");
+            var param = method.GetParameters();
+            if (param.Length != 0)
+                throw new Exception("Method should have 0 parameters");
+            if (list == null)
+                list = new List<Action<object>>();
+            list.Add(method.CreateAction());
+        }
+        private void TryAdd(MethodInfo method, ref List<Action<object, string>> list)
+        {
+
+            if (method.ReturnType != typeof(void))
+                throw new Exception("Method should not have a return type");
+            var param = method.GetParameters();
+            if (param.Length != 1)
+                throw new Exception("Method should have 1 parameter");
+
+            if (param[0].ParameterType != typeof(string))
+                throw new Exception("Method's parameter should be of type String");
+
+            if (list == null)
+                list = new List<Action<object, string>>();
+            list.Add(method.CreateAction<string>());
+        }
+
+        private void TryAdd(MethodInfo method, ref List<Action<object, string, CtpObject>> list)
+        {
+
+            if (method.ReturnType != typeof(void))
+                throw new Exception("Method should not have a return type");
+            var param = method.GetParameters();
+            if (param.Length != 2)
+                throw new Exception("Method should have 2 parameter");
+
+            if (param[0].ParameterType != typeof(string))
+                throw new Exception("Method's parameter should be of type String");
+            if (param[1].ParameterType != typeof(CtpObject))
+                throw new Exception("Method's parameter should be of type CtpObject");
+
+            if (list == null)
+                list = new List<Action<object, string, CtpObject>>();
+            list.Add(method.CreateAction<string, CtpObject>());
         }
 
         private void AddIfValid(HashSet<string> duplicateNameChecker, List<FieldIO> records, MemberInfo member)
@@ -64,11 +151,17 @@ namespace CTP.Serialization
             }
             else
             {
+                if (BeforeSave != null)
+                    foreach (var item in BeforeSave)
+                        item(obj);
                 writer.Write(true);
                 foreach (var item in m_records)
                 {
                     item.Save(obj, writer);
                 }
+                if (AfterSave != null)
+                    foreach (var item in AfterSave)
+                        item(obj);
             }
         }
 
@@ -91,8 +184,9 @@ namespace CTP.Serialization
             }
 
             var rv = m_constructor();
-            ICommandObjectOptionalMethods rv2 = rv as ICommandObjectOptionalMethods;
-            rv2?.BeforeLoad();
+            if (BeforeLoad != null)
+                foreach (var item in BeforeLoad)
+                    item(rv);
             FieldIO read;
             int id;
 
@@ -109,9 +203,11 @@ namespace CTP.Serialization
                         }
                         else
                         {
-                            if (rv2 == null)
+                            if (MissingElement != null)
+                                foreach (var item in MissingElement)
+                                    item(rv, reader.ElementName);
+                            else
                                 throw new Exception("Missing an element");
-                            rv2.MissingElement(reader.ElementName);
                             reader.SkipElement();
                         }
                         break;
@@ -123,21 +219,25 @@ namespace CTP.Serialization
                         }
                         else
                         {
-                            if (rv2 == null)
+                            if (MissingValue != null)
+                                foreach (var item in MissingValue)
+                                    item(rv, reader.ValueName, reader.Value);
+                            else
                                 throw new Exception("Missing a value");
-                            rv2.MissingValue(reader.ValueName, reader.Value);
-                            reader.SkipElement();
                         }
                         break;
                     case CommandSchemaSymbol.EndElement:
-                        rv2?.AfterLoad();
+                        if (AfterLoad != null)
+                            foreach (var item in AfterLoad)
+                                item(rv);
                         return rv;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
+            throw new Exception("Error loading.");
 
-            rv2?.AfterLoad();
+            //rv2?.AfterLoad();
             return rv;
         }
     }

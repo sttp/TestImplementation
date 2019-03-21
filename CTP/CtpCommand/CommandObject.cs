@@ -8,35 +8,6 @@ using GSF.Collections;
 
 namespace CTP
 {
-    public interface ICommandObjectOptionalMethods
-    {
-        /// <summary>
-        /// When creating a new object from <see cref="CtpCommand"/>, this method is called first to allow the coder
-        /// to define default values.
-        /// </summary>
-        void BeforeLoad();
-
-        /// <summary>
-        /// This occurs after a new object is loaded. This allows the coder to validate or finish the loading process.
-        /// </summary>
-        void AfterLoad();
-
-        /// <summary>
-        /// Occurs during loading when a value is present in the <see cref="CtpCommand"/> but
-        /// there is not a corresponding field.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        void MissingValue(string name, CtpObject value);
-
-        /// <summary>
-        /// Occurs during loading when a element is present in the <see cref="CtpCommand"/> but
-        /// there is not a corresponding field.
-        /// </summary>
-        /// <param name="name"></param>
-        void MissingElement(string name);
-    }
-
     /// <summary>
     /// The base class for all Object that can be automatically serialized to/from a <see cref="CtpCommand"/>.
     /// </summary>
