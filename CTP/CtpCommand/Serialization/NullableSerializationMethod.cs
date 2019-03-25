@@ -14,7 +14,7 @@ namespace CTP.Serialization
 
         public NullableSerializationMethod(string recordName)
         {
-            m_serializeT = TypeIO.Create<T>(recordName);
+            m_serializeT = TypeIO.Create<T>(recordName, false);
         }
 
         public override void Save(T? obj, CtpObjectWriter writer)

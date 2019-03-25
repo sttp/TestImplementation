@@ -149,7 +149,7 @@ namespace CTP
                 var type = typeof(T);
                 var attribute = type.GetCustomAttributes(false).OfType<CommandNameAttribute>().FirstOrDefault();
                 CmdName = attribute?.CommandName ?? type.Name;
-                IOMethods = TypeIO.Create<T>(CmdName);
+                IOMethods = TypeIO.Create<T>(CmdName, true);
                 var writer = new CommandSchemaWriter();
                 IOMethods.WriteSchema(writer);
                 WriteSchema = writer.ToSchema();

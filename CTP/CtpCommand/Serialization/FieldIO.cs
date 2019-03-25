@@ -34,7 +34,7 @@ namespace CTP.Serialization
                     throw new NotSupportedException();
                 }
 
-                m_io = TypeIO.Create<T>(recordName);
+                m_io = TypeIO.Create<T>(recordName, false);
             }
 
             public override void Save(object obj, CtpObjectWriter writer)

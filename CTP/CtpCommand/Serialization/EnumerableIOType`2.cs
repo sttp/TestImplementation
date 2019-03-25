@@ -21,14 +21,14 @@ namespace CTP.Serialization
         {
             m_recordName = recordName;
             m_castToType = castToType;
-            m_serializeT = TypeIO.Create<T>("Item");
+            m_serializeT = TypeIO.Create<T>("Item", false);
         }
 
         public override void Save(TEnum obj, CtpObjectWriter writer)
         {
             if (obj == null)
             {
-                writer.Write(CtpObject.Null);
+                writer.Write(-1);
             }
             else
             {

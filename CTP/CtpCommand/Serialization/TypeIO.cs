@@ -30,17 +30,20 @@ namespace CTP.Serialization
         /// Used by other serialization methods to acquire child serialization methods
         /// </summary>
         /// <returns></returns>
-        public static TypeIOMethodBase<T> Create<T>(string recordName)
+        public static TypeIOMethodBase<T> Create<T>(string recordName, bool isRootElement)
         {
-            var serialization = PrimitiveIOMethods.TryGetWriteMethod<T>(recordName);
-            if (serialization != null)
-                return serialization;
-
-            serialization = TryCreate<T>(recordName);
-            if (serialization != null)
-                return serialization;
-
             var type = typeof(T);
+
+            if (!isRootElement)
+            {
+                var serialization = PrimitiveIOMethods.TryGetWriteMethod<T>(recordName);
+                if (serialization != null)
+                    return serialization;
+
+                serialization = TryCreate<T>(recordName);
+                if (serialization != null)
+                    return serialization;
+            }
 
             if (!type.IsClass)
                 throw new Exception("Specified type must be of type class");
@@ -55,7 +58,7 @@ namespace CTP.Serialization
                 throw new Exception("Specified type must have a parameterless constructor. This can be a private constructor. " + typeof(T).ToString());
             }
 
-            return new CommandObjectIOMethod<T>(c, recordName);
+            return new CommandObjectIOMethod<T>(c, recordName, isRootElement);
         }
 
         private static TypeIOMethodBase<T> TryCreate<T>(string recordName)

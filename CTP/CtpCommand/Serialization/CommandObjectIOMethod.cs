@@ -21,10 +21,11 @@ namespace CTP.Serialization
         private List<Action<object>> AfterSave;
         private List<Action<object, string, CtpObject>> MissingValue;
         private List<Action<object, string>> MissingElement;
+        private bool m_isRootElement;
 
-
-        public CommandObjectIOMethod(ConstructorInfo c, string recordName)
+        public CommandObjectIOMethod(ConstructorInfo c, string recordName, bool isRootElement)
         {
+            m_isRootElement = isRootElement;
             m_recordName = recordName;
             var type = typeof(T);
             m_constructor = c.Compile<T>();
@@ -147,6 +148,8 @@ namespace CTP.Serialization
         {
             if (obj == null)
             {
+                if (m_isRootElement)
+                    throw new Exception("Root element cannot be null");
                 writer.Write(false);
             }
             else
@@ -154,7 +157,8 @@ namespace CTP.Serialization
                 if (BeforeSave != null)
                     foreach (var item in BeforeSave)
                         item(obj);
-                writer.Write(true);
+                if (!m_isRootElement)
+                    writer.Write(true);
                 foreach (var item in m_records)
                 {
                     item.Save(obj, writer);
@@ -179,6 +183,8 @@ namespace CTP.Serialization
         {
             if (reader.IsElementOrArrayNull)
             {
+                if (m_isRootElement)
+                    throw new Exception("Root element cannot be null");
                 reader.Read();
                 return default(T);
             }

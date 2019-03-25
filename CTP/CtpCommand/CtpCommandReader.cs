@@ -161,6 +161,8 @@ namespace CTP
             {
                 m_initialized = true;
                 m_currentNode = m_schema[0];
+                m_isElementOrArrayNull = false;
+                return true;
             }
             else
             {
@@ -184,8 +186,8 @@ namespace CTP
             switch (m_currentNode.Symbol)
             {
                 case CommandSchemaSymbol.StartArray:
-                    CtpObject count = m_stream.Read();
-                    if (count.IsNull)
+                    int count = (int)m_stream.Read();
+                    if (count < 0)
                     {
                         m_isElementOrArrayNull = true;
                         m_arrayCountStack.Push(0);

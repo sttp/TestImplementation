@@ -21,8 +21,8 @@ namespace CTP.Serialization
             m_recordName = recordName;
             m_item1Name = item1Name;
             m_item2Name = item2Name;
-            m_serializeT1 = TypeIO.Create<T1>(item1Name);
-            m_serializeT2 = TypeIO.Create<T2>(item2Name);
+            m_serializeT1 = TypeIO.Create<T1>(item1Name, false);
+            m_serializeT2 = TypeIO.Create<T2>(item2Name, false);
         }
 
         public void WriteSchema(CommandSchemaWriter schema)
