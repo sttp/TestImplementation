@@ -45,8 +45,11 @@ namespace CTP
 
         public void Start()
         {
+
             if (m_started)
                 throw new Exception("Already started");
+            if (NewPacket == null)
+                throw new Exception("NewPacket event should be handled first");
             m_started = true;
             ThreadPool.QueueUserWorkItem(m_beginRead, null);
         }

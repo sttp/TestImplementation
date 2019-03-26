@@ -39,10 +39,23 @@ namespace CTP.Net
             return FromCommand(obj);
         }
 
-        public void Validate()
+        /// <summary>
+        /// Creates an anonymous config that allows all users to connect.
+        /// </summary>
+        /// <returns></returns>
+        public static CtpServerConfig CreateAnonymous()
         {
-
-
+            var cfg = new CtpServerConfig();
+            cfg.EnableSSL = false;
+            cfg.AnonymousMappings.Add(new CtpAnonymousMapping()
+            {
+                MappedAccount = "User",
+                Name = "User",
+                TrustedIPs = new IpAndMask() { IpAddress = "0.0.0.0", MaskBits = 0 }
+            });
+            cfg.Accounts.Add(new CtpAccount() { Description = "Default", IsEnabled = true, Name = "User", Roles = new List<string>() });
+            return cfg;
         }
+
     }
 }

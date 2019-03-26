@@ -8,7 +8,6 @@ namespace CTP.Net
 {
     public class CtpRuntimeConfig
     {
-
         public EncryptionOptions EncryptionOptions;
 
         public SortedList<IpMatchDefinition, string> AnonymousMappings = new SortedList<IpMatchDefinition, string>();
@@ -19,7 +18,6 @@ namespace CTP.Net
 
         public CtpRuntimeConfig(CtpServerConfig config)
         {
-            config.Validate();
             X509Certificate2 cert = null;
             if (config.EnableSSL)
             {

@@ -16,11 +16,11 @@ namespace CTP.IO
         private byte[] m_tempBuffer;
         private bool m_disposed;
         private CtpReadParser m_readParser;
-        private CtpWriteParser m_write;
+        private CtpWriteEncoder m_write;
 
         public CtpFileStream(Stream stream, CtpCompressionMode mode, bool ownsStream)
         {
-            m_write = new CtpWriteParser(mode, WriteInternal);
+            m_write = new CtpWriteEncoder(mode, WriteInternal);
             m_readParser = new CtpReadParser();
             m_stream = stream;
             m_ownsStream = ownsStream;

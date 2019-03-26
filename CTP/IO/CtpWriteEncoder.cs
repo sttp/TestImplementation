@@ -13,7 +13,11 @@ using DeflateStream = System.IO.Compression.DeflateStream;
 
 namespace CTP.IO
 {
-    internal class CtpWriteParser
+    /// <summary>
+    /// This class will write all <see cref="CommandObject"/>s, ensure that a schema has been previously negotiated
+    /// and it will also compress the data if configured to do so.
+    /// </summary>
+    internal class CtpWriteEncoder
     {
         private Dictionary<int, int> m_knownSchemas;
         private CtpCompressionMode m_compressionMode;
@@ -21,7 +25,7 @@ namespace CTP.IO
         private MemoryStream m_stream;
         private Ionic.Zlib.DeflateStream m_deflate;
 
-        public CtpWriteParser(CtpCompressionMode mode, Action<PooledBuffer> send)
+        public CtpWriteEncoder(CtpCompressionMode mode, Action<PooledBuffer> send)
         {
             m_knownSchemas = new Dictionary<int, int>();
             m_compressionMode = mode;
@@ -62,21 +66,6 @@ namespace CTP.IO
             }
 
         }
-
-        //public void Send(CtpCommand command)
-        //{
-        //    int schemeRuntimeID;
-        //    lock (m_knownSchemas)
-        //    {
-        //        if (!m_knownSchemas.TryGetValue(command.SchemaID, out schemeRuntimeID))
-        //        {
-        //            schemeRuntimeID = m_knownSchemas.Count;
-        //            m_knownSchemas.Add(command.SchemaID, schemeRuntimeID);
-        //            Send(command.ToCommandSchema(schemeRuntimeID));
-        //        }
-        //    }
-        //    Send(command.ToCommandData(schemeRuntimeID));
-        //}
 
         private void Send(PooledBuffer packet)
         {

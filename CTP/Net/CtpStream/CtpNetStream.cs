@@ -34,6 +34,13 @@ namespace CTP.Net
         /// Occurs when this class is disposed. This event is raised on a ThreadPool thread and will only be called once.
         /// </summary>
         public event Action OnDisposed;
+
+        /// <summary>
+        /// For Blocking Mode: This event will not be raised.
+        /// For Queuing Mode: This event will be raised 
+        /// </summary>
+        public event PacketReceivedEventHandler PacketReceived;
+
         /// <summary>
         /// Gets the socket that this session is on.
         /// </summary>
@@ -47,25 +54,7 @@ namespace CTP.Net
         /// </summary>
         private readonly SslStream m_ssl;
 
-        private Stream m_stream;
-
-        /// <summary>
-        /// The login name assigned to this session. Typically this will only be tracked by the server.
-        /// </summary>
-        public string LoginName = string.Empty;
-        /// <summary>
-        /// The roles granted to this session. Typically this will only be tracked by the server.
-        /// </summary>
-        public HashSet<string> GrantedRoles = new HashSet<string>();
-        public IPEndPoint RemoteEndpoint => m_socket.Client.RemoteEndPoint as IPEndPoint;
-        public X509Certificate RemoteCertificate => m_ssl?.RemoteCertificate;
-        public X509Certificate LocalCertificate => m_ssl?.LocalCertificate;
-
-        /// <summary>
-        /// For Blocking Mode: This event will not be raised.
-        /// For Queuing Mode: This event will be raised 
-        /// </summary>
-        public event PacketReceivedEventHandler PacketReceived;
+        private readonly Stream m_stream;
 
         private CtpStreamReader m_reader;
         private CtpStreamReaderAsync m_readerAsync;
@@ -76,7 +65,21 @@ namespace CTP.Net
         private SendMode m_sendMode;
         private ReceiveMode m_receiveMode;
         private int m_disposed = 0;
-        private CtpWriteParser m_write;
+        private CtpWriteEncoder m_writeEncoder;
+
+
+        /// <summary>
+        /// The login name assigned to this session. Typically this will only be tracked by the server.
+        /// </summary>
+        public string LoginName = string.Empty;
+        /// <summary>
+        /// The roles granted to this session. Typically this will only be tracked by the server.
+        /// </summary>
+        public HashSet<string> GrantedRoles = new HashSet<string>();
+
+        public IPEndPoint RemoteEndpoint => m_socket.Client.RemoteEndPoint as IPEndPoint;
+        public X509Certificate RemoteCertificate => m_ssl?.RemoteCertificate;
+        public X509Certificate LocalCertificate => m_ssl?.LocalCertificate;
 
         public CtpNetStream(TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
@@ -91,7 +94,7 @@ namespace CTP.Net
             m_receiveMode = ReceiveMode.Blocking;
             m_writer = new CtpStreamWriter(m_stream, SendReceiveOnException);
             m_reader = new CtpStreamReader(m_stream, SendReceiveOnException);
-            m_write = new CtpWriteParser(CtpCompressionMode.None, InternalSend);
+            m_writeEncoder = new CtpWriteEncoder(CtpCompressionMode.None, InternalSend);
         }
 
         /// <summary>
@@ -110,6 +113,7 @@ namespace CTP.Net
                         case SendMode.Blocking:
                             throw new InvalidOperationException("Cannot change from a Queuing based reading scheme back into a blocking one.");
                         case SendMode.Queueing:
+                            Log.Publish(MessageLevel.Info, "Send Mode Changed To Queueing");
                             m_writerAsync = new CtpStreamWriterAsync(m_stream, m_sendTimeout, SendReceiveOnException);
                             break;
                         default:
@@ -137,6 +141,11 @@ namespace CTP.Net
                         case ReceiveMode.Blocking:
                             throw new InvalidOperationException("Cannot change from an event based reading scheme back into a blocking one.");
                         case ReceiveMode.Event:
+
+                            if (PacketReceived == null)
+                                throw new Exception("User must handle PacketReceived event before changing the receive mode.");
+
+                            Log.Publish(MessageLevel.Info, "Receive Mode Changed To Event");
                             m_readerAsync = new CtpStreamReaderAsync(m_stream, SendReceiveOnException);
                             m_readerAsync.NewPacket += OnNewPacket;
                             m_readerAsync.Start();
@@ -222,6 +231,7 @@ namespace CTP.Net
 
         private void OnDisposedCallback(object state)
         {
+            Log.Publish(MessageLevel.Info, "Disposed Event Raised");
             OnDisposed?.Invoke();
         }
 
@@ -229,6 +239,7 @@ namespace CTP.Net
         {
             try
             {
+                Log.Publish(MessageLevel.Info, "Disposed Called");
                 ThreadPool.QueueUserWorkItem(OnDisposedCallback);
                 m_ssl?.Dispose();
                 m_netStream?.Dispose();
@@ -242,7 +253,7 @@ namespace CTP.Net
             }
             catch (Exception e)
             {
-
+                Logger.SwallowException(e, "Error occurred during dispose");
             }
         }
 
@@ -258,8 +269,8 @@ namespace CTP.Net
         /// Attempts a read operation.
         /// When ReceiveMode = Blocking,
         ///     this method will block until a read has occurred. If the stream has been disposed, an exception will be raised.
-        /// When ReceiveMode = Queuing,
-        ///     this method will not block, nor raise an exception if the stream has been disposed.
+        /// When ReceiveMode = Event,
+        ///     This method will throw an exception.
         /// </summary>
         /// <returns></returns>
         public CtpCommand Read()
@@ -274,14 +285,13 @@ namespace CTP.Net
             }
         }
 
-        //public void Send(CtpCommand command)
-        //{
-        //    m_write.Send(command);
-        //}
-
+        /// <summary>
+        /// Sends a command. This method will block or queue depending on <see cref="SendMode"/>.
+        /// </summary>
+        /// <param name="command"></param>
         public void Send(CommandObject command)
         {
-            m_write.Send(command);
+            m_writeEncoder.Send(command);
         }
 
         private void InternalSend(PooledBuffer packet)

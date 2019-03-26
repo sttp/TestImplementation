@@ -7,6 +7,7 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Threading;
+using GSF.Diagnostics;
 
 namespace CTP.Net
 {
@@ -21,6 +22,8 @@ namespace CTP.Net
         /// </summary>
         private class ProcessClient
         {
+            private readonly LogPublisher Log;
+
             //ToDo: For now, a new background thread is started that synchronously authenticates a new client.
             //      There may be opportunity to make this async one day.
 
@@ -29,6 +32,9 @@ namespace CTP.Net
 
             private ProcessClient(CtpServer server, TcpClient client)
             {
+                using (Logger.AppendStackMessages("Remote Client", client.Client.RemoteEndPoint.ToString()))
+                    Log = Logger.CreatePublisher(typeof(ProcessClient), MessageClass.Framework);
+
                 m_server = server;
                 m_client = client;
             }
@@ -57,6 +63,9 @@ namespace CTP.Net
 
                     var session = new CtpNetStream(socket, netStream, ssl);
                     var packet = session.Read();
+
+                    Log.Publish(MessageLevel.Info, "Auth Packet", packet.CommandName);
+
                     string accountName = null;
                     session.GrantedRoles = new HashSet<string>();
                     switch (packet.CommandName)
@@ -97,8 +106,9 @@ namespace CTP.Net
                     }
                     m_server.OnSessionCompleted(session);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Logger.SwallowException(e, "Failed to authenticate client, Safely Disconnecting");
                     //Swallow the exception since a failed connection attempt can safely be ignored by the server.
                 }
             }

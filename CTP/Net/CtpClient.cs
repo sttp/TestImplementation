@@ -36,6 +36,8 @@ namespace CTP.Net
 
         public CtpNetStream Connect()
         {
+            Log.Publish(MessageLevel.Info, "Attempting Connection");
+
             var auth = m_ticket?.GetTicket();
 
             var socket = new TcpClient();
@@ -61,6 +63,9 @@ namespace CTP.Net
             {
                 session.Send(auth.Auth);
             }
+
+            Log.Publish(MessageLevel.Info, "Session Completed");
+
             return session;
         }
 
