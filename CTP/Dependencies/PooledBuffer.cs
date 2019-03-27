@@ -36,7 +36,7 @@ namespace CTP.Collection
             stream.Write(m_data, 0, Length);
         }
 
-        public IAsyncResult CopyToAsync(Stream stream, AsyncCallback callback, object state)
+        public IAsyncResult CopyToBeginWrite(Stream stream, AsyncCallback callback, object state)
         {
             return stream.BeginWrite(m_data, 0, Length, callback, state);
         }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Net.Security;
@@ -8,7 +10,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using CTP.Collection;
 using CTP.IO;
+using GSF;
 using GSF.Diagnostics;
+using GSF.Threading;
 
 namespace CTP.Net
 {
@@ -58,13 +62,10 @@ namespace CTP.Net
 
         private CtpStreamReader m_reader;
         private CtpStreamReaderAsync m_readerAsync;
-        private CtpStreamWriter m_writer;
-        private CtpStreamWriterAsync m_writerAsync;
         private int m_sendTimeout;
         private int m_receiveTimeout;
-        private SendMode m_sendMode;
         private ReceiveMode m_receiveMode;
-        private int m_disposed = 0;
+        private bool m_disposed;
         private CtpWriteEncoder m_writeEncoder;
 
 
@@ -81,6 +82,16 @@ namespace CTP.Net
         public X509Certificate RemoteCertificate => m_ssl?.RemoteCertificate;
         public X509Certificate LocalCertificate => m_ssl?.LocalCertificate;
 
+        /// <summary>
+        /// Used to synchronize the <see cref="m_writeQueue"/> during writing, disposing, and timeout checks.
+        /// </summary>
+        private object m_writeSyncRoot = new object();
+
+        private AsyncCallback m_endWrite;
+        private WaitCallback m_processNextWrite;
+        private ScheduledTask m_processWriteTimeouts;
+        private Queue<Tuple<ShortTime, PooledBuffer, ManualResetEventSlim>> m_writeQueue;
+
         public CtpNetStream(TcpClient socket, NetworkStream netStream, SslStream ssl)
         {
             m_socket = socket;
@@ -90,39 +101,17 @@ namespace CTP.Net
 
             m_sendTimeout = 5000;
             m_receiveTimeout = 5000;
-            m_sendMode = SendMode.Blocking;
             m_receiveMode = ReceiveMode.Blocking;
-            m_writer = new CtpStreamWriter(m_stream, SendReceiveOnException);
             m_reader = new CtpStreamReader(m_stream, SendReceiveOnException);
-            m_writeEncoder = new CtpWriteEncoder(CtpCompressionMode.None, InternalSend);
-        }
+            m_writeEncoder = new CtpWriteEncoder(CtpCompressionMode.None, WriteCallback);
 
-        /// <summary>
-        /// Changes the SendMode on the session. The session starts out in blocking mode, but can be changed to a queuing mode.
-        /// However, it cannot be changed back into a blocking mode at the present time.
-        /// </summary>
-        public SendMode SendMode
-        {
-            get => m_sendMode;
-            set
-            {
-                if (m_sendMode != value)
-                {
-                    switch (value)
-                    {
-                        case SendMode.Blocking:
-                            throw new InvalidOperationException("Cannot change from a Queuing based reading scheme back into a blocking one.");
-                        case SendMode.Queueing:
-                            Log.Publish(MessageLevel.Info, "Send Mode Changed To Queueing");
-                            m_writerAsync = new CtpStreamWriterAsync(m_stream, m_sendTimeout, SendReceiveOnException);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+            m_endWrite = EndWrite;
+            m_writeQueue = new Queue<Tuple<ShortTime, PooledBuffer, ManualResetEventSlim>>();
 
-                    m_sendMode = value;
-                }
-            }
+            m_processWriteTimeouts = new ScheduledTask();
+            m_processWriteTimeouts.Running += ProcessWriteTimeoutsRunning;
+            m_processWriteTimeouts.Start(100);
+            m_processNextWrite = ProcessNextWrite;
         }
 
         /// <summary>
@@ -172,8 +161,7 @@ namespace CTP.Net
                 if (value <= 0)
                     throw new ArgumentOutOfRangeException(nameof(value), "SendTimeout cannot be infinite");
                 m_sendTimeout = value;
-                if (m_writerAsync != null)
-                    m_writerAsync.Timeout = value;
+                m_processWriteTimeouts.Start();
             }
         }
 
@@ -205,7 +193,6 @@ namespace CTP.Net
             ReceiveTimeout = receiveTimeout;
             SendTimeout = sendTimeout;
             ReceiveMode = receiveMode;
-            SendMode = sendMode;
         }
 
         /// <summary>
@@ -216,15 +203,12 @@ namespace CTP.Net
         private void SendReceiveOnException(object sender, Exception ex)
         {
             Log.Publish(MessageLevel.Error, MessageFlags.None, "Send/Receive Error", "An error has occurred with sending or receiving from a socket. The socket will be disposed.", null, ex);
-            if (Interlocked.CompareExchange(ref m_disposed, 1, 0) == 0)
-            {
-                ThreadPool.QueueUserWorkItem(InternalDispose);
-            }
+            Dispose();
         }
 
         private void OnNewPacket(CtpCommand obj)
         {
-            if (m_disposed == 1)
+            if (m_disposed)
                 return;
             PacketReceived?.Invoke(this, obj);
         }
@@ -248,8 +232,7 @@ namespace CTP.Net
 
                 m_reader?.Dispose();
                 m_readerAsync?.Dispose();
-                m_writer?.Dispose();
-                m_writerAsync?.Dispose();
+                m_processWriteTimeouts?.Dispose();
             }
             catch (Exception e)
             {
@@ -259,10 +242,21 @@ namespace CTP.Net
 
         public void Dispose()
         {
-            if (Interlocked.CompareExchange(ref m_disposed, 1, 0) == 0)
+            if (m_disposed)
+                return;
+            lock (m_writeSyncRoot)
             {
-                InternalDispose(null);
+                if (m_disposed)
+                    return;
+                m_disposed = true;
+                while (m_writeQueue.Count > 0)
+                {
+                    var item = m_writeQueue.Dequeue();
+                    item.Item2.Release();
+                    item.Item3?.Set();
+                }
             }
+            ThreadPool.QueueUserWorkItem(InternalDispose);
         }
 
         /// <summary>
@@ -285,29 +279,129 @@ namespace CTP.Net
             }
         }
 
+        #region [ Write Methods ]
+
         /// <summary>
-        /// Sends a command. This method will block or queue depending on <see cref="SendMode"/>.
+        /// Sends a command and blocks until the send operation has completed. Will throw a TimeoutException
         /// </summary>
         /// <param name="command"></param>
         public void Send(CommandObject command)
         {
+            var wait = new ManualResetEventSlim(false, 1);
+            m_writeEncoder.Send(command, wait);
+            if (!wait.Wait(m_sendTimeout))
+            {
+                SendReceiveOnException(this, new TimeoutException());
+                throw new TimeoutException();
+            }
+        }
+
+        /// <summary>
+        /// Queues a command to send. Will not block or throw exceptions.
+        /// </summary>
+        /// <param name="command"></param>
+        public void SendAsync(CommandObject command)
+        {
             m_writeEncoder.Send(command);
         }
 
-        private void InternalSend(PooledBuffer packet)
+        private void ProcessWriteTimeoutsRunning(object sender, EventArgs<ScheduledTaskRunningReason> e)
         {
-            switch (SendMode)
+            if (m_disposed)
+                return;
+
+            m_processWriteTimeouts.Start(100);
+
+            lock (m_writeSyncRoot)
             {
-                case SendMode.Blocking:
-                    m_writer.Write(packet, m_sendTimeout);
-                    break;
-                case SendMode.Queueing:
-                    m_writerAsync.Write(packet);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                if (m_writeQueue.Count == 0)
+                    return;
+                if (m_writeQueue.Peek().Item1.ElapsedMilliseconds() < m_sendTimeout)
+                    return;
+            }
+            SendReceiveOnException(this, new TimeoutException());
+        }
+
+        /// <summary>
+        /// Writes a packet to the underlying stream. 
+        /// </summary>
+        private void WriteCallback(PooledBuffer data, ManualResetEventSlim resetEvent)
+        {
+            if ((object)data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            lock (m_writeSyncRoot)
+            {
+                if (m_disposed)
+                {
+                    //Silently ignore the send operation and do not error.
+                    data.Release();
+                    resetEvent?.Set();
+                    return;
+                }
+
+                m_writeQueue.Enqueue(Tuple.Create(ShortTime.Now, data, resetEvent));
+
+                if (m_writeQueue.Count > 1)
+                {
+                    //if there are more than 1 items in the queue, this means some other thread is actively working the queue.
+                    return;
+                }
+            }
+
+            ProcessNextWrite(null);
+        }
+
+        private void ProcessNextWrite(object state)
+        {
+            Tuple<ShortTime, PooledBuffer, ManualResetEventSlim> tuple;
+            lock (m_writeSyncRoot)
+            {
+                if (m_disposed)
+                    return;
+                if (m_writeQueue.Count == 0)
+                    return;
+                tuple = m_writeQueue.Peek();
+            }
+
+            try
+            {
+                tuple.Item2.CopyToBeginWrite(m_stream, m_endWrite, null);
+            }
+            catch (Exception e)
+            {
+                tuple.Item3?.Set();
+                tuple.Item2.Release();
+                SendReceiveOnException(this, e);
             }
         }
+
+        private void EndWrite(IAsyncResult ar)
+        {
+            try
+            {
+                m_stream.EndWrite(ar);
+                Tuple<ShortTime, PooledBuffer, ManualResetEventSlim> tuple;
+                lock (m_writeSyncRoot)
+                {
+                    if (m_writeQueue.Count == 0)
+                        return; //There's a possible race condition on a dispose operation.
+                    tuple = m_writeQueue.Dequeue();
+                    if (m_writeQueue.Count > 0)
+                        ThreadPool.QueueUserWorkItem(m_processNextWrite);
+                }
+
+                tuple.Item2.Release();
+                tuple.Item3?.Set();
+            }
+            catch (Exception e)
+            {
+                SendReceiveOnException(this, e);
+            }
+        }
+
+        #endregion
+
 
     }
 }

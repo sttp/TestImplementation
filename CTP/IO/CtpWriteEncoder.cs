@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CTP.Collection;
 using GSF;
@@ -21,11 +22,11 @@ namespace CTP.IO
     {
         private Dictionary<int, int> m_knownSchemas;
         private CtpCompressionMode m_compressionMode;
-        private readonly Action<PooledBuffer> m_send;
+        private readonly Action<PooledBuffer, ManualResetEventSlim> m_send;
         private MemoryStream m_stream;
         private Ionic.Zlib.DeflateStream m_deflate;
 
-        public CtpWriteEncoder(CtpCompressionMode mode, Action<PooledBuffer> send)
+        public CtpWriteEncoder(CtpCompressionMode mode, Action<PooledBuffer, ManualResetEventSlim> send)
         {
             m_knownSchemas = new Dictionary<int, int>();
             m_compressionMode = mode;
@@ -42,11 +43,11 @@ namespace CTP.IO
         /// </summary>
         public int MaximumSchemeCount { get; set; } = 1_000;
 
-        public void Send(CommandObject command)
+        public void Send(CommandObject command, ManualResetEventSlim resetEvent = null)
         {
             if (!command.Schema.ProcessRuntimeID.HasValue)
             {
-                Send(PacketMethods.CreatePacket(PacketContents.CommandSchemaWithData, 0, command.ToCommand().ToArray()));
+                Send(PacketMethods.CreatePacket(PacketContents.CommandSchemaWithData, 0, command.ToCommand().ToArray()), resetEvent);
             }
             else
             {
@@ -59,20 +60,22 @@ namespace CTP.IO
                             throw new Exception("Cannot serialize a schema that has not been defined in this process.");
                         schemeRuntimeID = m_knownSchemas.Count;
                         m_knownSchemas.Add(command.Schema.ProcessRuntimeID.Value, schemeRuntimeID);
-                        Send(command.Schema.ToCommand(schemeRuntimeID));
+                        Send(command.Schema.ToCommand(schemeRuntimeID), null);
                     }
                 }
-                Send(command.ToDataCommandPacket(schemeRuntimeID));
+                Send(command.ToDataCommandPacket(schemeRuntimeID), resetEvent);
             }
-
         }
 
-        private void Send(PooledBuffer packet)
+        private void Send(PooledBuffer packet, ManualResetEventSlim resetEvent)
         {
+            if (packet.Length > MaximumPacketSize)
+                throw new Exception("This packet is too large to send, if this is a legitimate size, increase the MaxPacketSize.");
+
             switch (m_compressionMode)
             {
                 case CtpCompressionMode.None:
-                    m_send(packet);
+                    m_send(packet, resetEvent);
                     break;
                 case CtpCompressionMode.Deflate:
                     using (var ms = new MemoryStream())
@@ -81,7 +84,7 @@ namespace CTP.IO
                         {
                             packet.CopyTo(comp);
                         }
-                        m_send(PacketMethods.CreatePacket(PacketContents.CompressedDeflate, packet.Length, ms.ToArray()));
+                        m_send(PacketMethods.CreatePacket(PacketContents.CompressedDeflate, packet.Length, ms.ToArray()), resetEvent);
                     }
                     break;
                 case CtpCompressionMode.Zlib:
@@ -97,7 +100,7 @@ namespace CTP.IO
                     m_deflate.Flush();
                     byte[] rv = m_stream.ToArray();
                     m_stream.SetLength(0);
-                    m_send(PacketMethods.CreatePacket(PacketContents.CompressedZlib, packet.Length, rv));
+                    m_send(PacketMethods.CreatePacket(PacketContents.CompressedZlib, packet.Length, rv), resetEvent);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

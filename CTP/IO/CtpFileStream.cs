@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using CTP.Collection;
 using GSF;
 
@@ -84,7 +85,7 @@ namespace CTP.IO
             m_write.Send(command);
         }
 
-        private void WriteInternal(PooledBuffer packet)
+        private void WriteInternal(PooledBuffer packet, ManualResetEventSlim resetEvent)
         {
             if ((object)packet == null)
                 throw new ArgumentNullException(nameof(packet));
@@ -97,6 +98,7 @@ namespace CTP.IO
 
             packet.CopyTo(m_stream);
             packet.Release();
+            resetEvent?.Set();
         }
 
         public void Dispose()
