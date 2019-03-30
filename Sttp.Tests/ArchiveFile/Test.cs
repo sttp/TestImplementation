@@ -22,6 +22,82 @@ namespace Sttp.Tests
     [TestClass]
     public class ArchiveFile
     {
+        private Stopwatch m_sw;
+        private int m_value;
+        private ManualResetEventSlim m_resetEvent;
+        private WaitCallback m_threadPoolItem;
+
+        [TestMethod]
+        public void TestDelegateInstance()
+        {
+            m_value = 100_000;
+            m_sw = new Stopwatch();
+            m_resetEvent = new ManualResetEventSlim(false, 1);
+            m_sw.Start();
+            ThreadPool.QueueUserWorkItem(ThreadpoolItem);
+            m_resetEvent.Wait();
+
+            m_value = 10_000_000;
+            m_sw = new Stopwatch();
+            m_resetEvent = new ManualResetEventSlim(false, 1);
+            m_sw.Start();
+            ThreadPool.QueueUserWorkItem(ThreadpoolItem);
+            m_resetEvent.Wait();
+            Console.WriteLine(m_sw.Elapsed.TotalMilliseconds);
+
+            m_threadPoolItem = ThreadpoolItem;
+            m_value = 10_000_000;
+            m_sw = new Stopwatch();
+            m_resetEvent = new ManualResetEventSlim(false, 1);
+            m_sw.Start();
+            ThreadPool.QueueUserWorkItem(ThreadpoolItem);
+            m_resetEvent.Wait();
+            Console.WriteLine(m_sw.Elapsed.TotalMilliseconds);
+        }
+
+        private void ThreadpoolItem(object value)
+        {
+            if (m_value == 0)
+            {
+                m_sw.Stop();
+                m_resetEvent.Set();
+                return;
+            }
+            m_value--;
+            ThreadPool.UnsafeQueueUserWorkItem(m_threadPoolItem ?? ThreadpoolItem, null);
+        }
+
+        [TestMethod]
+        public void TestDelegate()
+        {
+            m_value = 100_000;
+            m_sw = new Stopwatch();
+            m_resetEvent = new ManualResetEventSlim(false, 1);
+            m_sw.Start();
+            ThreadPool.QueueUserWorkItem(ThreadpoolItem);
+            m_resetEvent.Wait();
+
+            m_threadPoolItem = DoNothing;
+
+            m_sw = new Stopwatch();
+            m_sw.Start();
+            for (int x = 0; x < 100_000_000; x++)
+            {
+                m_threadPoolItem = DoNothing;
+                Thread.MemoryBarrier();
+                m_threadPoolItem(null);
+
+            }
+            Console.WriteLine(m_sw.Elapsed.TotalMilliseconds);
+
+        }
+
+        private void DoNothing(object value)
+        {
+
+        }
+
+
         [TestMethod]
         public void TestFloat()
         {
@@ -162,8 +238,8 @@ namespace Sttp.Tests
 
             using (var sha = new SHA1Managed())
             {
-                Console.WriteLine(GuidExtensions.ToRfcGuid(sha.ComputeHash(File.ReadAllBytes(@"C:\temp\C37Test\benchmark1.sttp")),0));
-                Console.WriteLine(GuidExtensions.ToRfcGuid(sha.ComputeHash(File.ReadAllBytes(@"C:\temp\C37Test\benchmark2.sttp")),0));
+                Console.WriteLine(GuidExtensions.ToRfcGuid(sha.ComputeHash(File.ReadAllBytes(@"C:\temp\C37Test\benchmark1.sttp")), 0));
+                Console.WriteLine(GuidExtensions.ToRfcGuid(sha.ComputeHash(File.ReadAllBytes(@"C:\temp\C37Test\benchmark2.sttp")), 0));
             }
 
             return;

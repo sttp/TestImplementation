@@ -41,6 +41,11 @@ namespace CTP.Collection
             return stream.BeginWrite(m_data, 0, Length, callback, state);
         }
 
+        public Task CopyToWriteAsync(Stream stream)
+        {
+            return stream.WriteAsync(m_data, 0, Length);
+        }
+
         public void Release()
         {
             var item = Interlocked.Exchange(ref m_data, null);

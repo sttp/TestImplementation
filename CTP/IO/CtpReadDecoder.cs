@@ -6,7 +6,7 @@ using Ionic.Zlib;
 
 namespace CTP.IO
 {
-    internal class CtpReadParser : IDisposable
+    internal class CtpReadDecoder : IDisposable
     {
         private bool m_disposed;
         /// <summary>
@@ -40,7 +40,7 @@ namespace CTP.IO
         private MemoryStream m_stream;
         private DeflateStream m_inflate;
 
-        public CtpReadParser()
+        public CtpReadDecoder()
         {
             m_inboundSchemes = new Dictionary<int, CtpCommandSchema>();
             m_inboundBuffer = new byte[128];

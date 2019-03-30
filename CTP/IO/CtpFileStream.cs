@@ -16,13 +16,13 @@ namespace CTP.IO
         private bool m_ownsStream;
         private byte[] m_tempBuffer;
         private bool m_disposed;
-        private CtpReadParser m_readParser;
+        private CtpReadDecoder m_readDecoder;
         private CtpWriteEncoder m_write;
 
         public CtpFileStream(Stream stream, CtpCompressionMode mode, bool ownsStream)
         {
             m_write = new CtpWriteEncoder(mode, WriteInternal);
-            m_readParser = new CtpReadParser();
+            m_readDecoder = new CtpReadDecoder();
             m_stream = stream;
             m_ownsStream = ownsStream;
             m_tempBuffer = new byte[3000];
@@ -38,14 +38,14 @@ namespace CTP.IO
                 throw new ObjectDisposedException(GetType().FullName);
             CtpCommand packet;
 
-            while (!m_readParser.ReadFromBuffer(out packet))
+            while (!m_readDecoder.ReadFromBuffer(out packet))
             {
                 if (m_disposed)
                     throw new ObjectDisposedException(GetType().FullName);
                 int length = m_stream.Read(m_tempBuffer, 0, m_tempBuffer.Length);
                 if (length == 0)
                     return null;
-                m_readParser.AppendToBuffer(m_tempBuffer, length);
+                m_readDecoder.AppendToBuffer(m_tempBuffer, length);
             }
 
             return packet;
@@ -56,8 +56,8 @@ namespace CTP.IO
         /// </summary>
         public int MaximumPacketSize
         {
-            get => m_readParser.MaximumPacketSize;
-            set => m_write.MaximumPacketSize = m_readParser.MaximumPacketSize = value;
+            get => m_readDecoder.MaximumPacketSize;
+            set => m_write.MaximumPacketSize = m_readDecoder.MaximumPacketSize = value;
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace CTP.IO
         /// </summary>
         public int MaximumSchemaCount
         {
-            get => m_readParser.MaximumSchemeCount;
-            set => m_write.MaximumSchemeCount = m_readParser.MaximumSchemeCount = value;
+            get => m_readDecoder.MaximumSchemeCount;
+            set => m_write.MaximumSchemeCount = m_readDecoder.MaximumSchemeCount = value;
         }
 
         ///// <summary>
@@ -85,7 +85,7 @@ namespace CTP.IO
             m_write.Send(command);
         }
 
-        private void WriteInternal(PooledBuffer packet, ManualResetEventSlim resetEvent)
+        private ManualResetEventSlim WriteInternal(PooledBuffer packet)
         {
             if ((object)packet == null)
                 throw new ArgumentNullException(nameof(packet));
@@ -98,7 +98,7 @@ namespace CTP.IO
 
             packet.CopyTo(m_stream);
             packet.Release();
-            resetEvent?.Set();
+            return null;
         }
 
         public void Dispose()
@@ -110,7 +110,7 @@ namespace CTP.IO
                 {
                     m_stream?.Dispose();
                 }
-                m_readParser.Dispose();
+                m_readDecoder.Dispose();
             }
         }
 
