@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Net;
 using System.Net.Security;
@@ -14,56 +12,28 @@ using CTP.IO;
 using GSF;
 using GSF.Diagnostics;
 using GSF.Threading;
-using CancellationToken = System.Threading.CancellationToken;
 
 namespace CTP.Net
 {
     public delegate void PacketReceivedEventHandler(CtpNetStream sender, CtpCommand command);
 
-    public enum ReceiveMode
-    {
-        Blocking,
-        Event,
-    }
-
-    public enum SendMode
-    {
-        Blocking,
-        Queueing
-    }
-
     public class CtpNetStream : IDisposable
     {
         private class StreamReading
         {
-            private enum States
-            {
-                /// <summary>
-                /// Occurs when socket IO is configured to not be reading.
-                /// </summary>
-                NotReading,
-                /// <summary>
-                /// Occurs when socket IO is pending.
-                /// </summary>
-                Reading,
-                /// <summary>
-                /// Occurs when disposed has been called and no more IO should occur.
-                /// </summary>
-                Disposed,
-            }
-
-            private States m_state;
+            private bool m_disposed;
+            private bool m_isReading;
             private Stream m_stream;
             private Action m_notify;
             private Action<Exception> m_onException;
-            private Action<Task<int>> m_continueRead;
+            private WeakActionAsync<Task<int>> m_continueRead;
 
             /// <summary>
             /// A buffer used to read data from the underlying stream.
             /// </summary>
             private byte[] m_readBuffer;
             private CtpReadDecoder m_readDecoder;
-            private object m_readSyncRoot = new object();
+            private object m_syncRoot = new object();
             private ManualResetEventSlim m_waiting;
             private CtpCommand m_pendingCommand;
 
@@ -75,22 +45,23 @@ namespace CTP.Net
             /// <param name="onException">Is called anytime that the socket raises an exception. The class is automatically disposed.</param>
             public StreamReading(Stream stream, Action notify, Action<Exception> onException)
             {
-                m_state = States.NotReading;
                 m_notify = notify ?? throw new ArgumentNullException(nameof(notify));
                 m_stream = stream ?? throw new ArgumentNullException(nameof(stream));
                 m_onException = onException ?? throw new ArgumentNullException(nameof(onException));
 
                 m_readBuffer = new byte[3000];
                 m_readDecoder = new CtpReadDecoder();
-                m_continueRead = ContinueRead;
+                m_continueRead = new WeakActionAsync<Task<int>>(ContinueRead);
             }
 
             /// <summary>
             /// Attempts to read a command. If this fails, a wait object is returned to indicate when a receive is successful.
+            /// A callback is also queued to indicate when more data has been received.
             /// </summary>
             /// <param name="command"></param>
             /// <param name="waiting"></param>
             /// <returns></returns>
+            /// <exception cref="ObjectDisposedException"></exception>
             public bool TryRead(out CtpCommand command, out ManualResetEventSlim waiting)
             {
                 waiting = null;
@@ -98,59 +69,61 @@ namespace CTP.Net
 
                 try
                 {
-                    lock (m_readSyncRoot)
+                    lock (m_syncRoot)
                     {
-                        switch (m_state)
+                        if (m_disposed)
+                            throw new ObjectDisposedException(GetType().FullName);
+                        if (m_isReading)
                         {
-                            case States.Disposed:
-                                throw new ObjectDisposedException(GetType().FullName);
-                            case States.Reading:
-                                waiting = m_waiting;
-                                return false;
-                            case States.NotReading:
-                                if (TryReadInternal(out command))
-                                {
-                                    return true;
-                                }
-                                else
-                                {
-                                    m_state = States.Reading;
-                                    m_waiting = new ManualResetEventSlim(false, 1);
-                                    waiting = m_waiting;
-                                    return false;
-                                }
-                            default:
-                                throw new ArgumentOutOfRangeException();
+                            waiting = m_waiting;
+                            return false;
                         }
+
+                        command = TryReadInternal();
+                        if ((object)command != null)
+                            return true;
+                        m_waiting = new ManualResetEventSlim(false, 1);
+                        waiting = m_waiting;
+                        return false;
                     }
                 }
                 catch (Exception e)
                 {
                     OnException(e);
+                    waiting = null;
                     return false;
                 }
             }
 
-            private bool TryReadInternal(out CtpCommand command)
+            /// <summary>
+            /// Must occur within a lock. This will attempt to read a Command and queue a read from the stream if it fails.
+            /// </summary>
+            /// <returns></returns>
+            private CtpCommand TryReadInternal()
             {
                 if ((object)m_pendingCommand != null)
                 {
-                    command = m_pendingCommand;
+                    var command = m_pendingCommand;
                     m_pendingCommand = null;
-                    return true;
+                    return command;
                 }
 
                 while (true)
                 {
-                    if (m_readDecoder.ReadFromBuffer(out command))
-                        return true;
+                    if (m_readDecoder.ReadFromBuffer(out var command))
+                        return command;
 
                     var task = m_stream.ReadAsync(m_readBuffer, 0, m_readBuffer.Length);
                     if (!task.IsCompleted)
                     {
-                        task.ContinueWith(m_continueRead, TaskContinuationOptions.RunContinuationsAsynchronously);
-                        return false;
+                        m_isReading = true;
+                        task.ContinueWith(m_continueRead.AsyncCallback);
+                        return null;
                     }
+                    if (task.IsFaulted)
+                        throw task.Exception ?? new Exception("Task failed with no exception specified");
+                    if (task.IsCanceled)
+                        throw new Exception("Receive was canceled");
                     m_readDecoder.AppendToBuffer(m_readBuffer, task.Result);
                 }
             }
@@ -159,35 +132,38 @@ namespace CTP.Net
             {
                 try
                 {
-                    if (!task.IsCompleted)
+                    if (m_disposed)
                         return;
+                    if (!task.IsCompleted)
+                        throw new Exception("Only completed tasks should be here.");
+                    if (task.IsFaulted)
+                        throw task.Exception ?? new Exception("Task failed with no exception specified");
+                    if (task.IsCanceled)
+                        throw new Exception("Receive was canceled");
 
                     ManualResetEventSlim waiting;
-
-                    lock (m_readSyncRoot)
+                    lock (m_syncRoot)
                     {
-                        if (m_state == States.NotReading)
-                            throw new Exception("Invalid State");
-                        if (m_state == States.Reading)
-                        {
-                            m_readDecoder.AppendToBuffer(m_readBuffer, task.Result);
+                        if (m_disposed)
+                            return;
+                        if (!m_isReading)
+                            throw new Exception("IsReading should have been set to true.");
+                        m_isReading = false;
+                        m_readDecoder.AppendToBuffer(m_readBuffer, task.Result);
 
-                            if (!TryReadInternal(out m_pendingCommand))
-                                return;
+                        m_pendingCommand = TryReadInternal();
+                        if ((object)m_pendingCommand == null)
+                            return; //If null, this means another read asyc operation started.
 
-                            m_state = States.NotReading;
-                        }
                         waiting = m_waiting;
                         m_waiting = null;
                     }
 
-                    waiting.Set();
+                    waiting?.Set();
                     try
                     {
-                        if (m_state != States.Disposed)
-                        {
+                        if (!m_disposed)
                             m_notify();
-                        }
                     }
                     catch (Exception)
                     {
@@ -202,11 +178,7 @@ namespace CTP.Net
 
             private void OnException(Exception e)
             {
-                lock (m_readSyncRoot)
-                {
-                    m_state = States.Disposed;
-                }
-
+                Dispose();
                 try
                 {
                     m_onException(e);
@@ -214,19 +186,27 @@ namespace CTP.Net
                 catch (Exception)
                 {
                 }
-
             }
-
 
             public void Dispose()
             {
-                lock (m_readSyncRoot)
+                lock (m_syncRoot)
                 {
-                    m_state = States.Disposed;
+                    if (m_disposed)
+                        return;
+                    m_disposed = true;
+                    m_continueRead.Dispose();
+                    m_waiting?.Set();
+                    m_waiting = null;
+                }
+                try
+                {
+                    m_notify();
+                }
+                catch (Exception)
+                {
                 }
             }
-
-
         }
 
         private class StreamWriting
@@ -234,7 +214,7 @@ namespace CTP.Net
             private Stream m_stream;
             private Action m_notify;
             private Action<Exception> m_onException;
-            private Action<Task> m_continueWrite;
+            private WeakActionAsync<Task> m_continueWrite;
 
             private CtpWriteEncoder m_writeEncoder;
             private object m_syncRoot = new object();
@@ -247,31 +227,24 @@ namespace CTP.Net
             /// 
             /// </summary>
             /// <param name="stream"></param>
-            /// <param name="notify">A callback that occurs after an asynchronous read returns successfully. This is not signaled all the time, only when calls to <see cref="TryRead"/> fail</param>
+            /// <param name="notify">A callback that occurs after an asynchronous read returns successfully. This is not signaled all the time, only when calls to <see cref="TryWrite"/> fail</param>
             /// <param name="onException">Is called anytime that the socket raises an exception. The class is automatically disposed.</param>
             public StreamWriting(Stream stream, Action notify, Action<Exception> onException)
             {
+                m_sendTimeout = 5000;
                 m_notify = notify ?? throw new ArgumentNullException(nameof(notify));
                 m_stream = stream ?? throw new ArgumentNullException(nameof(stream));
                 m_onException = onException ?? throw new ArgumentNullException(nameof(onException));
 
                 m_processWriteTimeouts = new ScheduledTask();
                 m_processWriteTimeouts.Running += ProcessWriteTimeoutsRunning;
-                m_processWriteTimeouts.Start(100);
-
                 m_writeEncoder = new CtpWriteEncoder(CtpCompressionMode.None, WriteCallback);
-
                 m_writeQueue = new Queue<Tuple<ShortTime, PooledBuffer, ManualResetEventSlim>>();
-
-                m_continueWrite = ContinueWrite;
+                m_continueWrite = new WeakActionAsync<Task>(ContinueWrite);
             }
 
-
-
             /// <summary>
-            /// Must be positive milliseconds
-            /// If SendMode = Blocking: The timeout permitted during each Send operation
-            /// If SendMode = Queuing: The depth of the queue permitted before the stream is deemed too far behind and is disposed.
+            /// The timeout in milliseconds between 1 and 60,000
             /// </summary>
             public int SendTimeout
             {
@@ -286,30 +259,37 @@ namespace CTP.Net
             }
 
             /// <summary>
-            /// Queues a command to send. Will not block or throw exceptions.
+            /// Queues a command to write. Will not block or throw exceptions.
+            /// When disposed, the wait handle is null
             /// </summary>
             /// <param name="command"></param>
             /// <param name="wait"></param>
-            public bool TrySend(CommandObject command, out ManualResetEventSlim wait)
+            public bool TryWrite(CommandObject command, out ManualResetEventSlim wait)
             {
-                lock (m_syncRoot)
+                try
                 {
-                    if (m_disposed)
+                    lock (m_syncRoot)
                     {
-                        wait = new ManualResetEventSlim(false, 1);
-                        wait.Set();
-                        return false;
-                    }
+                        if (m_disposed)
+                        {
+                            wait = null;
+                            return false;
+                        }
 
-                    wait = m_writeEncoder.Send(command);
-                    if (wait == null)
-                        return true;
+                        wait = m_writeEncoder.Send(command);
+                        return wait == null;
+                    }
+                }
+                catch (Exception e)
+                {
+                    OnException(e);
+                    wait = null;
                     return false;
                 }
             }
 
             /// <summary>
-            /// Writes a packet to the underlying stream. 
+            /// Writes a packet to the underlying stream. This is called in a sync context
             /// </summary>
             private ManualResetEventSlim WriteCallback(PooledBuffer data)
             {
@@ -326,14 +306,19 @@ namespace CTP.Net
                 var task = data.CopyToWriteAsync(m_stream);
                 if (task.IsCompleted)
                 {
+                    if (task.IsFaulted)
+                        throw task.Exception ?? new Exception("Task failed with no exception specified");
+                    if (task.IsCanceled)
+                        throw new Exception("Receive was canceled");
                     data.Release();
                     return null;
                 }
                 else
                 {
+                    m_processWriteTimeouts.Start(m_sendTimeout + 10);
                     var resetEvent = new ManualResetEventSlim(false, 1);
                     m_writeQueue.Enqueue(Tuple.Create(ShortTime.Now, data, resetEvent));
-                    task.ContinueWith(m_continueWrite, TaskContinuationOptions.RunContinuationsAsynchronously);
+                    task.ContinueWith(m_continueWrite.AsyncCallback);
                     return resetEvent;
                 }
             }
@@ -344,11 +329,19 @@ namespace CTP.Net
                 {
                     TryAgain:
 
-                    if (!task.IsCompleted)
+                    if (m_disposed)
                         return;
+                    if (!task.IsCompleted)
+                        throw new Exception("Only completed tasks should be here.");
+                    if (task.IsFaulted)
+                        throw task.Exception ?? new Exception("Task failed with no exception specified");
+                    if (task.IsCanceled)
+                        throw new Exception("Receive was canceled");
 
                     lock (m_syncRoot)
                     {
+                        if (m_disposed)
+                            return;
                         if (m_writeQueue.Count > 0)
                         {
                             var tuple = m_writeQueue.Dequeue();
@@ -367,21 +360,21 @@ namespace CTP.Net
                             }
                             else
                             {
-                                task.ContinueWith(m_continueWrite, TaskContinuationOptions.RunContinuationsAsynchronously);
+                                task.ContinueWith(m_continueWrite.AsyncCallback);
                             }
-
                         }
                     }
 
                     try
                     {
-                        if (m_disposed)
+                        if (!m_disposed)
                         {
                             m_notify();
                         }
                     }
                     catch (Exception)
                     {
+
                     }
                 }
                 catch (Exception e)
@@ -393,17 +386,18 @@ namespace CTP.Net
 
             private void ProcessWriteTimeoutsRunning(object sender, EventArgs<ScheduledTaskRunningReason> e)
             {
-                if (m_disposed)
-                    return;
-
-                m_processWriteTimeouts.Start(100);
-
                 lock (m_syncRoot)
                 {
+                    if (m_disposed)
+                        return;
                     if (m_writeQueue.Count == 0)
                         return;
-                    if (m_writeQueue.Peek().Item1.ElapsedMilliseconds() < m_sendTimeout)
+                    var msUntilTimeout = m_sendTimeout - m_writeQueue.Peek().Item1.ElapsedMilliseconds();
+                    if (msUntilTimeout > 0)
+                    {
+                        m_processWriteTimeouts.Start((int)(msUntilTimeout + 10));
                         return;
+                    }
                 }
                 OnException(new TimeoutException());
             }
@@ -411,10 +405,7 @@ namespace CTP.Net
 
             private void OnException(Exception e)
             {
-                lock (m_syncRoot)
-                {
-                    m_disposed = true;
-                }
+                Dispose();
 
                 try
                 {
@@ -422,6 +413,7 @@ namespace CTP.Net
                 }
                 catch (Exception)
                 {
+
                 }
             }
 
@@ -429,7 +421,25 @@ namespace CTP.Net
             {
                 lock (m_syncRoot)
                 {
+                    if (m_disposed)
+                        return;
                     m_disposed = true;
+                    m_continueWrite.Dispose();
+
+                    while (m_writeQueue.Count > 0)
+                    {
+                        var tuple = m_writeQueue.Dequeue();
+                        tuple.Item2.Release();
+                        tuple.Item3?.Set();
+                    }
+                }
+                try
+                {
+                    m_notify();
+                }
+                catch (Exception)
+                {
+
                 }
             }
 
@@ -463,9 +473,10 @@ namespace CTP.Net
 
         private readonly Stream m_stream;
 
-        private int m_sendTimeout;
         private int m_receiveTimeout;
+
         private bool m_disposed;
+
         private bool m_readEvents;
 
         /// <summary>
@@ -483,7 +494,7 @@ namespace CTP.Net
 
         private ScheduledTask m_processReadEvents;
 
-        private object m_readSyncRoot = new object();
+        private object m_syncRoot = new object();
 
         private StreamReading m_read;
         private StreamWriting m_write;
@@ -495,7 +506,6 @@ namespace CTP.Net
             m_ssl = ssl;
             m_stream = (Stream)ssl ?? netStream;
 
-            m_sendTimeout = 5000;
             m_receiveTimeout = 5000;
 
             m_read = new StreamReading(m_stream, NotifyDataReady, OnException);
@@ -516,7 +526,7 @@ namespace CTP.Net
                 if (m_readEvents != value)
                 {
                     m_readEvents = value;
-                    if (m_readEvents)
+                    if (value)
                     {
                         m_processReadEvents.Start();
                     }
@@ -525,9 +535,7 @@ namespace CTP.Net
         }
 
         /// <summary>
-        /// Must be positive milliseconds
-        /// If SendMode = Blocking: The timeout permitted during each Send operation
-        /// If SendMode = Queuing: The depth of the queue permitted before the stream is deemed too far behind and is disposed.
+        /// The time that something can be pending a send operation before an exception is thrown.
         /// </summary>
         public int SendTimeout
         {
@@ -536,9 +544,7 @@ namespace CTP.Net
         }
 
         /// <summary>
-        /// May be 0.
-        /// If ReceiveMode = Blocking: The maximum time to block for a read command.
-        /// Otherwise Ignored.
+        /// The default timeout during a blocking read before the socket is timed out. Must be between 1 and 60,000 milliseconds.
         /// </summary>
         public int ReceiveTimeout
         {
@@ -551,55 +557,11 @@ namespace CTP.Net
             }
         }
 
-        /// <summary>
-        /// Event occurs when a send/receive operation has an exception.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="ex"></param>
-        private void SendReceiveOnException(object sender, Exception ex)
-        {
-            Log.Publish(MessageLevel.Error, MessageFlags.None, "Send/Receive Error", "An error has occurred with sending or receiving from a socket. The socket will be disposed.", null, ex);
-            Dispose();
-        }
-
         private void OnNewPacket(CtpCommand obj)
         {
             if (m_disposed)
                 return;
             PacketReceived?.Invoke(this, obj);
-        }
-
-        private void OnDisposedCallback(object state)
-        {
-            Log.Publish(MessageLevel.Info, "Disposed Event Raised");
-            OnDisposed?.Invoke();
-        }
-
-        private void InternalDispose(object state)
-        {
-            try
-            {
-                Log.Publish(MessageLevel.Info, "Disposed Called");
-                ThreadPool.QueueUserWorkItem(OnDisposedCallback);
-                m_ssl?.Dispose();
-                m_netStream?.Dispose();
-                m_socket?.Dispose();
-                m_stream?.Dispose();
-                m_read.Dispose();
-                m_write.Dispose();
-
-            }
-            catch (Exception e)
-            {
-                Logger.SwallowException(e, "Error occurred during dispose");
-            }
-        }
-
-        public void Dispose()
-        {
-            if (m_disposed)
-                return;
-            ThreadPool.QueueUserWorkItem(InternalDispose);
         }
 
         /// <summary>
@@ -608,10 +570,10 @@ namespace CTP.Net
         /// <param name="command"></param>
         public void Send(CommandObject command)
         {
-            m_write.TrySend(command, out var wait);
-            if (wait != null && !wait.Wait(m_sendTimeout))
+            m_write.TryWrite(command, out var wait);
+            if (wait != null && !wait.Wait(SendTimeout))
             {
-                SendReceiveOnException(this, new TimeoutException());
+                OnException(new TimeoutException());
                 throw new TimeoutException();
             }
         }
@@ -622,10 +584,48 @@ namespace CTP.Net
         /// <param name="command"></param>
         public void SendAsync(CommandObject command)
         {
-            m_write.TrySend(command, out var wait);
+            m_write.TryWrite(command, out var wait);
         }
 
-        #region [ Read Methods ]
+        /// <summary>
+        /// Attempts a read operation.
+        /// When ReceiveMode = Blocking,
+        ///     this method will block until a read has occurred. If the stream has been disposed, an exception will be raised.
+        /// When ReceiveMode = Event,
+        ///     This method will throw an exception.
+        /// </summary>
+        /// <returns></returns>
+        public CtpCommand Read()
+        {
+            int totalWait = m_receiveTimeout;
+
+            TryAgain:
+
+            ManualResetEventSlim wait;
+
+            if (m_disposed)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            if (m_read.TryRead(out var packet, out wait))
+            {
+                return packet;
+            }
+
+            if (wait == null)
+                throw new ObjectDisposedException(GetType().FullName);
+
+            ShortTime time = ShortTime.Now;
+            if (!wait.Wait(totalWait))
+            {
+                OnException(new TimeoutException());
+                throw new TimeoutException();
+            }
+
+            totalWait = Math.Max(0, (int)(totalWait - time.ElapsedMilliseconds()));
+
+            goto TryAgain;
+        }
+
 
         private void ProcessReadEventsRunning(object sender, EventArgs<ScheduledTaskRunningReason> e)
         {
@@ -644,14 +644,11 @@ namespace CTP.Net
             }
         }
 
-        private void OnException(Exception ex)
-        {
-            Log.Publish(MessageLevel.Error, MessageFlags.None, "Send/Receive Error", "An error has occurred with sending or receiving from a socket. The socket will be disposed.", null, ex);
-            Dispose();
-        }
+
 
         private void NotifyWrite()
         {
+
         }
 
         private void NotifyDataReady()
@@ -659,47 +656,55 @@ namespace CTP.Net
             m_processReadEvents.Start();
         }
 
-        /// <summary>
-        /// Attempts a read operation.
-        /// When ReceiveMode = Blocking,
-        ///     this method will block until a read has occurred. If the stream has been disposed, an exception will be raised.
-        /// When ReceiveMode = Event,
-        ///     This method will throw an exception.
-        /// </summary>
-        /// <returns></returns>
-        public CtpCommand Read()
+        private void OnException(Exception ex)
         {
-            TryAgain:
-
-            ManualResetEventSlim wait;
-
-            lock (m_readSyncRoot)
-            {
-                if (m_readEvents)
-                    throw new NotSupportedException("Stream is currently configured to RaiseEvents. Set this property to false to change modes.");
-
-                if (m_disposed)
-                    throw new ObjectDisposedException(GetType().FullName);
-
-                if (m_read.TryRead(out var packet, out wait))
-                {
-                    return packet;
-                }
-            }
-
-            if (!wait.Wait(m_receiveTimeout))
-            {
-                SendReceiveOnException(this, new TimeoutException());
-                throw new TimeoutException();
-            }
-
-            goto TryAgain;
+            Log.Publish(MessageLevel.Error, MessageFlags.None, "Send/Receive Error", "An error has occurred with sending or receiving from a socket. The socket will be disposed.", null, ex);
+            Dispose();
         }
 
 
 
-        #endregion
+        public void Dispose()
+        {
+            lock (m_syncRoot)
+            {
+                if (m_disposed)
+                    return;
+                m_disposed = true;
+            }
+            ThreadPool.QueueUserWorkItem(InternalDispose);
+        }
 
+        private void InternalDispose(object state)
+        {
+            try
+            {
+                Log.Publish(MessageLevel.Info, "Disposed Called");
+                m_write.Dispose();
+                m_read.Dispose();
+                ThreadPool.QueueUserWorkItem(OnDisposedCallback);
+                m_ssl?.Dispose();
+                m_netStream?.Dispose();
+                m_socket?.Dispose();
+                m_stream?.Dispose();
+            }
+            catch (Exception e)
+            {
+                Logger.SwallowException(e, "Error occurred during dispose");
+            }
+        }
+
+        private void OnDisposedCallback(object state)
+        {
+            Log.Publish(MessageLevel.Info, "Disposed Event Raised");
+            try
+            {
+                OnDisposed?.Invoke();
+            }
+            catch (Exception)
+            {
+            }
+        }
 
     }
 }
