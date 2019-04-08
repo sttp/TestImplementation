@@ -108,7 +108,7 @@ namespace CTP
             switch (value.ValueTypeCode)
             {
                 case CtpTypeCode.Null:
-                    WriteSymbol(CtpObjectSymbols.Null);
+                    WriteNull();
                     break;
                 case CtpTypeCode.Integer:
                     WriteInt(value.IsInteger);
@@ -126,10 +126,7 @@ namespace CTP
                     WriteTime(value.IsCtpTime);
                     break;
                 case CtpTypeCode.Boolean:
-                    if (value.IsBoolean)
-                        WriteSymbol(CtpObjectSymbols.BoolTrue);
-                    else
-                        WriteSymbol(CtpObjectSymbols.BoolFalse);
+                    WriteBool(value.IsBoolean);
                     break;
                 case CtpTypeCode.Guid:
                     WriteGuid(value.IsGuid);
@@ -148,8 +145,40 @@ namespace CTP
             }
         }
 
+        private void WriteNull()
+        {
+            EnsureCapacityBytes(1);
+            WriteSymbol(CtpObjectSymbols.Null);
+        }
+
+        private void WriteBool(bool value)
+        {
+            EnsureCapacityBytes(1);
+            if (value)
+                WriteSymbol(CtpObjectSymbols.BoolTrue);
+            else
+                WriteSymbol(CtpObjectSymbols.BoolFalse);
+        }
+
+
+        public void WriteExact(long value)
+        {
+            WriteInt(value);
+        }
+
+        public unsafe void WriteExact(float value)
+        {
+            WriteSingle(*(uint*)&value);
+        }
+
+        public unsafe void WriteExact(double value)
+        {
+            WriteDouble(*(ulong*)&value);
+        }
+
         private void WriteInt(long value)
         {
+            EnsureCapacityBytes(9);
             if (-2 <= value && value <= 64)
             {
                 WriteSymbol(CtpObjectSymbols.IntNeg2 + (byte)(value + 2));
@@ -207,6 +236,8 @@ namespace CTP
 
         private void WriteSingle(uint value)
         {
+            EnsureCapacityBytes(5);
+
             if (value == NumericConstants.SingleNeg1)
                 WriteSymbol(CtpObjectSymbols.SingleNeg1);
             else if (value == NumericConstants.Single0)
@@ -236,6 +267,8 @@ namespace CTP
 
         private void WriteDouble(ulong value)
         {
+            EnsureCapacityBytes(9);
+
             if (value == NumericConstants.DoubleNeg1)
                 WriteSymbol(CtpObjectSymbols.DoubleNeg1);
             else if (value == NumericConstants.Double0)
@@ -265,6 +298,8 @@ namespace CTP
 
         private void WriteNumeric(CtpNumeric value)
         {
+            EnsureCapacityBytes(4 + 4 + 4 + 1 + 1);
+
             if (value.High != 0)
             {
                 WriteSymbol(CtpObjectSymbols.NumericHigh);
@@ -316,6 +351,7 @@ namespace CTP
 
         private void WriteTime(CtpTime value)
         {
+            EnsureCapacityBytes(9);
             if (value.Ticks == 0)
             {
                 WriteSymbol(CtpObjectSymbols.CtpTimeZero);
@@ -338,6 +374,7 @@ namespace CTP
 
         private void WriteGuid(Guid value)
         {
+            EnsureCapacityBytes(17);
             if (value == Guid.Empty)
             {
                 WriteSymbol(CtpObjectSymbols.GuidEmpty);
@@ -353,6 +390,7 @@ namespace CTP
 
         private void WriteString(string value)
         {
+            EnsureCapacityBytes(5);
             int length = Encoding.UTF8.GetByteCount(value);
             if (length <= 30)
                 WriteSymbol(CtpObjectSymbols.String0 + (byte)length);
@@ -366,6 +404,7 @@ namespace CTP
 
         private void WriteBuffer(CtpBuffer value)
         {
+            EnsureCapacityBytes(5);
             if (value.Length <= 50)
                 WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)value.Length);
             else
@@ -377,6 +416,7 @@ namespace CTP
 
         private void WriteBuffer(byte[] value, int offset, int length)
         {
+            EnsureCapacityBytes(5);
             if (length <= 50)
                 WriteSymbol(CtpObjectSymbols.CtpBuffer0 + (byte)length);
             else
@@ -388,6 +428,7 @@ namespace CTP
 
         private void WriteCommand(CtpCommand value)
         {
+            EnsureCapacityBytes(5);
             int length = value.LengthWithSchema;
             WriteArrayLength(CtpObjectSymbols.CtpCommand8Bit, length);
             EnsureCapacityBytes(length);
@@ -421,20 +462,17 @@ namespace CTP
 
         private void WriteSymbol(CtpObjectSymbols symbol)
         {
-            EnsureCapacityBytes(1);
             WriteBits8((uint)symbol);
         }
 
         private void WriteBits8(uint value)
         {
-            EnsureCapacityBytes(1);
             m_buffer[m_length + 0] = (byte)value;
             m_length += 1;
         }
 
         private void WriteBits16(uint value)
         {
-            EnsureCapacityBytes(2);
             m_buffer[m_length + 0] = (byte)(value >> 8);
             m_buffer[m_length + 1] = (byte)value;
             m_length += 2;
@@ -442,7 +480,6 @@ namespace CTP
 
         private void WriteBits24(uint value)
         {
-            EnsureCapacityBytes(3);
             m_buffer[m_length + 0] = (byte)(value >> 16);
             m_buffer[m_length + 1] = (byte)(value >> 8);
             m_buffer[m_length + 2] = (byte)value;
@@ -451,7 +488,6 @@ namespace CTP
 
         private void WriteBits32(uint value)
         {
-            EnsureCapacityBytes(4);
             m_buffer[m_length + 0] = (byte)(value >> 24);
             m_buffer[m_length + 1] = (byte)(value >> 16);
             m_buffer[m_length + 2] = (byte)(value >> 8);
@@ -461,7 +497,6 @@ namespace CTP
 
         private void WriteBits40(ulong value)
         {
-            EnsureCapacityBytes(5);
             m_buffer[m_length + 0] = (byte)(value >> 32);
             m_buffer[m_length + 1] = (byte)(value >> 24);
             m_buffer[m_length + 2] = (byte)(value >> 16);
@@ -472,7 +507,6 @@ namespace CTP
 
         private void WriteBits48(ulong value)
         {
-            EnsureCapacityBytes(6);
             m_buffer[m_length + 0] = (byte)(value >> 40);
             m_buffer[m_length + 1] = (byte)(value >> 32);
             m_buffer[m_length + 2] = (byte)(value >> 24);
@@ -484,7 +518,6 @@ namespace CTP
 
         private void WriteBits56(ulong value)
         {
-            EnsureCapacityBytes(7);
             m_buffer[m_length + 0] = (byte)(value >> 48);
             m_buffer[m_length + 1] = (byte)(value >> 40);
             m_buffer[m_length + 2] = (byte)(value >> 32);
@@ -497,7 +530,6 @@ namespace CTP
 
         private void WriteBits64(ulong value)
         {
-            EnsureCapacityBytes(8);
             m_buffer[m_length + 0] = (byte)(value >> 56);
             m_buffer[m_length + 1] = (byte)(value >> 48);
             m_buffer[m_length + 2] = (byte)(value >> 40);
@@ -509,7 +541,7 @@ namespace CTP
             m_length += 8;
         }
 
-        
+
 
 
     }
