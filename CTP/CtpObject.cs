@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace CTP
@@ -7,50 +9,60 @@ namespace CTP
     /// This class contains the fundamental value for CTP.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public partial struct CtpObject : IEquatable<CtpObject>
+    public readonly partial struct CtpObject : IEquatable<CtpObject>
     {
         public static readonly CtpObject Null = default(CtpObject);
 
         #region [ Members ]
 
+        /// <summary>
+        /// Extracts a value without type checking. Never use this unless a type check has already occurred.
+        /// Use the corresponding 'Is' method to direct cast or throw an exception, or 'As' method to attempt to cast to they specified type.
+        /// </summary>
         [FieldOffset(0)]
-        private readonly long m_valueInt64;
+        public readonly long UnsafeInteger;
         [FieldOffset(0)]
-        private readonly double m_valueDouble;
+        public readonly double UnsafeDouble;
         [FieldOffset(0)]
-        private readonly float m_valueSingle;
+        public readonly float UnsafeSingle;
         [FieldOffset(0)]
-        private readonly bool m_valueBoolean;
+        public readonly bool UnsafeBoolean;
         [FieldOffset(0)]
-        private readonly CtpTime m_valueCtpTime;
+        public readonly CtpTime UnsafeCtpTime;
         [FieldOffset(0)]
-        private readonly Guid m_valueGuid;
-
+        public readonly Guid UnsafeGuid;
         [FieldOffset(0)]
-        private readonly CtpNumeric m_valueNumeric;
-
-        [FieldOffset(0)]
-        private readonly int m_rawInt32;
+        public readonly CtpNumeric UnsafeNumeric;
 
         [FieldOffset(16)]
         private readonly object m_valueObject;
 
-        [FieldOffset(24)]
-        private readonly CtpTypeCode m_valueTypeCode;
-
-        [FieldOffset(0)]
-        public readonly ulong UnsafeRawInt64;
-        [FieldOffset(0)]
-        public readonly uint UnsafeRawInt32;
-
-        #endregion
-
-        #region [ Properties ]
 
         /// <summary>
         /// The type code of the value.
         /// </summary>
-        public CtpTypeCode ValueTypeCode => m_valueTypeCode;
+        [FieldOffset(24)]
+        public readonly CtpTypeCode ValueTypeCode;
+
+        /// <summary>
+        /// This extracts the first 8 bytes of a value.
+        /// Important Note: primitives that are not exactly 8 bytes will
+        /// exhibit an erratic behavior depending on the endian of the processor.
+        /// </summary>
+        [FieldOffset(0)]
+        public readonly ulong UnsafeRawUInt64;
+
+        /// <summary>
+        /// This extracts the first 4 bytes of a value.
+        /// Important Note: primitives that are not exactly 4 bytes will
+        /// exhibit an erratic behavior depending on the endian of the processor.
+        /// </summary>
+        [FieldOffset(0)]
+        public readonly uint UnsafeRawUInt32;
+
+        #endregion
+
+        #region [ Properties ]
 
         /// <summary>
         /// Gets if the specified value is considered the default value for that type.
@@ -60,7 +72,7 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return true;
@@ -69,11 +81,11 @@ namespace CTP
                     case CtpTypeCode.Double:
                     case CtpTypeCode.CtpTime:
                     case CtpTypeCode.Boolean:
-                        return m_valueInt64 == 0;
+                        return UnsafeInteger == 0;
                     case CtpTypeCode.Numeric:
-                        return m_valueNumeric.IsDefault;
+                        return UnsafeNumeric.IsDefault;
                     case CtpTypeCode.Guid:
-                        return m_valueGuid == Guid.Empty;
+                        return UnsafeGuid == Guid.Empty;
                     case CtpTypeCode.String:
                         return ((string)m_valueObject).Length == 0;
                     case CtpTypeCode.CtpBuffer:
@@ -90,9 +102,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Integer)
+                if (ValueTypeCode != CtpTypeCode.Integer)
                     ThrowHelper(CtpTypeCode.Integer);
-                return m_valueInt64;
+                return UnsafeInteger;
             }
         }
 
@@ -100,9 +112,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Single)
+                if (ValueTypeCode != CtpTypeCode.Single)
                     ThrowHelper(CtpTypeCode.Single);
-                return m_valueSingle;
+                return UnsafeSingle;
             }
         }
 
@@ -110,9 +122,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Double)
+                if (ValueTypeCode != CtpTypeCode.Double)
                     ThrowHelper(CtpTypeCode.Double);
-                return m_valueDouble;
+                return UnsafeDouble;
             }
         }
 
@@ -120,9 +132,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Numeric)
+                if (ValueTypeCode != CtpTypeCode.Numeric)
                     ThrowHelper(CtpTypeCode.Numeric);
-                return m_valueNumeric;
+                return UnsafeNumeric;
             }
         }
 
@@ -130,9 +142,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.CtpTime)
+                if (ValueTypeCode != CtpTypeCode.CtpTime)
                     ThrowHelper(CtpTypeCode.CtpTime);
-                return m_valueCtpTime;
+                return UnsafeCtpTime;
             }
         }
 
@@ -140,9 +152,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Boolean)
+                if (ValueTypeCode != CtpTypeCode.Boolean)
                     ThrowHelper(CtpTypeCode.Boolean);
-                return m_valueBoolean;
+                return UnsafeBoolean;
             }
         }
 
@@ -150,9 +162,9 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.Guid)
+                if (ValueTypeCode != CtpTypeCode.Guid)
                     ThrowHelper(CtpTypeCode.Guid);
-                return m_valueGuid;
+                return UnsafeGuid;
             }
         }
 
@@ -160,35 +172,43 @@ namespace CTP
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.String)
+                if (ValueTypeCode != CtpTypeCode.String)
                     ThrowHelper(CtpTypeCode.String);
-                return (string)m_valueObject;
+                return UnsafeString;
             }
         }
+
+        public string UnsafeString => (string)m_valueObject;
 
         public CtpBuffer IsCtpBuffer
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.CtpBuffer)
+                if (ValueTypeCode != CtpTypeCode.CtpBuffer)
                     ThrowHelper(CtpTypeCode.CtpBuffer);
-                return (CtpBuffer)m_valueObject;
+                return UnsafeCtpBuffer;
             }
         }
+
+        public CtpBuffer UnsafeCtpBuffer => (CtpBuffer)m_valueObject;
 
         public CtpCommand IsCtpCommand
         {
             get
             {
-                if (m_valueTypeCode != CtpTypeCode.CtpCommand)
+                if (ValueTypeCode != CtpTypeCode.CtpCommand)
                     ThrowHelper(CtpTypeCode.CtpCommand);
-                return (CtpCommand)m_valueObject;
+                return UnsafeCtpCommand;
             }
         }
 
+        public CtpCommand UnsafeCtpCommand => (CtpCommand)m_valueObject;
+
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void ThrowHelper(CtpTypeCode code)
         {
-            throw new InvalidOperationException($"The internal value is {m_valueTypeCode}, not {code}");
+            throw new InvalidOperationException($"The internal value is {ValueTypeCode}, not {code}");
         }
 
         /// <summary>
@@ -207,10 +227,10 @@ namespace CTP
 
         public bool Equals(CtpObject other)
         {
-            if (m_valueTypeCode != other.m_valueTypeCode)
+            if (ValueTypeCode != other.ValueTypeCode)
                 return false;
 
-            switch (m_valueTypeCode)
+            switch (ValueTypeCode)
             {
                 case CtpTypeCode.Boolean:
                 case CtpTypeCode.Null:
@@ -218,11 +238,11 @@ namespace CTP
                 case CtpTypeCode.Single:
                 case CtpTypeCode.Double:
                 case CtpTypeCode.CtpTime:
-                    return m_valueInt64 == other.m_valueInt64;
+                    return UnsafeInteger == other.UnsafeInteger;
                 case CtpTypeCode.Numeric:
-                    return m_valueNumeric == other.m_valueNumeric;
+                    return UnsafeNumeric == other.UnsafeNumeric;
                 case CtpTypeCode.Guid:
-                    return m_valueGuid == other.m_valueGuid;
+                    return UnsafeGuid == other.UnsafeGuid;
                 case CtpTypeCode.String:
                     return (string)m_valueObject == (string)other.m_valueObject;
                 case CtpTypeCode.CtpBuffer:
@@ -245,30 +265,30 @@ namespace CTP
 
         public override int GetHashCode()
         {
-            switch (m_valueTypeCode)
+            switch (ValueTypeCode)
             {
                 case CtpTypeCode.Null:
-                    return (int)m_valueTypeCode;
+                    return (int)ValueTypeCode;
                 case CtpTypeCode.Integer:
-                    return (m_valueInt64.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (UnsafeInteger.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.Single:
-                    return (m_valueSingle.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (UnsafeSingle.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.Double:
-                    return (m_valueDouble.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (UnsafeDouble.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.Numeric:
-                    return (m_valueNumeric.GetHashCode() << 3) ^ m_valueNumeric.GetHashCode();
+                    return (UnsafeNumeric.GetHashCode() << 3) ^ UnsafeNumeric.GetHashCode();
                 case CtpTypeCode.CtpTime:
-                    return (m_valueCtpTime.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (UnsafeCtpTime.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.Boolean:
-                    return (m_valueBoolean.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (UnsafeBoolean.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.Guid:
-                    return (m_valueGuid.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (UnsafeGuid.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.String:
-                    return (m_valueObject.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (m_valueObject.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.CtpBuffer:
-                    return (m_valueObject.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (m_valueObject.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 case CtpTypeCode.CtpCommand:
-                    return (m_valueObject.GetHashCode() << 3) ^ m_valueTypeCode.GetHashCode();
+                    return (m_valueObject.GetHashCode() << 3) ^ ValueTypeCode.GetHashCode();
                 default:
                     throw new ArgumentOutOfRangeException();
             }

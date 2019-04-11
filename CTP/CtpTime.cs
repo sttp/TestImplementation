@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace CTP
 {
-    public struct CtpTime : IComparable<CtpTime>, IEquatable<CtpTime>, IComparable, IFormattable, ISerializable
+    public readonly struct CtpTime : IComparable<CtpTime>, IEquatable<CtpTime>, IComparable, IFormattable, ISerializable
     {
         //((DateTime.MaxValue.Ticks / TimeSpan.TicksPerMinute) << 30) + TimeSpan.TicksPerSecond * 61;
         private const long MaxTicks = 5646770628038745215;
@@ -12,49 +12,47 @@ namespace CTP
         private const int LeapSecondUpperRange = 61 * (int)TimeSpan.TicksPerSecond;
         private const int TicksPerMinuteMask = (1 << 30) - 1;
         private const int MinutesPastEpocShift = 30;
-        private readonly long m_ticks;
+        public readonly long Ticks;
 
         public static readonly CtpTime MinValue = new CtpTime(0);
         public static readonly CtpTime MaxValue = new CtpTime(MaxTicks);
 
         public CtpTime(long ticks)
         {
-            m_ticks = ticks;
+            Ticks = ticks;
             Validate();
         }
 
         public CtpTime(DateTime value)
         {
-            m_ticks = value.Ticks / TimeSpan.TicksPerMinute;
-            m_ticks = (m_ticks << MinutesPastEpocShift) + (value.Ticks - (m_ticks * TimeSpan.TicksPerMinute));
+            Ticks = value.Ticks / TimeSpan.TicksPerMinute;
+            Ticks = (Ticks << MinutesPastEpocShift) + (value.Ticks - (Ticks * TimeSpan.TicksPerMinute));
             Validate();
         }
 
         public CtpTime(DateTime value, bool leapSecondInProgress)
         {
-            m_ticks = value.Ticks / TimeSpan.TicksPerMinute;
-            m_ticks = (m_ticks << MinutesPastEpocShift) + (value.Ticks - (m_ticks * TimeSpan.TicksPerMinute));
+            Ticks = value.Ticks / TimeSpan.TicksPerMinute;
+            Ticks = (Ticks << MinutesPastEpocShift) + (value.Ticks - (Ticks * TimeSpan.TicksPerMinute));
 
             if (leapSecondInProgress)
             {
-                m_ticks += TimeSpan.TicksPerSecond;
+                Ticks += TimeSpan.TicksPerSecond;
             }
             Validate();
         }
 
         private void Validate()
         {
-            if (m_ticks < 0 || m_ticks > MaxTicks || TicksPastMinute > LeapSecondUpperRange)
+            if (Ticks < 0 || Ticks > MaxTicks || TicksPastMinute > LeapSecondUpperRange)
             {
                 throw new Exception("Encoding Error");
             }
         }
 
-        public int TicksPastMinute => (int)(m_ticks & TicksPerMinuteMask);
+        public int TicksPastMinute => (int)(Ticks & TicksPerMinuteMask);
 
-        public long MinutesPastEpoc => (m_ticks >> MinutesPastEpocShift);
-
-        public long Ticks => m_ticks;
+        public long MinutesPastEpoc => (Ticks >> MinutesPastEpocShift);
 
         public DateTime AsDateTime
         {
@@ -79,42 +77,42 @@ namespace CTP
 
         public int CompareTo(CtpTime other)
         {
-            return m_ticks.CompareTo(other.m_ticks);
+            return Ticks.CompareTo(other.Ticks);
         }
 
         public bool Equals(CtpTime other)
         {
-            return m_ticks == other.m_ticks;
+            return Ticks == other.Ticks;
         }
 
         public static bool operator ==(CtpTime a, CtpTime b)
         {
-            return a.m_ticks == b.m_ticks;
+            return a.Ticks == b.Ticks;
         }
 
         public static bool operator !=(CtpTime a, CtpTime b)
         {
-            return a.m_ticks != b.m_ticks;
+            return a.Ticks != b.Ticks;
         }
 
         public static bool operator <(CtpTime a, CtpTime b)
         {
-            return a.m_ticks < b.m_ticks;
+            return a.Ticks < b.Ticks;
         }
 
         public static bool operator >(CtpTime a, CtpTime b)
         {
-            return a.m_ticks > b.m_ticks;
+            return a.Ticks > b.Ticks;
         }
 
         public static bool operator <=(CtpTime a, CtpTime b)
         {
-            return a.m_ticks <= b.m_ticks;
+            return a.Ticks <= b.Ticks;
         }
 
         public static bool operator >=(CtpTime a, CtpTime b)
         {
-            return a.m_ticks >= b.m_ticks;
+            return a.Ticks >= b.Ticks;
         }
 
         public static explicit operator DateTime(CtpTime a)
@@ -132,7 +130,7 @@ namespace CTP
         {
             if (value is CtpTime)
             {
-                return m_ticks == ((CtpTime)value).m_ticks;
+                return Ticks == ((CtpTime)value).Ticks;
             }
             return false;
         }
@@ -148,12 +146,12 @@ namespace CTP
             {
                 throw new ArgumentNullException("info");
             }
-            info.AddValue("ticks", m_ticks);
+            info.AddValue("ticks", Ticks);
         }
 
         public override int GetHashCode()
         {
-            return (int)m_ticks ^ (int)(m_ticks >> 32);
+            return (int)Ticks ^ (int)(Ticks >> 32);
         }
 
         public string ToString(string format, IFormatProvider formatProvider)
@@ -171,8 +169,8 @@ namespace CTP
             {
                 throw new ArgumentException("Type must be SttpTime");
             }
-            long internalTicks = ((CtpTime)value).m_ticks;
-            long internalTicks2 = m_ticks;
+            long internalTicks = ((CtpTime)value).Ticks;
+            long internalTicks2 = Ticks;
             if (internalTicks2 > internalTicks)
             {
                 return 1;

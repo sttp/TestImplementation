@@ -111,34 +111,34 @@ namespace CTP
                     WriteNull();
                     break;
                 case CtpTypeCode.Integer:
-                    WriteInt(value.IsInteger);
+                    WriteInt(value.UnsafeInteger);
                     break;
                 case CtpTypeCode.Single:
-                    WriteSingle(value.UnsafeRawInt32);
+                    WriteSingle(value.UnsafeRawUInt32);
                     break;
                 case CtpTypeCode.Double:
-                    WriteDouble(value.UnsafeRawInt64);
+                    WriteDouble(value.UnsafeRawUInt64);
                     break;
                 case CtpTypeCode.Numeric:
-                    WriteNumeric(value.IsNumeric);
+                    WriteNumeric(value.UnsafeNumeric);
                     break;
                 case CtpTypeCode.CtpTime:
-                    WriteTime(value.IsCtpTime);
+                    WriteTime(value.UnsafeCtpTime);
                     break;
                 case CtpTypeCode.Boolean:
-                    WriteBool(value.IsBoolean);
+                    WriteBool(value.UnsafeBoolean);
                     break;
                 case CtpTypeCode.Guid:
-                    WriteGuid(value.IsGuid);
+                    WriteGuid(value.UnsafeGuid);
                     break;
                 case CtpTypeCode.String:
-                    WriteString(value.IsString);
+                    WriteString(value.UnsafeString);
                     break;
                 case CtpTypeCode.CtpBuffer:
-                    WriteBuffer(value.IsCtpBuffer);
+                    WriteBuffer(value.UnsafeCtpBuffer);
                     break;
                 case CtpTypeCode.CtpCommand:
-                    WriteCommand(value.IsCtpCommand);
+                    WriteCommand(value.UnsafeCtpCommand);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -185,8 +185,7 @@ namespace CTP
             }
             else if ((ulong)value > Bits56)
             {
-                WriteSymbol(CtpObjectSymbols.IntBits64);
-                WriteBits64((ulong)value);
+                WriteBits64(CtpObjectSymbols.IntBits64, (ulong)value);
             }
             else
             {
@@ -198,38 +197,31 @@ namespace CTP
                 }
                 if (value <= Bits8)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits8Pos + adder);
-                    WriteBits8((uint)value);
+                    WriteBits8(CtpObjectSymbols.IntBits8Pos + adder, (uint)value);
                 }
                 else if (value <= Bits16)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits16Pos + adder);
-                    WriteBits16((uint)value);
+                    WriteBits16(CtpObjectSymbols.IntBits16Pos + adder, (uint)value);
                 }
                 else if (value <= Bits24)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits24Pos + adder);
-                    WriteBits24((uint)value);
+                    WriteBits24(CtpObjectSymbols.IntBits24Pos + adder, (uint)value);
                 }
                 else if (value <= Bits32)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits32Pos + adder);
-                    WriteBits32((uint)value);
+                    WriteBits32(CtpObjectSymbols.IntBits32Pos + adder, (uint)value);
                 }
                 else if (value <= (long)Bits40)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits40Pos + adder);
-                    WriteBits40((ulong)value);
+                    WriteBits40(CtpObjectSymbols.IntBits40Pos + adder, (ulong)value);
                 }
                 else if (value <= (long)Bits48)
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits48Pos + adder);
-                    WriteBits48((ulong)value);
+                    WriteBits48(CtpObjectSymbols.IntBits48Pos + adder, (ulong)value);
                 }
                 else
                 {
-                    WriteSymbol(CtpObjectSymbols.IntBits56Pos + adder);
-                    WriteBits56((ulong)value);
+                    WriteBits56(CtpObjectSymbols.IntBits56Pos + adder, (ulong)value);
                 }
             }
         }
@@ -249,18 +241,15 @@ namespace CTP
                 byte firstByte = (byte)(value >> 24);
                 if (56 <= firstByte && firstByte <= 79)
                 {
-                    WriteSymbol(CtpObjectSymbols.Single56 + (byte)(firstByte - 56));
-                    WriteBits24(value);
+                    WriteBits24(CtpObjectSymbols.Single56 + (byte)(firstByte - 56), value);
                 }
                 else if (184 <= firstByte && firstByte <= 207)
                 {
-                    WriteSymbol(CtpObjectSymbols.Single184 + (byte)(firstByte - 184));
-                    WriteBits24(value);
+                    WriteBits24(CtpObjectSymbols.Single184 + (byte)(firstByte - 184), value);
                 }
                 else
                 {
-                    WriteSymbol(CtpObjectSymbols.SingleElse);
-                    WriteBits32(value);
+                    WriteBits32(CtpObjectSymbols.SingleElse, value);
                 }
             }
         }
@@ -280,18 +269,15 @@ namespace CTP
                 byte firstByte = (byte)(value >> 56);
                 if (63 <= firstByte && firstByte <= 65)
                 {
-                    WriteSymbol(CtpObjectSymbols.Double63 + (byte)(firstByte - 63));
-                    WriteBits56(value);
+                    WriteBits56(CtpObjectSymbols.Double63 + (byte)(firstByte - 63), value);
                 }
                 else if (191 <= firstByte && firstByte <= 193)
                 {
-                    WriteSymbol(CtpObjectSymbols.Double191 + (byte)(firstByte - 191));
-                    WriteBits56(value);
+                    WriteBits56(CtpObjectSymbols.Double191 + (byte)(firstByte - 191), value);
                 }
                 else
                 {
-                    WriteSymbol(CtpObjectSymbols.DoubleElse);
-                    WriteBits64(value);
+                    WriteBits64(CtpObjectSymbols.DoubleElse, value);
                 }
             }
         }
@@ -302,50 +288,60 @@ namespace CTP
 
             if (value.High != 0)
             {
-                WriteSymbol(CtpObjectSymbols.NumericHigh);
-                WriteNumericHelper(value.Flags, value.High);
+                WriteNumericHelper(CtpObjectSymbols.NumericHigh, value.Flags, value.High);
                 WriteBits32(value.Mid);
                 WriteBits32(value.Low);
             }
             else if (value.Mid != 0)
             {
-                WriteSymbol(CtpObjectSymbols.NumericMid);
-                WriteNumericHelper(value.Flags, value.Mid);
+                WriteNumericHelper(CtpObjectSymbols.NumericMid, value.Flags, value.Mid);
                 WriteBits32(value.Low);
             }
             else if (value.Low != 0)
             {
-                WriteSymbol(CtpObjectSymbols.NumericLow);
-                WriteNumericHelper(value.Flags, value.Low);
+                WriteNumericHelper(CtpObjectSymbols.NumericLow, value.Flags, value.Low);
             }
             else
             {
-                WriteSymbol(CtpObjectSymbols.NumericNone);
-                WriteBits8(value.Flags);
+                WriteBits8(CtpObjectSymbols.NumericNone, value.Flags);
             }
         }
 
-        private void WriteNumericHelper(byte flags, uint value)
+        private void WriteNumericHelper(CtpObjectSymbols symbol, byte flags, uint value)
         {
             if (value > Bits24)
             {
-                WriteBits8(flags + 192u);
-                WriteBits32(value);
+                m_buffer[m_length + 0] = (byte)symbol;
+                m_buffer[m_length + 1] = (byte)(flags + 192u);
+                m_buffer[m_length + 2] = (byte)(value >> 24);
+                m_buffer[m_length + 3] = (byte)(value >> 16);
+                m_buffer[m_length + 4] = (byte)(value >> 8);
+                m_buffer[m_length + 5] = (byte)value;
+                m_length += 6;
             }
             else if (value > Bits16)
             {
-                WriteBits8(flags + 128u);
-                WriteBits24(value);
+                m_buffer[m_length + 0] = (byte)symbol;
+                m_buffer[m_length + 1] = (byte)(flags + 128u);
+                m_buffer[m_length + 2] = (byte)(value >> 16);
+                m_buffer[m_length + 3] = (byte)(value >> 8);
+                m_buffer[m_length + 4] = (byte)value;
+                m_length += 5;
             }
             else if (value > Bits8)
             {
-                WriteBits8(flags + 64u);
-                WriteBits16(value);
+                m_buffer[m_length + 0] = (byte)symbol;
+                m_buffer[m_length + 1] = (byte)(flags + 64u);
+                m_buffer[m_length + 2] = (byte)(value >> 8);
+                m_buffer[m_length + 3] = (byte)value;
+                m_length += 4;
             }
             else
             {
-                WriteBits8(flags);
-                WriteBits8(value);
+                m_buffer[m_length + 0] = (byte)symbol;
+                m_buffer[m_length + 1] = (byte)flags;
+                m_buffer[m_length + 2] = (byte)value;
+                m_length += 3;
             }
         }
 
@@ -361,13 +357,11 @@ namespace CTP
                 byte firstByte = (byte)(value.Ticks >> 56);
                 if (14 <= firstByte && firstByte <= 17)
                 {
-                    WriteSymbol(CtpObjectSymbols.CtpTime14 + (byte)(firstByte - 14));
-                    WriteBits56((ulong)value.Ticks);
+                    WriteBits56(CtpObjectSymbols.CtpTime14 + (byte)(firstByte - 14), (ulong)value.Ticks);
                 }
                 else
                 {
-                    WriteSymbol(CtpObjectSymbols.CtpTimeElse);
-                    WriteBits64((ulong)value.Ticks);
+                    WriteBits64(CtpObjectSymbols.CtpTimeElse, (ulong)value.Ticks);
                 }
             }
         }
@@ -440,50 +434,26 @@ namespace CTP
         {
             if (length > Bits24)
             {
-                WriteBits8((uint)baseSymbol + 3u);
-                WriteBits32((uint)length);
+                WriteBits32(baseSymbol + 3, (uint)length);
             }
             else if (length > Bits16)
             {
-                WriteBits8((uint)baseSymbol + 2u);
-                WriteBits24((uint)length);
+                WriteBits24(baseSymbol + 2, (uint)length);
             }
             else if (length > Bits8)
             {
-                WriteBits8((uint)baseSymbol + 1u);
-                WriteBits16((uint)length);
+                WriteBits16(baseSymbol + 1, (uint)length);
             }
             else
             {
-                WriteBits8((uint)baseSymbol + 0u);
-                WriteBits8((uint)length);
+                WriteBits8(baseSymbol + 0, (uint)length);
             }
         }
 
         private void WriteSymbol(CtpObjectSymbols symbol)
         {
-            WriteBits8((uint)symbol);
-        }
-
-        private void WriteBits8(uint value)
-        {
-            m_buffer[m_length + 0] = (byte)value;
+            m_buffer[m_length + 0] = (byte)symbol;
             m_length += 1;
-        }
-
-        private void WriteBits16(uint value)
-        {
-            m_buffer[m_length + 0] = (byte)(value >> 8);
-            m_buffer[m_length + 1] = (byte)value;
-            m_length += 2;
-        }
-
-        private void WriteBits24(uint value)
-        {
-            m_buffer[m_length + 0] = (byte)(value >> 16);
-            m_buffer[m_length + 1] = (byte)(value >> 8);
-            m_buffer[m_length + 2] = (byte)value;
-            m_length += 3;
         }
 
         private void WriteBits32(uint value)
@@ -495,9 +465,33 @@ namespace CTP
             m_length += 4;
         }
 
-        private void WriteBits40(ulong value)
+        private void WriteBits8(CtpObjectSymbols symbol, uint value)
         {
-            m_buffer[m_length + 0] = (byte)(value >> 32);
+            m_buffer[m_length + 0] = (byte)symbol;
+            m_buffer[m_length + 1] = (byte)value;
+            m_length += 2;
+        }
+
+        private void WriteBits16(CtpObjectSymbols symbol, uint value)
+        {
+            m_buffer[m_length + 0] = (byte)symbol;
+            m_buffer[m_length + 1] = (byte)(value >> 8);
+            m_buffer[m_length + 2] = (byte)value;
+            m_length += 3;
+        }
+
+        private void WriteBits24(CtpObjectSymbols symbol, uint value)
+        {
+            m_buffer[m_length + 0] = (byte)symbol;
+            m_buffer[m_length + 1] = (byte)(value >> 16);
+            m_buffer[m_length + 2] = (byte)(value >> 8);
+            m_buffer[m_length + 3] = (byte)value;
+            m_length += 4;
+        }
+
+        private void WriteBits32(CtpObjectSymbols symbol, uint value)
+        {
+            m_buffer[m_length + 0] = (byte)symbol;
             m_buffer[m_length + 1] = (byte)(value >> 24);
             m_buffer[m_length + 2] = (byte)(value >> 16);
             m_buffer[m_length + 3] = (byte)(value >> 8);
@@ -505,9 +499,9 @@ namespace CTP
             m_length += 5;
         }
 
-        private void WriteBits48(ulong value)
+        private void WriteBits40(CtpObjectSymbols symbol, ulong value)
         {
-            m_buffer[m_length + 0] = (byte)(value >> 40);
+            m_buffer[m_length + 0] = (byte)symbol;
             m_buffer[m_length + 1] = (byte)(value >> 32);
             m_buffer[m_length + 2] = (byte)(value >> 24);
             m_buffer[m_length + 3] = (byte)(value >> 16);
@@ -516,9 +510,9 @@ namespace CTP
             m_length += 6;
         }
 
-        private void WriteBits56(ulong value)
+        private void WriteBits48(CtpObjectSymbols symbol, ulong value)
         {
-            m_buffer[m_length + 0] = (byte)(value >> 48);
+            m_buffer[m_length + 0] = (byte)symbol;
             m_buffer[m_length + 1] = (byte)(value >> 40);
             m_buffer[m_length + 2] = (byte)(value >> 32);
             m_buffer[m_length + 3] = (byte)(value >> 24);
@@ -528,9 +522,9 @@ namespace CTP
             m_length += 7;
         }
 
-        private void WriteBits64(ulong value)
+        private void WriteBits56(CtpObjectSymbols symbol, ulong value)
         {
-            m_buffer[m_length + 0] = (byte)(value >> 56);
+            m_buffer[m_length + 0] = (byte)symbol;
             m_buffer[m_length + 1] = (byte)(value >> 48);
             m_buffer[m_length + 2] = (byte)(value >> 40);
             m_buffer[m_length + 3] = (byte)(value >> 32);
@@ -541,6 +535,19 @@ namespace CTP
             m_length += 8;
         }
 
+        private void WriteBits64(CtpObjectSymbols symbol, ulong value)
+        {
+            m_buffer[m_length + 0] = (byte)symbol;
+            m_buffer[m_length + 1] = (byte)(value >> 56);
+            m_buffer[m_length + 2] = (byte)(value >> 48);
+            m_buffer[m_length + 3] = (byte)(value >> 40);
+            m_buffer[m_length + 4] = (byte)(value >> 32);
+            m_buffer[m_length + 5] = (byte)(value >> 24);
+            m_buffer[m_length + 6] = (byte)(value >> 16);
+            m_buffer[m_length + 7] = (byte)(value >> 8);
+            m_buffer[m_length + 8] = (byte)value;
+            m_length += 9;
+        }
 
 
 

@@ -7,7 +7,7 @@ using GSF;
 
 namespace CTP
 {
-    public struct CtpNumeric
+    public readonly struct CtpNumeric
     {
         public readonly byte Flags;
         public readonly uint High;

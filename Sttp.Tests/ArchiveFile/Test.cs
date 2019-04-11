@@ -242,7 +242,6 @@ namespace Sttp.Tests
                 Console.WriteLine(GuidExtensions.ToRfcGuid(sha.ComputeHash(File.ReadAllBytes(@"C:\temp\C37Test\benchmark2.sttp")), 0));
             }
 
-            return;
 
             string[] file1 = File.ReadAllLines(@"C:\temp\C37Test\benchmark1.txt");
             string[] file2 = File.ReadAllLines(@"C:\temp\C37Test\benchmark2.txt");
@@ -289,7 +288,7 @@ namespace Sttp.Tests
         {
             string newFileName = Path.ChangeExtension(source, ".txt");
 
-            //using (var raw = new StreamWriter(newFileName, false))
+           //using (var raw = new StreamWriter(newFileName, false))
             using (var fs = new FileStream(source, FileMode.Open))
             using (var fs2 = new FileStream(dest, FileMode.Create))
             using (var ctp = new SttpFileReader(fs, false))

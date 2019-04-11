@@ -57,7 +57,7 @@ namespace Sttp.DataPointEncoding
 
                     value = m_stream.Read();
                 }
-                else if (code >= 16)
+                else
                 {
                     value = code - 16;
                 }

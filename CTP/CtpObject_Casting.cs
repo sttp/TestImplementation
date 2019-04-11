@@ -8,24 +8,24 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return $"(Null)";
                     case CtpTypeCode.Integer:
-                        return $"(Integer){m_valueInt64.ToString()}";
+                        return $"(Integer){UnsafeInteger.ToString()}";
                     case CtpTypeCode.Single:
-                        return $"(float){m_valueSingle.ToString()}";
+                        return $"(float){UnsafeSingle.ToString()}";
                     case CtpTypeCode.Double:
-                        return $"(double){m_valueDouble.ToString()}";
+                        return $"(double){UnsafeDouble.ToString()}";
                     case CtpTypeCode.Numeric:
-                        return $"(Numeric){m_valueNumeric.ToString()}";
+                        return $"(Numeric){UnsafeNumeric.ToString()}";
                     case CtpTypeCode.CtpTime:
-                        return $"(CtpTime){m_valueCtpTime.ToString()}";
+                        return $"(CtpTime){UnsafeCtpTime.ToString()}";
                     case CtpTypeCode.Boolean:
-                        return $"(bool){m_valueBoolean.ToString()}";
+                        return $"(bool){UnsafeBoolean.ToString()}";
                     case CtpTypeCode.Guid:
-                        return $"(Guid){m_valueGuid.ToString()}";
+                        return $"(Guid){UnsafeGuid.ToString()}";
                     case CtpTypeCode.String:
                         return $"(String){(m_valueObject as string).ToString()}";
                     case CtpTypeCode.CtpBuffer:
@@ -42,24 +42,24 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return null;
                     case CtpTypeCode.Integer:
-                        return m_valueInt64;
+                        return UnsafeInteger;
                     case CtpTypeCode.Single:
-                        return m_valueSingle;
+                        return UnsafeSingle;
                     case CtpTypeCode.Double:
-                        return m_valueDouble;
+                        return UnsafeDouble;
                     case CtpTypeCode.Numeric:
-                        return m_valueNumeric;
+                        return UnsafeNumeric;
                     case CtpTypeCode.CtpTime:
-                        return m_valueCtpTime;
+                        return UnsafeCtpTime;
                     case CtpTypeCode.Boolean:
-                        return m_valueBoolean;
+                        return UnsafeBoolean;
                     case CtpTypeCode.Guid:
-                        return m_valueGuid;
+                        return UnsafeGuid;
                     case CtpTypeCode.String:
                         return m_valueObject as string;
                     case CtpTypeCode.CtpBuffer:
@@ -225,33 +225,33 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Integer:
                         {
                             checked
                             {
-                                return (long)m_valueInt64;
+                                return (long)UnsafeInteger;
                             }
                         }
                     case CtpTypeCode.Single:
                         {
                             checked
                             {
-                                return (long)m_valueSingle;
+                                return (long)UnsafeSingle;
                             }
                         }
                     case CtpTypeCode.Double:
                         {
                             checked
                             {
-                                return (long)m_valueDouble;
+                                return (long)UnsafeDouble;
                             }
                         }
                     case CtpTypeCode.Numeric:
                         checked
                         {
-                            return (long)(decimal)m_valueNumeric;
+                            return (long)(decimal)UnsafeNumeric;
                         }
                     case CtpTypeCode.String:
                         {
@@ -314,27 +314,27 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Integer:
                         checked
                         {
-                            return (float)m_valueInt64;
+                            return (float)UnsafeInteger;
                         }
                     case CtpTypeCode.Single:
                         checked
                         {
-                            return (float)m_valueSingle;
+                            return (float)UnsafeSingle;
                         }
                     case CtpTypeCode.Double:
                         checked
                         {
-                            return (float)m_valueDouble;
+                            return (float)UnsafeDouble;
                         }
                     case CtpTypeCode.Numeric:
                         checked
                         {
-                            return (float)(decimal)m_valueNumeric;
+                            return (float)(decimal)UnsafeNumeric;
                         }
                     case CtpTypeCode.String:
                     {
@@ -353,27 +353,27 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Integer:
                         checked
                         {
-                            return (double)m_valueInt64;
+                            return (double)UnsafeInteger;
                         }
                     case CtpTypeCode.Single:
                         checked
                         {
-                            return (double)m_valueSingle;
+                            return (double)UnsafeSingle;
                         }
                     case CtpTypeCode.Double:
                         checked
                         {
-                            return (double)m_valueDouble;
+                            return (double)UnsafeDouble;
                         }
                     case CtpTypeCode.Numeric:
                         checked
                         {
-                            return (double)(decimal)m_valueNumeric;
+                            return (double)(decimal)UnsafeNumeric;
                         }
                     case CtpTypeCode.String:
                     {
@@ -393,27 +393,27 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Integer:
                         checked
                         {
-                            return (decimal)m_valueInt64;
+                            return (decimal)UnsafeInteger;
                         }
                     case CtpTypeCode.Single:
                         checked
                         {
-                            return (decimal)m_valueSingle;
+                            return (decimal)UnsafeSingle;
                         }
                     case CtpTypeCode.Double:
                         checked
                         {
-                            return (decimal)m_valueDouble;
+                            return (decimal)UnsafeDouble;
                         }
                     case CtpTypeCode.Numeric:
                         checked
                         {
-                            return (decimal)m_valueNumeric;
+                            return (decimal)UnsafeNumeric;
                         }
                     case CtpTypeCode.String:
                         {
@@ -431,27 +431,27 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Integer:
                         checked
                         {
-                            return (CtpNumeric)(decimal)m_valueInt64;
+                            return (CtpNumeric)(decimal)UnsafeInteger;
                         }
                     case CtpTypeCode.Single:
                         checked
                         {
-                            return (CtpNumeric)(decimal)m_valueSingle;
+                            return (CtpNumeric)(decimal)UnsafeSingle;
                         }
                     case CtpTypeCode.Double:
                         checked
                         {
-                            return (CtpNumeric)(decimal)m_valueDouble;
+                            return (CtpNumeric)(decimal)UnsafeDouble;
                         }
                     case CtpTypeCode.Numeric:
                         checked
                         {
-                            return m_valueNumeric;
+                            return UnsafeNumeric;
                         }
                     case CtpTypeCode.String:
                     {
@@ -471,10 +471,10 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.CtpTime:
-                        return m_valueCtpTime;
+                        return UnsafeCtpTime;
                     case CtpTypeCode.String:
                     {
                         if (DateTime.TryParse((string)m_valueObject, out var result))
@@ -492,10 +492,10 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Boolean:
-                        return m_valueBoolean;
+                        return UnsafeBoolean;
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to Boolean");
                 }
@@ -506,10 +506,10 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Guid:
-                        return m_valueGuid;
+                        return UnsafeGuid;
                     default:
                         throw new InvalidCastException($"Cannot cast from {ToTypeString} to Guid");
                 }
@@ -520,10 +520,10 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Boolean:
-                        if (m_valueBoolean)
+                        if (UnsafeBoolean)
                         {
                             return 'T';
                         }
@@ -545,24 +545,24 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return null;
                     case CtpTypeCode.Integer:
-                        return m_valueInt64.ToString();
+                        return UnsafeInteger.ToString();
                     case CtpTypeCode.Single:
-                        return m_valueSingle.ToString();
+                        return UnsafeSingle.ToString();
                     case CtpTypeCode.Double:
-                        return m_valueDouble.ToString();
+                        return UnsafeDouble.ToString();
                     case CtpTypeCode.Numeric:
-                        return m_valueNumeric.ToString();
+                        return UnsafeNumeric.ToString();
                     case CtpTypeCode.CtpTime:
-                        return m_valueCtpTime.ToString();
+                        return UnsafeCtpTime.ToString();
                     case CtpTypeCode.Boolean:
-                        return m_valueBoolean.ToString();
+                        return UnsafeBoolean.ToString();
                     case CtpTypeCode.Guid:
-                        return m_valueGuid.ToString();
+                        return UnsafeGuid.ToString();
                     case CtpTypeCode.String:
                         return (m_valueObject as string).ToString();
                     case CtpTypeCode.CtpBuffer:
@@ -579,7 +579,7 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return null;
@@ -595,7 +595,7 @@ namespace CTP
         {
             get
             {
-                switch (m_valueTypeCode)
+                switch (ValueTypeCode)
                 {
                     case CtpTypeCode.Null:
                         return null;

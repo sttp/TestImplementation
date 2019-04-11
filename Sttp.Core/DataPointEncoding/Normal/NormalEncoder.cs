@@ -9,10 +9,11 @@ namespace Sttp.DataPointEncoding
     {
         private CtpObjectWriter m_stream;
         private int m_lastChannelID = 0;
-        private CtpTime m_lastTimestamp;
+        private long m_lastTimestamp;
         private long m_lastQuality = 0;
-        private Dictionary<CtpObject, int> m_pointIDToChannelIDMapping = new Dictionary<CtpObject, int>();
-        private List<SttpDataPointID> m_metadata = new List<SttpDataPointID>();
+        private Dictionary<SttpDataPointID, int> m_pointIDToChannelIDMapping = new Dictionary<SttpDataPointID, int>();
+        private SttpDataPointID[] m_metadata = new SttpDataPointID[16];
+        private int m_metadataCount;
 
         public NormalEncoder()
         {
@@ -25,7 +26,7 @@ namespace Sttp.DataPointEncoding
         public sealed override void Clear()
         {
             m_lastChannelID = 0;
-            m_lastTimestamp = default(CtpTime);
+            m_lastTimestamp = 0;
             m_lastQuality = 0;
             m_stream.Clear();
         }
@@ -35,75 +36,91 @@ namespace Sttp.DataPointEncoding
             return new CommandDataStreamNormal(m_stream.ToArray());
         }
 
-        public override void AddDataPoint(SttpDataPoint point)
+        public override int AddDataPoint(SttpDataPoint point)
         {
-            int channelID = m_lastChannelID += 1;
-            bool includeMetadata = false;
+            byte code = 0;
+            //CtpObject value = point.Value;
+            int channelID = m_lastChannelID += 1; //Note the += 1
 
             //Most of the time, measurements will be sequential, this limits a dictionary lookup
-            if (channelID >= m_metadata.Count || !m_metadata[channelID].ID.Equals(point.DataPoint.ID))
+            if (channelID >= m_metadataCount || !ReferenceEquals(m_metadata[channelID], point.DataPoint))
             {
-                channelID = GetChannelID(point, ref includeMetadata);
-            }
-
-            CtpObject value = point.Value;
-            bool qualityChanged = point.Quality != m_lastQuality;
-            bool timeChanged = point.Time != m_lastTimestamp;
-            bool channelIDChanged = m_lastChannelID != channelID;
-            bool isSpecialExclusion = (value.ValueTypeCode == CtpTypeCode.Integer && value.IsInteger > long.MaxValue - 16);
-
-            if (includeMetadata || qualityChanged || timeChanged || channelIDChanged || isSpecialExclusion)
-            {
-                byte code = 0;
-                if (channelIDChanged)
-                    code |= 1;
-                if (includeMetadata)
-                    code |= 2;
-                if (qualityChanged)
-                    code |= 4;
-                if (timeChanged)
-                    code |= 8;
-
-                m_stream.WriteExact(code);
-                if (channelIDChanged)
+                //A reference equals should be good enough to try
+                channelID = GetChannelID(point, out var includeMetadata);
+                if (m_lastChannelID != channelID)
                 {
-                    m_stream.WriteExact(channelID);
+                    code |= 1;
                     m_lastChannelID = channelID;
                 }
-
                 if (includeMetadata)
-                {
-                    m_stream.Write(point.DataPoint.ID);
-                }
-                if (qualityChanged)
-                {
-                    m_stream.WriteExact(point.Quality);
-                    m_lastQuality = point.Quality;
-                }
-                if (timeChanged)
-                {
-                    m_stream.Write(point.Time);
-                    m_lastTimestamp = point.Time;
-                }
-            }
-            else if (value.ValueTypeCode == CtpTypeCode.Integer)
-            {
-                if (value.IsInteger >= 0)
-                    value = value.IsInteger + 16;
+                    code |= 2;
             }
 
-            m_stream.Write(value);
+            if (point.Quality != m_lastQuality)
+            {
+                code |= 4;
+                m_lastQuality = point.Quality;
+            }
+
+            if (point.Time.Ticks != m_lastTimestamp)
+            {
+                code |= 8;
+                m_lastTimestamp = point.Time.Ticks;
+            }
+
+            if (code > 0 || (point.Value.ValueTypeCode == CtpTypeCode.Integer && point.Value.UnsafeInteger > long.MaxValue - 16))
+            {
+                m_stream.WriteExact(code);
+                if ((code & 1) != 0)
+                    m_stream.WriteExact(channelID);
+                if ((code & 2) != 0)
+                    m_stream.Write(point.DataPoint.ID);
+                if ((code & 4) != 0)
+                    m_stream.WriteExact(point.Quality);
+                if ((code & 8) != 0)
+                    m_stream.Write(point.Time);
+            }
+            else if (point.Value.ValueTypeCode == CtpTypeCode.Integer)
+            {
+                //10% of the time, it's an integer
+                if (point.Value.UnsafeInteger >= 0)
+                    m_stream.WriteExact(point.Value.UnsafeInteger + 16);
+                else
+                    m_stream.WriteExact(point.Value.UnsafeInteger);
+                return m_stream.Length;
+
+            }
+
+            if (point.Value.ValueTypeCode == CtpTypeCode.Single)
+            {
+                m_stream.WriteExact(point.Value.UnsafeSingle); //90% of the time, its single.
+            }
+            else
+            {
+                m_stream.Write(point.Value);
+            }
+            return m_stream.Length;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private int GetChannelID(SttpDataPoint point, ref bool includeMetadata)
+        private int GetChannelID(SttpDataPoint point, out bool includeMetadata)
         {
-            if (!m_pointIDToChannelIDMapping.TryGetValue(point.DataPoint.ID, out var channelID))
+            includeMetadata = false;
+            if (!m_pointIDToChannelIDMapping.TryGetValue(point.DataPoint, out var channelID))
             {
                 includeMetadata = true;
-                channelID = m_metadata.Count;
-                m_pointIDToChannelIDMapping.Add(point.DataPoint.ID, channelID);
-                m_metadata.Add(point.DataPoint);
+                channelID = m_metadataCount;
+                m_pointIDToChannelIDMapping.Add(point.DataPoint, channelID);
+
+                if (m_metadataCount + 1 == m_metadata.Length)
+                {
+                    var newList = new SttpDataPointID[m_metadata.Length * 2];
+                    m_metadata.CopyTo(newList, 0);
+                    m_metadata = newList;
+                }
+
+                m_metadata[m_metadataCount] = point.DataPoint;
+                m_metadataCount++;
             }
             return channelID;
         }

@@ -11,7 +11,7 @@ namespace Sttp.DataPointEncoding
     {
         public abstract int Length { get; }
         public abstract void Clear();
-        public abstract void AddDataPoint(SttpDataPoint point);
+        public abstract int AddDataPoint(SttpDataPoint point);
         public abstract CommandObject ToArray();
     }
 }

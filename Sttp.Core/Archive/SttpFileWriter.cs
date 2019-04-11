@@ -52,8 +52,7 @@ namespace Sttp
 
         public void AddDataPoint(SttpDataPoint dataPoint)
         {
-            m_encoder.AddDataPoint(dataPoint);
-            if (m_encoder.Length > 1500)
+            if (m_encoder.AddDataPoint(dataPoint) > 8100)
             {
                 m_stream.Write(m_encoder.ToArray());
                 m_encoder.Clear();
