@@ -116,6 +116,45 @@ namespace CTP
 
         public int DataLength => m_data.Length;
 
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            var prefix = "";
+            for (int x = 0; x < NodeCount; x++)
+            {
+                switch (m_nodes[x].Symbol)
+                {
+                    case CommandSchemaSymbol.StartArray:
+                        sb.Append(prefix);
+                        sb.AppendLine(m_nodes[x].NodeName + "[]");
+                        prefix += " ";
+                        break;
+                    case CommandSchemaSymbol.StartElement:
+                        sb.Append(prefix);
+                        sb.AppendLine("Element: " + m_nodes[x].NodeName);
+                        prefix += "|";
+                        break;
+                    case CommandSchemaSymbol.Value:
+                        sb.Append(prefix);
+                        sb.AppendLine(m_nodes[x].NodeName);
+                        break;
+                    case CommandSchemaSymbol.EndElement:
+                        prefix = prefix.Substring(0, prefix.Length - 1);
+                        sb.Append(prefix);
+                        sb.AppendLine("-" + m_nodes[x].NodeName);
+                        break;
+                    case CommandSchemaSymbol.EndArray:
+                        prefix = prefix.Substring(0, prefix.Length - 1);
+                        sb.Append(prefix);
+                        sb.AppendLine("-" + m_nodes[x].NodeName);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            return sb.ToString();
+        }
+
         public PooledBuffer ToCommand(int schemaRuntimeID)
         {
             return PacketMethods.CreatePacket(PacketContents.CommandSchema, schemaRuntimeID, m_data);

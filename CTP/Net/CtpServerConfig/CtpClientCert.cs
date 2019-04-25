@@ -13,7 +13,7 @@ namespace CTP.Net
         public string CertificateName { get; set; }
 
         [CommandField()]
-        public List<string> CertificatePaths { get; set; }
+        public string CertificateDirectory { get; set; }
 
         [CommandField()]
         public string MappedAccount { get; set; }
@@ -24,7 +24,6 @@ namespace CTP.Net
         public CtpClientCert()
         {
             AllowedRemoteIPs = new List<IpAndMask>();
-            CertificatePaths = new List<string>();
         }
 
         public static explicit operator CtpClientCert(CtpCommand obj)
@@ -43,13 +42,13 @@ namespace CTP.Net
                 if (!string.IsNullOrWhiteSpace(MappedAccount))
                     sb.Append("=> " + MappedAccount + "; ");
 
-                if (CertificatePaths == null || CertificatePaths.Count == 0)
+                if (string.IsNullOrWhiteSpace(CertificateDirectory))
                 {
                     sb.Append("Missing Certificates; ");
                 }
                 else
                 {
-                    sb.Append("Certs: " + string.Join(", ", CertificatePaths.Select(Path.GetFileName)) + "; ");
+                    sb.Append("Certs: " + Path.GetDirectoryName(CertificateDirectory) + "; ");
                 }
                 return sb.ToString();
             }

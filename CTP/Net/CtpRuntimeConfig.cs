@@ -41,11 +41,11 @@ namespace CTP.Net
 
             foreach (var item in config.ClientCerts)
             {
-                foreach (var path in item.CertificatePaths)
+                if (Directory.Exists(item.CertificateDirectory))
                 {
-                    if (File.Exists(path))
+                    foreach (var file in Directory.GetFiles(item.CertificateDirectory, "*.cer"))
                     {
-                        X509Certificate2 certificate = new X509Certificate2(path);
+                        X509Certificate2 certificate = new X509Certificate2(file);
                         CertificateClients.Add(certificate.Thumbprint, new ClientCerts(item, certificate));
                     }
                 }

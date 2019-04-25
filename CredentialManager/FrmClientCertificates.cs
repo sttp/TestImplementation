@@ -14,14 +14,7 @@ namespace CredentialManager
             InitializeComponent();
 
             txtName.Text = data.CertificateName;
-            lstCertificates.Items.Clear();
-            if (data.AllowedRemoteIPs != null)
-            {
-                foreach (var item in data.CertificatePaths)
-                {
-                    lstCertificates.Items.Add(item);
-                }
-            }
+            txtCertificateDirectory.Text = data.CertificateDirectory ?? string.Empty;
             lstTrustedIPs.Items.Clear();
             if (data.AllowedRemoteIPs != null)
             {
@@ -38,7 +31,7 @@ namespace CredentialManager
         {
             var data = new CtpClientCert();
             data.CertificateName = txtName.Text;
-            data.CertificatePaths = new List<string>(lstCertificates.Items.Cast<string>());
+            data.CertificateDirectory = txtCertificateDirectory.Text;
             data.AllowedRemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
             data.MappedAccount = txtMappedAccount.Text;
 
@@ -91,49 +84,6 @@ namespace CredentialManager
                 }
             }
         }
-
-        private void btnCertificatesAdd_Click(object sender, EventArgs e)
-        {
-            using (var dlg = new OpenFileDialog())
-            {
-                dlg.Filter = "Certificate|*.cer";
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    lstCertificates.Items.Add(dlg.FileName);
-                }
-            }
-        }
-
-        private void lstCertificates_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (lstCertificates.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-            string data = Interaction.InputBox("Edit Certificate Location", "Location", (string)lstCertificates.SelectedItem);
-            if (data.Length > 0)
-                lstCertificates.Items[lstCertificates.SelectedIndex] = data;
-        }
-
-        private void lstCertificates_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                e.Handled = true;
-                if (lstCertificates.SelectedItem == null)
-                {
-                    MessageBox.Show("Select and item");
-                    return;
-                }
-                lstCertificates.Items.Remove(lstCertificates.SelectedItem);
-
-            }
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-                lstCertificates_MouseDoubleClick(null, null);
-            }
-        }
+        
     }
 }
