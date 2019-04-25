@@ -66,7 +66,6 @@ namespace CTP.Net
 
                     Log.Publish(MessageLevel.Info, "Auth Packet", packet.CommandName);
 
-                    string accountName = null;
                     session.GrantedRoles = new HashSet<string>();
                     switch (packet.CommandName)
                     {
@@ -80,9 +79,9 @@ namespace CTP.Net
                                     if (string.IsNullOrEmpty(ticket.ApprovedPublicKey) || session.RemoteCertificate.GetPublicKeyString() != ticket.ApprovedPublicKey
                                         && (ticket.ValidFrom < DateTime.UtcNow && DateTime.UtcNow <= ticket.ValidTo))
                                     {
-                                        accountName = clientCert.ClientCert.MappedAccount;
+                                        session.AccountName = clientCert.ClientCert.MappedAccount;
                                         session.LoginName = ticket.LoginName;
-                                        session.GrantedRoles.UnionWith(m_server.m_config.Accounts[accountName].Union(ticket.Roles));
+                                        session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName].Union(ticket.Roles));
                                     }
                                     break;
                                 }
@@ -95,8 +94,8 @@ namespace CTP.Net
                                 var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
                                 if (item.Key.IsMatch(ipBytes))
                                 {
-                                    accountName = item.Value;
-                                    session.GrantedRoles.UnionWith(m_server.m_config.Accounts[accountName]);
+                                    session.AccountName = item.Value;
+                                    session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName]);
                                     break;
                                 }
                             }

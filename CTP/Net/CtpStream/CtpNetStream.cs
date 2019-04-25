@@ -480,6 +480,10 @@ namespace CTP.Net
         private bool m_readEvents;
 
         /// <summary>
+        /// The name of the mapped account.
+        /// </summary>
+        public string AccountName= string.Empty;
+        /// <summary>
         /// The login name assigned to this session. Typically this will only be tracked by the server.
         /// </summary>
         public string LoginName = string.Empty;
