@@ -23,7 +23,7 @@ namespace CTP.Net
             {
                 if (!File.Exists(config.ServerCertificatePath))
                     throw new Exception($"Missing certificate at {config.ServerCertificatePath}");
-                cert = new X509Certificate2(config.ServerCertificatePath);
+                cert = new X509Certificate2(config.ServerCertificatePath, config.CertificatePassword);
             }
 
             EncryptionOptions = new EncryptionOptions(cert);
