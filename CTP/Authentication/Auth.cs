@@ -32,9 +32,16 @@ namespace CTP
         [CommandField()]
         public byte[] Signature;
 
-        public Auth(AuthorizationTicket authorizationTicket, X509Certificate2 certificate)
+        public Auth(byte[] authorizationTicket, string certificateThumbprint, byte[] signature)
         {
-            Ticket = authorizationTicket.ToArray();
+            Ticket = authorizationTicket;
+            CertificateThumbprint = certificateThumbprint;
+            Signature = signature;
+        }
+
+        public Auth(byte[] authorizationTicket, X509Certificate2 certificate)
+        {
+            Ticket = authorizationTicket;
             CertificateThumbprint = certificate.Thumbprint;
 
             using (var ecdsa = certificate.GetECDsaPrivateKey())

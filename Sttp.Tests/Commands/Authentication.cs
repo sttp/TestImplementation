@@ -73,7 +73,7 @@ namespace Sttp.Tests.Commands
                                  new List<string>(new string[] { "Admin", "User" }),
                                  "Cert1");
 
-            var cmd = new Auth(ticket, Cert);
+            var cmd = new Auth(ticket.ToArray(), Cert);
             cmd = (Auth)(CtpCommand)cmd;
             Console.WriteLine(cmd.ToString());
         }
