@@ -36,7 +36,7 @@ namespace CTP.Net
 
             foreach (var item in config.Accounts)
             {
-                Accounts.Add(item.Name, item.Roles);
+                Accounts.Add(item.Name, item.Roles ?? new List<string>());
             }
 
             foreach (var item in config.ClientCerts)

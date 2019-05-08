@@ -51,7 +51,7 @@ namespace CTP.Net
             {
                 m_approvedCerts = auth?.ValidServerSidePublicKeys;
                 m_sslStream = new SslStream(netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
-                m_sslStream.AuthenticateAsClient(string.Empty, new X509Certificate2Collection(auth.ClientCertificate), SslProtocols.None, false);
+                m_sslStream.AuthenticateAsClient(string.Empty, new X509CertificateCollection(new X509Certificate[] { auth.ClientCertificate }), SslProtocols.Tls12, false);
             }
 
             var session = new CtpNetStream(socket, netStream, m_sslStream);

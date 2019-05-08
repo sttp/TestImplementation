@@ -17,10 +17,10 @@ namespace CTP
         /// This field is a <see cref="CtpCommand"/> defined by <see cref="CommandObject"/> <see cref="Ticket"/>.
         /// </summary>
         [CommandField()]
-        public CtpCommand Ticket { get; private set; }
+        public byte[] Ticket { get; private set; }
 
         /// <summary>
-        /// The thumbprint of the certificate that was used to sign the ticket.
+        /// The thumbprint of the certificate that was used to sign the authorizationTicket.
         /// Note: this certificate must pre-exist on the server.
         /// </summary>
         [CommandField()]
@@ -32,16 +32,16 @@ namespace CTP
         [CommandField()]
         public byte[] Signature;
 
-        public Auth(Ticket ticket, X509Certificate2 certificate)
+        public Auth(AuthorizationTicket authorizationTicket, X509Certificate2 certificate)
         {
-            Ticket = ticket.ToCommand();
+            Ticket = authorizationTicket.ToArray();
             CertificateThumbprint = certificate.Thumbprint;
 
             using (var ecdsa = certificate.GetECDsaPrivateKey())
             {
                 if (ecdsa != null)
                 {
-                    Signature = ecdsa.SignData(Ticket.ToArray(), HashAlgorithmName.SHA256);
+                    Signature = ecdsa.SignData(Ticket, HashAlgorithmName.SHA256);
                     return;
                 }
             }
@@ -49,7 +49,7 @@ namespace CTP
             {
                 if (rsa != null)
                 {
-                    Signature = rsa.SignData(Ticket.ToArray(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    Signature = rsa.SignData(Ticket, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                     return;
                 }
             }
@@ -61,12 +61,12 @@ namespace CTP
             using (var ecdsa = certificate.GetECDsaPublicKey())
             {
                 if (ecdsa != null)
-                    return ecdsa.VerifyData(Ticket.ToArray(), Signature, HashAlgorithmName.SHA256);
+                    return ecdsa.VerifyData(Ticket, Signature, HashAlgorithmName.SHA256);
             }
             using (var rsa = certificate.GetRSAPublicKey())
             {
                 if (rsa != null)
-                    return rsa.VerifyData(Ticket.ToArray(), Signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    return rsa.VerifyData(Ticket, Signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             }
             throw new Exception("Certificate signing algorithm is invalid.");
         }

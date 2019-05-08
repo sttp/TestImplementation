@@ -25,24 +25,24 @@ namespace Sttp.Tests.Commands
         [TestMethod]
         public void Ticket()
         {
-            var cmd = new Ticket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
+            var cmd = new AuthorizationTicket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
                                  DateTime.Parse("2/2/3456 7:08:09.1234567"),
                                  "Login",
                                  new List<string>(new string[] { "Admin", "User" }),
                                  "Cert1");
-            cmd = (Ticket)(CtpCommand)cmd;
+            cmd = new AuthorizationTicket(cmd.ToArray());
             Console.WriteLine(cmd.ToString());
         }
 
         [TestMethod]
         public void Ticket2()
         {
-            var cmd = new Ticket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
+            var cmd = new AuthorizationTicket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
                                  DateTime.Parse("2/2/3456 7:08:09.1234567"),
                                  "Login",
                                  null,
                                  "Cert1");
-            cmd = (Ticket)(CtpCommand)cmd;
+            cmd = new AuthorizationTicket(cmd.ToArray());
             Console.WriteLine(cmd.ToString());
         }
 
@@ -67,7 +67,7 @@ namespace Sttp.Tests.Commands
         [TestMethod]
         public void Auth()
         {
-            var ticket = new Ticket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
+            var ticket = new AuthorizationTicket(DateTime.Parse("1/2/3456 7:08:09.1234567"),
                                  DateTime.Parse("2/2/3456 7:08:09.1234567"),
                                  "Login",
                                  new List<string>(new string[] { "Admin", "User" }),

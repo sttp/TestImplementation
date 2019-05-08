@@ -22,7 +22,7 @@ namespace CTP.Net
 
         public TicketDetails GetTicket()
         {
-            var t = new Ticket(DateTime.UtcNow.AddMinutes(-1), DateTime.UtcNow.AddMinutes(1), m_loginName, m_roles, m_certificate.GetPublicKeyString());
+            var t = new AuthorizationTicket(DateTime.UtcNow.AddMinutes(-1), DateTime.UtcNow.AddMinutes(1), m_loginName, m_roles, m_certificate.GetPublicKeyString());
             var auth = new Auth(t, m_certificate);
             return new TicketDetails() { Auth = auth, ValidServerSidePublicKeys = m_remoteCertificates.Select(x => x.GetPublicKeyString()).ToList(), ClientCertificate = m_certificate };
         }

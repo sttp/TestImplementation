@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using GSF.Diagnostics;
 
@@ -57,8 +58,8 @@ namespace CTP.Net
                     SslStream ssl = null;
                     if (config.EnableSSL)
                     {
-                        ssl = new SslStream(netStream, false, null, null, EncryptionPolicy.RequireEncryption);
-                        ssl.AuthenticateAsServer(config.ServerCertificate, true, SslProtocols.None, false);
+                        ssl = new SslStream(netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
+                        ssl.AuthenticateAsServer(config.ServerCertificate, true, SslProtocols.Tls12, false);
                     }
 
                     var session = new CtpNetStream(socket, netStream, ssl);
@@ -75,13 +76,23 @@ namespace CTP.Net
                             {
                                 if (auth.ValidateSignature(clientCert.Certificate))
                                 {
-                                    var ticket = (Ticket)auth.Ticket;
-                                    if (string.IsNullOrEmpty(ticket.ApprovedPublicKey) || session.RemoteCertificate.GetPublicKeyString() != ticket.ApprovedPublicKey
+                                    var ticket = new AuthorizationTicket(auth.Ticket);
+                                    if (string.IsNullOrEmpty(ticket.ApprovedPublicKey) || session.RemoteCertificate.GetPublicKeyString() == ticket.ApprovedPublicKey
                                         && (ticket.ValidFrom < DateTime.UtcNow && DateTime.UtcNow <= ticket.ValidTo))
                                     {
                                         session.AccountName = clientCert.ClientCert.MappedAccount;
                                         session.LoginName = ticket.LoginName;
-                                        session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName].Union(ticket.Roles));
+                                        if (m_server.m_config.Accounts.ContainsKey(session.AccountName))
+                                        {
+                                            if (ticket.Roles == null)
+                                            {
+                                                session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName]);
+                                            }
+                                            else
+                                            {
+                                                session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName].Union(ticket.Roles));
+                                            }
+                                        }
                                     }
                                     break;
                                 }
@@ -95,7 +106,11 @@ namespace CTP.Net
                                 if (item.Key.IsMatch(ipBytes))
                                 {
                                     session.AccountName = item.Value;
-                                    session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName]);
+                                    if (m_server.m_config.Accounts.ContainsKey(session.AccountName))
+                                    {
+                                        session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName]);
+                                    }
+
                                     break;
                                 }
                             }
@@ -110,6 +125,12 @@ namespace CTP.Net
                     Logger.SwallowException(e, "Failed to authenticate client, Safely Disconnecting");
                     //Swallow the exception since a failed connection attempt can safely be ignored by the server.
                 }
+            }
+
+            private bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+            {
+                //Always accept any client certificate, the ticket is used to authenticate it.
+                return true;
             }
 
             public static void AcceptAsync(CtpServer server, TcpClient client)
