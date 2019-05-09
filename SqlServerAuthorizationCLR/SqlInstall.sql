@@ -20,20 +20,18 @@ GO
 
 CREATE PROCEDURE [dbo].[Sign]
     @ticket varbinary(max) OUTPUT,
+    @certificateThumbprint nvarchar(max) OUTPUT,
 	@signature varbinary(max) OUTPUT,
-	@configPath nvarchar(max),
-	@validFrom [datetime2](7),
-	@validTo [datetime2](7),
-	@loginName [nvarchar](max),
-	@rolesQuery [nvarchar](max),
-	@approvedPublicKey [nvarchar](max)
+	@certificatePath nvarchar(max),
+	@ticketQuery nvarchar(max)
 WITH EXECUTE AS CALLER
 AS
 EXTERNAL NAME [SqlServerAuthorizationCLR].[SqlServerAuthorizationCLR.SignTicket].[Sign]
 GO
 
 CREATE PROCEDURE [dbo].[GetTrustedEndpoints]
-    @configPath nvarchar(max)
+    @configPath nvarchar(max),
+	@hashBits int
 WITH EXECUTE AS CALLER
 AS
 EXTERNAL NAME [SqlServerAuthorizationCLR].[SqlServerAuthorizationCLR.SignTicket].[GetTrustedEndpoints]

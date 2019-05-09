@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 using System.Text;
 using Microsoft.SqlServer.Server;
 
@@ -14,192 +13,51 @@ namespace SqlServerAuthorizationCLR
 {
     public static class SignTicket
     {
-        private class AuthorizationTicket
-        {
-            /// <summary>
-            /// Gets the UTC time this ticket is valid from.
-            /// </summary>
-            public DateTime ValidFrom { get; private set; }
-
-            /// <summary>
-            /// Gets the UTC time this ticket is valid until.
-            /// </summary>
-            public DateTime ValidTo { get; private set; }
-
-            /// <summary>
-            /// A string that identifies the user of this ticket.
-            /// </summary>
-            public string LoginName { get; private set; }
-
-            /// <summary>
-            /// The list of roles granted by this ticket. If blank, all roles will be assumed.
-            /// </summary>
-            public List<string> Roles { get; private set; }
-
-            /// <summary>
-            /// If specified, this is the public key that the client must be using.
-            /// If blank, the client does not have to supply a client side certificate.
-            /// This can be used to prevent hijacking credentials.
-            /// </summary>
-            public string ApprovedPublicKey { get; private set; }
-
-            public AuthorizationTicket(byte[] data)
-            {
-                ValidFrom = DateTime.MinValue;
-                ValidTo = DateTime.MaxValue;
-                LoginName = "";
-                Roles = new List<string>();
-                ApprovedPublicKey = "";
-
-                var ms = new MemoryStream(data);
-                while (TryRead(ms, out var name, out var value))
-                {
-                    if (name.Length < 1)
-                        throw new Exception("Name cannot be an empty string");
-                    switch (name.ToLower())
-                    {
-                        case "salt":
-                            break;
-                        case "validfrom":
-                            ValidFrom = DateTime.Parse(value);
-                            break;
-                        case "validto":
-                            ValidTo = DateTime.Parse(value);
-                            break;
-                        case "loginname":
-                            LoginName = value;
-                            break;
-                        case "role":
-                            Roles.Add(value);
-                            break;
-                        case "approvedpublickey":
-                            ApprovedPublicKey = value;
-                            break;
-                        default:
-                            {
-                                if (char.IsLower(name[0]))
-                                {
-                                    //lower character names are optional.
-                                    break;
-                                }
-                                throw new Exception("Unknown tag");
-                            }
-                    }
-                }
-
-            }
-
-            public AuthorizationTicket(DateTime? validFrom, DateTime? validTo, string loginName, List<string> roles, string approvedPublicKey)
-            {
-                ValidFrom = validFrom ?? DateTime.MinValue;
-                ValidTo = validTo ?? DateTime.MaxValue;
-                LoginName = loginName ?? string.Empty;
-                Roles = roles ?? new List<string>();
-                ApprovedPublicKey = approvedPublicKey ?? string.Empty;
-            }
-
-            public byte[] ToArray()
-            {
-                var ms = new MemoryStream();
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    byte[] salt = new byte[16];
-                    rng.GetBytes(salt);
-                    Write(ms, "salt", Convert.ToBase64String(salt)); //Salt means the data can be ignored.
-                }
-                if (ValidFrom != DateTime.MinValue)
-                {
-                    Write(ms, "ValidFrom", ValidFrom.ToString("O"));
-                }
-                if (ValidTo != DateTime.MaxValue)
-                {
-                    Write(ms, "ValidTo", ValidTo.ToString("O"));
-                }
-                if (!string.IsNullOrWhiteSpace(LoginName))
-                {
-                    Write(ms, "LoginName", LoginName);
-                }
-                if (Roles != null)
-                {
-                    foreach (var role in Roles)
-                    {
-                        if (!string.IsNullOrWhiteSpace(role))
-                            Write(ms, "Role", role);
-                    }
-                }
-                if (!string.IsNullOrWhiteSpace(ApprovedPublicKey))
-                {
-                    Write(ms, "ApprovedPublicKey", ApprovedPublicKey);
-                }
-                return ms.ToArray();
-            }
-
-            private void Write(MemoryStream stream, string name, string data)
-            {
-                byte[] nameBytes = Encoding.UTF8.GetBytes(name);
-                if (nameBytes.Length > 65536)
-                    throw new Exception("String length too long");
-                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
-                if (dataBytes.Length > 65536)
-                    throw new Exception("String length too long");
-
-                stream.WriteByte((byte)nameBytes.Length);
-                stream.Write(nameBytes, 0, nameBytes.Length);
-                stream.WriteByte((byte)(dataBytes.Length >> 8));
-                stream.WriteByte((byte)(dataBytes.Length));
-                stream.Write(dataBytes, 0, dataBytes.Length);
-            }
-
-            private bool TryRead(MemoryStream stream, out string name, out string data)
-            {
-                if (stream.Position == stream.Length)
-                {
-                    name = null;
-                    data = null;
-                    return false;
-                }
-
-                int length = stream.ReadNextByte();
-                byte[] nameBytes = stream.ReadBytes(length);
-                length = stream.ReadNextByte() << 8;
-                length += stream.ReadNextByte();
-                byte[] dataBytes = stream.ReadBytes(length);
-                name = Encoding.UTF8.GetString(nameBytes);
-                data = Encoding.UTF8.GetString(dataBytes);
-                return true;
-            }
-        }
-
         [SqlProcedure()]
-        public static void Sign(out byte[] ticket, out byte[] signature, string configPath, DateTime validFrom, DateTime validTo, string loginName, string rolesQuery, string approvedPublicKey)
+        public static void Sign(out byte[] ticket, out string certificateThumbprint, out byte[] signature, string certificatePath, string ticketQuery)
         {
             var allowedRoles = new List<string>();
+            var ticketValues = new DataTable();
 
-            if (string.IsNullOrWhiteSpace(rolesQuery))
+            if (string.IsNullOrWhiteSpace(ticketQuery))
+                throw new Exception("Ticket cannot be null");
+
+            var ms = new MemoryStream();
+
+            using (var connection = new SqlConnection("context connection=true"))
             {
-                var roles = new DataTable();
-                using (var connection = new SqlConnection("context connection=true"))
-                {
-                    connection.Open();
-                    var ta = new SqlDataAdapter(rolesQuery, connection);
-                    ta.Fill(roles);
-                    connection.Close();
-                }
-                foreach (DataRow dataRow in roles.Rows)
-                {
-                    allowedRoles.Add(dataRow[0].ToString());
-                }
+                connection.Open();
+                var cmd = new SqlCommand(ticketQuery, connection);
+                var ta = new SqlDataAdapter(ticketQuery, connection);
+                ta.Fill(ticketValues);
+                connection.Close();
             }
 
-            ticket = new AuthorizationTicket(validFrom, validTo, loginName, allowedRoles, approvedPublicKey).ToArray();
+            foreach (DataRow dataRow in ticketValues.Rows)
+            {
+                string name = dataRow[0].ToString();
+                object value = dataRow[1];
 
-            var cert = Find(configPath);
+                if (value is DateTime)
+                    value = ((DateTime)value).ToString("O");
+                else if (value is byte[])
+                    value = Convert.ToBase64String((byte[])value);
+                else
+                    value = value.ToString();
+
+                Write(ms, name, (string)value);
+            }
+
+            ticket = ms.ToArray();
+
+            var cert = Find(certificatePath);
+            certificateThumbprint = cert.Thumbprint;
 
             using (var ecdsa = cert.GetECDsaPrivateKey())
             {
                 if (ecdsa != null)
                 {
-                    signature = ecdsa.SignData(ticket, HashAlgorithmName.SHA256);
+                    signature = ecdsa.SignData(ticket, HashAlgorithmName.SHA512);
                     return;
                 }
             }
@@ -207,7 +65,7 @@ namespace SqlServerAuthorizationCLR
             {
                 if (rsa != null)
                 {
-                    signature = rsa.SignData(ticket, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                    signature = rsa.SignData(ticket, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
                     return;
                 }
             }
@@ -215,27 +73,57 @@ namespace SqlServerAuthorizationCLR
         }
 
         [SqlProcedure()]
-        public static void GetTrustedEndpoints(string configPath)
+        public static void GetTrustedEndpoints(string configPath, int hashBits)
         {
-            SqlDataRecord record = new SqlDataRecord(new SqlMetaData("Thumbprint", SqlDbType.NVarChar, -1), new SqlMetaData("Public Key", SqlDbType.NVarChar, -1));
+            SqlDataRecord record = new SqlDataRecord(new SqlMetaData("Hash", SqlDbType.VarBinary, -1));
             SqlContext.Pipe.SendResultsStart(record);
 
-            foreach (var file in Directory.GetFiles(configPath, "*.cer", SearchOption.TopDirectoryOnly))
+            HashAlgorithm hash;
+            switch (hashBits)
             {
-                var crt = new X509Certificate2(file);
-                record.SetString(0, crt.Thumbprint);
-                record.SetString(1, crt.GetPublicKeyString());
-
-                SqlContext.Pipe.SendResultsRow(record);
-
+                case -1:
+                    hash = null;
+                    break;
+                case 160:
+                    hash = new SHA1Cng();
+                    break;
+                case 256:
+                    hash = new SHA256Cng();
+                    break;
+                case 384:
+                    hash = new SHA384Cng();
+                    break;
+                case 512:
+                    hash = new SHA512Cng();
+                    break;
+                default:
+                    throw new ArgumentException(nameof(hashBits), "Must be in (-1, 160, 256, 384, 512)");
             }
+
+            using (hash)
+            {
+                foreach (var file in Directory.GetFiles(configPath, "*.cer", SearchOption.TopDirectoryOnly))
+                {
+                    var crt = new X509Certificate2(file);
+                    if (hash == null)
+                    {
+                        record.SetSqlBytes(0, new SqlBytes(crt.GetRawCertData()));
+                    }
+                    else
+                    {
+                        record.SetSqlBytes(0, new SqlBytes(hash.ComputeHash(crt.GetRawCertData())));
+                    }
+                    SqlContext.Pipe.SendResultsRow(record);
+                }
+            }
+
             SqlContext.Pipe.SendResultsEnd();
         }
 
 
-        private static X509Certificate2 Find(string configPath)
+        private static X509Certificate2 Find(string certificatePath)
         {
-            var crt = new X509Certificate2(Path.Combine(configPath, "Main.cer"));
+            var crt = new X509Certificate2(certificatePath);
             X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
             store.Open(OpenFlags.ReadOnly);
             foreach (var cert in store.Certificates)
@@ -302,6 +190,41 @@ namespace SqlServerAuthorizationCLR
                 length -= num;
                 position += num;
             }
+        }
+
+        private static void Write(MemoryStream stream, string name, string data)
+        {
+            byte[] nameBytes = Encoding.UTF8.GetBytes(name);
+            if (nameBytes.Length > 256)
+                throw new Exception("String length too long");
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            if (dataBytes.Length > 65536)
+                throw new Exception("String length too long");
+
+            stream.WriteByte((byte)nameBytes.Length);
+            stream.Write(nameBytes, 0, nameBytes.Length);
+            stream.WriteByte((byte)(dataBytes.Length >> 8));
+            stream.WriteByte((byte)(dataBytes.Length));
+            stream.Write(dataBytes, 0, dataBytes.Length);
+        }
+
+        private static bool TryRead(MemoryStream stream, out string name, out string data)
+        {
+            if (stream.Position == stream.Length)
+            {
+                name = null;
+                data = null;
+                return false;
+            }
+
+            int length = stream.ReadNextByte();
+            byte[] nameBytes = stream.ReadBytes(length);
+            length = stream.ReadNextByte() << 8;
+            length += stream.ReadNextByte();
+            byte[] dataBytes = stream.ReadBytes(length);
+            name = Encoding.UTF8.GetString(nameBytes);
+            data = Encoding.UTF8.GetString(dataBytes);
+            return true;
         }
     }
 
