@@ -482,7 +482,7 @@ namespace CTP.Net
         /// <summary>
         /// The name of the mapped account.
         /// </summary>
-        public string AccountName= string.Empty;
+        public string AccountName = string.Empty;
         /// <summary>
         /// The login name assigned to this session. Typically this will only be tracked by the server.
         /// </summary>
@@ -648,8 +648,6 @@ namespace CTP.Net
             }
         }
 
-
-
         private void NotifyWrite()
         {
 
@@ -665,8 +663,6 @@ namespace CTP.Net
             Log.Publish(MessageLevel.Error, MessageFlags.None, "Send/Receive Error", "An error has occurred with sending or receiving from a socket. The socket will be disposed.", null, ex);
             Dispose();
         }
-
-
 
         public void Dispose()
         {

@@ -1,4 +1,6 @@
-﻿namespace CTP.Net
+﻿using System.Net;
+
+namespace CTP.Net
 {
     [CommandName("IpAndMask")]
     public class IpAndMask
@@ -26,6 +28,17 @@
             {
                 return $"{IpAddress}/{MaskBits}";
             }
+        }
+
+        private IpMatchDefinition m_ipMatch;
+
+        public bool IsMatch(byte[] ipBytes)
+        {
+            if (m_ipMatch == null)
+            {
+                m_ipMatch = new IpMatchDefinition(IPAddress.Parse(IpAddress), MaskBits);
+            }
+            return m_ipMatch.IsMatch(ipBytes);
         }
     }
 }

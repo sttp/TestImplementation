@@ -20,16 +20,34 @@ namespace CredentialManager
             chkIsEnabled.Checked = account.IsEnabled;
             txtName.Text = account.Name;
             txtDescription.Text = account.Description;
-           
-            lstRoles.Items.Clear();
-            if (account.Roles != null)
+            txtCertificateDirectory.Text = account.CertificateDirectory ?? string.Empty;
+            lstTrustedIPs.Items.Clear();
+            if (account.AllowedRemoteIPs != null)
             {
-                foreach (var item in account.Roles)
+                foreach (var item in account.AllowedRemoteIPs)
                 {
-                    lstRoles.Items.Add(item);
+                    lstTrustedIPs.Items.Add(item);
                 }
             }
-           
+
+            lstImplicitRoles.Items.Clear();
+            if (account.ImplicitRoles != null)
+            {
+                foreach (var item in account.ImplicitRoles)
+                {
+                    lstImplicitRoles.Items.Add(item);
+                }
+            }
+
+            lstExplicitRoles.Items.Clear();
+            if (account.ExplicitRoles != null)
+            {
+                foreach (var item in account.ExplicitRoles)
+                {
+                    lstExplicitRoles.Items.Add(item);
+                }
+            }
+
         }
 
         public CtpAccount SaveData()
@@ -38,7 +56,10 @@ namespace CredentialManager
             rv.IsEnabled = chkIsEnabled.Checked;
             rv.Name = txtName.Text;
             rv.Description = txtDescription.Text;
-            rv.Roles = new List<string>(lstRoles.Items.Cast<string>());
+            rv.CertificateDirectory = txtCertificateDirectory.Text;
+            rv.AllowedRemoteIPs = new List<IpAndMask>(lstTrustedIPs.Items.Cast<IpAndMask>());
+            rv.ImplicitRoles = new List<string>(lstImplicitRoles.Items.Cast<string>());
+            rv.ExplicitRoles = new List<string>(lstExplicitRoles.Items.Cast<string>());
             return rv;
         }
 
@@ -47,48 +68,95 @@ namespace CredentialManager
             DialogResult = DialogResult.OK;
         }
 
-        
-
-      private void btnAddRoles_Click(object sender, EventArgs e)
+        private void btnAddExplicitRoles_Click(object sender, EventArgs e)
         {
             string data = Interaction.InputBox("Role Name", "Role");
             if (data.Length > 0)
-                lstRoles.Items.Add(data);
+                lstExplicitRoles.Items.Add(data);
+        }
+
+        private void btnAddRoles_Click(object sender, EventArgs e)
+        {
+            string data = Interaction.InputBox("Role Name", "Role");
+            if (data.Length > 0)
+                lstImplicitRoles.Items.Add(data);
         }
 
         private void lstRoles_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (lstRoles.SelectedItem == null)
+            ListBox lst = sender as ListBox;
+            if (lst.SelectedItem == null)
             {
                 MessageBox.Show("Select and item");
                 return;
             }
-            string data = Interaction.InputBox("Edit Role Name", "Role", (string)lstRoles.SelectedItem);
+            string data = Interaction.InputBox("Edit Role Name", "Role", (string)lst.SelectedItem);
             if (data.Length > 0)
-                lstRoles.Items[lstRoles.SelectedIndex] = data;
+                lst.Items[lst.SelectedIndex] = data;
         }
 
         private void lstRoles_KeyUp(object sender, KeyEventArgs e)
         {
+            ListBox lst = sender as ListBox;
             if (e.KeyCode == Keys.Delete)
             {
                 e.Handled = true;
-                if (lstRoles.SelectedItem == null)
+                if (lst.SelectedItem == null)
                 {
                     MessageBox.Show("Select and item");
                     return;
                 }
-                lstRoles.Items.Remove(lstRoles.SelectedItem);
+                lst.Items.Remove(lst.SelectedItem);
 
             }
             if (e.KeyCode == Keys.Enter)
             {
                 e.Handled = true;
-                lstRoles_MouseDoubleClick(null, null);
+                lstRoles_MouseDoubleClick(sender, null);
             }
         }
 
-       
+        private void btnAddTrustedIP_Click(object sender, EventArgs e)
+        {
+            lstTrustedIPs.Items.Add(new IpAndMask() { IpAddress = "127.0.0.1", MaskBits = 32 });
+        }
+
+        private void lstTrustedIPs_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstTrustedIPs.SelectedItem == null)
+            {
+                MessageBox.Show("Select and item");
+                return;
+            }
+
+            using (var frm = new FrmAccessList((IpAndMask)lstTrustedIPs.SelectedItem))
+            {
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    lstTrustedIPs.Items[lstTrustedIPs.SelectedIndex] = frm.SaveData();
+                }
+            }
+        }
+
+        private void lstTrustedIPs_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                e.Handled = true;
+                if (lstTrustedIPs.SelectedItem == null)
+                {
+                    MessageBox.Show("Select and item");
+                    return;
+                }
+                lstTrustedIPs.Items.Remove(lstTrustedIPs.SelectedItem);
+
+            }
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                lstTrustedIPs_MouseDoubleClick(null, null);
+            }
+        }
 
        
     }

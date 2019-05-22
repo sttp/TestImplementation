@@ -50,12 +50,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FrmAnonymousMapping.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmAnonymousMapping.Designer.cs">
-      <DependentUpon>FrmAnonymousMapping.cs</DependentUpon>
-    </Compile>
     <Compile Include="FrmAccessList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,12 +61,6 @@
     </Compile>
     <Compile Include="FrmAccountManager.Designer.cs">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FrmClientCertificates.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmClientCertificates.Designer.cs">
-      <DependentUpon>FrmClientCertificates.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmAccount.cs">
       <SubType>Form</SubType>
@@ -88,17 +76,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FrmAnonymousMapping.resx">
-      <DependentUpon>FrmAnonymousMapping.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FrmAccessList.resx">
       <DependentUpon>FrmAccessList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAccountManager.resx">
       <DependentUpon>FrmAccountManager.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmClientCertificates.resx">
-      <DependentUpon>FrmClientCertificates.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmAccount.resx">
       <DependentUpon>FrmAccount.cs</DependentUpon>

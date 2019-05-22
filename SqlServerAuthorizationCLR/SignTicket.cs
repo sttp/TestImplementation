@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
@@ -16,7 +15,6 @@ namespace SqlServerAuthorizationCLR
         [SqlProcedure()]
         public static void Sign(out byte[] ticket, out string certificateThumbprint, out byte[] signature, string certificatePath, string ticketQuery)
         {
-            var allowedRoles = new List<string>();
             var ticketValues = new DataTable();
 
             if (string.IsNullOrWhiteSpace(ticketQuery))
@@ -139,59 +137,6 @@ namespace SqlServerAuthorizationCLR
             throw new Exception("Certificate Not Found");
         }
 
-        /// <summary>
-        /// Read a byte from the stream.
-        /// Will throw an exception if the end of the stream has been reached.
-        /// </summary>
-        /// <param name="stream">the stream to read from.</param>
-        /// <returns>the value read</returns>
-        private static byte ReadNextByte(this Stream stream)
-        {
-            int num = stream.ReadByte();
-            if (num < 0)
-                throw new EndOfStreamException();
-            return (byte)num;
-        }
-
-        /// <summary>
-        /// Reads a byte array from a <see cref="T:System.IO.Stream" />.
-        /// The number of bytes should be prefixed in the stream.
-        /// </summary>
-        /// <param name="stream">the stream to read from</param>
-        /// <param name="length">gets the number of bytes to read.</param>
-        /// <returns>A new array containing the bytes.</returns>
-        private static byte[] ReadBytes(this Stream stream, int length)
-        {
-            if (length < 0)
-                throw new Exception("Invalid length");
-            byte[] buffer = new byte[length];
-            if (length > 0)
-                stream.ReadAll(buffer, 0, buffer.Length);
-            return buffer;
-        }
-
-        /// <summary>
-        /// Reads all of the provided bytes. Will not return prematurely,
-        /// but continue to execute a <see cref="M:System.IO.Stream.Read(System.Byte[],System.Int32,System.Int32)" /> command until the entire
-        /// <paramref name="length" /> has been read.
-        /// </summary>
-        /// <param name="stream">The stream to read from</param>
-        /// <param name="buffer">The buffer to write to</param>
-        /// <param name="position">the start position in the <paramref name="buffer" /></param>
-        /// <param name="length">the number of bytes to read</param>
-        /// <exception cref="T:System.IO.EndOfStreamException">occurs if the end of the stream has been reached.</exception>
-        private static void ReadAll(this Stream stream, byte[] buffer, int position, int length)
-        {
-            while (length > 0)
-            {
-                int num = stream.Read(buffer, position, length);
-                if (num == 0)
-                    throw new EndOfStreamException();
-                length -= num;
-                position += num;
-            }
-        }
-
         private static void Write(MemoryStream stream, string name, string data)
         {
             byte[] nameBytes = Encoding.UTF8.GetBytes(name);
@@ -207,25 +152,7 @@ namespace SqlServerAuthorizationCLR
             stream.WriteByte((byte)(dataBytes.Length));
             stream.Write(dataBytes, 0, dataBytes.Length);
         }
-
-        private static bool TryRead(MemoryStream stream, out string name, out string data)
-        {
-            if (stream.Position == stream.Length)
-            {
-                name = null;
-                data = null;
-                return false;
-            }
-
-            int length = stream.ReadNextByte();
-            byte[] nameBytes = stream.ReadBytes(length);
-            length = stream.ReadNextByte() << 8;
-            length += stream.ReadNextByte();
-            byte[] dataBytes = stream.ReadBytes(length);
-            name = Encoding.UTF8.GetString(nameBytes);
-            data = Encoding.UTF8.GetString(dataBytes);
-            return true;
-        }
+      
     }
 
 

@@ -58,38 +58,21 @@ namespace CredentialManager
                 }
             }
             
-            lstAnonymousAccountMapping.Items.Clear();
-            if (config.AnonymousMappings != null)
-            {
-                foreach (var option in config.AnonymousMappings)
-                {
-                    lstAnonymousAccountMapping.Items.Add(option);
-                }
-            }
-            lstCertificates.Items.Clear();
-            if (config.ClientCerts != null)
-            {
-                foreach (var item in config.ClientCerts)
-                {
-                    lstCertificates.Items.Add(item);
-                }
-            }
-
-
             chkEnableSSL.Checked = config.EnableSSL;
             txtLocalCertPath.Text = config.ServerCertificatePath;
             txtLocalCertPassword.Text = config.CertificatePassword;
+            chkUseEphemeralCertificates.Checked = config.UseEphemeralCertificates;
+
         }
 
         private CtpServerConfig SaveData()
         {
             var cfg = new CtpServerConfig();
             cfg.Accounts = new List<CtpAccount>(lstAccounts.Items.Cast<CtpAccount>());
-            cfg.AnonymousMappings = new List<CtpAnonymousMapping>(lstAnonymousAccountMapping.Items.Cast<CtpAnonymousMapping>());
-            cfg.ClientCerts = new List<CtpClientCert>(lstCertificates.Items.Cast<CtpClientCert>());
             cfg.EnableSSL = chkEnableSSL.Checked;
             cfg.ServerCertificatePath = txtLocalCertPath.Text;
             cfg.CertificatePassword = txtLocalCertPassword.Text;
+            cfg.UseEphemeralCertificates = chkUseEphemeralCertificates.Checked;
             return cfg;
         }
 
@@ -132,92 +115,6 @@ namespace CredentialManager
                     lstAccounts.Items[lstAccounts.SelectedIndex] = frm.SaveData();
                 }
             }
-        }
-
-        private void btnAddAnonomousAccountMapping_Click(object sender, EventArgs e)
-        {
-            lstAnonymousAccountMapping.Items.Add(new CtpAnonymousMapping());
-
-        }
-
-        private void lstAnonymousAccountMapping_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (lstAnonymousAccountMapping.SelectedItem == null)
-            {
-                MessageBox.Show("Select an item to edit");
-                return;
-            }
-
-            using (var frm = new FrmAnonymousMapping((CtpAnonymousMapping)lstAnonymousAccountMapping.SelectedItem))
-            {
-                if (frm.ShowDialog() == DialogResult.OK)
-                {
-                    lstAnonymousAccountMapping.Items[lstAnonymousAccountMapping.SelectedIndex] = frm.SaveData();
-                }
-            }
-        }
-
-        private void lstAnonymousAccountMapping_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                e.Handled = true;
-                if (lstAnonymousAccountMapping.SelectedItem == null)
-                {
-                    MessageBox.Show("Select an item to remove");
-                    return;
-                }
-                lstAnonymousAccountMapping.Items.Remove(lstAnonymousAccountMapping.SelectedItem);
-            }
-
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-                lstAnonymousAccountMapping_MouseDoubleClick(null, null);
-            }
-        }
-
-        private void btnAddCertificates_Click(object sender, EventArgs e)
-        {
-            lstCertificates.Items.Add(new CtpClientCert());
-        }
-
-        private void lstCertificates_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                e.Handled = true;
-                if (lstCertificates.SelectedItem == null)
-                {
-                    MessageBox.Show("Select and item");
-                    return;
-                }
-                lstCertificates.Items.Remove(lstCertificates.SelectedItem);
-
-            }
-            if (e.KeyCode == Keys.Enter)
-            {
-                e.Handled = true;
-                lstCertificates_MouseDoubleClick(null, null);
-            }
-        }
-
-        private void lstCertificates_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (lstCertificates.SelectedItem == null)
-            {
-                MessageBox.Show("Select and item");
-                return;
-            }
-
-            using (var dlg = new FrmClientCertificates((CtpClientCert)lstCertificates.SelectedItem))
-            {
-                if (dlg.ShowDialog() == DialogResult.OK)
-                {
-                    lstCertificates.Items[lstCertificates.SelectedIndex] = dlg.SaveData();
-                }
-            }
-
         }
 
         private void btnBrowseLocalCertificate_Click(object sender, EventArgs e)

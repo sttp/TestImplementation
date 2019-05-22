@@ -7,31 +7,33 @@ namespace CTP.Net
         : CommandObject<CtpServerConfig>
     {
         [CommandField()]
-        public List<CtpAccount> Accounts { get; set; }
+        public string SPN { get; set; }
 
         [CommandField()]
-        public List<CtpAnonymousMapping> AnonymousMappings { get; set; }
+        public bool EnableSSL { get; set; }
 
         [CommandField()]
-        public List<CtpClientCert> ClientCerts { get; set; }
-
-        [CommandField()]
-        public bool EnableSSL;
+        public bool UseEphemeralCertificates { get; set; }
 
         [CommandField()]
         public string ServerCertificatePath { get; set; }
 
         /// <summary>
         /// If the ServerCertificatePath is a PFX file, this password will decrypt the certificate.
+        /// If it's a .CER, the private key will be obtained from the certificate store.
         /// </summary>
         [CommandField()]
         public string CertificatePassword { get; set; }
 
+
+        [CommandField()]
+        public List<CtpAccount> Accounts { get; set; }
+
+     
+
         public CtpServerConfig()
         {
-            ClientCerts = new List<CtpClientCert>();
             Accounts = new List<CtpAccount>();
-            AnonymousMappings = new List<CtpAnonymousMapping>();
         }
 
         public static explicit operator CtpServerConfig(CtpCommand obj)
@@ -43,17 +45,11 @@ namespace CTP.Net
         /// Creates an anonymous config that allows all users to connect.
         /// </summary>
         /// <returns></returns>
-        public static CtpServerConfig CreateAnonymous()
+        public static CtpServerConfig CreateAnonymous(string spn)
         {
             var cfg = new CtpServerConfig();
+            cfg.SPN = spn;
             cfg.EnableSSL = false;
-            cfg.AnonymousMappings.Add(new CtpAnonymousMapping()
-            {
-                MappedAccount = "User",
-                Name = "User",
-                TrustedIPs = new IpAndMask() { IpAddress = "0.0.0.0", MaskBits = 0 }
-            });
-            cfg.Accounts.Add(new CtpAccount() { Description = "Default", IsEnabled = true, Name = "User", Roles = new List<string>() });
             return cfg;
         }
 

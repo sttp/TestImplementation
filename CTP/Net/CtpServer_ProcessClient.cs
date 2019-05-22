@@ -1,13 +1,17 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using GSF;
 using GSF.Diagnostics;
 
 namespace CTP.Net
@@ -54,71 +58,60 @@ namespace CTP.Net
                     TcpClient socket = m_client;
                     NetworkStream netStream = socket.GetStream();
 
-                    var config = m_server.m_config.EncryptionOptions;
-                    SslStream ssl = null;
-                    if (config.EnableSSL)
+                    IServerHandshake config = m_server.m_config;
+                    CtpNetStream session;
+
+                    if (config.UseSSL)
                     {
-                        ssl = new SslStream(netStream, false, ValidateCertificate, null, EncryptionPolicy.RequireEncryption);
-                        ssl.AuthenticateAsServer(config.ServerCertificate, true, SslProtocols.Tls12, false);
+                        var ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
+                        ssl.AuthenticateAsServer(config.GetCertificate(), true, SslProtocols.Tls12, false);
+                        session = new CtpNetStream(socket, netStream, ssl);
+
+
+                        if (config.IsEphemeralCertificate)
+                        {
+                            session.Send(config.GetCertificateProof());
+                        }
+                        else
+                        {
+                            session.Send(config.GetServerDone());
+                        }
+
+                        var cmd = session.Read();
+
+                        if (cmd.CommandName == "ClientDone")
+                        {
+                            if (!config.IsCertificateTrusted(session, (ClientDone)cmd))
+                            {
+                                session.Send(new AuthFailure("Negotiated Certificate is not trusted: " + ssl.RemoteCertificate.ToString()));
+                                session.Dispose();
+                                throw new Exception("Certificate is not trusted");
+                            }
+                        }
+                        else if (cmd.CommandName == "CertificateProof")
+                        {
+                            if (!config.IsCertificateTrusted(session, (CertificateProof)cmd))
+                            {
+                                session.Send(new AuthFailure("Negotiated Certificate is not trusted: " + ssl.RemoteCertificate.ToString()));
+                                session.Dispose();
+                                throw new Exception("Certificate is not trusted");
+                            }
+                        }
+                        else
+                        {
+                            session.Send(new AuthFailure("Unrecognized Auth Command: " + cmd.CommandName));
+                            session.Dispose();
+                            throw new Exception("Unrecognized Auth Command: " + cmd.CommandName);
+                        }
+                        session.Send(new AuthSuccess());
+                    }
+                    else
+                    {
+                        session = new CtpNetStream(socket, netStream, null);
                     }
 
-                    var session = new CtpNetStream(socket, netStream, ssl);
-                    var packet = session.Read();
-
-                    Log.Publish(MessageLevel.Info, "Auth Packet", packet.CommandName);
-
-                    session.GrantedRoles = new HashSet<string>();
-                    switch (packet.CommandName)
-                    {
-                        case "Auth":
-                            var auth = (Auth)packet;
-                            if (m_server.m_config.CertificateClients.TryGetValue(auth.CertificateThumbprint, out var clientCert))
-                            {
-                                if (auth.ValidateSignature(clientCert.Certificate))
-                                {
-                                    var ticket = new AuthorizationTicket(auth.Ticket);
-                                    if (string.IsNullOrEmpty(ticket.ApprovedPublicKey) || session.RemoteCertificate.GetPublicKeyString() == ticket.ApprovedPublicKey
-                                        && (ticket.ValidFrom < DateTime.UtcNow && DateTime.UtcNow <= ticket.ValidTo))
-                                    {
-                                        session.AccountName = clientCert.ClientCert.MappedAccount;
-                                        session.LoginName = ticket.LoginName;
-                                        if (m_server.m_config.Accounts.ContainsKey(session.AccountName))
-                                        {
-                                            if (ticket.Roles == null)
-                                            {
-                                                session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName]);
-                                            }
-                                            else
-                                            {
-                                                session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName].Union(ticket.Roles));
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                            break;
-                        case "AuthNone":
-                            session.LoginName = "";
-                            foreach (var item in m_server.m_config.AnonymousMappings)
-                            {
-                                var ipBytes = (socket.Client.RemoteEndPoint as IPEndPoint).Address.GetAddressBytes();
-                                if (item.Key.IsMatch(ipBytes))
-                                {
-                                    session.AccountName = item.Value;
-                                    if (m_server.m_config.Accounts.ContainsKey(session.AccountName))
-                                    {
-                                        session.GrantedRoles.UnionWith(m_server.m_config.Accounts[session.AccountName]);
-                                    }
-
-                                    break;
-                                }
-                            }
-                            break;
-                        default:
-                            throw new Exception();
-                    }
                     m_server.OnSessionCompleted(session);
+
                 }
                 catch (Exception e)
                 {
@@ -127,9 +120,8 @@ namespace CTP.Net
                 }
             }
 
-            private bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
+            private bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
             {
-                //Always accept any client certificate, the ticket is used to authenticate it.
                 return true;
             }
 

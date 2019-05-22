@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace CTP.Net
@@ -19,19 +20,55 @@ namespace CTP.Net
         public string Description { get; set; }
 
         /// <summary>
+        /// The path to the trusted certificates on this account.
+        /// </summary>
+        [CommandField()]
+        public string CertificateDirectory { get; set; }
+
+        /// <summary>
         /// All of the roles granted with this account.
         /// </summary>
         [CommandField()]
-        public List<string> Roles { get; set; }
+        public List<string> ExplicitRoles { get; set; }
+
+        /// <summary>
+        /// All of the roles granted with this account.
+        /// </summary>
+        [CommandField()]
+        public List<string> ImplicitRoles { get; set; }
+
+        /// <summary>
+        /// The expected remote IPs that can use this certificate if the desire is to limit its scope.
+        /// </summary>
+        [CommandField()]
+        public List<IpAndMask> AllowedRemoteIPs { get; set; }
 
         public CtpAccount()
         {
-            Roles = new List<string>();
+            AllowedRemoteIPs = new List<IpAndMask>();
+            ExplicitRoles = new List<string>();
+            ImplicitRoles = new List<string>();
         }
 
         public static explicit operator CtpAccount(CtpCommand obj)
         {
             return FromCommand(obj);
+        }
+
+        public bool IsIPAllowed(IPAddress ip)
+        {
+            if (AllowedRemoteIPs == null || AllowedRemoteIPs.Count == 0)
+                return true;
+
+            var ipBytes = ip.GetAddressBytes();
+            foreach (var allowed in AllowedRemoteIPs)
+            {
+                if (allowed.IsMatch(ipBytes))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public string DisplayMember
@@ -43,10 +80,6 @@ namespace CTP.Net
                     sb.Append("(Disabled) ");
                 if (!string.IsNullOrWhiteSpace(Name))
                     sb.Append("Name: " + Name + "; ");
-                if (Roles != null)
-                {
-                    sb.Append("Roles: " + string.Join(", ", Roles) + "; ");
-                }
 
                 return sb.ToString();
             }

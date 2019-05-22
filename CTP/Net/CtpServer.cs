@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using GSF;
 using GSF.Diagnostics;
+using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
@@ -14,6 +15,8 @@ namespace CTP.Net
     /// </summary>
     public partial class CtpServer : IDisposable
     {
+        private static readonly X509Certificate2 EphemeralCertificate = CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.ECDSA_256_SHA2_256, "Ephemeral Certificate", new DateTime(DateTime.Now.Year - 1, 1, 1), new DateTime(DateTime.Now.Year + 10, 1, 1));
+
         private readonly LogPublisher Log;
         private readonly ManualResetEvent m_shutdownCompleted = new ManualResetEvent(false);
         private TcpListener m_listener;
@@ -37,9 +40,7 @@ namespace CTP.Net
             m_onAccept = OnAccept;
 
             var logMessages = new LogStackMessages("Listen Port", listenEndpoint.ToString());
-            logMessages = logMessages.Union("Use SSL", m_config.EncryptionOptions.EnableSSL.ToString());
-            if (m_config.EncryptionOptions.EnableSSL)
-                logMessages = logMessages.Union("Certificate", m_config.EncryptionOptions.ServerCertificate.ToString());
+            logMessages = logMessages.Union("Use SSL", m_config.EnableSSL.ToString());
             using (Logger.AppendStackMessages(logMessages))
                 Log = Logger.CreatePublisher(typeof(CtpServer), MessageClass.Framework);
         }

@@ -36,12 +36,6 @@
             this.btnOpen = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnNew = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.lstAnonymousAccountMapping = new System.Windows.Forms.ListBox();
-            this.btnAddAnonomousAccountMapping = new System.Windows.Forms.Button();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.btnAddCertificates = new System.Windows.Forms.Button();
-            this.lstCertificates = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
             this.txtLocalCertPath = new System.Windows.Forms.TextBox();
             this.btnBrowseLocalCertificate = new System.Windows.Forms.Button();
@@ -49,9 +43,8 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.txtLocalCertPassword = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.chkUseEphemeralCertificates = new System.Windows.Forms.CheckBox();
             this.groupBox3.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.groupBox4.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,7 +52,7 @@
             // 
             this.btnAddAccount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnAddAccount.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAddAccount.Location = new System.Drawing.Point(653, 15);
+            this.btnAddAccount.Location = new System.Drawing.Point(652, 15);
             this.btnAddAccount.Name = "btnAddAccount";
             this.btnAddAccount.Size = new System.Drawing.Size(28, 23);
             this.btnAddAccount.TabIndex = 12;
@@ -69,13 +62,14 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.lstAccounts);
             this.groupBox3.Controls.Add(this.btnAddAccount);
             this.groupBox3.Location = new System.Drawing.Point(12, 41);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(690, 124);
+            this.groupBox3.Size = new System.Drawing.Size(689, 183);
             this.groupBox3.TabIndex = 11;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Accounts";
@@ -89,7 +83,7 @@
             this.lstAccounts.FormattingEnabled = true;
             this.lstAccounts.Location = new System.Drawing.Point(12, 15);
             this.lstAccounts.Name = "lstAccounts";
-            this.lstAccounts.Size = new System.Drawing.Size(635, 95);
+            this.lstAccounts.Size = new System.Drawing.Size(634, 147);
             this.lstAccounts.TabIndex = 0;
             this.lstAccounts.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstAccounts_KeyUp);
             this.lstAccounts.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstAccounts_MouseDoubleClick);
@@ -123,85 +117,6 @@
             this.btnNew.Text = "New Config";
             this.btnNew.UseVisualStyleBackColor = true;
             this.btnNew.Click += new System.EventHandler(this.btnNew_Click);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.lstAnonymousAccountMapping);
-            this.groupBox1.Controls.Add(this.btnAddAnonomousAccountMapping);
-            this.groupBox1.Location = new System.Drawing.Point(12, 344);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(690, 117);
-            this.groupBox1.TabIndex = 17;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Anonymous Mapping";
-            // 
-            // lstAnonymousAccountMapping
-            // 
-            this.lstAnonymousAccountMapping.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstAnonymousAccountMapping.DisplayMember = "DisplayMember";
-            this.lstAnonymousAccountMapping.FormattingEnabled = true;
-            this.lstAnonymousAccountMapping.Location = new System.Drawing.Point(12, 15);
-            this.lstAnonymousAccountMapping.Name = "lstAnonymousAccountMapping";
-            this.lstAnonymousAccountMapping.Size = new System.Drawing.Size(635, 82);
-            this.lstAnonymousAccountMapping.TabIndex = 0;
-            this.lstAnonymousAccountMapping.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstAnonymousAccountMapping_KeyUp);
-            this.lstAnonymousAccountMapping.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstAnonymousAccountMapping_MouseDoubleClick);
-            // 
-            // btnAddAnonomousAccountMapping
-            // 
-            this.btnAddAnonomousAccountMapping.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddAnonomousAccountMapping.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.btnAddAnonomousAccountMapping.Location = new System.Drawing.Point(653, 15);
-            this.btnAddAnonomousAccountMapping.Name = "btnAddAnonomousAccountMapping";
-            this.btnAddAnonomousAccountMapping.Size = new System.Drawing.Size(28, 23);
-            this.btnAddAnonomousAccountMapping.TabIndex = 12;
-            this.btnAddAnonomousAccountMapping.Text = "+";
-            this.btnAddAnonomousAccountMapping.UseVisualStyleBackColor = true;
-            this.btnAddAnonomousAccountMapping.Click += new System.EventHandler(this.btnAddAnonomousAccountMapping_Click);
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox4.Controls.Add(this.btnAddCertificates);
-            this.groupBox4.Controls.Add(this.lstCertificates);
-            this.groupBox4.Location = new System.Drawing.Point(12, 169);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(690, 167);
-            this.groupBox4.TabIndex = 38;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Certificate Mapping";
-            // 
-            // btnAddCertificates
-            // 
-            this.btnAddCertificates.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAddCertificates.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.btnAddCertificates.Location = new System.Drawing.Point(654, 16);
-            this.btnAddCertificates.Name = "btnAddCertificates";
-            this.btnAddCertificates.Size = new System.Drawing.Size(28, 23);
-            this.btnAddCertificates.TabIndex = 18;
-            this.btnAddCertificates.Text = "+";
-            this.btnAddCertificates.UseVisualStyleBackColor = true;
-            this.btnAddCertificates.Click += new System.EventHandler(this.btnAddCertificates_Click);
-            // 
-            // lstCertificates
-            // 
-            this.lstCertificates.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lstCertificates.DisplayMember = "DisplayMember";
-            this.lstCertificates.FormattingEnabled = true;
-            this.lstCertificates.Location = new System.Drawing.Point(9, 16);
-            this.lstCertificates.Name = "lstCertificates";
-            this.lstCertificates.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lstCertificates.Size = new System.Drawing.Size(639, 134);
-            this.lstCertificates.TabIndex = 1;
-            this.lstCertificates.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lstCertificates_KeyUp);
-            this.lstCertificates.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstCertificates_MouseDoubleClick);
             // 
             // label1
             // 
@@ -241,13 +156,16 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.chkUseEphemeralCertificates);
             this.groupBox2.Controls.Add(this.txtLocalCertPassword);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.chkEnableSSL);
             this.groupBox2.Controls.Add(this.btnBrowseLocalCertificate);
             this.groupBox2.Controls.Add(this.txtLocalCertPath);
             this.groupBox2.Controls.Add(this.label1);
-            this.groupBox2.Location = new System.Drawing.Point(12, 467);
+            this.groupBox2.Location = new System.Drawing.Point(12, 230);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(690, 112);
             this.groupBox2.TabIndex = 43;
@@ -271,14 +189,22 @@
             this.label2.TabIndex = 43;
             this.label2.Text = "PFX Password (Optional)";
             // 
+            // chkUseEphemeralCertificates
+            // 
+            this.chkUseEphemeralCertificates.AutoSize = true;
+            this.chkUseEphemeralCertificates.Location = new System.Drawing.Point(106, 19);
+            this.chkUseEphemeralCertificates.Name = "chkUseEphemeralCertificates";
+            this.chkUseEphemeralCertificates.Size = new System.Drawing.Size(153, 17);
+            this.chkUseEphemeralCertificates.TabIndex = 45;
+            this.chkUseEphemeralCertificates.Text = "Use Ephemeral Certificates";
+            this.chkUseEphemeralCertificates.UseVisualStyleBackColor = true;
+            // 
             // FrmAccountManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(722, 610);
+            this.ClientSize = new System.Drawing.Size(721, 351);
             this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnNew);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnSave);
@@ -286,8 +212,6 @@
             this.Name = "FrmAccountManager";
             this.Text = "Account Manager";
             this.groupBox3.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox4.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
@@ -303,12 +227,6 @@
         private System.Windows.Forms.Button btnOpen;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnNew;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.ListBox lstAnonymousAccountMapping;
-        private System.Windows.Forms.Button btnAddAnonomousAccountMapping;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.Button btnAddCertificates;
-        private System.Windows.Forms.ListBox lstCertificates;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtLocalCertPath;
         private System.Windows.Forms.Button btnBrowseLocalCertificate;
@@ -316,6 +234,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.TextBox txtLocalCertPassword;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkUseEphemeralCertificates;
     }
 }
 
