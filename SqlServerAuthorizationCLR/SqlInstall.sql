@@ -8,7 +8,7 @@ use CtpAuth
 GO
 DROP PROCEDURE dbo.[Sign]
 GO
-DROP PROCEDURE dbo.[GetTrustedEndpoints]
+DROP PROCEDURE dbo.[OpenCertificate]
 GO
 IF EXISTS (select * from sys.assemblies WHERE NAME = 'SqlServerAuthorizationCLR')
 BEGIN
@@ -19,22 +19,22 @@ Create Assembly SqlServerAuthorizationCLR from 'P:\Database\CtpAuth\SqlServerAut
 GO
 
 CREATE PROCEDURE [dbo].[Sign]
-    @ticket varbinary(max) OUTPUT,
-    @certificateThumbprint nvarchar(max) OUTPUT,
-	@signature varbinary(max) OUTPUT,
-	@certificatePath nvarchar(max),
-	@ticketQuery nvarchar(max)
+    @ephemeralCertificate varbinary(max) OUTPUT,
+    @signingCertificate varbinary(max),
+	@contentsQuery nvarchar(max)
 WITH EXECUTE AS CALLER
 AS
-EXTERNAL NAME [SqlServerAuthorizationCLR].[SqlServerAuthorizationCLR.SignTicket].[Sign]
+EXTERNAL NAME [SqlServerAuthorizationCLR].[SqlServerAuthorizationCLR.SignEphemeralCertificate].[Sign]
 GO
 
-CREATE PROCEDURE [dbo].[GetTrustedEndpoints]
-    @configPath nvarchar(max),
-	@hashBits int
+CREATE PROCEDURE [dbo].[OpenCertificate]
+    @data varbinary(max) OUTPUT,
+    @thumbprint varbinary(max) OUTPUT,
+    @contents nvarchar(max) OUTPUT,
+    @certificatePath nvarchar(max)
 WITH EXECUTE AS CALLER
 AS
-EXTERNAL NAME [SqlServerAuthorizationCLR].[SqlServerAuthorizationCLR.SignTicket].[GetTrustedEndpoints]
+EXTERNAL NAME [SqlServerAuthorizationCLR].[SqlServerAuthorizationCLR.SignEphemeralCertificate].[OpenCertificate]
 GO
 
 -------------------------------------

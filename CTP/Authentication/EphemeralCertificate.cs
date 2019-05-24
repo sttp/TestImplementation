@@ -320,7 +320,7 @@ namespace CTP
             byte[] signature = SignData(data, 0, data.Length, signingCertificate);
 
             var rv = new byte[2 + signature.Length + data.Length];
-            BigEndian.CopyBytes((ushort)rv.Length, rv, 0);
+            BigEndian.CopyBytes((ushort)signature.Length, rv, 0);
             signature.CopyTo(rv, 2);
             data.CopyTo(rv, 2 + signature.Length);
             return rv;
@@ -355,7 +355,7 @@ namespace CTP
             byte[] signature = SignData(data, 0, data.Length, signingCertificate);
 
             var rv = new byte[2 + signature.Length + data.Length];
-            BigEndian.CopyBytes((ushort)rv.Length, rv, 0);
+            BigEndian.CopyBytes((ushort)signature.Length, rv, 0);
             signature.CopyTo(rv, 2);
             data.CopyTo(rv, 2 + signature.Length);
             return rv;

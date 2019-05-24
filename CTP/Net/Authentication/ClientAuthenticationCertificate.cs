@@ -9,16 +9,16 @@ namespace CTP.Net
     public class ClientAuthenticationCertificate : IClientAuthentication, IClientHandshake
     {
         private string m_spn;
-        private X509Certificate2 m_trustedClientCertificate;
+        private X509Certificate2 m_clientCertificate;
         private string m_loginName;
         private List<string> m_grantedRoles;
         private List<string> m_deniedRoles;
         private CertificateTrust m_trustedRemotes;
 
-        public ClientAuthenticationCertificate(string spn, X509Certificate2 trustedClientCertificate, string trustedCertificatesPath, string loginName, List<string> grantedRoles, List<string> deniedRoles)
+        public ClientAuthenticationCertificate(string spn, X509Certificate2 clientCertificate, string trustedCertificatesPath, string loginName, List<string> grantedRoles, List<string> deniedRoles)
         {
             m_spn = spn;
-            m_trustedClientCertificate = trustedClientCertificate;
+            m_clientCertificate = clientCertificate;
             m_loginName = loginName;
             m_trustedRemotes = new CertificateTrust(trustedCertificatesPath);
             m_grantedRoles = grantedRoles;
@@ -31,12 +31,12 @@ namespace CTP.Net
 
         public X509Certificate2 GetCertificate()
         {
-            return m_trustedClientCertificate;
+            return m_clientCertificate;
         }
 
         public X509CertificateCollection GetCertificateCollection()
         {
-            return new X509CertificateCollection(new X509Certificate[] { m_trustedClientCertificate });
+            return new X509CertificateCollection(new X509Certificate[] { m_clientCertificate });
         }
 
         public ClientDone GetClientDone()
@@ -49,7 +49,7 @@ namespace CTP.Net
             throw new InvalidOperationException();
         }
 
-        public bool IsCertificateTrusted(X509Certificate channelCertificate)
+        public bool IsCertificateTrusted(X509Certificate channelCertificate, ServerDone serverDone)
         {
             return m_trustedRemotes.IsCertificateTrusted(channelCertificate);
         }
@@ -64,9 +64,14 @@ namespace CTP.Net
             return this;
         }
 
+        public void AuthenticationFailed()
+        {
+
+        }
+
         public void Dispose()
         {
-           
+
         }
     }
 }

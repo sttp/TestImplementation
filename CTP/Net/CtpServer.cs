@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using GSF.Diagnostics;
-using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
@@ -15,15 +13,13 @@ namespace CTP.Net
     /// </summary>
     public partial class CtpServer : IDisposable
     {
-        private static readonly X509Certificate2 EphemeralCertificate = CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.ECDSA_256_SHA2_256, "Ephemeral Certificate", new DateTime(DateTime.Now.Year - 1, 1, 1), new DateTime(DateTime.Now.Year + 10, 1, 1));
-
         private readonly LogPublisher Log;
         private readonly ManualResetEvent m_shutdownCompleted = new ManualResetEvent(false);
         private TcpListener m_listener;
         private volatile bool m_shuttingDown;
         private AsyncCallback m_onAccept;
         private IPEndPoint m_listenEndpoint;
-        private CtpRuntimeConfig m_config;
+        private IServerAuthentication m_config;
 
         /// <summary>
         /// Raised when a client successfully connects
@@ -33,14 +29,13 @@ namespace CTP.Net
         /// <summary>
         /// Listen for a socket connection
         /// </summary>
-        public CtpServer(IPEndPoint listenEndpoint, CtpServerConfig config)
+        public CtpServer(IPEndPoint listenEndpoint, IServerAuthentication config)
         {
-            m_config = new CtpRuntimeConfig(config);
+            m_config = config;
             m_listenEndpoint = listenEndpoint ?? throw new ArgumentNullException(nameof(listenEndpoint));
             m_onAccept = OnAccept;
 
             var logMessages = new LogStackMessages("Listen Port", listenEndpoint.ToString());
-            logMessages = logMessages.Union("Use SSL", m_config.EnableSSL.ToString());
             using (Logger.AppendStackMessages(logMessages))
                 Log = Logger.CreatePublisher(typeof(CtpServer), MessageClass.Framework);
         }
@@ -106,6 +101,9 @@ namespace CTP.Net
                 TcpClient socket = m_listener.EndAcceptTcpClient(ar);
                 socket.SendTimeout = 3000;
                 socket.ReceiveTimeout = 3000;
+                socket.SendBufferSize = 64 * 1024;
+                socket.ReceiveBufferSize = 64 * 1024;
+                socket.NoDelay = true;
                 if (m_shuttingDown)
                 {
                     m_shutdownCompleted.Set();

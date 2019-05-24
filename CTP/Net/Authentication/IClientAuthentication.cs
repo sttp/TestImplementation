@@ -3,5 +3,6 @@
     public interface IClientAuthentication
     {
         IClientHandshake StartHandshake();
+        void AuthenticationFailed();
     }
 }

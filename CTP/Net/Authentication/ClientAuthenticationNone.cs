@@ -34,7 +34,7 @@ namespace CTP.Net
             throw new NotImplementedException();
         }
 
-        public bool IsCertificateTrusted(X509Certificate channelCertificate)
+        public bool IsCertificateTrusted(X509Certificate channelCertificate, ServerDone serverDone)
         {
             throw new NotImplementedException();
         }
@@ -47,6 +47,11 @@ namespace CTP.Net
         public IClientHandshake StartHandshake()
         {
             return this;
+        }
+
+        public void AuthenticationFailed()
+        {
+            
         }
 
         public void Dispose()

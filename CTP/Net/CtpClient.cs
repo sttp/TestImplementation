@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.DirectoryServices.Protocols;
-using System.IO;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using GSF.Diagnostics;
-using GSF.Security.Cryptography.X509;
 
 namespace CTP.Net
 {
@@ -19,10 +15,8 @@ namespace CTP.Net
     public class CtpClient
     {
         private static readonly LogPublisher Log = Logger.CreatePublisher(typeof(CtpClient), MessageClass.Component);
-
-        private IPEndPoint m_remoteEndpoint;
-
-        private IClientAuthentication m_authentication;
+        private readonly IPEndPoint m_remoteEndpoint;
+        private readonly IClientAuthentication m_authentication;
 
         /// <summary>
         /// Creates a means of connecting to a <see cref="CtpServer"/>.
@@ -42,7 +36,14 @@ namespace CTP.Net
             var socket = new TcpClient();
             socket.SendTimeout = 3000;
             socket.ReceiveTimeout = 3000;
-            socket.Connect(m_remoteEndpoint);
+            var connect = socket.BeginConnect(m_remoteEndpoint.Address, m_remoteEndpoint.Port, null, null);
+            var success = connect.AsyncWaitHandle.WaitOne(3000);
+            if (!success)
+            {
+                socket.Close();
+                throw new TimeoutException("Failed to connect");
+            }
+            socket.EndConnect(connect);
             var netStream = socket.GetStream();
 
             SslStream sslStream = null;
@@ -57,8 +58,9 @@ namespace CTP.Net
                     var cmd = session.Read();
                     if (cmd.CommandName == "ServerDone")
                     {
-                        if (!handshake.IsCertificateTrusted(sslStream.RemoteCertificate))
+                        if (!handshake.IsCertificateTrusted(sslStream.RemoteCertificate, (ServerDone)cmd))
                         {
+                            m_authentication.AuthenticationFailed();
                             session.Send(new AuthFailure("Negotiated Certificate is not trusted: " + sslStream.RemoteCertificate.ToString()));
                             session.Dispose();
                             throw new Exception("Certificate is not trusted");
@@ -68,6 +70,7 @@ namespace CTP.Net
                     {
                         if (!handshake.IsCertificateTrusted(sslStream.RemoteCertificate, (CertificateProof)cmd))
                         {
+                            m_authentication.AuthenticationFailed();
                             session.Send(new AuthFailure("Negotiated Certificate is not trusted: " + sslStream.RemoteCertificate.ToString()));
                             session.Dispose();
                             throw new Exception("Certificate is not trusted");
@@ -75,6 +78,7 @@ namespace CTP.Net
                     }
                     else
                     {
+                        m_authentication.AuthenticationFailed();
                         session.Send(new AuthFailure("Unrecognized Auth Command: " + cmd.CommandName));
                         session.Dispose();
                         throw new Exception("Unrecognized Auth Command: " + cmd.CommandName);
@@ -92,20 +96,18 @@ namespace CTP.Net
                     cmd = session.Read();
                     if (cmd.CommandName != "AuthSuccess")
                     {
+                        m_authentication.AuthenticationFailed();
                         session.Send(new AuthFailure("Expecting AuthSuccess, received: " + cmd.CommandName));
                         session.Dispose();
                         throw new Exception("Expecting AuthSuccess, received: " + cmd.CommandName);
                     }
-
                     Log.Publish(MessageLevel.Info, "SSL Session Completed");
-
                     return session;
                 }
                 else
                 {
                     var session = new CtpNetStream(socket, netStream, null);
                     Log.Publish(MessageLevel.Info, "Non SSL Session Completed");
-
                     return session;
                 }
             }

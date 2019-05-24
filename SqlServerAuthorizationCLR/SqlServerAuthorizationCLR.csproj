@@ -43,7 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SignTicket.cs" />
+    <Compile Include="EphemeralCertificate.cs" />
+    <Compile Include="SignEphemeralCertificate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="SqlInstall.sql" />
   </ItemGroup>

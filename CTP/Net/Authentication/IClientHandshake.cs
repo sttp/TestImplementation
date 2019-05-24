@@ -37,7 +37,7 @@ namespace CTP.Net
         /// </summary>
         /// <param name="channelCertificate"></param>
         /// <returns></returns>
-        bool IsCertificateTrusted(X509Certificate channelCertificate);
+        bool IsCertificateTrusted(X509Certificate channelCertificate, ServerDone serverDone);
 
         /// <summary>
         /// Ensures that the supplied certificate is trusted in the certificate proof.

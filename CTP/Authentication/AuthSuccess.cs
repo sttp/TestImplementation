@@ -8,6 +8,7 @@ namespace CTP
     {
         public AuthSuccess()
         {
+
         }
 
         public static explicit operator AuthSuccess(CtpCommand obj)

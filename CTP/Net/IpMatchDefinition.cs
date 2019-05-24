@@ -10,12 +10,12 @@ namespace CTP.Net
     public class IpMatchDefinition
         : IComparable<IpMatchDefinition>, IEquatable<IpMatchDefinition>
     {
-        public readonly IPAddress Ip;
-        public readonly int MaskBits;
+        private readonly IPAddress Ip;
+        private readonly int MaskBits;
 
-        private int m_maskBits;
-        private byte[] m_ipBytes;
-        private byte[] m_mask;
+        private readonly int m_maskBits;
+        private readonly byte[] m_ipBytes;
+        private readonly byte[] m_mask;
 
         /// <summary>
         /// Creates a <see cref="IpMatchDefinition"/>
@@ -63,8 +63,7 @@ namespace CTP.Net
             //Since compares must be the longest match, maskbits is compared first.
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
-            int cmp;
-            cmp = -m_maskBits.CompareTo(other.m_maskBits);
+            var cmp = -m_maskBits.CompareTo(other.m_maskBits);
             if (cmp != 0)
                 return cmp;
             cmp = m_ipBytes.Length.CompareTo(other.m_ipBytes.Length);

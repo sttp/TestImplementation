@@ -1,17 +1,9 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using GSF;
 using GSF.Diagnostics;
 
 namespace CTP.Net
@@ -57,8 +49,7 @@ namespace CTP.Net
                 {
                     TcpClient socket = m_client;
                     NetworkStream netStream = socket.GetStream();
-
-                    IServerHandshake config = m_server.m_config;
+                    IServerHandshake config = m_server.m_config.StartHandshake();
                     CtpNetStream session;
 
                     if (config.UseSSL)
@@ -66,7 +57,6 @@ namespace CTP.Net
                         var ssl = new SslStream(netStream, false, UserCertificateValidationCallback, null, EncryptionPolicy.RequireEncryption);
                         ssl.AuthenticateAsServer(config.GetCertificate(), true, SslProtocols.Tls12, false);
                         session = new CtpNetStream(socket, netStream, ssl);
-
 
                         if (config.IsEphemeralCertificate)
                         {

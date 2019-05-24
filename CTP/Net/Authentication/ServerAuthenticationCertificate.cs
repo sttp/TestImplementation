@@ -11,7 +11,7 @@ using GSF.Threading;
 
 namespace CTP.Net
 {
-    public class CtpRuntimeConfig : IServerHandshake
+    public class ServerAuthenticationCertificate : IServerAuthentication, IServerHandshake
     {
         private static readonly X509Certificate2 TempCert = CertificateMaker.GenerateSelfSignedCertificate(CertificateSigningMode.ECDSA_256_SHA2_256, "Ephemeral Certificate", new DateTime(DateTime.Now.Year - 1, 1, 1), new DateTime(DateTime.Now.Year + 10, 1, 1));
 
@@ -23,9 +23,7 @@ namespace CTP.Net
         private object m_syncRoot = new object();
         private ShortTime m_lastCertRefresh;
 
-        public bool EnableSSL => m_certificate != null;
-
-        public CtpRuntimeConfig(CtpServerConfig config)
+        public ServerAuthenticationCertificate(CtpServerConfig config)
         {
             m_config = config;
             if (config.EnableSSL)
@@ -129,6 +127,7 @@ namespace CTP.Net
 
         public void Dispose()
         {
+
         }
 
         public bool UseSSL => m_config.EnableSSL;
@@ -213,6 +212,11 @@ namespace CTP.Net
                 sb.Append(ToChar(b & 15));
             }
             return sb.ToString();
+        }
+
+        public IServerHandshake StartHandshake()
+        {
+            return this;
         }
     }
 }
