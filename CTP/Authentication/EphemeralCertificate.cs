@@ -1,6 +1,6 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -8,7 +8,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using GSF;
 using GSF.IO;
-using GSF.Security.Cryptography.X509;
 
 namespace CTP
 {
@@ -19,12 +18,12 @@ namespace CTP
         /// <summary>
         /// Valid starting this time.
         /// </summary>
-        public DateTime ValidFrom { get; private set; }
+        public DateTime NotBefore { get; private set; }
 
         /// <summary>
         /// Valid until this time.
         /// </summary>
-        public DateTime ValidTo { get; private set; }
+        public DateTime NotAfter { get; private set; }
 
         /// <summary>
         /// Gets the service provider name associated with a request.
@@ -39,12 +38,12 @@ namespace CTP
         /// <summary>
         /// The list of roles granted to this certificate.
         /// </summary>
-        public List<string> GrantedRoles { get; private set; }
+        public List<string> GrantRoles { get; private set; }
 
         /// <summary>
         /// The list of roles granted to this certificate.
         /// </summary>
-        public List<string> DeniedRoles { get; private set; }
+        public List<string> DenyRoles { get; private set; }
 
         /// <summary>
         /// The public certificate that has this permission.
@@ -60,14 +59,16 @@ namespace CTP
 
         public byte[] TrustedCertSignature { get; private set; }
 
+        public string SignatureAlgorithm { get; private set; }
+
         public EphemeralCertificate(byte[] data)
         {
-            ValidFrom = DateTime.MinValue;
-            ValidTo = DateTime.MaxValue;
+            NotBefore = DateTime.MinValue;
+            NotAfter = DateTime.MaxValue;
             SPN = "";
             LoginName = "";
-            GrantedRoles = new List<string>();
-            DeniedRoles = new List<string>();
+            GrantRoles = new List<string>();
+            DenyRoles = new List<string>();
 
             var ms = new MemoryStream(data);
             TrustedCertSignature = ReadBytes(ms);
@@ -91,23 +92,26 @@ namespace CTP
                     case "login":
                         LoginName = Encoding.UTF8.GetString(value);
                         break;
-                    case "grantedrole":
-                        GrantedRoles.Add(Encoding.UTF8.GetString(value));
+                    case "grantrole":
+                        GrantRoles.Add(Encoding.UTF8.GetString(value));
                         break;
-                    case "deniedrole":
-                        DeniedRoles.Add(Encoding.UTF8.GetString(value));
+                    case "denyrole":
+                        DenyRoles.Add(Encoding.UTF8.GetString(value));
                         break;
-                    case "validfrom":
-                        ValidFrom = DateTime.Parse(Encoding.UTF8.GetString(value));
+                    case "notbefore":
+                        NotBefore = DateTime.SpecifyKind(DateTime.Parse(Encoding.UTF8.GetString(value)), DateTimeKind.Utc);
                         break;
-                    case "validto":
-                        ValidTo = DateTime.Parse(Encoding.UTF8.GetString(value));
+                    case "notAfter":
+                        NotAfter = DateTime.SpecifyKind(DateTime.Parse(Encoding.UTF8.GetString(value)), DateTimeKind.Utc);
                         break;
                     case "clientcertificate":
                         ClientCertificate = value;
                         break;
                     case "servercertificate":
                         ServerCertificate = value;
+                        break;
+                    case "signaturealgorithm":
+                        SignatureAlgorithm = Encoding.UTF8.GetString(value);
                         break;
                     default:
                         {
@@ -124,86 +128,56 @@ namespace CTP
 
         public bool ValidateSignature(X509Certificate2 signingCertificate)
         {
-            return ValidateSignature(m_signedData, TrustedCertSignature, TrustedCertThumbprint, signingCertificate);
-        }
-
-        private static bool ValidateSignature(byte[] data, byte[] signature, byte[] thumbprint, X509Certificate2 signingCertificate)
-        {
             using (var sha = SHA1.Create())
             {
-                if (!thumbprint.SequenceEqual(sha.ComputeHash(signingCertificate.RawData)))
+                if (!TrustedCertThumbprint.SequenceEqual(sha.ComputeHash(signingCertificate.RawData)))
                     return false;
             }
 
-            //ToDO: Base the signing mode to be the same as specified in the certificate
-            using (var ecdsa = signingCertificate.GetECDsaPublicKey())
+            switch (SignatureAlgorithm)
             {
-                if (ecdsa != null)
-                {
-                    HashAlgorithmName name;
-                    if (ecdsa.KeySize <= 256)
-                        name = HashAlgorithmName.SHA256;
-                    else if (ecdsa.KeySize <= 384)
-                        name = HashAlgorithmName.SHA384;
-                    else
-                        name = HashAlgorithmName.SHA512;
+                case "SHA512-ECDSA":
+                    using (var ecdsa = signingCertificate.GetECDsaPublicKey())
+                    {
+                        if (ecdsa != null)
+                        {
+                            return ecdsa.VerifyData(m_signedData, TrustedCertSignature, HashAlgorithmName.SHA512);
+                        }
+                    }
+                    break;
+                case "SHA512-RSA-PKCS1":
+                    using (var rsa = signingCertificate.GetRSAPublicKey())
+                    {
+                        if (rsa != null)
+                        {
+                            return rsa.VerifyData(m_signedData, TrustedCertSignature, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("Unknown Signature Algorithm: " + SignatureAlgorithm);
 
-                    return ecdsa.VerifyData(data, signature, name);
-                }
             }
-            using (var rsa = signingCertificate.GetRSAPublicKey())
-            {
-                if (rsa != null)
-                {
-                    HashAlgorithmName name;
-                    if (rsa.KeySize <= 3072)
-                        name = HashAlgorithmName.SHA256;
-                    else if (rsa.KeySize <= 15360)
-                        name = HashAlgorithmName.SHA384;
-                    else
-                        name = HashAlgorithmName.SHA512;
-
-                    return rsa.VerifyData(data, signature, name, RSASignaturePadding.Pkcs1);
-                }
-            }
-
             return false;
         }
 
-
-        private static byte[] SignData(byte[] data, int offset, int length, X509Certificate2 signingCertificate)
+        private static byte[] SignData(byte[] data, X509Certificate2 signingCertificate)
         {
-            //ToDO: Base the signing mode to be the same as specified in the certificate
             using (var ecdsa = signingCertificate.GetECDsaPrivateKey())
             {
                 if (ecdsa != null)
                 {
-                    HashAlgorithmName name;
-                    if (ecdsa.KeySize <= 256)
-                        name = HashAlgorithmName.SHA256;
-                    else if (ecdsa.KeySize <= 384)
-                        name = HashAlgorithmName.SHA384;
-                    else
-                        name = HashAlgorithmName.SHA512;
-
-                    return ecdsa.SignData(data, offset, length, name);
+                    return ecdsa.SignData(data, HashAlgorithmName.SHA512);
                 }
             }
             using (var rsa = signingCertificate.GetRSAPrivateKey())
             {
                 if (rsa != null)
                 {
-                    HashAlgorithmName name;
-                    if (rsa.KeySize <= 3072)
-                        name = HashAlgorithmName.SHA256;
-                    else if (rsa.KeySize <= 15360)
-                        name = HashAlgorithmName.SHA384;
-                    else
-                        name = HashAlgorithmName.SHA512;
-
-                    return rsa.SignData(data, offset, length, name, RSASignaturePadding.Pkcs1);
+                    return rsa.SignData(data, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
                 }
             }
+
             throw new Exception("Signature Algorithm not found");
         }
 
@@ -229,7 +203,6 @@ namespace CTP
             stream.Write(dataBytes, 0, dataBytes.Length);
         }
 
-
         private static void Write(MemoryStream stream, byte[] dataBytes)
         {
             if (dataBytes.Length > ushort.MaxValue)
@@ -238,17 +211,6 @@ namespace CTP
             stream.WriteByte((byte)(dataBytes.Length >> 8));
             stream.WriteByte((byte)(dataBytes.Length));
             stream.Write(dataBytes, 0, dataBytes.Length);
-        }
-
-        private bool TryRead(MemoryStream stream, out string name, out string data)
-        {
-            if (TryRead(stream, out name, out byte[] dataBytes))
-            {
-                data = Encoding.UTF8.GetString(dataBytes);
-                return true;
-            }
-            data = null;
-            return false;
         }
 
         private bool TryRead(MemoryStream stream, out string name, out byte[] data)
@@ -276,22 +238,22 @@ namespace CTP
             return stream.ReadBytes(length);
         }
 
-        public static byte[] SignClientCertificate(X509Certificate2 signingCertificate, string spn, string loginName, List<string> grantedRoles, List<string> deniedRoles, DateTime validAfter, DateTime validBefore, byte[] clientCertificate)
+        public static byte[] SignClientCertificate(X509Certificate2 signingCertificate, string spn, string loginName, List<string> grantRoles, List<string> denyRoles, DateTime notBefore, DateTime notAfter, byte[] clientCertificate)
         {
             if (string.IsNullOrWhiteSpace(spn))
                 throw new ArgumentNullException(nameof(spn));
             if (string.IsNullOrWhiteSpace(loginName))
                 throw new ArgumentNullException(nameof(loginName));
-            if (grantedRoles == null || grantedRoles.Count == 0)
-                throw new ArgumentNullException(nameof(grantedRoles));
-            if (grantedRoles.Any(string.IsNullOrWhiteSpace))
-                throw new ArgumentNullException(nameof(grantedRoles));
-            if (deniedRoles == null || deniedRoles.Count == 0)
-                throw new ArgumentNullException(nameof(deniedRoles));
-            if (deniedRoles.Any(string.IsNullOrWhiteSpace))
-                throw new ArgumentNullException(nameof(deniedRoles));
-            if (validAfter >= validBefore)
-                throw new ArgumentNullException(nameof(validAfter));
+            if (grantRoles == null || grantRoles.Count == 0)
+                throw new ArgumentNullException(nameof(grantRoles));
+            if (grantRoles.Any(string.IsNullOrWhiteSpace))
+                throw new ArgumentNullException(nameof(grantRoles));
+            if (denyRoles == null || denyRoles.Count == 0)
+                throw new ArgumentNullException(nameof(denyRoles));
+            if (denyRoles.Any(string.IsNullOrWhiteSpace))
+                throw new ArgumentNullException(nameof(denyRoles));
+            if (notBefore >= notAfter)
+                throw new ArgumentNullException(nameof(notBefore));
             if (clientCertificate == null || clientCertificate.Length < 30)
                 throw new ArgumentNullException(nameof(clientCertificate));
 
@@ -308,16 +270,28 @@ namespace CTP
 
             Write(ms, "SPN", spn);
             Write(ms, "login", loginName);
-            foreach (var role in grantedRoles)
-                Write(ms, "GrantedRoles", role);
-            foreach (var role in deniedRoles)
-                Write(ms, "DeniedRoles", role);
-            Write(ms, "ValidBefore", validBefore.ToString("O"));
-            Write(ms, "ValidAfter", validAfter.ToString("O"));
+            foreach (var role in grantRoles)
+                Write(ms, "GrantRole", role);
+            foreach (var role in denyRoles)
+                Write(ms, "DenyRole", role);
+            Write(ms, "NotAfter", notAfter.ToString("yyyy-MM-dd HH:mm:ss"));
+            Write(ms, "NotBefore", notBefore.ToString("yyyy-MM-dd HH:mm:ss"));
             Write(ms, "ClientCertificate", clientCertificate);
 
+            if (signingCertificate.PublicKey.Oid.Value == "1.2.840.10045.2.1") //iso/member-body/us/ansi-x962/keyType/ecPublicKey
+            {
+                Write(ms, "SignatureAlgorithm", "SHA512-ECDSA");
+            }
+            else if (signingCertificate.PublicKey.Oid.Value.StartsWith("1.2.840.113549.1.1.")) //iso/member-body/us/rsadsi/pkcs/pkcs-1
+            {
+                Write(ms, "SignatureAlgorithm", "SHA512-RSA-PKCS1");
+            }
+            else
+            {
+                throw new Exception("Unknown public key type" + signingCertificate.PublicKey.Oid.Value);
+            }
             byte[] data = ms.ToArray();
-            byte[] signature = SignData(data, 0, data.Length, signingCertificate);
+            byte[] signature = SignData(data, signingCertificate);
 
             var rv = new byte[2 + signature.Length + data.Length];
             BigEndian.CopyBytes((ushort)signature.Length, rv, 0);
@@ -326,12 +300,12 @@ namespace CTP
             return rv;
         }
 
-        public static byte[] SignServerCertificate(X509Certificate2 signingCertificate, string spn, DateTime validAfter, DateTime validBefore, byte[] serverCertificate)
+        public static byte[] SignServerCertificate(X509Certificate2 signingCertificate, string spn, DateTime notBefore, DateTime notAfter, byte[] serverCertificate)
         {
             if (string.IsNullOrWhiteSpace(spn))
                 throw new ArgumentNullException(nameof(spn));
-            if (validAfter >= validBefore)
-                throw new ArgumentNullException(nameof(validAfter));
+            if (notBefore >= notAfter)
+                throw new ArgumentNullException(nameof(notBefore));
             if (serverCertificate == null || serverCertificate.Length < 30)
                 throw new ArgumentNullException(nameof(serverCertificate));
 
@@ -347,12 +321,25 @@ namespace CTP
             }
 
             Write(ms, "SPN", spn);
-            Write(ms, "ValidBefore", validBefore.ToString("O"));
-            Write(ms, "ValidAfter", validAfter.ToString("O"));
+            Write(ms, "NotAfter", notAfter.ToString("yyyy-MM-dd HH:mm:ss"));
+            Write(ms, "NotBefore", notBefore.ToString("yyyy-MM-dd HH:mm:ss"));
             Write(ms, "ServerCertificate", serverCertificate);
 
+            if (signingCertificate.PublicKey.Oid.Value == "1.2.840.10045.2.1") //iso/member-body/us/ansi-x962/keyType/ecPublicKey
+            {
+                Write(ms, "SignatureAlgorithm", "SHA512-ECDSA");
+            }
+            else if (signingCertificate.PublicKey.Oid.Value.StartsWith("1.2.840.113549.1.1.")) //iso/member-body/us/rsadsi/pkcs/pkcs-1
+            {
+                Write(ms, "SignatureAlgorithm", "SHA512-RSA-PKCS1");
+            }
+            else
+            {
+                throw new Exception("Unknown public key type" + signingCertificate.PublicKey.Oid.Value);
+            }
+
             byte[] data = ms.ToArray();
-            byte[] signature = SignData(data, 0, data.Length, signingCertificate);
+            byte[] signature = SignData(data, signingCertificate);
 
             var rv = new byte[2 + signature.Length + data.Length];
             BigEndian.CopyBytes((ushort)signature.Length, rv, 0);

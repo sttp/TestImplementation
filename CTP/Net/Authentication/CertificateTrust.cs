@@ -47,7 +47,7 @@ namespace CTP.Net
         public bool IsCertificateTrusted(X509Certificate channelCertificate, CertificateProof proof)
         {
             var cert = new EphemeralCertificate(proof.EphemeralCertificate);
-            if (!(cert.ValidFrom <= DateTime.UtcNow && DateTime.UtcNow <= cert.ValidTo))
+            if (!(cert.NotBefore <= DateTime.UtcNow && DateTime.UtcNow <= cert.NotAfter))
                 return false;
 
             if (!channelCertificate.GetRawCertData().SequenceEqual(cert.ClientCertificate))

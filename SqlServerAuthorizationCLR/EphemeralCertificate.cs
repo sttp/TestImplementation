@@ -11,37 +11,20 @@ namespace SqlServerAuthorizationCLR
 {
     public static class EphemeralCertificate
     {
-        private static byte[] SignData(byte[] data, int offset, int length, X509Certificate2 signingCertificate)
+        private static byte[] SignData(byte[] data, X509Certificate2 signingCertificate)
         {
-            //ToDO: Base the signing mode to be the same as specified in the certificate
             using (var ecdsa = signingCertificate.GetECDsaPrivateKey())
             {
                 if (ecdsa != null)
                 {
-                    HashAlgorithmName name;
-                    if (ecdsa.KeySize <= 256)
-                        name = HashAlgorithmName.SHA256;
-                    else if (ecdsa.KeySize <= 384)
-                        name = HashAlgorithmName.SHA384;
-                    else
-                        name = HashAlgorithmName.SHA512;
-
-                    return ecdsa.SignData(data, offset, length, name);
+                    return ecdsa.SignData(data, HashAlgorithmName.SHA512);
                 }
             }
             using (var rsa = signingCertificate.GetRSAPrivateKey())
             {
                 if (rsa != null)
                 {
-                    HashAlgorithmName name;
-                    if (rsa.KeySize <= 3072)
-                        name = HashAlgorithmName.SHA256;
-                    else if (rsa.KeySize <= 15360)
-                        name = HashAlgorithmName.SHA384;
-                    else
-                        name = HashAlgorithmName.SHA512;
-
-                    return rsa.SignData(data, offset, length, name, RSASignaturePadding.Pkcs1);
+                    return rsa.SignData(data, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
                 }
             }
             throw new Exception("Signature Algorithm not found");
@@ -93,7 +76,7 @@ namespace SqlServerAuthorizationCLR
 
                 if (value is DateTime)
                 {
-                    Write(ms, name, ((DateTime)value).ToString("O"));
+                    Write(ms, name, ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss"));
                 }
                 else if (value is byte[])
                 {
@@ -103,11 +86,23 @@ namespace SqlServerAuthorizationCLR
                 {
                     Write(ms, name, value.ToString());
                 }
+            }
 
+            if (signingCertificate.PublicKey.Oid.Value == "1.2.840.10045.2.1") //iso/member-body/us/ansi-x962/keyType/ecPublicKey
+            {
+                Write(ms, "SignatureAlgorithm", "SHA512-ECDSA");
+            }
+            else if (signingCertificate.PublicKey.Oid.Value.StartsWith("1.2.840.113549.1.1.")) //iso/member-body/us/rsadsi/pkcs/pkcs-1
+            {
+                Write(ms, "SignatureAlgorithm", "SHA512-RSA-PKCS1");
+            }
+            else
+            {
+                throw new Exception("Unknown public key type" + signingCertificate.PublicKey.Oid.Value);
             }
 
             byte[] data = ms.ToArray();
-            byte[] signature = SignData(data, 0, data.Length, signingCertificate);
+            byte[] signature = SignData(data, signingCertificate);
 
             var rv = new byte[2 + signature.Length + data.Length];
 

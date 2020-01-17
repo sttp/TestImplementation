@@ -146,7 +146,7 @@ namespace CTP.Net
         public CertificateProof GetCertificateProof()
         {
             return new CertificateProof(EphemeralCertificate.SignServerCertificate(m_signingCertificate, m_config.SPN,
-                DateTime.UtcNow.AddMinutes(-5), DateTime.UtcNow.AddMinutes(15), m_signingCertificate.RawData));
+                DateTime.UtcNow.AddMinutes(-5), DateTime.UtcNow.AddMinutes(15), m_certificate.RawData));
         }
 
         public bool IsCertificateTrusted(CtpNetStream stream, ClientDone clientDone)
@@ -193,7 +193,7 @@ namespace CTP.Net
                 return false;
             }
 
-            GrantPermissions(stream, account, eph.LoginName, eph.GrantedRoles, eph.DeniedRoles);
+            GrantPermissions(stream, account, eph.LoginName, eph.GrantRoles, eph.DenyRoles);
 
             return true;
         }
